@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import builtins as _py_builtins
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -28,6 +28,9 @@ DEFAULT_DATASET_PATH = (
 )
 
 # coding's restricted builtins cannot define classes; these instances can.
+# Note: object/type expose the __subclasses__() chain, so this sandbox (like
+# coding's) is a guard against accidental misuse, not a security boundary
+# for adversarial code.
 CLASS_BUILTINS = {
     name: getattr(_py_builtins, name)
     for name in (
@@ -54,6 +57,9 @@ class SWEBenchInstance:
     world: Dict[str, Any]
 
 
+_INSTANCE_FIELDS = {f.name for f in fields(SWEBenchInstance)}
+
+
 def load_dataset(path: Optional[Path] = None) -> List[SWEBenchInstance]:
     """Read instances from the JSONL dataset artifact."""
     text = Path(path or DEFAULT_DATASET_PATH).read_text(encoding="utf-8")
@@ -64,7 +70,7 @@ def load_dataset(path: Optional[Path] = None) -> List[SWEBenchInstance]:
         record = json.loads(line)
         record["fail_to_pass"] = [tuple(t) for t in record["fail_to_pass"]]
         record["pass_to_pass"] = [tuple(t) for t in record["pass_to_pass"]]
-        instances.append(SWEBenchInstance(**record))
+        instances.append(SWEBenchInstance(**{k: v for k, v in record.items() if k in _INSTANCE_FIELDS}))
     return instances
 
 
@@ -88,6 +94,16 @@ def run_instance_tests(
     }
 
 
+def merged_errors(result: Dict[str, Any], limit: int = 3) -> List[str]:
+    """Up to `limit` failure strings, never letting fail_to_pass crowd out
+    regression errors entirely."""
+    f2p = result["fail_to_pass"]["errors"]
+    p2p = result["pass_to_pass"]["errors"]
+    if p2p:
+        return (f2p[: limit - 1] + p2p)[:limit]
+    return f2p[:limit]
+
+
 def initial_world_state(instance: SWEBenchInstance) -> Dict[str, Any]:
     """The world's initial symbolic state: the buggy module's exact test results."""
     result = run_instance_tests(instance.buggy_source, instance)
@@ -98,9 +114,7 @@ def initial_world_state(instance: SWEBenchInstance) -> Dict[str, Any]:
         "fail_to_pass_failed": result["fail_to_pass"]["failed"],
         "pass_to_pass_passed": result["pass_to_pass"]["passed"],
         "pass_to_pass_failed": result["pass_to_pass"]["failed"],
-        "last_errors": (
-            result["fail_to_pass"]["errors"] + result["pass_to_pass"]["errors"]
-        )[:3],
+        "last_errors": merged_errors(result),
         "attempts": 0,
         "solved": result["solved"],
     }

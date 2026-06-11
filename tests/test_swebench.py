@@ -1,8 +1,12 @@
 """Tests for the OpenWorld-SWE-bench dataset and harness."""
 
+import json
+
 from openworld.swebench import (
     SWEBenchInstance,
     initial_world_state,
+    load_dataset,
+    merged_errors,
     run_instance_tests,
 )
 
@@ -89,3 +93,40 @@ def test_initial_world_state_reflects_buggy_results():
     assert state["solved"] is False
     assert state["source"] == FIXTURE.buggy_source
     assert len(state["last_errors"]) == 2
+    assert all(state["last_errors"])
+    assert "bump" in state["last_errors"][0]
+
+
+def test_load_dataset_round_trip(tmp_path):
+    record = {
+        "instance_id": FIXTURE.instance_id,
+        "module_name": FIXTURE.module_name,
+        "issue": FIXTURE.issue,
+        "buggy_source": FIXTURE.buggy_source,
+        "reference_source": FIXTURE.reference_source,
+        "test_preamble": FIXTURE.test_preamble,
+        "fail_to_pass": [list(t) for t in FIXTURE.fail_to_pass],
+        "pass_to_pass": [list(t) for t in FIXTURE.pass_to_pass],
+        "world": FIXTURE.world,
+        "future_field": "ignored",
+    }
+    path = tmp_path / "tasks.jsonl"
+    path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+    loaded = load_dataset(path)
+    assert len(loaded) == 1
+    assert loaded[0].fail_to_pass == FIXTURE.fail_to_pass
+    assert loaded[0].pass_to_pass == FIXTURE.pass_to_pass
+    assert loaded[0].buggy_source == FIXTURE.buggy_source
+
+
+def test_merged_errors_keeps_regression_visibility():
+    result = {
+        "fail_to_pass": {"errors": ["f1", "f2", "f3", "f4"]},
+        "pass_to_pass": {"errors": ["r1"]},
+    }
+    assert merged_errors(result) == ["f1", "f2", "r1"]
+    no_regressions = {
+        "fail_to_pass": {"errors": ["f1", "f2", "f3", "f4"]},
+        "pass_to_pass": {"errors": []},
+    }
+    assert merged_errors(no_regressions) == ["f1", "f2", "f3"]

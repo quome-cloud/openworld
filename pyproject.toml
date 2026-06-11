@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openworld"
-version = "0.1.0"
+version = "0.2.0"
 description = "A framework for creating, prototyping, and optimizing world models with an Ollama backbone."
 readme = "README.md"
 requires-python = ">=3.9"

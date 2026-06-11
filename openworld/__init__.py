@@ -29,17 +29,25 @@ from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
 from .state import Action, WorldState
 from .transition import CodeTransition, FunctionTransition, LLMTransition, Transition
+from .tune import Choice, IntRange, Param, Study, Trial, Tuner, Uniform
 from .verify import SynthesisError, Verifier, synthesize_transition
 from .world import World
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Action",
     "Agent",
     "BaseLLM",
+    "Choice",
     "CodeTransition",
     "Dial",
+    "IntRange",
+    "Param",
+    "Study",
+    "Trial",
+    "Tuner",
+    "Uniform",
     "FunctionTransition",
     "LLMTransition",
     "MockLLM",

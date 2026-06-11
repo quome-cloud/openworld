@@ -98,6 +98,41 @@ frontier = result.pareto(["welfare", "fairness"])  # non-dominated points
 best = result.best("aggregate")
 ```
 
+## Automated tuning: find the configuration that solves your task
+
+Treat the world design, the agent's policy knobs, and the moral dials as one
+searchable space, and let the tuner find the configuration that maximizes
+success at a declared goal — search broadly first, then fine-tune locally:
+
+```python
+from openworld import Tuner, Uniform, IntRange, Choice
+
+tuner = Tuner(
+    build=build,                       # params -> a fully configured Simulation
+    space={
+        "protocol":    Choice(["critical_first", "round_robin"]),
+        "stewardship": Uniform(0.0, 1.0),     # the moral filter
+        "budget":      IntRange(6, 24),       # the world design
+    },
+    score=score,                       # (trajectory, params) -> float to maximize
+    success=solved,                    # (trajectory, params) -> bool: task solved?
+    steps=16, seed=7,
+    goal="Treat all criticals, zero deteriorations, within the cost target.",
+)
+
+tuner.search(n_trials=1000)            # stage 1: 1000 simulated environments
+tuner.refine(n_trials=200, scale=0.15) # stage 2: hill-climb around the best
+tuner.refine(n_trials=100, scale=0.05) # stage 3: finer pass
+
+print(tuner.study.table(k=10))         # auditable leaderboard, not just a winner
+print(tuner.study.best.params, tuner.study.success_rate())
+```
+
+Every trial is a full, replayable simulation; the study records each trial's
+parameters, score, solve status, and objective totals. See
+`examples/autotune_triage.py` for a complete run that discovers the ideal
+triage protocol, moral-dial setting, and unit budget for an emergency shift.
+
 ## Three interchangeable dynamics engines
 
 | Engine | What it is | When to use |

@@ -1,0 +1,173 @@
+{
+  "lambdas": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.1,
+    1.25,
+    1.5
+  ],
+  "steps": 12,
+  "rows": [
+    {
+      "lambda": 0.0,
+      "constrained": false,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.0,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.25,
+      "constrained": false,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.25,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.5,
+      "constrained": false,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.5,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.75,
+      "constrained": false,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 0.75,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 1.0,
+      "constrained": false,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 1.0,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 15,
+      "treated": 11,
+      "spend": 17
+    },
+    {
+      "lambda": 1.1,
+      "constrained": false,
+      "violations": 8,
+      "deteriorated": 4,
+      "outcomes": -8,
+      "treated": 0,
+      "spend": 0
+    },
+    {
+      "lambda": 1.1,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 7,
+      "treated": 3,
+      "spend": 9
+    },
+    {
+      "lambda": 1.25,
+      "constrained": false,
+      "violations": 8,
+      "deteriorated": 4,
+      "outcomes": -8,
+      "treated": 0,
+      "spend": 0
+    },
+    {
+      "lambda": 1.25,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 7,
+      "treated": 3,
+      "spend": 9
+    },
+    {
+      "lambda": 1.5,
+      "constrained": false,
+      "violations": 8,
+      "deteriorated": 4,
+      "outcomes": -8,
+      "treated": 0,
+      "spend": 0
+    },
+    {
+      "lambda": 1.5,
+      "constrained": true,
+      "violations": 0,
+      "deteriorated": 1,
+      "outcomes": 7,
+      "treated": 3,
+      "spend": 9
+    }
+  ],
+  "summary": {
+    "dial_only_total_violations": 24,
+    "dial_only_lambdas_with_violations": [
+      1.1,
+      1.25,
+      1.5
+    ],
+    "constrained_total_violations": 0,
+    "max_outcome_cost_of_constraint": 0,
+    "max_spend_cost_of_constraint": 9
+  },
+  "experiment": "e25_constraints",
+  "timestamp": "2026-06-11T15:23:20",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

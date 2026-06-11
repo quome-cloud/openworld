@@ -179,11 +179,15 @@ at all; a complexity stress test locates the 7B synthesis cliff near eight
 interacting rules; seeded-RNG synthesis extends the paradigm to stochastic
 worlds within 1.2 points of the declared distribution; and ensemble
 disagreement across independently synthesized programs detects every
-ground-truth error without an oracle. The central result: a training-free,
-verified, symbolic world model on consumer hardware eliminates compounding
-rollout error---the defining failure mode of learned world models---at zero
-training cost. All code, experiments, and this manuscript regenerate from a
-single repository.
+ground-truth error without an oracle. A moral-philosophy review round
+further broadens the value machinery beyond its implicit consequentialism:
+Rawlsian and lexicographic aggregators, deontological side constraints
+enforced as action vetoes (eliminating the impermissible region a weighted
+sum cannot exclude), and a moral parliament that hedges across ethical
+theories. The central result: a training-free, verified, symbolic world
+model on consumer hardware eliminates compounding rollout error---the
+defining failure mode of learned world models---at zero training cost. All
+code, experiments, and this manuscript regenerate from a single repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -498,7 +502,10 @@ second review round demanded cross-family replication (E16), a powered judge
 comparison (E17), a filter-vs-repair decomposition (E18), and a scale ladder
 with a stronger learned baseline (E19); a third round demanded a complexity
 stress test (E20), stochastic-dynamics support and verification (E21), a
-planning-utility demonstration (E22), and an oracle-free error signal (E23).
+planning-utility demonstration (E22), and an oracle-free error signal (E23);
+a fourth round, written from a moral philosopher's standpoint, demanded that
+the dial system's consequentialist commitments be made explicit and
+structurally broadened (E24--E27, \S\ref{sec:moral-structure}).
 Experiment numbering preserves provenance; E14 was absorbed into the
 benchmark expansion and the number is retired. All LLM-dependent numbers are
 specific to the stated Ollama snapshots and Q4\_K\_M quantization; absolute
@@ -721,6 +728,62 @@ retraining.}
 \label{fig:pareto}
 \end{figure}
 
+\subsection{The structure of the moral filter}\label{sec:moral-structure}
+A fourth review round, written from a moral philosopher's standpoint
+(\texttt{docs/review/}), pressed a charge the engineering rounds could not:
+the dial system is not a neutral container for ethics. Everything
+expressible as \texttt{Objective}+\texttt{Dial} reduces to
+$\sum_i w_i o_i$---act consequentialism with a linear social welfare
+function---so the ``morality dial'' selects points in one theory's parameter
+space, not among theories. Four experiments, enabled by a new
+\texttt{openworld.ethics} module (Rawlsian and lexicographic aggregators,
+deontological constraints as action vetoes, and a moral parliament),
+measure what that restriction costs and what lifting it buys.
+
+\paragraph{Aggregation is an ethical commitment (E24).} On a scarce commons
+where one agent harvests faster than the other, the utilitarian sum,
+Rawlsian maximin~\cite{rawls1971}, and leximin choose different operating
+points from the same outcome table: the sum is \emph{indifferent} between
+harvests of $(6,3)$ and $(5,4)$---both total 9---and so picks the unequal
+allocation arbitrarily, while maximin and leximin select the restraint level
+that lifts the worst-off from \AggUtilWorst{} to \AggMaximinWorst{} at zero
+total cost. Distribution-blindness is not a hypothetical defect of the
+weighted sum; it selects a different world even when an egalitarian free
+lunch exists.
+
+\paragraph{Side constraints cannot be simulated by weights (E25).} A myopic
+cost-weighted nurse becomes \emph{impermissible} at $\lambda > 1$: the
+weighting makes abandoning waiting critical patients optimal
+(\ViolationsDialOnly{} violations across the sweep, four deteriorations,
+outcomes collapsing to $-8$). A Nozickian side constraint~\cite{nozick1974}
+---``never choose another action while a critical patient waits,'' enforced
+as a veto on the action set, not a penalty in the score---eliminates every
+violation at every $\lambda$, and here costs nothing in the dial's
+permissible region (\ConstraintOutcomeCost{} outcome points) while
+\emph{rescuing} the impermissible one. Penalties are just more
+utilitarianism; vetoes are a different kind of object, and the framework now
+has both.
+
+\paragraph{Moral uncertainty and the parliament (E26).} An operator who
+does not know the right theory should hedge rather than maximize within one
+theory~\cite{macaskill2020}. Delegates for utilitarian, Rawlsian, and
+deontological positions vote (credence-weighted Borda) over each action; on
+the triage shift, the parliament is never the strictly worst agent under
+\emph{any} theory's own lens---and notably it rescues the lone Rawlsian
+delegate from itself: pure one-step maximin lets critical patients
+deteriorate (worst-off welfare $-6$, two duty violations), while the
+parliament's mixed counsel reaches the same outcome as the best
+single-theory agents ($-3$, zero violations).
+
+\paragraph{Pluralism is visible in the judge (E27).} Grading the same
+twelve dial-swept trajectories under utilitarian, deontological, and
+care-ethics rubrics yields orderings that correlate only partially
+(pairwise Spearman \RubricPluralismRange; the deontological and care
+rubrics track the dial differently than the utilitarian one). Rubric
+framing is a value choice, not a wording choice---a quantitative
+counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
+caution for anyone deploying a single ``ethics rubric'' judge.
+
 \subsection{Configuration search}\label{sec:external}
 E9 compares tuning strategies on the triage auto-configuration problem (two
 moral dials $\times$ protocol $\times$ budget) over ten seeds at a
@@ -828,9 +891,19 @@ ground the alignment claim: because objectives are declared artifacts, the
 welfare--fairness frontier is \emph{operational}---an operator moves along it
 in real time, and a tuner searches moral configurations jointly with world
 design, surfacing the manifold of value settings that solve a task rather
-than a single frozen compromise. This is a concrete response to the
-specification trap~\cite{spectrap2025}: the specification stays open because
-it stays code.
+than a single frozen compromise. Two qualifications, owed to the
+philosophical review. First, openness is only as wide as the expressible
+structures: a weighted sum is act consequentialism, and
+\S\ref{sec:moral-structure} shows that aggregator choice, side constraints,
+and theory uncertainty are distinct moral objects the framework must (and
+now does) represent rather than approximate with weights. Second, open
+specification \emph{manages} the specification trap~\cite{spectrap2025}
+procedurally rather than resolving it: the trap relocates from frozen
+weights to the operator's hand on the dial, and which hand that should
+be---justifiability to those affected, in the contractualist's
+sense~\cite{scanlon1998}---is a question no architecture settles. The
+tuner's solving manifold is at best a crude contractualist surface: the set
+of configurations meeting every stakeholder's declared minimum.
 
 \paragraph{Relationship to HAARF.} For autonomous-agent governance frameworks
 such as HAARF~\cite{haarf2026}, these mechanisms map onto verification and
@@ -866,9 +939,13 @@ across generators reading the same ambiguous rule; it is a screen, not a
 proof. (vii) The sandbox is best-effort isolation against accident, not an
 adversarial security boundary (generated patches twice defeated in-process
 timeouts before the fork-based runner; see the repository history).
-(viii) Several experiments were redesigned after pilots and three internal
-review rounds (E3, E5/E6, E11--E23); pilot saturation results are reported
-alongside the final protocols, and all reviews ship in the repository.
+(viii) The moral machinery, even broadened, evaluates declared values; whose
+values are declared---and the legitimacy of the declaring hand---is a
+procedural question outside any architecture~\cite{scanlon1998}, and the
+parliament's credences are themselves operator-set dials. (ix) Several
+experiments were redesigned after pilots and four internal review rounds
+(E3, E5/E6, E11--E27); pilot saturation results are reported alongside the
+final protocols, and all reviews ship in the repository.
 
 % ============================================================================
 \section{Conclusion}

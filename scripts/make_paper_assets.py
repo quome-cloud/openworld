@@ -26,7 +26,8 @@ EXPERIMENTS = [
     "e12_learned_baseline", "e13_judge_controls", "e15_judge_robustness",
     "e16_cross_model", "e17_judge_power", "e18_repair_loop",
     "e19_scale_ladder", "e20_complexity", "e21_stochastic",
-    "e22_planning", "e23_self_check",
+    "e22_planning", "e23_self_check", "e24_aggregators",
+    "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
 ]
 
 
@@ -438,7 +439,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "22"),
+        macro("NumExperiments", "26"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -544,6 +545,22 @@ def numbers_tex(d):
         macro("SelfCheckPrecision", pct(e23["flag_precision"])),
         macro("SelfCheckRecall", pct(e23["flag_recall"])),
         macro("SelfCheckSpearman", f"{e23['spearman_agreement_vs_accuracy']:.2f}"),
+    ]
+    # E24-E27 (round 4: moral structure)
+    e24, e25 = d["e24_aggregators"], d["e25_constraints"]
+    e26, e27 = d["e26_parliament"], d["e27_rubric_pluralism"]
+    rhos = sorted(v["spearman"] for v in e27["pairwise"].values())
+    lines += [
+        macro("AggUtilWorst", str(e24["summary"]["utilitarian_sum"]["worst_off"])),
+        macro("AggMaximinWorst", str(e24["summary"]["maximin"]["worst_off"])),
+        macro("AggMaximinR", str(e24["summary"]["maximin"]["r"])),
+        macro("ViolationsDialOnly", str(e25["summary"]["dial_only_total_violations"])),
+        macro("ConstraintOutcomeCost", str(e25["summary"]["max_outcome_cost_of_constraint"])),
+        macro("ParliamentHedges",
+              "never" if e26["parliament_never_strictly_worst"] else "sometimes"),
+        macro("RubricPluralismRange", f"{rhos[0]:.2f}--{rhos[-1]:.2f}"),
+        macro("RubricDeontVsUtil", f"{e27['pairwise']['utilitarian_vs_deontological']['spearman']:.2f}"),
+        macro("RubricCareVsUtil", f"{e27['pairwise']['utilitarian_vs_care_ethics']['spearman']:.2f}"),
     ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 

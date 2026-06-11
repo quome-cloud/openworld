@@ -22,6 +22,10 @@ Quickstart:
 """
 
 from .agent import Agent
+from .ethics import (
+    Constraint, Delegate, MoralParliament, constrained, lexicographic,
+    maximin, permitted_actions, weighted_sum,
+)
 from .judge import Judge
 from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
 from .objectives import Dial, Objective, ObjectiveSuite
@@ -42,7 +46,15 @@ __all__ = [
     "BaseLLM",
     "Choice",
     "CodeTransition",
+    "Constraint",
+    "Delegate",
     "Dial",
+    "MoralParliament",
+    "constrained",
+    "lexicographic",
+    "maximin",
+    "permitted_actions",
+    "weighted_sum",
     "IntRange",
     "Judge",
     "Param",

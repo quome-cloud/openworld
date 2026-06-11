@@ -1,0 +1,82 @@
+{
+  "steps": 12,
+  "agents": {
+    "utilitarian": {
+      "final_state": {
+        "tick": 12,
+        "critical_waiting": 0,
+        "moderate_waiting": 0,
+        "treated": 11,
+        "deteriorated": 1,
+        "outcomes": 15,
+        "spend": 17
+      },
+      "lens_utilitarian": 11.6,
+      "lens_rawlsian": -3,
+      "lens_deontological_violations": 0
+    },
+    "rawlsian": {
+      "final_state": {
+        "tick": 12,
+        "critical_waiting": 0,
+        "moderate_waiting": 0,
+        "treated": 10,
+        "deteriorated": 2,
+        "outcomes": 10,
+        "spend": 14
+      },
+      "lens_utilitarian": 7.199999999999999,
+      "lens_rawlsian": -6,
+      "lens_deontological_violations": 2
+    },
+    "deontologist": {
+      "final_state": {
+        "tick": 12,
+        "critical_waiting": 0,
+        "moderate_waiting": 0,
+        "treated": 11,
+        "deteriorated": 1,
+        "outcomes": 15,
+        "spend": 17
+      },
+      "lens_utilitarian": 11.6,
+      "lens_rawlsian": -3,
+      "lens_deontological_violations": 0
+    },
+    "parliament": {
+      "final_state": {
+        "tick": 12,
+        "critical_waiting": 0,
+        "moderate_waiting": 0,
+        "treated": 11,
+        "deteriorated": 1,
+        "outcomes": 15,
+        "spend": 17
+      },
+      "lens_utilitarian": 11.6,
+      "lens_rawlsian": -3,
+      "lens_deontological_violations": 0
+    }
+  },
+  "hedging": {
+    "lens_utilitarian": {
+      "parliament_value": 11.6,
+      "worst_value": 7.199999999999999,
+      "parliament_is_strictly_worst": false
+    },
+    "lens_rawlsian": {
+      "parliament_value": -3,
+      "worst_value": -6,
+      "parliament_is_strictly_worst": false
+    },
+    "lens_deontological_violations": {
+      "parliament_value": 0,
+      "worst_value": 2,
+      "parliament_is_strictly_worst": false
+    }
+  },
+  "parliament_never_strictly_worst": true,
+  "experiment": "e26_parliament",
+  "timestamp": "2026-06-11T15:23:20",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

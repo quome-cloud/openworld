@@ -1,0 +1,8 @@
+  utilitarian: [7.0, 8.0, 7.0, 6.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
+  deontological: [7.0, 5.0, 7.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
+  care_ethics: [9.0, 8.0, 8.0, 9.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0]
+[saved] /Users/jim/Desktop/openworld/experiments/results/e27_rubric_pluralism.json
+utilitarian_vs_deontological: rho=0.6181339274290046 p=0.0613938606139386
+utilitarian_vs_care_ethics: rho=0.9276836825800986 p=0.0024997500249975004
+deontological_vs_care_ethics: rho=0.6196773353931867 p=0.07839216078392161
+dial correlations: {'utilitarian': -0.8258176201052108, 'deontological': -0.5829752480681661, 'care_ethics': -0.8027923296068071}

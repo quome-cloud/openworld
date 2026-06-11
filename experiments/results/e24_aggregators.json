@@ -1,0 +1,155 @@
+{
+  "r_values": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "steps": 8,
+  "outcomes": [
+    {
+      "r": 0.0,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.1,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.2,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.3,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.4,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.5,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.6,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.7,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    {
+      "r": 0.8,
+      "alice": 5,
+      "bob": 4,
+      "total": 9,
+      "worst_off": 4,
+      "gap": 1
+    },
+    {
+      "r": 0.9,
+      "alice": 4,
+      "bob": 4,
+      "total": 8,
+      "worst_off": 4,
+      "gap": 0
+    },
+    {
+      "r": 1.0,
+      "alice": 4,
+      "bob": 4,
+      "total": 8,
+      "worst_off": 4,
+      "gap": 0
+    }
+  ],
+  "chosen": {
+    "utilitarian_sum": {
+      "r": 0.0,
+      "alice": 6,
+      "bob": 3,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    "maximin": {
+      "r": 0.8,
+      "alice": 5,
+      "bob": 4,
+      "total": 9,
+      "worst_off": 4,
+      "gap": 1
+    },
+    "leximin": {
+      "r": 0.8,
+      "alice": 5,
+      "bob": 4,
+      "total": 9,
+      "worst_off": 4,
+      "gap": 1
+    }
+  },
+  "summary": {
+    "utilitarian_sum": {
+      "r": 0.0,
+      "total": 9,
+      "worst_off": 3,
+      "gap": 3
+    },
+    "maximin": {
+      "r": 0.8,
+      "total": 9,
+      "worst_off": 4,
+      "gap": 1
+    },
+    "leximin": {
+      "r": 0.8,
+      "total": 9,
+      "worst_off": 4,
+      "gap": 1
+    }
+  },
+  "experiment": "e24_aggregators",
+  "timestamp": "2026-06-11T15:27:27",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

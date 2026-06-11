@@ -57,14 +57,14 @@ def test_run_tests_times_out_on_infinite_loop():
 
 
 def test_timeout_survives_exception_swallowing_code():
-    # A patch that catches Exception inside its loop must not be able to
-    # swallow the timeout alarm and spin forever.
+    # A patch that swallows ALL exceptions inside its loop (bare except)
+    # must still be stopped: only a hard process kill is loop-proof.
     source = (
         "def f():\n"
         "    while True:\n"
         "        try:\n"
         "            x = 1\n"
-        "        except Exception:\n"
+        "        except:\n"
         "            pass\n"
         "f()\n"
     )

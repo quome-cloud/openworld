@@ -59,64 +59,95 @@ def run_tests(
     """Execute `source`, run each test expression, compare repr() to expected.
 
     Returns {"passed": n, "failed": n, "errors": [readable failure strings]}.
-    A source that fails to exec marks every test as failed. On POSIX main
-    threads a wall-clock alarm bounds the whole suite, so a submitted patch
-    that loops forever fails instead of hanging the world.
+    A source that fails to exec marks every test as failed.
+
+    On POSIX the suite runs in a forked child that the parent SIGKILLs at the
+    deadline. In-process alarms are insufficient: a generated patch containing
+    a bare `except:` inside its loop swallows any exception an alarm handler
+    raises (observed in the wild) - only a hard kill is loop-proof.
     """
+    import os
+
+    if timeout_seconds and hasattr(os, "fork"):
+        return _run_tests_forked(source, tests, timeout_seconds)
+    return _run_tests_inline(source, tests)
+
+
+def _run_tests_inline(source: str, tests: List[Tuple[str, str]]) -> Dict[str, Any]:
     import math
 
     namespace: Dict[str, Any] = {"__builtins__": dict(_TEST_BUILTINS), "math": math}
     errors: List[str] = []
-
-    import signal
-    import threading
-
-    use_alarm = (
-        hasattr(signal, "SIGALRM")
-        and threading.current_thread() is threading.main_thread()
-    )
-
-    # BaseException, not Exception: submitted code with a bare
-    # `except Exception` must not be able to swallow the alarm and keep
-    # spinning (observed in the wild with generated patches).
-    class _Timeout(BaseException):
-        pass
-
-    def _raise_timeout(signum, frame):
-        raise _Timeout()
-
-    if use_alarm:
-        previous = signal.signal(signal.SIGALRM, _raise_timeout)
-        signal.setitimer(signal.ITIMER_REAL, timeout_seconds)
     try:
+        exec(compile(source, "<submission>", "exec"), namespace)
+    except Exception as exc:
+        return {
+            "passed": 0,
+            "failed": len(tests),
+            "errors": [f"source failed to execute: {exc!r}"],
+        }
+    passed = 0
+    for expression, expected in tests:
         try:
-            exec(compile(source, "<submission>", "exec"), namespace)
-        except _Timeout:
-            return {"passed": 0, "failed": len(tests),
-                    "errors": ["source timed out (possible infinite loop)"]}
+            result = eval(expression, namespace)  # noqa: S307 - sandboxed namespace
+            if repr(result) == expected:
+                passed += 1
+            else:
+                errors.append(f"{expression} -> {result!r}, expected {expected}")
         except Exception as exc:
-            return {
-                "passed": 0,
-                "failed": len(tests),
-                "errors": [f"source failed to execute: {exc!r}"],
-            }
-        passed = 0
-        for expression, expected in tests:
-            try:
-                result = eval(expression, namespace)  # noqa: S307 - sandboxed namespace
-                if repr(result) == expected:
-                    passed += 1
-                else:
-                    errors.append(f"{expression} -> {result!r}, expected {expected}")
-            except _Timeout:
-                errors.append(f"{expression} timed out (possible infinite loop)")
-            except Exception as exc:
-                errors.append(f"{expression} raised {exc!r}")
-        return {"passed": passed, "failed": len(tests) - passed, "errors": errors}
-    finally:
-        if use_alarm:
-            signal.setitimer(signal.ITIMER_REAL, 0)
-            signal.signal(signal.SIGALRM, previous)
+            errors.append(f"{expression} raised {exc!r}")
+    return {"passed": passed, "failed": len(tests) - passed, "errors": errors}
+
+
+def _run_tests_forked(
+    source: str, tests: List[Tuple[str, str]], timeout_seconds: float
+) -> Dict[str, Any]:
+    import json
+    import os
+    import signal
+    import time
+
+    read_fd, write_fd = os.pipe()
+    pid = os.fork()
+    if pid == 0:  # child: run the suite, report through the pipe, hard-exit
+        try:
+            os.close(read_fd)
+            payload = json.dumps(_run_tests_inline(source, tests)).encode("utf-8")
+            os.write(write_fd, payload)
+            os.close(write_fd)
+        finally:
+            os._exit(0)
+
+    os.close(write_fd)
+    deadline = time.monotonic() + timeout_seconds
+    timed_out = False
+    while True:
+        done_pid, _status = os.waitpid(pid, os.WNOHANG)
+        if done_pid:
+            break
+        if time.monotonic() > deadline:
+            os.kill(pid, signal.SIGKILL)
+            os.waitpid(pid, 0)
+            timed_out = True
+            break
+        time.sleep(0.02)
+
+    chunks = []
+    while True:
+        chunk = os.read(read_fd, 65536)
+        if not chunk:
+            break
+        chunks.append(chunk)
+    os.close(read_fd)
+
+    if timed_out:
+        return {"passed": 0, "failed": len(tests),
+                "errors": ["source timed out (killed; possible infinite loop)"]}
+    data = b"".join(chunks)
+    if not data:
+        return {"passed": 0, "failed": len(tests),
+                "errors": ["test process died without reporting"]}
+    return json.loads(data.decode("utf-8"))
 
 
 class CodeFixTransition(Transition):

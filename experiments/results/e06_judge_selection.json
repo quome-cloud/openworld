@@ -1,0 +1,94 @@
+{
+  "max_attempts": 4,
+  "n_candidates": 3,
+  "summary": {
+    "condition": "judge_selected",
+    "model": "proposer=qwen2.5:1.5b, judge=qwen2.5:7b",
+    "n_tasks": 10,
+    "pass_at_1": 0.8,
+    "pass_at_1_ci": [
+      0.49015684672072335,
+      0.9433190520193067
+    ],
+    "pass_at_budget": 0.9,
+    "pass_at_budget_ci": [
+      0.5958436145024278,
+      0.9821242504842788
+    ],
+    "mean_attempts_when_solved": 1.1111111111111112
+  },
+  "judge_audit": {
+    "rounds_with_passing_candidate": 10,
+    "judge_picked_passing": 9,
+    "judge_accuracy_when_solvable": 0.9,
+    "judge_accuracy_ci": [
+      0.5958436145024278,
+      0.9821242504842788
+    ]
+  },
+  "records": [
+    {
+      "task": "sum_range_off_by_one",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "max_wrong_comparison",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "palindrome_case",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "count_vowels_missing",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "fib_wrong_base",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "median_unsorted",
+      "solved": false,
+      "solved_first_attempt": false,
+      "attempts": 4
+    },
+    {
+      "task": "dedupe_order",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "balanced_parens_early",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "word_count_split",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "running_max_reset",
+      "solved": true,
+      "solved_first_attempt": false,
+      "attempts": 2
+    }
+  ],
+  "experiment": "e06_judge_selection",
+  "timestamp": "2026-06-11T01:29:56",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

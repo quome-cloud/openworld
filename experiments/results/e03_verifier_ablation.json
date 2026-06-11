@@ -1,0 +1,232 @@
+{
+  "attempts": 8,
+  "generator": "qwen2.5:3b",
+  "critic": "qwen2.5:7b",
+  "summary": [
+    {
+      "condition": "none",
+      "n": 8,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.4625000000000001,
+      "perfect_rate": 0.0
+    },
+    {
+      "condition": "syntax",
+      "n": 8,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.4625000000000001,
+      "perfect_rate": 0.0
+    },
+    {
+      "condition": "full",
+      "n": 8,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.65,
+      "perfect_rate": 0.0
+    },
+    {
+      "condition": "critic",
+      "n": 8,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.7000000000000001,
+      "perfect_rate": 0.0
+    }
+  ],
+  "runs": [
+    {
+      "condition": "none",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.4
+    },
+    {
+      "condition": "none",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "condition": "none",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "none",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.2
+    },
+    {
+      "condition": "none",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "none",
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "condition": "none",
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "none",
+      "attempt": 7,
+      "accepted": true,
+      "probe_accuracy": 0.0
+    },
+    {
+      "condition": "syntax",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.4
+    },
+    {
+      "condition": "syntax",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "condition": "syntax",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "syntax",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.2
+    },
+    {
+      "condition": "syntax",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "syntax",
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "condition": "syntax",
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "syntax",
+      "attempt": 7,
+      "accepted": true,
+      "probe_accuracy": 0.0
+    },
+    {
+      "condition": "full",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    },
+    {
+      "condition": "full",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "condition": "full",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.3
+    },
+    {
+      "condition": "full",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "full",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "full",
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "condition": "full",
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "full",
+      "attempt": 7,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    },
+    {
+      "condition": "critic",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    },
+    {
+      "condition": "critic",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "condition": "critic",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "condition": "critic",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "critic",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "critic",
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.7
+    },
+    {
+      "condition": "critic",
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "condition": "critic",
+      "attempt": 7,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    }
+  ],
+  "experiment": "e03_verifier_ablation",
+  "timestamp": "2026-06-11T01:05:55",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

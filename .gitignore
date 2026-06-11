@@ -11,3 +11,16 @@ venv/
 examples/orchard_dynamics.py
 orchard_dynamics.py
 autotune_triage_study.csv
+
+# LaTeX build intermediates
+paper/main.aux
+paper/main.bbl
+paper/main.blg
+paper/main.log
+paper/main.out
+paper/main.toc
+_template/main.aux
+_template/main.bbl
+_template/main.blg
+_template/main.log
+_template/main.out

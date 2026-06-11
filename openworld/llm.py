@@ -44,14 +44,18 @@ class OllamaLLM(BaseLLM):
         model: str = "llama3.1",
         host: str = "http://localhost:11434",
         temperature: float = 0.2,
-        timeout: float = 120.0,
+        timeout: float = 300.0,
         options: Optional[Dict[str, Any]] = None,
+        keep_alive: str = "15m",
     ):
         self.model = model
         self.host = host.rstrip("/")
         self.temperature = temperature
         self.timeout = timeout
         self.options = dict(options or {})
+        # Keep the model resident between calls; servers configured with
+        # OLLAMA_KEEP_ALIVE=0 otherwise reload the model cold on every request.
+        self.keep_alive = keep_alive
 
     def chat(self, messages: List[Dict[str, str]], **options: Any) -> str:
         opts = {"temperature": self.temperature, **self.options, **options}
@@ -59,6 +63,7 @@ class OllamaLLM(BaseLLM):
             "model": self.model,
             "messages": messages,
             "stream": False,
+            "keep_alive": self.keep_alive,
             "options": opts,
         }
         request = urllib.request.Request(

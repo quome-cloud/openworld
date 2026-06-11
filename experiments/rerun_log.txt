@@ -1,0 +1,61 @@
+  none #0: accepted=True probe_acc=0.40
+  none #1: accepted=True probe_acc=0.80
+  none #2: accepted=True probe_acc=0.60
+  none #3: accepted=True probe_acc=0.20
+  none #4: accepted=True probe_acc=0.60
+  none #5: accepted=True probe_acc=0.50
+  none #6: accepted=True probe_acc=0.60
+  none #7: accepted=True probe_acc=0.00
+  syntax #0: accepted=True probe_acc=0.40
+  syntax #1: accepted=True probe_acc=0.80
+  syntax #2: accepted=True probe_acc=0.60
+  syntax #3: accepted=True probe_acc=0.20
+  syntax #4: accepted=True probe_acc=0.60
+  syntax #5: accepted=True probe_acc=0.50
+  syntax #6: accepted=True probe_acc=0.60
+  syntax #7: accepted=True probe_acc=0.00
+  full #0: accepted=True probe_acc=0.90
+  full #1: accepted=True probe_acc=0.80
+  full #2: accepted=True probe_acc=0.30
+  full #3: accepted=True probe_acc=0.60
+  full #4: accepted=True probe_acc=0.60
+  full #5: accepted=True probe_acc=0.50
+  full #6: accepted=True probe_acc=0.60
+  full #7: accepted=True probe_acc=0.90
+  critic #0: accepted=True probe_acc=0.90
+  critic #1: accepted=True probe_acc=0.80
+  critic #2: accepted=True probe_acc=0.50
+  critic #3: accepted=True probe_acc=0.60
+  critic #4: accepted=True probe_acc=0.60
+  critic #5: accepted=True probe_acc=0.70
+  critic #6: accepted=True probe_acc=0.60
+  critic #7: accepted=True probe_acc=0.90
+[saved] /Users/jim/Desktop/openworld/experiments/results/e03_verifier_ablation.json
+   none: probe accuracy 0.46, perfect 0%
+ syntax: probe accuracy 0.46, perfect 0%
+   full: probe accuracy 0.65, perfect 0%
+ critic: probe accuracy 0.70, perfect 0%
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=True attempts=1
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=True attempts=1
+  word_count_split: solved=True attempts=1
+  running_max_reset: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e05_codefix_agent.json
+pass@1 100%, pass@4 100%
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=True attempts=1
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=True attempts=1
+  word_count_split: solved=True attempts=1
+  running_max_reset: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e06_judge_selection.json
+pass@1 100%, pass@4 100%; judge accuracy when solvable: 1.0

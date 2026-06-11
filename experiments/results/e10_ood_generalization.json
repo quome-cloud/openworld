@@ -1,0 +1,49 @@
+{
+  "model": "qwen2.5:7b",
+  "rows": [
+    {
+      "engine": "code_transition",
+      "probes": "in_distribution",
+      "n": 10,
+      "exact_match_rate": 1.0,
+      "ci": [
+        0.7224598312333834,
+        1.0
+      ]
+    },
+    {
+      "engine": "code_transition",
+      "probes": "scaled_10x",
+      "n": 10,
+      "exact_match_rate": 1.0,
+      "ci": [
+        0.7224598312333834,
+        1.0
+      ]
+    },
+    {
+      "engine": "llm_transition",
+      "probes": "in_distribution",
+      "n": 10,
+      "exact_match_rate": 0.4,
+      "ci": [
+        0.16817758120350962,
+        0.6873304525498136
+      ]
+    },
+    {
+      "engine": "llm_transition",
+      "probes": "scaled_10x",
+      "n": 10,
+      "exact_match_rate": 0.4,
+      "ci": [
+        0.16817758120350962,
+        0.6873304525498136
+      ]
+    }
+  ],
+  "synthesized_code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increase = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increase)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    return next_state",
+  "experiment": "e10_ood_generalization",
+  "timestamp": "2026-06-11T00:52:16",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

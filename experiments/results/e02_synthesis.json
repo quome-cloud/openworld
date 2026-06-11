@@ -1,0 +1,271 @@
+{
+  "attempts_per_cell": 5,
+  "max_iters": 4,
+  "summary": [
+    {
+      "model": "qwen2.5:7b",
+      "n": 15,
+      "acceptance_rate": 1.0,
+      "acceptance_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "mean_probe_accuracy_accepted": 0.98
+    },
+    {
+      "model": "qwen2.5:3b",
+      "n": 15,
+      "acceptance_rate": 1.0,
+      "acceptance_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "mean_probe_accuracy_accepted": 0.8666666666666667
+    }
+  ],
+  "runs": [
+    {
+      "model": "qwen2.5:7b",
+      "world": "sprint",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.7,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increase = state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increase)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, state['debt'] - 2)\n    \n    # No-op or unknown action\n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "sprint",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increase = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increase)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "sprint",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_to_add = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_to_add)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    # Noop or unknown actions do nothing\n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "sprint",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increased_by = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increased_by)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "sprint",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increased_by = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increased_by)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "orchard",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        if next_state.get('apples', 0) > 0:\n            apples = next_state['apples']\n            agent_name = action['agent']\n            harvested = next_state.setdefault('harvested', {})\n            \n            harvested[agent_name] = harvested.get(agent_name, 0) + 1\n            next_state['apples'] = max(apples - 1, 0)\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "orchard",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state.get('apples', 0)\n        if apples > 0:\n            harvested = next_state.setdefault('harvested', {}).get(action['agent'], 0)\n            next_state['harvested'][action['agent']] = harvested + 1\n            next_state['apples'] -= 1\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "orchard",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        if 'apples' in next_state and next_state['apples'] > 0:\n            apples = next_state.pop('apples')\n            harvested = next_state.setdefault('harvested', {})\n            agent_name = action['agent']\n            harvested[agent_name] = harvested.get(agent_name, 0) + 1\n            next_state['apples'] = apples - 1\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "orchard",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        harvested = next_state.get('harvested', {})\n        orchard_apples = next_state.get('apples', 0)\n        \n        if orchard_apples > 0:\n            agent_name = action['agent']\n            harvested[agent_name] = harvested.get(agent_name, 0) + 1\n            next_state['apples'] = orchard_apples - 1\n            \n    elif action['name'] == 'wait':\n        pass\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "orchard",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        harvested = next_state.get('harvested', {})\n        orchard_apples = next_state.get('apples', 0)\n        \n        agent_name = action['agent']\n        harvested_agent_count = harvested.get(agent_name, 0)\n        \n        if orchard_apples > 0:\n            next_state['apples'] = orchard_apples - 1\n            next_state['harvested'][agent_name] = harvested_agent_count + 1\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "triage",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass  # No-op in terms of state changes, just increase tick.\n    \n    else:  # Noop\n        pass  # No-op in terms of state changes, just increase tick.\n    \n    next_state['tick'] += 1\n    \n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "triage",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass  # No-op in terms of state change, only increment tick.\n    \n    else:  # 'noop'\n        pass  # Also no-op in terms of state change, only increment tick.\n    \n    next_state['tick'] += 1\n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "triage",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass\n    \n    else:  # noop\n        pass\n    \n    next_state['tick'] += 1\n    \n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "triage",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['deteriorated'] += 0  # No deterioration on treatment.\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass  # Do nothing.\n    \n    else:  # noop\n        pass  # Do nothing.\n    \n    next_state['tick'] += 1\n    \n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:7b",
+      "world": "triage",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass\n    \n    else:  # noop\n        pass\n    \n    next_state['tick'] += 1\n    \n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "sprint",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.7,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        shipped = next_state.get('shipped', 0)\n        bugs_increase_factor = (next_state['debt'] + 1) // 4\n        next_state['backlog'] -= 1\n        next_state['shipped'] += 1\n        next_state['debt'] += 1\n        next_state['bugs'] += bugs_increase_factor\n        \n    elif action['name'] == 'fix':\n        if state['bugs'] >= 2:\n            next_state['bugs'] -= 2\n    \n    elif action['name'] == 'refactor':\n        if state['debt'] >= 2:\n            next_state['debt'] -= 2\n            \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "sprint",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.9,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        shipped = next_state.get('shipped', 0)\n        bugs_increase = (next_state['debt'] + 1) // 4\n        next_state['backlog'] -= 1\n        next_state['shipped'] += 1\n        next_state['debt'] += 1\n        next_state['bugs'] += bugs_increase\n        \n    elif action['name'] == 'fix':\n        bugs = next_state.get('bugs', 0)\n        bugs_new = max(bugs - 2, 0)\n        next_state['bugs'] = bugs_new\n    \n    elif action['name'] == 'refactor':\n        debt = next_state.get('debt', 0)\n        debt_new = max(debt - 2, 0)\n        next_state['debt'] = debt_new\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "sprint",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.6,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        shipped = 0\n        if state['backlog'] > 0:\n            state['backlog'] -= 1\n            shipped += 1\n            next_state['shipped'] = shipped\n            next_state['debt'] += 1\n            bugs_increase = next_state['debt'] // 4\n            next_state['bugs'] += bugs_increase\n    elif action['name'] == 'fix':\n        if state['bugs'] > 0:\n            bugs_decrease = min(2, state['bugs'])\n            state['bugs'] -= bugs_decrease\n            next_state['bugs'] = state['bugs']\n    elif action['name'] == 'refactor':\n        if state['debt'] > 0:\n            debt_decrease = min(2, state['debt'])\n            state['debt'] -= debt_decrease\n            next_state['debt'] = state['debt']\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "sprint",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.7,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        shipped = next_state.get('shipped', 0)\n        bugs = next_state.get('bugs', 0)\n        debt = next_state.get('debt', 0)\n        \n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increase = debt // 4\n            next_state['bugs'] = bugs - bugs_increase\n            \n    elif action['name'] == 'fix':\n        bugs = next_state.get('bugs', 0)\n        \n        if bugs > 0:\n            bugs -= 2\n            next_state['bugs'] = max(bugs, 0)\n            \n    elif action['name'] == 'refactor':\n        debt = next_state.get('debt', 0)\n        \n        if debt > 0:\n            debt -= 2\n            next_state['debt'] = max(debt, 0)\n            \n    # Noop and unknown actions do nothing.\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "sprint",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        shipped = next_state['shipped']\n        backlog = next_state['backlog']\n        bugs = next_state['bugs']\n        debt = next_state['debt']\n        next_state['backlog'] = backlog - 1\n        next_state['shipped'] = shipped + 1\n        next_state['debt'] = debt + 1\n        next_state['bugs'] = bugs + (debt // 4)\n    \n    if action['name'] == 'fix':\n        bugs = next_state['bugs']\n        next_state['bugs'] = max(bugs - 2, 0)\n\n    if action['name'] == 'refactor':\n        debt = next_state['debt']\n        next_state['debt'] = max(debt - 2, 0)\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "orchard",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state['apples']\n        agent = action['agent']\n        \n        if apples > 0:\n            next_state['apples'] = apples - 1\n            if agent not in next_state['harvested']:\n                next_state['harvested'][agent] = 0\n            next_state['harvested'][agent] += 1\n    \n    elif action['name'] == 'wait':\n        pass  # No change for wait action\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "orchard",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state['apples']\n        harvested = next_state['harvested']\n        \n        agent = action['agent']\n        if agent in harvested:\n            harvested[agent] += 1\n        else:\n            harvested[agent] = 1\n        \n        if apples > 0:\n            apples -= 1\n            next_state['apples'] = apples\n    \n    elif action['name'] == 'wait':\n        pass  # No change for 'wait' action\n\n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "orchard",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state.get('apples', 0)\n        harvested = next_state['harvested']\n        \n        if apples > 0:\n            harvested[action['agent']] = harvested.get(action['agent'], 0) + 1\n            next_state['apples'] = apples - 1\n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "orchard",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state.get('apples', 0)\n        harvested = next_state.get('harvested', {})\n        \n        if apples > 0 and action['agent'] not in harvested:\n            harvested[action['agent']] = 0\n            next_state['apples'] = max(apples - 1, 0)\n            next_state['harvested'][action['agent']] = 1\n    elif action['name'] == 'wait':\n        pass\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "orchard",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'pick':\n        apples = next_state.get('apples', 0)\n        harvested = next_state.get('harvested', {})\n        \n        if apples > 0 and action['agent'] not in harvested or harvested[action['agent']] < len(state['harvested']):\n            harvested[action['agent']] = harvested.get(action['agent'], 0) + 1\n            next_state['apples'] = apples - 1\n            next_state['harvested'] = harvested\n            \n    elif action['name'] == 'wait':\n        pass\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "triage",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    elif action['name'] == 'wait':\n        pass\n    \n    next_state['tick'] += 1\n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n        next_state['critical_waiting'] -= 1\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "triage",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    elif action['name'] == 'treat_moderate':\n        if state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    elif action['name'] == 'wait':\n        pass\n    \n    next_state['tick'] += 1\n\n    if next_state['tick'] % 2 == 0 and state['critical_waiting'] > 0:\n        next_state['deteriorated'] += 1\n        next_state['critical_waiting'] -= 1\n        next_state['outcomes'] -= 2\n\n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "triage",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass\n    \n    else:  # 'noop'\n        pass\n    \n    next_state['tick'] += 1\n\n    if (next_state['tick'] % 2) == 0 and next_state['critical_waiting'] > 0:\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n        next_state['critical_waiting'] -= 1\n    \n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "triage",
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.5,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if next_state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    elif action['name'] == 'treat_moderate':\n        if next_state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    # 'wait' action does nothing but increment tick\n    elif action['name'] == 'wait':\n        next_state['tick'] += 1\n        \n    # 'noop' is a no-op, just increment tick\n    elif action['name'] == 'noop':\n        next_state['tick'] += 1\n    \n    # Deterioration happens at even ticks if there are critical patients waiting\n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['critical_waiting'] -= 1\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n    \n    # Increment tick after any action, except 'wait' which already does this\n    if action['name'] not in ['wait', 'noop']:\n        next_state['tick'] += 1\n\n    return next_state"
+    },
+    {
+      "model": "qwen2.5:3b",
+      "world": "triage",
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'treat_critical':\n        if state['critical_waiting'] > 0:\n            next_state['critical_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 3\n            next_state['spend'] += 3\n    \n    elif action['name'] == 'treat_moderate':\n        if state['moderate_waiting'] > 0:\n            next_state['moderate_waiting'] -= 1\n            next_state['treated'] += 1\n            next_state['outcomes'] += 1\n            next_state['spend'] += 1\n    \n    elif action['name'] == 'wait':\n        pass  # No change for wait action\n    \n    elif action['name'] == 'noop':\n        pass  # No change for noop action\n    \n    next_state['tick'] += 1\n\n    if next_state['tick'] % 2 == 0 and next_state['critical_waiting'] > 0:\n        next_state['deteriorated'] += 1\n        next_state['outcomes'] -= 2\n        next_state['critical_waiting'] -= 1\n    \n    return next_state"
+    }
+  ],
+  "experiment": "e02_synthesis",
+  "timestamp": "2026-06-11T00:46:39",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

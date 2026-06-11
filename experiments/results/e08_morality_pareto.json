@@ -1,0 +1,102 @@
+{
+  "lambdas": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "steps": 8,
+  "points": [
+    {
+      "lambda": 0.0,
+      "welfare": 12.0,
+      "fairness": -44.0
+    },
+    {
+      "lambda": 0.1,
+      "welfare": 12.0,
+      "fairness": -44.0
+    },
+    {
+      "lambda": 0.2,
+      "welfare": 12.0,
+      "fairness": -44.0
+    },
+    {
+      "lambda": 0.3,
+      "welfare": 12.0,
+      "fairness": -44.0
+    },
+    {
+      "lambda": 0.4,
+      "welfare": 11.0,
+      "fairness": -42.0
+    },
+    {
+      "lambda": 0.5,
+      "welfare": 10.0,
+      "fairness": -36.0
+    },
+    {
+      "lambda": 0.6,
+      "welfare": 10.0,
+      "fairness": -36.0
+    },
+    {
+      "lambda": 0.7,
+      "welfare": 10.0,
+      "fairness": -36.0
+    },
+    {
+      "lambda": 0.8,
+      "welfare": 9.0,
+      "fairness": -26.0
+    },
+    {
+      "lambda": 0.9,
+      "welfare": 8.0,
+      "fairness": -12.0
+    },
+    {
+      "lambda": 1.0,
+      "welfare": 8.0,
+      "fairness": -12.0
+    }
+  ],
+  "pareto_frontier_size": 11,
+  "pareto_lambdas": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "equal_weight_optimum_lambda": 0.0,
+  "nash_optimum_lambda": 0.8,
+  "nash_optimum_is_interior": true,
+  "fairness_monotone_in_lambda": true,
+  "welfare_range": [
+    8.0,
+    12.0
+  ],
+  "fairness_range": [
+    -44.0,
+    -12.0
+  ],
+  "experiment": "e08_morality_pareto",
+  "timestamp": "2026-06-11T00:43:17",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

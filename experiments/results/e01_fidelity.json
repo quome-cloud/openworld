@@ -1,0 +1,69 @@
+{
+  "model": "qwen2.5:7b",
+  "rollout_steps": 20,
+  "seed": 11,
+  "engines": [
+    {
+      "engine": "code_transition",
+      "per_step_match_rate": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_first_divergence_step": 21.0,
+      "mean_final_l1_error": 0.0,
+      "exact_full_rollouts": 3,
+      "n_rollouts": 3
+    },
+    {
+      "engine": "llm_transition",
+      "per_step_match_rate": [
+        0.6666666666666666,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean_first_divergence_step": 2.3333333333333335,
+      "mean_final_l1_error": 10.333333333333334,
+      "exact_full_rollouts": 0,
+      "n_rollouts": 3
+    }
+  ],
+  "synthesized_code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'ship':\n        if state['backlog'] > 0:\n            next_state['backlog'] -= 1\n            next_state['shipped'] += 1\n            next_state['debt'] += 1\n            bugs_increase = next_state['debt'] // 4\n            next_state['bugs'] += max(0, bugs_increase)\n    \n    elif action['name'] == 'fix':\n        next_state['bugs'] = max(0, next_state['bugs'] - 2)\n    \n    elif action['name'] == 'refactor':\n        next_state['debt'] = max(0, next_state['debt'] - 2)\n    \n    return next_state",
+  "experiment": "e01_fidelity",
+  "timestamp": "2026-06-11T00:44:52",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -1,0 +1,25 @@
+{
+  "model": "qwen2.5:7b",
+  "seed": 13,
+  "engines": [
+    {
+      "engine": "code_transition",
+      "steps_per_second": 14996.573283004867,
+      "measured_steps": 5000,
+      "one_time_synthesis_seconds": 3.397540833
+    },
+    {
+      "engine": "function_oracle",
+      "steps_per_second": 243727.57340732907,
+      "measured_steps": 5000
+    },
+    {
+      "engine": "llm_transition",
+      "steps_per_second": 0.31848767866512123,
+      "measured_steps": 10
+    }
+  ],
+  "experiment": "e04_rollout_speed",
+  "timestamp": "2026-06-11T00:51:04",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

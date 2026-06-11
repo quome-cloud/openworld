@@ -185,6 +185,39 @@ Domain walkthroughs in [`tutorials/`](tutorials/README.md), each with a runnable
 - **[Finance](tutorials/finance_portfolio.md)** — portfolio rebalancing: scenario replay, growth-vs-risk frontiers
 - **[Software engineering](tutorials/software_engineering_sprint.md)** — sprint planning: generator + critic relay, validating synthesized code against ground truth
 
+## Agents-as-a-judge
+
+`Judge` wraps any backbone model with two operations: pick the best of N
+candidate behaviors, or grade a whole episode against a written rubric:
+
+```python
+from openworld import Judge
+
+judge = Judge(OllamaLLM(model="qwen2.5:7b"), criteria="prefer minimal correct fixes")
+best = judge.choose(candidate_patches, context=task_description)   # index
+score = judge.score_trajectory(trajectory, rubric="reward prompt triage")  # 0-10
+```
+
+## The coding world
+
+`openworld.coding` ships a ten-task program-repair benchmark where the world's
+dynamics *are* test execution: submit a patch, the sandbox runs the hidden
+tests bit-exactly, and failing-test feedback enters the state for the next
+attempt. See `experiments/e05_codefix_agent.py` and `e06_judge_selection.py`.
+
+## Experiments and paper
+
+`experiments/` contains a 10-experiment campaign (dynamics fidelity, synthesis
+reliability, verifier ablations, rollout speed, program repair, judge
+selection and alignment, morality Pareto sweeps, tuning efficiency, and OOD
+generalization), each writing `results/*.json`. The research paper in `paper/`
+regenerates end-to-end:
+
+```bash
+python3 scripts/make_paper_assets.py   # figures, tables, numbers.tex from results
+cd paper && make                       # builds main.pdf (tectonic or pdflatex)
+```
+
 ## Testing
 
 The test suite runs entirely offline via `MockLLM`:

@@ -1,0 +1,150 @@
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e01_fidelity ==='
+=== e01_fidelity ===
++ python3 e01_fidelity.py
+Synthesizing symbolic dynamics...
+Rolling out 3 x 20 steps per engine...
+[saved] /Users/jim/Desktop/openworld/experiments/results/e01_fidelity.json
+  code_transition: first divergence at step 21.0, final L1 0.0
+  llm_transition: first divergence at step 2.3, final L1 10.3
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e02_synthesis ==='
+=== e02_synthesis ===
++ python3 e02_synthesis.py
+  qwen2.5:7b sprint #0: accepted=True probe_acc=0.70
+  qwen2.5:7b sprint #1: accepted=True probe_acc=1.00
+  qwen2.5:7b sprint #2: accepted=True probe_acc=1.00
+  qwen2.5:7b sprint #3: accepted=True probe_acc=1.00
+  qwen2.5:7b sprint #4: accepted=True probe_acc=1.00
+  qwen2.5:7b orchard #0: accepted=True probe_acc=1.00
+  qwen2.5:7b orchard #1: accepted=True probe_acc=1.00
+  qwen2.5:7b orchard #2: accepted=True probe_acc=1.00
+  qwen2.5:7b orchard #3: accepted=True probe_acc=1.00
+  qwen2.5:7b orchard #4: accepted=True probe_acc=1.00
+  qwen2.5:7b triage #0: accepted=True probe_acc=1.00
+  qwen2.5:7b triage #1: accepted=True probe_acc=1.00
+  qwen2.5:7b triage #2: accepted=True probe_acc=1.00
+  qwen2.5:7b triage #3: accepted=True probe_acc=1.00
+  qwen2.5:7b triage #4: accepted=True probe_acc=1.00
+  qwen2.5:3b sprint #0: accepted=True probe_acc=0.70
+  qwen2.5:3b sprint #1: accepted=True probe_acc=0.90
+  qwen2.5:3b sprint #2: accepted=True probe_acc=0.60
+  qwen2.5:3b sprint #3: accepted=True probe_acc=0.70
+  qwen2.5:3b sprint #4: accepted=True probe_acc=0.60
+  qwen2.5:3b orchard #0: accepted=True probe_acc=1.00
+  qwen2.5:3b orchard #1: accepted=True probe_acc=1.00
+  qwen2.5:3b orchard #2: accepted=True probe_acc=1.00
+  qwen2.5:3b orchard #3: accepted=True probe_acc=1.00
+  qwen2.5:3b orchard #4: accepted=True probe_acc=1.00
+  qwen2.5:3b triage #0: accepted=True probe_acc=1.00
+  qwen2.5:3b triage #1: accepted=True probe_acc=1.00
+  qwen2.5:3b triage #2: accepted=True probe_acc=1.00
+  qwen2.5:3b triage #3: accepted=True probe_acc=0.50
+  qwen2.5:3b triage #4: accepted=True probe_acc=1.00
+[saved] /Users/jim/Desktop/openworld/experiments/results/e02_synthesis.json
+qwen2.5:7b: acceptance 100% (CI 0.80-1.00), probe accuracy 0.98
+qwen2.5:3b: acceptance 100% (CI 0.80-1.00), probe accuracy 0.87
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e03_verifier_ablation ==='
+=== e03_verifier_ablation ===
++ python3 e03_verifier_ablation.py
+  none #0: accepted=True probe_acc=0.70
+  none #1: accepted=True probe_acc=0.70
+  none #2: accepted=True probe_acc=1.00
+  none #3: accepted=True probe_acc=1.00
+  none #4: accepted=True probe_acc=1.00
+  none #5: accepted=True probe_acc=1.00
+  syntax #0: accepted=True probe_acc=0.70
+  syntax #1: accepted=True probe_acc=0.70
+  syntax #2: accepted=True probe_acc=1.00
+  syntax #3: accepted=True probe_acc=1.00
+  syntax #4: accepted=True probe_acc=1.00
+  syntax #5: accepted=True probe_acc=1.00
+  full #0: accepted=True probe_acc=0.70
+  full #1: accepted=True probe_acc=0.70
+  full #2: accepted=True probe_acc=1.00
+  full #3: accepted=True probe_acc=1.00
+  full #4: accepted=True probe_acc=1.00
+  full #5: accepted=True probe_acc=1.00
+  critic #0: accepted=True probe_acc=0.70
+  critic #1: accepted=True probe_acc=0.70
+  critic #2: accepted=True probe_acc=1.00
+  critic #3: accepted=True probe_acc=1.00
+  critic #4: accepted=True probe_acc=1.00
+  critic #5: accepted=True probe_acc=1.00
+[saved] /Users/jim/Desktop/openworld/experiments/results/e03_verifier_ablation.json
+   none: probe accuracy 0.90, perfect 67%
+ syntax: probe accuracy 0.90, perfect 67%
+   full: probe accuracy 0.90, perfect 67%
+ critic: probe accuracy 0.90, perfect 67%
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e04_rollout_speed ==='
+=== e04_rollout_speed ===
++ python3 e04_rollout_speed.py
+Synthesizing symbolic dynamics (one-time cost)...
+[saved] /Users/jim/Desktop/openworld/experiments/results/e04_rollout_speed.json
+  code_transition: 14996.6 steps/s
+  function_oracle: 243727.6 steps/s
+  llm_transition: 0.3 steps/s
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e05_codefix_agent ==='
+=== e05_codefix_agent ===
++ python3 e05_codefix_agent.py
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=True attempts=1
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=True attempts=1
+  word_count_split: solved=True attempts=1
+  running_max_reset: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e05_codefix_agent.json
+pass@1 100%, pass@4 100%
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e06_judge_selection ==='
+=== e06_judge_selection ===
++ python3 e06_judge_selection.py
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=True attempts=1
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=True attempts=1
+  word_count_split: solved=True attempts=1
+  running_max_reset: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e06_judge_selection.json
+pass@1 100%, pass@4 100%; judge accuracy when solvable: 1.0
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e07_judge_alignment ==='
+=== e07_judge_alignment ===
++ python3 e07_judge_alignment.py
+  lambda=0.00: aggregate=12.00 judge=7.0
+  lambda=0.09: aggregate=9.83 judge=8.0
+  lambda=0.18: aggregate=7.02 judge=7.0
+  lambda=0.27: aggregate=5.30 judge=6.0
+  lambda=0.36: aggregate=3.76 judge=6.0
+  lambda=0.45: aggregate=2.95 judge=6.0
+  lambda=0.55: aggregate=2.05 judge=6.0
+  lambda=0.64: aggregate=1.24 judge=6.0
+  lambda=0.73: aggregate=0.43 judge=6.0
+  lambda=0.82: aggregate=-0.38 judge=6.0
+  lambda=0.91: aggregate=-1.19 judge=6.0
+  lambda=1.00: aggregate=-2.00 judge=6.0
+[saved] /Users/jim/Desktop/openworld/experiments/results/e07_judge_alignment.json
+Spearman(judge, ground truth) = 0.746 over 12 episodes
++ for script in e01_fidelity e02_synthesis e03_verifier_ablation e04_rollout_speed e05_codefix_agent e06_judge_selection e07_judge_alignment e10_ood_generalization
++ echo '=== e10_ood_generalization ==='
+=== e10_ood_generalization ===
++ python3 e10_ood_generalization.py
+Synthesizing symbolic dynamics at in-distribution scale...
+  code_transition on in_distribution: 10/10
+  code_transition on scaled_10x: 10/10
+  llm_transition on in_distribution: 4/10
+  llm_transition on scaled_10x: 4/10
+[saved] /Users/jim/Desktop/openworld/experiments/results/e10_ood_generalization.json
++ echo '=== all done ==='
+=== all done ===

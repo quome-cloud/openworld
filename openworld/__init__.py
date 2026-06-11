@@ -22,6 +22,7 @@ Quickstart:
 """
 
 from .agent import Agent
+from .judge import Judge
 from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
 from .objectives import Dial, Objective, ObjectiveSuite
 from .optimize import SweepPoint, SweepResult, sweep
@@ -43,6 +44,7 @@ __all__ = [
     "CodeTransition",
     "Dial",
     "IntRange",
+    "Judge",
     "Param",
     "Study",
     "Trial",

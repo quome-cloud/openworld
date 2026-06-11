@@ -1,0 +1,241 @@
+{
+  "budget_trials": 200,
+  "summary": [
+    {
+      "strategy": "random",
+      "seeds": 10,
+      "mean_best_score": 17.599999999999998,
+      "seeds_solving": 10,
+      "mean_trials_to_first_solve": 4.3
+    },
+    {
+      "strategy": "tpe",
+      "seeds": 10,
+      "mean_best_score": 17.599999999999998,
+      "seeds_solving": 10,
+      "mean_trials_to_first_solve": 4.8
+    },
+    {
+      "strategy": "random+refine",
+      "seeds": 10,
+      "mean_best_score": 17.599999999999998,
+      "seeds_solving": 10,
+      "mean_trials_to_first_solve": 4.3
+    }
+  ],
+  "runs": [
+    {
+      "strategy": "random",
+      "seed": 0,
+      "trials_to_first_solve": 4,
+      "best_score": 17.6,
+      "solve_rate": 0.205
+    },
+    {
+      "strategy": "random",
+      "seed": 1,
+      "trials_to_first_solve": 7,
+      "best_score": 17.6,
+      "solve_rate": 0.275
+    },
+    {
+      "strategy": "random",
+      "seed": 2,
+      "trials_to_first_solve": 5,
+      "best_score": 17.6,
+      "solve_rate": 0.23
+    },
+    {
+      "strategy": "random",
+      "seed": 3,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.16
+    },
+    {
+      "strategy": "random",
+      "seed": 4,
+      "trials_to_first_solve": 7,
+      "best_score": 17.6,
+      "solve_rate": 0.265
+    },
+    {
+      "strategy": "random",
+      "seed": 5,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.195
+    },
+    {
+      "strategy": "random",
+      "seed": 6,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.225
+    },
+    {
+      "strategy": "random",
+      "seed": 7,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.26
+    },
+    {
+      "strategy": "random",
+      "seed": 8,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.21
+    },
+    {
+      "strategy": "random",
+      "seed": 9,
+      "trials_to_first_solve": 12,
+      "best_score": 17.6,
+      "solve_rate": 0.235
+    },
+    {
+      "strategy": "tpe",
+      "seed": 0,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.7
+    },
+    {
+      "strategy": "tpe",
+      "seed": 1,
+      "trials_to_first_solve": 6,
+      "best_score": 17.6,
+      "solve_rate": 0.675
+    },
+    {
+      "strategy": "tpe",
+      "seed": 2,
+      "trials_to_first_solve": 3,
+      "best_score": 17.6,
+      "solve_rate": 0.695
+    },
+    {
+      "strategy": "tpe",
+      "seed": 3,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.595
+    },
+    {
+      "strategy": "tpe",
+      "seed": 4,
+      "trials_to_first_solve": 5,
+      "best_score": 17.6,
+      "solve_rate": 0.65
+    },
+    {
+      "strategy": "tpe",
+      "seed": 5,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.6
+    },
+    {
+      "strategy": "tpe",
+      "seed": 6,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.68
+    },
+    {
+      "strategy": "tpe",
+      "seed": 7,
+      "trials_to_first_solve": 9,
+      "best_score": 17.6,
+      "solve_rate": 0.745
+    },
+    {
+      "strategy": "tpe",
+      "seed": 8,
+      "trials_to_first_solve": 9,
+      "best_score": 17.6,
+      "solve_rate": 0.66
+    },
+    {
+      "strategy": "tpe",
+      "seed": 9,
+      "trials_to_first_solve": 10,
+      "best_score": 17.6,
+      "solve_rate": 0.715
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 0,
+      "trials_to_first_solve": 4,
+      "best_score": 17.6,
+      "solve_rate": 0.385
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 1,
+      "trials_to_first_solve": 7,
+      "best_score": 17.6,
+      "solve_rate": 0.45
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 2,
+      "trials_to_first_solve": 5,
+      "best_score": 17.6,
+      "solve_rate": 0.41
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 3,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.505
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 4,
+      "trials_to_first_solve": 7,
+      "best_score": 17.6,
+      "solve_rate": 0.44
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 5,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.545
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 6,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.585
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 7,
+      "trials_to_first_solve": 2,
+      "best_score": 17.6,
+      "solve_rate": 0.52
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 8,
+      "trials_to_first_solve": 1,
+      "best_score": 17.6,
+      "solve_rate": 0.5
+    },
+    {
+      "strategy": "random+refine",
+      "seed": 9,
+      "trials_to_first_solve": 12,
+      "best_score": 17.6,
+      "solve_rate": 0.545
+    }
+  ],
+  "experiment": "e09_tuning_efficiency",
+  "timestamp": "2026-06-11T00:42:02",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

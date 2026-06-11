@@ -44,6 +44,30 @@ def test_codefix_world_episode():
     assert world.state["attempts"] == 2
 
 
-def test_benchmark_has_ten_distinct_tasks():
-    assert len(BENCHMARK) == 10
-    assert len({t.name for t in BENCHMARK}) == 10
+def test_benchmark_has_twenty_distinct_tasks():
+    assert len(BENCHMARK) == 20
+    assert len({t.name for t in BENCHMARK}) == 20
+
+
+def test_run_tests_times_out_on_infinite_loop():
+    result = run_tests("def f():\n    while True:\n        pass\nf()\n",
+                       [("1", "1")], timeout_seconds=0.5)
+    assert result["failed"] == 1
+    assert "timed out" in result["errors"][0]
+
+
+def test_timeout_survives_exception_swallowing_code():
+    # A patch that catches Exception inside its loop must not be able to
+    # swallow the timeout alarm and spin forever.
+    source = (
+        "def f():\n"
+        "    while True:\n"
+        "        try:\n"
+        "            x = 1\n"
+        "        except Exception:\n"
+        "            pass\n"
+        "f()\n"
+    )
+    result = run_tests(source, [("1", "1")], timeout_seconds=0.5)
+    assert result["failed"] == 1
+    assert "timed out" in result["errors"][0]

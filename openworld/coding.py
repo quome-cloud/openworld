@@ -51,35 +51,72 @@ class CodingTask:
     reference_source: str = ""  # known-good solution, for oracle baselines
 
 
-def run_tests(source: str, tests: List[Tuple[str, str]]) -> Dict[str, Any]:
+def run_tests(
+    source: str,
+    tests: List[Tuple[str, str]],
+    timeout_seconds: float = 5.0,
+) -> Dict[str, Any]:
     """Execute `source`, run each test expression, compare repr() to expected.
 
     Returns {"passed": n, "failed": n, "errors": [readable failure strings]}.
-    A source that fails to exec marks every test as failed.
+    A source that fails to exec marks every test as failed. On POSIX main
+    threads a wall-clock alarm bounds the whole suite, so a submitted patch
+    that loops forever fails instead of hanging the world.
     """
     import math
 
     namespace: Dict[str, Any] = {"__builtins__": dict(_TEST_BUILTINS), "math": math}
     errors: List[str] = []
+
+    import signal
+    import threading
+
+    use_alarm = (
+        hasattr(signal, "SIGALRM")
+        and threading.current_thread() is threading.main_thread()
+    )
+
+    # BaseException, not Exception: submitted code with a bare
+    # `except Exception` must not be able to swallow the alarm and keep
+    # spinning (observed in the wild with generated patches).
+    class _Timeout(BaseException):
+        pass
+
+    def _raise_timeout(signum, frame):
+        raise _Timeout()
+
+    if use_alarm:
+        previous = signal.signal(signal.SIGALRM, _raise_timeout)
+        signal.setitimer(signal.ITIMER_REAL, timeout_seconds)
     try:
-        exec(compile(source, "<submission>", "exec"), namespace)
-    except Exception as exc:
-        return {
-            "passed": 0,
-            "failed": len(tests),
-            "errors": [f"source failed to execute: {exc!r}"],
-        }
-    passed = 0
-    for expression, expected in tests:
         try:
-            result = eval(expression, namespace)  # noqa: S307 - sandboxed namespace
-            if repr(result) == expected:
-                passed += 1
-            else:
-                errors.append(f"{expression} -> {result!r}, expected {expected}")
+            exec(compile(source, "<submission>", "exec"), namespace)
+        except _Timeout:
+            return {"passed": 0, "failed": len(tests),
+                    "errors": ["source timed out (possible infinite loop)"]}
         except Exception as exc:
-            errors.append(f"{expression} raised {exc!r}")
-    return {"passed": passed, "failed": len(tests) - passed, "errors": errors}
+            return {
+                "passed": 0,
+                "failed": len(tests),
+                "errors": [f"source failed to execute: {exc!r}"],
+            }
+        passed = 0
+        for expression, expected in tests:
+            try:
+                result = eval(expression, namespace)  # noqa: S307 - sandboxed namespace
+                if repr(result) == expected:
+                    passed += 1
+                else:
+                    errors.append(f"{expression} -> {result!r}, expected {expected}")
+            except _Timeout:
+                errors.append(f"{expression} timed out (possible infinite loop)")
+            except Exception as exc:
+                errors.append(f"{expression} raised {exc!r}")
+        return {"passed": passed, "failed": len(tests) - passed, "errors": errors}
+    finally:
+        if use_alarm:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous)
 
 
 class CodeFixTransition(Transition):
@@ -211,5 +248,85 @@ BENCHMARK: List[CodingTask] = [
         reference_source="def running_max(xs):\n    out = []\n    best = None\n    for x in xs:\n        best = x if best is None or x > best else best\n        out.append(best)\n    return out\n",
         tests=[("running_max([1, 3, 2, 5, 4])", "[1, 3, 3, 5, 5]"), ("running_max([2])", "[2]"), ("running_max([5, 1])", "[5, 5]")],
         function_name="running_max",
+    ),
+    CodingTask(
+        name="binary_search_last",
+        description="binary_search(xs, target) should return the index of target in sorted list xs, or -1 if absent.",
+        buggy_source="def binary_search(xs, target):\n    lo, hi = 0, len(xs) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if xs[mid] == target:\n            return mid\n        elif xs[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n",
+        reference_source="def binary_search(xs, target):\n    lo, hi = 0, len(xs) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if xs[mid] == target:\n            return mid\n        elif xs[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n",
+        tests=[("binary_search([1, 3, 5], 5)", "2"), ("binary_search([1, 3, 5], 1)", "0"), ("binary_search([2, 4], 3)", "-1")],
+        function_name="binary_search",
+    ),
+    CodingTask(
+        name="anagram_normalize",
+        description="is_anagram(a, b) should ignore letter case and spaces.",
+        buggy_source="def is_anagram(a, b):\n    return sorted(a) == sorted(b)\n",
+        reference_source="def is_anagram(a, b):\n    na = sorted(a.lower().replace(' ', ''))\n    nb = sorted(b.lower().replace(' ', ''))\n    return na == nb\n",
+        tests=[("is_anagram('Listen', 'Silent')", "True"), ("is_anagram('hello', 'world')", "False"), ("is_anagram('a gentleman', 'elegant man')", "True")],
+        function_name="is_anagram",
+    ),
+    CodingTask(
+        name="flatten_no_expand",
+        description="flatten(xs) should flatten one level: a list of lists becomes a single list.",
+        buggy_source="def flatten(xs):\n    out = []\n    for x in xs:\n        out.append(x)\n    return out\n",
+        reference_source="def flatten(xs):\n    out = []\n    for x in xs:\n        out.extend(x)\n    return out\n",
+        tests=[("flatten([[1, 2], [3], [4, 5]])", "[1, 2, 3, 4, 5]"), ("flatten([[7]])", "[7]"), ("flatten([])", "[]")],
+        function_name="flatten",
+    ),
+    CodingTask(
+        name="clamp_swapped",
+        description="clamp(x, lo, hi) should clamp x into the inclusive range [lo, hi].",
+        buggy_source="def clamp(x, lo, hi):\n    return min(lo, max(hi, x))\n",
+        reference_source="def clamp(x, lo, hi):\n    return max(lo, min(hi, x))\n",
+        tests=[("clamp(5, 0, 10)", "5"), ("clamp(-3, 0, 10)", "0"), ("clamp(15, 0, 10)", "10")],
+        function_name="clamp",
+    ),
+    CodingTask(
+        name="average_int_division",
+        description="average(xs) should return the arithmetic mean as a float.",
+        buggy_source="def average(xs):\n    return sum(xs) // len(xs)\n",
+        reference_source="def average(xs):\n    return sum(xs) / len(xs)\n",
+        tests=[("average([1, 2])", "1.5"), ("average([3])", "3.0"), ("average([1, 2, 3, 5])", "2.75")],
+        function_name="average",
+    ),
+    CodingTask(
+        name="count_overlapping",
+        description="count_overlapping(s, sub) should count occurrences of sub in s, including overlapping ones.",
+        buggy_source="def count_overlapping(s, sub):\n    return s.count(sub)\n",
+        reference_source="def count_overlapping(s, sub):\n    count = 0\n    for i in range(len(s) - len(sub) + 1):\n        if s[i:i + len(sub)] == sub:\n            count += 1\n    return count\n",
+        tests=[("count_overlapping('aaa', 'aa')", "2"), ("count_overlapping('abcabc', 'abc')", "2"), ("count_overlapping('xyz', 'q')", "0")],
+        function_name="count_overlapping",
+    ),
+    CodingTask(
+        name="reverse_words_chars",
+        description="reverse_words(s) should reverse the order of the words, not the characters.",
+        buggy_source="def reverse_words(s):\n    return s[::-1]\n",
+        reference_source="def reverse_words(s):\n    return ' '.join(s.split()[::-1])\n",
+        tests=[("reverse_words('hello world')", "'world hello'"), ("reverse_words('a b c')", "'c b a'"), ("reverse_words('solo')", "'solo'")],
+        function_name="reverse_words",
+    ),
+    CodingTask(
+        name="second_largest_dup",
+        description="second_largest(xs) should return the second-largest DISTINCT value in xs.",
+        buggy_source="def second_largest(xs):\n    return sorted(xs)[-2]\n",
+        reference_source="def second_largest(xs):\n    return sorted(set(xs))[-2]\n",
+        tests=[("second_largest([5, 5, 3])", "3"), ("second_largest([1, 2, 3])", "2"), ("second_largest([9, 9, 9, 4])", "4")],
+        function_name="second_largest",
+    ),
+    CodingTask(
+        name="rle_last_run",
+        description="rle(s) should run-length encode s as letter+count pairs, e.g. 'aaabb' -> 'a3b2'.",
+        buggy_source="def rle(s):\n    if not s:\n        return ''\n    out = ''\n    count = 1\n    for i in range(1, len(s)):\n        if s[i] == s[i - 1]:\n            count += 1\n        else:\n            out += s[i - 1] + str(count)\n            count = 1\n    return out\n",
+        reference_source="def rle(s):\n    if not s:\n        return ''\n    out = ''\n    count = 1\n    for i in range(1, len(s)):\n        if s[i] == s[i - 1]:\n            count += 1\n        else:\n            out += s[i - 1] + str(count)\n            count = 1\n    out += s[-1] + str(count)\n    return out\n",
+        tests=[("rle('aaabb')", "'a3b2'"), ("rle('x')", "'x1'"), ("rle('')", "''")],
+        function_name="rle",
+    ),
+    CodingTask(
+        name="gcd_returns_zero",
+        description="gcd(a, b) should return the greatest common divisor (gcd(x, 0) == x).",
+        buggy_source="def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return b\n",
+        reference_source="def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n",
+        tests=[("gcd(12, 18)", "6"), ("gcd(7, 3)", "1"), ("gcd(5, 0)", "5")],
+        function_name="gcd",
     ),
 ]

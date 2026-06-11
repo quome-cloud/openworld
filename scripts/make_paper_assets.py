@@ -16,7 +16,15 @@ RESULTS = ROOT / "experiments" / "results"
 FIGS = ROOT / "paper" / "figs"
 TABLES = ROOT / "paper" / "tables"
 
-BLUE, ORANGE, TEAL, SLATE = "#1D4ED8", "#D97706", "#0F766E", "#475569"
+BLUE, ORANGE, TEAL, SLATE, PURPLE = "#1D4ED8", "#D97706", "#0F766E", "#475569", "#6D28D9"
+
+EXPERIMENTS = [
+    "e01_fidelity", "e02_synthesis", "e03_verifier_ablation",
+    "e04_rollout_speed", "e05_codefix_agent", "e06_judge_selection",
+    "e07_judge_alignment", "e08_morality_pareto", "e09_tuning_efficiency",
+    "e10_ood_generalization", "e11_multiworld_fidelity",
+    "e12_learned_baseline", "e13_judge_controls", "e15_judge_robustness",
+]
 
 
 def load(name):
@@ -35,14 +43,13 @@ def ci_str(ci):
 def fig_hero(e01, e10):
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
 
-    # Panel A: compounding rollout error.
     ax = axes[0]
     engines = {e["engine"]: e for e in e01["engines"]}
     steps = range(1, e01["rollout_steps"] + 1)
     ax.plot(steps, engines["code_transition"]["per_step_match_rate"], "-o",
             color=BLUE, markersize=3.5, label="Symbolic (verified code, ours)")
     ax.plot(steps, engines["llm_transition"]["per_step_match_rate"], "-s",
-            color=ORANGE, markersize=3.5, label="Learned-style (LLM next-state)")
+            color=ORANGE, markersize=3.5, label="LLM next-state (proxy)")
     ax.set_xlabel("Rollout depth (steps)")
     ax.set_ylabel("Exact state-match rate")
     ax.set_ylim(-0.05, 1.08)
@@ -50,7 +57,6 @@ def fig_hero(e01, e10):
     ax.legend(fontsize=8, loc="center right")
     ax.grid(alpha=0.25)
 
-    # Panel B: OOD scale generalization.
     ax = axes[1]
     rows = e10["rows"]
 
@@ -64,7 +70,7 @@ def fig_hero(e01, e10):
     ax.bar([i - width / 2 for i in x], [rate("code_transition", g) for g in groups],
            width, color=BLUE, label="Symbolic (ours)")
     ax.bar([i + width / 2 for i in x], [rate("llm_transition", g) for g in groups],
-           width, color=ORANGE, label="Learned-style")
+           width, color=ORANGE, label="LLM next-state")
     ax.set_xticks(x)
     ax.set_xticklabels(["In-distribution", "10× scaled (OOD)"])
     ax.set_ylabel("Exact transition accuracy")
@@ -78,29 +84,57 @@ def fig_hero(e01, e10):
     plt.close(fig)
 
 
-def fig_judge(e05, e06):
+def fig_learned(e12):
+    """Sample-efficiency of trained baselines vs the zero-transition program."""
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.4))
+    rows = e12["rows"]
+    ks = e12["ks"]
+
+    def series(model, field):
+        return [next(r[field] for r in rows
+                     if r["model"] == model and r["k_transitions"] == k) for k in ks]
+
+    for ax, field, title in (
+        (axes[0], "probe_in_dist", "A. Branch-covering probes (in-distribution)"),
+        (axes[1], "probe_ood_10x", "B. The same probes at 10× scale (OOD)"),
+    ):
+        ax.plot(ks, series("mlp", field), "-o", color=PURPLE, label="MLP (trained)")
+        ax.plot(ks, series("knn1", field), "-s", color=SLATE, label="1-NN (memorizer)")
+        ax.axhline(1.0, color=BLUE, lw=2, ls="--",
+                   label="Synthesized code (0 transitions)")
+        ax.set_xscale("log")
+        ax.set_xticks(ks)
+        ax.set_xticklabels([str(k) for k in ks])
+        ax.set_xlabel("Training transitions (random policy)")
+        ax.set_ylabel("Exact transition accuracy")
+        ax.set_ylim(-0.05, 1.1)
+        ax.set_title(title, fontsize=10, loc="left")
+        ax.grid(alpha=0.25)
+        ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(FIGS / "learned.png", dpi=200)
+    plt.close(fig)
+
+
+def fig_judge(e13):
+    """Controlled selection comparison on shared candidate sets."""
     fig, ax = plt.subplots(figsize=(6.4, 3.4))
-    b, j = e05["summary"], e06["summary"]
-    metrics = ["pass_at_1", "pass_at_budget"]
-    labels = ["pass@1", f"pass@{e05['max_attempts']}"]
-    x = [0, 1]
-    width = 0.36
-    ax.bar([i - width / 2 for i in x], [b[m] for m in metrics], width,
-           color=SLATE, label="Single proposal (baseline)")
-    ax.bar([i + width / 2 for i in x], [j[m] for m in metrics], width,
-           color=TEAL, label=f"{e06['n_candidates']} candidates + judge")
-    for i, m in enumerate(metrics):
-        lo, hi = b[f"{m}_ci"]
-        ax.errorbar(i - width / 2, b[m], yerr=[[b[m] - lo], [hi - b[m]]],
+    order = ["first", "random", "judge", "oracle"]
+    labels = ["first\ncandidate", "random\nof 3", "judge\nof 3", "oracle\nof 3\n(ceiling)"]
+    colors = [SLATE, SLATE, TEAL, "#9CA3AF"]
+    strategies = e13["strategies"]
+    x = list(range(len(order)))
+    for i, name in enumerate(order):
+        s = strategies[name]
+        ax.bar(i, s["rate"], 0.55, color=colors[i])
+        lo, hi = s["ci"]
+        ax.errorbar(i, s["rate"], yerr=[[s["rate"] - lo], [hi - s["rate"]]],
                     fmt="none", ecolor="black", capsize=3, lw=1)
-        lo, hi = j[f"{m}_ci"]
-        ax.errorbar(i + width / 2, j[m], yerr=[[j[m] - lo], [hi - j[m]]],
-                    fmt="none", ecolor="black", capsize=3, lw=1)
+        ax.text(i, min(s["rate"] + 0.1, 1.02), f"{s['rate']:.0%}", ha="center", fontsize=9)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    ax.set_ylabel("Solve rate (10 repair tasks)")
+    ax.set_ylabel(f"Solve rate over {e13['n_rounds']} paired rounds")
     ax.set_ylim(0, 1.12)
-    ax.legend(fontsize=8)
     ax.grid(alpha=0.25, axis="y")
     fig.tight_layout()
     fig.savefig(FIGS / "judge.png", dpi=200)
@@ -137,7 +171,7 @@ def fig_verifier(e03):
     summary = {s["condition"]: s for s in e03["summary"]}
     accs = [summary[c]["mean_probe_accuracy"] for c in order]
     x = list(range(len(order)))
-    bars = ax.bar(x, accs, 0.55, color=[SLATE, SLATE, BLUE, TEAL])
+    ax.bar(x, accs, 0.55, color=[SLATE, SLATE, BLUE, TEAL])
     for i, v in enumerate(accs):
         ax.text(i, v + 0.02, f"{v:.2f}", ha="center", fontsize=9)
     ax.set_xticks(x)
@@ -167,12 +201,58 @@ def table_main(e01, e04, e10):
 
     body = "\n".join([
         row("\\textbf{Symbolic (verified code, ours)}", "code_transition"),
-        row("Learned-style (LLM next-state)", "llm_transition"),
+        row("LLM next-state (proxy)", "llm_transition"),
     ])
     (TABLES / "main.tex").write_text(
         "\\begin{tabular}{lcccc}\n\\toprule\n"
         "Engine & First divergence (step) & Final L1 error & OOD exact (10$\\times$) & Steps/s \\\\\n"
         "\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
+def table_fidelity(e11):
+    rows = []
+    worlds = sorted({r["world"] for r in e11["rows"]})
+    for world in worlds:
+        code = next(r for r in e11["rows"]
+                    if r["world"] == world and r["engine"] == "code_transition")
+        llm = next(r for r in e11["rows"]
+                   if r["world"] == world and r["engine"] == "llm_transition")
+        llm_div = (f"{llm['mean_first_divergence']:.1f}"
+                   if llm["mean_first_divergence"] else "---")
+        rows.append(
+            f"{world} & {code['exact_rollouts']}/{code['n_rollouts']} & "
+            f"{llm['exact_rollouts']}/{llm['n_rollouts']} & {llm_div} \\\\"
+        )
+    totals = e11["totals"]
+    code_t, llm_t = totals["code_transition"], totals["llm_transition"]
+    rows.append("\\midrule")
+    rows.append(
+        f"\\textbf{{Total}} & \\textbf{{{code_t['exact_rollouts']}/{code_t['n']}}} "
+        f"{ci_str(code_t['ci'])} & {llm_t['exact_rollouts']}/{llm_t['n']} "
+        f"{ci_str(llm_t['ci'])} & --- \\\\"
+    )
+    (TABLES / "fidelity.tex").write_text(
+        "\\begin{tabular}{lccc}\n\\toprule\n"
+        "World & Code: exact rollouts & LLM: exact rollouts & LLM first divergence \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
+def table_judge_controls(e13):
+    rows = []
+    labels = {"first": "First candidate (no selection)",
+              "random": "Random of 3 (diversity only)",
+              "judge": "\\textbf{Judge of 3 (ours)}",
+              "oracle": "Oracle of 3 (ceiling)"}
+    for name in ("first", "random", "judge", "oracle"):
+        s = e13["strategies"][name]
+        rows.append(f"{labels[name]} & {s['solves']}/{s['n']} & "
+                    f"{pct(s['rate'])} {ci_str(s['ci'])} \\\\")
+    (TABLES / "judge_controls.tex").write_text(
+        "\\begin{tabular}{lcc}\n\\toprule\n"
+        "Selection strategy & Solves & Rate (95\\% CI) \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     )
 
 
@@ -206,12 +286,23 @@ def table_tuning(e09):
     )
 
 
-def numbers_tex(e01, e02, e03, e04, e05, e06, e07, e08, e09, e10):
+def numbers_tex(d):
+    e01, e02, e03 = d["e01_fidelity"], d["e02_synthesis"], d["e03_verifier_ablation"]
+    e04, e05, e06 = d["e04_rollout_speed"], d["e05_codefix_agent"], d["e06_judge_selection"]
+    e07, e08, e09 = d["e07_judge_alignment"], d["e08_morality_pareto"], d["e09_tuning_efficiency"]
+    e10, e11, e12 = d["e10_ood_generalization"], d["e11_multiworld_fidelity"], d["e12_learned_baseline"]
+    e13, e15 = d["e13_judge_controls"], d["e15_judge_robustness"]
+
     engines01 = {e["engine"]: e for e in e01["engines"]}
     speed = {e["engine"]: e for e in e04["engines"]}
     ood = {(r["engine"], r["probes"]): r for r in e10["rows"]}
     e03s = {s["condition"]: s for s in e03["summary"]}
     audit = e06["judge_audit"]
+    code_total = e11["totals"]["code_transition"]
+    llm_total = e11["totals"]["llm_transition"]
+    e12_rows = {(r["model"], r["k_transitions"]): r for r in e12["rows"]}
+    bias = e13["position_bias"]
+    mcn = e13["mcnemar_judge_vs_random"]
 
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
@@ -230,8 +321,6 @@ def numbers_tex(e01, e02, e03, e04, e05, e06, e07, e08, e09, e10):
         macro("VerifierNoneAcc", f"{e03s['none']['mean_probe_accuracy']:.2f}"),
         macro("VerifierFullAcc", f"{e03s['full']['mean_probe_accuracy']:.2f}"),
         macro("VerifierCriticAcc", f"{e03s['critic']['mean_probe_accuracy']:.2f}"),
-        macro("VerifierNonePerfect", pct(e03s["none"]["perfect_rate"])),
-        macro("VerifierFullPerfect", pct(e03s["full"]["perfect_rate"])),
         macro("CodeStepsPerSec", f"{speed['code_transition']['steps_per_second']:,.0f}"),
         macro("LLMStepsPerSec", f"{speed['llm_transition']['steps_per_second']:.2f}"),
         macro("SpeedRatio", f"{speed_ratio:,.0f}"),
@@ -252,7 +341,42 @@ def numbers_tex(e01, e02, e03, e04, e05, e06, e07, e08, e09, e10):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "10"),
+        macro("NumExperiments", "14"),
+        # E11 multi-world fidelity
+        macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
+        macro("MultiCodeCI", ci_str(code_total["ci"])),
+        macro("MultiLLMExact", f"{llm_total['exact_rollouts']}/{llm_total['n']}"),
+        macro("MultiLLMCI", ci_str(llm_total["ci"])),
+        # E12 learned baselines (10k-transition column)
+        macro("MLPInDistTenK", pct(e12_rows[("mlp", 10000)]["probe_in_dist"])),
+        macro("MLPOODTenK", pct(e12_rows[("mlp", 10000)]["probe_ood_10x"])),
+        macro("KNNInDistTenK", pct(e12_rows[("knn1", 10000)]["probe_in_dist"])),
+        macro("KNNRolloutsTenK",
+              f"{e12_rows[('knn1', 10000)]['exact_rollouts']}/{e12_rows[('knn1', 10000)]['n_rollouts']}"),
+        # E13 judge controls
+        macro("CtrlFirst", pct(e13["strategies"]["first"]["rate"])),
+        macro("CtrlRandom", pct(e13["strategies"]["random"]["rate"])),
+        macro("CtrlJudge", pct(e13["strategies"]["judge"]["rate"])),
+        macro("CtrlOracle", pct(e13["strategies"]["oracle"]["rate"])),
+        macro("CtrlRounds", str(e13["n_rounds"])),
+        macro("McNemarP", f"{mcn['p']:.3f}"),
+        macro("McNemarB", str(mcn["b"])),
+        macro("McNemarC", str(mcn["c"])),
+        macro("OrderConsistency", pct(bias["order_consistency"])),
+        macro("OrderConsistencyDisc", pct(
+            (lambda disc: sum(r["order_consistent"] for r in disc) / len(disc) if disc else 0)
+            ([r for r in e13["rounds"] if any(r["passing"]) and not all(r["passing"])])
+        )),
+        macro("JudgeFwdAcc",
+              pct(bias["judge_accuracy_forward"]) if bias["judge_accuracy_forward"] is not None else "n/a"),
+        macro("JudgeRevAcc",
+              pct(bias["judge_accuracy_reversed"]) if bias["judge_accuracy_reversed"] is not None else "n/a"),
+        macro("DiscRounds", str(bias["n_discriminative_rounds"])),
+        # E15 judge robustness
+        macro("RubricOrigRho", f"{e15['results']['original']['spearman']:.2f}"),
+        macro("RubricOrigP", f"{e15['results']['original']['permutation_p']:.4f}"),
+        macro("RubricParaRho", f"{e15['results']['paraphrase']['spearman']:.2f}"),
+        macro("RubricParaP", f"{e15['results']['paraphrase']['permutation_p']:.4f}"),
     ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
@@ -260,25 +384,18 @@ def numbers_tex(e01, e02, e03, e04, e05, e06, e07, e08, e09, e10):
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
-    data = {name: load(name) for name in (
-        "e01_fidelity", "e02_synthesis", "e03_verifier_ablation",
-        "e04_rollout_speed", "e05_codefix_agent", "e06_judge_selection",
-        "e07_judge_alignment", "e08_morality_pareto", "e09_tuning_efficiency",
-        "e10_ood_generalization",
-    )}
+    data = {name: load(name) for name in EXPERIMENTS}
     fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
-    fig_judge(data["e05_codefix_agent"], data["e06_judge_selection"])
+    fig_learned(data["e12_learned_baseline"])
+    fig_judge(data["e13_judge_controls"])
     fig_pareto(data["e08_morality_pareto"])
     fig_verifier(data["e03_verifier_ablation"])
     table_main(data["e01_fidelity"], data["e04_rollout_speed"], data["e10_ood_generalization"])
+    table_fidelity(data["e11_multiworld_fidelity"])
+    table_judge_controls(data["e13_judge_controls"])
     table_synthesis(data["e02_synthesis"])
     table_tuning(data["e09_tuning_efficiency"])
-    numbers_tex(*[data[k] for k in (
-        "e01_fidelity", "e02_synthesis", "e03_verifier_ablation",
-        "e04_rollout_speed", "e05_codefix_agent", "e06_judge_selection",
-        "e07_judge_alignment", "e08_morality_pareto", "e09_tuning_efficiency",
-        "e10_ood_generalization",
-    )])
+    numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 
 

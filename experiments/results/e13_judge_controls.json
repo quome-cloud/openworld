@@ -1,0 +1,1085 @@
+{
+  "proposer": "qwen2.5:1.5b",
+  "judge": "qwen2.5:7b",
+  "n_rounds": 60,
+  "n_candidates": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "strategies": {
+    "first": {
+      "solves": 49,
+      "n": 60,
+      "rate": 0.8166666666666667,
+      "ci": [
+        0.7008000677353371,
+        0.8944231096286387
+      ]
+    },
+    "random": {
+      "solves": 49,
+      "n": 60,
+      "rate": 0.8166666666666667,
+      "ci": [
+        0.7008000677353371,
+        0.8944231096286387
+      ]
+    },
+    "judge": {
+      "solves": 53,
+      "n": 60,
+      "rate": 0.8833333333333333,
+      "ci": [
+        0.7782097940014187,
+        0.9423235259654995
+      ]
+    },
+    "oracle": {
+      "solves": 56,
+      "n": 60,
+      "rate": 0.9333333333333333,
+      "ci": [
+        0.8407442010623228,
+        0.973771725856802
+      ]
+    }
+  },
+  "mcnemar_judge_vs_random": {
+    "b": 6,
+    "c": 2,
+    "p": 0.2890625
+  },
+  "position_bias": {
+    "order_consistency": 0.2833333333333333,
+    "n_discriminative_rounds": 19,
+    "judge_accuracy_forward": 0.8421052631578947,
+    "judge_accuracy_reversed": 0.8421052631578947
+  },
+  "rounds": [
+    {
+      "task": "sum_range_off_by_one",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "sum_range_off_by_one",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "sum_range_off_by_one",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 0,
+      "order_consistent": true
+    },
+    {
+      "task": "max_wrong_comparison",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "max_wrong_comparison",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "max_wrong_comparison",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "palindrome_case",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": false,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "palindrome_case",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "palindrome_case",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "count_vowels_missing",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "count_vowels_missing",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 0,
+      "order_consistent": false
+    },
+    {
+      "task": "count_vowels_missing",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "fib_wrong_base",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "fib_wrong_base",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "fib_wrong_base",
+      "seed": 2,
+      "passing": [
+        false,
+        true,
+        true
+      ],
+      "first_pass": false,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "median_unsorted",
+      "seed": 0,
+      "passing": [
+        false,
+        false,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": false,
+      "judge_rev_pass": false,
+      "oracle_pass": false,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "median_unsorted",
+      "seed": 1,
+      "passing": [
+        false,
+        false,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": false,
+      "judge_rev_pass": false,
+      "oracle_pass": false,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "median_unsorted",
+      "seed": 2,
+      "passing": [
+        false,
+        false,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": false,
+      "judge_rev_pass": false,
+      "oracle_pass": false,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "dedupe_order",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "dedupe_order",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "dedupe_order",
+      "seed": 2,
+      "passing": [
+        false,
+        true,
+        true
+      ],
+      "first_pass": false,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "balanced_parens_early",
+      "seed": 0,
+      "passing": [
+        true,
+        false,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "balanced_parens_early",
+      "seed": 1,
+      "passing": [
+        false,
+        false,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": false,
+      "judge_rev_pass": false,
+      "oracle_pass": false,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "balanced_parens_early",
+      "seed": 2,
+      "passing": [
+        false,
+        true,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": false,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "word_count_split",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "word_count_split",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "word_count_split",
+      "seed": 2,
+      "passing": [
+        true,
+        false,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "running_max_reset",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "running_max_reset",
+      "seed": 1,
+      "passing": [
+        false,
+        true,
+        true
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "running_max_reset",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "binary_search_last",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "binary_search_last",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "binary_search_last",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "anagram_normalize",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "anagram_normalize",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "anagram_normalize",
+      "seed": 2,
+      "passing": [
+        true,
+        false,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": false,
+      "judge_rev_pass": false,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "flatten_no_expand",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "flatten_no_expand",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "flatten_no_expand",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 0,
+      "order_consistent": true
+    },
+    {
+      "task": "clamp_swapped",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "clamp_swapped",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "clamp_swapped",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "average_int_division",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "average_int_division",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "average_int_division",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "count_overlapping",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "count_overlapping",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 2,
+      "order_consistent": true
+    },
+    {
+      "task": "count_overlapping",
+      "seed": 2,
+      "passing": [
+        true,
+        false,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 0,
+      "order_consistent": true
+    },
+    {
+      "task": "reverse_words_chars",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "reverse_words_chars",
+      "seed": 1,
+      "passing": [
+        false,
+        true,
+        true
+      ],
+      "first_pass": false,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "reverse_words_chars",
+      "seed": 2,
+      "passing": [
+        false,
+        true,
+        false
+      ],
+      "first_pass": false,
+      "random_pass": false,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 1,
+      "judge_choice_rev": 1,
+      "order_consistent": true
+    },
+    {
+      "task": "second_largest_dup",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        false
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": false,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "second_largest_dup",
+      "seed": 1,
+      "passing": [
+        false,
+        true,
+        true
+      ],
+      "first_pass": false,
+      "random_pass": true,
+      "judge_pass": false,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "second_largest_dup",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "rle_last_run",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    },
+    {
+      "task": "rle_last_run",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 2,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "rle_last_run",
+      "seed": 2,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 0,
+      "order_consistent": true
+    },
+    {
+      "task": "gcd_returns_zero",
+      "seed": 0,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "gcd_returns_zero",
+      "seed": 1,
+      "passing": [
+        true,
+        true,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 1,
+      "order_consistent": false
+    },
+    {
+      "task": "gcd_returns_zero",
+      "seed": 2,
+      "passing": [
+        true,
+        false,
+        true
+      ],
+      "first_pass": true,
+      "random_pass": true,
+      "judge_pass": true,
+      "judge_rev_pass": true,
+      "oracle_pass": true,
+      "judge_choice_fwd": 0,
+      "judge_choice_rev": 2,
+      "order_consistent": false
+    }
+  ],
+  "experiment": "e13_judge_controls",
+  "timestamp": "2026-06-11T09:05:53",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -224,6 +224,31 @@ def spearman(xs, ys):
     return num / den if den else 0.0
 
 
+def mcnemar_p(b, c):
+    """Exact two-sided McNemar test from discordant-pair counts b and c."""
+    n = b + c
+    if n == 0:
+        return 1.0
+    k = min(b, c)
+    tail = sum(math.comb(n, i) for i in range(0, k + 1)) / (2 ** n)
+    return min(1.0, 2 * tail)
+
+
+def permutation_p_spearman(xs, ys, n_permutations=10000, seed=0):
+    """Two-sided permutation p-value for the observed Spearman correlation."""
+    import random as _random
+
+    observed = abs(spearman(xs, ys))
+    rng = _random.Random(seed)
+    ys = list(ys)
+    hits = 0
+    for _ in range(n_permutations):
+        rng.shuffle(ys)
+        if abs(spearman(xs, ys)) >= observed - 1e-12:
+            hits += 1
+    return (hits + 1) / (n_permutations + 1)
+
+
 def save_results(name, payload):
     RESULTS_DIR.mkdir(exist_ok=True)
     payload = dict(payload)

@@ -4,26 +4,26 @@
   "summary": {
     "condition": "judge_selected",
     "model": "proposer=qwen2.5:1.5b, judge=qwen2.5:7b",
-    "n_tasks": 10,
-    "pass_at_1": 0.8,
+    "n_tasks": 20,
+    "pass_at_1": 0.7,
     "pass_at_1_ci": [
-      0.49015684672072335,
-      0.9433190520193067
+      0.4810232237710206,
+      0.854524726031006
     ],
-    "pass_at_budget": 0.9,
+    "pass_at_budget": 0.85,
     "pass_at_budget_ci": [
-      0.5958436145024278,
-      0.9821242504842788
+      0.6395767041130426,
+      0.9476322080405041
     ],
-    "mean_attempts_when_solved": 1.1111111111111112
+    "mean_attempts_when_solved": 1.2941176470588236
   },
   "judge_audit": {
-    "rounds_with_passing_candidate": 10,
-    "judge_picked_passing": 9,
-    "judge_accuracy_when_solvable": 0.9,
+    "rounds_with_passing_candidate": 22,
+    "judge_picked_passing": 17,
+    "judge_accuracy_when_solvable": 0.7727272727272727,
     "judge_accuracy_ci": [
-      0.5958436145024278,
-      0.9821242504842788
+      0.5655964393704065,
+      0.8987710920517964
     ]
   },
   "records": [
@@ -86,9 +86,69 @@
       "solved": true,
       "solved_first_attempt": false,
       "attempts": 2
+    },
+    {
+      "task": "binary_search_last",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "anagram_normalize",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "flatten_no_expand",
+      "solved": false,
+      "solved_first_attempt": false,
+      "attempts": 4
+    },
+    {
+      "task": "clamp_swapped",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "average_int_division",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "count_overlapping",
+      "solved": false,
+      "solved_first_attempt": false,
+      "attempts": 4
+    },
+    {
+      "task": "reverse_words_chars",
+      "solved": true,
+      "solved_first_attempt": false,
+      "attempts": 2
+    },
+    {
+      "task": "second_largest_dup",
+      "solved": true,
+      "solved_first_attempt": false,
+      "attempts": 4
+    },
+    {
+      "task": "rle_last_run",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "gcd_returns_zero",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
     }
   ],
   "experiment": "e06_judge_selection",
-  "timestamp": "2026-06-11T01:29:56",
+  "timestamp": "2026-06-11T09:07:28",
   "platform": "macOS-26.5-arm64-arm-64bit"
 }

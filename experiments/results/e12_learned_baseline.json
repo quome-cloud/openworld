@@ -1,0 +1,111 @@
+{
+  "seed": 23,
+  "ks": [
+    100,
+    1000,
+    10000
+  ],
+  "rollout_steps": 20,
+  "rows": [
+    {
+      "model": "mlp",
+      "k_transitions": 100,
+      "probe_in_dist": 0.4,
+      "probe_in_dist_ci": [
+        0.16817758120350962,
+        0.6873304525498136
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 3,
+      "n_rollouts": 8
+    },
+    {
+      "model": "knn1",
+      "k_transitions": 100,
+      "probe_in_dist": 0.2,
+      "probe_in_dist_ci": [
+        0.056680947980693314,
+        0.5098431532792765
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 0,
+      "n_rollouts": 8
+    },
+    {
+      "model": "mlp",
+      "k_transitions": 1000,
+      "probe_in_dist": 0.4,
+      "probe_in_dist_ci": [
+        0.16817758120350962,
+        0.6873304525498136
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 3,
+      "n_rollouts": 8
+    },
+    {
+      "model": "knn1",
+      "k_transitions": 1000,
+      "probe_in_dist": 0.2,
+      "probe_in_dist_ci": [
+        0.056680947980693314,
+        0.5098431532792765
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 5,
+      "n_rollouts": 8
+    },
+    {
+      "model": "mlp",
+      "k_transitions": 10000,
+      "probe_in_dist": 0.5,
+      "probe_in_dist_ci": [
+        0.23658959361548731,
+        0.7634104063845126
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 3,
+      "n_rollouts": 8
+    },
+    {
+      "model": "knn1",
+      "k_transitions": 10000,
+      "probe_in_dist": 0.3,
+      "probe_in_dist_ci": [
+        0.10778928748621183,
+        0.6032267800204347
+      ],
+      "probe_ood_10x": 0.0,
+      "probe_ood_ci": [
+        0.0,
+        0.2775401687666166
+      ],
+      "exact_rollouts": 8,
+      "n_rollouts": 8
+    }
+  ],
+  "note": "Synthesized code (E1/E11) achieves 1.0/1.0/all-exact with zero environment transitions, from rule text alone.",
+  "experiment": "e12_learned_baseline",
+  "timestamp": "2026-06-11T01:54:08",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

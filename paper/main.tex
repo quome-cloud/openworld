@@ -151,20 +151,28 @@ plans, writes, and \emph{verifies} the executable dynamics of a declared world;
 objectives remain open, editable artifacts weighted by inference-time moral
 dials; an automated tuner searches world, policy, and moral configurations
 jointly; and an agent-as-a-judge selects among candidate behaviors. Across
-\NumExperiments{} pre-registered experiments on local 7B/3B models we find:
-verified synthesized dynamics are \emph{bit-exact} over every
-\RolloutSteps-step rollout while direct LLM next-state prediction (a
-learned-dynamics proxy) first diverges at step \LLMFirstDivergence{} and is
-wrong on \LLMProbeErrorRate{} of single transitions; the symbolic engine answers
-$10\times$ out-of-distribution probes at \CodeOODRate{} exact accuracy and
-rolls out $\sim$\SpeedRatio$\times$ faster; verification gates measurably
-raise the semantic correctness of accepted dynamics; and on a ten-task
-program-repair benchmark, a 7B judge selecting among a small proposer's
-candidates lifts solve rates from \BaselinePassBudget{} to \JudgePassBudget{}
-while choosing a passing candidate \JudgeAccuracy{} of the time one exists. The central result: a training-free, verified, symbolic
-world model on consumer hardware eliminates compounding rollout error---the
-defining failure mode of learned world models---at zero training cost. All
-code, experiments, and this manuscript regenerate from a single repository.
+\NumExperiments{} seed-fixed experiments on local 7B/3B/1.5B models we find:
+verified synthesized dynamics are exact on \MultiCodeExact{} twenty-step
+rollouts across three ground-truth worlds (95\% CI \MultiCodeCI) while direct
+LLM next-state prediction (a learned-dynamics proxy) completes
+\MultiLLMExact{}; a genuinely \emph{trained} baseline---an MLP given
+10{,}000 environment transitions---reaches only \MLPInDistTenK{} exact
+accuracy on branch-covering probes and \MLPOODTenK{} at $10\times$
+out-of-distribution scale, where the synthesized program, built from rule
+text alone with zero transitions, scores \CodeOODRate; rollouts run
+$\sim$\SpeedRatio$\times$ faster than LLM prediction; verification gates
+raise the semantic correctness of a weak generator's accepted dynamics from
+\VerifierNoneAcc{} to \VerifierCriticAcc; and on a \NumTasks-task
+program-repair benchmark with paired controls, judge selection solves
+\CtrlJudge{} of rounds against \CtrlRandom{} for random selection over the
+same candidates---a directional margin that does not reach significance at
+this sample size (exact McNemar $p=\McNemarP$)---while picking a passing
+candidate \JudgeFwdAcc{} of the time under either candidate order, near the
+\CtrlOracle{} oracle ceiling. The central result: a training-free, verified,
+symbolic world model on consumer hardware eliminates compounding rollout
+error---the defining failure mode of learned world models---at zero training
+cost. All code, experiments, and this manuscript regenerate from a single
+repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -246,27 +254,31 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
 
 \paragraph{Contributions.} Our contributions are as follows:
 \begin{enumerate}
-  \item \textbf{The central result.} On worlds with known ground truth,
-  verified synthesized dynamics are bit-exact over \emph{every}
-  \RolloutSteps-step evaluation rollout and answer $10\times$
-  out-of-distribution probes at \CodeOODRate{} exact accuracy, while a
-  learned-style LLM dynamics baseline first diverges at step
-  \LLMFirstDivergence{} and is wrong on most probes at either scale---at a
-  $\sim$\SpeedRatio$\times$ rollout-speed disadvantage.
+  \item \textbf{The central result.} On three worlds with known ground
+  truth, verified synthesized dynamics are exact on \MultiCodeExact{}
+  \RolloutSteps-step evaluation rollouts (95\% CI \MultiCodeCI) and answer
+  $10\times$ out-of-distribution probes at \CodeOODRate, while the LLM
+  next-state proxy completes \MultiLLMExact{} rollouts and a trained MLP
+  given 10{,}000 transitions scores \MLPOODTenK{} out of
+  distribution---at a $\sim$\SpeedRatio$\times$ rollout-speed disadvantage
+  for the LLM engine.
   \item \textbf{The system.} \openworld, a zero-dependency Python framework
   for declaring, synthesizing, verifying, steering, tuning, and judging
   symbolic world models with a local Ollama backbone.
   \item \textbf{The benchmark and protocol.} Three ground-truth-instrumented
-  worlds, a ten-task program-repair benchmark (the coding world), and
-  \NumExperiments{} pre-registered experiments with fixed seeds, all
-  regenerable from one repository.
+  worlds, a \NumTasks-task program-repair benchmark (the coding world), and
+  \NumExperiments{} seed-fixed experiments with paired statistical tests,
+  all regenerable from one repository.
   \item \textbf{Measured guardrails.} Verification and judging are evaluated,
   not assumed: ablations isolate what each verification gate buys ($+0.24$
-  absolute probe accuracy over blind acceptance); a 7B judge over a 1.5B
-  proposer lifts program repair from \BaselinePassBudget{} to
-  \JudgePassBudget{} and picks a passing candidate \JudgeAccuracy{} of the
-  time one exists; judge rubric scores track a ground-truth objective at
-  Spearman $\rho=\JudgeSpearman$.
+  absolute probe accuracy over blind acceptance); against paired controls on
+  shared candidates, judge selection exceeds random selection directionally
+  (\CtrlJudge{} vs \CtrlRandom, exact McNemar $p=\McNemarP$) and approaches
+  the \CtrlOracle{} oracle ceiling, with a position-bias audit showing
+  order-sensitive choices but order-stable accuracy; judge rubric scores
+  track a ground-truth objective at Spearman $\rho=\JudgeSpearman$
+  ($p=\RubricOrigP$, permutation test), directionally stable under rubric
+  paraphrase ($\rho=\RubricParaRho$, $p=\RubricParaP$).
 \end{enumerate}
 
 \paragraph{Positioning in the field.} \openworld{} operationalizes the
@@ -396,10 +408,10 @@ score exists.
 
 \subsection{Implementation}
 Python ($\geq$3.9), zero runtime dependencies (Optuna optional),
-$\sim$1{,}700 lines across 14 modules, 43 unit tests that run fully offline
+$\sim$1{,}800 lines across 14 modules, 44 unit tests that run fully offline
 via a scripted mock backbone. Released with worked examples, four domain
-tutorials, the three instrumented worlds, the ten-task coding benchmark, and
-every experiment script used here.
+tutorials, the three instrumented worlds, the \NumTasks-task coding
+benchmark, and every experiment script used here.
 
 % ============================================================================
 \section{Experimental Setup}
@@ -415,55 +427,70 @@ exercises clamping, empty-queue, and interaction branches.
 \paragraph{The coding world.} Program repair is the flagship use case:
 well-known, objectively scored, and natively symbolic~\cite{humaneval2021}.
 Each of \NumTasks{} tasks is a buggy Python function plus a hidden test suite
-spanning classic defect archetypes (off-by-one ranges, inverted comparisons,
-missing normalization, wrong base cases, unsorted medians, order-destroying
-dedup, early imbalance, whitespace splitting, accumulator resets). The
-world's transition \emph{is} test execution: a submitted patch runs
-bit-exactly in a sandbox, and failing-test feedback enters the state for the
-next attempt.
+spanning classic defect archetypes (off-by-one ranges and binary-search
+bounds, inverted comparisons, missing normalization, wrong base cases,
+unsorted medians, order-destroying dedup, early imbalance, whitespace
+splitting, accumulator resets, integer-division truncation, overlapping
+counts, dropped final runs, and degenerate-input handling). The world's
+transition \emph{is} test execution: a submitted patch runs bit-exactly in a
+sandbox with a wall-clock alarm (a looping patch fails rather than hangs),
+and failing-test feedback enters the state for the next attempt.
 
 \paragraph{Models and hardware.} All experiments use local models served by
 Ollama on an Apple-silicon laptop: \texttt{qwen2.5:7b} (generator, judge,
 critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3), and
-\texttt{qwen2.5:1.5b} (repair agent in E5/E6). No cloud APIs, no
-fine-tuning, no training compute of any kind.
+\texttt{qwen2.5:1.5b} (repair agent in E5/E6/E13). The trained baselines in
+E12 are plain numpy models. No cloud APIs, no fine-tuning, and no training
+compute beyond E12's seconds-scale baseline fitting.
 
-\paragraph{Baselines.} The learned-dynamics family is represented by
-\texttt{LLMTransition}: the same backbone predicting each next state directly
-from the same description and rules---sharing the symbolic engine's knowledge
-while exhibiting the per-step stochastic prediction structure of learned
-models. We are explicit that this is a structural proxy, not a trained
-Dreamer; laptop-scale reimplementation of the learned family is infeasible,
-which is itself part of the comparison (DreamerV3-class systems require
-millions of environment steps~\cite{dreamerv3}).
+\paragraph{Baselines.} The learned-dynamics family is represented two ways.
+(i) \texttt{LLMTransition}: the same backbone predicting each next state
+directly from the same description and rules---sharing the symbolic engine's
+knowledge while exhibiting the per-step stochastic prediction structure of
+learned models. (ii) \emph{Genuinely trained} models (E12): a two-hidden-layer
+MLP and a 1-nearest-neighbor memorizer, each trained on $K \in \{100, 1000,
+10000\}$ environment transitions collected by a random policy---real learned
+dynamics with a measured sample-efficiency curve. We are explicit that
+neither is a trained Dreamer; laptop-scale reimplementation of the
+pixel-native family is infeasible, which is itself part of the comparison
+(DreamerV3-class systems require millions of environment
+steps~\cite{dreamerv3}).
 
-\paragraph{Metrics.} Rate metrics carry 95\% Wilson confidence intervals.
-Dynamics fidelity uses exact-state match (every field equal),
+\paragraph{Metrics and statistics.} Rate metrics carry 95\% Wilson confidence
+intervals. Dynamics fidelity uses exact-state match (every field equal),
 first-divergence step, and final-state $L^1$ error. Program repair reports
-pass@1 and pass@budget (4 attempts). Judge alignment uses Spearman rank
-correlation. Seeds are fixed in each script; every number in this paper
-regenerates via \texttt{python3 scripts/make\_paper\_assets.py}.
+pass@1 and pass@budget (4 attempts); the controlled selection comparison
+(E13) is a paired design on shared candidate sets with an exact two-sided
+McNemar test. Judge alignment uses Spearman rank correlation with permutation
+p-values (10{,}000 shuffles). Seeds are fixed in each script; every number in
+this paper regenerates via \texttt{python3 scripts/make\_paper\_assets.py}.
 
-\paragraph{Calibration and pilot adjustments.} Two design changes were made
-after pilots and are reported rather than hidden: (a) the verifier ablation
-(E3) uses the 3B generator at high temperature because the 7B generator's
-first attempts passed every gate, leaving nothing for conditions to
-discriminate; (b) the repair agent in E5/E6 is the 1.5B model because both
-the 7B and 3B agents saturated the benchmark (pass@1 $=100\%$)---with
+\paragraph{Calibration, pilots, and internal review.} Design changes made
+after pilots are reported rather than hidden: (a) the verifier ablation (E3)
+uses the 3B generator at high temperature because the 7B generator's first
+attempts passed every gate, leaving nothing for conditions to discriminate;
+(b) the repair agent in E5/E6/E13 is the 1.5B model because both the 7B and
+3B agents saturated the original benchmark (pass@1 $=100\%$)---with
 failing-test feedback in the state, these archetypes are easy for capable
-models---leaving no headroom to measure judge selection. The capability
-ladder (1.5B: 70\%, 3B and 7B: 100\%) is itself a finding.
+models. The capability ladder (1.5B: 70\%, 3B and 7B: 100\% on the original
+suite) is itself a finding. Experiments E11--E15, the expanded \NumTasks-task
+benchmark, and the statistical tests were added in revision in response to an
+internal adversarial review (included in the repository at
+\texttt{docs/review/}), which demanded a trained baseline, multi-world
+replication, paired judge controls, and significance testing.
 
 % ============================================================================
 \section{Results}\label{sec:results}
 
 \subsection{Head-to-head: symbolic vs.\ learned-style dynamics}
 Table~\ref{tab:main} and Figure~\ref{fig:hero} present the primary comparison
-(E1, E4, E10). The verified synthesized engine is exact at every rollout
-depth and on every probe at both scales, and---because planning executes
-Python rather than a forward pass---rolls out at \CodeStepsPerSec{} steps/s
-against the LLM engine's \LLMStepsPerSec{} steps/s, after a one-time
-synthesis cost of a few seconds.
+(E1, E4, E10), and Table~\ref{tab:fidelity} replicates the protocol across
+all three instrumented worlds with eight action scripts each (E11). The
+verified synthesized engines are exact on \MultiCodeExact{} rollouts (95\%
+CI \MultiCodeCI) against \MultiLLMExact{} (CI \MultiLLMCI) for per-step LLM
+prediction, and---because planning executes Python rather than a forward
+pass---roll out at \CodeStepsPerSec{} steps/s against the LLM engine's
+\LLMStepsPerSec{} steps/s, after a one-time synthesis cost of a few seconds.
 
 \begin{table}[htb]\centering\small
 \input{tables/main.tex}
@@ -474,6 +501,14 @@ accuracy on ten $10\times$ out-of-distribution probes; and rollout
 throughput. A first divergence of \CodeFirstDivergence{} means no divergence
 occurred within the rollout.}
 \label{tab:main}
+\end{table}
+
+\begin{table}[htb]\centering\small
+\input{tables/fidelity.tex}
+\caption{Multi-world replication (E11): exact \RolloutSteps-step rollouts per
+world, eight scripts each, dynamics synthesized once per world by the 7B
+generator. Totals carry 95\% Wilson CIs.}
+\label{tab:fidelity}
 \end{table}
 
 \subsection{The central result}\label{sec:central-result}
@@ -489,6 +524,34 @@ at synthesis time, where it is auditable: if the accepted program is right,
 every rollout of any depth is right, bit-exactly. This is the CWM
 hypothesis~\cite{worldcoder2024,cwmgames2025} made measurable on consumer
 hardware.
+
+\subsection{Against genuinely trained dynamics}\label{sec:learned}
+The LLM next-state engine is a structural proxy; E12 adds real learned
+baselines trained on environment transitions (Figure~\ref{fig:learned}). An
+MLP and a 1-NN memorizer were each trained on $K \in \{100, 1000, 10000\}$
+random-policy transitions and held to the same evaluation as the synthesized
+program. Two results stand out. First, \emph{sample efficiency}: even at
+$K=10{,}000$ the MLP reaches only \MLPInDistTenK{} exact accuracy on the
+branch-covering probe suite and \MLPOODTenK{} at $10\times$ scale; the
+synthesized program scores 100\% on both from \emph{zero} transitions---its
+input is the rule text. Second, a measurement caution: at $K=10{,}000$ the
+1-NN memorizer completes \KNNRolloutsTenK{} on-policy rollouts exactly while
+scoring only \KNNInDistTenK{} on the probe suite---on-policy rollout fidelity
+can be \emph{memorized} without learning the rules, which is precisely why
+branch-covering probes and OOD evaluation, not rollout agreement alone, are
+the right instruments for dynamics quality.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.97\linewidth]{figs/learned.png}
+\caption{\textbf{Trained baselines vs.\ the zero-transition program (E12).}
+Exact transition accuracy of an MLP and a 1-NN memorizer trained on $K$
+random-policy transitions of the sprint world, on branch-covering probes
+in-distribution (\emph{A}) and at $10\times$ scale (\emph{B}). The dashed
+line is the synthesized program, which uses no transitions at all. No trained
+baseline transfers out of distribution.}
+\label{fig:learned}
+\end{figure}
 
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
@@ -527,33 +590,60 @@ guarantees executable, invariant-respecting code---not rule-perfect code;
 model capability still buys semantic fidelity.
 
 \subsection{Agents-as-a-judge}\label{sec:judge-results}
-E5 and E6 evaluate the coding world with a 1.5B repair agent
-(Figure~\ref{fig:judge}). A single low-temperature proposal per attempt
-solves \BaselinePassOne{} of tasks on the first try---and, tellingly,
-feedback-driven retries recover \emph{nothing} (pass@4
-\BaselinePassBudget): the small agent resubmits near-identical wrong patches,
-a local minimum. Sampling three high-temperature 1.5B candidates and letting
-the 7B judge select lifts first-attempt solves to \JudgePassOne{} and pass@4
-to \JudgePassBudget---candidate diversity plus judgment escapes precisely the
-minima that retries cannot. The judge audit explains the mechanism: across
-the \JudgeRounds{} selection rounds where at least one sampled candidate
-actually passed the hidden tests, the judge picked a passing candidate
-\JudgeAccuracy{} of the time, against a $\sim$33\% random-selection floor. E7 closes the loop on judge-as-objective: across
-twelve triage episodes spanning the stewardship dial, judge rubric scores
-track the ground-truth dial-weighted aggregate at Spearman
-$\rho=\JudgeSpearman$---high enough to license judges for behavior selection
-where no programmatic objective exists, and imperfect enough
-(Appendix~\ref{app:examples}) to caution against unaudited use.
+E13 is the controlled comparison (Figure~\ref{fig:judge},
+Table~\ref{tab:judge-controls}): for each of \CtrlRounds{} paired rounds
+(\NumTasks{} tasks $\times$ 3 proposer seeds), the 1.5B proposer samples
+three candidate patches \emph{once}, and four selection strategies act on the
+same set. Taking the first candidate solves \CtrlFirst{} of rounds; random
+selection---which isolates the best-of-3 diversity effect---solves
+\CtrlRandom; the 7B judge solves \CtrlJudge, against the \CtrlOracle{} oracle
+ceiling. The judge-vs-random difference on paired rounds is \McNemarB{}
+versus \McNemarC{} discordant outcomes: directionally in the judge's favor
+but \emph{not significant} at this sample size (exact McNemar $p=\McNemarP$);
+the judge recovers roughly half of the random-to-oracle gap, and a larger
+benchmark is needed to bound the effect tightly. The position-bias audit is
+the sharper finding: asked again with candidates in reversed order, the
+judge's raw choices match on only \OrderConsistency{} of rounds
+(\OrderConsistencyDisc{} on the \DiscRounds{} discriminative rounds where
+some but not all candidates pass)---yet its \emph{accuracy} is order-stable,
+picking a passing candidate \JudgeFwdAcc{} of the time forward and
+\JudgeRevAcc{} reversed. Most inconsistency falls on rounds where several
+candidates pass and the choice is inconsequential; the bias is real, but it
+costs correctness little here.
+
+In the multi-attempt protocol (E5/E6), a single low-temperature 1.5B proposal
+solves \BaselinePassOne{} of tasks first-try, and feedback-driven retries
+recover nothing (pass@4 \BaselinePassBudget): the small agent resubmits
+near-identical wrong patches, a local minimum. Judge-selected
+high-temperature candidates trade first-attempt accuracy (\JudgePassOne{}
+pass@1) for budgeted recovery (\JudgePassBudget{} pass@4)---diverse sampling
+plus judgment escapes minima that deterministic retries cannot, at the cost
+of noisier first shots. E7 and E15 close the loop on judge-as-objective:
+across twelve dial-swept triage episodes, judge rubric scores track the
+ground-truth aggregate at Spearman $\rho=\JudgeSpearman$ (permutation
+$p=\RubricOrigP$); a paraphrased rubric is directionally consistent but
+weaker and only marginal ($\rho=\RubricParaRho$, $p=\RubricParaP$)---rubric
+wording matters. Together: judges are useful selectors and plausible
+objectives, but their verdicts should gate, not replace, programmatic
+verification.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.62\linewidth]{figs/judge.png}
-\caption{\textbf{Agents-as-a-judge on the ten-task coding world (E5--E6).}
-A 7B judge selecting among three high-temperature 1.5B candidates versus a
-single low-temperature 1.5B proposal; whiskers are 95\% Wilson intervals
-(n=\NumTasks{} tasks).}
+\caption{\textbf{Controlled judge-selection comparison (E13).} Four selection
+strategies over the same three 1.5B candidate patches per round,
+\CtrlRounds{} paired rounds; whiskers are 95\% Wilson intervals. Random-of-3
+isolates the diversity effect; the judge's margin over it estimates the value
+of judgment (directional; McNemar $p=\McNemarP$).}
 \label{fig:judge}
 \end{figure}
+
+\begin{table}[htb]\centering\small
+\input{tables/judge_controls.tex}
+\caption{E13 selection strategies on shared candidate sets (\CtrlRounds{}
+rounds: \NumTasks{} tasks $\times$ 3 proposer seeds).}
+\label{tab:judge-controls}
+\end{table}
 
 \subsection{Steerability: the moral dial}\label{sec:robustness}
 E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
@@ -625,16 +715,18 @@ accuracy).
 
 \paragraph{Limitations.} (i) Scope: symbolic-state worlds; pixel-native
 domains remain the territory of learned models---the comparison here is
-within the symbolic regime, and \texttt{LLMTransition} is a structural proxy
-for learned dynamics, not a trained Dreamer. (ii) Scale: ten repair tasks and
-three worlds give wide Wilson intervals; the benchmark is an archetype suite,
-not HumanEval~\cite{humaneval2021}, and the 7B agent already saturates it.
-(iii) Single model family (Qwen2.5) and single machine. (iv) Judges: accuracy
-is measured but imperfect, and rubric grading showed compression; judge
-verdicts should gate, not replace, programmatic verification. (v) The sandbox
-is best-effort isolation against accident, not an adversarial security
-boundary. (vi) Two experiments were redesigned after pilots (E3, E5/E6); we
-report the pilots' saturation results alongside the final protocol.
+within the symbolic regime, and neither the LLM proxy nor the numpy
+baselines is a trained Dreamer. (ii) Scale: twenty repair tasks and three
+worlds; paired tests sharpen the comparisons, but the benchmark remains an
+archetype suite, not HumanEval~\cite{humaneval2021}, and 3B+ agents saturate
+it. (iii) Single model family (Qwen2.5) and single machine. (iv) Judges:
+selection accuracy and order-consistency are measured but imperfect, and
+rubric grading showed compression; judge verdicts should gate, not replace,
+programmatic verification. (v) The sandbox is best-effort isolation against
+accident, not an adversarial security boundary. (vi) Several experiments
+were redesigned after pilots and internal review (E3, E5/E6, E11--E15); the
+pilots' saturation results are reported alongside the final protocol, and the
+review itself ships in the repository.
 
 % ============================================================================
 \section{Conclusion}
@@ -726,15 +818,17 @@ The coding-world tasks pair a buggy function with hidden tests; e.g.\
 \texttt{dedupe} returns \texttt{list(set(xs))} (order-destroying) and must
 preserve first-seen order, and \texttt{balanced} counts parenthesis depth but
 misses early-imbalance strings like \texttt{")("}. Failure modes observed in
-the campaign: the 3B baseline resubmitted near-identical patches until the
+the campaign: the 1.5B baseline resubmitted near-identical patches until the
 attempt budget expired on tasks where its first reading of the spec was
 wrong---precisely the local minimum that high-temperature candidate sampling
 plus judge selection escapes; conversely, when several candidates passed, the
-judge sometimes preferred a verbose refactor over the minimal fix---harmless
-here, but evidence that judge criteria need auditing. In E7, the rubric judge
-compressed mid-range episodes toward similar scores (rank correlation
-\JudgeSpearman{} rather than 1.0), consistent with known LLM-judge
-coarseness~\cite{llmjudge2023}.
+judge's pick was strongly order-sensitive (E13: raw choices matched under
+order reversal on only \OrderConsistency{} of rounds) while its accuracy was
+not---evidence that judge criteria and presentation order need auditing even
+when outcomes look fine. In E7/E15, the rubric judge compressed mid-range
+episodes toward similar scores (rank correlation \JudgeSpearman{} rather than
+1.0, dropping to \RubricParaRho{} under paraphrase), consistent with known
+LLM-judge coarseness~\cite{llmjudge2023}.
 
 \section{Reproducibility}
 One pipeline rebuilds every artifact: experiment scripts in

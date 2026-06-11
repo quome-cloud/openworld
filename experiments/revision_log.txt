@@ -1,0 +1,12 @@
+[sprint] synthesizing...
+  code_transition: exact 8/8
+  llm_transition: exact 0/8
+[orchard] synthesizing...
+  code_transition: exact 8/8
+  llm_transition: exact 0/8
+[triage] synthesizing...
+  code_transition: exact 8/8
+  llm_transition: exact 0/8
+[saved] /Users/jim/Desktop/openworld/experiments/results/e11_multiworld_fidelity.json
+code_transition: 24/24 exact (CI 0.86-1.00)
+llm_transition: 0/24 exact (CI 0.00-0.14)

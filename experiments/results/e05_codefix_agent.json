@@ -3,16 +3,16 @@
   "summary": {
     "condition": "baseline",
     "model": "qwen2.5:1.5b",
-    "n_tasks": 10,
-    "pass_at_1": 0.7,
+    "n_tasks": 20,
+    "pass_at_1": 0.8,
     "pass_at_1_ci": [
-      0.39677321997956516,
-      0.892210712513788
+      0.5839782779742401,
+      0.9193436467288
     ],
-    "pass_at_budget": 0.7,
+    "pass_at_budget": 0.8,
     "pass_at_budget_ci": [
-      0.39677321997956516,
-      0.892210712513788
+      0.5839782779742401,
+      0.9193436467288
     ],
     "mean_attempts_when_solved": 1.0
   },
@@ -76,9 +76,69 @@
       "solved": true,
       "solved_first_attempt": true,
       "attempts": 1
+    },
+    {
+      "task": "binary_search_last",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "anagram_normalize",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "flatten_no_expand",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "clamp_swapped",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "average_int_division",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "count_overlapping",
+      "solved": false,
+      "solved_first_attempt": false,
+      "attempts": 4
+    },
+    {
+      "task": "reverse_words_chars",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "second_largest_dup",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "rle_last_run",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
+    },
+    {
+      "task": "gcd_returns_zero",
+      "solved": true,
+      "solved_first_attempt": true,
+      "attempts": 1
     }
   ],
   "experiment": "e05_codefix_agent",
-  "timestamp": "2026-06-11T01:26:48",
+  "timestamp": "2026-06-11T09:06:08",
   "platform": "macOS-26.5-arm64-arm-64bit"
 }

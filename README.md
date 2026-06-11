@@ -207,11 +207,14 @@ attempt. See `experiments/e05_codefix_agent.py` and `e06_judge_selection.py`.
 
 ## Experiments and paper
 
-`experiments/` contains a 10-experiment campaign (dynamics fidelity, synthesis
-reliability, verifier ablations, rollout speed, program repair, judge
-selection and alignment, morality Pareto sweeps, tuning efficiency, and OOD
-generalization), each writing `results/*.json`. The research paper in `paper/`
-regenerates end-to-end:
+`experiments/` contains a 14-experiment campaign (dynamics fidelity across
+three worlds, synthesis reliability, verifier ablations, rollout speed,
+program repair, controlled judge selection with McNemar tests and
+position-bias audits, judge-objective alignment with permutation tests,
+morality Pareto sweeps, tuning efficiency, OOD generalization, and trained
+MLP/k-NN baselines), each writing `results/*.json`. A NeurIPS-style internal
+review and the revision protocol it drove live in `docs/review/`. The
+research paper in `paper/` regenerates end-to-end:
 
 ```bash
 python3 scripts/make_paper_assets.py   # figures, tables, numbers.tex from results

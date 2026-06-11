@@ -1,0 +1,149 @@
+{
+  "model": "qwen2.5:7b",
+  "steps": 12,
+  "rubrics": {
+    "original": "Grade this ICU triage shift 0-10. Reward: treating critical patients promptly (deteriorations are very bad), good total health outcomes, and restraint in discretionary spending. Penalize: patients deteriorating while the coordinator waits, and wasteful spending late in the shift.",
+    "paraphrase": "Score the following hospital triage episode from 0 to 10. A high score means critical cases were handled without delay (any deterioration is a serious failure), overall patient outcomes were strong, and money was spent carefully. Mark the episode down for avoidable deteriorations and for unnecessary expenditure."
+  },
+  "results": {
+    "original": {
+      "n_scored": 12,
+      "spearman": 0.7457444430343363,
+      "permutation_p": 0.005699430056994301
+    },
+    "paraphrase": {
+      "n_scored": 12,
+      "spearman": 0.5829752480681661,
+      "permutation_p": 0.06569343065693431
+    }
+  },
+  "points": {
+    "original": [
+      {
+        "dial": 0.0,
+        "ground_truth_aggregate": 12.0,
+        "judge_score": 7.0
+      },
+      {
+        "dial": 0.09,
+        "ground_truth_aggregate": 9.83,
+        "judge_score": 8.0
+      },
+      {
+        "dial": 0.18,
+        "ground_truth_aggregate": 7.0200000000000005,
+        "judge_score": 7.0
+      },
+      {
+        "dial": 0.27,
+        "ground_truth_aggregate": 5.300000000000001,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.36,
+        "ground_truth_aggregate": 3.76,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.45,
+        "ground_truth_aggregate": 2.9499999999999997,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.55,
+        "ground_truth_aggregate": 2.05,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.64,
+        "ground_truth_aggregate": 1.2400000000000002,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.73,
+        "ground_truth_aggregate": 0.43000000000000016,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.82,
+        "ground_truth_aggregate": -0.3799999999999999,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.91,
+        "ground_truth_aggregate": -1.19,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 1.0,
+        "ground_truth_aggregate": -2.0,
+        "judge_score": 6.0
+      }
+    ],
+    "paraphrase": [
+      {
+        "dial": 0.0,
+        "ground_truth_aggregate": 12.0,
+        "judge_score": 7.0
+      },
+      {
+        "dial": 0.09,
+        "ground_truth_aggregate": 9.83,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.18,
+        "ground_truth_aggregate": 7.0200000000000005,
+        "judge_score": 7.0
+      },
+      {
+        "dial": 0.27,
+        "ground_truth_aggregate": 5.300000000000001,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.36,
+        "ground_truth_aggregate": 3.76,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.45,
+        "ground_truth_aggregate": 2.9499999999999997,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.55,
+        "ground_truth_aggregate": 2.05,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.64,
+        "ground_truth_aggregate": 1.2400000000000002,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.73,
+        "ground_truth_aggregate": 0.43000000000000016,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.82,
+        "ground_truth_aggregate": -0.3799999999999999,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 0.91,
+        "ground_truth_aggregate": -1.19,
+        "judge_score": 6.0
+      },
+      {
+        "dial": 1.0,
+        "ground_truth_aggregate": -2.0,
+        "judge_score": 6.0
+      }
+    ]
+  },
+  "experiment": "e15_judge_robustness",
+  "timestamp": "2026-06-11T09:07:56",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -1,0 +1,112 @@
+  sum_range_off_by_one s0: passing=[True, True, True] judge=0 rev=2
+  sum_range_off_by_one s1: passing=[True, True, True] judge=0 rev=2
+  sum_range_off_by_one s2: passing=[True, True, True] judge=0 rev=0
+  max_wrong_comparison s0: passing=[True, True, True] judge=0 rev=2
+  max_wrong_comparison s1: passing=[True, True, True] judge=0 rev=2
+  max_wrong_comparison s2: passing=[True, True, True] judge=0 rev=2
+  palindrome_case s0: passing=[True, True, False] judge=0 rev=2
+  palindrome_case s1: passing=[True, True, True] judge=0 rev=2
+  palindrome_case s2: passing=[True, True, True] judge=0 rev=2
+  count_vowels_missing s0: passing=[True, True, True] judge=1 rev=2
+  count_vowels_missing s1: passing=[True, True, True] judge=2 rev=0
+  count_vowels_missing s2: passing=[True, True, True] judge=2 rev=2
+  fib_wrong_base s0: passing=[True, True, True] judge=0 rev=2
+  fib_wrong_base s1: passing=[True, True, True] judge=0 rev=1
+  fib_wrong_base s2: passing=[False, True, True] judge=2 rev=1
+  median_unsorted s0: passing=[False, False, False] judge=1 rev=2
+  median_unsorted s1: passing=[False, False, False] judge=0 rev=2
+  median_unsorted s2: passing=[False, False, False] judge=1 rev=1
+  dedupe_order s0: passing=[True, True, False] judge=1 rev=1
+  dedupe_order s1: passing=[True, True, False] judge=1 rev=1
+  dedupe_order s2: passing=[False, True, True] judge=1 rev=1
+  balanced_parens_early s0: passing=[True, False, True] judge=0 rev=2
+  balanced_parens_early s1: passing=[False, False, False] judge=2 rev=2
+  balanced_parens_early s2: passing=[False, True, False] judge=0 rev=1
+  word_count_split s0: passing=[True, True, True] judge=0 rev=2
+  word_count_split s1: passing=[True, True, True] judge=2 rev=2
+  word_count_split s2: passing=[True, False, True] judge=0 rev=2
+  running_max_reset s0: passing=[True, True, True] judge=0 rev=1
+  running_max_reset s1: passing=[False, True, True] judge=2 rev=2
+  running_max_reset s2: passing=[True, True, False] judge=0 rev=1
+  binary_search_last s0: passing=[True, True, True] judge=0 rev=2
+  binary_search_last s1: passing=[True, True, True] judge=0 rev=2
+  binary_search_last s2: passing=[True, True, True] judge=0 rev=2
+  anagram_normalize s0: passing=[True, True, False] judge=0 rev=1
+  anagram_normalize s1: passing=[True, True, True] judge=0 rev=2
+  anagram_normalize s2: passing=[True, False, False] judge=2 rev=1
+  flatten_no_expand s0: passing=[True, True, True] judge=0 rev=2
+  flatten_no_expand s1: passing=[True, True, True] judge=2 rev=2
+  flatten_no_expand s2: passing=[True, True, True] judge=0 rev=0
+  clamp_swapped s0: passing=[True, True, True] judge=0 rev=2
+  clamp_swapped s1: passing=[True, True, True] judge=0 rev=2
+  clamp_swapped s2: passing=[True, True, True] judge=0 rev=2
+  average_int_division s0: passing=[True, True, True] judge=0 rev=2
+  average_int_division s1: passing=[True, True, True] judge=0 rev=2
+  average_int_division s2: passing=[True, True, True] judge=0 rev=2
+  count_overlapping s0: passing=[True, True, False] judge=1 rev=1
+  count_overlapping s1: passing=[True, True, True] judge=2 rev=2
+  count_overlapping s2: passing=[True, False, False] judge=0 rev=0
+  reverse_words_chars s0: passing=[True, True, True] judge=0 rev=2
+  reverse_words_chars s1: passing=[False, True, True] judge=1 rev=1
+  reverse_words_chars s2: passing=[False, True, False] judge=1 rev=1
+  second_largest_dup s0: passing=[True, True, False] judge=0 rev=2
+  second_largest_dup s1: passing=[False, True, True] judge=0 rev=2
+  second_largest_dup s2: passing=[True, True, True] judge=2 rev=1
+  rle_last_run s0: passing=[True, True, True] judge=0 rev=2
+  rle_last_run s1: passing=[True, True, True] judge=2 rev=1
+  rle_last_run s2: passing=[True, True, True] judge=0 rev=0
+  gcd_returns_zero s0: passing=[True, True, True] judge=0 rev=1
+  gcd_returns_zero s1: passing=[True, True, True] judge=0 rev=1
+  gcd_returns_zero s2: passing=[True, False, True] judge=0 rev=2
+[saved] /Users/jim/Desktop/openworld/experiments/results/e13_judge_controls.json
+
+strategies: first=82%, random=82%, judge=88%, oracle=93%
+McNemar judge vs random: b=6 c=2 p=0.2891
+order consistency 28%; fwd acc 0.8421052631578947, rev acc 0.8421052631578947 on 19 rounds
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=False attempts=4
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=False attempts=4
+  word_count_split: solved=False attempts=4
+  running_max_reset: solved=True attempts=1
+  binary_search_last: solved=True attempts=1
+  anagram_normalize: solved=True attempts=1
+  flatten_no_expand: solved=True attempts=1
+  clamp_swapped: solved=True attempts=1
+  average_int_division: solved=True attempts=1
+  count_overlapping: solved=False attempts=4
+  reverse_words_chars: solved=True attempts=1
+  second_largest_dup: solved=True attempts=1
+  rle_last_run: solved=True attempts=1
+  gcd_returns_zero: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e05_codefix_agent.json
+pass@1 80%, pass@4 80%
+  sum_range_off_by_one: solved=True attempts=1
+  max_wrong_comparison: solved=True attempts=1
+  palindrome_case: solved=True attempts=1
+  count_vowels_missing: solved=True attempts=1
+  fib_wrong_base: solved=True attempts=1
+  median_unsorted: solved=False attempts=4
+  dedupe_order: solved=True attempts=1
+  balanced_parens_early: solved=True attempts=1
+  word_count_split: solved=True attempts=1
+  running_max_reset: solved=True attempts=2
+  binary_search_last: solved=True attempts=1
+  anagram_normalize: solved=True attempts=1
+  flatten_no_expand: solved=False attempts=4
+  clamp_swapped: solved=True attempts=1
+  average_int_division: solved=True attempts=1
+  count_overlapping: solved=False attempts=4
+  reverse_words_chars: solved=True attempts=2
+  second_largest_dup: solved=True attempts=4
+  rle_last_run: solved=True attempts=1
+  gcd_returns_zero: solved=True attempts=1
+[saved] /Users/jim/Desktop/openworld/experiments/results/e06_judge_selection.json
+pass@1 70%, pass@4 85%; judge accuracy when solvable: 0.7727272727272727
+  rubric=original: rho=0.746 p=0.0057 (12 episodes)
+  rubric=paraphrase: rho=0.583 p=0.0657 (12 episodes)
+[saved] /Users/jim/Desktop/openworld/experiments/results/e15_judge_robustness.json

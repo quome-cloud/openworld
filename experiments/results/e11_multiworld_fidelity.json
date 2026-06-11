@@ -1,0 +1,132 @@
+{
+  "model": "qwen2.5:7b",
+  "rollout_steps": 20,
+  "seed": 17,
+  "rows": [
+    {
+      "world": "sprint",
+      "engine": "code_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 8,
+      "first_divergences": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mean_first_divergence": null
+    },
+    {
+      "world": "sprint",
+      "engine": "llm_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 0,
+      "first_divergences": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        3,
+        1
+      ],
+      "mean_first_divergence": 1.375
+    },
+    {
+      "world": "orchard",
+      "engine": "code_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 8,
+      "first_divergences": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mean_first_divergence": null
+    },
+    {
+      "world": "orchard",
+      "engine": "llm_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 0,
+      "first_divergences": [
+        13,
+        11,
+        11,
+        7,
+        11,
+        13,
+        9,
+        15
+      ],
+      "mean_first_divergence": 11.25
+    },
+    {
+      "world": "triage",
+      "engine": "code_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 8,
+      "first_divergences": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "mean_first_divergence": null
+    },
+    {
+      "world": "triage",
+      "engine": "llm_transition",
+      "n_rollouts": 8,
+      "exact_rollouts": 0,
+      "first_divergences": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "mean_first_divergence": 2.0
+    }
+  ],
+  "totals": {
+    "code_transition": {
+      "exact_rollouts": 24,
+      "n": 24,
+      "rate": 1.0,
+      "ci": [
+        0.8620194241710247,
+        1.0
+      ]
+    },
+    "llm_transition": {
+      "exact_rollouts": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci": [
+        0.0,
+        0.13798057582897535
+      ]
+    }
+  },
+  "experiment": "e11_multiworld_fidelity",
+  "timestamp": "2026-06-11T02:05:06",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

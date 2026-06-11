@@ -58,11 +58,19 @@ def _mock_for(instance):
     return MockLLM(responses=[f"```python\n{instance.reference_source}```"])
 
 
+# Bound per-request time and output length so a runaway small-model generation
+# fails fast as one attempt instead of stalling the whole run for minutes.
+_OLLAMA_TIMEOUT = 120.0
+_OLLAMA_OPTS = {"num_predict": 1024}
+
+
 def run_model(model, instances, budget, mock):
     pairs = []
     for inst in instances:
-        ss_llm = _mock_for(inst) if mock else OllamaLLM(model=model)
-        iw_llm = _mock_for(inst) if mock else OllamaLLM(model=model)
+        ss_llm = _mock_for(inst) if mock else OllamaLLM(
+            model=model, timeout=_OLLAMA_TIMEOUT, options=dict(_OLLAMA_OPTS))
+        iw_llm = _mock_for(inst) if mock else OllamaLLM(
+            model=model, timeout=_OLLAMA_TIMEOUT, options=dict(_OLLAMA_OPTS))
         ss = solve_single_shot(inst, ss_llm)
         iw = solve_in_world(inst, iw_llm, budget=budget)
         pairs.append({"instance_id": inst.instance_id, "single_shot": ss, "in_world": iw})
@@ -106,9 +114,12 @@ def main() -> int:
     parser.add_argument("models", nargs="*", default=[])
     parser.add_argument("--budget", type=int, default=4)
     parser.add_argument("--mock", action="store_true", help="offline smoke with MockLLM")
+    parser.add_argument("--limit", type=int, default=0, help="run only the first N instances")
     args = parser.parse_args()
 
     instances = load_dataset()
+    if args.limit:
+        instances = instances[: args.limit]
     print(f"[loaded] {len(instances)} instances")
 
     models = args.models or DEFAULT_MODELS

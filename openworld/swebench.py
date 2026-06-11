@@ -307,9 +307,19 @@ def _base_prompt(instance: SWEBenchInstance, source: str) -> str:
     )
 
 
+def _safe_ask(llm: BaseLLM, prompt: str, system: str) -> str:
+    """Ask the model, degrading any backend error (timeout, connection reset,
+    runaway generation killed by timeout) to an empty reply — i.e. a failed
+    attempt — so a single flaky call never crashes a whole benchmark run."""
+    try:
+        return llm.ask(prompt, system=system)
+    except Exception:
+        return ""
+
+
 def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
     """One prompt, one completion, one hidden-suite run."""
-    reply = llm.ask(_base_prompt(instance, instance.buggy_source), system=_SYSTEM)
+    reply = _safe_ask(llm, _base_prompt(instance, instance.buggy_source), _SYSTEM)
     source = extract_code(reply)
     if not source.strip():
         return {"instance_id": instance.instance_id, "condition": "single_shot",
@@ -344,7 +354,7 @@ def solve_in_world(instance: SWEBenchInstance, llm: BaseLLM, budget: int = 4) ->
                 f"Errors:\n" + "\n".join(f"- {e}" for e in s["last_errors"]) + "\n"
                 "Fix the remaining failures without breaking the passing tests."
             )
-        reply = llm.ask(_base_prompt(instance, s["source"]) + feedback, system=_SYSTEM)
+        reply = _safe_ask(llm, _base_prompt(instance, s["source"]) + feedback, _SYSTEM)
         source = extract_code(reply)
         attempts += 1
         action = Action("submit_patch", params={"source": source or s["source"]}, agent="solver")

@@ -24,3 +24,6 @@ _template/main.bbl
 _template/main.blg
 _template/main.log
 _template/main.out
+
+# dataset runner output (regenerated)
+datasets/openworld-swebench/results/

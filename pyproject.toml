@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openworld"
+version = "0.1.0"
+description = "A framework for creating, prototyping, and optimizing world models with an Ollama backbone."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Jim" }]
+keywords = ["world-models", "ollama", "simulation", "agents", "neuro-symbolic"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+include = ["openworld*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

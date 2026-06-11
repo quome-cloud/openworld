@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+
+# synthesized dynamics artifacts written by examples
+examples/orchard_dynamics.py
+orchard_dynamics.py

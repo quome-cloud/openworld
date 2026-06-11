@@ -2,8 +2,10 @@
 
 import json
 
+from openworld import Action
 from openworld.swebench import (
     SWEBenchInstance,
+    build_swebench_world,
     initial_world_state,
     load_dataset,
     merged_errors,
@@ -130,3 +132,29 @@ def test_merged_errors_keeps_regression_visibility():
         "pass_to_pass": {"errors": []},
     }
     assert merged_errors(no_regressions) == ["f1", "f2", "f3"]
+
+
+def test_world_episode_garbage_then_reference():
+    world = build_swebench_world(FIXTURE)
+    assert world.state["solved"] is False
+    assert world.state["fail_to_pass_failed"] == 2
+
+    world.step(Action("submit_patch", params={"source": "x = 1\n"}))
+    assert world.state["attempts"] == 1
+    assert world.state["solved"] is False
+    assert world.state["last_errors"]
+
+    world.step(Action("submit_patch", params={"source": FIXTURE.reference_source}))
+    assert world.state["attempts"] == 2
+    assert world.state["solved"] is True
+    assert world.state["fail_to_pass_failed"] == 0
+    assert world.state["pass_to_pass_failed"] == 0
+
+
+def test_solved_world_ignores_further_steps():
+    world = build_swebench_world(FIXTURE)
+    world.step(Action("submit_patch", params={"source": FIXTURE.reference_source}))
+    assert world.state["solved"] is True
+    world.step(Action("submit_patch", params={"source": "x = 1\n"}))
+    assert world.state["attempts"] == 1  # unchanged
+    assert world.state["solved"] is True

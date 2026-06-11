@@ -21,6 +21,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .coding import run_tests
+from .state import Action, WorldState
+from .transition import Transition
+from .world import World
 
 DEFAULT_DATASET_PATH = (
     Path(__file__).resolve().parent.parent
@@ -118,3 +121,40 @@ def initial_world_state(instance: SWEBenchInstance) -> Dict[str, Any]:
         "attempts": 0,
         "solved": result["solved"],
     }
+
+
+class SWEBenchTransition(Transition):
+    """Exact dynamics: submitting a patch runs both hidden suites."""
+
+    def __init__(self, instance: SWEBenchInstance):
+        self.instance = instance
+
+    def step(self, state: WorldState, action: Action) -> WorldState:
+        s = state.copy()
+        if s.get("solved"):
+            return s
+        if action.name == "submit_patch":
+            source = str(action.params.get("source", "")) or s["source"]
+            result = run_instance_tests(source, self.instance)
+            s["source"] = source
+            s["fail_to_pass_passed"] = result["fail_to_pass"]["passed"]
+            s["fail_to_pass_failed"] = result["fail_to_pass"]["failed"]
+            s["pass_to_pass_passed"] = result["pass_to_pass"]["passed"]
+            s["pass_to_pass_failed"] = result["pass_to_pass"]["failed"]
+            s["last_errors"] = merged_errors(result)
+            s["attempts"] += 1
+            s["solved"] = result["solved"]
+        return s
+
+
+def build_swebench_world(instance: SWEBenchInstance) -> World:
+    """Instantiate the instance's world spec with exact test-running dynamics."""
+    spec = instance.world
+    return World(
+        name=spec["name"],
+        description=spec["description"],
+        initial_state=spec["initial_state"],
+        actions=spec["actions"],
+        rules=spec.get("rules", []),
+        transition=SWEBenchTransition(instance),
+    )

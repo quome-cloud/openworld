@@ -1,0 +1,70 @@
+{
+  "model": "qwen2.5:7b",
+  "episode_steps": 12,
+  "value_function": "shipped - bugs - 0.5*debt",
+  "depths": {
+    "code": 3,
+    "llm": 2
+  },
+  "rows": [
+    {
+      "planner": "code_d3",
+      "score": 7.5,
+      "final_state": {
+        "backlog": 3,
+        "shipped": 9,
+        "bugs": 0,
+        "debt": 3
+      },
+      "episode_seconds": 0.031697791999999975
+    },
+    {
+      "planner": "oracle_d3",
+      "score": 7.5,
+      "final_state": {
+        "backlog": 3,
+        "shipped": 9,
+        "bugs": 0,
+        "debt": 3
+      },
+      "episode_seconds": 0.0021484170000000136
+    },
+    {
+      "planner": "llm_d2",
+      "score": 0.0,
+      "final_state": {
+        "backlog": 12,
+        "shipped": 0,
+        "bugs": 0,
+        "debt": 0
+      },
+      "episode_seconds": 85.848020542
+    },
+    {
+      "planner": "reactive_heuristic",
+      "score": 5.0,
+      "final_state": {
+        "backlog": 4,
+        "shipped": 8,
+        "bugs": 1,
+        "debt": 4
+      },
+      "episode_seconds": 8.540999999695487e-06
+    },
+    {
+      "planner": "random",
+      "score": 3.8,
+      "scores": [
+        1.5,
+        4.0,
+        5.0,
+        3.5,
+        5.0
+      ],
+      "episode_seconds": null
+    }
+  ],
+  "experiment": "e22_planning",
+  "timestamp": "2026-06-11T13:55:48",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

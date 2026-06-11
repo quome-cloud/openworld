@@ -1,0 +1,27 @@
+  R=4 #0: accepted=True acc=1.00
+  R=4 #1: accepted=True acc=1.00
+  R=4 #2: accepted=True acc=1.00
+  R=8 #0: accepted=True acc=0.35
+  R=8 #1: accepted=True acc=0.50
+  R=8 #2: accepted=True acc=0.75
+  R=12 #0: accepted=True acc=0.15
+  R=12 #1: accepted=True acc=0.30
+  R=12 #2: accepted=True acc=0.30
+  R=16 #0: accepted=True acc=0.15
+  R=16 #1: accepted=True acc=0.15
+  R=16 #2: accepted=True acc=0.15
+[saved] /Users/jim/Desktop/openworld/experiments/results/e20_complexity.json
+R=4: mean probe accuracy 1.00
+R=8: mean probe accuracy 0.53
+R=12: mean probe accuracy 0.25
+R=16: mean probe accuracy 0.15
+  #0: arrival rate 0.312 (target 0.3), det acc 1.000, replay exact True, oracle exact 1.00
+  #1: arrival rate 0.312 (target 0.3), det acc 1.000, replay exact True, oracle exact 1.00
+  #2: synthesis failed
+[saved] /Users/jim/Desktop/openworld/experiments/results/e21_stochastic.json
+  code_d3: score=7.5 final={'backlog': 3, 'shipped': 9, 'bugs': 0, 'debt': 3} (0.0s)
+  oracle_d3: score=7.5 final={'backlog': 3, 'shipped': 9, 'bugs': 0, 'debt': 3} (0.0s)
+  llm_d2: score=0.0 final={'backlog': 12, 'shipped': 0, 'bugs': 0, 'debt': 0} (85.8s)
+  reactive: score=5.0
+  random: mean score=3.8
+[saved] /Users/jim/Desktop/openworld/experiments/results/e22_planning.json

@@ -1,0 +1,43 @@
+{
+  "model": "qwen2.5:7b",
+  "arrival_p": 0.3,
+  "n_draws": 2000,
+  "attempts": 3,
+  "summary": {
+    "acceptance_rate": 0.6666666666666666,
+    "mean_arrival_abs_error": 0.01200000000000001,
+    "mean_deterministic_accuracy": 1.0,
+    "replay_bit_exact_all": true,
+    "mean_oracle_bit_exact": 1.0
+  },
+  "rows": [
+    {
+      "attempt": 0,
+      "accepted": true,
+      "arrival_rate": 0.312,
+      "arrival_abs_error": 0.01200000000000001,
+      "deterministic_accuracy": 1.0,
+      "replay_bit_exact": true,
+      "oracle_bit_exact_rate": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'serve':\n        if next_state['queue'] > 0:\n            next_state['queue'] -= 1\n            next_state['served'] += 1\n    \n    # Apply randomness for new request arrival or not\n    rng = random.Random(next_state['rng_seed'])\n    if rng.random() < 0.3:\n        next_state['queue'] += 1\n        next_state['arrivals'] += 1\n    \n    # Update the RNG seed for reproducibility\n    next_state['rng_seed'] = rng.randint(0, 999999999)\n    \n    return next_state"
+    },
+    {
+      "attempt": 1,
+      "accepted": true,
+      "arrival_rate": 0.312,
+      "arrival_abs_error": 0.01200000000000001,
+      "deterministic_accuracy": 1.0,
+      "replay_bit_exact": true,
+      "oracle_bit_exact_rate": 1.0,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'serve':\n        if next_state['queue'] > 0:\n            next_state['queue'] -= 1\n            next_state['served'] += 1\n    \n    rng = random.Random(next_state['rng_seed'])\n    if rng.random() < 0.3:\n        next_state['queue'] += 1\n        next_state['arrivals'] += 1\n    \n    next_state['rng_seed'] = rng.randint(0, 999999999)\n    \n    return next_state"
+    },
+    {
+      "attempt": 2,
+      "accepted": false,
+      "error": "Failed to synthesize verified transition code after 4 attempts. Last feedback: On action 'serve': Code failed to execute: ImportError('__import__ not found')"
+    }
+  ],
+  "experiment": "e21_stochastic",
+  "timestamp": "2026-06-11T13:54:22",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -172,11 +172,18 @@ controls pooled over \PooledRounds{} rounds, judge selection solves
 candidates---a margin that sharpened with sample size but remains marginal
 (exact McNemar $p=\PooledMcNemarP$)---while picking a passing candidate
 $\sim$85\% of the time under either candidate order, near the \PooledOracle{}
-oracle ceiling. The central result: a training-free, verified,
-symbolic world model on consumer hardware eliminates compounding rollout
-error---the defining failure mode of learned world models---at zero training
-cost. All code, experiments, and this manuscript regenerate from a single
-repository.
+oracle ceiling. Depth-3 lookahead planning through the synthesized simulator
+matches planning through ground truth exactly and beats reactive and random
+baselines, while planning through the LLM proxy scores worse than no model
+at all; a complexity stress test locates the 7B synthesis cliff near eight
+interacting rules; seeded-RNG synthesis extends the paradigm to stochastic
+worlds within 1.2 points of the declared distribution; and ensemble
+disagreement across independently synthesized programs detects every
+ground-truth error without an oracle. The central result: a training-free,
+verified, symbolic world model on consumer hardware eliminates compounding
+rollout error---the defining failure mode of learned world models---at zero
+training cost. All code, experiments, and this manuscript regenerate from a
+single repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -489,9 +496,14 @@ repository at \texttt{docs/review/}), which demanded a trained baseline,
 multi-world replication, paired judge controls, and significance testing; a
 second review round demanded cross-family replication (E16), a powered judge
 comparison (E17), a filter-vs-repair decomposition (E18), and a scale ladder
-with a stronger learned baseline (E19). Experiment numbering preserves
-provenance; E14 was absorbed into the benchmark expansion and the number is
-retired.
+with a stronger learned baseline (E19); a third round demanded a complexity
+stress test (E20), stochastic-dynamics support and verification (E21), a
+planning-utility demonstration (E22), and an oracle-free error signal (E23).
+Experiment numbering preserves provenance; E14 was absorbed into the
+benchmark expansion and the number is retired. All LLM-dependent numbers are
+specific to the stated Ollama snapshots and Q4\_K\_M quantization; absolute
+rates may shift under other runtimes, though the structural comparisons
+should not.
 
 % ============================================================================
 \section{Results}\label{sec:results}
@@ -649,7 +661,11 @@ its \emph{accuracy} is order-stable, picking a passing candidate
 \PooledFwdAcc{} of the time forward and \PooledRevAcc{} reversed on
 discriminative rounds. Most inconsistency falls on rounds where several
 candidates pass and the choice is inconsequential; the bias is real, but it
-costs correctness little here.
+costs correctness little here. Cost accounting: judge-of-3 spends four model
+calls per round (three 1.5B generations plus one 7B judgment) against one for
+the single-proposal baseline, so the \PooledJudge-vs-\PooledFirst{} margin is
+bought at roughly $4\times$ inference cost---worth it when test execution is
+expensive or attempts are budgeted, not when proposals are free.
 
 In the multi-attempt protocol (E5/E6), a single low-temperature 1.5B proposal
 solves \BaselinePassOne{} of tasks first-try, and feedback-driven retries
@@ -714,6 +730,77 @@ found (Table~\ref{tab:tuning-app}, Appendix~\ref{app:tables}). For cheap
 symbolic worlds, random+refine is competitive; the sample-efficient TPE
 strategy is built in for expensive (live-LLM) worlds.
 
+\subsection{From fidelity to decisions: planning}\label{sec:planning}
+World models exist to improve decisions; E22 closes that chain
+(Table~\ref{tab:planning}). A model-predictive planner runs exhaustive
+depth-3 lookahead inside its world model and executes the best action in the
+ground-truth environment. Planning through the verified synthesized program
+scores \PlanCode---\emph{identical} to planning through the ground truth
+itself (\PlanOracle), as bit-exactness guarantees---against \PlanReactive{}
+for a reactive heuristic and \PlanRandom{} for random actions, with the
+whole 12-step episode planned in \PlanCodeSeconds\,s. Planning through the
+LLM next-state engine is confined to depth 2 by cost (\PlanLLMSeconds\,s per
+episode) and scores \PlanLLM---\emph{worse than no model at all}: lookahead
+through hallucinated transitions steered the agent away from productive
+actions entirely. Fidelity and throughput are not abstract virtues; they are
+the difference between planning that helps and planning that harms.
+
+\begin{table}[htb]\centering\small
+\input{tables/planning.tex}
+\caption{E22: model-predictive lookahead on the sprint world, plans executed
+in the ground-truth environment. Value function: shipped $-$ bugs $-$
+0.5$\cdot$debt after 12 steps.}
+\label{tab:planning}
+\end{table}
+
+\subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
+Three round-3 experiments chart where the paradigm holds and what to do at
+the edge.
+
+\paragraph{The complexity cliff (E20).} Parametric worlds with $R$
+interacting rules (conditions reading pre-action state, summed effects,
+clamping) were synthesized from rule text at $R \in \{4, 8, 12, 16\}$
+(Figure~\ref{fig:complexity}). Mean probe accuracy falls from \CplxFour{} at
+$R{=}4$ to \CplxEight{} at $R{=}8$, \CplxTwelve{} at $R{=}12$, and
+\CplxSixteen{} at $R{=}16$: monolithic single-function synthesis with a 7B
+generator degrades sharply once roughly eight coupled rules must be
+implemented at once. This is the paradigm's present boundary at this model
+scale, and it motivates compositional synthesis---one expert per rule, as in
+PoE-World~\cite{poeworld2025}---as the structural fix.
+
+\paragraph{Stochastic dynamics (E21).} Threading a seed through the state
+(\texttt{rng\_seed} in, derived seed out) extends verified synthesis to
+stochastic worlds without sacrificing replayability. On a queueing world
+with a declared 0.3 arrival probability, accepted programs (\StochAccept{}
+of attempts) matched the declared distribution within
+\StochArrivalErr{}~percentage points over 2{,}000 seeded transitions, kept
+the deterministic bookkeeping perfect (\StochDetAcc), replayed bit-exactly,
+and in fact matched the hand-written stochastic oracle bit-for-bit
+(\StochOracleExact).
+
+\paragraph{Oracle-free error detection (E23).} Practitioners lack the
+hand-written oracles our evaluations use; they can, however, synthesize the
+dynamics several times. Across \SelfCheckPrograms{} stored programs and
+\SelfCheckPairs{} program--probe pairs, disagreement with the ensemble
+majority detected ground-truth errors with \SelfCheckPrecision{} precision
+and \SelfCheckRecall{} recall---the majority vote reconstructed the oracle
+exactly on these worlds---and a program's agreement rate ranked its true
+accuracy perfectly (Spearman $\rho=\SelfCheckSpearman$). The caveat is
+structural: majority-as-oracle fails under correlated errors (e.g., every
+model misreading the same ambiguous rule), so ensemble disagreement is a
+cheap screen, not a proof; it composes naturally with the invariant and
+critic gates.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.6\linewidth]{figs/complexity.png}
+\caption{\textbf{The complexity cliff (E20).} Probe accuracy of 7B-synthesized
+dynamics versus the number of declared interacting rules; three syntheses per
+point, shaded band is the 95\% CI over pooled probes. Monolithic synthesis is
+reliable at $R{=}4$ and unreliable past $R{\approx}8$.}
+\label{fig:complexity}
+\end{figure}
+
 \subsection{End-to-end evaluation}\label{sec:endtoend}
 The coding world is itself the end-to-end test: world declaration, bit-exact
 test-execution dynamics, an LLM agent in the loop, feedback-driven repair,
@@ -756,40 +843,51 @@ accuracy).
 \paragraph{Limitations.} (i) Scope: symbolic-state worlds; pixel-native
 domains remain the territory of learned models---the comparison here is
 within the symbolic regime, and neither the LLM proxy nor the numpy
-baselines is a trained Dreamer. (ii) Scale: twenty repair tasks and three
-worlds; paired tests sharpen the comparisons, but the benchmark remains an
-archetype suite, not HumanEval~\cite{humaneval2021}, and 3B+ agents saturate
-it. Moreover the defect archetypes are classic and plausibly present in
-pretraining data: agent solve rates should not be read as measurements of
-debugging skill---the world-model claims are unaffected, since the
-environment executes exactly regardless of what the agent has memorized.
-(iii) Synthesis replicates across three model families (E16), but the judge,
-critic, and repair-agent roles remain Qwen-only, and all experiments ran on
-one machine. (iv) Judges: selection accuracy and order-consistency are
+baselines is a trained Dreamer. (ii) Complexity: monolithic synthesis with a
+7B generator is reliable at four interacting rules and unreliable past
+roughly eight (E20); the headline worlds sit below that cliff, and richer
+worlds will need compositional synthesis~\cite{poeworld2025} or larger
+generators. (iii) Scale: twenty repair tasks and three handwritten worlds;
+paired tests sharpen the comparisons, but the benchmark remains an archetype
+suite, not HumanEval~\cite{humaneval2021}, 3B+ agents saturate it, and the
+classic defect archetypes are plausibly present in pretraining data: agent
+solve rates should not be read as measurements of debugging skill---the
+world-model claims are unaffected, since the environment executes exactly
+regardless of what the agent has memorized. (iv) Synthesis replicates across
+three model families (E16), but the judge, critic, and repair-agent roles
+remain Qwen-only, and all experiments ran on one machine under the stated
+quantizations. (v) Judges: selection accuracy and order-consistency are
 measured but imperfect, the pooled selection margin is marginal
-($p=\PooledMcNemarP$), and rubric grading showed compression; judge verdicts
-should gate, not replace, programmatic verification. (v) The sandbox is
-best-effort isolation against accident, not an adversarial security
-boundary (generated patches twice defeated in-process timeouts before the
-fork-based runner; see the repository history). (vi) Several experiments
-were redesigned after pilots and two internal review rounds (E3, E5/E6,
-E11--E19); pilot saturation results are reported alongside the final
-protocols, and both reviews ship in the repository.
+($p=\PooledMcNemarP$) and costs $\sim$4$\times$ inference, and rubric grading
+showed compression; judge verdicts should gate, not replace, programmatic
+verification. (vi) Ensemble self-checking (E23) achieved perfect
+precision/recall here but is structurally vulnerable to correlated errors
+across generators reading the same ambiguous rule; it is a screen, not a
+proof. (vii) The sandbox is best-effort isolation against accident, not an
+adversarial security boundary (generated patches twice defeated in-process
+timeouts before the fork-based runner; see the repository history).
+(viii) Several experiments were redesigned after pilots and three internal
+review rounds (E3, E5/E6, E11--E23); pilot saturation results are reported
+alongside the final protocols, and all reviews ship in the repository.
 
 % ============================================================================
 \section{Conclusion}
 A training-free symbolic world model---synthesized as code by a local model,
 verified before acceptance, steered by declared moral dials, optimized by an
 automated tuner, and assisted by an agent-as-a-judge---is bit-exact where
-learned-style dynamics compound error, transfers across $10\times$ scale
-shifts where they fail, rolls out orders of magnitude faster, and lifts
-program-repair success through judged candidate selection. The world-model
-field's trajectory has been to scale parameters until hallucination is
-suppressed; these results argue for an orthogonal path---make the model a
-program, verify the program, and keep the values dialable. Next steps: scale
-the coding world to standard benchmarks, hybridize (learned perception
-feeding symbolic dynamics), and let judges propose---not just select---world
-repairs.
+learned-style dynamics compound error, transfers across $100\times$ scale
+shifts where trained baselines collapse, rolls out orders of magnitude
+faster, plans \emph{as well as the ground truth itself} where planning
+through a hallucinating model is worse than no model, extends to stochastic
+dynamics with verified distributions, and flags its own synthesis errors by
+ensemble disagreement. Its boundary is equally measured: monolithic 7B
+synthesis fails past roughly eight interacting rules. The world-model field's
+trajectory has been to scale parameters until hallucination is suppressed;
+these results argue for an orthogonal path---make the model a program, verify
+the program, and keep the values dialable. Next steps: compositional
+synthesis to cross the complexity cliff~\cite{poeworld2025}, the coding world
+at standard-benchmark scale, hybrid perception-to-symbol pipelines, and
+judges that propose---not just select---world repairs.
 
 % ============================================================================
 \section*{Declaration of generative AI use}

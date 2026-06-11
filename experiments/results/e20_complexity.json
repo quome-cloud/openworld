@@ -1,0 +1,130 @@
+{
+  "model": "qwen2.5:7b",
+  "r_values": [
+    4,
+    8,
+    12,
+    16
+  ],
+  "n_probes": 20,
+  "spec_seed": 31,
+  "summary": [
+    {
+      "n_rules": 4,
+      "attempts": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 1.0,
+      "pooled_ci": [
+        0.9398260695220669,
+        0.9999999999999999
+      ]
+    },
+    {
+      "n_rules": 8,
+      "attempts": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.5333333333333333,
+      "pooled_ci": [
+        0.40893208671135106,
+        0.65372298459012
+      ]
+    },
+    {
+      "n_rules": 12,
+      "attempts": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.25,
+      "pooled_ci": [
+        0.1577638557841185,
+        0.372323109454848
+      ]
+    },
+    {
+      "n_rules": 16,
+      "attempts": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.15,
+      "pooled_ci": [
+        0.08097349242295687,
+        0.26114825891159615
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "n_rules": 4,
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0
+    },
+    {
+      "n_rules": 4,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0
+    },
+    {
+      "n_rules": 4,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0
+    },
+    {
+      "n_rules": 8,
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.35
+    },
+    {
+      "n_rules": 8,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "n_rules": 8,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.75
+    },
+    {
+      "n_rules": 12,
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.15
+    },
+    {
+      "n_rules": 12,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.3
+    },
+    {
+      "n_rules": 12,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.3
+    },
+    {
+      "n_rules": 16,
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.15
+    },
+    {
+      "n_rules": 16,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.15
+    },
+    {
+      "n_rules": 16,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.15
+    }
+  ],
+  "experiment": "e20_complexity",
+  "timestamp": "2026-06-11T13:54:00",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

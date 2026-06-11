@@ -1,0 +1,11 @@
+\begin{tabular}{lcc}
+\toprule
+Policy & Episode score & Planning time (s) \\
+\midrule
+\textbf{Lookahead d=3 via synthesized code} & 7.5 & 0.03 \\
+Lookahead d=3 via ground truth (bound) & 7.5 & 0.00 \\
+Lookahead d=2 via LLM next-state & 0.0 & 85.85 \\
+Reactive heuristic (no model) & 5.0 & 0.00 \\
+Random policy (5 seeds, mean) & 3.8 & --- \\
+\bottomrule
+\end{tabular}

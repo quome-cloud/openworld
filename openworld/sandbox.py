@@ -28,8 +28,17 @@ class SandboxError(RuntimeError):
 
 
 def load_transition_code(code: str, func_name: str = "transition") -> Callable:
-    """Exec `code` in a restricted namespace and return the named function."""
-    namespace: Dict[str, Any] = {"__builtins__": SAFE_BUILTINS, "math": math}
+    """Exec `code` in a restricted namespace and return the named function.
+
+    The namespace exposes `math` and the `random` module (for stochastic
+    worlds that thread a seed through the state, keeping rollouts
+    replayable); imports and I/O remain unavailable.
+    """
+    import random
+
+    namespace: Dict[str, Any] = {
+        "__builtins__": SAFE_BUILTINS, "math": math, "random": random,
+    }
     try:
         exec(compile(code, "<transition>", "exec"), namespace)
     except Exception as exc:

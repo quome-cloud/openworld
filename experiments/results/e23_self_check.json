@@ -1,0 +1,204 @@
+{
+  "n_probes_per_world": 30,
+  "seed": 41,
+  "n_programs": 30,
+  "n_program_probe_pairs": 900,
+  "n_flagged": 87,
+  "n_true_errors": 87,
+  "flag_precision": 1.0,
+  "flag_precision_ci": [
+    0.957711004649852,
+    1.0
+  ],
+  "flag_recall": 1.0,
+  "flag_recall_ci": [
+    0.957711004649852,
+    1.0
+  ],
+  "spearman_agreement_vs_accuracy": 1.0,
+  "program_rows": [
+    {
+      "world": "sprint",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 0.9666666666666667,
+      "true_accuracy": 0.9666666666666667
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.8666666666666667,
+      "true_accuracy": 0.8666666666666667
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.9666666666666667,
+      "true_accuracy": 0.9666666666666667
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.5,
+      "true_accuracy": 0.5
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.7666666666666667,
+      "true_accuracy": 0.7666666666666667
+    },
+    {
+      "world": "sprint",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.9333333333333333,
+      "true_accuracy": 0.9333333333333333
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.26666666666666666,
+      "true_accuracy": 0.26666666666666666
+    },
+    {
+      "world": "orchard",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.4,
+      "true_accuracy": 0.4
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:7b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.9333333333333333,
+      "true_accuracy": 0.9333333333333333
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 0.5,
+      "true_accuracy": 0.5
+    },
+    {
+      "world": "triage",
+      "model": "qwen2.5:3b",
+      "agreement_rate": 1.0,
+      "true_accuracy": 1.0
+    }
+  ],
+  "experiment": "e23_self_check",
+  "timestamp": "2026-06-11T13:52:26",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -25,7 +25,8 @@ EXPERIMENTS = [
     "e10_ood_generalization", "e11_multiworld_fidelity",
     "e12_learned_baseline", "e13_judge_controls", "e15_judge_robustness",
     "e16_cross_model", "e17_judge_power", "e18_repair_loop",
-    "e19_scale_ladder",
+    "e19_scale_ladder", "e20_complexity", "e21_stochastic",
+    "e22_planning", "e23_self_check",
 ]
 
 
@@ -306,6 +307,47 @@ def table_ladder(e19):
     )
 
 
+def fig_complexity(e20):
+    fig, ax = plt.subplots(figsize=(5.6, 3.3))
+    summary = e20["summary"]
+    xs = [s["n_rules"] for s in summary]
+    ys = [s["mean_probe_accuracy"] for s in summary]
+    los = [s["pooled_ci"][0] for s in summary]
+    his = [s["pooled_ci"][1] for s in summary]
+    ax.plot(xs, ys, "-o", color=BLUE, lw=2)
+    ax.fill_between(xs, los, his, color=BLUE, alpha=0.15,
+                    label="95% CI (pooled probes)")
+    ax.set_xlabel("Declared interacting rules (R)")
+    ax.set_ylabel("Mean probe accuracy of synthesized dynamics")
+    ax.set_xticks(xs)
+    ax.set_ylim(0, 1.05)
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(FIGS / "complexity.png", dpi=200)
+    plt.close(fig)
+
+
+def table_planning(e22):
+    labels = {
+        "code_d3": "\\textbf{Lookahead d=3 via synthesized code}",
+        "oracle_d3": "Lookahead d=3 via ground truth (bound)",
+        "llm_d2": "Lookahead d=2 via LLM next-state",
+        "reactive_heuristic": "Reactive heuristic (no model)",
+        "random": "Random policy (5 seeds, mean)",
+    }
+    rows = []
+    for r in e22["rows"]:
+        secs = ("---" if r["episode_seconds"] is None
+                else f"{r['episode_seconds']:.2f}")
+        rows.append(f"{labels[r['planner']]} & {r['score']:.1f} & {secs} \\\\")
+    (TABLES / "planning.tex").write_text(
+        "\\begin{tabular}{lcc}\n\\toprule\n"
+        "Policy & Episode score & Planning time (s) \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
 def table_repair(e18):
     rows = []
     for s in e18["summary"]:
@@ -396,7 +438,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "18"),
+        macro("NumExperiments", "22"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -476,6 +518,33 @@ def numbers_tex(d):
         macro("DeltaMLPHundredX", pct(ladder[("delta_mlp_strong", "100x")]["rate"])),
         macro("LLMHundredX", pct(ladder[("llm_next_state", "100x")]["rate"])),
     ]
+    # E20-E23 (round 3)
+    e20, e21 = d["e20_complexity"], d["e21_stochastic"]
+    e22, e23 = d["e22_planning"], d["e23_self_check"]
+    c20 = {s["n_rules"]: s for s in e20["summary"]}
+    plan = {r["planner"]: r for r in e22["rows"]}
+    lines += [
+        macro("CplxFour", f"{c20[4]['mean_probe_accuracy']:.2f}"),
+        macro("CplxEight", f"{c20[8]['mean_probe_accuracy']:.2f}"),
+        macro("CplxTwelve", f"{c20[12]['mean_probe_accuracy']:.2f}"),
+        macro("CplxSixteen", f"{c20[16]['mean_probe_accuracy']:.2f}"),
+        macro("StochAccept", pct(e21["summary"]["acceptance_rate"])),
+        macro("StochArrivalErr", f"{100 * e21['summary']['mean_arrival_abs_error']:.1f}"),
+        macro("StochDetAcc", pct(e21["summary"]["mean_deterministic_accuracy"])),
+        macro("StochOracleExact", pct(e21["summary"]["mean_oracle_bit_exact"])),
+        macro("PlanCode", f"{plan['code_d3']['score']:.1f}"),
+        macro("PlanOracle", f"{plan['oracle_d3']['score']:.1f}"),
+        macro("PlanLLM", f"{plan['llm_d2']['score']:.1f}"),
+        macro("PlanReactive", f"{plan['reactive_heuristic']['score']:.1f}"),
+        macro("PlanRandom", f"{plan['random']['score']:.1f}"),
+        macro("PlanLLMSeconds", f"{plan['llm_d2']['episode_seconds']:.0f}"),
+        macro("PlanCodeSeconds", f"{plan['code_d3']['episode_seconds']:.2f}"),
+        macro("SelfCheckPrograms", str(e23["n_programs"])),
+        macro("SelfCheckPairs", str(e23["n_program_probe_pairs"])),
+        macro("SelfCheckPrecision", pct(e23["flag_precision"])),
+        macro("SelfCheckRecall", pct(e23["flag_recall"])),
+        macro("SelfCheckSpearman", f"{e23['spearman_agreement_vs_accuracy']:.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -495,6 +564,8 @@ def main():
     table_tuning(data["e09_tuning_efficiency"])
     table_ladder(data["e19_scale_ladder"])
     table_repair(data["e18_repair_loop"])
+    fig_complexity(data["e20_complexity"])
+    table_planning(data["e22_planning"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

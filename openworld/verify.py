@@ -117,8 +117,13 @@ def synthesize_transition(
     rules: Optional[List[str]] = None,
     verifier: Optional[Verifier] = None,
     max_iters: int = 4,
+    generator_system: Optional[str] = None,
 ) -> CodeTransition:
-    """Generate verified transition code for a world. Raises SynthesisError."""
+    """Generate verified transition code for a world. Raises SynthesisError.
+
+    generator_system overrides the default deterministic-code system prompt -
+    e.g. to permit seeded randomness for stochastic worlds.
+    """
     rules = rules or []
     # Smoke-run actions carry a named agent so agent-dependent code paths
     # (e.g. per-agent tallies) are exercised realistically.
@@ -133,6 +138,7 @@ def synthesize_transition(
         f"{_world_context(description, initial_state, actions, rules)}\n\n"
         "Write the transition function now."
     )
+    system = generator_system or GENERATOR_SYSTEM
     attempts: List[str] = []
     feedback = ""
     for _ in range(max_iters):
@@ -140,7 +146,7 @@ def synthesize_transition(
             f"{prompt}\n\nYour previous attempt failed verification:\n{feedback}\n"
             "Fix the problem and output the corrected full code block."
         )
-        code = extract_code(llm.ask(full_prompt, system=GENERATOR_SYSTEM))
+        code = extract_code(llm.ask(full_prompt, system=system))
         attempts.append(code)
         ok, feedback = verifier.check(code)
         if ok:

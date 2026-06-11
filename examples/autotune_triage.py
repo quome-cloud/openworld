@@ -5,12 +5,17 @@ THE AGENT SKETCH - "TriageCoordinator"
 --------------------------------------
 An autonomous coordinator running a 16-step emergency shift with a fixed
 patient load (4 critical, 10 moderate). Its behavior is fully determined by
-three tunable knobs:
+four tunable knobs - including a two-dial MORAL CONFIGURATION passed into the
+search space as Dial objects:
 
   protocol     (Choice)  - 'critical_first' always clears critical patients
                            before anything else; 'round_robin' alternates.
-  stewardship  (Uniform) - the moral dial: weight on thrift vs raw outcomes,
-                           which also throttles discretionary moderate care.
+  stewardship  (Dial)    - moral axis 1: weight on thrift vs raw outcomes;
+                           throttles discretionary moderate care via a
+                           spend cap.
+  compassion   (Dial)    - moral axis 2: a guaranteed-service floor for
+                           moderate patients that overrides stewardship
+                           (but never the world's hard budget).
   budget       (IntRange)- the unit's resourcing; the WORLD enforces it
                            (treatment is impossible once spend hits budget).
 
@@ -39,7 +44,6 @@ from openworld import (
     Objective,
     Simulation,
     Tuner,
-    Uniform,
     World,
 )
 
@@ -57,6 +61,7 @@ def triage_dynamics(state, action):
         s["spend"] += 3
     elif name == "treat_moderate" and s["moderate_waiting"] > 0 and s["spend"] + 1 <= s["budget"]:
         s["moderate_waiting"] -= 1
+        s["moderate_treated"] += 1
         s["treated"] += 1
         s["outcomes"] += 1
         s["spend"] += 1
@@ -72,6 +77,7 @@ def triage_dynamics(state, action):
 def build(params):
     """params -> a fully configured Simulation. Called fresh for every trial."""
     stewardship = Dial("stewardship", value=params["stewardship"])
+    compassion = Dial("compassion", value=params["compassion"])
 
     def coordinator(state, actions):
         wants_critical = state["critical_waiting"] > 0
@@ -80,9 +86,13 @@ def build(params):
             wants_critical = wants_critical and state["tick"] % 2 == 0
         if wants_critical:
             return Action("treat_critical")
-        moderate_cap = round((1.0 - stewardship.value) * 24)
-        if state["moderate_waiting"] > 0 and state["spend"] + 1 <= moderate_cap:
-            return Action("treat_moderate")
+        if state["moderate_waiting"] > 0:
+            # Compassion guarantees a floor of moderate care that overrides
+            # stewardship's spend cap (the world's hard budget still applies).
+            service_floor = round(compassion.value * 8)
+            moderate_cap = round((1.0 - stewardship.value) * 24)
+            if state["moderate_treated"] < service_floor or state["spend"] + 1 <= moderate_cap:
+                return Action("treat_moderate")
         return Action("wait")
 
     world = World(
@@ -91,7 +101,7 @@ def build(params):
         initial_state={
             "tick": 0,
             "critical_waiting": 4, "moderate_waiting": 10,
-            "treated": 0, "deteriorated": 0,
+            "treated": 0, "moderate_treated": 0, "deteriorated": 0,
             "outcomes": 0, "spend": 0,
             "budget": params["budget"],
         },
@@ -104,6 +114,8 @@ def build(params):
         objectives=[
             Objective("outcomes", fn=lambda s, a, ns: ns["outcomes"] - s["outcomes"], weight=1.0),
             Objective("thrift", fn=lambda s, a, ns: -(ns["spend"] - s["spend"]), weight=stewardship),
+            Objective("equity", fn=lambda s, a, ns: float(ns["moderate_treated"] - s["moderate_treated"]),
+                      weight=compassion),
         ],
     )
 
@@ -128,7 +140,10 @@ def main():
         build=build,
         space={
             "protocol": Choice(["critical_first", "round_robin"]),
-            "stewardship": Uniform(0.0, 1.0),
+            # Moral configuration: Dials go straight into the search space and
+            # are tuned across their declared bounds.
+            "stewardship": Dial("stewardship"),
+            "compassion": Dial("compassion"),
             "budget": IntRange(6, 24),
         },
         score=score,
@@ -160,11 +175,15 @@ def main():
     print(
         f"\nIdeal configuration found:\n"
         f"  protocol     = {best.params['protocol']}\n"
-        f"  stewardship  = {best.params['stewardship']:.3f}   (the moral filter)\n"
+        f"  stewardship  = {best.params['stewardship']:.3f}   (moral axis 1: thrift)\n"
+        f"  compassion   = {best.params['compassion']:.3f}   (moral axis 2: guaranteed service)\n"
         f"  budget       = {best.params['budget']}\n"
         f"  -> outcome: {final['treated']} treated, {final['deteriorated']} deteriorated, "
         f"${final['spend']}k spent (target ${COST_TARGET}k), solved={best.solved}"
     )
+
+    csv_path = tuner.study.to_csv("autotune_triage_study.csv")
+    print(f"\nFull study exported to {csv_path} ({len(tuner.study.trials)} trials)")
 
 
 def _short(params):

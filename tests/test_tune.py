@@ -8,6 +8,7 @@ from openworld import (
     Action,
     Agent,
     Choice,
+    Dial,
     FunctionTransition,
     IntRange,
     Simulation,
@@ -100,6 +101,69 @@ def test_param_bounds_respected():
         assert 2 <= span.perturb(5, rng, 0.5) <= 5
         assert -1.0 <= uni.perturb(-1.0, rng, 0.9) <= 1.0
         assert choice.perturb("p", rng, 0.3) in ("p", "q")
+
+
+def test_dials_are_first_class_in_space():
+    # A Dial in the space is tuned as a Uniform over its [minimum, maximum].
+    dial = Dial("morality", value=0.5, minimum=0.2, maximum=0.8)
+    tuner = Tuner(
+        build=make_noop_simulation,
+        space={"morality": dial},
+        score=lambda traj, params: params["morality"],
+        steps=1,
+        seed=4,
+    )
+    tuner.search(50)
+    values = [t.params["morality"] for t in tuner.study.trials]
+    assert all(0.2 <= v <= 0.8 for v in values)
+    assert tuner.study.best.params["morality"] > 0.75  # maximizing finds the top
+
+
+def test_parallel_search_matches_serial():
+    serial = quadratic_tuner(seed=9)
+    serial.search(40)
+    parallel = quadratic_tuner(seed=9)
+    parallel.workers = 4
+    parallel.search(40)
+    assert [t.params for t in serial.study.trials] == [t.params for t in parallel.study.trials]
+    assert [t.score for t in serial.study.trials] == [t.score for t in parallel.study.trials]
+
+
+def test_parallel_refine_runs_and_improves():
+    tuner = quadratic_tuner(seed=9)
+    tuner.workers = 4
+    tuner.search(20)
+    before = tuner.study.best.score
+    tuner.refine(40, scale=0.1)
+    assert tuner.study.best.score >= before
+    assert sum(t.stage == "refine" for t in tuner.study.trials) == 40
+
+
+def test_optuna_tpe_strategy():
+    pytest.importorskip("optuna")
+    tuner = quadratic_tuner(seed=5)
+    tuner.search(40, strategy="tpe")
+    best = tuner.study.best
+    assert best.params["k"] == "b"
+    assert abs(best.params["x"] - 0.7) < 0.2
+    assert {t.stage for t in tuner.study.trials} == {"tpe"}
+
+
+def test_unknown_strategy_raises():
+    tuner = quadratic_tuner(seed=5)
+    with pytest.raises(ValueError):
+        tuner.search(5, strategy="genetic")
+
+
+def test_study_to_csv(tmp_path):
+    tuner = quadratic_tuner(seed=6)
+    tuner.search(10)
+    path = tuner.study.to_csv(tmp_path / "study.csv")
+    lines = path.read_text().strip().splitlines()
+    assert len(lines) == 11  # header + 10 trials
+    header = lines[0].split(",")
+    assert "score" in header and "x" in header and "k" in header
+    assert any(name.startswith("total_") for name in header)
 
 
 def test_study_table_and_empty_guard():

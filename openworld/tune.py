@@ -7,21 +7,36 @@ predicate). The Tuner then:
 
 1. search(n_trials)  — samples the space broadly, building and simulating a
                        fresh environment per trial (thousands of environments).
+                       strategy="random" (default) or "tpe" (Optuna-backed
+                       Bayesian optimization, for expensive worlds).
 2. refine(n_trials)  — fine-tunes: local perturbation search around the best
                        configuration found so far, re-centering on every
                        improvement (hill climbing).
 
 Every trial is a full, replayable simulation; the study keeps each trial's
 parameters, score, success, and objective totals so the result is an auditable
-table, not just a single winner.
+table (or CSV via study.to_csv), not just a single winner.
+
+Moral configurations are first-class: pass Dial objects directly in the space
+and they are tuned across their declared [minimum, maximum] bounds, so the
+search jointly optimizes world design, agent policy, AND the value weights
+that govern behavior.
+
+Set workers > 1 to evaluate trials concurrently (threads). This pays off for
+LLM-backed worlds, where trials are network-bound; pure-Python symbolic
+rollouts gain little. build() must construct fully independent simulations.
 """
 
 from __future__ import annotations
 
+import csv
 import random
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
+from .objectives import Dial
 from .simulation import Simulation, Trajectory
 
 BuildFn = Callable[[Dict[str, Any]], Simulation]
@@ -84,7 +99,7 @@ class Choice(Param):
 @dataclass
 class Trial:
     number: int
-    stage: str  # "search" or "refine"
+    stage: str  # "search", "tpe", or "refine"
     params: Dict[str, Any]
     score: float
     success: Optional[float]  # mean success over episodes, None if no predicate
@@ -138,6 +153,26 @@ class Study:
             )
         return "\n".join(lines)
 
+    def to_csv(self, path: Union[str, Path]) -> Path:
+        """Write every trial (params, score, success, totals) to a CSV file."""
+        path = Path(path)
+        param_names = sorted({k for t in self.trials for k in t.params})
+        total_names = sorted({k for t in self.trials for k in t.totals})
+        with open(path, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle)
+            writer.writerow(
+                ["number", "stage", "score", "success"]
+                + param_names
+                + [f"total_{n}" for n in total_names]
+            )
+            for t in self.trials:
+                writer.writerow(
+                    [t.number, t.stage, t.score, "" if t.success is None else t.success]
+                    + [t.params.get(n, "") for n in param_names]
+                    + [t.totals.get(n, "") for n in total_names]
+                )
+        return path
+
 
 def _fmt(value: Any) -> str:
     if isinstance(value, float):
@@ -151,34 +186,48 @@ class Tuner:
     build:   params -> Simulation. Construct the whole experiment from the
              sampled parameters: world (and its design), agents (and their
              policy thresholds), objectives, and dial settings.
+    space:   {name: Param or Dial}. A Dial is tuned as a Uniform over its
+             [minimum, maximum] bounds — moral configurations are searchable
+             like any other parameter.
     score:   (trajectory, params) -> float to MAXIMIZE. Defaults to the
              trajectory's dial-weighted 'aggregate' total.
     success: optional (trajectory, params) -> bool predicate defining what
              'solving the task' means; tracked per trial as a solve rate.
     episodes: simulations per trial (use >1 for stochastic worlds).
+    workers: trials evaluated concurrently (threads). >1 helps LLM-backed
+             worlds; build() must produce independent simulations.
     """
 
     def __init__(
         self,
         build: BuildFn,
-        space: Dict[str, Param],
+        space: Dict[str, Union[Param, Dial]],
         score: Optional[ScoreFn] = None,
         success: Optional[SuccessFn] = None,
         steps: int = 10,
         episodes: int = 1,
         seed: Optional[int] = None,
         goal: str = "",
+        workers: int = 1,
     ):
         self.build = build
-        self.space = dict(space)
+        self.space = {
+            name: Uniform(p.minimum, p.maximum) if isinstance(p, Dial) else p
+            for name, p in space.items()
+        }
         self.score = score or (lambda traj, params: traj.totals().get("aggregate", 0.0))
         self.success = success
         self.steps = steps
         self.episodes = episodes
+        self.workers = max(1, workers)
         self.rng = random.Random(seed)
         self.study = Study(goal=goal)
 
-    def _evaluate(self, params: Dict[str, Any], stage: str) -> Trial:
+    # -- evaluation ---------------------------------------------------------
+
+    def _run(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Build and simulate one configuration. No shared-state mutation, so
+        it is safe to call from worker threads."""
         scores: List[float] = []
         successes: List[bool] = []
         last: Optional[Trajectory] = None
@@ -189,24 +238,89 @@ class Tuner:
             if self.success is not None:
                 successes.append(bool(self.success(trajectory, params)))
             last = trajectory
+        return {
+            "score": sum(scores) / len(scores),
+            "success": (sum(successes) / len(successes)) if successes else None,
+            "totals": last.totals(),
+            "final_state": dict(last.final_state),
+        }
+
+    def _record(self, params: Dict[str, Any], stage: str, result: Dict[str, Any]) -> Trial:
         trial = Trial(
             number=len(self.study.trials),
             stage=stage,
             params=dict(params),
-            score=sum(scores) / len(scores),
-            success=(sum(successes) / len(successes)) if successes else None,
-            totals=last.totals(),
-            final_state=dict(last.final_state),
+            **result,
         )
         self.study.trials.append(trial)
         return trial
 
-    def search(self, n_trials: int = 100) -> Study:
-        """Stage 1: broad random sampling across the whole space."""
-        for _ in range(n_trials):
-            params = {name: p.sample(self.rng) for name, p in self.space.items()}
-            self._evaluate(params, "search")
+    def _evaluate(self, params: Dict[str, Any], stage: str) -> Trial:
+        return self._record(params, stage, self._run(params))
+
+    def _evaluate_batch(self, batch: List[Dict[str, Any]], stage: str) -> List[Trial]:
+        """Evaluate a list of parameter dicts, in parallel when workers > 1.
+        Trials are recorded in batch order, keeping studies reproducible."""
+        if self.workers > 1 and len(batch) > 1:
+            with ThreadPoolExecutor(max_workers=self.workers) as pool:
+                results = list(pool.map(self._run, batch))
+        else:
+            results = [self._run(params) for params in batch]
+        return [self._record(p, stage, r) for p, r in zip(batch, results)]
+
+    # -- stage 1: broad search ----------------------------------------------
+
+    def search(self, n_trials: int = 100, strategy: str = "random") -> Study:
+        """Broad sampling across the whole space.
+
+        strategy="random": independent uniform samples (parallelizes freely).
+        strategy="tpe":    Optuna's Tree-structured Parzen Estimator — sample-
+                           efficient Bayesian optimization for expensive
+                           (e.g. live-LLM) worlds. Requires `pip install optuna`.
+        """
+        if strategy == "tpe":
+            return self._search_optuna(n_trials)
+        if strategy != "random":
+            raise ValueError(f"Unknown strategy {strategy!r}; use 'random' or 'tpe'")
+        batch = [
+            {name: p.sample(self.rng) for name, p in self.space.items()}
+            for _ in range(n_trials)
+        ]
+        self._evaluate_batch(batch, "search")
         return self.study
+
+    def _search_optuna(self, n_trials: int) -> Study:
+        try:
+            import optuna
+        except ImportError as exc:
+            raise ImportError(
+                "strategy='tpe' requires Optuna: pip install optuna "
+                "(or pip install 'openworld[optuna]')"
+            ) from exc
+        optuna.logging.set_verbosity(optuna.logging.WARNING)
+        sampler = optuna.samplers.TPESampler(seed=self.rng.randint(0, 2**31 - 1))
+        optuna_study = optuna.create_study(direction="maximize", sampler=sampler)
+
+        def objective(otrial):
+            params: Dict[str, Any] = {}
+            for name, p in self.space.items():
+                if isinstance(p, Uniform):
+                    params[name] = otrial.suggest_float(name, p.low, p.high)
+                elif isinstance(p, IntRange):
+                    params[name] = otrial.suggest_int(name, p.low, p.high)
+                elif isinstance(p, Choice):
+                    params[name] = otrial.suggest_categorical(name, list(p.options))
+                else:
+                    raise TypeError(
+                        f"Cannot map param {name!r} ({type(p).__name__}) to an "
+                        "Optuna distribution; use Uniform, IntRange, or Choice."
+                    )
+            return self._evaluate(params, "tpe").score
+
+        optuna_study.optimize(objective, n_trials=n_trials)
+        return self.study
+
+    # -- stage 2: local fine-tuning -----------------------------------------
 
     def refine(
         self,
@@ -214,21 +328,26 @@ class Tuner:
         around: Optional[Dict[str, Any]] = None,
         scale: float = 0.15,
     ) -> Study:
-        """Stage 2: fine-tune locally around the best configuration.
+        """Fine-tune locally around the best configuration.
 
-        Perturbs each parameter within `scale` of its range and re-centers the
-        search on every new best (hill climbing with random restarts of size
-        `scale`). Call repeatedly with shrinking scale for finer passes.
+        Perturbs each parameter within `scale` of its range and re-centers on
+        every new best (hill climbing). With workers > 1, perturbations are
+        evaluated in generations of `workers` and the center moves to the best
+        of each generation. Call repeatedly with shrinking scale for finer
+        passes.
         """
         center = dict(around or self.study.best.params)
         best_score = self.study.best.score if self.study.trials else float("-inf")
-        for _ in range(n_trials):
-            params = {
-                name: p.perturb(center[name], self.rng, scale)
-                for name, p in self.space.items()
-            }
-            trial = self._evaluate(params, "refine")
-            if trial.score > best_score:
-                best_score = trial.score
-                center = dict(trial.params)
+        remaining = n_trials
+        while remaining > 0:
+            batch_size = min(self.workers, remaining) if self.workers > 1 else 1
+            batch = [
+                {name: p.perturb(center[name], self.rng, scale) for name, p in self.space.items()}
+                for _ in range(batch_size)
+            ]
+            for trial in self._evaluate_batch(batch, "refine"):
+                if trial.score > best_score:
+                    best_score = trial.score
+                    center = dict(trial.params)
+            remaining -= batch_size
         return self.study

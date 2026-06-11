@@ -111,27 +111,36 @@ tuner = Tuner(
     build=build,                       # params -> a fully configured Simulation
     space={
         "protocol":    Choice(["critical_first", "round_robin"]),
-        "stewardship": Uniform(0.0, 1.0),     # the moral filter
+        "stewardship": Dial("stewardship"),   # moral configuration is first-class:
+        "compassion":  Dial("compassion"),    # dials are tuned over their bounds
         "budget":      IntRange(6, 24),       # the world design
     },
     score=score,                       # (trajectory, params) -> float to maximize
     success=solved,                    # (trajectory, params) -> bool: task solved?
     steps=16, seed=7,
+    workers=8,                         # parallel trials (pays off for LLM-backed worlds)
     goal="Treat all criticals, zero deteriorations, within the cost target.",
 )
 
 tuner.search(n_trials=1000)            # stage 1: 1000 simulated environments
+tuner.search(n_trials=50, strategy="tpe")  # or: Optuna TPE for expensive worlds
 tuner.refine(n_trials=200, scale=0.15) # stage 2: hill-climb around the best
 tuner.refine(n_trials=100, scale=0.05) # stage 3: finer pass
 
 print(tuner.study.table(k=10))         # auditable leaderboard, not just a winner
 print(tuner.study.best.params, tuner.study.success_rate())
+tuner.study.to_csv("study.csv")        # full trial history for offline analysis
 ```
 
 Every trial is a full, replayable simulation; the study records each trial's
-parameters, score, solve status, and objective totals. See
+parameters, score, solve status, and objective totals. The `"tpe"` strategy
+uses [Optuna](https://optuna.org)'s Bayesian sampler (`pip install optuna`) —
+worth it when each trial is expensive (live-LLM dynamics); plain random search
+parallelizes freely and is usually enough for fast symbolic worlds. See
 `examples/autotune_triage.py` for a complete run that discovers the ideal
-triage protocol, moral-dial setting, and unit budget for an emergency shift.
+triage protocol, two-dial moral configuration, and unit budget for an
+emergency shift — including the *solving manifold*: the distinct moral
+configurations that all solve the task.
 
 ## Three interchangeable dynamics engines
 

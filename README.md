@@ -132,6 +132,15 @@ python examples/orchard.py            # synthesis + agent loop (falls back to Mo
 python examples/morality_sweep.py     # Pareto frontier over a morality dial
 ```
 
+## Tutorials
+
+Domain walkthroughs in [`tutorials/`](tutorials/README.md), each with a runnable script:
+
+- **[Healthcare](tutorials/healthcare_triage.md)** — ICU triage: synthesized dynamics, safety invariants, outcomes-vs-spend dial
+- **[Legaltech](tutorials/legaltech_settlement.md)** — settlement negotiation: multi-agent simulation, event-triggered objectives
+- **[Finance](tutorials/finance_portfolio.md)** — portfolio rebalancing: scenario replay, growth-vs-risk frontiers
+- **[Software engineering](tutorials/software_engineering_sprint.md)** — sprint planning: generator + critic relay, validating synthesized code against ground truth
+
 ## Testing
 
 The test suite runs entirely offline via `MockLLM`:

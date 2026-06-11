@@ -1,0 +1,459 @@
+% =============================================================================
+%  Task Force for AI Agents in Healthcare — paper template
+%  Derived from the QFIRE paper (qfire/paper/main.tex). This file reproduces the
+%  "house style" (title page, gray abstract panel, caption + figure framing,
+%  policy-card / listings infrastructure) and a generic section skeleton.
+%
+%  HOW TO USE
+%   1. Fill in every  % TODO:  marker (title, authors, abstract, body).
+%   2. Drop figures into  figs/  and tables into  tables/  (\input them).
+%   3. Add citations to  refs.bib .
+%   4. Build with  `make`  (tectonic preferred; falls back to pdflatex+bibtex).
+%   5. \todofig{...} draws a placeholder box so the doc compiles before you have
+%      real figures — replace each with \includegraphics when ready.
+% =============================================================================
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{afterpage}
+\usepackage[section]{placeins}  % keep floats within their section (\FloatBarrier)
+% Float placement: let figures fill more of a page and sit at the top OR bottom,
+% so they land near the text that introduces them.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+% -----------------------------------------------------------------------------
+% Colored, readable rendering for any YAML/DSL/config figure your paper needs.
+% (listings rather than minted, so a tectonic build needs no shell-escape.)
+% Customize the two keyword lists below to your own domain language.
+% -----------------------------------------------------------------------------
+\definecolor{kwblue}{rgb}{0.10,0.20,0.65}
+\definecolor{typepurple}{rgb}{0.50,0.15,0.55}
+\definecolor{strred}{rgb}{0.62,0.12,0.12}
+\definecolor{cmtgreen}{rgb}{0.20,0.45,0.20}
+\lstdefinestyle{housespecyaml}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  framesep=5pt,
+  rulecolor=\color{black!45},
+  columns=fullflexible,
+  breaklines=true,
+  keepspaces=true,
+  showstringspaces=false,
+  alsoletter=_,
+  commentstyle=\color{cmtgreen}\itshape,
+  stringstyle=\color{strred},
+  morecomment=[l]{\#},
+  morestring=[b]",
+  morestring=[b]',
+  keywordstyle=\color{kwblue}\bfseries,
+  keywords={id,scope,pipeline,type,rules,default,mode,threshold},% TODO: your keywords
+  keywordstyle=[2]\color{typepurple}\bfseries,
+  keywords=[2]{regex,judge,allow,deny,ordered},% TODO: your value/type keywords
+}
+\lstdefinestyle{housespecyamlbare}{style=housespecyaml, frame=none,
+  backgroundcolor=\color{white}, xleftmargin=0pt, framexleftmargin=0pt,
+  aboveskip=1pt, belowskip=0pt}
+% Policy "cards": titled, colour-coded panels for declarative artifacts, so a
+% config/spec reads as a designed document rather than one undifferentiated dump.
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings,skins}
+% TikZ for hand-drawn system-architecture figures.
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric,arrows.meta,calc,fit,backgrounds,shadows}
+\definecolor{cardindigo}{HTML}{4F46E5}
+\definecolor{slate}{HTML}{475569}
+\definecolor{amber}{HTML}{D97706}
+\definecolor{cardblue}{HTML}{1D4ED8}
+\definecolor{cardpurple}{HTML}{6D28D9}
+\definecolor{cardteal}{HTML}{0F766E}
+\tcbset{
+  cardcol/.store in=\cardcol, cardcol=cardblue,
+  policycard/.style={
+    enhanced, breakable=false, arc=3pt, boxrule=0.7pt, top=3pt, bottom=3pt,
+    left=7pt, right=7pt, boxsep=1pt, coltitle=white,
+    colframe=\cardcol!60!black, colback=white, colbacktitle=\cardcol,
+    fonttitle=\bfseries\small, drop fuzzy shadow=black!25,
+  },
+}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{ragged2e}
+% Left-aligned (ragged-right) fixed-width column for readable narrow tables.
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+% Allow long monospace identifiers to break at their hyphens.
+\usepackage[htt]{hyphenat}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+% Distinct captions: smaller font, bold + underlined "Figure N:" / "Table N:".
+\usepackage{caption}
+\DeclareCaptionLabelFormat{boldunder}{\underline{\textbf{#1~#2}}}
+\captionsetup{
+  font=small,
+  labelformat=boldunder,
+  labelsep=colon,
+  textfont=normalcolor,
+  skip=6pt,
+}
+
+% Give every \includegraphics a thin black frame so figures read as panels.
+\let\oldincludegraphics\includegraphics
+\renewcommand{\includegraphics}[2][]{%
+  \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.5pt}%
+  \fbox{\oldincludegraphics[#1]{#2}}}
+
+% Placeholder figure box, so the template compiles before real figures exist.
+% Usage: \todofig{4cm}{what this figure will show}
+\newcommand{\todofig}[2]{%
+  \begin{tcolorbox}[colback=black!4, colframe=black!35, arc=3pt, boxrule=0.5pt,
+    halign=center, valign=center, height=#1, width=\linewidth]
+    {\ttfamily\small [FIGURE PLACEHOLDER]\\[4pt] #2}
+  \end{tcolorbox}}
+
+% Headline numbers generated from your results (e.g. by scripts/make_tables.py);
+% \providecommand defaults keep the document compilable before a run, and
+% numbers.tex (\input below) overrides them with the real values.
+\providecommand{\NumPrompts}{0}
+\providecommand{\NumAttacks}{0}
+\providecommand{\NumBenign}{0}
+\IfFileExists{numbers.tex}{\input{numbers.tex}}{}
+
+% Month-and-year stamp for the title page (e.g. "June 2026").
+\newcommand{\monthyeartoday}{%
+  \ifcase\month\or January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\year}
+
+\begin{document}
+
+% ============================================================================
+% Title page: logo top-left, date top-right, centered title, authors with
+% superscript affiliation markers, affiliations row, then a light-gray rounded
+% abstract panel carrying keywords, code/data link, and correspondence.
+% ============================================================================
+\thispagestyle{empty}
+\noindent
+\begin{minipage}[c]{0.55\textwidth}
+  % House logo: Quome (this repo's papers). Swap to figs/taskforce_logo.png if preferred.
+  \raggedright\oldincludegraphics[height=1.05cm]{figs/quome.png}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.4\textwidth}
+  \raggedleft\itshape\large \monthyeartoday
+\end{minipage}
+
+\vspace{1.1em}
+\begin{center}
+  % TODO: Title. Use \\[2pt] to balance lines on the title page.
+  {\LARGE\bfseries Paper Title Goes Here:\\[2pt]
+   A Descriptive Subtitle That States the Contribution\par}
+
+  \vspace{0.9em}
+  % TODO: Authors. Superscripts = affiliation indices; \,* marks the corresponding author.
+  {\large
+   First Author\textsuperscript{1,\,*}\quad
+   Second Author, PhD\textsuperscript{1}\quad
+   Third Author, MD\textsuperscript{2}\par}
+
+  \vspace{0.7em}
+  % TODO: Affiliations.
+  {\small
+   \textsuperscript{1}\,Affiliation One \qquad
+   \textsuperscript{2}\,Affiliation Two\par}
+  \vspace{0.35em}
+  {\small All authors are members of the
+   \emph{Task Force for AI Agents in Healthcare}.\par}
+\end{center}
+
+\vspace{0.5em}
+\begin{tcolorbox}[breakable, enhanced jigsaw, colback=black!4, colframe=black!4,
+  arc=5pt, boxrule=0pt, left=16pt, right=16pt, top=10pt, bottom=10pt]
+\setlength{\parskip}{0pt}
+{\centering\large\bfseries Abstract\par}
+\smallskip
+\fontsize{9.5}{11.3}\selectfont
+% TODO: Abstract (~200-250 words). Recommended arc, mirroring the house style:
+%  context/problem -> the gap existing approaches miss -> what we built (name it
+%  in \textbf{bold}) -> 2-3 headline quantitative results with CIs -> the single
+%  "central result" -> reproducibility/release statement.
+Replace this paragraph with the abstract. State the problem, the gap that motivates
+the work, the system or method you introduce (name it in \textbf{bold}), and the
+headline results with 95\% confidence intervals. Close with the central result and a
+one-sentence reproducibility/release statement.
+
+\medskip
+\noindent\textbf{Keywords:}~% TODO: 5--8 semicolon-separated keywords.
+keyword one; keyword two; keyword three; keyword four; keyword five.
+
+\medskip
+\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/Task-force-for-AI-agents-in-Healthcare/REPO}{\texttt{github.com/Task-force-for-AI-agents-in-Healthcare/REPO}}\\
+\noindent\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:corresponding@example.org}{corresponding@example.org}
+\end{tcolorbox}
+
+\vspace{2pt}
+\noindent{\footnotesize \textsuperscript{*}\,Corresponding author.}
+\vspace{0.3em}
+
+% ============================================================================
+\section{Introduction}
+% Motivate the problem and the threat/clinical context. Cite the landscape
+% \cite{key}. End the opening with why a new control/method is necessary.
+Open with the broad motivation and why this matters now. Introduce the gap your
+work targets and the one-line statement of what you do about it.
+
+\begin{figure}[htb]
+\centering
+% TODO: replace \todofig with \includegraphics[width=0.97\linewidth]{figs/hero.png}
+\todofig{5cm}{``The paper in one figure'' — the single result that captures the contribution.}
+\caption{\textbf{The paper in one figure.} A reader should grasp the central result
+from this figure and its caption alone. State what is compared, what wins, and
+\emph{why}.}
+\label{fig:hero}
+\end{figure}
+
+A review of related work reveals distinct approaches (Table~\ref{tab:related}).
+Summarize the families of prior work and the recurring tension or gap they share.
+
+\paragraph{Contributions.} Our contributions are as follows:
+\begin{enumerate}
+  \item \textbf{The central result.} State the single most important finding in one
+  sentence, with the headline number.
+  \item \textbf{The system/method.} Name what you built and its key design properties.
+  \item \textbf{The benchmark/dataset.} Describe any new dataset or evaluation you
+  build and release, and how results are produced reproducibly.
+  \item \textbf{End-to-end / domain evidence.} State the deployment-level or
+  regulatory evidence that makes the contribution \emph{measured} rather than asserted.
+\end{enumerate}
+
+\paragraph{Positioning in the field.} Place the work against the most relevant recent
+line(s) of research, and state precisely how your deployment point or assumptions differ.
+
+% ============================================================================
+\section{Threat Model and Positioning}
+% State adversary capabilities, defender capabilities/position, and assumptions.
+% For non-security papers, retitle this "Problem Setting" or "Background".
+Describe the adversary (what they control), the defender (network/position and goals),
+and the assumptions. Table~\ref{tab:related} situates this work against representative
+systems.
+
+\begin{table}[htb]\centering\small
+\begin{tabular}{L{3.2cm}L{4.2cm}L{4.2cm}}
+\toprule
+System & Approach & Gap this paper targets \\
+\midrule
+Prior work A~\cite{haarf2026} & one-line summary & what it misses \\
+Prior work B & one-line summary & what it misses \\
+\textbf{This work} & one-line summary & --- \\
+\bottomrule
+\end{tabular}
+\caption{Positioning against representative recent systems. Replace rows with the
+relevant prior work.}
+\label{tab:related}
+\end{table}
+
+% ============================================================================
+\section{System Design}
+% The architecture and its components. Use subsections per major component.
+\subsection{Overview and components}
+Describe the high-level architecture and the components that compose it.
+
+\subsection{A declarative configuration}\label{sec:language}
+% Optional: if your system has a config/DSL/policy language, showcase it with the
+% policy-card infrastructure. Example card (delete if unused):
+\begin{figure}[htb]\centering
+\begin{tcolorbox}[policycard, cardcol=cardblue, title=Example policy artifact,
+  width=0.8\linewidth]
+\begin{lstlisting}[style=housespecyamlbare]
+id: example_rule
+scope: "a declared natural-language purpose"
+pipeline:
+  - type: regex
+    rules: [ "pattern-a", "pattern-b" ]
+  - type: judge
+    threshold: 0.5
+    mode: deny
+default: allow
+\end{lstlisting}
+\end{tcolorbox}
+\caption{A declarative artifact rendered as a titled policy card. Replace with your
+own config, or delete this subsection if your system has no DSL.}
+\label{fig:spec}
+\end{figure}
+
+\subsection{Processing / concurrency model}
+Describe how inputs are processed (e.g. the execution model, ordering, short-circuiting,
+scaling). Reference any throughput/scaling figure.
+
+\subsection{Implementation}
+Language, key dependencies, lines of code, and what ships in the released artifact.
+
+% ============================================================================
+\section{Experimental Setup}
+\paragraph{Data.} Describe the public datasets/corpora and their sizes (e.g.
+\NumPrompts{} items).
+
+\paragraph{New benchmark.}\label{sec:benchmark} If you build and release a new dataset,
+describe its construction, size, labeling, and why existing corpora were insufficient.
+
+\paragraph{Baselines.} List the baselines and exactly how they were run for an
+apples-to-apples comparison.
+
+\paragraph{Metrics.} Define the positive class and report
+precision/recall/F1 with 95\% Wilson confidence intervals, plus any
+domain-specific metrics (latency percentiles, AUC, etc.).
+
+\paragraph{Calibration.} State how thresholds/operating points were chosen, and on
+what split, to avoid test-set tuning.
+
+\paragraph{Hardware and software.} Record the machine, model snapshots, and seeds so
+results are reproducible.
+
+\paragraph{What the inputs look like.} Ground the corpora with a few representative
+examples (Table~\ref{tab:examples}).
+
+\begin{table}[htb]\centering\small
+\begin{tabular}{L{2.4cm}L{8.0cm}c}
+\toprule
+Category & Example input (verbatim; synthetic identifiers) & Label \\
+\midrule
+category one & ``A representative item from your corpus.'' & attack \\
+category two & ``A representative benign item.'' & benign \\
+\bottomrule
+\end{tabular}
+\caption{Representative inputs from the evaluation corpora. Replace with your own.}
+\label{tab:examples}
+\end{table}
+
+% ============================================================================
+\section{Results}\label{sec:results}
+\subsection{Head-to-head comparison}
+The primary comparison. Reference Table~\ref{tab:main} and the supporting figure.
+
+\begin{table}[htb]\centering\small
+% Tip: generate this from results JSON (e.g. \input{tables/main.tex}); the inline
+% version below is a stub showing the expected columns.
+\begin{tabular}{lcccc}
+\toprule
+Method & Precision & Recall & F1 & Latency p95 (ms) \\
+\midrule
+Baseline A & 0.00 & 0.00 & 0.00 & 0 \\
+Baseline B & 0.00 & 0.00 & 0.00 & 0 \\
+\textbf{This work} & 0.00 & 0.00 & \textbf{0.00} & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Head-to-head results with 95\% Wilson confidence intervals (omitted in this
+stub). Replace with your generated table.}
+\label{tab:main}
+\end{table}
+
+\subsection{The central result}\label{sec:central-result}
+The headline finding, stated and defended. Explain \emph{why} the effect occurs, not
+just that it does.
+
+\subsection{Supporting ablations}
+\subsubsection{Ablation one}\label{sec:abl1}
+What you removed/varied, and the effect on the metric.
+
+\subsubsection{Ablation two}\label{sec:abl2}
+A second controlled variation.
+
+\subsection{Robustness}\label{sec:robustness}
+Adaptive/adversarial pressure, stress tests, or sensitivity analyses.
+
+\subsection{External validity}\label{sec:external}
+Transfer to other datasets/scales, and threshold stability.
+
+\subsection{End-to-end evaluation}\label{sec:endtoend}
+The deployment-level result (e.g. harm-reduction at a stated utility cost).
+
+% ============================================================================
+\section{Discussion and Limitations}
+\paragraph{Interpretation.} What the results mean and why the design choices matter.
+
+\paragraph{Relationship to HAARF.} Map each control/finding to the relevant HAARF
+sub-controls so the contribution is grounded in the framework~\cite{haarf2026}.
+
+\paragraph{Limitations.} State the honest limitations and the threats to validity.
+
+% ============================================================================
+\section{Conclusion}
+Restate the central result and its implication in a few sentences, and point to the
+next paper/step.
+
+% ============================================================================
+% Back matter: declarations required by most journals/preprint servers. Keep the
+% ones your venue requires; edit each to reflect what you actually did.
+% ============================================================================
+\section*{Declaration of generative AI use}
+% Sample text — EDIT to reflect your actual usage. Aligns with ICMJE/COPE guidance:
+% disclose the tool, the purpose, and that the authors reviewed and take full
+% responsibility; AI tools do not meet authorship criteria and are not listed as authors.
+During the preparation of this work the authors used % TODO: tool & version, e.g.
+\emph{[AI tool name and version]} for % TODO: purpose, e.g.
+[copy-editing and language refinement / drafting boilerplate / generating and
+debugging analysis or figure-plotting code / brainstorming structure].
+After using this tool, the authors reviewed and edited the content as needed and take
+full responsibility for the content of the publication. No generative-AI system was
+used to % TODO: state exclusions, e.g.
+[generate or fabricate data, interpret results, or produce clinical conclusions], and
+no AI tool is listed as an author or co-author, as such tools do not satisfy authorship
+criteria.
+% If no generative AI was used, replace the paragraph above with:
+% ``The authors declare that no generative AI tools were used in the preparation of
+%   this manuscript.''
+
+\section*{Data and code availability}
+% TODO: state where code, datasets, and result artifacts are released.
+All code, datasets, and scripts are available at
+\href{https://github.com/Task-force-for-AI-agents-in-Healthcare/REPO}{\nolinkurl{github.com/Task-force-for-AI-agents-in-Healthcare/REPO}}.
+All patient data are synthetic; no real protected health information was used.
+
+\section*{Author contributions}
+% TODO: e.g. CRediT roles. Author initials with contributions.
+[A.B.] conceived the study; [C.D.] implemented the system; [E.F.] ran the experiments;
+all authors reviewed and approved the manuscript.
+
+\section*{Competing interests}
+% TODO: declare or state none.
+The authors declare no competing interests.
+
+\section*{Funding}
+% TODO: declare funding sources or state none.
+This work received no specific external funding.
+
+% ============================================================================
+\appendix
+\section{Detailed result tables}\label{app:tables}
+% \input{tables/main.tex}  % e.g. tables generated by scripts/make_tables.py
+The full numeric tables behind the figures in \S\ref{sec:results}.
+
+\section{Supplementary figures}\label{app:figs}
+Additional figures referenced from the main text.
+
+\section{Example prompts and failure cases}\label{app:examples}
+Concrete, verbatim examples (with synthetic identifiers) that make the central result
+tangible — ideally the cases your method handles and baselines miss.
+
+\section{Reproducibility}
+State the single build command and how every table/figure regenerates from source
+(seed, model and data versions embedded in each artifact).
+
+% Flush every pending appendix float before the bibliography.
+\clearpage
+
+\bibliographystyle{plain}
+\bibliography{refs}
+\end{document}

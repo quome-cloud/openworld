@@ -24,6 +24,8 @@ EXPERIMENTS = [
     "e07_judge_alignment", "e08_morality_pareto", "e09_tuning_efficiency",
     "e10_ood_generalization", "e11_multiworld_fidelity",
     "e12_learned_baseline", "e13_judge_controls", "e15_judge_robustness",
+    "e16_cross_model", "e17_judge_power", "e18_repair_loop",
+    "e19_scale_ladder",
 ]
 
 
@@ -116,13 +118,13 @@ def fig_learned(e12):
     plt.close(fig)
 
 
-def fig_judge(e13):
-    """Controlled selection comparison on shared candidate sets."""
+def fig_judge(e17_pooled):
+    """Controlled selection comparison, pooled across all paired rounds."""
     fig, ax = plt.subplots(figsize=(6.4, 3.4))
     order = ["first", "random", "judge", "oracle"]
     labels = ["first\ncandidate", "random\nof 3", "judge\nof 3", "oracle\nof 3\n(ceiling)"]
     colors = [SLATE, SLATE, TEAL, "#9CA3AF"]
-    strategies = e13["strategies"]
+    strategies = e17_pooled["strategies"]
     x = list(range(len(order)))
     for i, name in enumerate(order):
         s = strategies[name]
@@ -133,7 +135,7 @@ def fig_judge(e13):
         ax.text(i, min(s["rate"] + 0.1, 1.02), f"{s['rate']:.0%}", ha="center", fontsize=9)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
-    ax.set_ylabel(f"Solve rate over {e13['n_rounds']} paired rounds")
+    ax.set_ylabel(f"Solve rate over {e17_pooled['n_rounds']} paired rounds")
     ax.set_ylim(0, 1.12)
     ax.grid(alpha=0.25, axis="y")
     fig.tight_layout()
@@ -256,16 +258,67 @@ def table_judge_controls(e13):
     )
 
 
-def table_synthesis(e02):
+def table_synthesis(e02, e16):
+    """Synthesis reliability across model scale AND family (E2 + E16)."""
+    families = {"qwen2.5:7b": "Qwen", "qwen2.5:3b": "Qwen",
+                "llama3.1:8b": "Llama", "gemma2:9b": "Gemma"}
     rows = []
     for s in e02["summary"]:
         rows.append(
-            f"{s['model']} & {s['n']} & {pct(s['acceptance_rate'])} "
-            f"{ci_str(s['acceptance_ci'])} & {s['mean_probe_accuracy_accepted']:.2f} \\\\"
+            f"{s['model']} ({families.get(s['model'], '?')}) & {s['n']} & "
+            f"{pct(s['acceptance_rate'])} {ci_str(s['acceptance_ci'])} & "
+            f"{s['mean_probe_accuracy_accepted']:.2f} & --- \\\\"
+        )
+    for s in e16["summary"]:
+        rows.append(
+            f"{s['model']} ({families.get(s['model'], '?')}) & {s['n']} & "
+            f"{pct(s['acceptance_rate'])} {ci_str(s['acceptance_ci'])} & "
+            f"{s['mean_probe_accuracy_accepted']:.2f} & {s['mean_wall_seconds']:.0f}s \\\\"
         )
     (TABLES / "synthesis.tex").write_text(
+        "\\begin{tabular}{lcccc}\n\\toprule\n"
+        "Generator (family) & Runs & Verified acceptance (95\\% CI) & "
+        "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
+def table_ladder(e19):
+    order = ["code_synthesized", "delta_mlp_strong", "mlp", "knn1", "llm_next_state"]
+    labels = {
+        "code_synthesized": "\\textbf{Synthesized code (0 transitions)}",
+        "delta_mlp_strong": "Delta-MLP, 128h (10k transitions)",
+        "mlp": "MLP, 64h (10k transitions)",
+        "knn1": "1-NN memorizer (10k transitions)",
+        "llm_next_state": "LLM next-state (7B, 0 transitions)",
+    }
+    scales = ["1x", "10x", "100x"]
+    by = {(r["engine"], r["scale"]): r for r in e19["rows"]}
+    rows = []
+    for engine in order:
+        cells = " & ".join(
+            f"{by[(engine, s)]['exact']}/{by[(engine, s)]['n']}" for s in scales)
+        rows.append(f"{labels[engine]} & {cells} \\\\")
+    (TABLES / "ladder.tex").write_text(
         "\\begin{tabular}{lccc}\n\\toprule\n"
-        "Generator model & Runs & Verified acceptance (95\\% CI) & Probe accuracy of accepted \\\\\n"
+        "Engine & 1$\\times$ & 10$\\times$ & 100$\\times$ \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
+def table_repair(e18):
+    rows = []
+    for s in e18["summary"]:
+        label = ("Filter only (max\\_iters=1)" if s["max_iters"] == 1
+                 else "Filter + repair loop (max\\_iters=4)")
+        rows.append(
+            f"{label} & {pct(s['acceptance_rate'])} & "
+            f"{s['mean_probe_accuracy_accepted']:.2f} & "
+            f"{s['mean_probe_accuracy_all']:.2f} \\\\"
+        )
+    (TABLES / "repair.tex").write_text(
+        "\\begin{tabular}{lccc}\n\\toprule\n"
+        "Regime & Acceptance & Probe acc.\\ (accepted) & Probe acc.\\ (all runs) \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     )
 
@@ -292,6 +345,8 @@ def numbers_tex(d):
     e07, e08, e09 = d["e07_judge_alignment"], d["e08_morality_pareto"], d["e09_tuning_efficiency"]
     e10, e11, e12 = d["e10_ood_generalization"], d["e11_multiworld_fidelity"], d["e12_learned_baseline"]
     e13, e15 = d["e13_judge_controls"], d["e15_judge_robustness"]
+    e16, e17, e18, e19 = (d["e16_cross_model"], d["e17_judge_power"],
+                          d["e18_repair_loop"], d["e19_scale_ladder"])
 
     engines01 = {e["engine"]: e for e in e01["engines"]}
     speed = {e["engine"]: e for e in e04["engines"]}
@@ -341,7 +396,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "14"),
+        macro("NumExperiments", "18"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -378,6 +433,49 @@ def numbers_tex(d):
         macro("RubricParaRho", f"{e15['results']['paraphrase']['spearman']:.2f}"),
         macro("RubricParaP", f"{e15['results']['paraphrase']['permutation_p']:.4f}"),
     ]
+    # E16 cross-family synthesis
+    e16s = {s["model"]: s for s in e16["summary"]}
+    lines += [
+        macro("LlamaAccept", pct(e16s["llama3.1:8b"]["acceptance_rate"])),
+        macro("LlamaProbe", f"{e16s['llama3.1:8b']['mean_probe_accuracy_accepted']:.2f}"),
+        macro("LlamaWall", f"{e16s['llama3.1:8b']['mean_wall_seconds']:.0f}"),
+        macro("GemmaAccept", pct(e16s["gemma2:9b"]["acceptance_rate"])),
+        macro("GemmaProbe", f"{e16s['gemma2:9b']['mean_probe_accuracy_accepted']:.2f}"),
+        macro("GemmaWall", f"{e16s['gemma2:9b']['mean_wall_seconds']:.0f}"),
+    ]
+    # E17 pooled judge power
+    pooled = e17["pooled"]
+    pm = pooled["mcnemar_judge_vs_random"]
+    pb = pooled["position_bias"]
+    lines += [
+        macro("PooledRounds", str(pooled["n_rounds"])),
+        macro("PooledFirst", pct(pooled["strategies"]["first"]["rate"])),
+        macro("PooledRandom", pct(pooled["strategies"]["random"]["rate"])),
+        macro("PooledJudge", pct(pooled["strategies"]["judge"]["rate"])),
+        macro("PooledOracle", pct(pooled["strategies"]["oracle"]["rate"])),
+        macro("PooledMcNemarP", f"{pm['p']:.3f}"),
+        macro("PooledMcNemarB", str(pm["b"])),
+        macro("PooledMcNemarC", str(pm["c"])),
+        macro("PooledFwdAcc", pct(pb["judge_accuracy_forward"])),
+        macro("PooledRevAcc", pct(pb["judge_accuracy_reversed"])),
+        macro("PooledConsistency", pct(pb["order_consistency"])),
+    ]
+    # E18 repair loop
+    e18s = {s["max_iters"]: s for s in e18["summary"]}
+    lines += [
+        macro("FilterAccept", pct(e18s[1]["acceptance_rate"])),
+        macro("FilterProbeAccepted", f"{e18s[1]['mean_probe_accuracy_accepted']:.2f}"),
+        macro("LoopAccept", pct(e18s[4]["acceptance_rate"])),
+        macro("LoopProbeAccepted", f"{e18s[4]['mean_probe_accuracy_accepted']:.2f}"),
+    ]
+    # E19 scale ladder
+    ladder = {(r["engine"], r["scale"]): r for r in e19["rows"]}
+    lines += [
+        macro("CodeHundredX", pct(ladder[("code_synthesized", "100x")]["rate"])),
+        macro("DeltaMLPInDist", pct(ladder[("delta_mlp_strong", "1x")]["rate"])),
+        macro("DeltaMLPHundredX", pct(ladder[("delta_mlp_strong", "100x")]["rate"])),
+        macro("LLMHundredX", pct(ladder[("llm_next_state", "100x")]["rate"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -387,14 +485,16 @@ def main():
     data = {name: load(name) for name in EXPERIMENTS}
     fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
     fig_learned(data["e12_learned_baseline"])
-    fig_judge(data["e13_judge_controls"])
+    fig_judge(data["e17_judge_power"]["pooled"])
     fig_pareto(data["e08_morality_pareto"])
     fig_verifier(data["e03_verifier_ablation"])
     table_main(data["e01_fidelity"], data["e04_rollout_speed"], data["e10_ood_generalization"])
     table_fidelity(data["e11_multiworld_fidelity"])
     table_judge_controls(data["e13_judge_controls"])
-    table_synthesis(data["e02_synthesis"])
+    table_synthesis(data["e02_synthesis"], data["e16_cross_model"])
     table_tuning(data["e09_tuning_efficiency"])
+    table_ladder(data["e19_scale_ladder"])
+    table_repair(data["e18_repair_loop"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

@@ -162,13 +162,17 @@ out-of-distribution scale, where the synthesized program, built from rule
 text alone with zero transitions, scores \CodeOODRate; rollouts run
 $\sim$\SpeedRatio$\times$ faster than LLM prediction; verification gates
 raise the semantic correctness of a weak generator's accepted dynamics from
-\VerifierNoneAcc{} to \VerifierCriticAcc; and on a \NumTasks-task
-program-repair benchmark with paired controls, judge selection solves
-\CtrlJudge{} of rounds against \CtrlRandom{} for random selection over the
-same candidates---a directional margin that does not reach significance at
-this sample size (exact McNemar $p=\McNemarP$)---while picking a passing
-candidate \JudgeFwdAcc{} of the time under either candidate order, near the
-\CtrlOracle{} oracle ceiling. The central result: a training-free, verified,
+\VerifierNoneAcc{} to \VerifierCriticAcc, with an ablation separating the
+filter (quality) from the repair loop (throughput); the synthesis result
+replicates across model families (Llama-3.1-8B: \LlamaProbe{} probe accuracy,
+Gemma-2-9B: \GemmaProbe, both 100\% verified acceptance at 4--9\,s per
+world); and on a \NumTasks-task program-repair benchmark with paired
+controls pooled over \PooledRounds{} rounds, judge selection solves
+\PooledJudge{} against \PooledRandom{} for random selection over the same
+candidates---a margin that sharpened with sample size but remains marginal
+(exact McNemar $p=\PooledMcNemarP$)---while picking a passing candidate
+$\sim$85\% of the time under either candidate order, near the \PooledOracle{}
+oracle ceiling. The central result: a training-free, verified,
 symbolic world model on consumer hardware eliminates compounding rollout
 error---the defining failure mode of learned world models---at zero training
 cost. All code, experiments, and this manuscript regenerate from a single
@@ -271,14 +275,17 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   all regenerable from one repository.
   \item \textbf{Measured guardrails.} Verification and judging are evaluated,
   not assumed: ablations isolate what each verification gate buys ($+0.24$
-  absolute probe accuracy over blind acceptance); against paired controls on
-  shared candidates, judge selection exceeds random selection directionally
-  (\CtrlJudge{} vs \CtrlRandom, exact McNemar $p=\McNemarP$) and approaches
-  the \CtrlOracle{} oracle ceiling, with a position-bias audit showing
-  order-sensitive choices but order-stable accuracy; judge rubric scores
-  track a ground-truth objective at Spearman $\rho=\JudgeSpearman$
-  ($p=\RubricOrigP$, permutation test), directionally stable under rubric
-  paraphrase ($\rho=\RubricParaRho$, $p=\RubricParaP$).
+  absolute probe accuracy over blind acceptance) and decompose the mechanism
+  (the filter holds quality, the repair loop converts \FilterAccept{}
+  acceptance into \LoopAccept); against paired controls on shared candidates
+  pooled over \PooledRounds{} rounds, judge selection exceeds random
+  selection (\PooledJudge{} vs \PooledRandom, exact McNemar
+  $p=\PooledMcNemarP$, marginal) and approaches the \PooledOracle{} oracle
+  ceiling, with a position-bias audit showing order-sensitive choices but
+  order-stable accuracy; judge rubric scores track a ground-truth objective
+  at Spearman $\rho=\JudgeSpearman$ ($p=\RubricOrigP$, permutation test),
+  directionally stable under rubric paraphrase ($\rho=\RubricParaRho$,
+  $p=\RubricParaP$).
 \end{enumerate}
 
 \paragraph{Positioning in the field.} \openworld{} operationalizes the
@@ -438,10 +445,12 @@ and failing-test feedback enters the state for the next attempt.
 
 \paragraph{Models and hardware.} All experiments use local models served by
 Ollama on an Apple-silicon laptop: \texttt{qwen2.5:7b} (generator, judge,
-critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3), and
-\texttt{qwen2.5:1.5b} (repair agent in E5/E6/E13). The trained baselines in
-E12 are plain numpy models. No cloud APIs, no fine-tuning, and no training
-compute beyond E12's seconds-scale baseline fitting.
+critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3),
+\texttt{qwen2.5:1.5b} (repair agent in E5/E6/E13/E17), and---for
+cross-family replication (E16)---\texttt{llama3.1:8b} (Meta) and
+\texttt{gemma2:9b} (Google). The trained baselines in E12/E19 are plain
+numpy models. No cloud APIs, no fine-tuning, and no training compute beyond
+the baselines' seconds-scale fitting.
 
 \paragraph{Baselines.} The learned-dynamics family is represented two ways.
 (i) \texttt{LLMTransition}: the same backbone predicting each next state
@@ -474,10 +483,15 @@ attempts passed every gate, leaving nothing for conditions to discriminate;
 failing-test feedback in the state, these archetypes are easy for capable
 models. The capability ladder (1.5B: 70\%, 3B and 7B: 100\% on the original
 suite) is itself a finding. Experiments E11--E15, the expanded \NumTasks-task
-benchmark, and the statistical tests were added in revision in response to an
-internal adversarial review (included in the repository at
-\texttt{docs/review/}), which demanded a trained baseline, multi-world
-replication, paired judge controls, and significance testing.
+benchmark, and the statistical tests were added in a first revision in
+response to an internal adversarial review (both review rounds ship in the
+repository at \texttt{docs/review/}), which demanded a trained baseline,
+multi-world replication, paired judge controls, and significance testing; a
+second review round demanded cross-family replication (E16), a powered judge
+comparison (E17), a filter-vs-repair decomposition (E18), and a scale ladder
+with a stronger learned baseline (E19). Experiment numbering preserves
+provenance; E14 was absorbed into the benchmark expansion and the number is
+retired.
 
 % ============================================================================
 \section{Results}\label{sec:results}
@@ -541,6 +555,18 @@ can be \emph{memorized} without learning the rules, which is precisely why
 branch-covering probes and OOD evaluation, not rollout agreement alone, are
 the right instruments for dynamics quality.
 
+E19 extends both axes (Table~\ref{tab:ladder-app}). A \emph{stronger}
+learned baseline---delta-state target, double capacity, lr-decayed
+training---does not improve on the original MLP (\DeltaMLPInDist{} in
+distribution) and collapses identically out of distribution
+(\DeltaMLPHundredX{} at both $10\times$ and $100\times$): the failure is not
+under-tuning but extrapolation itself. Across a 1$\times$/10$\times$/100$\times$
+scale ladder the synthesized program is exact everywhere
+(\CodeHundredX{} at $100\times$); the LLM next-state engine is roughly
+scale-\emph{insensitive} but uniformly unreliable ($\sim$40--50\% at every
+scale)---it does not degrade OOD because it was never anchored to the
+distribution in the first place.
+
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.97\linewidth]{figs/learned.png}
@@ -580,34 +606,48 @@ a branch-covering probe suite.}
 \label{fig:verifier}
 \end{figure}
 
-\subsubsection{Synthesis reliability across model scale}\label{sec:abl2}
-E2 attempts compilation five times per world per model. Both backbones reach
-\SynthAcceptBig{}/\SynthAcceptSmall{} verified acceptance within four
-iterations, but semantic quality separates them: accepted 7B code matches
-ground-truth probes at \SynthProbeBig{} versus 0.87 for the 3B generator
-(Table~\ref{tab:synthesis-app}, Appendix~\ref{app:tables}). Verification
-guarantees executable, invariant-respecting code---not rule-perfect code;
-model capability still buys semantic fidelity.
+\subsubsection{Synthesis reliability across model scale and family}\label{sec:abl2}
+E2 attempts compilation five times per world per model; E16 replicates the
+protocol with generators from two other vendors
+(Table~\ref{tab:synthesis-app}, Appendix~\ref{app:tables}). Every backbone
+reaches 100\% verified acceptance within four iterations, but semantic
+quality varies: accepted 7B Qwen code matches ground-truth probes at
+\SynthProbeBig{} versus 0.87 for the 3B generator, while Llama-3.1-8B reaches
+\LlamaProbe{} and Gemma-2-9B is \emph{rule-perfect on every attempt}
+(\GemmaProbe), at mean synthesis costs of \LlamaWall\,s and \GemmaWall\,s per
+world. The paradigm is not a Qwen artifact: three model families synthesize
+verified dynamics in seconds on one laptop. Verification guarantees
+executable, invariant-respecting code---not rule-perfect code; generator
+capability still buys semantic fidelity.
+
+E18 decomposes \emph{what verification does}
+(Table~\ref{tab:repair-app}): with the same full gate, accepting only
+first-shot candidates (no repair loop) accepts \FilterAccept{} of runs at
+probe accuracy \FilterProbeAccepted{} among accepted, while enabling the
+feedback loop lifts acceptance to \LoopAccept{} at \LoopProbeAccepted.
+The filter is what protects quality; the repair loop is what recovers
+throughput---it converts rejected generators into accepted ones without
+degrading what gets through.
 
 \subsection{Agents-as-a-judge}\label{sec:judge-results}
-E13 is the controlled comparison (Figure~\ref{fig:judge},
-Table~\ref{tab:judge-controls}): for each of \CtrlRounds{} paired rounds
-(\NumTasks{} tasks $\times$ 3 proposer seeds), the 1.5B proposer samples
-three candidate patches \emph{once}, and four selection strategies act on the
-same set. Taking the first candidate solves \CtrlFirst{} of rounds; random
-selection---which isolates the best-of-3 diversity effect---solves
-\CtrlRandom; the 7B judge solves \CtrlJudge, against the \CtrlOracle{} oracle
-ceiling. The judge-vs-random difference on paired rounds is \McNemarB{}
-versus \McNemarC{} discordant outcomes: directionally in the judge's favor
-but \emph{not significant} at this sample size (exact McNemar $p=\McNemarP$);
-the judge recovers roughly half of the random-to-oracle gap, and a larger
-benchmark is needed to bound the effect tightly. The position-bias audit is
-the sharper finding: asked again with candidates in reversed order, the
-judge's raw choices match on only \OrderConsistency{} of rounds
-(\OrderConsistencyDisc{} on the \DiscRounds{} discriminative rounds where
-some but not all candidates pass)---yet its \emph{accuracy} is order-stable,
-picking a passing candidate \JudgeFwdAcc{} of the time forward and
-\JudgeRevAcc{} reversed. Most inconsistency falls on rounds where several
+E13/E17 form the controlled comparison (Figure~\ref{fig:judge},
+Table~\ref{tab:judge-controls}): for each paired round, the 1.5B proposer
+samples three candidate patches \emph{once}, and four selection strategies
+act on the same set. E13's 60 rounds put the judge at \CtrlJudge{} versus
+\CtrlRandom{} for random selection (McNemar $p=\McNemarP$); the round-2
+review asked for power, so E17 tripled the proposer seeds. Pooled over
+\PooledRounds{} rounds (\NumTasks{} tasks $\times$ 6 seeds): first candidate
+\PooledFirst, random \PooledRandom, judge \PooledJudge, oracle ceiling
+\PooledOracle. The judge-vs-random margin replicated in direction and
+sharpened---\PooledMcNemarB{} versus \PooledMcNemarC{} discordant rounds,
+exact McNemar $p=\PooledMcNemarP$---but remains short of the conventional
+threshold; the judge recovers roughly half of the random-to-oracle gap, and
+we report the effect as estimated, not established. The position-bias audit
+is the sharper finding: asked again with candidates in reversed order, the
+judge's raw choices match on only \PooledConsistency{} of pooled rounds---yet
+its \emph{accuracy} is order-stable, picking a passing candidate
+\PooledFwdAcc{} of the time forward and \PooledRevAcc{} reversed on
+discriminative rounds. Most inconsistency falls on rounds where several
 candidates pass and the choice is inconsequential; the bias is real, but it
 costs correctness little here.
 
@@ -630,11 +670,11 @@ verification.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.62\linewidth]{figs/judge.png}
-\caption{\textbf{Controlled judge-selection comparison (E13).} Four selection
-strategies over the same three 1.5B candidate patches per round,
-\CtrlRounds{} paired rounds; whiskers are 95\% Wilson intervals. Random-of-3
-isolates the diversity effect; the judge's margin over it estimates the value
-of judgment (directional; McNemar $p=\McNemarP$).}
+\caption{\textbf{Controlled judge-selection comparison (E13+E17, pooled).}
+Four selection strategies over the same three 1.5B candidate patches per
+round, \PooledRounds{} paired rounds; whiskers are 95\% Wilson intervals.
+Random-of-3 isolates the diversity effect; the judge's margin over it
+estimates the value of judgment (McNemar $p=\PooledMcNemarP$, marginal).}
 \label{fig:judge}
 \end{figure}
 
@@ -719,14 +759,22 @@ within the symbolic regime, and neither the LLM proxy nor the numpy
 baselines is a trained Dreamer. (ii) Scale: twenty repair tasks and three
 worlds; paired tests sharpen the comparisons, but the benchmark remains an
 archetype suite, not HumanEval~\cite{humaneval2021}, and 3B+ agents saturate
-it. (iii) Single model family (Qwen2.5) and single machine. (iv) Judges:
-selection accuracy and order-consistency are measured but imperfect, and
-rubric grading showed compression; judge verdicts should gate, not replace,
-programmatic verification. (v) The sandbox is best-effort isolation against
-accident, not an adversarial security boundary. (vi) Several experiments
-were redesigned after pilots and internal review (E3, E5/E6, E11--E15); the
-pilots' saturation results are reported alongside the final protocol, and the
-review itself ships in the repository.
+it. Moreover the defect archetypes are classic and plausibly present in
+pretraining data: agent solve rates should not be read as measurements of
+debugging skill---the world-model claims are unaffected, since the
+environment executes exactly regardless of what the agent has memorized.
+(iii) Synthesis replicates across three model families (E16), but the judge,
+critic, and repair-agent roles remain Qwen-only, and all experiments ran on
+one machine. (iv) Judges: selection accuracy and order-consistency are
+measured but imperfect, the pooled selection margin is marginal
+($p=\PooledMcNemarP$), and rubric grading showed compression; judge verdicts
+should gate, not replace, programmatic verification. (v) The sandbox is
+best-effort isolation against accident, not an adversarial security
+boundary (generated patches twice defeated in-process timeouts before the
+fork-based runner; see the repository history). (vi) Several experiments
+were redesigned after pilots and two internal review rounds (E3, E5/E6,
+E11--E19); pilot saturation results are reported alongside the final
+protocols, and both reviews ship in the repository.
 
 % ============================================================================
 \section{Conclusion}
@@ -776,10 +824,25 @@ This work received no specific external funding.
 
 \begin{table}[htb]\centering\small
 \input{tables/synthesis.tex}
-\caption{E2: synthesis reliability by generator scale. Five compilation
-attempts per world (sprint, orchard, triage), maximum four verify--repair
-iterations each.}
+\caption{E2 + E16: synthesis reliability by generator scale and family.
+Qwen rows: five compilation attempts per world; Llama/Gemma rows: three per
+world. Maximum four verify--repair iterations each; wall-clock includes all
+iterations.}
 \label{tab:synthesis-app}
+\end{table}
+
+\begin{table}[htb]\centering\small
+\input{tables/repair.tex}
+\caption{E18: filter-vs-repair decomposition of the full verification gate
+(3B generator, eight paired high-temperature attempts per regime).}
+\label{tab:repair-app}
+\end{table}
+
+\begin{table}[htb]\centering\small
+\input{tables/ladder.tex}
+\caption{E19: exact transition accuracy on the branch-covering probe suite
+across a 1$\times$/10$\times$/100$\times$ scale ladder.}
+\label{tab:ladder-app}
 \end{table}
 
 \begin{table}[htb]\centering\small

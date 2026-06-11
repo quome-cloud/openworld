@@ -1,0 +1,121 @@
+{
+  "generator": "qwen2.5:3b",
+  "attempts": 8,
+  "summary": [
+    {
+      "max_iters": 1,
+      "n": 8,
+      "acceptance_rate": 0.625,
+      "mean_probe_accuracy_all": 0.3875,
+      "mean_probe_accuracy_accepted": 0.62
+    },
+    {
+      "max_iters": 4,
+      "n": 8,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy_all": 0.65,
+      "mean_probe_accuracy_accepted": 0.65
+    }
+  ],
+  "runs": [
+    {
+      "max_iters": 1,
+      "attempt": 0,
+      "accepted": false,
+      "probe_accuracy": 0.0
+    },
+    {
+      "max_iters": 1,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "max_iters": 1,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 1,
+      "attempt": 3,
+      "accepted": false,
+      "probe_accuracy": 0.0
+    },
+    {
+      "max_iters": 1,
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 1,
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "max_iters": 1,
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 1,
+      "attempt": 7,
+      "accepted": false,
+      "probe_accuracy": 0.0
+    },
+    {
+      "max_iters": 4,
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    },
+    {
+      "max_iters": 4,
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.8
+    },
+    {
+      "max_iters": 4,
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.3
+    },
+    {
+      "max_iters": 4,
+      "attempt": 3,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 4,
+      "attempt": 4,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 4,
+      "attempt": 5,
+      "accepted": true,
+      "probe_accuracy": 0.5
+    },
+    {
+      "max_iters": 4,
+      "attempt": 6,
+      "accepted": true,
+      "probe_accuracy": 0.6
+    },
+    {
+      "max_iters": 4,
+      "attempt": 7,
+      "accepted": true,
+      "probe_accuracy": 0.9
+    }
+  ],
+  "experiment": "e18_repair_loop",
+  "timestamp": "2026-06-11T12:48:20",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -1,0 +1,197 @@
+{
+  "attempts_per_cell": 3,
+  "max_iters": 4,
+  "summary": [
+    {
+      "model": "llama3.1:8b",
+      "n": 9,
+      "acceptance_rate": 1.0,
+      "acceptance_ci": [
+        0.7008472464490407,
+        1.0
+      ],
+      "mean_probe_accuracy_accepted": 0.8462962962962963,
+      "mean_iterations": 1.7777777777777777,
+      "mean_wall_seconds": 9.345725083111112
+    },
+    {
+      "model": "gemma2:9b",
+      "n": 9,
+      "acceptance_rate": 1.0,
+      "acceptance_ci": [
+        0.7008472464490407,
+        1.0
+      ],
+      "mean_probe_accuracy_accepted": 1.0,
+      "mean_iterations": 1.0,
+      "mean_wall_seconds": 4.05167983333333
+    }
+  ],
+  "runs": [
+    {
+      "model": "llama3.1:8b",
+      "world": "sprint",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 2,
+      "wall_seconds": 9.281979917
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "sprint",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.4,
+      "iterations": 2,
+      "wall_seconds": 13.097599291
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "sprint",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 0.8,
+      "iterations": 2,
+      "wall_seconds": 6.505907791000002
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "orchard",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 0.6666666666666666,
+      "iterations": 1,
+      "wall_seconds": 4.806281500000001
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "orchard",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 4.4350648330000055
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "orchard",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 2,
+      "wall_seconds": 7.354268208000001
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "triage",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 2,
+      "wall_seconds": 11.815867291000004
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "triage",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 0.75,
+      "iterations": 2,
+      "wall_seconds": 13.690254458999995
+    },
+    {
+      "model": "llama3.1:8b",
+      "world": "triage",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 2,
+      "wall_seconds": 13.124302458000003
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "sprint",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 4.438537083
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "sprint",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 3.7304252090000034
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "sprint",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 4.126746624999996
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "orchard",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 2.6602346669999974
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "orchard",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 2.533444457999991
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "orchard",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 2.5655841659999936
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "triage",
+      "attempt": 0,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 5.98428337499999
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "triage",
+      "attempt": 1,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 5.232235458999995
+    },
+    {
+      "model": "gemma2:9b",
+      "world": "triage",
+      "attempt": 2,
+      "accepted": true,
+      "probe_accuracy": 1.0,
+      "iterations": 1,
+      "wall_seconds": 5.193627458000009
+    }
+  ],
+  "experiment": "e16_cross_model",
+  "timestamp": "2026-06-11T12:43:02",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

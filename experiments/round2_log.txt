@@ -1,0 +1,154 @@
+  llama3.1:8b sprint #0: accepted=True acc=1.00 iters=2 9.3s
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+{'backlog': 11, 'bugs': 0, 'debt': 1, 'shipped': 1}
+  llama3.1:8b sprint #1: accepted=True acc=0.40 iters=2 13.1s
+  llama3.1:8b sprint #2: accepted=True acc=0.80 iters=2 6.5s
+  llama3.1:8b orchard #0: accepted=True acc=0.67 iters=1 4.8s
+  llama3.1:8b orchard #1: accepted=True acc=1.00 iters=1 4.4s
+  llama3.1:8b orchard #2: accepted=True acc=1.00 iters=2 7.4s
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+{'critical_waiting': 3, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 3, 'spend': 3, 'tick': 1, 'treated': 1}
+{'critical_waiting': 4, 'deteriorated': 0, 'moderate_waiting': 8, 'outcomes': 0, 'spend': 0, 'tick': 1, 'treated': 0}
+  llama3.1:8b triage #0: accepted=True acc=1.00 iters=2 11.8s
+  llama3.1:8b triage #1: accepted=True acc=0.75 iters=2 13.7s
+  llama3.1:8b triage #2: accepted=True acc=1.00 iters=2 13.1s
+  gemma2:9b sprint #0: accepted=True acc=1.00 iters=1 4.4s
+  gemma2:9b sprint #1: accepted=True acc=1.00 iters=1 3.7s
+  gemma2:9b sprint #2: accepted=True acc=1.00 iters=1 4.1s
+  gemma2:9b orchard #0: accepted=True acc=1.00 iters=1 2.7s
+  gemma2:9b orchard #1: accepted=True acc=1.00 iters=1 2.5s
+  gemma2:9b orchard #2: accepted=True acc=1.00 iters=1 2.6s
+  gemma2:9b triage #0: accepted=True acc=1.00 iters=1 6.0s
+  gemma2:9b triage #1: accepted=True acc=1.00 iters=1 5.2s
+  gemma2:9b triage #2: accepted=True acc=1.00 iters=1 5.2s
+[saved] /Users/jim/Desktop/openworld/experiments/results/e16_cross_model.json
+llama3.1:8b: accept 100%, probe 0.85, 9s avg
+gemma2:9b: accept 100%, probe 1.00, 4s avg
+  sum_range_off_by_one s3: passing=[True, True, True] judge=0
+  sum_range_off_by_one s4: passing=[True, True, False] judge=1
+  sum_range_off_by_one s5: passing=[True, True, True] judge=1
+  max_wrong_comparison s3: passing=[True, True, True] judge=0
+  max_wrong_comparison s4: passing=[True, True, True] judge=1
+  max_wrong_comparison s5: passing=[True, True, True] judge=1
+  palindrome_case s3: passing=[True, True, True] judge=0
+  palindrome_case s4: passing=[True, True, True] judge=0
+  palindrome_case s5: passing=[True, True, True] judge=0
+  count_vowels_missing s3: passing=[True, True, False] judge=1
+  count_vowels_missing s4: passing=[True, False, True] judge=2
+  count_vowels_missing s5: passing=[True, True, True] judge=1
+  fib_wrong_base s3: passing=[True, True, True] judge=1
+  fib_wrong_base s4: passing=[True, True, True] judge=0
+  fib_wrong_base s5: passing=[True, True, True] judge=0
+  median_unsorted s3: passing=[False, False, False] judge=0
+  median_unsorted s4: passing=[False, False, False] judge=0
+  median_unsorted s5: passing=[False, False, False] judge=2
+  dedupe_order s3: passing=[True, True, True] judge=0
+  dedupe_order s4: passing=[False, False, True] judge=1
+  dedupe_order s5: passing=[True, False, True] judge=0
+  balanced_parens_early s3: passing=[False, False, False] judge=1
+  balanced_parens_early s4: passing=[False, False, False] judge=0
+  balanced_parens_early s5: passing=[False, True, True] judge=2
+  word_count_split s3: passing=[True, False, True] judge=0
+  word_count_split s4: passing=[False, True, True] judge=0
+  word_count_split s5: passing=[True, False, True] judge=0
+  running_max_reset s3: passing=[False, True, False] judge=1
+  running_max_reset s4: passing=[True, True, True] judge=2
+  running_max_reset s5: passing=[True, False, True] judge=0
+  binary_search_last s3: passing=[True, True, True] judge=0
+  binary_search_last s4: passing=[True, True, True] judge=0
+  binary_search_last s5: passing=[True, True, True] judge=0
+  anagram_normalize s3: passing=[True, True, True] judge=0
+  anagram_normalize s4: passing=[True, False, True] judge=2
+  anagram_normalize s5: passing=[True, False, True] judge=0
+  flatten_no_expand s3: passing=[True, True, True] judge=0
+  flatten_no_expand s4: passing=[False, True, False] judge=1
+  flatten_no_expand s5: passing=[True, True, True] judge=1
+  clamp_swapped s3: passing=[True, True, True] judge=0
+  clamp_swapped s4: passing=[True, True, True] judge=0
+  clamp_swapped s5: passing=[True, True, True] judge=0
+  average_int_division s3: passing=[True, True, True] judge=0
+  average_int_division s4: passing=[True, True, True] judge=0
+  average_int_division s5: passing=[True, True, True] judge=0
+  count_overlapping s3: passing=[True, True, False] judge=2
+  count_overlapping s4: passing=[False, False, True] judge=2
+  count_overlapping s5: passing=[True, False, True] judge=2
+  reverse_words_chars s3: passing=[True, True, False] judge=0
+  reverse_words_chars s4: passing=[True, True, False] judge=1
+  reverse_words_chars s5: passing=[True, False, True] judge=0
+  second_largest_dup s3: passing=[True, False, False] judge=0
+  second_largest_dup s4: passing=[False, False, False] judge=1
+  second_largest_dup s5: passing=[False, False, False] judge=2
+  rle_last_run s3: passing=[True, True, False] judge=0
+  rle_last_run s4: passing=[False, False, True] judge=2
+  rle_last_run s5: passing=[True, True, True] judge=0
+  gcd_returns_zero s3: passing=[False, True, True] judge=0
+  gcd_returns_zero s4: passing=[True, True, True] judge=0
+  gcd_returns_zero s5: passing=[True, False, True] judge=2
+[saved] /Users/jim/Desktop/openworld/experiments/results/e17_judge_power.json
+
+pooled n=120: first=78%, random=78%, judge=85%, oracle=91%
+pooled McNemar: b=15 c=6 p=0.0784
+  iters=1 #0: accepted=False acc=0.00
+  iters=1 #1: accepted=True acc=0.80
+  iters=1 #2: accepted=True acc=0.60
+  iters=1 #3: accepted=False acc=0.00
+  iters=1 #4: accepted=True acc=0.60
+  iters=1 #5: accepted=True acc=0.50
+  iters=1 #6: accepted=True acc=0.60
+  iters=1 #7: accepted=False acc=0.00
+  iters=4 #0: accepted=True acc=0.90
+  iters=4 #1: accepted=True acc=0.80
+  iters=4 #2: accepted=True acc=0.30
+  iters=4 #3: accepted=True acc=0.60
+  iters=4 #4: accepted=True acc=0.60
+  iters=4 #5: accepted=True acc=0.50
+  iters=4 #6: accepted=True acc=0.60
+  iters=4 #7: accepted=True acc=0.90
+[saved] /Users/jim/Desktop/openworld/experiments/results/e18_repair_loop.json
+max_iters=1: accept 62%, probe(all) 0.39, probe(accepted) 0.62
+max_iters=4: accept 100%, probe(all) 0.65, probe(accepted) 0.65
+    code_synthesized @   1x: 10/10
+    code_synthesized @  10x: 10/10
+    code_synthesized @ 100x: 10/10
+                 mlp @   1x: 5/10
+                 mlp @  10x: 0/10
+                 mlp @ 100x: 0/10
+    delta_mlp_strong @   1x: 5/10
+    delta_mlp_strong @  10x: 0/10
+    delta_mlp_strong @ 100x: 0/10
+                knn1 @   1x: 3/10
+                knn1 @  10x: 0/10
+                knn1 @ 100x: 0/10
+      llm_next_state @   1x: 4/10
+      llm_next_state @  10x: 4/10
+      llm_next_state @ 100x: 5/10
+[saved] /Users/jim/Desktop/openworld/experiments/results/e19_scale_ladder.json

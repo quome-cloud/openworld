@@ -1,8 +1,10 @@
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \toprule
-Generator model & Runs & Verified acceptance (95\% CI) & Probe accuracy of accepted \\
+Generator (family) & Runs & Verified acceptance (95\% CI) & Probe acc.\ of accepted & Mean synthesis time \\
 \midrule
-qwen2.5:7b & 15 & 100\% [0.80, 1.00] & 0.98 \\
-qwen2.5:3b & 15 & 100\% [0.80, 1.00] & 0.87 \\
+qwen2.5:7b (Qwen) & 15 & 100\% [0.80, 1.00] & 0.98 & --- \\
+qwen2.5:3b (Qwen) & 15 & 100\% [0.80, 1.00] & 0.87 & --- \\
+llama3.1:8b (Llama) & 9 & 100\% [0.70, 1.00] & 0.85 & 9s \\
+gemma2:9b (Gemma) & 9 & 100\% [0.70, 1.00] & 1.00 & 4s \\
 \bottomrule
 \end{tabular}

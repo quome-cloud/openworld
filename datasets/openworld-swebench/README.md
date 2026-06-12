@@ -76,6 +76,23 @@ via the hardened fork+SIGKILL runner from `openworld.coding`, so a pathological
 patch (e.g. an infinite loop behind a bare `except:`) is killed rather than
 hanging the harness. `solved` requires zero failures across **both** suites.
 
+## Results (v0 — local small models)
+
+From `results/comparison.json` (6 instances, budget 4, `solved` = both suites pass):
+
+| model | single-shot pass@1 | in-world pass@1 | in-world pass@4 | Δ (pass@4 − SS) | mean attempts |
+|---|---|---|---|---|---|
+| qwen2.5:3b | 0.33 | 0.33 | 0.33 | +0.00 | 3.00 |
+| qwen2.5:1.5b | 0.17 | 0.17 | 0.17 | +0.00 | 3.50 |
+
+**Finding:** at ≤3B parameters the in-world feedback loop gives **no lift** over a
+single shot (Δ = 0.00), despite the models spending ~3–3.5 of their 4 attempts —
+i.e. they keep patching but don't convert the exact failing-test feedback into a
+correct fix. This suggests the value of the in-world loop is **gated by base-model
+capability** to consume structured feedback; the natural next step is the larger
+rungs of the model ladder (qwen2.5:7b, llama3.2) where the loop is expected to pay
+off. The harness records paired per-task results so this can be tested directly.
+
 ## Out of scope (v0)
 
 Real SWE-bench instances, git/diff patches, multi-file repos, LLM-synthesized

@@ -78,3 +78,78 @@ def test_reset_restores_nested_initial_state():
     comp.step(Action("x:work"))
     comp.reset()
     assert comp.state["x"]["output"] == 0
+
+
+class TransferTransition(Transition):
+    """Move 1 unit of output from the richer side to the poorer, if unequal."""
+
+    def step(self, state, action):
+        s = state.copy()
+        if action.name != "flow":
+            return s
+        if s["a"]["output"] > s["b"]["output"]:
+            s["a"]["output"] -= 1
+            s["b"]["output"] += 1
+        elif s["b"]["output"] > s["a"]["output"]:
+            s["b"]["output"] -= 1
+            s["a"]["output"] += 1
+        return s
+
+
+class StampTransition(Transition):
+    """Append this bridge's tag to b's log - used to observe firing order."""
+
+    def __init__(self, tag):
+        self.tag = tag
+
+    def step(self, state, action):
+        s = state.copy()
+        s["b"]["log"] = s["b"].get("log", "") + self.tag
+        return s
+
+
+def test_binding_injects_value_before_child_step():
+    comp = CompositeWorld(
+        name="bound",
+        children={"x": make_city(rate=1), "y": make_city(rate=5)},
+        bindings=[Binding(("y", "rate"), "x", "rate")],
+    )
+    s = comp.step(Action("x:work"))
+    assert s["x"]["rate"] == 5      # bound down from y before the step
+    assert s["x"]["output"] == 5    # the step used the bound rate
+
+
+def test_bridge_conserves_total_across_rollout():
+    comp = CompositeWorld(
+        name="bridged",
+        children={"x": make_city(output=10), "y": make_city(output=0)},
+        bridges=[Bridge("transfer", "x", "y", TransferTransition())],
+    )
+    for _ in range(5):
+        comp.step(Action("x:wait"))   # the action is a no-op; bridges still fire
+    assert comp.state["x"]["output"] == 5
+    assert comp.state["y"]["output"] == 5
+    assert comp.state["x"]["output"] + comp.state["y"]["output"] == 10
+
+
+def test_bridges_fire_in_declared_order():
+    comp = CompositeWorld(
+        name="ordered",
+        children={"x": make_city(), "y": make_city()},
+        bridges=[
+            Bridge("first", "x", "y", StampTransition("A")),
+            Bridge("second", "x", "y", StampTransition("B")),
+        ],
+    )
+    s = comp.step(Action("x:wait"))
+    assert s["y"]["log"] == "AB"
+
+
+def test_aggregators_present_initially_and_track_leaves():
+    total = Aggregator("total_output", lambda kids: sum(c["output"] for c in kids.values()))
+    comp = make_pair(aggregators=[total])
+    assert comp.state[AGG_KEY]["total_output"] == 0
+    s = comp.step(Action("x:work"))
+    assert s[AGG_KEY]["total_output"] == 2
+    s = comp.step(Action("y:work"))
+    assert s[AGG_KEY]["total_output"] == 5

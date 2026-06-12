@@ -128,30 +128,21 @@ prompt text constant.
 
 ## How to run
 
+All operations go through the recipe (`recipes/owsb-atomic-v1.json`):
+
 ```bash
-# full comparison on the default model ladder (Ollama must be running)
-python datasets/openworld-swebench/run_comparison.py
-
-# offline smoke run — no Ollama required
-python datasets/openworld-swebench/run_comparison.py --mock
-
-# specific models
-python datasets/openworld-swebench/run_comparison.py qwen2.5:7b llama3.2
-
-# adjust the in-world attempt budget
-python datasets/openworld-swebench/run_comparison.py --budget 8
-
-# regenerate tasks.jsonl after editing build_tasks.py
-python datasets/openworld-swebench/build_tasks.py
-
-# validate the dataset
-python -m pytest tests/test_swebench.py
+python -m openworld.bench recipes/owsb-atomic-v1.json run --mock   # offline smoke
+python -m openworld.bench recipes/owsb-atomic-v1.json run          # Ollama ladder
+python -m openworld.bench recipes/owsb-atomic-v1.json all --mock   # build+validate+run+card
 ```
 
-Default model ladder: `qwen2.5:1.5b`, `qwen2.5:3b`, `qwen2.5:7b`,
-`llama3.2`. Results are written to `datasets/openworld-swebench/results/comparison.json`
-(gitignored). Each run overwrites it with a timestamped record holding the
-per-instance rows and aggregate summaries with Wilson 95% confidence intervals.
+Results land in `results/<model>.json` (frozen result schema v1, one file
+per model); the dataset card is `CARD.md`.
+
+To rebuild `tasks.jsonl` directly: `python datasets/openworld-swebench/build_tasks.py`
+(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owsb-atomic-v1.json build`).
+
+To validate the dataset: `python -m pytest tests/test_swebench.py`
 
 ## Results
 

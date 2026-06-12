@@ -102,6 +102,54 @@ nested composites; leaf dynamics stay ordinary (possibly synthesized) worlds.
 
 `CompositeWorld, Bridge, Aggregator, Binding` from `openworld/__init__.py`.
 
+## Sub-project A2: agent traversal (added after design review)
+
+Agents relate to composites in two senses, both supported:
+
+**Attention traversal (acting across the tree).** External agents reach any
+depth through namespaced actions (`usa:ca:sf:build`) — already covered by A.
+What A2 adds is scoped observation and legal-action helpers so LLM/policy
+agents don't need the whole macrostate:
+
+- `observe(composite, state, agent_name) -> dict` — full detail of the
+  agent's own leaf slice; `_agg` summaries of every ancestor level; the
+  `_agg` (or whole slice if the neighbor is a leaf) of route-adjacent
+  locations. Hierarchical attention: local detail, global aggregates.
+- `legal_actions(composite, state, agent_name) -> List[str]` — the agent's
+  leaf-world actions namespaced to its location, plus one `travel` option
+  per incident route. Policy agents call both helpers directly; no
+  `Simulation`/`Agent` class changes in v1.
+
+**Embodied traversal (moving between worlds).**
+
+- **Registry:** `CompositeWorld(..., agents={name: {"at": path, **attrs}})`
+  stores a root-level `state["_agents"]` registry. Locations are full
+  namespace paths from the owning composite (`"usa:sf"` — same syntax as
+  action routing). Nested composites stay agent-unaware; only the composite
+  that owns the registry handles travel.
+- **`Route(Bridge)`** — a bridge agents may cross. Inherits the optional
+  per-step coupling `transition`; adds `on_cross`: an optional `Transition`
+  over `{"agent": <attrs>, "a": <src slice>, "b": <dst slice>}` stepped with
+  `Action("cross")` — tolls, visas, capacity — synthesizable and verifiable
+  like any dynamics, with conservation invariants ("crossing never creates
+  money"). A `Route` with `transition=None` is a pure path.
+- **`travel` action:** `Action("travel", params={"agent": name, "to": path})`
+  is legal only along a declared `Route` (either direction) touching the
+  agent's current location. The composite transition updates the registry,
+  runs `on_cross`, and writes back both endpoint slices. Illegal travel
+  (unknown agent, no incident route) is a tolerant no-op, matching the
+  framework's transition style. Single-hop only; multi-hop journeys are
+  successive travel actions.
+- Locations live in state, so who-was-where-when is replayable, diffable,
+  and judgeable like everything else.
+
+Tests (`tests/test_traverse.py`): travel moves the registry entry; on_cross
+transfers/charges across slices with conservation; illegal travel is a no-op;
+routes work in both directions; observe returns leaf detail + ancestor
+aggregates and omits non-adjacent siblings' detail; legal_actions matches
+location and incident routes; a two-level composite with an agent two levels
+deep.
+
 ## Sub-project B: `PhasedTransition` (in `openworld/transition.py`)
 
 `PhasedTransition(phases: List[Tuple[trigger, Transition]], record_key="_phase")`
@@ -138,7 +186,10 @@ predicate trigger; `_phase` recorded; phases verified independently
 - **E31 — nested fidelity.** A 3-level region ⊃ 2 countries ⊃ 2 cities world
   with a hand-written whole-system oracle; 20-step rollouts; metrics: exact
   leaf match, aggregator consistency at every step, conservation invariants
-  (population, money) never violated.
+  (population, money) never violated. Includes a traversal scenario: a
+  policy agent working in one city, traveling across a route with a toll,
+  and working in another — registry, toll conservation, and scoped
+  observation all checked against the oracle.
 - **E32 — regime switch.** A two-phase economy (policy change at step 10):
   (a) `PhasedTransition` with two pre-verified phases, (b) monolithic
   synthesis from the full rules-with-change text, (c) LLM next-state proxy.
@@ -153,4 +204,7 @@ predicate trigger; `_phase` recorded; phases verified independently
 - Live mid-run re-synthesis of dynamics (flag-gated future work).
 - Asynchronous/event-queue scheduling between worlds (actor model).
 - Bridges spanning more than two children (compose pairwise instead).
-- Cross-composite agent planning (agents act through namespaced actions).
+- Multi-hop route planning/pathfinding (journeys are successive single-hop
+  travel actions chosen by the agent or policy).
+- `Simulation`/`Agent` class changes for scoped agents (v1 ships `observe` /
+  `legal_actions` helpers; policy agents use them directly).

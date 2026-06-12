@@ -286,6 +286,305 @@ RAW = [
             ("format_duration(190)", "'3:10'"),
         ],
     ),
+    # -----------------------------------------------------------------------
+    # 7. CSV row — strip fields (stage 1) AND drop a trailing empty field (s2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="csv-row-staged", module_name="csv_row",
+        issue=(
+            "parse_row() doesn't strip surrounding whitespace from fields: "
+            "'a, b , c' parses to ['a', ' b ', ' c']. Each field should have its "
+            "leading/trailing spaces removed."
+        ),
+        buggy="def parse_row(line):\n    return line.split(',')\n",
+        ref=(
+            "def parse_row(line):\n"
+            "    fields = [f.strip() for f in line.split(',')]\n"
+            "    while fields and fields[-1] == '':\n"
+            "        fields.pop()\n"
+            "    return fields\n"
+        ),
+        preamble="",
+        f2p=[
+            ("parse_row('a, b , c')", "['a', 'b', 'c']"),
+            ("parse_row('a,b,')", "['a', 'b']"),
+        ],
+        p2p=[
+            ("parse_row('a,b,c')", "['a', 'b', 'c']"),
+            ("parse_row('x')", "['x']"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 8. Battery charge — cap at 100 (stage 1) AND floor at 0 (stage 2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="charge-clamp-staged", module_name="charge",
+        issue=(
+            "charge() lets the level exceed 100%: charge(90, 20) returns 110. "
+            "Charging should never push the level above 100."
+        ),
+        buggy="def charge(level, amount):\n    return level + amount\n",
+        ref=(
+            "def charge(level, amount):\n"
+            "    return max(0, min(100, level + amount))\n"
+        ),
+        preamble="",
+        f2p=[
+            ("charge(90, 20)", "100"),
+            ("charge(10, -50)", "0"),
+        ],
+        p2p=[
+            ("charge(50, 10)", "60"),
+            ("charge(0, 0)", "0"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 9. Bounded stack — enforce capacity on push (stage 1) AND guard pop on
+    #    empty (stage 2). Stateful class.
+    # -----------------------------------------------------------------------
+    dict(
+        slug="bounded-stack-staged", module_name="bounded_stack",
+        issue=(
+            "BoundedStack ignores its capacity: pushing past `cap` keeps growing "
+            "the stack. A push when the stack is already full should be rejected "
+            "(don't append) and just return the current size."
+        ),
+        buggy=(
+            "class BoundedStack:\n"
+            "    def __init__(self, cap):\n"
+            "        self.cap = cap\n"
+            "        self.items = []\n\n"
+            "    def push(self, x):\n"
+            "        self.items.append(x)\n"
+            "        return len(self.items)\n\n"
+            "    def pop(self):\n"
+            "        return self.items.pop()\n"
+        ),
+        ref=(
+            "class BoundedStack:\n"
+            "    def __init__(self, cap):\n"
+            "        self.cap = cap\n"
+            "        self.items = []\n\n"
+            "    def push(self, x):\n"
+            "        if len(self.items) >= self.cap:\n"
+            "            return len(self.items)\n"
+            "        self.items.append(x)\n"
+            "        return len(self.items)\n\n"
+            "    def pop(self):\n"
+            "        if not self.items:\n"
+            "            return None\n"
+            "        return self.items.pop()\n"
+        ),
+        preamble=(
+            "def run(cap, ops):\n"
+            "    s = BoundedStack(cap)\n"
+            "    out = []\n"
+            "    for op in ops:\n"
+            "        if op[0] == 'push':\n"
+            "            out.append(s.push(op[1]))\n"
+            "        else:\n"
+            "            out.append(s.pop())\n"
+            "    return out\n"
+        ),
+        f2p=[
+            ("run(2, [('push',1),('push',2),('push',3)])", "[1, 2, 2]"),
+            ("run(1, [('pop',)])", "[None]"),
+        ],
+        p2p=[
+            ("run(3, [('push',1),('push',2),('pop',)])", "[1, 2, 2]"),
+            ("run(2, [('push',5)])", "[1]"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 10. Slugify — strip ends (stage 1) AND collapse internal whitespace (s2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="slugify-staged", module_name="slugify",
+        issue=(
+            "slugify() turns leading/trailing spaces into dashes: ' Hello World ' "
+            "becomes '-hello-world-'. Surrounding whitespace should be trimmed "
+            "before slugifying."
+        ),
+        buggy="def slugify(text):\n    return text.lower().replace(' ', '-')\n",
+        ref="def slugify(text):\n    return '-'.join(text.strip().lower().split())\n",
+        preamble="",
+        f2p=[
+            ("slugify(' Hello World ')", "'hello-world'"),
+            ("slugify('a  b')", "'a-b'"),
+        ],
+        p2p=[
+            ("slugify('hello world')", "'hello-world'"),
+            ("slugify('abc')", "'abc'"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 11. Phone format — validate length (stage 1) AND strip non-digits (s2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="phone-format-staged", module_name="phone_format",
+        issue=(
+            "format_phone() produces garbage for inputs that aren't exactly 10 "
+            "digits (a 7-digit string yields an empty area code). If the input "
+            "isn't 10 digits, return it unchanged."
+        ),
+        buggy=(
+            "def format_phone(digits):\n"
+            "    return '(' + digits[0:3] + ') ' + digits[3:6] + '-' + digits[6:10]\n"
+        ),
+        ref=(
+            "def format_phone(digits):\n"
+            "    cleaned = ''.join(c for c in digits if c.isdigit())\n"
+            "    if len(cleaned) != 10:\n"
+            "        return digits\n"
+            "    return '(' + cleaned[0:3] + ') ' + cleaned[3:6] + '-' + cleaned[6:10]\n"
+        ),
+        preamble="",
+        f2p=[
+            ("format_phone('1234567')", "'1234567'"),
+            ("format_phone('123-456-7890')", "'(123) 456-7890'"),
+        ],
+        p2p=[
+            ("format_phone('1234567890')", "'(123) 456-7890'"),
+            ("format_phone('5551234567')", "'(555) 123-4567'"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 12. Running stats — guard max() on empty (stage 1) AND mean() on empty
+    #     (stage 2). Stateful class.
+    # -----------------------------------------------------------------------
+    dict(
+        slug="running-stats-staged", module_name="running_stats",
+        issue=(
+            "RunningStats.max() crashes with a ValueError when called before any "
+            "value has been added. With no values, max() should return None."
+        ),
+        buggy=(
+            "class RunningStats:\n"
+            "    def __init__(self):\n"
+            "        self.values = []\n\n"
+            "    def add(self, x):\n"
+            "        self.values.append(x)\n\n"
+            "    def max(self):\n"
+            "        return max(self.values)\n\n"
+            "    def mean(self):\n"
+            "        return sum(self.values) / len(self.values)\n"
+        ),
+        ref=(
+            "class RunningStats:\n"
+            "    def __init__(self):\n"
+            "        self.values = []\n\n"
+            "    def add(self, x):\n"
+            "        self.values.append(x)\n\n"
+            "    def max(self):\n"
+            "        if not self.values:\n"
+            "            return None\n"
+            "        return max(self.values)\n\n"
+            "    def mean(self):\n"
+            "        if not self.values:\n"
+            "            return 0.0\n"
+            "        return sum(self.values) / len(self.values)\n"
+        ),
+        preamble=(
+            "def run(ops):\n"
+            "    rs = RunningStats()\n"
+            "    out = []\n"
+            "    for op in ops:\n"
+            "        if op[0] == 'add':\n"
+            "            rs.add(op[1])\n"
+            "            out.append(None)\n"
+            "        elif op[0] == 'max':\n"
+            "            out.append(rs.max())\n"
+            "        else:\n"
+            "            out.append(rs.mean())\n"
+            "    return out\n"
+        ),
+        f2p=[
+            ("run([('max',)])", "[None]"),
+            ("run([('mean',)])", "[0.0]"),
+        ],
+        p2p=[
+            ("run([('add',3),('add',5),('max',)])", "[None, None, 5]"),
+            ("run([('add',2),('add',4),('mean',)])", "[None, None, 3.0]"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 13. Parse ints — empty string -> [] (stage 1) AND skip empty entries from
+    #     double/trailing commas (stage 2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="parse-ints-staged", module_name="parse_ints",
+        issue=(
+            "parse_ints() crashes with a ValueError on an empty string (it tries "
+            "int('')). An empty string should return an empty list."
+        ),
+        buggy="def parse_ints(s):\n    return [int(x) for x in s.split(',')]\n",
+        ref="def parse_ints(s):\n    return [int(x) for x in s.split(',') if x.strip()]\n",
+        preamble="",
+        f2p=[
+            ("parse_ints('')", "[]"),
+            ("parse_ints('1,,2')", "[1, 2]"),
+        ],
+        p2p=[
+            ("parse_ints('1,2,3')", "[1, 2, 3]"),
+            ("parse_ints('5')", "[5]"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 14. Palindrome — ignore case (stage 1) AND ignore spaces (stage 2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="palindrome-staged", module_name="palindrome",
+        issue=(
+            "is_palindrome() is case-sensitive, so 'Anna' is not recognized as a "
+            "palindrome. The check should ignore letter case."
+        ),
+        buggy="def is_palindrome(s):\n    return s == s[::-1]\n",
+        ref="def is_palindrome(s):\n    s = s.lower().replace(' ', '')\n    return s == s[::-1]\n",
+        preamble="",
+        f2p=[
+            ("is_palindrome('Anna')", "True"),
+            ("is_palindrome('race car')", "True"),
+        ],
+        p2p=[
+            ("is_palindrome('racecar')", "True"),
+            ("is_palindrome('hello')", "False"),
+        ],
+    ),
+    # -----------------------------------------------------------------------
+    # 15. Truncate — keep total length <= n with ellipsis (stage 1) AND handle
+    #     n too small for an ellipsis (stage 2)
+    # -----------------------------------------------------------------------
+    dict(
+        slug="truncate-staged", module_name="truncate",
+        issue=(
+            "truncate(text, n) appends '...' but ignores it in the length budget, "
+            "so the result can exceed n characters. The total length including the "
+            "ellipsis must be at most n."
+        ),
+        buggy=(
+            "def truncate(text, n):\n"
+            "    if len(text) > n:\n"
+            "        return text[:n] + '...'\n"
+            "    return text\n"
+        ),
+        ref=(
+            "def truncate(text, n):\n"
+            "    if len(text) <= n:\n"
+            "        return text\n"
+            "    if n <= 3:\n"
+            "        return text[:n]\n"
+            "    return text[:n - 3] + '...'\n"
+        ),
+        preamble="",
+        f2p=[
+            ("truncate('hello world', 8)", "'hello...'"),
+            ("truncate('hello', 2)", "'he'"),
+        ],
+        p2p=[
+            ("truncate('hi', 5)", "'hi'"),
+            ("truncate('abc', 3)", "'abc'"),
+        ],
+    ),
 ]
 
 
@@ -341,6 +640,72 @@ def format_duration(seconds):
     minutes = seconds // 60
     secs = seconds % 60
     return "{}:{:02d}".format(minutes, secs)
+''',
+    "csv-row-staged": '''\
+def parse_row(line):
+    return [f.strip() for f in line.split(',')]
+''',
+    "charge-clamp-staged": '''\
+def charge(level, amount):
+    return min(100, level + amount)
+''',
+    "bounded-stack-staged": '''\
+class BoundedStack:
+    def __init__(self, cap):
+        self.cap = cap
+        self.items = []
+
+    def push(self, x):
+        if len(self.items) >= self.cap:
+            return len(self.items)
+        self.items.append(x)
+        return len(self.items)
+
+    def pop(self):
+        return self.items.pop()
+''',
+    "slugify-staged": '''\
+def slugify(text):
+    return text.strip().lower().replace(' ', '-')
+''',
+    "phone-format-staged": '''\
+def format_phone(digits):
+    if len(digits) != 10:
+        return digits
+    return '(' + digits[0:3] + ') ' + digits[3:6] + '-' + digits[6:10]
+''',
+    "running-stats-staged": '''\
+class RunningStats:
+    def __init__(self):
+        self.values = []
+
+    def add(self, x):
+        self.values.append(x)
+
+    def max(self):
+        if not self.values:
+            return None
+        return max(self.values)
+
+    def mean(self):
+        return sum(self.values) / len(self.values)
+''',
+    "parse-ints-staged": '''\
+def parse_ints(s):
+    if not s:
+        return []
+    return [int(x) for x in s.split(',')]
+''',
+    "palindrome-staged": '''\
+def is_palindrome(s):
+    s = s.lower()
+    return s == s[::-1]
+''',
+    "truncate-staged": '''\
+def truncate(text, n):
+    if len(text) > n:
+        return text[:n - 3] + '...'
+    return text
 ''',
 }
 

@@ -127,7 +127,7 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def mock_factory(instance):
+def mock_factory(instance, seed=None):
     """Offline smoke model: garbage first, the oracle patch second."""
     from .llm import MockLLM
 
@@ -156,14 +156,37 @@ def _ollama_digest(model: str) -> Optional[str]:
     return None
 
 
+def _mcnemar_p(b: int, c: int) -> float:
+    """Two-sided exact McNemar (sign-test) p-value over discordant pairs.
+
+    b, c are the discordant counts (one condition solved, the other didn't).
+    Exact binomial under H0 p=0.5 — zero-dependency, valid for small samples.
+    """
+    from math import comb
+
+    n = b + c
+    if n == 0:
+        return 1.0
+    k = min(b, c)
+    tail = sum(comb(n, i) for i in range(k + 1)) * (0.5 ** n)
+    return min(1.0, 2.0 * tail)
+
+
 def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
-    n = len(rows)
+    n = len(rows)  # total paired trials = n_instances x n_seeds
     single = sum(r["single_shot"]["solved"] for r in rows)
     world_first = sum(r["in_world"]["solved_first_attempt"] for r in rows)
     world_budget = sum(r["in_world"]["solved"] for r in rows)
     solved_attempts = [r["in_world"]["attempts"] for r in rows if r["in_world"]["solved"]]
+    # Paired McNemar: in-world(budget) vs single-shot over every trial.
+    iw_wins = sum(1 for r in rows
+                  if r["in_world"]["solved"] and not r["single_shot"]["solved"])
+    ss_wins = sum(1 for r in rows
+                  if r["single_shot"]["solved"] and not r["in_world"]["solved"])
     return {
-        "n_instances": n,
+        "n_instances": len({r["instance_id"] for r in rows}),
+        "n_seeds": len({r.get("seed", 0) for r in rows}),
+        "n_trials": n,
         "budget": budget,
         "single_shot_pass_at_1": single / n,
         "single_shot_pass_at_1_ci": list(wilson_ci(single, n)),
@@ -172,6 +195,9 @@ def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
         "in_world_pass_at_budget": world_budget / n,
         "in_world_pass_at_budget_ci": list(wilson_ci(world_budget, n)),
         "delta": (world_budget - single) / n,
+        "mcnemar_in_world_wins": iw_wins,
+        "mcnemar_single_shot_wins": ss_wins,
+        "mcnemar_p_value": _mcnemar_p(iw_wins, ss_wins),
         "mean_attempts_when_solved": (
             sum(solved_attempts) / len(solved_attempts) if solved_attempts else None
         ),
@@ -179,24 +205,32 @@ def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
 
 
 def evaluate(recipe, model, llm_factory, budget=None, mock=False,
-             results_dir=None) -> Dict[str, Any]:
-    """Run the paired ablation for one model; write one frozen-schema file."""
+             results_dir=None, seeds=None) -> Dict[str, Any]:
+    """Run the paired ablation for one model; write one frozen-schema file.
+
+    With multiple `seeds`, each instance is run once per seed (n_instances x
+    n_seeds paired trials), tightening the CIs and powering the McNemar test.
+    `llm_factory(instance, seed)` builds the model for a given seed.
+    """
     from datetime import datetime
 
     from .swebench import load_dataset, solve_in_world, solve_single_shot
 
     instances = load_dataset(recipe["dataset"]["path"])
     budget = budget or recipe["eval"]["budget"]
+    seeds = list(seeds) if seeds else [recipe["eval"].get("seed", 41)]
     rows = []
     for inst in instances:
-        single = solve_single_shot(inst, llm_factory(inst))
-        in_world = solve_in_world(inst, llm_factory(inst), budget=budget)
-        rows.append({"instance_id": inst.instance_id,
-                     "single_shot": single, "in_world": in_world})
-        print(f"  {inst.instance_id}: "
-              f"single-shot={'Y' if single['solved'] else 'n'} "
-              f"in-world={'Y' if in_world['solved'] else 'n'} "
-              f"({in_world['attempts']} att)")
+        for sd in seeds:
+            single = solve_single_shot(inst, llm_factory(inst, sd))
+            in_world = solve_in_world(inst, llm_factory(inst, sd), budget=budget)
+            rows.append({"instance_id": inst.instance_id, "seed": sd,
+                         "single_shot": single, "in_world": in_world})
+            tag = f" seed={sd}" if len(seeds) > 1 else ""
+            print(f"  {inst.instance_id}{tag}: "
+                  f"single-shot={'Y' if single['solved'] else 'n'} "
+                  f"in-world={'Y' if in_world['solved'] else 'n'} "
+                  f"({in_world['attempts']} att)")
     result = {
         "result_schema_version": RESULT_SCHEMA_VERSION,
         "dataset": recipe["dataset"]["name"],
@@ -207,7 +241,10 @@ def evaluate(recipe, model, llm_factory, budget=None, mock=False,
         "model_digest": None if mock else _ollama_digest(model),
         "mock": bool(mock),
         "budget": budget,
-        "n_instances": len(rows),
+        "seeds": seeds,
+        "n_seeds": len(seeds),
+        "n_instances": len(instances),
+        "n_trials": len(rows),
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "rows": rows,
         "summary": summarize(rows, budget),
@@ -329,6 +366,9 @@ def main(argv=None) -> int:
     parser.add_argument("--models", nargs="*", default=None,
                         help="override recipe eval.models")
     parser.add_argument("--budget", type=int, default=None)
+    parser.add_argument("--seeds", type=int, default=None,
+                        help="run N seeds per instance for multi-trial "
+                             "significance (McNemar); overrides recipe eval.seeds")
     parser.add_argument("--freeze", action="store_true",
                         help="with build: write the artifact hash into the recipe")
     args = parser.parse_args(argv)
@@ -351,9 +391,14 @@ def main(argv=None) -> int:
             raise SystemExit("gate failed; not running evaluation")
     if args.command in ("run", "all"):
         results = []
+        base_seed = recipe["eval"].get("seed", 41)
+        if args.seeds:
+            seeds = [base_seed + i for i in range(args.seeds)]
+        else:
+            seeds = recipe["eval"].get("seeds") or [base_seed]
         if args.mock:
             results.append(evaluate(recipe, "mock", mock_factory,
-                                    budget=args.budget, mock=True))
+                                    budget=args.budget, mock=True, seeds=seeds))
         else:
             from .llm import OllamaConnectionError, OllamaLLM
 
@@ -362,18 +407,18 @@ def main(argv=None) -> int:
             if len(set(slugs)) != len(slugs):
                 raise SystemExit(
                     f"model names collide after filename slugging: {models}")
+            temp = recipe["eval"].get("temperature", 0.2)
             for model in models:
-                llm = OllamaLLM(model=model,
-                                temperature=recipe["eval"].get("temperature", 0.2),
-                                options={"seed": recipe["eval"].get("seed", 41)})
+                def _factory(inst, sd, _m=model, _t=temp):
+                    return OllamaLLM(model=_m, temperature=_t, options={"seed": sd})
                 try:
-                    llm.ask("Reply with OK.")
+                    _factory(None, seeds[0]).ask("Reply with OK.")
                 except OllamaConnectionError as exc:
                     raise SystemExit(f"model {model!r} unavailable: {exc}")
-                print(f"[{model}] budget {args.budget or recipe['eval']['budget']}")
-                results.append(evaluate(recipe, model,
-                                        lambda inst, _llm=llm: _llm,
-                                        budget=args.budget))
+                print(f"[{model}] budget {args.budget or recipe['eval']['budget']} "
+                      f"seeds {seeds}")
+                results.append(evaluate(recipe, model, _factory,
+                                        budget=args.budget, seeds=seeds))
         print("\n" + markdown_table(results))
     if args.command in ("card", "all"):
         if report is None:

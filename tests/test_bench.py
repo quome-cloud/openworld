@@ -80,7 +80,7 @@ def test_evaluate_mock_oracle_second_try(tmp_path):
     assert saved["n_instances"] == 20
     assert len(saved["rows"]) == 20
     row = saved["rows"][0]
-    assert set(row) == {"instance_id", "single_shot", "in_world"}
+    assert set(row) == {"instance_id", "seed", "single_shot", "in_world"}
     s = saved["summary"]
     assert s["single_shot_pass_at_1"] == 0.0
     assert s["in_world_pass_at_budget"] == 1.0

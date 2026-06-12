@@ -504,17 +504,36 @@ INSTANCES = [
         instance_id="openworld-swebench-007-tokenizer-quoted-strings",
         module_name="tokenizer",
         issue=D('''
-            tokenize() breaks quoted phrases apart. tokenize('say "hello
-            world" now') yields 4 tokens, two of which still contain stray
-            double-quote characters, instead of 3 tokens with hello world
-            kept together as a single token (quotes removed). count_tokens
-            over-counts every input that uses quoting. Plain unquoted text,
-            including runs of multiple spaces, tokenizes correctly.
+            Quoted phrases are not kept together. tokenize('say "hello
+            world" now') comes back as ['say', 'hello', 'world', 'now'] --
+            four tokens -- when it should be ['say', 'hello world', 'now'].
+            Oddly, the quote characters themselves ARE removed correctly;
+            it is only the grouping that is lost, so anything inside the
+            quotes still splits on spaces. As a result count_tokens
+            over-counts every input that uses quoted phrases, e.g.
+            count_tokens('a "b c" d') reports 4 instead of 3. Plain
+            unquoted text tokenizes fine, including runs of multiple
+            spaces, and quoting a single word with no spaces inside also
+            behaves as expected.
         '''),
         buggy_source=D('''
             def tokenize(s):
                 """Split a command line into tokens; double quotes group words."""
-                return [t for t in s.split(' ') if t]
+                tokens = []
+                current = ''
+                in_quotes = False
+                for ch in s:
+                    if ch == '"':
+                        in_quotes = not in_quotes
+                    elif ch == ' ':
+                        if current:
+                            tokens.append(current)
+                        current = ''
+                    else:
+                        current += ch
+                if current:
+                    tokens.append(current)
+                return tokens
 
             def count_tokens(s):
                 """Number of tokens in the input."""
@@ -548,11 +567,13 @@ INSTANCES = [
             ("tokenize('say \"hello world\" now')", "['say', 'hello world', 'now']"),
             ("count_tokens('a \"b c\" d')", "3"),
             ("tokenize('\"one two three\"')", "['one two three']"),
+            ("tokenize('run \"a b\" \"c d\"')", "['run', 'a b', 'c d']"),
         ],
         pass_to_pass=[
             ("tokenize('alpha beta')", "['alpha', 'beta']"),
             ("tokenize('a  b   c')", "['a', 'b', 'c']"),
             ("count_tokens('')", "0"),
+            ("tokenize('say \"solo\" now')", "['say', 'solo', 'now']"),
         ],
     ),
     dict(

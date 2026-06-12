@@ -56,6 +56,11 @@ class Route(Bridge):
     {"agent": <attrs>, "a": <source slice>, "b": <destination slice>},
     stepped with Action("cross") - tolls, visas, capacity - synthesizable
     and verifiable like any other dynamics.
+
+    on_cross mediates the crossing's effects and may VETO it by setting
+    "denied": True on the agent slot (the agent then stays put, while any
+    fees or attempt effects it wrote still apply). Without a veto the move
+    always completes; gating logic belongs inside on_cross, not the caller.
     """
 
     on_cross: Optional[Transition] = None
@@ -197,6 +202,19 @@ class CompositeWorld(World):
             node = node[part]
         node[parts[-1]] = dict(value)
 
+    def _refresh_path_aggregates(self, state: Dict[str, Any], path: str) -> None:
+        """Recompute _agg bottom-up in every composite along `path` (root included)."""
+        levels = [(self, state)]
+        world: Any = self
+        node: Any = state
+        for part in path.split(":")[:-1]:
+            world = world.children[part]
+            node = node[part]
+            if isinstance(world, CompositeWorld):
+                levels.append((world, node))
+        for composite, slice_ in reversed(levels):
+            slice_[AGG_KEY] = composite._aggregates(slice_)
+
     def _travel(self, s: WorldState, action: Action) -> WorldState:
         """Move an agent along a Route; tolerant no-op when illegal."""
         name = action.params.get("agent")
@@ -214,17 +232,21 @@ class CompositeWorld(World):
             return s
         attrs = dict(registry[name])
         src, dst = self._resolve(s, here), self._resolve(s, dest)
+        denied = False
         if route.on_cross is not None:
             out = route.on_cross.step(
                 WorldState({"agent": attrs, "a": src, "b": dst}),
                 Action("cross", agent=name),
             )
             attrs, src, dst = dict(out["agent"]), dict(out["a"]), dict(out["b"])
-        attrs["at"] = dest
+            denied = bool(attrs.pop("denied", False))
+        if not denied:
+            attrs["at"] = dest
         s[AGENTS_KEY] = {**registry, name: attrs}
         self._write_back(s, here, src)
         self._write_back(s, dest, dst)
-        s[AGG_KEY] = self._aggregates(s)
+        self._refresh_path_aggregates(s, here)
+        self._refresh_path_aggregates(s, dest)
         return s
 
 

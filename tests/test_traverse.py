@@ -169,3 +169,45 @@ def test_observe_unknown_agent_raises():
         pass
     else:
         raise AssertionError("expected KeyError")
+
+
+class VisaTransition(Transition):
+    """Crossing requires a visa; an attempt without one is denied but logged."""
+
+    def step(self, state, action):
+        s = state.copy()
+        if action.name == "cross" and not s["agent"].get("visa", False):
+            s["agent"]["denied"] = True
+            s["b"]["denied_entries"] = s["b"].get("denied_entries", 0) + 1
+        return s
+
+
+def test_on_cross_can_deny_crossing():
+    comp = make_map(bridges=[Route("border", "sf", "ny",
+                                   transition=None, on_cross=VisaTransition())])
+    s = comp.step(Action("travel", params={"agent": "alice", "to": "ny"}))
+    assert s[AGENTS_KEY]["alice"]["at"] == "sf"          # vetoed: still home
+    assert "denied" not in s[AGENTS_KEY]["alice"]        # transient key stripped
+    assert s["ny"]["denied_entries"] == 1                # attempt effects applied
+
+
+def test_deep_travel_refreshes_inner_aggregates():
+    inner = CompositeWorld(
+        name="usa",
+        children={"sf": make_town("sf"), "ny": make_town("ny")},
+        aggregators=[Aggregator("treasury",
+                                lambda kids: sum(c.get("treasury", 0) for c in kids.values()))],
+    )
+    comp = CompositeWorld(
+        name="earth",
+        children={"usa": inner},
+        agents={"alice": {"at": "usa:sf", "coins": 5}},
+        bridges=[Route("flight", "usa:sf", "usa:ny",
+                       transition=None, on_cross=TollTransition())],
+        aggregators=[Aggregator("world_treasury",
+                                lambda kids: kids["usa"][AGG_KEY]["treasury"])],
+    )
+    s = comp.step(Action("travel", params={"agent": "alice", "to": "usa:ny"}))
+    assert s["usa"]["ny"]["treasury"] == 2
+    assert s["usa"][AGG_KEY]["treasury"] == 2     # inner _agg fresh (was the bug)
+    assert s[AGG_KEY]["world_treasury"] == 2      # outer chain sees it

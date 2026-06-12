@@ -14,8 +14,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
+from .llm import BaseLLM
 from .state import Action, WorldState
 from .transition import Transition
+from .verify import Verifier, synthesize_transition
 from .world import World
 
 AGG_KEY = "_agg"
@@ -154,3 +156,46 @@ class CompositeWorld(World):
             for part in binding.source_path:
                 value = value[part]
             state[binding.child][binding.key] = value
+
+
+def compile_bridge(
+    llm: BaseLLM,
+    name: str,
+    a: str,
+    b: str,
+    description: str,
+    rules: Sequence[str] = (),
+    sample_a: Optional[dict] = None,
+    sample_b: Optional[dict] = None,
+    invariants: Sequence[tuple] = (),
+    critic: Optional[BaseLLM] = None,
+    max_iters: int = 4,
+) -> Bridge:
+    """Synthesize and verify a bridge from plain-language rules.
+
+    The bridge's dynamics are an ordinary transition over the two-slot dict
+    {"a": ..., "b": ...} with the single action "flow", so the standard
+    generate -> verify relay (sandboxed smoke runs, invariants, optional
+    critic) applies unchanged. Invariants are predicates over the two-slot
+    state, which is where cross-world conservation laws live.
+    """
+    initial = WorldState({"a": dict(sample_a or {}), "b": dict(sample_b or {})})
+    verifier = Verifier(
+        initial_state=initial,
+        sample_actions=[Action("flow", agent="smoke_test_agent")],
+        invariants=list(invariants),
+        critic=critic,
+    )
+    transition = synthesize_transition(
+        llm,
+        description=(
+            f"A bridge between two worlds, '{a}' (slot 'a') and '{b}' "
+            f"(slot 'b'). {description}"),
+        initial_state=initial,
+        actions=["flow"],
+        rules=list(rules),
+        verifier=verifier,
+        max_iters=max_iters,
+    )
+    return Bridge(name=name, a=a, b=b, transition=transition,
+                  description=description, rules=tuple(rules))

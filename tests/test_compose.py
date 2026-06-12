@@ -1,7 +1,7 @@
 """Tests for composing worlds: composites, bridges, aggregators, bindings."""
 
-from openworld import Action, World
-from openworld.compose import AGG_KEY, Aggregator, Binding, Bridge, CompositeWorld
+from openworld import Action, MockLLM, World
+from openworld.compose import AGG_KEY, Aggregator, Binding, Bridge, CompositeWorld, compile_bridge
 from openworld.transition import Transition
 
 
@@ -153,3 +153,53 @@ def test_aggregators_present_initially_and_track_leaves():
     assert s[AGG_KEY]["total_output"] == 2
     s = comp.step(Action("y:work"))
     assert s[AGG_KEY]["total_output"] == 5
+
+
+def test_nested_composite_routes_two_levels_and_keeps_aggregates():
+    inner = CompositeWorld(
+        name="country",
+        children={"city": make_city(rate=2)},
+        aggregators=[Aggregator("gdp", lambda kids: kids["city"]["output"])],
+    )
+    outer = CompositeWorld(
+        name="earth",
+        children={"usa": inner},
+        aggregators=[Aggregator("world_gdp", lambda kids: kids["usa"][AGG_KEY]["gdp"])],
+    )
+    s = outer.step(Action("usa:city:work"))
+    assert s["usa"]["city"]["output"] == 2          # leaf stepped two levels down
+    assert s["usa"][AGG_KEY]["gdp"] == 2            # inner aggregate recomputed
+    assert s[AGG_KEY]["world_gdp"] == 2             # outer aggregate sees it
+    assert "usa:city:work" in outer.actions          # namespacing composes
+
+
+def test_compile_bridge_synthesizes_and_verifies_a_two_slot_transition():
+    # MockLLM returns ready-made bridge code; the verifier must accept it and
+    # the resulting Bridge must conserve the total.
+    # Contract note: generated code receives action as a plain dict, so we use
+    # action["name"] (not action.get or action.name). Adapted from plan to match
+    # the real verify.py contract (action passed via action.to_dict()).
+    code = (
+        "```python\n"
+        "def transition(state, action):\n"
+        "    s = {k: dict(v) if isinstance(v, dict) else v for k, v in state.items()}\n"
+        "    if action[\"name\"] == \"flow\" and s[\"a\"][\"water\"] > 0:\n"
+        "        s[\"a\"][\"water\"] -= 1\n"
+        "        s[\"b\"][\"water\"] += 1\n"
+        "    return s\n"
+        "```"
+    )
+    bridge = compile_bridge(
+        MockLLM([code]),
+        name="river",
+        a="uphill",
+        b="downhill",
+        description="One unit of water flows downhill per tick while any remains.",
+        rules=["water is conserved", "flow stops at zero"],
+        sample_a={"water": 3},
+        sample_b={"water": 0},
+        invariants=[("water conserved",
+                     lambda s: s["a"]["water"] + s["b"]["water"] == 3)],
+    )
+    sa, sb = bridge.flow({"water": 3}, {"water": 0})
+    assert (sa["water"], sb["water"]) == (2, 1)

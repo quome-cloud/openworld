@@ -22,6 +22,7 @@ Quickstart:
 """
 
 from .agent import Agent
+from .compose import Aggregator, Binding, Bridge, CompositeWorld, compile_bridge
 from .ethics import (
     Constraint, Delegate, MoralParliament, constrained, lexicographic,
     maximin, permitted_actions, weighted_sum,
@@ -49,11 +50,16 @@ __version__ = "0.2.0"
 
 __all__ = [
     "Action",
+    "Aggregator",
     "Agent",
     "BaseLLM",
+    "Binding",
+    "Bridge",
     "Choice",
     "CodeTransition",
+    "CompositeWorld",
     "Constraint",
+    "compile_bridge",
     "Delegate",
     "Dial",
     "MoralParliament",

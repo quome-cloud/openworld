@@ -30,7 +30,7 @@ EXPERIMENTS = [
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
-    "e33_dynamic_traversal",
+    "e33_dynamic_traversal", "e34_composite_swe",
 ]
 
 
@@ -728,6 +728,39 @@ def fig_dynamic_traversal(e33):
     plt.close(fig)
 
 
+def fig_sprint(e34):
+    """E34: solved-vs-budget curves per allocation condition on owsb-atomic."""
+    styles = {
+        "fixed": (SLATE, "-", "o", "fixed 4/task (standard protocol)"),
+        "round_robin": (BLUE, "--", "s", "round-robin (pinned seed)"),
+        "greedy": (RED, ":", "v", "greedy min-failing (pinned seed)"),
+        "round_robin_jitter": (TEAL, "-", "D", "round-robin + per-attempt seeds"),
+        "greedy_jitter": (ORANGE, "-.", "^", "greedy + per-attempt seeds"),
+    }
+    fig, ax = plt.subplots(figsize=(6.4, 3.7))
+    for cond in e34["conditions"]:
+        name = cond["condition"]
+        color, ls, marker, label = styles[name]
+        xs = [0] + [e["attempt_index"] for e in cond["events"]]
+        ys = [0] + [e["cumulative_solved"] for e in cond["events"]]
+        ax.plot(xs, ys, ls, color=color, lw=1.9, marker=marker, markersize=3,
+                markevery=max(1, len(xs) // 16), label=label)
+    ax.axhline(e34["conditions"][0]["n_tasks"], color="#9CA3AF", lw=0.8,
+               ls=(0, (1, 3)))
+    ax.text(1, e34["conditions"][0]["n_tasks"] + 0.25, "all tasks",
+            fontsize=7, color="#9CA3AF")
+    ax.set_xlabel(f"Repair attempts consumed (budget {e34['total_budget']})")
+    ax.set_ylabel("Tasks solved")
+    ax.set_xlim(0, e34["total_budget"] + 1)
+    ax.set_ylim(0, e34["conditions"][0]["n_tasks"] + 2)
+    ax.set_yticks(range(0, e34["conditions"][0]["n_tasks"] + 1, 5))
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=7, loc="center right")
+    fig.tight_layout()
+    fig.savefig(FIGS / "sprint.png", dpi=200)
+    plt.close(fig)
+
+
 def table_planning(e22):
     labels = {
         "code_d3": "\\textbf{Lookahead d=3 via synthesized code}",
@@ -838,7 +871,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "32"),
+        macro("NumExperiments", "33"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1040,6 +1073,7 @@ def main():
     fig_composition_cliff(data["e20_complexity"], data["e30_composition"])
     fig_traversal(data["e31_nested_fidelity"])
     fig_dynamic_traversal(data["e33_dynamic_traversal"])
+    fig_sprint(data["e34_composite_swe"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])

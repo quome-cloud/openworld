@@ -1,0 +1,1995 @@
+{
+  "model": "qwen2.5:7b",
+  "dataset": "owsb-atomic",
+  "dataset_version": "v1",
+  "tasks_jsonl_sha256": "2aa0f691d30ee9b67e2436b16c1c431500b7aa3d5a35639de42f9098a00df156",
+  "per_task_budget": 4,
+  "total_budget": 80,
+  "summary": [
+    {
+      "condition": "fixed",
+      "solved": 15,
+      "n_tasks": 20,
+      "solved_rate": 0.75,
+      "solved_ci": [
+        0.5312949900419365,
+        0.888139947210597
+      ],
+      "attempts_consumed": 36,
+      "task_switches": 19,
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 4,
+        "openworld-swebench-002-pagination-last-page": 1,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 4,
+        "openworld-swebench-005-interval-merge-touching": 1,
+        "openworld-swebench-006-bank-ledger-overdraft": 1,
+        "openworld-swebench-007-tokenizer-quoted-strings": 1,
+        "openworld-swebench-008-graph-bfs-distance": 1,
+        "openworld-swebench-009-priority-queue-stability": 1,
+        "openworld-swebench-010-roman-numerals-subtractive": 1,
+        "openworld-swebench-011-date-add-days-leap": 1,
+        "openworld-swebench-012-stats-variance-bias": 4,
+        "openworld-swebench-013-rpn-operand-order": 2,
+        "openworld-swebench-014-cart-coupon-stacking": 1,
+        "openworld-swebench-015-matrix-multiply-index": 1,
+        "openworld-swebench-016-histogram-bin-edge": 4,
+        "openworld-swebench-017-query-string-repeats": 1,
+        "openworld-swebench-018-scheduler-containment": 1,
+        "openworld-swebench-019-runlength-segments": 1,
+        "openworld-swebench-020-thermostat-hysteresis": 4
+      },
+      "seconds": 367.9
+    },
+    {
+      "condition": "round_robin",
+      "solved": 15,
+      "n_tasks": 20,
+      "solved_rate": 0.75,
+      "solved_ci": [
+        0.5312949900419365,
+        0.888139947210597
+      ],
+      "attempts_consumed": 80,
+      "task_switches": 79,
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 13,
+        "openworld-swebench-002-pagination-last-page": 1,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 13,
+        "openworld-swebench-005-interval-merge-touching": 1,
+        "openworld-swebench-006-bank-ledger-overdraft": 1,
+        "openworld-swebench-007-tokenizer-quoted-strings": 1,
+        "openworld-swebench-008-graph-bfs-distance": 1,
+        "openworld-swebench-009-priority-queue-stability": 1,
+        "openworld-swebench-010-roman-numerals-subtractive": 1,
+        "openworld-swebench-011-date-add-days-leap": 1,
+        "openworld-swebench-012-stats-variance-bias": 13,
+        "openworld-swebench-013-rpn-operand-order": 2,
+        "openworld-swebench-014-cart-coupon-stacking": 1,
+        "openworld-swebench-015-matrix-multiply-index": 1,
+        "openworld-swebench-016-histogram-bin-edge": 13,
+        "openworld-swebench-017-query-string-repeats": 1,
+        "openworld-swebench-018-scheduler-containment": 1,
+        "openworld-swebench-019-runlength-segments": 1,
+        "openworld-swebench-020-thermostat-hysteresis": 12
+      },
+      "seconds": 576.1
+    },
+    {
+      "condition": "greedy",
+      "solved": 1,
+      "n_tasks": 20,
+      "solved_rate": 0.05,
+      "solved_ci": [
+        0.008881219432873136,
+        0.23613589351256675
+      ],
+      "attempts_consumed": 80,
+      "task_switches": 2,
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 1,
+        "openworld-swebench-002-pagination-last-page": 0,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 78,
+        "openworld-swebench-005-interval-merge-touching": 0,
+        "openworld-swebench-006-bank-ledger-overdraft": 0,
+        "openworld-swebench-007-tokenizer-quoted-strings": 0,
+        "openworld-swebench-008-graph-bfs-distance": 0,
+        "openworld-swebench-009-priority-queue-stability": 0,
+        "openworld-swebench-010-roman-numerals-subtractive": 0,
+        "openworld-swebench-011-date-add-days-leap": 0,
+        "openworld-swebench-012-stats-variance-bias": 0,
+        "openworld-swebench-013-rpn-operand-order": 0,
+        "openworld-swebench-014-cart-coupon-stacking": 0,
+        "openworld-swebench-015-matrix-multiply-index": 0,
+        "openworld-swebench-016-histogram-bin-edge": 0,
+        "openworld-swebench-017-query-string-repeats": 0,
+        "openworld-swebench-018-scheduler-containment": 0,
+        "openworld-swebench-019-runlength-segments": 0,
+        "openworld-swebench-020-thermostat-hysteresis": 0
+      },
+      "seconds": 636.7
+    }
+  ],
+  "conditions": [
+    {
+      "condition": "fixed",
+      "solved": 15,
+      "n_tasks": 20,
+      "solved_rate": 0.75,
+      "solved_ci": [
+        0.5312949900419365,
+        0.888139947210597
+      ],
+      "attempts_consumed": 36,
+      "task_switches": 19,
+      "events": [
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 1,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 2,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 3,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 4,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-002-pagination-last-page",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 19,
+          "attempt_index": 5,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-003-lru-cache-eviction",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 18,
+          "attempt_index": 6,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 3,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 18,
+          "attempt_index": 7,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 18,
+          "attempt_index": 8,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 18,
+          "attempt_index": 9,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 18,
+          "attempt_index": 10,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-005-interval-merge-touching",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 17,
+          "attempt_index": 11,
+          "cumulative_solved": 3
+        },
+        {
+          "task": "openworld-swebench-006-bank-ledger-overdraft",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 16,
+          "attempt_index": 12,
+          "cumulative_solved": 4
+        },
+        {
+          "task": "openworld-swebench-007-tokenizer-quoted-strings",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 15,
+          "attempt_index": 13,
+          "cumulative_solved": 5
+        },
+        {
+          "task": "openworld-swebench-008-graph-bfs-distance",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 14,
+          "attempt_index": 14,
+          "cumulative_solved": 6
+        },
+        {
+          "task": "openworld-swebench-009-priority-queue-stability",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 13,
+          "attempt_index": 15,
+          "cumulative_solved": 7
+        },
+        {
+          "task": "openworld-swebench-010-roman-numerals-subtractive",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 12,
+          "attempt_index": 16,
+          "cumulative_solved": 8
+        },
+        {
+          "task": "openworld-swebench-011-date-add-days-leap",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 11,
+          "attempt_index": 17,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 3,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 18,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 19,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 20,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 21,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-013-rpn-operand-order",
+          "failing_before": 4,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 22,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-013-rpn-operand-order",
+          "failing_before": 2,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 10,
+          "attempt_index": 23,
+          "cumulative_solved": 10
+        },
+        {
+          "task": "openworld-swebench-014-cart-coupon-stacking",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 9,
+          "attempt_index": 24,
+          "cumulative_solved": 11
+        },
+        {
+          "task": "openworld-swebench-015-matrix-multiply-index",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 8,
+          "attempt_index": 25,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 8,
+          "attempt_index": 26,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 8,
+          "attempt_index": 27,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 8,
+          "attempt_index": 28,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 8,
+          "attempt_index": 29,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-017-query-string-repeats",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 7,
+          "attempt_index": 30,
+          "cumulative_solved": 13
+        },
+        {
+          "task": "openworld-swebench-018-scheduler-containment",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 6,
+          "attempt_index": 31,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-019-runlength-segments",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 5,
+          "attempt_index": 32,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 33,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 34,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 35,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 36,
+          "cumulative_solved": 15
+        }
+      ],
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 4,
+        "openworld-swebench-002-pagination-last-page": 1,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 4,
+        "openworld-swebench-005-interval-merge-touching": 1,
+        "openworld-swebench-006-bank-ledger-overdraft": 1,
+        "openworld-swebench-007-tokenizer-quoted-strings": 1,
+        "openworld-swebench-008-graph-bfs-distance": 1,
+        "openworld-swebench-009-priority-queue-stability": 1,
+        "openworld-swebench-010-roman-numerals-subtractive": 1,
+        "openworld-swebench-011-date-add-days-leap": 1,
+        "openworld-swebench-012-stats-variance-bias": 4,
+        "openworld-swebench-013-rpn-operand-order": 2,
+        "openworld-swebench-014-cart-coupon-stacking": 1,
+        "openworld-swebench-015-matrix-multiply-index": 1,
+        "openworld-swebench-016-histogram-bin-edge": 4,
+        "openworld-swebench-017-query-string-repeats": 1,
+        "openworld-swebench-018-scheduler-containment": 1,
+        "openworld-swebench-019-runlength-segments": 1,
+        "openworld-swebench-020-thermostat-hysteresis": 4
+      },
+      "seconds": 367.9
+    },
+    {
+      "condition": "round_robin",
+      "solved": 15,
+      "n_tasks": 20,
+      "solved_rate": 0.75,
+      "solved_ci": [
+        0.5312949900419365,
+        0.888139947210597
+      ],
+      "attempts_consumed": 80,
+      "task_switches": 79,
+      "events": [
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 1,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-002-pagination-last-page",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 19,
+          "attempt_index": 2,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-003-lru-cache-eviction",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 18,
+          "attempt_index": 3,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 3,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 18,
+          "attempt_index": 4,
+          "cumulative_solved": 2
+        },
+        {
+          "task": "openworld-swebench-005-interval-merge-touching",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 17,
+          "attempt_index": 5,
+          "cumulative_solved": 3
+        },
+        {
+          "task": "openworld-swebench-006-bank-ledger-overdraft",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 16,
+          "attempt_index": 6,
+          "cumulative_solved": 4
+        },
+        {
+          "task": "openworld-swebench-007-tokenizer-quoted-strings",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 15,
+          "attempt_index": 7,
+          "cumulative_solved": 5
+        },
+        {
+          "task": "openworld-swebench-008-graph-bfs-distance",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 14,
+          "attempt_index": 8,
+          "cumulative_solved": 6
+        },
+        {
+          "task": "openworld-swebench-009-priority-queue-stability",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 13,
+          "attempt_index": 9,
+          "cumulative_solved": 7
+        },
+        {
+          "task": "openworld-swebench-010-roman-numerals-subtractive",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 12,
+          "attempt_index": 10,
+          "cumulative_solved": 8
+        },
+        {
+          "task": "openworld-swebench-011-date-add-days-leap",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 11,
+          "attempt_index": 11,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 3,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 12,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-013-rpn-operand-order",
+          "failing_before": 4,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 11,
+          "attempt_index": 13,
+          "cumulative_solved": 9
+        },
+        {
+          "task": "openworld-swebench-014-cart-coupon-stacking",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 10,
+          "attempt_index": 14,
+          "cumulative_solved": 10
+        },
+        {
+          "task": "openworld-swebench-015-matrix-multiply-index",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 9,
+          "attempt_index": 15,
+          "cumulative_solved": 11
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 9,
+          "attempt_index": 16,
+          "cumulative_solved": 11
+        },
+        {
+          "task": "openworld-swebench-017-query-string-repeats",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 8,
+          "attempt_index": 17,
+          "cumulative_solved": 12
+        },
+        {
+          "task": "openworld-swebench-018-scheduler-containment",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 7,
+          "attempt_index": 18,
+          "cumulative_solved": 13
+        },
+        {
+          "task": "openworld-swebench-019-runlength-segments",
+          "failing_before": 4,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 6,
+          "attempt_index": 19,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 6,
+          "attempt_index": 20,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 6,
+          "attempt_index": 21,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 6,
+          "attempt_index": 22,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 6,
+          "attempt_index": 23,
+          "cumulative_solved": 14
+        },
+        {
+          "task": "openworld-swebench-013-rpn-operand-order",
+          "failing_before": 2,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 5,
+          "attempt_index": 24,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 25,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 26,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 27,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 28,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 29,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 30,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 31,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 32,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 33,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 34,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 35,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 36,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 37,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 38,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 39,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 40,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 41,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 42,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 43,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 44,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 45,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 46,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 47,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 48,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 49,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 50,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 51,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 52,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 53,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 54,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 55,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 56,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 57,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 58,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 59,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 60,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 61,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 62,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 63,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 64,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 65,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 66,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 67,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 68,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 69,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 70,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 71,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 72,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 73,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 74,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 75,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-020-thermostat-hysteresis",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 76,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 77,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 78,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-012-stats-variance-bias",
+          "failing_before": 5,
+          "failing_after": 5,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 79,
+          "cumulative_solved": 15
+        },
+        {
+          "task": "openworld-swebench-016-histogram-bin-edge",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 5,
+          "attempt_index": 80,
+          "cumulative_solved": 15
+        }
+      ],
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 13,
+        "openworld-swebench-002-pagination-last-page": 1,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 13,
+        "openworld-swebench-005-interval-merge-touching": 1,
+        "openworld-swebench-006-bank-ledger-overdraft": 1,
+        "openworld-swebench-007-tokenizer-quoted-strings": 1,
+        "openworld-swebench-008-graph-bfs-distance": 1,
+        "openworld-swebench-009-priority-queue-stability": 1,
+        "openworld-swebench-010-roman-numerals-subtractive": 1,
+        "openworld-swebench-011-date-add-days-leap": 1,
+        "openworld-swebench-012-stats-variance-bias": 13,
+        "openworld-swebench-013-rpn-operand-order": 2,
+        "openworld-swebench-014-cart-coupon-stacking": 1,
+        "openworld-swebench-015-matrix-multiply-index": 1,
+        "openworld-swebench-016-histogram-bin-edge": 13,
+        "openworld-swebench-017-query-string-repeats": 1,
+        "openworld-swebench-018-scheduler-containment": 1,
+        "openworld-swebench-019-runlength-segments": 1,
+        "openworld-swebench-020-thermostat-hysteresis": 12
+      },
+      "seconds": 576.1
+    },
+    {
+      "condition": "greedy",
+      "solved": 1,
+      "n_tasks": 20,
+      "solved_rate": 0.05,
+      "solved_ci": [
+        0.008881219432873136,
+        0.23613589351256675
+      ],
+      "attempts_consumed": 80,
+      "task_switches": 2,
+      "events": [
+        {
+          "task": "openworld-swebench-001-rate-limiter-window",
+          "failing_before": 3,
+          "failing_after": 3,
+          "solved": false,
+          "open_tasks": 20,
+          "attempt_index": 1,
+          "cumulative_solved": 0
+        },
+        {
+          "task": "openworld-swebench-003-lru-cache-eviction",
+          "failing_before": 3,
+          "failing_after": 0,
+          "solved": true,
+          "open_tasks": 19,
+          "attempt_index": 2,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 3,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 3,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 4,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 5,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 6,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 7,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 8,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 9,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 10,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 11,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 12,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 13,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 14,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 15,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 16,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 17,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 18,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 19,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 20,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 21,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 22,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 23,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 24,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 25,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 26,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 27,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 28,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 29,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 30,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 31,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 32,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 33,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 34,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 35,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 36,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 37,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 38,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 39,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 40,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 41,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 42,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 43,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 44,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 45,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 46,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 47,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 48,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 49,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 50,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 51,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 52,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 53,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 54,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 55,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 56,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 57,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 58,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 59,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 60,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 61,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 62,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 63,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 64,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 65,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 66,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 67,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 68,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 69,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 70,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 71,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 72,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 73,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 74,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 75,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 76,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 77,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 78,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 79,
+          "cumulative_solved": 1
+        },
+        {
+          "task": "openworld-swebench-004-text-wrap-long-word",
+          "failing_before": 2,
+          "failing_after": 2,
+          "solved": false,
+          "open_tasks": 19,
+          "attempt_index": 80,
+          "cumulative_solved": 1
+        }
+      ],
+      "attempts_per_task": {
+        "openworld-swebench-001-rate-limiter-window": 1,
+        "openworld-swebench-002-pagination-last-page": 0,
+        "openworld-swebench-003-lru-cache-eviction": 1,
+        "openworld-swebench-004-text-wrap-long-word": 78,
+        "openworld-swebench-005-interval-merge-touching": 0,
+        "openworld-swebench-006-bank-ledger-overdraft": 0,
+        "openworld-swebench-007-tokenizer-quoted-strings": 0,
+        "openworld-swebench-008-graph-bfs-distance": 0,
+        "openworld-swebench-009-priority-queue-stability": 0,
+        "openworld-swebench-010-roman-numerals-subtractive": 0,
+        "openworld-swebench-011-date-add-days-leap": 0,
+        "openworld-swebench-012-stats-variance-bias": 0,
+        "openworld-swebench-013-rpn-operand-order": 0,
+        "openworld-swebench-014-cart-coupon-stacking": 0,
+        "openworld-swebench-015-matrix-multiply-index": 0,
+        "openworld-swebench-016-histogram-bin-edge": 0,
+        "openworld-swebench-017-query-string-repeats": 0,
+        "openworld-swebench-018-scheduler-containment": 0,
+        "openworld-swebench-019-runlength-segments": 0,
+        "openworld-swebench-020-thermostat-hysteresis": 0
+      },
+      "seconds": 636.7
+    }
+  ],
+  "experiment": "e34_composite_swe",
+  "timestamp": "2026-06-12T15:40:08",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

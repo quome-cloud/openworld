@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from openworld.bench import RecipeError, load_recipe, validate_dataset
+from openworld.bench import RecipeError, evaluate, load_recipe, mock_factory, summarize, validate_dataset
 
 ATOMIC_RECIPE = "recipes/owsb-atomic-v1.json"
 STAGED_RECIPE = "recipes/owsb-staged-v1.json"
@@ -64,3 +64,35 @@ def test_validate_catches_artifact_drift(tmp_path):
     report = validate_dataset(recipe)
     assert report["ok"] is False
     assert any("sha256" in c["name"] and not c["ok"] for c in report["checks"])
+
+
+def test_evaluate_mock_oracle_second_try(tmp_path):
+    recipe = load_recipe(ATOMIC_RECIPE)
+    result = evaluate(recipe, model="mock", llm_factory=mock_factory,
+                      budget=4, mock=True, results_dir=tmp_path)
+    out = tmp_path / "mock.json"
+    assert out.exists()
+    saved = json.loads(out.read_text(encoding="utf-8"))
+    assert saved["result_schema_version"] == 1
+    assert saved["dataset"] == "owsb-atomic"
+    assert saved["recipe_sha256"] == recipe["_recipe_sha256"]
+    assert saved["mock"] is True
+    assert saved["n_instances"] == 20
+    assert len(saved["rows"]) == 20
+    row = saved["rows"][0]
+    assert set(row) == {"instance_id", "single_shot", "in_world"}
+    s = saved["summary"]
+    assert s["single_shot_pass_at_1"] == 0.0
+    assert s["in_world_pass_at_budget"] == 1.0
+    assert s["delta"] == 1.0
+    assert s["mean_attempts_when_solved"] == 2.0
+    assert result["summary"] == s
+
+
+def test_summarize_handles_no_solves():
+    rows = [{"instance_id": "x",
+             "single_shot": {"solved": False, "solved_first_attempt": False, "attempts": 1},
+             "in_world": {"solved": False, "solved_first_attempt": False, "attempts": 4}}]
+    s = summarize(rows, budget=4)
+    assert s["mean_attempts_when_solved"] is None
+    assert s["delta"] == 0.0

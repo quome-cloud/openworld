@@ -125,3 +125,115 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
         "ok": all(c["ok"] for c in checks),
         "checks": checks,
     }
+
+
+def mock_factory(instance):
+    """Offline smoke model: garbage first, the oracle patch second."""
+    from .llm import MockLLM
+
+    return MockLLM([
+        "I think the bug is in the loop, roughly.",
+        f"```python\n{instance.reference_source}\n```",
+    ])
+
+
+def _model_slug(model: str) -> str:
+    return "".join(c if c.isalnum() or c in "._-" else "-" for c in model)
+
+
+def _ollama_digest(model: str) -> Optional[str]:
+    """Best-effort digest lookup from a local Ollama; None when unavailable."""
+    import urllib.request
+
+    try:
+        with urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3) as fh:
+            tags = json.loads(fh.read().decode("utf-8"))
+        for entry in tags.get("models", []):
+            if entry.get("name") == model or entry.get("model") == model:
+                return entry.get("digest")
+    except Exception:
+        return None
+    return None
+
+
+def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
+    n = len(rows)
+    single = sum(r["single_shot"]["solved"] for r in rows)
+    world_first = sum(r["in_world"]["solved_first_attempt"] for r in rows)
+    world_budget = sum(r["in_world"]["solved"] for r in rows)
+    solved_attempts = [r["in_world"]["attempts"] for r in rows if r["in_world"]["solved"]]
+    return {
+        "n_instances": n,
+        "budget": budget,
+        "single_shot_pass_at_1": single / n,
+        "single_shot_pass_at_1_ci": list(wilson_ci(single, n)),
+        "in_world_pass_at_1": world_first / n,
+        "in_world_pass_at_1_ci": list(wilson_ci(world_first, n)),
+        "in_world_pass_at_budget": world_budget / n,
+        "in_world_pass_at_budget_ci": list(wilson_ci(world_budget, n)),
+        "delta": (world_budget - single) / n,
+        "mean_attempts_when_solved": (
+            sum(solved_attempts) / len(solved_attempts) if solved_attempts else None
+        ),
+    }
+
+
+def evaluate(recipe, model, llm_factory, budget=None, mock=False,
+             results_dir=None) -> Dict[str, Any]:
+    """Run the paired ablation for one model; write one frozen-schema file."""
+    from datetime import datetime
+
+    from .swebench import load_dataset, solve_in_world, solve_single_shot
+
+    instances = load_dataset(recipe["dataset"]["path"])
+    budget = budget or recipe["eval"]["budget"]
+    rows = []
+    for inst in instances:
+        single = solve_single_shot(inst, llm_factory(inst))
+        in_world = solve_in_world(inst, llm_factory(inst), budget=budget)
+        rows.append({"instance_id": inst.instance_id,
+                     "single_shot": single, "in_world": in_world})
+        print(f"  {inst.instance_id}: "
+              f"single-shot={'Y' if single['solved'] else 'n'} "
+              f"in-world={'Y' if in_world['solved'] else 'n'} "
+              f"({in_world['attempts']} att)")
+    result = {
+        "result_schema_version": RESULT_SCHEMA_VERSION,
+        "dataset": recipe["dataset"]["name"],
+        "dataset_version": recipe["dataset"]["version"],
+        "recipe_sha256": recipe["_recipe_sha256"],
+        "tasks_jsonl_sha256": sha256_file(recipe["dataset"]["path"]),
+        "model": model,
+        "model_digest": None if mock else _ollama_digest(model),
+        "mock": bool(mock),
+        "budget": budget,
+        "n_instances": len(rows),
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "rows": rows,
+        "summary": summarize(rows, budget),
+    }
+    results_dir = Path(results_dir) if results_dir else (
+        recipe["dataset"]["path"].parent / "results")
+    results_dir.mkdir(exist_ok=True)
+    out = results_dir / f"{_model_slug(model)}.json"
+    out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(f"[saved] {out}")
+    return result
+
+
+def markdown_table(results: List[Dict[str, Any]]) -> str:
+    budget = results[0]["budget"] if results else 0
+    lines = [
+        f"| model | single-shot pass@1 | in-world pass@1 | in-world pass@{budget} "
+        f"| Δ (pass@{budget} − SS) | mean attempts |",
+        "|---|---|---|---|---|---|",
+    ]
+    for r in results:
+        s = r["summary"]
+        mean_att = (f"{s['mean_attempts_when_solved']:.1f}"
+                    if s["mean_attempts_when_solved"] is not None else "—")
+        lines.append(
+            f"| {r['model']} | {s['single_shot_pass_at_1']:.0%} | "
+            f"{s['in_world_pass_at_1']:.0%} | {s['in_world_pass_at_budget']:.0%} | "
+            f"{s['delta']:+.0%} | {mean_att} |")
+    return "\n".join(lines)

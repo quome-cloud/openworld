@@ -11,7 +11,7 @@ Do not edit by hand; regeneration is deterministic for a frozen recipe.*
 |---|---|
 | generator | hand (`datasets/openworld-swebench/build_tasks.py`) |
 | generator seed | None |
-| recipe | `recipes/owsb-atomic-v1.json` (sha256 `a728f6c8894e…`) |
+| recipe | `recipes/owsb-atomic-v1.json` (sha256 `a037182faf87…`) |
 | tasks.jsonl sha256 (frozen) | `2aa0f691d30ee9b67e2436b16c1c431500b7aa3d5a35639de42f9098a00df156` |
 
 ## Gate
@@ -26,7 +26,7 @@ the artifact hash matches the recipe when frozen.
 
 Paired ablation per instance: the same model single-shot (one completion,
 no feedback) and in-world (iterative `submit_patch` against exact dynamics,
-budget 4). Default ladder: qwen2.5:1.5b, qwen2.5:3b, qwen2.5:7b, llama3.2.
+budget 4). Default ladder: qwen2.5:1.5b, qwen2.5:3b, qwen2.5:7b.
 Per-instance paired records are always saved so exact tests (e.g. McNemar)
 remain possible.
 

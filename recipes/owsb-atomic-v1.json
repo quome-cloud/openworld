@@ -18,12 +18,18 @@
     "models": [
       "qwen2.5:1.5b",
       "qwen2.5:3b",
-      "qwen2.5:7b",
-      "llama3.2"
+      "qwen2.5:7b"
     ],
     "budget": 4,
     "temperature": 0.2,
-    "seed": 41
+    "seed": 41,
+    "seeds": [
+      41,
+      42,
+      43,
+      44,
+      45
+    ]
   },
   "artifacts": {
     "tasks_jsonl_sha256": "2aa0f691d30ee9b67e2436b16c1c431500b7aa3d5a35639de42f9098a00df156"

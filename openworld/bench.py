@@ -77,6 +77,11 @@ def wilson_ci(successes: int, n: int, z: float = 1.96):
     return (max(0.0, center - half), min(1.0, center + half))
 
 
+def harness_kind(recipe: Dict[str, Any]) -> str:
+    """The harness dispatch kind; defaults to the original swebench ablation."""
+    return recipe.get("harness", {}).get("kind", "swebench")
+
+
 def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     """Gate v1: every check the dataset must pass before results count.
 
@@ -85,16 +90,32 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     - buggy fails ALL fail_to_pass and passes ALL pass_to_pass
     - stored world.initial_state matches recomputation
     - tasks.jsonl sha256 matches recipe.artifacts (when frozen)
-    """
-    from .swebench import initial_world_state, load_dataset, run_instance_tests
 
-    instances = load_dataset(recipe["dataset"]["path"])
+    For harness.kind == "contextbench" the unit of iteration is a
+    ContextBenchInstance whose `.task` IS a swebench instance, so the same
+    per-task gate runs against `inst.task`. The contextbench world only stores
+    a `source/attempts/solved` initial state (no per-suite counts), so the
+    initial-state drift check is run over exactly the keys present in the
+    stored state — still meaningful, just narrower than swebench's.
+    """
+    from .swebench import initial_world_state, run_instance_tests
+
+    kind = harness_kind(recipe)
+    if kind == "contextbench":
+        from .contextbench import load_dataset as load_cb
+        cb_instances = load_cb(recipe["dataset"]["path"])
+        instances = [c.task for c in cb_instances]
+        ids = [c.instance_id for c in cb_instances]
+    else:
+        from .swebench import load_dataset
+        instances = load_dataset(recipe["dataset"]["path"])
+        ids = [i.instance_id for i in instances]
+
     checks: List[Dict[str, Any]] = []
 
     def check(name: str, ok: bool, detail: str = "") -> None:
         checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
-    ids = [i.instance_id for i in instances]
     check("nonempty", len(instances) > 0, f"{len(instances)} instances")
     check("unique-ids", len(ids) == len(set(ids)))
 
@@ -107,10 +128,12 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
               buggy["fail_to_pass"]["passed"] == 0 and buggy["pass_to_pass"]["failed"] == 0)
         recomputed = initial_world_state(inst)
         stored = inst.world.get("initial_state", {})
+        # Gate over the keys the stored state actually carries (swebench stores
+        # the full per-suite counts; contextbench stores source/attempts/solved).
         drift = [k for k in ("fail_to_pass_passed", "fail_to_pass_failed",
                              "pass_to_pass_passed", "pass_to_pass_failed",
                              "attempts", "solved", "source")
-                 if stored.get(k) != recomputed[k]]
+                 if k in stored and stored.get(k) != recomputed[k]]
         check(f"initial-state:{inst.instance_id}", not drift, ",".join(drift))
 
     frozen = recipe["artifacts"].get("tasks_jsonl_sha256")
@@ -127,13 +150,29 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def mock_factory(instance):
-    """Offline smoke model: garbage first, the oracle patch second."""
+def _oracle_source(instance) -> str:
+    """The reference patch for either a swebench or contextbench instance."""
+    # ContextBenchInstance wraps a SWEBenchInstance in `.task`.
+    task = getattr(instance, "task", instance)
+    return task.reference_source
+
+
+def mock_factory(instance, seed=None):
+    """Offline smoke model: garbage first, the oracle patch second.
+
+    For contextbench the model is asked once per condition (no iteration), so
+    the oracle must be the FIRST response — the leading garbage line would make
+    the without/with-context single-shot fail. `solve_with/without_context`
+    extract the first code block, so we lead with the oracle for those.
+    """
     from .llm import MockLLM
 
+    oracle = _oracle_source(instance)
+    if getattr(instance, "task", None) is not None:  # contextbench: single ask
+        return MockLLM([f"```python\n{oracle}\n```"])
     return MockLLM([
         "I think the bug is in the loop, roughly.",
-        f"```python\n{instance.reference_source}\n```",
+        f"```python\n{oracle}\n```",
     ])
 
 
@@ -156,14 +195,37 @@ def _ollama_digest(model: str) -> Optional[str]:
     return None
 
 
+def _mcnemar_p(b: int, c: int) -> float:
+    """Two-sided exact McNemar (sign-test) p-value over discordant pairs.
+
+    b, c are the discordant counts (one condition solved, the other didn't).
+    Exact binomial under H0 p=0.5 — zero-dependency, valid for small samples.
+    """
+    from math import comb
+
+    n = b + c
+    if n == 0:
+        return 1.0
+    k = min(b, c)
+    tail = sum(comb(n, i) for i in range(k + 1)) * (0.5 ** n)
+    return min(1.0, 2.0 * tail)
+
+
 def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
-    n = len(rows)
+    n = len(rows)  # total paired trials = n_instances x n_seeds
     single = sum(r["single_shot"]["solved"] for r in rows)
     world_first = sum(r["in_world"]["solved_first_attempt"] for r in rows)
     world_budget = sum(r["in_world"]["solved"] for r in rows)
     solved_attempts = [r["in_world"]["attempts"] for r in rows if r["in_world"]["solved"]]
+    # Paired McNemar: in-world(budget) vs single-shot over every trial.
+    iw_wins = sum(1 for r in rows
+                  if r["in_world"]["solved"] and not r["single_shot"]["solved"])
+    ss_wins = sum(1 for r in rows
+                  if r["single_shot"]["solved"] and not r["in_world"]["solved"])
     return {
-        "n_instances": n,
+        "n_instances": len({r["instance_id"] for r in rows}),
+        "n_seeds": len({r.get("seed", 0) for r in rows}),
+        "n_trials": n,
         "budget": budget,
         "single_shot_pass_at_1": single / n,
         "single_shot_pass_at_1_ci": list(wilson_ci(single, n)),
@@ -172,31 +234,74 @@ def summarize(rows: List[Dict[str, Any]], budget: int) -> Dict[str, Any]:
         "in_world_pass_at_budget": world_budget / n,
         "in_world_pass_at_budget_ci": list(wilson_ci(world_budget, n)),
         "delta": (world_budget - single) / n,
+        "mcnemar_in_world_wins": iw_wins,
+        "mcnemar_single_shot_wins": ss_wins,
+        "mcnemar_p_value": _mcnemar_p(iw_wins, ss_wins),
         "mean_attempts_when_solved": (
             sum(solved_attempts) / len(solved_attempts) if solved_attempts else None
         ),
     }
 
 
-def evaluate(recipe, model, llm_factory, budget=None, mock=False,
-             results_dir=None) -> Dict[str, Any]:
-    """Run the paired ablation for one model; write one frozen-schema file."""
+def summarize_contextbench(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Summary for the with-context vs without-context ablation.
+
+    `rows` carry {instance_id, seed, without, with} where without/with each hold
+    at least "solved". Reports both pass@1 rates + Wilson CIs, their delta, and
+    an exact paired McNemar over the discordant trials (reusing `_mcnemar_p`).
+    """
+    n = len(rows)  # total paired trials = n_instances x n_seeds
+    without = sum(r["without"]["solved"] for r in rows)
+    with_ = sum(r["with"]["solved"] for r in rows)
+    # Paired McNemar: with-context vs without-context over every trial.
+    wc_wins = sum(1 for r in rows
+                  if r["with"]["solved"] and not r["without"]["solved"])
+    woc_wins = sum(1 for r in rows
+                   if r["without"]["solved"] and not r["with"]["solved"])
+    return {
+        "n_instances": len({r["instance_id"] for r in rows}),
+        "n_seeds": len({r.get("seed", 0) for r in rows}),
+        "n_trials": n,
+        "without_context_pass_at_1": without / n if n else 0.0,
+        "without_context_pass_at_1_ci": list(wilson_ci(without, n)),
+        "with_context_pass_at_1": with_ / n if n else 0.0,
+        "with_context_pass_at_1_ci": list(wilson_ci(with_, n)),
+        "delta": (with_ - without) / n if n else 0.0,
+        "mcnemar_with_context_wins": wc_wins,
+        "mcnemar_without_context_wins": woc_wins,
+        "mcnemar_p_value": _mcnemar_p(wc_wins, woc_wins),
+    }
+
+
+def evaluate_contextbench(recipe, model, llm_factory, mock=False,
+                          results_dir=None, seeds=None) -> Dict[str, Any]:
+    """Run the with-context vs without-context ablation for one model.
+
+    Result-file shape is kept parallel to the swebench `evaluate` (same
+    top-level keys) so results stay comparable across harness kinds.
+    `budget` is carried (from recipe.eval.budget) but unused — contextbench has
+    no iteration budget; the field exists only for schema parity.
+    """
     from datetime import datetime
 
-    from .swebench import load_dataset, solve_in_world, solve_single_shot
+    from .contextbench import (
+        load_dataset, solve_with_context, solve_without_context,
+    )
 
     instances = load_dataset(recipe["dataset"]["path"])
-    budget = budget or recipe["eval"]["budget"]
+    budget = recipe["eval"].get("budget")  # unused; schema parity only
+    seeds = list(seeds) if seeds else [recipe["eval"].get("seed", 41)]
     rows = []
     for inst in instances:
-        single = solve_single_shot(inst, llm_factory(inst))
-        in_world = solve_in_world(inst, llm_factory(inst), budget=budget)
-        rows.append({"instance_id": inst.instance_id,
-                     "single_shot": single, "in_world": in_world})
-        print(f"  {inst.instance_id}: "
-              f"single-shot={'Y' if single['solved'] else 'n'} "
-              f"in-world={'Y' if in_world['solved'] else 'n'} "
-              f"({in_world['attempts']} att)")
+        for sd in seeds:
+            without = solve_without_context(inst, llm_factory(inst, sd))
+            with_ = solve_with_context(inst, llm_factory(inst, sd))
+            rows.append({"instance_id": inst.instance_id, "seed": sd,
+                         "without": without, "with": with_})
+            tag = f" seed={sd}" if len(seeds) > 1 else ""
+            print(f"  {inst.instance_id}{tag}: "
+                  f"without-context={'Y' if without['solved'] else 'n'} "
+                  f"with-context={'Y' if with_['solved'] else 'n'}")
     result = {
         "result_schema_version": RESULT_SCHEMA_VERSION,
         "dataset": recipe["dataset"]["name"],
@@ -207,7 +312,64 @@ def evaluate(recipe, model, llm_factory, budget=None, mock=False,
         "model_digest": None if mock else _ollama_digest(model),
         "mock": bool(mock),
         "budget": budget,
-        "n_instances": len(rows),
+        "seeds": seeds,
+        "n_seeds": len(seeds),
+        "n_instances": len(instances),
+        "n_trials": len(rows),
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "rows": rows,
+        "summary": summarize_contextbench(rows),
+    }
+    results_dir = Path(results_dir) if results_dir else (
+        recipe["dataset"]["path"].parent / "results")
+    results_dir.mkdir(exist_ok=True)
+    out = results_dir / f"{_model_slug(model)}.json"
+    out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(f"[saved] {out}")
+    return result
+
+
+def evaluate(recipe, model, llm_factory, budget=None, mock=False,
+             results_dir=None, seeds=None) -> Dict[str, Any]:
+    """Run the paired ablation for one model; write one frozen-schema file.
+
+    With multiple `seeds`, each instance is run once per seed (n_instances x
+    n_seeds paired trials), tightening the CIs and powering the McNemar test.
+    `llm_factory(instance, seed)` builds the model for a given seed.
+    """
+    from datetime import datetime
+
+    from .swebench import load_dataset, solve_in_world, solve_single_shot
+
+    instances = load_dataset(recipe["dataset"]["path"])
+    budget = budget or recipe["eval"]["budget"]
+    seeds = list(seeds) if seeds else [recipe["eval"].get("seed", 41)]
+    rows = []
+    for inst in instances:
+        for sd in seeds:
+            single = solve_single_shot(inst, llm_factory(inst, sd))
+            in_world = solve_in_world(inst, llm_factory(inst, sd), budget=budget)
+            rows.append({"instance_id": inst.instance_id, "seed": sd,
+                         "single_shot": single, "in_world": in_world})
+            tag = f" seed={sd}" if len(seeds) > 1 else ""
+            print(f"  {inst.instance_id}{tag}: "
+                  f"single-shot={'Y' if single['solved'] else 'n'} "
+                  f"in-world={'Y' if in_world['solved'] else 'n'} "
+                  f"({in_world['attempts']} att)")
+    result = {
+        "result_schema_version": RESULT_SCHEMA_VERSION,
+        "dataset": recipe["dataset"]["name"],
+        "dataset_version": recipe["dataset"]["version"],
+        "recipe_sha256": recipe["_recipe_sha256"],
+        "tasks_jsonl_sha256": sha256_file(recipe["dataset"]["path"]),
+        "model": model,
+        "model_digest": None if mock else _ollama_digest(model),
+        "mock": bool(mock),
+        "budget": budget,
+        "seeds": seeds,
+        "n_seeds": len(seeds),
+        "n_instances": len(instances),
+        "n_trials": len(rows),
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "rows": rows,
         "summary": summarize(rows, budget),
@@ -230,6 +392,27 @@ def write_card(recipe, validate_report, out=None) -> Path:
                  else "GATE FAILING: " + "; ".join(
                      c["name"] for c in validate_report["checks"] if not c["ok"]))
     frozen = recipe["artifacts"].get("tasks_jsonl_sha256") or "(not frozen)"
+    kind = harness_kind(recipe)
+    if kind == "contextbench":
+        protocol = f"""## Evaluation protocol
+
+With-context vs without-context ablation per instance: the same model solves
+the repair task once with no examples (without-context) and once with a short
+history of related, already-solved bugs prepended (with-context). The axis is
+in-context learning — does showing prior solved examples help the model
+transfer the fix pattern to a new module? Scoring is identical to swebench:
+solved = zero failures in both hidden suites. Default ladder: {', '.join(recipe['eval']['models'])}.
+Per-instance paired records are always saved so exact tests (e.g. McNemar)
+remain possible. (`eval.budget` is a schema-parity placeholder; contextbench
+has no iteration budget.)"""
+    else:
+        protocol = f"""## Evaluation protocol
+
+Paired ablation per instance: the same model single-shot (one completion,
+no feedback) and in-world (iterative `submit_patch` against exact dynamics,
+budget {recipe['eval']['budget']}). Default ladder: {', '.join(recipe['eval']['models'])}.
+Per-instance paired records are always saved so exact tests (e.g. McNemar)
+remain possible."""
     card = f"""# {ds['name']} {ds['version']}
 
 {ds['description']}
@@ -254,13 +437,7 @@ suites; the buggy source fails every `fail_to_pass` test and passes every
 `pass_to_pass` test; the stored world `initial_state` matches recomputation;
 the artifact hash matches the recipe when frozen.
 
-## Evaluation protocol
-
-Paired ablation per instance: the same model single-shot (one completion,
-no feedback) and in-world (iterative `submit_patch` against exact dynamics,
-budget {recipe['eval']['budget']}). Default ladder: {', '.join(recipe['eval']['models'])}.
-Per-instance paired records are always saved so exact tests (e.g. McNemar)
-remain possible.
+{protocol}
 
 ## Reproducibility tiers
 
@@ -278,7 +455,13 @@ remain possible.
     return out
 
 
+def _is_contextbench_summary(summary: Dict[str, Any]) -> bool:
+    return "with_context_pass_at_1" in summary
+
+
 def markdown_table(results: List[Dict[str, Any]]) -> str:
+    if results and _is_contextbench_summary(results[0]["summary"]):
+        return _markdown_table_contextbench(results)
     budget = results[0]["budget"] if results else 0
     lines = [
         f"| model | single-shot pass@1 | in-world pass@1 | in-world pass@{budget} "
@@ -293,6 +476,21 @@ def markdown_table(results: List[Dict[str, Any]]) -> str:
             f"| {r['model']} | {s['single_shot_pass_at_1']:.0%} | "
             f"{s['in_world_pass_at_1']:.0%} | {s['in_world_pass_at_budget']:.0%} | "
             f"{s['delta']:+.0%} | {mean_att} |")
+    return "\n".join(lines)
+
+
+def _markdown_table_contextbench(results: List[Dict[str, Any]]) -> str:
+    lines = [
+        "| model | without-context pass@1 | with-context pass@1 "
+        "| Δ (with − without) | McNemar p |",
+        "|---|---|---|---|---|",
+    ]
+    for r in results:
+        s = r["summary"]
+        lines.append(
+            f"| {r['model']} | {s['without_context_pass_at_1']:.0%} | "
+            f"{s['with_context_pass_at_1']:.0%} | {s['delta']:+.0%} | "
+            f"{s['mcnemar_p_value']:.3f} |")
     return "\n".join(lines)
 
 
@@ -329,6 +527,9 @@ def main(argv=None) -> int:
     parser.add_argument("--models", nargs="*", default=None,
                         help="override recipe eval.models")
     parser.add_argument("--budget", type=int, default=None)
+    parser.add_argument("--seeds", type=int, default=None,
+                        help="run N seeds per instance for multi-trial "
+                             "significance (McNemar); overrides recipe eval.seeds")
     parser.add_argument("--freeze", action="store_true",
                         help="with build: write the artifact hash into the recipe")
     args = parser.parse_args(argv)
@@ -351,9 +552,22 @@ def main(argv=None) -> int:
             raise SystemExit("gate failed; not running evaluation")
     if args.command in ("run", "all"):
         results = []
+        kind = harness_kind(recipe)
+        base_seed = recipe["eval"].get("seed", 41)
+        if args.seeds:
+            seeds = [base_seed + i for i in range(args.seeds)]
+        else:
+            seeds = recipe["eval"].get("seeds") or [base_seed]
+
+        def _run(model, factory, mock):
+            if kind == "contextbench":
+                return evaluate_contextbench(recipe, model, factory,
+                                             mock=mock, seeds=seeds)
+            return evaluate(recipe, model, factory,
+                            budget=args.budget, mock=mock, seeds=seeds)
+
         if args.mock:
-            results.append(evaluate(recipe, "mock", mock_factory,
-                                    budget=args.budget, mock=True))
+            results.append(_run("mock", mock_factory, True))
         else:
             from .llm import OllamaConnectionError, OllamaLLM
 
@@ -362,18 +576,17 @@ def main(argv=None) -> int:
             if len(set(slugs)) != len(slugs):
                 raise SystemExit(
                     f"model names collide after filename slugging: {models}")
+            temp = recipe["eval"].get("temperature", 0.2)
             for model in models:
-                llm = OllamaLLM(model=model,
-                                temperature=recipe["eval"].get("temperature", 0.2),
-                                options={"seed": recipe["eval"].get("seed", 41)})
+                def _factory(inst, sd, _m=model, _t=temp):
+                    return OllamaLLM(model=_m, temperature=_t, options={"seed": sd})
                 try:
-                    llm.ask("Reply with OK.")
+                    _factory(None, seeds[0]).ask("Reply with OK.")
                 except OllamaConnectionError as exc:
                     raise SystemExit(f"model {model!r} unavailable: {exc}")
-                print(f"[{model}] budget {args.budget or recipe['eval']['budget']}")
-                results.append(evaluate(recipe, model,
-                                        lambda inst, _llm=llm: _llm,
-                                        budget=args.budget))
+                print(f"[{model}] budget {args.budget or recipe['eval']['budget']} "
+                      f"seeds {seeds}")
+                results.append(_run(model, _factory, False))
         print("\n" + markdown_table(results))
     if args.command in ("card", "all"):
         if report is None:

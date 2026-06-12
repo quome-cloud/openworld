@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "owcb-contextbench",
+    "version": "v1",
+    "description": "15 in-context program-repair instances: each task carries related already-solved bugs sharing one fix pattern, for a with-context vs without-context ablation.",
+    "path": "datasets/openworld-contextbench/tasks.jsonl"
+  },
+  "generator": {
+    "type": "hand",
+    "builder": "datasets/openworld-contextbench/build_tasks.py",
+    "seed": null
+  },
+  "harness": {
+    "kind": "contextbench",
+    "result_schema_version": 1
+  },
+  "eval": {
+    "models": [
+      "qwen2.5:1.5b",
+      "qwen2.5:3b",
+      "qwen2.5:7b"
+    ],
+    "budget": 1,
+    "temperature": 0.2,
+    "seed": 41,
+    "seeds": [
+      41,
+      42,
+      43,
+      44,
+      45
+    ]
+  },
+  "artifacts": {
+    "tasks_jsonl_sha256": "dfaead3da19fb1b5a62d9dfaab74cd7e1a36451b71b76158942c34c04a419bba"
+  }
+}

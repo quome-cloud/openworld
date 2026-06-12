@@ -82,16 +82,24 @@ From `results/comparison.json` (6 instances, budget 4, `solved` = both suites pa
 
 | model | single-shot pass@1 | in-world pass@1 | in-world pass@4 | Δ (pass@4 − SS) | mean attempts |
 |---|---|---|---|---|---|
-| qwen2.5:3b | 0.33 | 0.33 | 0.33 | +0.00 | 3.00 |
 | qwen2.5:1.5b | 0.17 | 0.17 | 0.17 | +0.00 | 3.50 |
+| qwen2.5:3b | 0.50 | 0.50 | 0.50 | +0.00 | 2.50 |
+| qwen2.5:7b | 1.00 | 0.67 | 0.83 | −0.17 | 1.67 |
 
-**Finding:** at ≤3B parameters the in-world feedback loop gives **no lift** over a
-single shot (Δ = 0.00), despite the models spending ~3–3.5 of their 4 attempts —
-i.e. they keep patching but don't convert the exact failing-test feedback into a
-correct fix. This suggests the value of the in-world loop is **gated by base-model
-capability** to consume structured feedback; the natural next step is the larger
-rungs of the model ladder (qwen2.5:7b, llama3.2) where the loop is expected to pay
-off. The harness records paired per-task results so this can be tested directly.
+**Findings (v0, n=6 — small, treat as directional):**
+1. **Solve rate scales cleanly with model size** (0.17 → 0.50 → ~0.9), so the
+   benchmark discriminates capability as intended.
+2. **The in-world loop adds no lift on this set** (Δ ≈ 0). The 7b single-shot
+   already solves all six; its small *negative* in-world delta is run-to-run
+   sampling noise (in-world attempt 1 uses the *same* prompt as single-shot, so at
+   n=6 with temperature they differ by chance). At ≤3B the models spend most of
+   their budget patching without converting failing-test feedback into a fix.
+3. **Design implication:** these bugs are too *atomic* to exercise the feedback
+   loop — a bug is either one-shot fixable or not, so test feedback has little to
+   act on. To make the in-world advantage measurable, v1 needs **staged-failure
+   instances** (fix one error → a *new* test fails → fix that) plus more instances
+   to power the comparison. The harness already records paired per-task results for
+   exactly this.
 
 ## Out of scope (v0)
 

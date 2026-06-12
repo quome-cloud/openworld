@@ -961,9 +961,29 @@ $\Delta$ measures feedback-driven iteration alone.}
 \end{table}
 
 \subsection{Composition defeats the complexity cliff (E30--E32)}\label{sec:composition}
+Figure~\ref{fig:composition} shows the anatomy under test: a composite world
+is itself a world, its children run unmodified, and every coupling channel
+is an explicit, independently verifiable object---bridges sideways, derived
+aggregators upward, bindings downward, routes for agents.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/composition.png}
+\caption{\textbf{Anatomy of a composite world} (the E31 system, real state
+values). Two country worlds, each containing two unmodified city worlds,
+compose into a region. The four coupling channels are explicit objects: a
+verified \emph{bridge} carries trade under a conservation invariant; a
+dashed \emph{route} lets an agent cross (paying a toll into the destination
+treasury); dashed upward arrows are \emph{aggregators}---parent summaries
+derived from leaves, never independently simulated; the solid downward
+arrow is a \emph{binding} injecting a parent parameter into a child.}
+\label{fig:composition}
+\end{figure}
+
 E20 (\S\ref{sec:boundaries}, Figure~\ref{fig:complexity}) left monolithic
 synthesis collapsing past $R{\approx}8$ coupled rules and named composition
-as the structural fix; E30 delivers it (Table~\ref{tab:composition}). The
+as the structural fix; E30 delivers it (Figure~\ref{fig:compcliff},
+Table~\ref{tab:composition}). The
 \emph{same} \CompRules-rule system that 7B monolithic synthesis renders at
 \CompMonoAcc{} probe accuracy (95\% CI \CompMonoCI) reaches \CompCompAcc{}
 (CI \CompCompCI) when posed as four \CompChildRules-rule children plus
@@ -973,6 +993,18 @@ verifier is not the difference; the decomposition is. This is the
 one-expert-per-piece structure PoE-World argues for~\cite{poeworld2025},
 with each piece here passing the same verification pipeline as a whole world.
 
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.72\linewidth]{figs/composition_cliff.png}
+\caption{\textbf{Composition defeats the cliff.} The E20 curve (grey, with
+pooled 95\% CI band): monolithic 7B synthesis accuracy falls as declared
+interacting rules grow. At $R{=}16$, E30's monolithic condition (red) lands
+on the fallen curve, while the same sixteen rules synthesized as four
+4-rule children plus verified bridges (teal star) return to
+near-$R{=}4$ accuracy.}
+\label{fig:compcliff}
+\end{figure}
+
 The composition machinery itself adds no error. In E31, a three-level
 composite (region $\to$ country $\to$ city) with a goods bridge, chained
 aggregators, and a toll route is replayed against an independent flat-dict
@@ -981,7 +1013,24 @@ oracle sharing no code with the framework: all \NestSteps{} steps are exact
 and agent-registry agreement, including one paid and one vetoed crossing).
 This holds essentially by construction---children run unmodified, aggregates
 are derived rather than simulated---but the independent oracle makes it
-evidence rather than assertion.
+evidence rather than assertion. The same hierarchy also defines what an
+agent embedded in it can see (Figure~\ref{fig:traversal}): full detail at
+its own node, derived aggregates of every ancestor, summaries of
+route-adjacent neighbors, and nothing else---scoped observation that lets
+planners reason locally against exact dynamics without ever holding the
+macrostate.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/traversal.png}
+\caption{\textbf{What an agent sees} (E31, the trader at \texttt{c0:b}
+after step 1). Its own city is fully observable; ancestor levels expose
+only their derived \texttt{\_agg} summaries; the route-adjacent city is a
+summary card; sibling cities are not observable at all. The
+\texttt{legal\_actions} strip is the agent's full action menu: local
+actions plus one travel option per incident route.}
+\label{fig:traversal}
+\end{figure}
 
 E32 deserves an honest reading. Both phased and monolithic synthesized code
 track the regime switch exactly (\RegimePhasedExact{} and \RegimeMonoExact{}

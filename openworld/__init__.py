@@ -22,6 +22,7 @@ Quickstart:
 """
 
 from .agent import Agent
+from .compose import (Aggregator, Binding, Bridge, CompositeWorld, Route, compile_bridge, legal_actions, observe)
 from .ethics import (
     Constraint, Delegate, MoralParliament, constrained, lexicographic,
     maximin, permitted_actions, weighted_sum,
@@ -40,7 +41,7 @@ from .swebench import (
     SWEBenchInstance, SWEBenchTransition, build_swebench_world, load_dataset,
     run_instance_tests, solve_in_world, solve_single_shot,
 )
-from .transition import CodeTransition, FunctionTransition, LLMTransition, Transition
+from .transition import CodeTransition, FunctionTransition, LLMTransition, PhasedTransition, Transition
 from .tune import Choice, IntRange, Param, Study, Trial, Tuner, Uniform
 from .verify import SynthesisError, Verifier, synthesize_transition
 from .world import World
@@ -49,11 +50,18 @@ __version__ = "0.2.0"
 
 __all__ = [
     "Action",
+    "Aggregator",
     "Agent",
     "BaseLLM",
+    "Binding",
+    "Bridge",
     "Choice",
     "CodeTransition",
+    "CompositeWorld",
     "Constraint",
+    "compile_bridge",
+    "legal_actions",
+    "observe",
     "Delegate",
     "Dial",
     "MoralParliament",
@@ -71,11 +79,13 @@ __all__ = [
     "Uniform",
     "FunctionTransition",
     "LLMTransition",
+    "PhasedTransition",
     "MockLLM",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",
     "OllamaLLM",
+    "Route",
     "SandboxError",
     "Simulation",
     "StepRecord",

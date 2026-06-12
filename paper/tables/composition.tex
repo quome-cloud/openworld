@@ -1,0 +1,20 @@
+\begin{tabular}{lcc}
+\toprule
+E30 condition (same 16-rule system) & Accepted & Probe acc.\ (95\% CI) \\
+\midrule
+Monolithic (one 20-rule prompt, flat state) & 100\% & 0.31 [0.21, 0.42] \\
+\textbf{Compositional (4 sectors $\times$ 4 rules + 4 bridges)} & 100\% & 0.92 [0.83, 0.96] \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.7em}
+
+\begin{tabular}{lcccc}
+\toprule
+E32 engine (switch at step 10) & Pre & Boundary & Post & Exact rollouts \\
+\midrule
+\textbf{PhasedTransition (two verified phases)} & 1.00 & 1.00 & 1.00 & 3/3 \\
+Monolithic (combined rules-with-change text) & 1.00 & 1.00 & 1.00 & 3/3 \\
+LLM next-state (proxy) & 0.20 & 0.00 & 0.00 & 0/1 \\
+\bottomrule
+\end{tabular}

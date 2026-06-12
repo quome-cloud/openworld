@@ -474,6 +474,34 @@ second attempt onward). An expanded 20-instance atomic suite with additional
 regression traps ships in the repository
 (\texttt{datasets/openworld-swebench/}).
 
+\paragraph{Composition, nesting, and changing rules (E30--E32).} Three
+experiments exercise \texttt{CompositeWorld}, a wrapper whose state nests its
+children's states under namespace keys. Children run \emph{unmodified}: the
+composite slices a child's namespace out, steps the child's own transition,
+and writes it back. Coupling is explicit---sideways through \texttt{Bridge}s
+(an ordinary transition over the two-slot dict of the coupled children's
+states, so the same synthesis-and-verification pipeline applies to bridges
+unchanged), upward through \texttt{Aggregator}s (derived from leaves, never
+simulated), and agents travel between children over \texttt{Route}s whose
+crossing effects (tolls, vetoes) are themselves verifiable transitions.
+\texttt{PhasedTransition} handles rules that change over time: ordered
+(trigger, transition) phases with sequential, irreversible advance, every
+phase constructed and verified \emph{before} the run. E30 holds one system
+fixed---\CompRules{} internal rules plus four ring couplings---and varies
+only how synthesis is posed: one monolithic prompt over a flat namespaced
+state versus eight small prompts (four \CompChildRules-rule sectors, four
+one-rule bridges), each verified independently and assembled into a
+\texttt{CompositeWorld}; both conditions score on the same ground-truth probe
+suite (7B generator, three replicates each). E31 replays a \NestSteps-step
+script (leaf actions, ticks, and two travel attempts across a toll route) on
+a three-level composite against an independent flat-dict oracle that imports
+nothing from the composition machinery, checking leaf exactness, aggregator
+consistency, money conservation, and agent-registry agreement at every step.
+E32 declares a market whose policy changes at a fixed step mid-rollout and
+compares phased synthesis (each phase from its own rule text alone),
+monolithic synthesis from the combined rules-with-change text, and the LLM
+next-state proxy, on closed-loop rollouts crossing the boundary.
+
 \paragraph{Models and hardware.} All experiments use local models served by
 Ollama on an Apple-silicon laptop: \texttt{qwen2.5:7b} (generator, judge,
 critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3),
@@ -930,6 +958,53 @@ atomic and staged suites. $\Delta$ is in-world pass@\SweBudget{} $-$
 single-shot pass@1; in-world attempt 1 shares the single-shot prompt, so
 $\Delta$ measures feedback-driven iteration alone.}
 \label{tab:swebench}
+\end{table}
+
+\subsection{Composition defeats the complexity cliff (E30--E32)}\label{sec:composition}
+E20 (\S\ref{sec:boundaries}, Figure~\ref{fig:complexity}) left monolithic
+synthesis collapsing past $R{\approx}8$ coupled rules and named composition
+as the structural fix; E30 delivers it (Table~\ref{tab:composition}). The
+\emph{same} \CompRules-rule system that 7B monolithic synthesis renders at
+\CompMonoAcc{} probe accuracy (95\% CI \CompMonoCI) reaches \CompCompAcc{}
+(CI \CompCompCI) when posed as four \CompChildRules-rule children plus
+verified bridges---every synthesized piece below the E20 cliff. Acceptance is
+identical in the two conditions (every attempt passed the gate), so the
+verifier is not the difference; the decomposition is. This is the
+one-expert-per-piece structure PoE-World argues for~\cite{poeworld2025},
+with each piece here passing the same verification pipeline as a whole world.
+
+The composition machinery itself adds no error. In E31, a three-level
+composite (region $\to$ country $\to$ city) with a goods bridge, chained
+aggregators, and a toll route is replayed against an independent flat-dict
+oracle sharing no code with the framework: all \NestSteps{} steps are exact
+(\NestExact{} on leaf exactness, aggregate consistency, money conservation,
+and agent-registry agreement, including one paid and one vetoed crossing).
+This holds essentially by construction---children run unmodified, aggregates
+are derived rather than simulated---but the independent oracle makes it
+evidence rather than assertion.
+
+E32 deserves an honest reading. Both phased and monolithic synthesized code
+track the regime switch exactly (\RegimePhasedExact{} and \RegimeMonoExact{}
+exact full rollouts; pre-boundary, boundary, and post-boundary accuracy all
+perfect): a single declared rule change does not by itself defeat a 7B
+generator at this scale. The LLM next-state proxy collapses on the same
+script (\RegimeLLMPre{} pre-boundary, \RegimeLLMPost{} after the switch).
+\texttt{PhasedTransition}'s value is therefore structural rather than a
+fidelity rescue: each phase is synthesized and verified independently
+against its own rule text, so changing rules \emph{compose} with the E30
+result---adding a regime adds a phase, instead of multiplying the
+complexity of a single synthesis prompt.
+
+\begin{table}[htb]\centering\small
+\input{tables/composition.tex}
+\caption{E30 (top): the same \CompRules-rule coupled system synthesized
+monolithically vs.\ compositionally (four \CompChildRules-rule children plus
+four one-rule bridges); probe accuracy with pooled 95\% CIs, three replicates
+per condition. E32 (bottom): per-step exact match against the oracle before,
+at, and after a declared regime switch, with exact full closed-loop rollouts;
+both synthesized conditions are perfect and the LLM next-state proxy
+collapses.}
+\label{tab:composition}
 \end{table}
 
 % ============================================================================

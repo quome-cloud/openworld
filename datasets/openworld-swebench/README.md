@@ -150,8 +150,8 @@ python -m pytest tests/test_swebench.py
 
 Default model ladder: `qwen2.5:1.5b`, `qwen2.5:3b`, `qwen2.5:7b`,
 `llama3.2`. Results are written to `datasets/openworld-swebench/results/comparison.json`
-(gitignored). Each run appends a timestamped record with per-instance rows and
-aggregate summaries including Wilson 95% confidence intervals.
+(gitignored). Each run overwrites it with a timestamped record holding the
+per-instance rows and aggregate summaries with Wilson 95% confidence intervals.
 
 ## Results
 

@@ -54,3 +54,19 @@ regeneration; no new LaTeX warnings; full test suite unaffected.
 ## Out of scope
 
 Animating or interactive figures; TikZ; changes to experiment data.
+
+## Amendment (approved): Figure 4 — dynamic rules × composition × traversal
+
+4. **`paper/figs/dynamic_traversal.png` — "When the rules change, agents
+   move."** Backed by a new deterministic offline scenario,
+   `experiments/e33_dynamic_traversal.py` (E33, no LLM, like E31): two
+   economies in a composite joined by a toll route; `c0` runs a
+   `PhasedTransition` that switches to austerity (work yields zero, observed
+   rate drops) after its 8th step; a greedy policy agent works wherever its
+   `observe()` view shows the best rate, so it crosses after the switch.
+   The same scenario runs twice: with the route and without (stranded
+   counterfactual). Figure: top panel — world-GDP curves for both runs with
+   the regime band and the crossing marked; bottom strip — the agent's
+   location lane (c0 → toll → c1) on the shared x-axis. Pipeline:
+   E33 JSON → `fig_dynamic_traversal` → figure block after `fig:traversal`
+   + one paragraph; `NumExperiments` 31 → 32. Same preview gate.

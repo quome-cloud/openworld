@@ -1,40 +1,33 @@
-"""Run the single-shot vs. in-world comparison on OpenWorld-SWE-bench.
+#!/usr/bin/env python3
+"""Side-by-side comparison on openworld-swebench: single-shot vs. in-world.
 
-For each model x instance, runs both conditions (paired) and reports whether the
-world-model feedback loop helps. Writes results/comparison.json (with per-task
-paired records for later significance testing) and prints a markdown table.
+Usage:
+    python datasets/openworld-swebench/run_comparison.py                # default ladder
+    python datasets/openworld-swebench/run_comparison.py qwen2.5:7b    # specific models
+    python datasets/openworld-swebench/run_comparison.py --mock         # offline smoke
 
-    python datasets/openworld-swebench/run_comparison.py                 # default ladder
-    python datasets/openworld-swebench/run_comparison.py qwen2.5:3b      # one model
-    python datasets/openworld-swebench/run_comparison.py --mock          # offline smoke
-    python datasets/openworld-swebench/run_comparison.py --budget 6 ...
-
-Requires Ollama only for real models; missing models are skipped with a warning.
+For each model x instance, runs the model once single-shot (issue + buggy
+module, no feedback) and once inside the world model (iterative submit_patch
+with exact failing-test feedback, --budget attempts). Records are paired
+per-instance; the summary table puts the conditions side by side.
 """
-
-from __future__ import annotations
 
 import argparse
 import json
 import math
-import sys
-import urllib.request
+from datetime import datetime
 from pathlib import Path
 
-# Make the repo importable when run as a script from the dataset folder.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
-from openworld.llm import MockLLM, OllamaLLM  # noqa: E402
-from openworld.swebench import (  # noqa: E402
-    load_dataset, solve_in_world, solve_single_shot,
-)
+from openworld import MockLLM, OllamaLLM
+from openworld.llm import OllamaConnectionError
+from openworld.swebench import load_dataset, solve_in_world, solve_single_shot
 
 DEFAULT_MODELS = ["qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5:7b", "llama3.2"]
-RESULTS = Path(__file__).resolve().parent / "results" / "comparison.json"
+RESULTS_DIR = Path(__file__).resolve().parent / "results"
 
 
-def wilson_ci(successes: int, n: int, z: float = 1.96):
-    """95% Wilson score interval (vendored so this folder runs standalone)."""
+def wilson_ci(successes, n, z=1.96):
+    """95% Wilson score interval, vendored from experiments/common.py."""
     if n == 0:
         return (0.0, 0.0)
     p = successes / n
@@ -44,117 +37,108 @@ def wilson_ci(successes: int, n: int, z: float = 1.96):
     return (max(0.0, center - half), min(1.0, center + half))
 
 
-def available_models():
-    try:
-        with urllib.request.urlopen("http://localhost:11434/api/tags", timeout=5) as r:
-            tags = json.loads(r.read().decode("utf-8"))
-        return {m["name"] for m in tags.get("models", [])}
-    except Exception:
-        return set()
-
-
-def _mock_for(instance):
-    """An LLM that always returns the instance's reference solution (smoke only)."""
-    return MockLLM(responses=[f"```python\n{instance.reference_source}```"])
-
-
-# Bound per-request time and output length so a runaway small-model generation
-# fails fast as one attempt instead of stalling the whole run for minutes.
-_OLLAMA_TIMEOUT = 120.0
-_OLLAMA_OPTS = {"num_predict": 1024}
-
-
-def run_model(model, instances, budget, mock):
-    pairs = []
+def evaluate_model(label, llm_factory, instances, budget):
+    rows = []
     for inst in instances:
-        ss_llm = _mock_for(inst) if mock else OllamaLLM(
-            model=model, timeout=_OLLAMA_TIMEOUT, options=dict(_OLLAMA_OPTS))
-        iw_llm = _mock_for(inst) if mock else OllamaLLM(
-            model=model, timeout=_OLLAMA_TIMEOUT, options=dict(_OLLAMA_OPTS))
-        ss = solve_single_shot(inst, ss_llm)
-        iw = solve_in_world(inst, iw_llm, budget=budget)
-        pairs.append({"instance_id": inst.instance_id, "single_shot": ss, "in_world": iw})
-    n = len(pairs)
-    ss_solved = sum(p["single_shot"]["solved"] for p in pairs)
-    iw_first = sum(p["in_world"]["solved_first_attempt"] for p in pairs)
-    iw_solved = sum(p["in_world"]["solved"] for p in pairs)
-    mean_attempts = sum(p["in_world"]["attempts"] for p in pairs) / n if n else 0.0
+        single = solve_single_shot(inst, llm_factory(inst))
+        in_world = solve_in_world(inst, llm_factory(inst), budget=budget)
+        rows.append({"instance_id": inst.instance_id,
+                     "single_shot": single, "in_world": in_world})
+        print(f"  {inst.instance_id}: "
+              f"single-shot={'Y' if single['solved'] else 'n'} "
+              f"in-world={'Y' if in_world['solved'] else 'n'} "
+              f"({in_world['attempts']} att)")
+    return rows
+
+
+def summarize(model, rows, budget):
+    n = len(rows)
+    single = sum(r["single_shot"]["solved"] for r in rows)
+    world_first = sum(r["in_world"]["solved_first_attempt"] for r in rows)
+    world_budget = sum(r["in_world"]["solved"] for r in rows)
+    solved_attempts = [r["in_world"]["attempts"] for r in rows if r["in_world"]["solved"]]
     return {
         "model": model,
-        "n": n,
-        "single_shot_pass1": ss_solved / n if n else 0.0,
-        "single_shot_pass1_ci": wilson_ci(ss_solved, n),
-        "in_world_pass1": iw_first / n if n else 0.0,
-        "in_world_pass_budget": iw_solved / n if n else 0.0,
-        "in_world_pass_budget_ci": wilson_ci(iw_solved, n),
-        "delta_budget_minus_ss": (iw_solved - ss_solved) / n if n else 0.0,
-        "mean_attempts": mean_attempts,
+        "n_instances": n,
         "budget": budget,
-        "pairs": pairs,
+        "single_shot_pass_at_1": single / n,
+        "single_shot_ci": list(wilson_ci(single, n)),
+        "in_world_pass_at_1": world_first / n,
+        "in_world_pass_at_1_ci": list(wilson_ci(world_first, n)),
+        "in_world_pass_at_budget": world_budget / n,
+        "in_world_pass_at_budget_ci": list(wilson_ci(world_budget, n)),
+        "delta": (world_budget - single) / n,
+        "mean_attempts_when_solved": (
+            sum(solved_attempts) / len(solved_attempts) if solved_attempts else None
+        ),
     }
 
 
 def markdown_table(summaries, budget):
-    lines = [
-        f"| model | single-shot pass@1 | in-world pass@1 | in-world pass@{budget} | "
-        f"Δ (pass@{budget} − SS) | mean attempts |",
-        "|---|---|---|---|---|---|",
-    ]
+    head = (f"| model | single-shot pass@1 | in-world pass@1 | "
+            f"in-world pass@{budget} | Δ (pass@{budget} − SS) | mean attempts |")
+    sep = "|---|---|---|---|---|---|"
+    lines = [head, sep]
     for s in summaries:
+        mean_att = (f"{s['mean_attempts_when_solved']:.1f}"
+                    if s["mean_attempts_when_solved"] is not None else "—")
         lines.append(
-            f"| {s['model']} | {s['single_shot_pass1']:.2f} | {s['in_world_pass1']:.2f} | "
-            f"{s['in_world_pass_budget']:.2f} | {s['delta_budget_minus_ss']:+.2f} | "
-            f"{s['mean_attempts']:.2f} |"
+            f"| {s['model']} | {s['single_shot_pass_at_1']:.0%} | "
+            f"{s['in_world_pass_at_1']:.0%} | {s['in_world_pass_at_budget']:.0%} | "
+            f"{s['delta']:+.0%} | {mean_att} |"
         )
     return "\n".join(lines)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("models", nargs="*", default=[])
-    parser.add_argument("--budget", type=int, default=4)
-    parser.add_argument("--mock", action="store_true", help="offline smoke with MockLLM")
-    parser.add_argument("--limit", type=int, default=0, help="run only the first N instances")
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("models", nargs="*", default=None,
+                        help=f"Ollama model names (default: {' '.join(DEFAULT_MODELS)})")
+    parser.add_argument("--budget", type=int, default=4,
+                        help="in-world attempt budget (default 4)")
+    parser.add_argument("--mock", action="store_true",
+                        help="offline smoke run with a scripted MockLLM")
     args = parser.parse_args()
 
     instances = load_dataset()
-    if args.limit:
-        instances = instances[: args.limit]
-    print(f"[loaded] {len(instances)} instances")
+    runs = []
+    if args.mock:
+        def factory(inst):
+            return MockLLM([
+                "I think the bug is in the loop, roughly.",
+                f"```python\n{inst.reference_source}\n```",
+            ])
+        runs.append(("mock-oracle-2nd-try", factory))
+    else:
+        for model in (args.models or DEFAULT_MODELS):
+            llm = OllamaLLM(model=model, temperature=0.2, options={"seed": 41})
+            try:
+                llm.ask("Reply with OK.")
+            except OllamaConnectionError as exc:
+                raise SystemExit(f"model {model!r} unavailable: {exc}")
+            runs.append((model, lambda inst, _llm=llm: _llm))
 
-    models = args.models or DEFAULT_MODELS
-    if not args.mock:
-        have = available_models()
-        present = [m for m in models if m in have]
-        missing = [m for m in models if m not in have]
-        for m in missing:
-            print(f"  !! skipping {m}: not pulled (ollama pull {m})", file=sys.stderr)
-        models = present
-        if not models:
-            print("No requested models are available. Try --mock for an offline smoke.",
-                  file=sys.stderr)
-            return 1
-
-    summaries = []
-    for model in models:
-        print(f"[running] {model} (budget={args.budget}) ...")
-        summaries.append(run_model(model, instances, args.budget, args.mock))
+    summaries, all_rows = [], {}
+    for label, factory in runs:
+        print(f"[{label}] {len(instances)} instances, budget {args.budget}")
+        rows = evaluate_model(label, factory, instances, args.budget)
+        summaries.append(summarize(label, rows, args.budget))
+        all_rows[label] = rows
 
     table = markdown_table(summaries, args.budget)
-    print("\n" + table + "\n")
+    print("\n" + table)
 
-    RESULTS.parent.mkdir(exist_ok=True)
-    RESULTS.write_text(json.dumps({
-        "n_instances": len(instances),
+    RESULTS_DIR.mkdir(exist_ok=True)
+    out = RESULTS_DIR / "comparison.json"
+    out.write_text(json.dumps({
+        "dataset": "openworld-swebench",
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
         "budget": args.budget,
-        "mock": args.mock,
-        "summary": [{k: v for k, v in s.items() if k != "pairs"} for s in summaries],
-        "results": summaries,
-        "table": table,
-    }, indent=2, default=str), encoding="utf-8")
-    print(f"[saved] {RESULTS}")
-    return 0
+        "summaries": summaries,
+        "rows": all_rows,
+    }, indent=2), encoding="utf-8")
+    print(f"\n[saved] {out}")
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

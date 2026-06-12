@@ -55,6 +55,7 @@ def run_tests(
     source: str,
     tests: List[Tuple[str, str]],
     timeout_seconds: float = 5.0,
+    extra_builtins: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Execute `source`, run each test expression, compare repr() to expected.
 
@@ -69,14 +70,22 @@ def run_tests(
     import os
 
     if timeout_seconds and hasattr(os, "fork"):
-        return _run_tests_forked(source, tests, timeout_seconds)
-    return _run_tests_inline(source, tests)
+        return _run_tests_forked(source, tests, timeout_seconds, extra_builtins)
+    return _run_tests_inline(source, tests, extra_builtins)
 
 
-def _run_tests_inline(source: str, tests: List[Tuple[str, str]]) -> Dict[str, Any]:
+def _run_tests_inline(
+    source: str,
+    tests: List[Tuple[str, str]],
+    extra_builtins: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     import math
 
-    namespace: Dict[str, Any] = {"__builtins__": dict(_TEST_BUILTINS), "math": math}
+    namespace: Dict[str, Any] = {
+        "__builtins__": {**_TEST_BUILTINS, **(extra_builtins or {})},
+        "math": math,
+        "__name__": "<submission>",
+    }
     errors: List[str] = []
     try:
         exec(compile(source, "<submission>", "exec"), namespace)
@@ -100,7 +109,10 @@ def _run_tests_inline(source: str, tests: List[Tuple[str, str]]) -> Dict[str, An
 
 
 def _run_tests_forked(
-    source: str, tests: List[Tuple[str, str]], timeout_seconds: float
+    source: str,
+    tests: List[Tuple[str, str]],
+    timeout_seconds: float,
+    extra_builtins: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     import json
     import os
@@ -112,7 +124,7 @@ def _run_tests_forked(
     if pid == 0:  # child: run the suite, report through the pipe, hard-exit
         try:
             os.close(read_fd)
-            payload = json.dumps(_run_tests_inline(source, tests)).encode("utf-8")
+            payload = json.dumps(_run_tests_inline(source, tests, extra_builtins)).encode("utf-8")
             os.write(write_fd, payload)
             os.close(write_fd)
         finally:

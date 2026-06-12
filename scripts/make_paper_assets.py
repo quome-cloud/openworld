@@ -405,6 +405,264 @@ def fig_complexity(e20):
     plt.close(fig)
 
 
+# ---------------------------------------------------------------------------
+# Composition figures (E30/E31): drawn with patches in the house palette.
+# ---------------------------------------------------------------------------
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # noqa: E402
+
+RED = "#B91C1C"
+
+
+def _card(ax, x, y, w, h, title, lines, face="white", edge="#CBD5E1",
+          alpha=1.0, title_color="#0F172A", bold_edge=None, shadow=True):
+    """A rounded state card with a soft shadow."""
+    if shadow:
+        ax.add_patch(FancyBboxPatch((x + 0.045, y - 0.045), w, h,
+                                    boxstyle="round,pad=0.02,rounding_size=0.08",
+                                    fc="black", ec="none", alpha=0.10 * alpha, zorder=2))
+    ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                boxstyle="round,pad=0.02,rounding_size=0.08",
+                                fc=face, ec=bold_edge or edge,
+                                lw=2.0 if bold_edge else 0.9, alpha=alpha, zorder=3))
+    ax.text(x + w / 2, y + h - 0.21, title, ha="center", va="center",
+            fontsize=8.5, fontweight="bold", color=title_color, alpha=alpha, zorder=4)
+    for i, line in enumerate(lines):
+        ax.text(x + 0.12, y + h - 0.50 - 0.26 * i, line, ha="left", va="center",
+                fontsize=7, family="monospace", color="#334155",
+                alpha=alpha, zorder=4)
+
+
+def _chip(ax, cx, cy, text, color, alpha=1.0, fontsize=7):
+    ax.add_patch(FancyBboxPatch((cx - 0.78, cy - 0.14), 1.56, 0.30,
+                                boxstyle="round,pad=0.02,rounding_size=0.12",
+                                fc=color, ec="none", alpha=0.14 * alpha, zorder=4))
+    ax.text(cx, cy, text, ha="center", va="center", fontsize=fontsize,
+            family="monospace", color=color, alpha=alpha, zorder=5)
+
+
+def _panel(ax, x, y, w, h, label, color, alpha_fill=0.05):
+    ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                boxstyle="round,pad=0.02,rounding_size=0.14",
+                                fc=color, ec=color, lw=1.1, alpha=alpha_fill, zorder=1))
+    ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                boxstyle="round,pad=0.02,rounding_size=0.14",
+                                fc="none", ec=color, lw=1.1, alpha=0.55, zorder=1))
+    ax.text(x + 0.14, y + h - 0.18, label, ha="left", va="center",
+            fontsize=9, fontweight="bold", color=color, zorder=4)
+
+
+def _city_lines(leaves, country, city):
+    return [f"treasury {leaves[f'{country}_{city}_treasury']:>3}",
+            f"goods    {leaves[f'{country}_{city}_goods']:>3}",
+            f"gdp      {leaves[f'{country}_{city}_gdp']:>3}"]
+
+
+_GEOM = {  # shared layout for fig_composition / fig_traversal
+    "region": (0.30, 1.00, 9.40, 4.10),
+    "c0": (0.62, 1.28, 4.20, 3.06),
+    "c1": (5.18, 1.28, 4.20, 3.06),
+    "cards": {("c0", "a"): (0.92, 1.55), ("c0", "b"): (2.92, 1.55),
+              ("c1", "a"): (5.48, 1.55), ("c1", "b"): (7.48, 1.55)},
+    "cw": 1.62, "ch": 1.38,
+}
+
+
+def fig_composition(e31):
+    leaves = e31["per_step"][0]["leaves"]
+    fig, ax = plt.subplots(figsize=(10, 6.1))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 6.05)
+    ax.axis("off")
+
+    rx, ry, rw, rh = _GEOM["region"]
+    _panel(ax, rx, ry, rw, rh, "region", SLATE, alpha_fill=0.03)
+    _chip(ax, rx + rw - 1.15, ry + rh - 0.18, "_agg gdp=Σ", SLATE)
+    for name, color in (("c0", BLUE), ("c1", BLUE)):
+        px, py, pw, ph = _GEOM[name]
+        _panel(ax, px, py, pw, ph, f"country {name}", color, alpha_fill=0.05)
+        _chip(ax, px + pw / 2, py + ph - 0.18, "_agg gdp=Σ cities", BLUE)
+    cw, ch = _GEOM["cw"], _GEOM["ch"]
+    for (country, city), (x, y) in _GEOM["cards"].items():
+        _card(ax, x, y, cw, ch, f"city {country}:{city}",
+              _city_lines(leaves, country, city))
+
+    # aggregator arrows: city tops -> country chip (derived, dashed, one-way up)
+    for (country, city), (x, y) in _GEOM["cards"].items():
+        px, py, pw, ph = _GEOM[country]
+        ax.add_patch(FancyArrowPatch((x + cw / 2, y + ch + 0.06),
+                                     (px + pw / 2, py + ph - 0.34),
+                                     arrowstyle="-|>", mutation_scale=7,
+                                     ls=(0, (2, 2)), color=BLUE, lw=0.9,
+                                     alpha=0.55, zorder=2))
+    for name in ("c0", "c1"):
+        px, py, pw, ph = _GEOM[name]
+        ax.add_patch(FancyArrowPatch((px + pw / 2, py + ph + 0.05),
+                                     (rx + rw - 1.15, ry + rh - 0.34),
+                                     arrowstyle="-|>", mutation_scale=7,
+                                     ls=(0, (2, 2)), color=SLATE, lw=0.9,
+                                     alpha=0.5, zorder=2))
+
+    # bridge: c0:b <-> c1:a (trade, conserved); label in the clear top band
+    bx0 = _GEOM["cards"][("c0", "b")][0] + cw
+    bx1 = _GEOM["cards"][("c1", "a")][0]
+    by = _GEOM["cards"][("c0", "b")][1] + ch * 0.55
+    ax.add_patch(FancyArrowPatch((bx0 + 0.03, by), (bx1 - 0.03, by),
+                                 connectionstyle="arc3,rad=-0.35",
+                                 arrowstyle="<|-|>", mutation_scale=13,
+                                 color=TEAL, lw=2.6, zorder=5))
+    label_y = ry + rh - 0.32  # the clear band inside the region, between panels
+    _chip(ax, (bx0 + bx1) / 2, label_y, "bridge: trade · Σ conserved", TEAL,
+          fontsize=7.5)
+    ax.add_patch(FancyArrowPatch(((bx0 + bx1) / 2, label_y - 0.16),
+                                 ((bx0 + bx1) / 2, by + 0.30),
+                                 arrowstyle="-", color=TEAL, lw=0.8,
+                                 ls=(0, (1, 2)), alpha=0.7, zorder=4))
+
+    # route: c0:b <-> c1:b along the bottom, with the agent mid-crossing
+    px0 = _GEOM["cards"][("c0", "b")][0] + cw * 0.55
+    px1 = _GEOM["cards"][("c1", "b")][0] + cw * 0.45
+    py0 = _GEOM["cards"][("c0", "b")][1] - 0.06
+    ax.add_patch(FancyArrowPatch((px0, py0), (px1, py0),
+                                 connectionstyle="arc3,rad=0.18",
+                                 arrowstyle="<|-|>", mutation_scale=11,
+                                 color=ORANGE, lw=2.0, ls=(0, (5, 2)), zorder=5))
+    mid_x, mid_y = (px0 + px1) / 2, py0 - 0.34
+    ax.plot([mid_x], [mid_y], "o", color=PURPLE, markersize=9, zorder=6)
+    ax.text(mid_x, 0.78, "agent · toll −2 → treasury", ha="center",
+            fontsize=7.5, color=ORANGE, zorder=6)
+
+    # binding: region -> c0 (downward parameter)
+    ax.add_patch(FancyArrowPatch((rx + 0.55, ry + rh - 0.30),
+                                 (rx + 0.55, _GEOM["c0"][1] + _GEOM["c0"][3] - 0.05),
+                                 arrowstyle="-|>", mutation_scale=9,
+                                 color=SLATE, lw=1.4, zorder=4))
+    ax.text(rx + 0.66, ry + rh - 0.62, "binding: policy ↓", fontsize=7.5,
+            color=SLATE, ha="left", zorder=4)
+
+    # legend strip: four fixed columns
+    legend = [(TEAL, "bridge — verified coupling"),
+              (ORANGE, "route — agents may cross"),
+              (BLUE, "aggregator — derived, never simulated"),
+              (SLATE, "binding — downward parameter")]
+    for lx, (color, label) in zip((0.55, 2.62, 4.72, 7.62), legend):
+        ax.plot([lx, lx + 0.26], [0.42, 0.42], color=color, lw=2.4,
+                ls="--" if color == ORANGE else "-",
+                solid_capstyle="round")
+        ax.text(lx + 0.36, 0.42, label, fontsize=6.8, color="#334155",
+                ha="left", va="center")
+    ax.text(0.32, 5.78, "A composite world is a world",
+            fontsize=11.5, fontweight="bold", color="#0F172A")
+    ax.text(0.32, 5.50,
+            "children run unmodified; every coupling channel is an explicit, verifiable object",
+            fontsize=8, color="#475569")
+    fig.savefig(FIGS / "composition.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_composition_cliff(e20, e30):
+    fig, ax = plt.subplots(figsize=(6.2, 3.6))
+    summary = e20["summary"]
+    xs = [s["n_rules"] for s in summary]
+    ys = [s["mean_probe_accuracy"] for s in summary]
+    los = [s["pooled_ci"][0] for s in summary]
+    his = [s["pooled_ci"][1] for s in summary]
+    ax.plot(xs, ys, "-o", color=SLATE, lw=2, markersize=4.5,
+            label="monolithic synthesis (E20)")
+    ax.fill_between(xs, los, his, color=SLATE, alpha=0.13)
+
+    by_cond = {s["condition"]: s for s in e30["summary"]}
+    mono, comp = by_cond["monolithic"], by_cond["compositional"]
+    ax.errorbar([16], [mono["mean_probe_accuracy"]],
+                yerr=[[mono["mean_probe_accuracy"] - mono["pooled_ci"][0]],
+                      [mono["pooled_ci"][1] - mono["mean_probe_accuracy"]]],
+                fmt="o", color=RED, markersize=7, capsize=4, lw=1.4,
+                label="monolithic, 16 rules (E30)", zorder=5)
+    ax.errorbar([16], [comp["mean_probe_accuracy"]],
+                yerr=[[comp["mean_probe_accuracy"] - comp["pooled_ci"][0]],
+                      [comp["pooled_ci"][1] - comp["mean_probe_accuracy"]]],
+                fmt="*", color=TEAL, markersize=17, capsize=4, lw=1.4,
+                markeredgecolor="white", markeredgewidth=0.6,
+                label="compositional, 4×4 + bridges (E30)", zorder=6)
+    ax.axhline(comp["mean_probe_accuracy"], color=TEAL, lw=0.8,
+               ls=(0, (1, 3)), alpha=0.6, zorder=1)
+    ax.annotate("same 16 rules:\n4×4 children + verified bridges",
+                xy=(16, comp["mean_probe_accuracy"]),
+                xytext=(9.2, 0.62), fontsize=8, color=TEAL,
+                arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.1,
+                                connectionstyle="arc3,rad=-0.25"))
+    ax.set_xlabel("Declared interacting rules (R)")
+    ax.set_ylabel("Probe accuracy")
+    ax.set_xticks(xs)
+    ax.set_ylim(0, 1.05)
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=7.5, loc="lower left")
+    fig.tight_layout()
+    fig.savefig(FIGS / "composition_cliff.png", dpi=200)
+    plt.close(fig)
+
+
+def fig_traversal(e31):
+    step = e31["per_step"][0]
+    leaves, agent = step["leaves"], step["agent"]
+    here_c, here_city = agent["at"].split(":")
+    fig, ax = plt.subplots(figsize=(10, 6.1))
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 6.05)
+    ax.axis("off")
+
+    rx, ry, rw, rh = _GEOM["region"]
+    _panel(ax, rx, ry, rw, rh, "region", SLATE, alpha_fill=0.02)
+    _chip(ax, rx + rw - 1.15, ry + rh - 0.18, "_agg: visible", SLATE)
+    for name in ("c0", "c1"):
+        px, py, pw, ph = _GEOM[name]
+        mine = name == here_c
+        _panel(ax, px, py, pw, ph, f"country {name}", BLUE,
+               alpha_fill=0.05 if mine else 0.02)
+        _chip(ax, px + pw / 2, py + ph - 0.18,
+              "_agg: visible" if mine else "_agg only", BLUE,
+              alpha=1.0 if mine else 0.75)
+    cw, ch = _GEOM["cw"], _GEOM["ch"]
+    neighbor = ("c1", "b")  # route-adjacent to the agent's city
+    for (country, city), (x, y) in _GEOM["cards"].items():
+        if (country, city) == (here_c, here_city):
+            _card(ax, x, y, cw, ch, f"YOU: {country}:{city}",
+                  _city_lines(leaves, country, city), bold_edge=PURPLE,
+                  title_color=PURPLE)
+            ax.plot([x + cw / 2], [y - 0.16], "o", color=PURPLE, markersize=8)
+            ax.text(x + cw / 2, y - 0.40, f"coins {agent['coins']}",
+                    ha="center", fontsize=7.5, color=PURPLE)
+        elif (country, city) == neighbor:
+            _card(ax, x, y, cw, ch, f"{country}:{city} · neighbor",
+                  ["summary only", "via route"], face="#FFF7ED",
+                  edge=ORANGE, alpha=0.95)
+        else:
+            _card(ax, x, y, cw, ch, f"{country}:{city}",
+                  ["not observable"], face="#F1F5F9", alpha=0.38,
+                  shadow=False)
+    hx, hy = _GEOM["cards"][(here_c, here_city)]
+    nx, ny = _GEOM["cards"][neighbor]
+    ax.add_patch(FancyArrowPatch((hx + cw * 0.55, hy - 0.05),
+                                 (nx + cw * 0.45, ny - 0.05),
+                                 connectionstyle="arc3,rad=0.18",
+                                 arrowstyle="<|-|>", mutation_scale=11,
+                                 color=ORANGE, lw=2.0, ls=(0, (5, 2)), zorder=5))
+    ax.add_patch(FancyBboxPatch((0.55, 0.18), 8.9, 0.52,
+                                boxstyle="round,pad=0.02,rounding_size=0.1",
+                                fc="#F8FAFC", ec="#CBD5E1", lw=0.8))
+    ax.text(0.75, 0.44, "legal_actions:", fontsize=8, color="#475569",
+            fontweight="bold", va="center")
+    ax.text(2.05, 0.44,
+            f"{agent['at']}:work   ·   {agent['at']}:trade   ·   travel:c1:b",
+            fontsize=8.5, family="monospace", color=PURPLE, va="center")
+    ax.text(0.32, 5.78, "What an agent sees",
+            fontsize=11.5, fontweight="bold", color="#0F172A")
+    ax.text(0.32, 5.50,
+            "full detail at its own node · ancestor aggregates · route-adjacent summaries · nothing else",
+            fontsize=8, color="#475569")
+    fig.savefig(FIGS / "traversal.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def table_planning(e22):
     labels = {
         "code_d3": "\\textbf{Lookahead d=3 via synthesized code}",
@@ -703,6 +961,9 @@ def main():
     table_ladder(data["e19_scale_ladder"])
     table_repair(data["e18_repair_loop"])
     fig_complexity(data["e20_complexity"])
+    fig_composition(data["e31_nested_fidelity"])
+    fig_composition_cliff(data["e20_complexity"], data["e30_composition"])
+    fig_traversal(data["e31_nested_fidelity"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])

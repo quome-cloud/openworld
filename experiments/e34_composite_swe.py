@@ -100,7 +100,7 @@ def pick_greedy(comp, instances, attempts_spent):
                               instances.index(i)))
 
 
-def run_condition(name, instances, llm, total_budget):
+def run_condition(name, instances, llm_factory, total_budget):
     comp = build_sprint(instances)
     by_id = {i.instance_id: i for i in instances}
     events = []
@@ -109,11 +109,11 @@ def run_condition(name, instances, llm, total_budget):
     last_task = None
     switches = 0
     for k in range(total_budget):
-        if name == "fixed":
+        if name.startswith("fixed"):
             inst = next((i for i in instances
                          if not comp.state[i.instance_id]["solved"]
                          and attempts_spent[i.instance_id] < PER_TASK_BUDGET), None)
-        elif name == "round_robin":
+        elif name.startswith("round_robin"):
             inst, cursor = pick_round_robin(comp, instances, cursor)
         else:
             inst = pick_greedy(comp, instances, attempts_spent)
@@ -122,7 +122,7 @@ def run_condition(name, instances, llm, total_budget):
         if last_task is not None and inst.instance_id != last_task:
             switches += 1
         last_task = inst.instance_id
-        event = attempt(comp, inst, llm, by_id)
+        event = attempt(comp, inst, llm_factory(k), by_id)
         attempts_spent[inst.instance_id] += 1
         event["attempt_index"] = k + 1
         event["cumulative_solved"] = len(instances) - event["open_tasks"]
@@ -150,14 +150,33 @@ def main():
     require_ollama(MODEL)
     instances = load_dataset(RECIPE["dataset"]["path"])
     total_budget = PER_TASK_BUDGET * len(instances)
-    llm = OllamaLLM(model=MODEL,
-                    temperature=RECIPE["eval"].get("temperature", 0.2),
-                    options={"seed": RECIPE["eval"].get("seed", 41)})
+    base_seed = RECIPE["eval"].get("seed", 41)
+    temperature = RECIPE["eval"].get("temperature", 0.2)
+
+    def fixed_seed_llm(k):
+        return OllamaLLM(model=MODEL, temperature=temperature,
+                         options={"seed": base_seed})
+
+    def jitter_llm(k):
+        # per-attempt seed: retries on an unchanged state now differ
+        return OllamaLLM(model=MODEL, temperature=temperature,
+                         options={"seed": base_seed + k})
+
+    import sys
+    jitter = "--jitter" in sys.argv
+    plan = (("round_robin_jitter", jitter_llm), ("greedy_jitter", jitter_llm)) \
+        if jitter else (("fixed", fixed_seed_llm),
+                        ("round_robin", fixed_seed_llm),
+                        ("greedy", fixed_seed_llm))
     results = []
-    for condition in ("fixed", "round_robin", "greedy"):
+    if jitter:
+        prior = json.load(open(Path(__file__).resolve().parent
+                               / "results" / "e34_composite_swe.json"))
+        results = prior["conditions"]
+    for condition, factory in plan:
         print(f"[{condition}] budget {total_budget}")
         with Timer() as t:
-            results.append(run_condition(condition, instances, llm, total_budget))
+            results.append(run_condition(condition, instances, factory, total_budget))
         results[-1]["seconds"] = round(t.elapsed, 1)
         # incremental save: a crash in a later condition loses nothing
         save_results("e34_composite_swe", {

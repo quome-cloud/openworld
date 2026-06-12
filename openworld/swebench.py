@@ -21,6 +21,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from .coding import run_tests
+from .llm import BaseLLM
+from .parsing import extract_code
 from .state import Action, WorldState
 from .transition import Transition
 from .world import World
@@ -158,3 +160,75 @@ def build_swebench_world(instance: SWEBenchInstance) -> World:
         rules=spec.get("rules", []),
         transition=SWEBenchTransition(instance),
     )
+
+
+SYSTEM_PROMPT = (
+    "You are an expert Python maintainer. You receive a bug report and the "
+    "full source of a module. Reply with ONLY a python code block containing "
+    "the complete corrected module. Keep all public names and signatures. "
+    "Use only pure python and math."
+)
+
+
+def _base_prompt(instance: SWEBenchInstance, source: str) -> str:
+    return (
+        f"Bug report for module `{instance.module_name}`:\n{instance.issue}\n\n"
+        f"Current module source:\n```python\n{source}\n```\n"
+    )
+
+
+def _feedback_prompt(instance: SWEBenchInstance, state: WorldState) -> str:
+    errors = "\n".join(f"- {e}" for e in state["last_errors"]) or "- (none reported)"
+    return (
+        _base_prompt(instance, state["source"])
+        + f"\nBug-report tests passing: {state['fail_to_pass_passed']}, "
+        f"failing: {state['fail_to_pass_failed']}\n"
+        f"Regression tests passing: {state['pass_to_pass_passed']}, "
+        f"failing: {state['pass_to_pass_failed']}\n"
+        f"Failing test feedback:\n{errors}\n\n"
+        "Provide the corrected module."
+    )
+
+
+def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
+    """Condition A: one completion from issue + buggy module, no feedback."""
+    prompt = _base_prompt(instance, instance.buggy_source) + "\nProvide the corrected module."
+    patch = extract_code(llm.ask(prompt, system=SYSTEM_PROMPT))
+    result = run_instance_tests(patch, instance)
+    return {
+        "instance_id": instance.instance_id,
+        "condition": "single_shot",
+        "solved": result["solved"],
+        "solved_first_attempt": result["solved"],
+        "attempts": 1,
+        "saw_regression": result["pass_to_pass"]["failed"] > 0,
+    }
+
+
+def solve_in_world(
+    instance: SWEBenchInstance, llm: BaseLLM, budget: int = 4
+) -> Dict[str, Any]:
+    """Condition B: iterative repair inside the world, exact feedback each step."""
+    world = build_swebench_world(instance)
+    attempts_used = 0
+    first_attempt_solved = False
+    saw_regression = False
+    for attempt in range(budget):
+        patch = extract_code(
+            llm.ask(_feedback_prompt(instance, world.state), system=SYSTEM_PROMPT)
+        )
+        world.step(Action("submit_patch", params={"source": patch}))
+        attempts_used = attempt + 1
+        if world.state["pass_to_pass_failed"] > 0:
+            saw_regression = True
+        if world.state["solved"]:
+            first_attempt_solved = attempt == 0
+            break
+    return {
+        "instance_id": instance.instance_id,
+        "condition": "in_world",
+        "solved": bool(world.state["solved"]),
+        "solved_first_attempt": first_attempt_solved,
+        "attempts": attempts_used,
+        "saw_regression": saw_regression,
+    }

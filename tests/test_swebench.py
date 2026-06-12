@@ -2,7 +2,7 @@
 
 import json
 
-from openworld import Action
+from openworld import Action, MockLLM
 from openworld.swebench import (
     SWEBenchInstance,
     build_swebench_world,
@@ -10,6 +10,8 @@ from openworld.swebench import (
     load_dataset,
     merged_errors,
     run_instance_tests,
+    solve_in_world,
+    solve_single_shot,
 )
 
 # (Tasks 2-4 extend this import block as they add symbols.)
@@ -158,3 +160,43 @@ def test_solved_world_ignores_further_steps():
     world.step(Action("submit_patch", params={"source": "x = 1\n"}))
     assert world.state["attempts"] == 1  # unchanged
     assert world.state["solved"] is True
+
+
+def _fenced(source):
+    return f"```python\n{source}\n```"
+
+
+def test_solve_single_shot_with_mock():
+    llm = MockLLM([_fenced(FIXTURE.reference_source)])
+    record = solve_single_shot(FIXTURE, llm)
+    assert record == {
+        "instance_id": FIXTURE.instance_id,
+        "condition": "single_shot",
+        "solved": True,
+        "solved_first_attempt": True,
+        "attempts": 1,
+        "saw_regression": False,
+    }
+    # Single-shot prompt must contain the issue but no test feedback.
+    prompt = llm.calls[0][-1]["content"]
+    assert "double-count" in prompt
+    assert "failing" not in prompt.lower()
+
+
+def test_solve_in_world_recovers_on_second_attempt():
+    llm = MockLLM(["no code at all", _fenced(FIXTURE.reference_source)])
+    record = solve_in_world(FIXTURE, llm, budget=4)
+    assert record["solved"] is True
+    assert record["solved_first_attempt"] is False
+    assert record["attempts"] == 2
+    assert record["condition"] == "in_world"
+    # The second prompt carries world feedback from the failed first attempt.
+    second_prompt = llm.calls[1][-1]["content"]
+    assert "failing" in second_prompt.lower()
+
+
+def test_solve_in_world_exhausts_budget():
+    llm = MockLLM(["still not code"])
+    record = solve_in_world(FIXTURE, llm, budget=2)
+    assert record["solved"] is False
+    assert record["attempts"] == 2

@@ -1,0 +1,466 @@
+{
+  "n_instances": 6,
+  "budget": 4,
+  "mock": false,
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "n": 6,
+      "single_shot_pass1": 0.16666666666666666,
+      "single_shot_pass1_ci": [
+        0.03005258587173032,
+        0.563509436563646
+      ],
+      "in_world_pass1": 0.16666666666666666,
+      "in_world_pass_budget": 0.16666666666666666,
+      "in_world_pass_budget_ci": [
+        0.03005258587173032,
+        0.563509436563646
+      ],
+      "delta_budget_minus_ss": 0.0,
+      "mean_attempts": 3.5,
+      "budget": 4
+    },
+    {
+      "model": "qwen2.5:3b",
+      "n": 6,
+      "single_shot_pass1": 0.3333333333333333,
+      "single_shot_pass1_ci": [
+        0.09676933255921683,
+        0.7000116786584712
+      ],
+      "in_world_pass1": 0.3333333333333333,
+      "in_world_pass_budget": 0.5,
+      "in_world_pass_budget_ci": [
+        0.18761280689940874,
+        0.8123871931005913
+      ],
+      "delta_budget_minus_ss": 0.16666666666666666,
+      "mean_attempts": 2.6666666666666665,
+      "budget": 4
+    },
+    {
+      "model": "qwen2.5:7b",
+      "n": 6,
+      "single_shot_pass1": 0.3333333333333333,
+      "single_shot_pass1_ci": [
+        0.09676933255921683,
+        0.7000116786584712
+      ],
+      "in_world_pass1": 0.3333333333333333,
+      "in_world_pass_budget": 0.5,
+      "in_world_pass_budget_ci": [
+        0.18761280689940874,
+        0.8123871931005913
+      ],
+      "delta_budget_minus_ss": 0.16666666666666666,
+      "mean_attempts": 2.8333333333333335,
+      "budget": 4
+    }
+  ],
+  "results": [
+    {
+      "model": "qwen2.5:1.5b",
+      "n": 6,
+      "single_shot_pass1": 0.16666666666666666,
+      "single_shot_pass1_ci": [
+        0.03005258587173032,
+        0.563509436563646
+      ],
+      "in_world_pass1": 0.16666666666666666,
+      "in_world_pass_budget": 0.16666666666666666,
+      "in_world_pass_budget_ci": [
+        0.03005258587173032,
+        0.563509436563646
+      ],
+      "delta_budget_minus_ss": 0.0,
+      "mean_attempts": 3.5,
+      "budget": 4,
+      "pairs": [
+        {
+          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 3
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 3
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 2
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 2
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 2
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 2
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 2
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 2
+          }
+        }
+      ]
+    },
+    {
+      "model": "qwen2.5:3b",
+      "n": 6,
+      "single_shot_pass1": 0.3333333333333333,
+      "single_shot_pass1_ci": [
+        0.09676933255921683,
+        0.7000116786584712
+      ],
+      "in_world_pass1": 0.3333333333333333,
+      "in_world_pass_budget": 0.5,
+      "in_world_pass_budget_ci": [
+        0.18761280689940874,
+        0.8123871931005913
+      ],
+      "delta_budget_minus_ss": 0.16666666666666666,
+      "mean_attempts": 2.6666666666666665,
+      "budget": 4,
+      "pairs": [
+        {
+          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": false,
+            "attempts": 2,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 2
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 2
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 0
+          }
+        }
+      ]
+    },
+    {
+      "model": "qwen2.5:7b",
+      "n": 6,
+      "single_shot_pass1": 0.3333333333333333,
+      "single_shot_pass1_ci": [
+        0.09676933255921683,
+        0.7000116786584712
+      ],
+      "in_world_pass1": 0.3333333333333333,
+      "in_world_pass_budget": 0.5,
+      "in_world_pass_budget_ci": [
+        0.18761280689940874,
+        0.8123871931005913
+      ],
+      "delta_budget_minus_ss": 0.16666666666666666,
+      "mean_attempts": 2.8333333333333335,
+      "budget": 4,
+      "pairs": [
+        {
+          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 1
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": false,
+            "attempts": 3,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+          "single_shot": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 2
+          }
+        }
+      ]
+    }
+  ],
+  "table": "| model | single-shot pass@1 | in-world pass@1 | in-world pass@4 | \u0394 (pass@4 \u2212 SS) | mean attempts |\n|---|---|---|---|---|---|\n| qwen2.5:1.5b | 0.17 | 0.17 | 0.17 | +0.00 | 3.50 |\n| qwen2.5:3b | 0.33 | 0.33 | 0.50 | +0.17 | 2.67 |\n| qwen2.5:7b | 0.33 | 0.33 | 0.50 | +0.17 | 2.83 |"
+}

@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from openworld.bench import RecipeError, evaluate, load_recipe, mock_factory, summarize, validate_dataset
+from openworld.bench import RecipeError, evaluate, load_recipe, mock_factory, summarize, validate_dataset, write_card
 
 ATOMIC_RECIPE = "recipes/owsb-atomic-v1.json"
 STAGED_RECIPE = "recipes/owsb-staged-v1.json"
@@ -96,3 +96,16 @@ def test_summarize_handles_no_solves():
     s = summarize(rows, budget=4)
     assert s["mean_attempts_when_solved"] is None
     assert s["delta"] == 0.0
+
+
+def test_card_contains_provenance_and_gate(tmp_path):
+    recipe = load_recipe(ATOMIC_RECIPE)
+    report = validate_dataset(recipe)
+    card_path = write_card(recipe, report, out=tmp_path / "CARD.md")
+    card = card_path.read_text(encoding="utf-8")
+    assert "# owsb-atomic v1" in card
+    assert "hand" in card                      # generator type
+    assert "20 instances" in card
+    assert "all checks passed" in card
+    assert recipe["_recipe_sha256"][:12] in card
+    assert "Tier 0" in card and "Tier 2" in card

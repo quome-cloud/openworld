@@ -9,6 +9,8 @@ from openworld.compose import (
     CompositeWorld,
     Route,
     CompositeTransition,  # noqa: F401 - imported to assert it stays public
+    legal_actions,
+    observe,
 )
 from openworld.transition import Transition
 
@@ -114,3 +116,56 @@ def test_registry_survives_tick_and_routing():
     comp.step(Action("tick"))
     comp.step(Action("sf:work"))
     assert comp.state[AGENTS_KEY]["alice"]["at"] == "sf"
+
+
+def make_earth():
+    west = CompositeWorld(
+        name="west",
+        children={"sf": make_town("sf"), "la": make_town("la")},
+        aggregators=[Aggregator("gdp", lambda kids: sum(c["output"] for c in kids.values()))],
+    )
+    east = CompositeWorld(
+        name="east",
+        children={"ny": make_town("ny")},
+        aggregators=[Aggregator("gdp", lambda kids: kids["ny"]["output"])],
+    )
+    return CompositeWorld(
+        name="earth",
+        children={"west": west, "east": east},
+        agents={"alice": {"at": "west:sf", "coins": 5}},
+        bridges=[Route("flight", "west:sf", "east:ny", transition=None)],
+        aggregators=[Aggregator("world_gdp",
+                                lambda kids: kids["west"][AGG_KEY]["gdp"]
+                                + kids["east"][AGG_KEY]["gdp"])],
+    )
+
+
+def test_observe_scopes_detail_aggregates_and_neighbors():
+    earth = make_earth()
+    earth.step(Action("west:sf:work"))
+    view = observe(earth, earth.state, "alice")
+    assert view["location"] == "west:sf"
+    assert view["local"]["output"] == 1                      # leaf detail
+    assert view["ancestors"]["<root>"]["world_gdp"] == 1     # root aggregates
+    assert view["ancestors"]["west"]["gdp"] == 1             # mid-level aggregates
+    assert "east:ny" in view["neighbors"]                    # route-adjacent
+    assert "la" not in view["neighbors"]                     # non-adjacent sibling
+    assert "la" not in view and "west:la" not in view.get("neighbors", {})
+
+
+def test_legal_actions_lists_local_actions_and_travel_options():
+    earth = make_earth()
+    acts = legal_actions(earth, earth.state, "alice")
+    assert "west:sf:work" in acts and "west:sf:wait" in acts
+    assert "travel:east:ny" in acts
+    assert not any(a.startswith("east:ny:") for a in acts)
+
+
+def test_observe_unknown_agent_raises():
+    earth = make_earth()
+    try:
+        observe(earth, earth.state, "nobody")
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("expected KeyError")

@@ -22,7 +22,7 @@ Quickstart:
 """
 
 from .agent import Agent
-from .compose import Aggregator, Binding, Bridge, CompositeWorld, compile_bridge
+from .compose import (Aggregator, Binding, Bridge, CompositeWorld, Route, compile_bridge, legal_actions, observe)
 from .ethics import (
     Constraint, Delegate, MoralParliament, constrained, lexicographic,
     maximin, permitted_actions, weighted_sum,
@@ -60,6 +60,8 @@ __all__ = [
     "CompositeWorld",
     "Constraint",
     "compile_bridge",
+    "legal_actions",
+    "observe",
     "Delegate",
     "Dial",
     "MoralParliament",
@@ -82,6 +84,7 @@ __all__ = [
     "ObjectiveSuite",
     "OllamaConnectionError",
     "OllamaLLM",
+    "Route",
     "SandboxError",
     "Simulation",
     "StepRecord",

@@ -269,3 +269,60 @@ def compile_bridge(
     )
     return Bridge(name=name, a=a, b=b, transition=transition,
                   description=description, rules=tuple(rules))
+
+
+def observe(composite: CompositeWorld, state: Dict[str, Any], agent_name: str) -> Dict[str, Any]:
+    """An agent's scoped view: full detail at its own node, aggregates of
+    every ancestor level, and summaries of route-adjacent locations.
+
+    This is the hierarchical-attention contract: planners reason locally
+    against exact local state and globally against derived aggregates,
+    without ever holding the whole macrostate.
+    """
+    registry = state.get(AGENTS_KEY, {})
+    if agent_name not in registry:
+        raise KeyError(f"unknown agent {agent_name!r}")
+    path = registry[agent_name]["at"]
+    view: Dict[str, Any] = {
+        "agent": dict(registry[agent_name]),
+        "location": path,
+        "local": composite._resolve(state, path),
+        "ancestors": {},
+        "neighbors": {},
+    }
+    node: Any = state
+    prefix: list = []
+    for part in path.split(":"):
+        if AGG_KEY in node:
+            view["ancestors"][":".join(prefix) or "<root>"] = dict(node[AGG_KEY])
+        node = node[part]
+        prefix.append(part)
+    for bridge in composite.bridges:
+        if not isinstance(bridge, Route):
+            continue
+        other = bridge.b if bridge.a == path else bridge.a if bridge.b == path else None
+        if other is not None:
+            slice_ = composite._resolve(state, other)
+            view["neighbors"][other] = dict(slice_.get(AGG_KEY, slice_))
+    return view
+
+
+def legal_actions(composite: CompositeWorld, state: Dict[str, Any], agent_name: str) -> list:
+    """The namespaced actions available to an agent at its location, plus a
+    'travel:<dest>' token per incident route. Callers turn a travel token
+    into Action('travel', params={'agent': name, 'to': dest})."""
+    registry = state.get(AGENTS_KEY, {})
+    if agent_name not in registry:
+        raise KeyError(f"unknown agent {agent_name!r}")
+    path = registry[agent_name]["at"]
+    world: Any = composite
+    for part in path.split(":"):
+        world = world.children[part]
+    actions = [f"{path}:{act}" for act in world.actions]
+    for bridge in composite.bridges:
+        if not isinstance(bridge, Route):
+            continue
+        other = bridge.b if bridge.a == path else bridge.a if bridge.b == path else None
+        if other is not None:
+            actions.append(f"travel:{other}")
+    return actions

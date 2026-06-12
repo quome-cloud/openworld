@@ -75,3 +75,53 @@ def wilson_ci(successes: int, n: int, z: float = 1.96):
     center = (p + z * z / (2 * n)) / denom
     half = (z / denom) * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
     return (max(0.0, center - half), min(1.0, center + half))
+
+
+def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
+    """Gate v1: every check the dataset must pass before results count.
+
+    - instance ids unique and non-empty dataset
+    - reference solves both suites on every instance
+    - buggy fails ALL fail_to_pass and passes ALL pass_to_pass
+    - stored world.initial_state matches recomputation
+    - tasks.jsonl sha256 matches recipe.artifacts (when frozen)
+    """
+    from .swebench import initial_world_state, load_dataset, run_instance_tests
+
+    instances = load_dataset(recipe["dataset"]["path"])
+    checks: List[Dict[str, Any]] = []
+
+    def check(name: str, ok: bool, detail: str = "") -> None:
+        checks.append({"name": name, "ok": bool(ok), "detail": detail})
+
+    ids = [i.instance_id for i in instances]
+    check("nonempty", len(instances) > 0, f"{len(instances)} instances")
+    check("unique-ids", len(ids) == len(set(ids)))
+
+    for inst in instances:
+        ref = run_instance_tests(inst.reference_source, inst)
+        check(f"oracle:{inst.instance_id}", ref["solved"],
+              "; ".join(ref["fail_to_pass"]["errors"][:1] + ref["pass_to_pass"]["errors"][:1]))
+        buggy = run_instance_tests(inst.buggy_source, inst)
+        check(f"bug-real:{inst.instance_id}",
+              buggy["fail_to_pass"]["passed"] == 0 and buggy["pass_to_pass"]["failed"] == 0)
+        recomputed = initial_world_state(inst)
+        stored = inst.world.get("initial_state", {})
+        drift = [k for k in ("fail_to_pass_passed", "fail_to_pass_failed",
+                             "pass_to_pass_passed", "pass_to_pass_failed",
+                             "attempts", "solved", "source")
+                 if stored.get(k) != recomputed[k]]
+        check(f"initial-state:{inst.instance_id}", not drift, ",".join(drift))
+
+    frozen = recipe["artifacts"].get("tasks_jsonl_sha256")
+    if frozen:
+        actual = sha256_file(recipe["dataset"]["path"])
+        check("artifact-sha256", actual == frozen,
+              f"recipe={frozen[:12]}.. actual={actual[:12]}..")
+
+    return {
+        "dataset": recipe["dataset"]["name"],
+        "n_instances": len(instances),
+        "ok": all(c["ok"] for c in checks),
+        "checks": checks,
+    }

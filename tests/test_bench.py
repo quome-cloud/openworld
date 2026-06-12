@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from openworld.bench import RecipeError, load_recipe
+from openworld.bench import RecipeError, load_recipe, validate_dataset
 
 ATOMIC_RECIPE = "recipes/owsb-atomic-v1.json"
 STAGED_RECIPE = "recipes/owsb-staged-v1.json"
@@ -42,3 +42,25 @@ def test_load_recipe_rejects_missing_section(tmp_path):
     }}), encoding="utf-8")
     with pytest.raises(RecipeError, match="generator"):
         load_recipe(bad)
+
+
+def test_validate_atomic_dataset_passes():
+    report = validate_dataset(load_recipe(ATOMIC_RECIPE))
+    assert report["ok"] is True
+    assert report["n_instances"] == 20
+    failed = [c for c in report["checks"] if not c["ok"]]
+    assert failed == []
+
+
+def test_validate_staged_dataset_passes():
+    report = validate_dataset(load_recipe(STAGED_RECIPE))
+    assert report["ok"] is True
+    assert report["n_instances"] == 15
+
+
+def test_validate_catches_artifact_drift(tmp_path):
+    recipe = load_recipe(ATOMIC_RECIPE)
+    recipe["artifacts"]["tasks_jsonl_sha256"] = "0" * 64  # wrong on purpose
+    report = validate_dataset(recipe)
+    assert report["ok"] is False
+    assert any("sha256" in c["name"] and not c["ok"] for c in report["checks"])

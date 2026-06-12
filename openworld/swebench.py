@@ -61,6 +61,30 @@ class SWEBenchInstance:
     pass_to_pass: List[Tuple[str, str]]
     world: Dict[str, Any]
 
+    @classmethod
+    def from_dict(cls, record: Dict[str, Any]) -> "SWEBenchInstance":
+        """Build from a JSONL record, ignoring unknown keys."""
+        record = {k: v for k, v in record.items() if k in _INSTANCE_FIELDS}
+        record["fail_to_pass"] = [tuple(t) for t in record.get("fail_to_pass", [])]
+        record["pass_to_pass"] = [tuple(t) for t in record.get("pass_to_pass", [])]
+        record.setdefault("reference_source", "")
+        record.setdefault("test_preamble", "")
+        record.setdefault("world", {})
+        return cls(**record)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "instance_id": self.instance_id,
+            "module_name": self.module_name,
+            "issue": self.issue,
+            "buggy_source": self.buggy_source,
+            "reference_source": self.reference_source,
+            "test_preamble": self.test_preamble,
+            "fail_to_pass": [list(t) for t in self.fail_to_pass],
+            "pass_to_pass": [list(t) for t in self.pass_to_pass],
+            "world": self.world,
+        }
+
 
 _INSTANCE_FIELDS = {f.name for f in fields(SWEBenchInstance)}
 
@@ -72,10 +96,7 @@ def load_dataset(path: Optional[Path] = None) -> List[SWEBenchInstance]:
     for line in text.splitlines():
         if not line.strip():
             continue
-        record = json.loads(line)
-        record["fail_to_pass"] = [tuple(t) for t in record["fail_to_pass"]]
-        record["pass_to_pass"] = [tuple(t) for t in record["pass_to_pass"]]
-        instances.append(SWEBenchInstance(**{k: v for k, v in record.items() if k in _INSTANCE_FIELDS}))
+        instances.append(SWEBenchInstance.from_dict(json.loads(line)))
     return instances
 
 
@@ -169,6 +190,19 @@ SYSTEM_PROMPT = (
     "Use only pure python and math."
 )
 
+# Back-compat alias used by openworld.contextbench.
+_SYSTEM = SYSTEM_PROMPT
+
+
+def _safe_ask(llm: BaseLLM, prompt: str, system: str) -> str:
+    """Ask the model, degrading any backend error (timeout, connection reset,
+    runaway generation killed by timeout) to an empty reply — i.e. a failed
+    attempt — so a single flaky call never crashes a whole benchmark run."""
+    try:
+        return llm.ask(prompt, system=system)
+    except Exception:
+        return ""
+
 
 def _base_prompt(instance: SWEBenchInstance, source: str) -> str:
     return (
@@ -193,7 +227,7 @@ def _feedback_prompt(instance: SWEBenchInstance, state: WorldState) -> str:
 def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
     """Condition A: one completion from issue + buggy module, no feedback."""
     prompt = _base_prompt(instance, instance.buggy_source) + "\nProvide the corrected module."
-    patch = extract_code(llm.ask(prompt, system=SYSTEM_PROMPT))
+    patch = extract_code(_safe_ask(llm, prompt, SYSTEM_PROMPT))
     result = run_instance_tests(patch, instance)
     return {
         "instance_id": instance.instance_id,
@@ -215,7 +249,7 @@ def solve_in_world(
     saw_regression = False
     for attempt in range(budget):
         patch = extract_code(
-            llm.ask(_feedback_prompt(instance, world.state), system=SYSTEM_PROMPT)
+            _safe_ask(llm, _feedback_prompt(instance, world.state), SYSTEM_PROMPT)
         )
         world.step(Action("submit_patch", params={"source": patch}))
         attempts_used = attempt + 1

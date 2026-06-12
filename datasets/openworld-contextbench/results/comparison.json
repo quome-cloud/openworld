@@ -1,0 +1,780 @@
+{
+  "n_instances": 15,
+  "mock": false,
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "n": 15,
+      "without_context_pass1": 0.26666666666666666,
+      "without_context_ci": [
+        0.10897276103182807,
+        0.5195088965768675
+      ],
+      "with_context_pass1": 0.8,
+      "with_context_ci": [
+        0.5481406466534955,
+        0.9295257935638959
+      ],
+      "delta_with_minus_without": 0.5333333333333333
+    },
+    {
+      "model": "qwen2.5:3b",
+      "n": 15,
+      "without_context_pass1": 0.4666666666666667,
+      "without_context_ci": [
+        0.24809225259746442,
+        0.6988336984894921
+      ],
+      "with_context_pass1": 1.0,
+      "with_context_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "delta_with_minus_without": 0.5333333333333333
+    },
+    {
+      "model": "qwen2.5:7b",
+      "n": 15,
+      "without_context_pass1": 0.8666666666666667,
+      "without_context_ci": [
+        0.6211750079348376,
+        0.9626395301086407
+      ],
+      "with_context_pass1": 1.0,
+      "with_context_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "delta_with_minus_without": 0.13333333333333333
+    }
+  ],
+  "results": [
+    {
+      "model": "qwen2.5:1.5b",
+      "n": 15,
+      "without_context_pass1": 0.26666666666666666,
+      "without_context_ci": [
+        0.10897276103182807,
+        0.5195088965768675
+      ],
+      "with_context_pass1": 0.8,
+      "with_context_ci": [
+        0.5481406466534955,
+        0.9295257935638959
+      ],
+      "delta_with_minus_without": 0.5333333333333333,
+      "pairs": [
+        {
+          "instance_id": "openworld-contextbench-000-cap-at-max",
+          "without": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "with_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-001-reject-underflow",
+          "without": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-002-sort-first",
+          "without": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "with_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-003-floor-at-zero",
+          "without": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-004-guard-empty-divide",
+          "without": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-005-default-missing-key",
+          "without": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-006-flush-final",
+          "without": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "with_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-007-clamp-both-ends",
+          "without": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-008-normalize-before-compare",
+          "without": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+          "without": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-010-early-return-first-match",
+          "without": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-011-guard-empty-index",
+          "without": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-012-reject-over-capacity",
+          "without": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-013-guard-zero-percent",
+          "without": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-014-default-missing-setting",
+          "without": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        }
+      ]
+    },
+    {
+      "model": "qwen2.5:3b",
+      "n": 15,
+      "without_context_pass1": 0.4666666666666667,
+      "without_context_ci": [
+        0.24809225259746442,
+        0.6988336984894921
+      ],
+      "with_context_pass1": 1.0,
+      "with_context_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "delta_with_minus_without": 0.5333333333333333,
+      "pairs": [
+        {
+          "instance_id": "openworld-contextbench-000-cap-at-max",
+          "without": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-001-reject-underflow",
+          "without": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-002-sort-first",
+          "without": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-003-floor-at-zero",
+          "without": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-004-guard-empty-divide",
+          "without": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-005-default-missing-key",
+          "without": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-006-flush-final",
+          "without": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-007-clamp-both-ends",
+          "without": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-008-normalize-before-compare",
+          "without": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+          "without": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-010-early-return-first-match",
+          "without": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-011-guard-empty-index",
+          "without": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-012-reject-over-capacity",
+          "without": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-013-guard-zero-percent",
+          "without": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-014-default-missing-setting",
+          "without": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        }
+      ]
+    },
+    {
+      "model": "qwen2.5:7b",
+      "n": 15,
+      "without_context_pass1": 0.8666666666666667,
+      "without_context_ci": [
+        0.6211750079348376,
+        0.9626395301086407
+      ],
+      "with_context_pass1": 1.0,
+      "with_context_ci": [
+        0.7961107336956521,
+        1.0
+      ],
+      "delta_with_minus_without": 0.13333333333333333,
+      "pairs": [
+        {
+          "instance_id": "openworld-contextbench-000-cap-at-max",
+          "without": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-000-cap-at-max",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-001-reject-underflow",
+          "without": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-001-reject-underflow",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-002-sort-first",
+          "without": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-002-sort-first",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-003-floor-at-zero",
+          "without": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-003-floor-at-zero",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-004-guard-empty-divide",
+          "without": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-004-guard-empty-divide",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-005-default-missing-key",
+          "without": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-005-default-missing-key",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-006-flush-final",
+          "without": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-006-flush-final",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-007-clamp-both-ends",
+          "without": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-007-clamp-both-ends",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-008-normalize-before-compare",
+          "without": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 2
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-008-normalize-before-compare",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+          "without": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-009-dedupe-preserve-order",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-010-early-return-first-match",
+          "without": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-010-early-return-first-match",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-011-guard-empty-index",
+          "without": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-011-guard-empty-index",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-012-reject-over-capacity",
+          "without": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "without_context",
+            "solved": false,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-012-reject-over-capacity",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-013-guard-zero-percent",
+          "without": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-013-guard-zero-percent",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-contextbench-014-default-missing-setting",
+          "without": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "without_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          },
+          "with": {
+            "instance_id": "openworld-contextbench-014-default-missing-setting",
+            "condition": "with_context",
+            "solved": true,
+            "regression_failures_seen": 0
+          }
+        }
+      ]
+    }
+  ],
+  "table": "| model | without-context pass@1 | with-context pass@1 | \u0394 (with \u2212 without) |\n|---|---|---|---|\n| qwen2.5:1.5b | 0.27 | 0.80 | +0.53 |\n| qwen2.5:3b | 0.47 | 1.00 | +0.53 |\n| qwen2.5:7b | 0.87 | 1.00 | +0.13 |"
+}

@@ -32,7 +32,14 @@ from .objectives import Dial, Objective, ObjectiveSuite
 from .optimize import SweepPoint, SweepResult, sweep
 from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
+from .contextbench import (
+    ContextBenchInstance, ContextExample, solve_with_context, solve_without_context,
+)
 from .state import Action, WorldState
+from .swebench import (
+    SWEBenchInstance, SWEBenchTransition, build_swebench_world, load_dataset,
+    run_instance_tests, solve_in_world, solve_single_shot,
+)
 from .transition import CodeTransition, FunctionTransition, LLMTransition, Transition
 from .tune import Choice, IntRange, Param, Study, Trial, Tuner, Uniform
 from .verify import SynthesisError, Verifier, synthesize_transition
@@ -78,6 +85,17 @@ __all__ = [
     "Trajectory",
     "Transition",
     "Verifier",
+    "ContextBenchInstance",
+    "ContextExample",
+    "solve_with_context",
+    "solve_without_context",
+    "SWEBenchInstance",
+    "SWEBenchTransition",
+    "build_swebench_world",
+    "load_dataset",
+    "run_instance_tests",
+    "solve_in_world",
+    "solve_single_shot",
     "World",
     "WorldState",
     "sweep",

@@ -454,6 +454,26 @@ transition \emph{is} test execution: a submitted patch runs bit-exactly in a
 sandbox with a wall-clock alarm (a looping patch fails rather than hangs),
 and failing-test feedback enters the state for the next attempt.
 
+\paragraph{Benchmark-scale repair (E28--E29).} Beyond the single-function
+benchmark, two SWE-bench-style suites probe repair at module scale. Each
+instance carries a natural-language issue report (symptoms and a repro, never
+the fix), a buggy module (functions or a stateful class), two hidden suites
+(\texttt{fail\_to\_pass} exercising the defect, \texttt{pass\_to\_pass}
+guarding regressions), and an explicit world specification whose
+\texttt{submit\_patch} dynamics run both suites bit-exactly; solving requires
+zero failures in \emph{both}, so a fix that breaks a passing test does not
+count. The \emph{atomic} suite (E28, $n=\SweAtomicN$) plants one
+issue-described defect per instance; the \emph{staged} suite (E29,
+$n=\SweStagedN$) plants a second, latent defect that surfaces only as a new
+failing test once the issue-visible defect is fixed. Both run a paired
+ablation across the \texttt{qwen2.5} ladder (1.5B/3B/7B): the same model
+\emph{single-shot} (one completion from issue + module) versus \emph{in-world}
+(up to \SweBudget{} \texttt{submit\_patch} steps; the first prompt is
+identical to single-shot, and exact failing-test feedback enters from the
+second attempt onward). An expanded 20-instance atomic suite with additional
+regression traps ships in the repository
+(\texttt{datasets/openworld-swebench/}).
+
 \paragraph{Models and hardware.} All experiments use local models served by
 Ollama on an Apple-silicon laptop: \texttt{qwen2.5:7b} (generator, judge,
 critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3),
@@ -871,6 +891,46 @@ and judge-based selection compose into a system that repairs
 \JudgePassBudget{} of benchmark defects with 1.5B/7B local models and no
 training (and 100\% with a 7B agent alone)---every component of the
 framework exercised against a verifiable external standard.
+
+\subsection{When does the feedback loop pay off? (E28--E29)}\label{sec:swebench}
+The in-world loop --- exact failing-test feedback flowing from the world's
+dynamics into the next attempt --- is the framework's central mechanism for
+repair, and E28--E29 ask directly what it is worth
+(Table~\ref{tab:swebench}). The design isolates the loop: in-world attempt 1
+uses the \emph{same} prompt as single-shot, so the two conditions can differ
+only through feedback-driven iteration.
+
+On the atomic suite, single-shot pass@1 scales cleanly with model size
+(\SweAtomicSSSmall{} $\to$ \SweAtomicSSMid{} $\to$ \SweAtomicSSBig), so the
+benchmark discriminates capability --- but the loop adds nothing at any rung
+($\Delta \approx 0$; the 7B entry's small negative value is sampling noise
+under temperature at $n=\SweAtomicN$, since its single-shot already solves
+every instance). An atomic, issue-described bug is one-shot fixable or it is
+not; feedback has nothing left to contribute. The staged suite changes the
+structure, not the harness: the issue-visible fix surfaces a latent second
+failing test that no prompt describes. There the loop becomes load-bearing,
+and its value is \emph{capability-gated}: the 1.5B model stays flat
+(\SweStagedDeltaSmall{} --- it cannot convert the feedback it is shown), the
+3B model gains $\Delta = \SweStagedDeltaMid$, and the 7B model gains
+$\Delta = \SweStagedDeltaBig$ (single-shot \SweStagedSSBig{} $\to$
+\SweStagedIWBudgetBig{} at budget \SweBudget). Two conclusions follow. First,
+the world model's feedback channel pays only when the base model is strong
+enough to act on structured feedback, and pays more with scale. Second,
+whether the channel is measurable at all is a property of task
+\emph{structure}: multi-stage defects --- the shape real SWE-bench issues
+take --- expose it; single-edit defects mask it. The caveats are the usual
+ones at this scale: $n$ is small and the Wilson intervals are wide
+(per-instance paired records ship with the results for exact tests), and
+absolute rates are specific to the stated local quantized snapshots.
+
+\begin{table}[htb]\centering\small
+\input{tables/swebench.tex}
+\caption{E28--E29: paired single-shot (SS) vs.\ in-world (IW) repair on the
+atomic and staged suites. $\Delta$ is in-world pass@\SweBudget{} $-$
+single-shot pass@1; in-world attempt 1 shares the single-shot prompt, so
+$\Delta$ measures feedback-driven iteration alone.}
+\label{tab:swebench}
+\end{table}
 
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}

@@ -28,6 +28,7 @@ EXPERIMENTS = [
     "e19_scale_ladder", "e20_complexity", "e21_stochastic",
     "e22_planning", "e23_self_check", "e24_aggregators",
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
+    "e28_swebench_ablation", "e29_swebench_staged",
 ]
 
 
@@ -308,6 +309,30 @@ def table_ladder(e19):
     )
 
 
+def table_swebench(e28, e29):
+    def block(label, summary):
+        rows = []
+        for s in summary:
+            rows.append(
+                f"{label} & \\texttt{{{s['model']}}} & "
+                f"{s['single_shot_pass1']:.2f} & {s['in_world_pass1']:.2f} & "
+                f"{s['in_world_pass_budget']:.2f} & "
+                f"${s['delta_budget_minus_ss']:+.2f}$ & {s['mean_attempts']:.1f} \\\\"
+            )
+            label = ""  # only print the suite name on its first row
+        return rows
+
+    atomic = block(f"Atomic ($n={e28['n_instances']}$)", e28["summary"])
+    staged = block(f"Staged ($n={e29['n_instances']}$)", e29["summary"])
+    (TABLES / "swebench.tex").write_text(
+        "\\begin{tabular}{llccccc}\n\\toprule\n"
+        "Suite & Model & SS pass@1 & IW pass@1 & IW pass@4 & "
+        "$\\Delta$ & Mean att. \\\\\n\\midrule\n"
+        + "\n".join(atomic) + "\n\\midrule\n" + "\n".join(staged)
+        + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
 def fig_complexity(e20):
     fig, ax = plt.subplots(figsize=(5.6, 3.3))
     summary = e20["summary"]
@@ -439,7 +464,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "26"),
+        macro("NumExperiments", "28"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -562,6 +587,26 @@ def numbers_tex(d):
         macro("RubricDeontVsUtil", f"{e27['pairwise']['utilitarian_vs_deontological']['spearman']:.2f}"),
         macro("RubricCareVsUtil", f"{e27['pairwise']['utilitarian_vs_care_ethics']['spearman']:.2f}"),
     ]
+    # E28-E29 (benchmark-scale repair ablation: single-shot vs in-world)
+    e28, e29 = d["e28_swebench_ablation"], d["e29_swebench_staged"]
+    a = {s["model"]: s for s in e28["summary"]}
+    g = {s["model"]: s for s in e29["summary"]}
+    lines += [
+        macro("SweAtomicN", str(e28["n_instances"])),
+        macro("SweStagedN", str(e29["n_instances"])),
+        macro("SweBudget", str(e28["budget"])),
+        macro("SweAtomicSSSmall", f"{a['qwen2.5:1.5b']['single_shot_pass1']:.2f}"),
+        macro("SweAtomicSSMid", f"{a['qwen2.5:3b']['single_shot_pass1']:.2f}"),
+        macro("SweAtomicSSBig", f"{a['qwen2.5:7b']['single_shot_pass1']:.2f}"),
+        macro("SweAtomicIWBudgetBig", f"{a['qwen2.5:7b']['in_world_pass_budget']:.2f}"),
+        macro("SweStagedSSMid", f"{g['qwen2.5:3b']['single_shot_pass1']:.2f}"),
+        macro("SweStagedSSBig", f"{g['qwen2.5:7b']['single_shot_pass1']:.2f}"),
+        macro("SweStagedIWBudgetMid", f"{g['qwen2.5:3b']['in_world_pass_budget']:.2f}"),
+        macro("SweStagedIWBudgetBig", f"{g['qwen2.5:7b']['in_world_pass_budget']:.2f}"),
+        macro("SweStagedDeltaSmall", f"{g['qwen2.5:1.5b']['delta_budget_minus_ss']:+.2f}"),
+        macro("SweStagedDeltaMid", f"{g['qwen2.5:3b']['delta_budget_minus_ss']:+.2f}"),
+        macro("SweStagedDeltaBig", f"{g['qwen2.5:7b']['delta_budget_minus_ss']:+.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -583,6 +628,7 @@ def main():
     table_repair(data["e18_repair_loop"])
     fig_complexity(data["e20_complexity"])
     table_planning(data["e22_planning"])
+    table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

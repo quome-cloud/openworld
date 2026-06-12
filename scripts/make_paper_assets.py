@@ -29,6 +29,7 @@ EXPERIMENTS = [
     "e22_planning", "e23_self_check", "e24_aggregators",
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
     "e28_swebench_ablation", "e29_swebench_staged",
+    "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
 ]
 
 
@@ -333,6 +334,56 @@ def table_swebench(e28, e29):
     )
 
 
+def table_composition(e30, e32):
+    """E30 (composition vs the cliff) + E32 (regime switch) in two blocks."""
+    s30 = {s["condition"]: s for s in e30["summary"]}
+    n_sectors = len(e30["sectors"])
+    n_bridges = len(e30["bridges"])
+    # 4 internal rules per sector: the parameter groups prod_*, rec_*,
+    # decay_* in the results JSON, plus the unparameterized wait rule.
+    child_rules = len({k.split("_")[0] for k in e30["sectors"][0]}) + 1
+    labels30 = {
+        "monolithic": f"Monolithic (one {n_sectors * child_rules + n_bridges}-rule prompt, flat state)",
+        "compositional": (f"\\textbf{{Compositional ({n_sectors} sectors $\\times$ "
+                          f"{child_rules} rules + {n_bridges} bridges)}}"),
+    }
+    rows30 = []
+    for cond in ("monolithic", "compositional"):
+        s = s30[cond]
+        rows30.append(
+            f"{labels30[cond]} & {pct(s['acceptance_rate'])} & "
+            f"{s['mean_probe_accuracy']:.2f} {ci_str(s['pooled_ci'])} \\\\"
+        )
+
+    s32 = {s["condition"]: s for s in e32["summary"]}
+    labels32 = {
+        "phased": "\\textbf{PhasedTransition (two verified phases)}",
+        "monolithic": "Monolithic (combined rules-with-change text)",
+        "llm_proxy": "LLM next-state (proxy)",
+    }
+    rows32 = []
+    for cond in ("phased", "monolithic", "llm_proxy"):
+        s = s32[cond]
+        rows32.append(
+            f"{labels32[cond]} & {s['mean_pre_boundary_accuracy']:.2f} & "
+            f"{s['boundary_step_match_rate']:.2f} & "
+            f"{s['mean_post_boundary_accuracy']:.2f} & "
+            f"{s['exact_full_rollouts']}/{s['replicates']} \\\\"
+        )
+
+    (TABLES / "composition.tex").write_text(
+        "\\begin{tabular}{lcc}\n\\toprule\n"
+        f"E30 condition (same {n_sectors * child_rules}-rule system) & "
+        "Accepted & Probe acc.\\ (95\\% CI) \\\\\n"
+        "\\midrule\n" + "\n".join(rows30) + "\n\\bottomrule\n\\end{tabular}\n"
+        "\n\\vspace{0.7em}\n\n"
+        "\\begin{tabular}{lcccc}\n\\toprule\n"
+        f"E32 engine (switch at step {e32['switch_step']}) & Pre & Boundary & "
+        "Post & Exact rollouts \\\\\n"
+        "\\midrule\n" + "\n".join(rows32) + "\n\\bottomrule\n\\end{tabular}\n"
+    )
+
+
 def fig_complexity(e20):
     fig, ax = plt.subplots(figsize=(5.6, 3.3))
     summary = e20["summary"]
@@ -464,7 +515,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "28"),
+        macro("NumExperiments", "31"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -607,6 +658,31 @@ def numbers_tex(d):
         macro("SweStagedDeltaMid", f"{g['qwen2.5:3b']['delta_budget_minus_ss']:+.2f}"),
         macro("SweStagedDeltaBig", f"{g['qwen2.5:7b']['delta_budget_minus_ss']:+.2f}"),
     ]
+    # E30-E32 (composition, nesting, and changing rules)
+    e30, e31, e32 = (d["e30_composition"], d["e31_nested_fidelity"],
+                     d["e32_regime_switch"])
+    s30 = {s["condition"]: s for s in e30["summary"]}
+    s32 = {s["condition"]: s for s in e32["summary"]}
+    # 4 internal rules per sector: the parameter groups prod_*, rec_*,
+    # decay_* in the results JSON, plus the unparameterized wait rule.
+    child_rules = len({k.split("_")[0] for k in e30["sectors"][0]}) + 1
+    n31 = e31["counts"]
+    lines += [
+        macro("CompMonoAcc", f"{s30['monolithic']['mean_probe_accuracy']:.2f}"),
+        macro("CompMonoCI", ci_str(s30["monolithic"]["pooled_ci"])),
+        macro("CompCompAcc", f"{s30['compositional']['mean_probe_accuracy']:.2f}"),
+        macro("CompCompCI", ci_str(s30["compositional"]["pooled_ci"])),
+        macro("CompRules", str(child_rules * len(e30["sectors"]))),
+        macro("CompChildRules", str(child_rules)),
+        macro("NestSteps", str(n31["steps"])),
+        macro("NestExact", f"{n31['leaf_exact']}/{n31['steps']}"),
+        macro("RegimePhasedExact",
+              f"{s32['phased']['exact_full_rollouts']}/{s32['phased']['replicates']}"),
+        macro("RegimeMonoExact",
+              f"{s32['monolithic']['exact_full_rollouts']}/{s32['monolithic']['replicates']}"),
+        macro("RegimeLLMPre", f"{s32['llm_proxy']['mean_pre_boundary_accuracy']:.2f}"),
+        macro("RegimeLLMPost", f"{s32['llm_proxy']['mean_post_boundary_accuracy']:.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -629,6 +705,7 @@ def main():
     fig_complexity(data["e20_complexity"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
+    table_composition(data["e30_composition"], data["e32_regime_switch"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

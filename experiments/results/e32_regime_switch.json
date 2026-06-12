@@ -1,0 +1,1150 @@
+{
+  "model": "qwen2.5:7b",
+  "switch_step": 10,
+  "rollout_steps": 20,
+  "action_script": [
+    "invest",
+    "invest",
+    "harvest",
+    "invest",
+    "wait",
+    "invest",
+    "harvest",
+    "invest",
+    "invest",
+    "harvest",
+    "invest",
+    "invest",
+    "harvest",
+    "invest",
+    "wait",
+    "invest",
+    "harvest",
+    "invest",
+    "invest",
+    "harvest"
+  ],
+  "initial_state": {
+    "step": 0,
+    "capital": 10,
+    "output": 0
+  },
+  "oracle_trajectory": [
+    {
+      "step": 1,
+      "capital": 8,
+      "output": 3
+    },
+    {
+      "step": 2,
+      "capital": 6,
+      "output": 6
+    },
+    {
+      "step": 3,
+      "capital": 12,
+      "output": 0
+    },
+    {
+      "step": 4,
+      "capital": 10,
+      "output": 3
+    },
+    {
+      "step": 5,
+      "capital": 10,
+      "output": 3
+    },
+    {
+      "step": 6,
+      "capital": 8,
+      "output": 6
+    },
+    {
+      "step": 7,
+      "capital": 14,
+      "output": 0
+    },
+    {
+      "step": 8,
+      "capital": 12,
+      "output": 3
+    },
+    {
+      "step": 9,
+      "capital": 10,
+      "output": 6
+    },
+    {
+      "step": 10,
+      "capital": 16,
+      "output": 0
+    },
+    {
+      "step": 11,
+      "capital": 14,
+      "output": 1
+    },
+    {
+      "step": 12,
+      "capital": 12,
+      "output": 2
+    },
+    {
+      "step": 13,
+      "capital": 13,
+      "output": 0
+    },
+    {
+      "step": 14,
+      "capital": 11,
+      "output": 1
+    },
+    {
+      "step": 15,
+      "capital": 11,
+      "output": 1
+    },
+    {
+      "step": 16,
+      "capital": 9,
+      "output": 2
+    },
+    {
+      "step": 17,
+      "capital": 10,
+      "output": 0
+    },
+    {
+      "step": 18,
+      "capital": 8,
+      "output": 1
+    },
+    {
+      "step": 19,
+      "capital": 6,
+      "output": 2
+    },
+    {
+      "step": 20,
+      "capital": 7,
+      "output": 0
+    }
+  ],
+  "phase_a_rules": [
+    "'invest' (only when capital >= 2): capital decreases by 2, output increases by 3. With less than 2 capital, 'invest' has no effect (besides the step counter).",
+    "'harvest': capital increases by the current output (1:1 conversion), then output resets to 0.",
+    "'wait' changes nothing (besides the step counter).",
+    "After EVERY action (including 'wait' and 'noop'), step increases by 1."
+  ],
+  "phase_b_rules": [
+    "'invest' (only when capital >= 2): capital decreases by 2, output increases by 1 (the other unit of capital is burned as tax). With less than 2 capital, 'invest' has no effect (besides the step counter).",
+    "'harvest': capital increases by output // 2 (integer floor division - a 50% tax), then output resets to 0.",
+    "'wait' changes nothing (besides the step counter).",
+    "After EVERY action (including 'wait' and 'noop'), step increases by 1."
+  ],
+  "combined_rules": [
+    "The market's policy CHANGES when the step counter reaches 10. All conditions read the PRE-action value of 'step'.",
+    "While step < 10 (the pre-action value), these rules apply:",
+    "  'invest' (only when capital >= 2): capital decreases by 2, output increases by 3. With less than 2 capital, 'invest' has no effect (besides the step counter).",
+    "  'harvest': capital increases by the current output (1:1 conversion), then output resets to 0.",
+    "  'wait' changes nothing (besides the step counter).",
+    "From step >= 10 (the pre-action value) on, these rules apply instead:",
+    "  'invest' (only when capital >= 2): capital decreases by 2, output increases by 1 (the other unit of capital is burned as tax). With less than 2 capital, 'invest' has no effect (besides the step counter).",
+    "  'harvest': capital increases by output // 2 (integer floor division - a 50% tax), then output resets to 0.",
+    "  'wait' changes nothing (besides the step counter).",
+    "In BOTH regimes, after EVERY action (including 'wait' and 'noop'), step increases by 1."
+  ],
+  "summary": [
+    {
+      "condition": "phased",
+      "replicates": 3,
+      "acceptance_rate": 1.0,
+      "mean_pre_boundary_accuracy": 1.0,
+      "boundary_step_match_rate": 1.0,
+      "mean_post_boundary_accuracy": 1.0,
+      "mean_post_after_boundary_accuracy": 1.0,
+      "exact_full_rollouts": 3
+    },
+    {
+      "condition": "monolithic",
+      "replicates": 3,
+      "acceptance_rate": 1.0,
+      "mean_pre_boundary_accuracy": 1.0,
+      "boundary_step_match_rate": 1.0,
+      "mean_post_boundary_accuracy": 1.0,
+      "mean_post_after_boundary_accuracy": 1.0,
+      "exact_full_rollouts": 3
+    },
+    {
+      "condition": "llm_proxy",
+      "replicates": 1,
+      "acceptance_rate": 1.0,
+      "mean_pre_boundary_accuracy": 0.2,
+      "boundary_step_match_rate": 0.0,
+      "mean_post_boundary_accuracy": 0.0,
+      "mean_post_after_boundary_accuracy": 0.0,
+      "exact_full_rollouts": 0
+    }
+  ],
+  "rows": [
+    {
+      "condition": "phased",
+      "replicate": 0,
+      "accepted": true,
+      "code_a": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    if action['name'] == 'invest':\n        if state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 3\n    elif action['name'] == 'harvest':\n        next_state['capital'] += next_state['output']\n        next_state['output'] = 0\n    elif action['name'] != 'noop':  # wait is a no-op, so we don't need to handle it explicitly\n        pass\n    \n    next_state['step'] += 1\n    return next_state",
+      "code_b": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 1\n    \n    elif action['name'] == 'harvest':\n        next_state['capital'] += state['output'] // 2\n        next_state['output'] = 0\n    \n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    next_state['step'] = state['step'] + 1\n    \n    return next_state",
+      "synthesis_seconds": 6.6,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "monolithic",
+      "replicate": 0,
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    capital = state['capital']\n    output = state['output']\n    step = state['step']\n    \n    next_state = {\n        'capital': capital,\n        'output': output,\n        'step': step + 1\n    }\n    \n    if action['name'] == 'invest':\n        if step < 10:\n            if capital >= 2:\n                next_state['capital'] -= 2\n                next_state['output'] += 3\n        else:\n            if capital >= 2:\n                next_state['capital'] -= 2\n                next_state['output'] += 1\n    \n    elif action['name'] == 'harvest':\n        if step < 10:\n            next_state['capital'] += output\n            next_state['output'] = 0\n        else:\n            next_state['capital'] += output // 2\n            next_state['output'] = 0\n    \n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    return next_state",
+      "synthesis_seconds": 4.9,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "phased",
+      "replicate": 1,
+      "accepted": true,
+      "code_a": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if next_state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 3\n    \n    elif action['name'] == 'harvest':\n        next_state['capital'] += next_state['output']\n        next_state['output'] = 0\n    \n    elif action['name'] != 'noop':  # wait is considered as a no-op in terms of state change\n        pass\n    \n    next_state['step'] += 1\n    return next_state",
+      "code_b": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    if action['name'] == 'invest':\n        if state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 1\n    elif action['name'] == 'harvest':\n        next_state['capital'] += state['output'] // 2\n        next_state['output'] = 0\n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    next_state['step'] += 1\n    return next_state",
+      "synthesis_seconds": 6.1,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "monolithic",
+      "replicate": 1,
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if next_state['capital'] >= 2 and next_state['step'] < 10:\n            next_state['capital'] -= 2\n            next_state['output'] += 3\n        elif next_state['capital'] >= 2 and next_state['step'] >= 10:\n            next_state['capital'] -= 2\n            next_state['output'] += 1\n    \n    elif action['name'] == 'harvest':\n        if next_state['step'] < 10:\n            next_state['capital'] += next_state['output']\n            next_state['output'] = 0\n        else:\n            next_state['capital'] += next_state['output'] // 2\n            next_state['output'] = 0\n    \n    elif action['name'] == 'wait':\n        pass\n    \n    # Increment step counter regardless of action\n    next_state['step'] += 1\n    \n    return next_state",
+      "synthesis_seconds": 5.1,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "phased",
+      "replicate": 2,
+      "accepted": true,
+      "code_a": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 3\n    \n    elif action['name'] == 'harvest':\n        next_state['capital'] += next_state['output']\n        next_state['output'] = 0\n    \n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    next_state['step'] += 1\n    return next_state",
+      "code_b": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 1\n    \n    elif action['name'] == 'harvest':\n        next_state['capital'] += next_state['output'] // 2\n        next_state['output'] = 0\n    \n    elif action['name'] == 'wait' or action['name'] == 'noop':\n        pass\n    \n    else:\n        raise ValueError(f\"Unknown action: {action['name']}\")\n    \n    next_state['step'] += 1\n    \n    return next_state",
+      "synthesis_seconds": 6.7,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "monolithic",
+      "replicate": 2,
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'invest':\n        if next_state['step'] < 10 and next_state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 3\n        elif next_state['step'] >= 10 and next_state['capital'] >= 2:\n            next_state['capital'] -= 2\n            next_state['output'] += 1\n    \n    elif action['name'] == 'harvest':\n        if next_state['step'] < 10:\n            next_state['capital'] += next_state['output']\n            next_state['output'] = 0\n        elif next_state['step'] >= 10:\n            next_state['capital'] += next_state['output'] // 2\n            next_state['output'] = 0\n    \n    elif action['name'] == 'wait':\n        pass  # No change for wait, it just increments the step\n\n    next_state['step'] += 1\n    return next_state",
+      "synthesis_seconds": 5.3,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 12,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 10,
+          "output": 3
+        },
+        {
+          "step": 6,
+          "capital": 8,
+          "output": 6
+        },
+        {
+          "step": 7,
+          "capital": 14,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 12,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 10,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 16,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 14,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 12,
+          "output": 2
+        },
+        {
+          "step": 13,
+          "capital": 13,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 11,
+          "output": 1
+        },
+        {
+          "step": 16,
+          "capital": 9,
+          "output": 2
+        },
+        {
+          "step": 17,
+          "capital": 10,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 8,
+          "output": 1
+        },
+        {
+          "step": 19,
+          "capital": 6,
+          "output": 2
+        },
+        {
+          "step": 20,
+          "capital": 7,
+          "output": 0
+        }
+      ],
+      "per_step_match": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "pre_boundary_accuracy": 1.0,
+      "boundary_step_match": true,
+      "post_boundary_accuracy": 1.0,
+      "post_after_boundary_accuracy": 1.0,
+      "exact_full_rollout": true
+    },
+    {
+      "condition": "llm_proxy",
+      "replicate": 0,
+      "accepted": true,
+      "trajectory": [
+        {
+          "step": 1,
+          "capital": 8,
+          "output": 3
+        },
+        {
+          "step": 2,
+          "capital": 6,
+          "output": 6
+        },
+        {
+          "step": 3,
+          "capital": 9,
+          "output": 0
+        },
+        {
+          "step": 4,
+          "capital": 7,
+          "output": 3
+        },
+        {
+          "step": 5,
+          "capital": 7,
+          "output": 0
+        },
+        {
+          "step": 6,
+          "capital": 5,
+          "output": 3
+        },
+        {
+          "step": 7,
+          "capital": 8,
+          "output": 0
+        },
+        {
+          "step": 8,
+          "capital": 6,
+          "output": 3
+        },
+        {
+          "step": 9,
+          "capital": 4,
+          "output": 6
+        },
+        {
+          "step": 10,
+          "capital": 5,
+          "output": 0
+        },
+        {
+          "step": 11,
+          "capital": 3,
+          "output": 1
+        },
+        {
+          "step": 12,
+          "capital": 1,
+          "output": 4
+        },
+        {
+          "step": 13,
+          "capital": 3,
+          "output": 0
+        },
+        {
+          "step": 14,
+          "capital": 1,
+          "output": 1
+        },
+        {
+          "step": 15,
+          "capital": 1,
+          "output": 0
+        },
+        {
+          "step": 16,
+          "capital": -1,
+          "output": 3
+        },
+        {
+          "step": 17,
+          "capital": 2,
+          "output": 0
+        },
+        {
+          "step": 18,
+          "capital": 0,
+          "output": 3
+        },
+        {
+          "step": 19,
+          "capital": -2,
+          "output": 6
+        },
+        {
+          "step": 20,
+          "capital": 3,
+          "output": 0
+        }
+      ],
+      "synthesis_seconds": 0.0,
+      "rollout_seconds": 11.2,
+      "per_step_match": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "pre_boundary_accuracy": 0.2,
+      "boundary_step_match": false,
+      "post_boundary_accuracy": 0.0,
+      "post_after_boundary_accuracy": 0.0,
+      "exact_full_rollout": false
+    }
+  ],
+  "experiment": "e32_regime_switch",
+  "timestamp": "2026-06-12T09:26:18",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

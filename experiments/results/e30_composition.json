@@ -1,0 +1,1427 @@
+{
+  "model": "qwen2.5:7b",
+  "n_probes": 24,
+  "probe_seed": 30,
+  "replicates": 3,
+  "sectors": [
+    {
+      "prod_cost": 1,
+      "prod_gain": 2,
+      "prod_waste": 1,
+      "rec_in": 2,
+      "rec_out": 1,
+      "decay_thresh": 5,
+      "decay_amt": 1
+    },
+    {
+      "prod_cost": 2,
+      "prod_gain": 3,
+      "prod_waste": 1,
+      "rec_in": 3,
+      "rec_out": 2,
+      "decay_thresh": 4,
+      "decay_amt": 2
+    },
+    {
+      "prod_cost": 1,
+      "prod_gain": 1,
+      "prod_waste": 2,
+      "rec_in": 2,
+      "rec_out": 2,
+      "decay_thresh": 6,
+      "decay_amt": 1
+    },
+    {
+      "prod_cost": 3,
+      "prod_gain": 4,
+      "prod_waste": 1,
+      "rec_in": 4,
+      "rec_out": 3,
+      "decay_thresh": 3,
+      "decay_amt": 1
+    }
+  ],
+  "bridges": [
+    {
+      "threshold": 3,
+      "amount": 2
+    },
+    {
+      "threshold": 4,
+      "amount": 1
+    },
+    {
+      "threshold": 2,
+      "amount": 2
+    },
+    {
+      "threshold": 5,
+      "amount": 3
+    }
+  ],
+  "probes": [
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s0:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s3:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 2,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s3:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s1:recycle"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 1
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s2:recycle"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 7,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s0:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 4,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 5,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 6,
+          "output": 3,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 6,
+          "waste": 4
+        }
+      },
+      "action": "s1:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s1": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 1,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 6,
+          "output": 2,
+          "waste": 4
+        }
+      },
+      "action": "s2:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 8,
+          "output": 4,
+          "waste": 0
+        },
+        "s1": {
+          "stock": 3,
+          "output": 4,
+          "waste": 0
+        },
+        "s2": {
+          "stock": 6,
+          "output": 6,
+          "waste": 2
+        },
+        "s3": {
+          "stock": 1,
+          "output": 7,
+          "waste": 0
+        }
+      },
+      "action": "s1:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 1,
+          "output": 2,
+          "waste": 8
+        },
+        "s1": {
+          "stock": 6,
+          "output": 5,
+          "waste": 8
+        },
+        "s2": {
+          "stock": 1,
+          "output": 6,
+          "waste": 0
+        },
+        "s3": {
+          "stock": 3,
+          "output": 4,
+          "waste": 6
+        }
+      },
+      "action": "s0:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 4,
+          "output": 8,
+          "waste": 1
+        },
+        "s1": {
+          "stock": 7,
+          "output": 4,
+          "waste": 2
+        },
+        "s2": {
+          "stock": 4,
+          "output": 4,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 8,
+          "output": 1,
+          "waste": 2
+        }
+      },
+      "action": "s1:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 5,
+          "output": 1,
+          "waste": 0
+        },
+        "s1": {
+          "stock": 6,
+          "output": 8,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 2,
+          "output": 8,
+          "waste": 2
+        },
+        "s3": {
+          "stock": 7,
+          "output": 5,
+          "waste": 8
+        }
+      },
+      "action": "s3:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 5,
+          "output": 8,
+          "waste": 5
+        },
+        "s1": {
+          "stock": 1,
+          "output": 0,
+          "waste": 1
+        },
+        "s2": {
+          "stock": 7,
+          "output": 7,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 7,
+          "output": 4,
+          "waste": 4
+        }
+      },
+      "action": "s1:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 2,
+          "output": 2,
+          "waste": 8
+        },
+        "s1": {
+          "stock": 4,
+          "output": 6,
+          "waste": 3
+        },
+        "s2": {
+          "stock": 3,
+          "output": 7,
+          "waste": 5
+        },
+        "s3": {
+          "stock": 6,
+          "output": 4,
+          "waste": 8
+        }
+      },
+      "action": "s3:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 4,
+          "waste": 7
+        },
+        "s1": {
+          "stock": 5,
+          "output": 4,
+          "waste": 8
+        },
+        "s2": {
+          "stock": 2,
+          "output": 2,
+          "waste": 4
+        },
+        "s3": {
+          "stock": 8,
+          "output": 5,
+          "waste": 0
+        }
+      },
+      "action": "s1:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 5,
+          "output": 8,
+          "waste": 0
+        },
+        "s1": {
+          "stock": 8,
+          "output": 4,
+          "waste": 6
+        },
+        "s2": {
+          "stock": 8,
+          "output": 0,
+          "waste": 7
+        },
+        "s3": {
+          "stock": 0,
+          "output": 2,
+          "waste": 7
+        }
+      },
+      "action": "s2:recycle"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 7,
+          "output": 8,
+          "waste": 2
+        },
+        "s1": {
+          "stock": 2,
+          "output": 6,
+          "waste": 8
+        },
+        "s2": {
+          "stock": 1,
+          "output": 5,
+          "waste": 0
+        },
+        "s3": {
+          "stock": 3,
+          "output": 6,
+          "waste": 7
+        }
+      },
+      "action": "s0:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 1,
+          "waste": 6
+        },
+        "s1": {
+          "stock": 3,
+          "output": 4,
+          "waste": 4
+        },
+        "s2": {
+          "stock": 0,
+          "output": 5,
+          "waste": 5
+        },
+        "s3": {
+          "stock": 0,
+          "output": 7,
+          "waste": 7
+        }
+      },
+      "action": "s0:recycle"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 7,
+          "output": 7,
+          "waste": 2
+        },
+        "s1": {
+          "stock": 1,
+          "output": 3,
+          "waste": 5
+        },
+        "s2": {
+          "stock": 7,
+          "output": 6,
+          "waste": 1
+        },
+        "s3": {
+          "stock": 3,
+          "output": 3,
+          "waste": 7
+        }
+      },
+      "action": "s0:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 1,
+          "waste": 2
+        },
+        "s1": {
+          "stock": 2,
+          "output": 8,
+          "waste": 5
+        },
+        "s2": {
+          "stock": 0,
+          "output": 2,
+          "waste": 5
+        },
+        "s3": {
+          "stock": 8,
+          "output": 8,
+          "waste": 4
+        }
+      },
+      "action": "s1:wait"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 5,
+          "output": 2,
+          "waste": 3
+        },
+        "s1": {
+          "stock": 3,
+          "output": 2,
+          "waste": 2
+        },
+        "s2": {
+          "stock": 7,
+          "output": 1,
+          "waste": 3
+        },
+        "s3": {
+          "stock": 5,
+          "output": 8,
+          "waste": 2
+        }
+      },
+      "action": "s1:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 4,
+          "output": 6,
+          "waste": 3
+        },
+        "s1": {
+          "stock": 4,
+          "output": 0,
+          "waste": 6
+        },
+        "s2": {
+          "stock": 4,
+          "output": 0,
+          "waste": 6
+        },
+        "s3": {
+          "stock": 4,
+          "output": 1,
+          "waste": 7
+        }
+      },
+      "action": "s2:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 6,
+          "output": 7,
+          "waste": 8
+        },
+        "s1": {
+          "stock": 1,
+          "output": 7,
+          "waste": 1
+        },
+        "s2": {
+          "stock": 3,
+          "output": 0,
+          "waste": 8
+        },
+        "s3": {
+          "stock": 7,
+          "output": 3,
+          "waste": 0
+        }
+      },
+      "action": "s1:produce"
+    },
+    {
+      "state": {
+        "s0": {
+          "stock": 7,
+          "output": 4,
+          "waste": 0
+        },
+        "s1": {
+          "stock": 8,
+          "output": 1,
+          "waste": 5
+        },
+        "s2": {
+          "stock": 2,
+          "output": 8,
+          "waste": 7
+        },
+        "s3": {
+          "stock": 5,
+          "output": 7,
+          "waste": 7
+        }
+      },
+      "action": "s3:produce"
+    }
+  ],
+  "expected": [
+    {
+      "s0": {
+        "stock": 5,
+        "output": 2,
+        "waste": 5
+      },
+      "s1": {
+        "stock": 8,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 9,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 3,
+        "output": 3,
+        "waste": 6
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 2,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 8,
+        "output": 2,
+        "waste": 1
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 1
+      },
+      "s3": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 5,
+        "waste": 5
+      },
+      "s1": {
+        "stock": 8,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 9,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 8,
+        "output": 4,
+        "waste": 6
+      },
+      "s2": {
+        "stock": 7,
+        "output": 1,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 8,
+        "output": 3,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 6,
+        "output": 2,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 0,
+        "output": 1,
+        "waste": 6
+      },
+      "s3": {
+        "stock": 8,
+        "output": 2,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 11,
+        "output": 2,
+        "waste": 0
+      },
+      "s1": {
+        "stock": 3,
+        "output": 6,
+        "waste": 3
+      },
+      "s2": {
+        "stock": 7,
+        "output": 4,
+        "waste": 2
+      },
+      "s3": {
+        "stock": 3,
+        "output": 4,
+        "waste": 0
+      }
+    },
+    {
+      "s0": {
+        "stock": 1,
+        "output": 2,
+        "waste": 8
+      },
+      "s1": {
+        "stock": 6,
+        "output": 4,
+        "waste": 8
+      },
+      "s2": {
+        "stock": 2,
+        "output": 4,
+        "waste": 0
+      },
+      "s3": {
+        "stock": 5,
+        "output": 4,
+        "waste": 6
+      }
+    },
+    {
+      "s0": {
+        "stock": 4,
+        "output": 6,
+        "waste": 1
+      },
+      "s1": {
+        "stock": 9,
+        "output": 4,
+        "waste": 2
+      },
+      "s2": {
+        "stock": 4,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 10,
+        "output": 1,
+        "waste": 2
+      }
+    },
+    {
+      "s0": {
+        "stock": 5,
+        "output": 1,
+        "waste": 0
+      },
+      "s1": {
+        "stock": 6,
+        "output": 7,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 3,
+        "output": 6,
+        "waste": 2
+      },
+      "s3": {
+        "stock": 9,
+        "output": 5,
+        "waste": 9
+      }
+    },
+    {
+      "s0": {
+        "stock": 5,
+        "output": 6,
+        "waste": 5
+      },
+      "s1": {
+        "stock": 3,
+        "output": 0,
+        "waste": 1
+      },
+      "s2": {
+        "stock": 7,
+        "output": 5,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 9,
+        "output": 4,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 2,
+        "output": 2,
+        "waste": 8
+      },
+      "s1": {
+        "stock": 4,
+        "output": 5,
+        "waste": 3
+      },
+      "s2": {
+        "stock": 4,
+        "output": 5,
+        "waste": 5
+      },
+      "s3": {
+        "stock": 8,
+        "output": 4,
+        "waste": 9
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 2,
+        "waste": 7
+      },
+      "s1": {
+        "stock": 5,
+        "output": 6,
+        "waste": 11
+      },
+      "s2": {
+        "stock": 3,
+        "output": 2,
+        "waste": 4
+      },
+      "s3": {
+        "stock": 8,
+        "output": 5,
+        "waste": 0
+      }
+    },
+    {
+      "s0": {
+        "stock": 5,
+        "output": 6,
+        "waste": 0
+      },
+      "s1": {
+        "stock": 10,
+        "output": 4,
+        "waste": 6
+      },
+      "s2": {
+        "stock": 10,
+        "output": 0,
+        "waste": 5
+      },
+      "s3": {
+        "stock": 0,
+        "output": 2,
+        "waste": 7
+      }
+    },
+    {
+      "s0": {
+        "stock": 9,
+        "output": 8,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 4,
+        "output": 5,
+        "waste": 8
+      },
+      "s2": {
+        "stock": 2,
+        "output": 3,
+        "waste": 0
+      },
+      "s3": {
+        "stock": 5,
+        "output": 3,
+        "waste": 7
+      }
+    },
+    {
+      "s0": {
+        "stock": 10,
+        "output": 1,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 3,
+        "output": 4,
+        "waste": 4
+      },
+      "s2": {
+        "stock": 0,
+        "output": 3,
+        "waste": 5
+      },
+      "s3": {
+        "stock": 2,
+        "output": 4,
+        "waste": 7
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 7,
+        "waste": 4
+      },
+      "s1": {
+        "stock": 3,
+        "output": 3,
+        "waste": 5
+      },
+      "s2": {
+        "stock": 7,
+        "output": 4,
+        "waste": 1
+      },
+      "s3": {
+        "stock": 5,
+        "output": 3,
+        "waste": 7
+      }
+    },
+    {
+      "s0": {
+        "stock": 9,
+        "output": 1,
+        "waste": 2
+      },
+      "s1": {
+        "stock": 2,
+        "output": 7,
+        "waste": 7
+      },
+      "s2": {
+        "stock": 1,
+        "output": 2,
+        "waste": 5
+      },
+      "s3": {
+        "stock": 8,
+        "output": 5,
+        "waste": 4
+      }
+    },
+    {
+      "s0": {
+        "stock": 8,
+        "output": 2,
+        "waste": 3
+      },
+      "s1": {
+        "stock": 1,
+        "output": 4,
+        "waste": 5
+      },
+      "s2": {
+        "stock": 8,
+        "output": 1,
+        "waste": 3
+      },
+      "s3": {
+        "stock": 5,
+        "output": 5,
+        "waste": 2
+      }
+    },
+    {
+      "s0": {
+        "stock": 4,
+        "output": 4,
+        "waste": 3
+      },
+      "s1": {
+        "stock": 6,
+        "output": 0,
+        "waste": 6
+      },
+      "s2": {
+        "stock": 3,
+        "output": 1,
+        "waste": 8
+      },
+      "s3": {
+        "stock": 4,
+        "output": 1,
+        "waste": 7
+      }
+    },
+    {
+      "s0": {
+        "stock": 6,
+        "output": 5,
+        "waste": 8
+      },
+      "s1": {
+        "stock": 3,
+        "output": 6,
+        "waste": 3
+      },
+      "s2": {
+        "stock": 4,
+        "output": 0,
+        "waste": 8
+      },
+      "s3": {
+        "stock": 7,
+        "output": 3,
+        "waste": 0
+      }
+    },
+    {
+      "s0": {
+        "stock": 10,
+        "output": 2,
+        "waste": 0
+      },
+      "s1": {
+        "stock": 10,
+        "output": 1,
+        "waste": 5
+      },
+      "s2": {
+        "stock": 2,
+        "output": 6,
+        "waste": 7
+      },
+      "s3": {
+        "stock": 4,
+        "output": 8,
+        "waste": 9
+      }
+    }
+  ],
+  "summary": [
+    {
+      "condition": "monolithic",
+      "replicates": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.3055555555555556,
+      "pooled_ci": [
+        0.21126482045921047,
+        0.4195446561341104
+      ],
+      "mean_synthesis_seconds": 18.3
+    },
+    {
+      "condition": "compositional",
+      "replicates": 3,
+      "acceptance_rate": 1.0,
+      "mean_probe_accuracy": 0.9166666666666666,
+      "pooled_ci": [
+        0.8298744472876599,
+        0.9612481028695096
+      ],
+      "mean_synthesis_seconds": 23.0
+    }
+  ],
+  "rows": [
+    {
+      "condition": "monolithic",
+      "replicate": 0,
+      "pieces": [],
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 's0_produce':\n        if next_state[\"s0_stock\"] >= 1:\n            next_state[\"s0_stock\"] -= 1\n            next_state[\"s0_output\"] += 2\n            next_state[\"s0_waste\"] += 1\n    \n    elif action['name'] == 's0_recycle':\n        if next_state[\"s0_waste\"] >= 2:\n            next_state[\"s0_waste\"] -= 2\n            next_state[\"s0_stock\"] += 1\n    \n    elif action['name'] == 's0_wait':\n        pass  # no direct effect, only decay rule applies\n    \n    elif action['name'] == 's1_produce':\n        if next_state[\"s1_stock\"] >= 2:\n            next_state[\"s1_stock\"] -= 2\n            next_state[\"s1_output\"] += 3\n            next_state[\"s1_waste\"] += 1\n    \n    elif action['name'] == 's1_recycle':\n        if next_state[\"s1_waste\"] >= 3:\n            next_state[\"s1_waste\"] -= 3\n            next_state[\"s1_stock\"] += 2\n    \n    elif action['name'] == 's1_wait':\n        pass  # no direct effect, only decay rule applies\n    \n    elif action['name'] == 's2_produce':\n        if next_state[\"s2_stock\"] >= 1:\n            next_state[\"s2_stock\"] -= 1\n            next_state[\"s2_output\"] += 1\n            next_state[\"s2_waste\"] += 2\n    \n    elif action['name'] == 's2_recycle':\n        if next_state[\"s2_waste\"] >= 2:\n            next_state[\"s2_waste\"] -= 2\n            next_state[\"s2_stock\"] += 2\n    \n    elif action['name'] == 's2_wait':\n        pass  # no direct effect, only decay rule applies\n    \n    elif action['name'] == 's3_produce':\n        if next_state[\"s3_stock\"] >= 3:\n            next_state[\"s3_stock\"] -= 3\n            next_state[\"s3_output\"] += 4\n            next_state[\"s3_waste\"] += 1\n    \n    elif action['name'] == 's3_recycle':\n        if next_state[\"s3_waste\"] >= 4:\n            next_state[\"s3_waste\"] -= 4\n            next_state[\"s3_stock\"] += 3\n    \n    elif action['name'] == 's3_wait':\n        pass  # no direct effect, only decay rule applies\n    \n    elif action['name'] == 'noop':\n        pass  # state remains unchanged\n    \n    else:\n        raise ValueError(f\"Unknown action: {action}\")\n    \n    if next_state[\"s0_output\"] > 5:\n        next_state[\"s0_waste\"] += 1\n    if next_state[\"s1_output\"] > 4:\n        next_state[\"s1_waste\"] += 2\n    if next_state[\"s2_output\"] > 6:\n        next_state[\"s2_waste\"] += 1\n    if next_state[\"s3_output\"] > 3:\n        next_state[\"s3_waste\"] += 1\n    \n    for sector in [\"s0\", \"s1\", \"s2\", \"s3\"]:\n        coupling = {\n            \"s0\": {\"output\": 3, \"stock_inc\": 2},\n            \"s1\": {\"output\": 4, \"stock_inc\": 1},\n            \"s2\": {\"output\": 2, \"stock_inc\": 2},\n            \"s3\": {\"output\": 5, \"stock_inc\": 3}\n        }.get(sector)\n        if coupling and next_state[f\"{sector}_output\"] > coupling[\"output\"]:\n            next_state[f\"{sector}_output\"] -= coupling[\"output\"]\n            next_state[f\"{coupling.get('next_sector', 's0')}_stock\"] += coupling.get(\"stock_inc\", 0)\n    \n    for sector in [\"s0\", \"s1\", \"s2\", \"s3\"]:\n        field = f\"{sector}_stock\"\n        if next_state[field] < 0:\n            next_state[field] = 0\n        field = f\"{sector}_output\"\n        if next_state[field] < 0:\n            next_state[field] = 0\n        field = f\"{sector}_waste\"\n        if next_state[field] < 0:\n            next_state[field] = 0\n    \n    return next_state",
+      "synthesis_seconds": 20.7,
+      "probe_hits": 3,
+      "probe_accuracy": 0.125
+    },
+    {
+      "condition": "compositional",
+      "replicate": 0,
+      "pieces": [
+        {
+          "piece": "s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 2\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 1\n            \n    elif action['name'] == 'wait':\n        # No direct effect, just apply decay rule\n        pass\n    \n    if next_state['output'] > 5:\n        next_state['waste'] += 1\n\n    for key in next_state:\n        next_state[key] = max(next_state[key], 0)\n    \n    return next_state",
+          "seconds": 3.8
+        },
+        {
+          "piece": "s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 2:\n            next_state['stock'] -= 2\n            next_state['output'] += 3\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 3:\n            next_state['waste'] -= 3\n            next_state['stock'] += 2\n    \n    elif action['name'] != 'noop':  # Wait is considered a no-op for this purpose\n        pass\n    \n    if next_state['output'] > 4:\n        next_state['waste'] += 2\n    \n    next_state = {k: max(v, 0) for k, v in next_state.items()}\n    \n    return next_state",
+          "seconds": 3.6
+        },
+        {
+          "piece": "s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 1\n            next_state['waste'] += 2\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 2\n    \n    # Decay rule applies after all actions\n    if next_state['output'] > 6:\n        next_state['waste'] += 1\n    \n    # Clamp values to avoid negative numbers\n    for key in ['output', 'stock', 'waste']:\n        next_state[key] = max(next_state.get(key, 0), 0)\n    \n    return next_state",
+          "seconds": 3.7
+        },
+        {
+          "piece": "s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 3:\n            next_state['stock'] -= 3\n            next_state['output'] += 4\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 4:\n            next_state['waste'] -= 4\n            next_state['stock'] += 3\n    \n    elif action['name'] == 'wait':\n        pass\n    \n    # Apply decay rule after all actions are applied\n    if next_state['output'] > 3:\n        next_state['waste'] += 1\n    \n    # Clamp values to be non-negative\n    for key in next_state:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 3.7
+        },
+        {
+          "piece": "bridge-s0->s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 3:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 1.9
+        },
+        {
+          "piece": "bridge-s1->s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 4:\n            next_state['a']['output'] -= 1\n            next_state['b']['stock'] += 1\n    \n    return next_state",
+          "seconds": 1.8
+        },
+        {
+          "piece": "bridge-s2->s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 2:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 1.8
+        },
+        {
+          "piece": "bridge-s3->s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        \n        if a_output > 5:\n            next_state['a']['output'] -= 3\n            next_state['b']['stock'] += 3\n    \n    return next_state",
+          "seconds": 1.8
+        }
+      ],
+      "synthesis_seconds": 22.2,
+      "accepted": true,
+      "probe_hits": 24,
+      "probe_accuracy": 1.0
+    },
+    {
+      "condition": "monolithic",
+      "replicate": 1,
+      "pieces": [],
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    def clamp(value, field):\n        return max(0, value)\n\n    next_state = state.copy()\n\n    if action['name'].startswith('s0'):\n        sector = 's0'\n    elif action['name'].startswith('s1'):\n        sector = 's1'\n    elif action['name'].startswith('s2'):\n        sector = 's2'\n    elif action['name'].startswith('s3'):\n        sector = 's3'\n    else:\n        return next_state  # Noop if unknown action\n\n    verb = action['name'].split('_')[-1]\n    params = action.get('params', {})\n    \n    if verb == 'produce':\n        stock_field = f'{sector}_stock'\n        output_field = f'{sector}_output'\n        waste_field = f'{sector}_waste'\n        \n        if next_state[stock_field] >= 1 and sector != 's3' or (sector == 's3' and next_state[stock_field] >= 3):\n            next_state[stock_field] -= 1\n            next_state[output_field] += 2\n            next_state[waste_field] += 1\n\n    elif verb == 'recycle':\n        waste_field = f'{sector}_waste'\n        stock_field = f'{sector}_stock'\n        \n        if sector != 's0' and next_state[waste_field] >= 3 or (sector == 's0' and next_state[waste_field] >= 2):\n            next_state[waste_field] -= 3\n            next_state[stock_field] += 2\n\n    decay_fields = [f'{sector}_output', f'{sector}_waste']\n    \n    for field in decay_fields:\n        if field in next_state and next_state[field] > (5 if sector == 's0' else 4):\n            next_state[f'{sector}_waste'] += 1\n\n    # Clamp all fields\n    for field, value in next_state.items():\n        next_state[field] = clamp(value, field)\n\n    # Apply couplings\n    if next_state['s0_output'] > 3:\n        next_state['s0_output'] -= 2\n        next_state['s1_stock'] += 2\n\n    if next_state['s1_output'] > 4:\n        next_state['s1_output'] -= 1\n        next_state['s2_stock'] += 1\n\n    if next_state['s2_output'] > 2:\n        next_state['s2_output'] -= 2\n        next_state['s3_stock'] += 2\n\n    if next_state['s3_output'] > 5:\n        next_state['s3_output'] -= 3\n        next_state['s0_stock'] += 3\n\n    return next_state",
+      "synthesis_seconds": 12.6,
+      "probe_hits": 12,
+      "probe_accuracy": 0.5
+    },
+    {
+      "condition": "compositional",
+      "replicate": 1,
+      "pieces": [
+        {
+          "piece": "s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 2\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 1\n    \n    else:  # action['name'] == 'wait'\n        pass\n\n    # Apply decay rule after all actions have been processed\n    if next_state['output'] > 5:\n        next_state['waste'] += 1\n    \n    # Clamp values to ensure they do not go below 0\n    for key in ['output', 'stock', 'waste']:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 4.1
+        },
+        {
+          "piece": "s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 2:\n            next_state['stock'] -= 2\n            next_state['output'] += 3\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 3:\n            next_state['waste'] -= 3\n            next_state['stock'] += 2\n    \n    # Decay rule applies after all direct effects of the actions\n    decay_threshold = max(0, next_state['output'] - 4)\n    next_state['waste'] += max(0, decay_threshold)\n    \n    for key in next_state:\n        next_state[key] = max(next_state[key], 0)  # Clamp values to non-negative\n    \n    return next_state",
+          "seconds": 3.8
+        },
+        {
+          "piece": "s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 1\n            next_state['waste'] += 2\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 2\n    \n    # Decay rule applies after all actions have been processed.\n    decay_amount = max(0, int(next_state['output'] > 6))\n    next_state['waste'] += decay_amount\n\n    for key in next_state:\n        next_state[key] = max(0, next_state[key])  # Clamp values to non-negative\n    \n    return next_state",
+          "seconds": 3.7
+        },
+        {
+          "piece": "s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 3:\n            next_state['stock'] -= 3\n            next_state['output'] += 4\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 4:\n            next_state['waste'] -= 4\n            next_state['stock'] += 3\n    \n    # Decay rule applies after every action\n    if next_state['output'] > 3:\n        next_state['waste'] += 1\n    \n    # Clamp values to ensure no value goes below zero\n    for key in next_state:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 3.6
+        },
+        {
+          "piece": "bridge-s0->s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 3:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 1.9
+        },
+        {
+          "piece": "bridge-s1->s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 4:\n            next_state['a']['output'] -= 1\n            next_state['b']['stock'] += 1\n    \n    return next_state",
+          "seconds": 1.9
+        },
+        {
+          "piece": "bridge-s2->s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        b_stock = next_state['b']['stock']\n        \n        if a_output > 2:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 2.2
+        },
+        {
+          "piece": "bridge-s3->s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        \n        if a_output > 5:\n            next_state['a']['output'] -= 3\n            next_state['b']['stock'] += 3\n    \n    return next_state",
+          "seconds": 2.0
+        }
+      ],
+      "synthesis_seconds": 23.3,
+      "accepted": true,
+      "probe_hits": 18,
+      "probe_accuracy": 0.75
+    },
+    {
+      "condition": "monolithic",
+      "replicate": 2,
+      "pieces": [],
+      "accepted": true,
+      "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 's0_produce':\n        if next_state['s0_stock'] >= 1:\n            next_state['s0_stock'] -= 1\n            next_state['s0_output'] += 2\n            next_state['s0_waste'] += 1\n    elif action['name'] == 's0_recycle':\n        if next_state['s0_waste'] >= 2:\n            next_state['s0_waste'] -= 2\n            next_state['s0_stock'] += 1\n    elif action['name'] == 's0_wait':\n        pass\n    \n    # Apply decay rule for s0 after all direct effects\n    if next_state['s0_output'] > 5:\n        next_state['s0_waste'] += 1\n\n    clamp(next_state)\n    \n    if action['name'] == 's1_produce':\n        if next_state['s1_stock'] >= 2:\n            next_state['s1_stock'] -= 2\n            next_state['s1_output'] += 3\n            next_state['s1_waste'] += 1\n    elif action['name'] == 's1_recycle':\n        if next_state['s1_waste'] >= 3:\n            next_state['s1_waste'] -= 3\n            next_state['s1_stock'] += 2\n    elif action['name'] == 's1_wait':\n        pass\n    \n    # Apply decay rule for s1 after all direct effects\n    if next_state['s1_output'] > 4:\n        next_state['s1_waste'] += 2\n\n    clamp(next_state)\n    \n    if action['name'] == 's2_produce':\n        if next_state['s2_stock'] >= 1:\n            next_state['s2_stock'] -= 1\n            next_state['s2_output'] += 1\n            next_state['s2_waste'] += 2\n    elif action['name'] == 's2_recycle':\n        if next_state['s2_waste'] >= 2:\n            next_state['s2_waste'] -= 2\n            next_state['s2_stock'] += 2\n    elif action['name'] == 's2_wait':\n        pass\n    \n    # Apply decay rule for s2 after all direct effects\n    if next_state['s2_output'] > 6:\n        next_state['s2_waste'] += 1\n\n    clamp(next_state)\n    \n    if action['name'] == 's3_produce':\n        if next_state['s3_stock'] >= 3:\n            next_state['s3_stock'] -= 3\n            next_state['s3_output'] += 4\n            next_state['s3_waste'] += 1\n    elif action['name'] == 's3_recycle':\n        if next_state['s3_waste'] >= 4:\n            next_state['s3_waste'] -= 4\n            next_state['s3_stock'] += 3\n    elif action['name'] == 's3_wait':\n        pass\n    \n    # Apply decay rule for s3 after all direct effects\n    if next_state['s3_output'] > 3:\n        next_state['s3_waste'] += 1\n\n    clamp(next_state)\n    \n    if action['name'].startswith('s0'):\n        if next_state['s0_output'] > 3:\n            next_state['s0_output'] -= 2\n            next_state['s1_stock'] += 2\n    elif action['name'].startswith('s1'):\n        if next_state['s1_output'] > 4:\n            next_state['s1_output'] -= 1\n            next_state['s2_stock'] += 1\n    elif action['name'].startswith('s2'):\n        if next_state['s2_output'] > 2:\n            next_state['s2_output'] -= 2\n            next_state['s3_stock'] += 2\n    elif action['name'].startswith('s3'):\n        if next_state['s3_output'] > 5:\n            next_state['s3_output'] -= 3\n            next_state['s0_stock'] += 3\n\n    clamp(next_state)\n    \n    return next_state\n\ndef clamp(state: dict):\n    for field in state:\n        if 'stock' in field or 'waste' in field:\n            state[field] = max(0, state[field])\n        elif 'output' in field:\n            pass",
+      "synthesis_seconds": 21.6,
+      "probe_hits": 7,
+      "probe_accuracy": 0.2916666666666667
+    },
+    {
+      "condition": "compositional",
+      "replicate": 2,
+      "pieces": [
+        {
+          "piece": "s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 2\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 1\n    \n    # Decay rule applies to all actions and wait\n    if next_state['output'] > 5:\n        next_state['waste'] += 1\n    \n    for key in next_state:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 3.7
+        },
+        {
+          "piece": "s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 2:\n            next_state['stock'] -= 2\n            next_state['output'] += 3\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 3:\n            next_state['waste'] -= 3\n            next_state['stock'] += 2\n    \n    # Decay rule applies after all actions are performed\n    decay_threshold = 4\n    if next_state['output'] > decay_threshold:\n        next_state['waste'] += 2\n    \n    for key in next_state:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 3.8
+        },
+        {
+          "piece": "s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 1:\n            next_state['stock'] -= 1\n            next_state['output'] += 1\n            next_state['waste'] += 2\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 2:\n            next_state['waste'] -= 2\n            next_state['stock'] += 2\n    \n    # Decay rule applies after all actions have been processed\n    if next_state['output'] > 6:\n        next_state['waste'] += 1\n    \n    for key in next_state:\n        next_state[key] = max(0, next_state[key])\n    \n    return next_state",
+          "seconds": 3.8
+        },
+        {
+          "piece": "s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'produce':\n        if next_state['stock'] >= 3:\n            next_state['stock'] -= 3\n            next_state['output'] += 4\n            next_state['waste'] += 1\n    \n    elif action['name'] == 'recycle':\n        if next_state['waste'] >= 4:\n            next_state['waste'] -= 4\n            next_state['stock'] += 3\n    \n    # Decay rule applies after all actions have been processed.\n    if next_state['output'] > 3:\n        next_state['waste'] += 1\n\n    # Clamp values to ensure they do not go below 0.\n    for key in next_state.keys():\n        next_state[key] = max(next_state[key], 0)\n    \n    return next_state",
+          "seconds": 4.1
+        },
+        {
+          "piece": "bridge-s0->s1",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = state['a']['output']\n        if a_output > 3:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 2.2
+        },
+        {
+          "piece": "bridge-s1->s2",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 4:\n            next_state['a']['output'] -= 1\n            next_state['b']['stock'] += 1\n    \n    return next_state",
+          "seconds": 2.0
+        },
+        {
+          "piece": "bridge-s2->s3",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = {k: v.copy() for k, v in state.items()}\n    \n    if action['name'] == 'flow':\n        a_output = next_state['a']['output']\n        if a_output > 2:\n            next_state['a']['output'] -= 2\n            next_state['b']['stock'] += 2\n    \n    return next_state",
+          "seconds": 2.2
+        },
+        {
+          "piece": "bridge-s3->s0",
+          "accepted": true,
+          "code": "def transition(state: dict, action: dict) -> dict:\n    next_state = state.copy()\n    \n    if action['name'] == 'flow':\n        a_output = state['a']['output']\n        if a_output > 5:\n            next_state['a']['output'] -= 3\n            next_state['b']['stock'] += 3\n    \n    return next_state",
+          "seconds": 2.0
+        }
+      ],
+      "synthesis_seconds": 23.6,
+      "accepted": true,
+      "probe_hits": 24,
+      "probe_accuracy": 1.0
+    }
+  ],
+  "experiment": "e30_composition",
+  "timestamp": "2026-06-12T09:25:31",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

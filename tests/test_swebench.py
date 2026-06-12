@@ -17,8 +17,6 @@ from openworld.swebench import (
     solve_single_shot,
 )
 
-# (Tasks 2-4 extend this import block as they add symbols.)
-
 # A minimal class-based instance used by unit tests (not part of the dataset).
 FIXTURE = SWEBenchInstance(
     instance_id="openworld-swebench-000-fixture",

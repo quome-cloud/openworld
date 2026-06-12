@@ -158,17 +158,19 @@ def main():
         print(f"[{condition}] budget {total_budget}")
         with Timer() as t:
             results.append(run_condition(condition, instances, llm, total_budget))
-        results[-1]["seconds"] = round(t.seconds, 1)
-    save_results("e34_composite_swe", {
-        "model": MODEL,
-        "dataset": RECIPE["dataset"]["name"],
-        "dataset_version": RECIPE["dataset"]["version"],
-        "tasks_jsonl_sha256": RECIPE["artifacts"]["tasks_jsonl_sha256"],
-        "per_task_budget": PER_TASK_BUDGET,
-        "total_budget": total_budget,
-        "summary": [{k: v for k, v in r.items() if k != "events"} for r in results],
-        "conditions": results,
-    })
+        results[-1]["seconds"] = round(t.elapsed, 1)
+        # incremental save: a crash in a later condition loses nothing
+        save_results("e34_composite_swe", {
+            "model": MODEL,
+            "dataset": RECIPE["dataset"]["name"],
+            "dataset_version": RECIPE["dataset"]["version"],
+            "tasks_jsonl_sha256": RECIPE["artifacts"]["tasks_jsonl_sha256"],
+            "per_task_budget": PER_TASK_BUDGET,
+            "total_budget": total_budget,
+            "summary": [{k: v for k, v in r.items() if k != "events"}
+                        for r in results],
+            "conditions": results,
+        })
     print(f"\n{'condition':<12} solved  attempts  switches")
     for r in results:
         print(f"{r['condition']:<12} {r['solved']:>2}/{r['n_tasks']}   "

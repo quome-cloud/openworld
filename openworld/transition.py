@@ -101,3 +101,43 @@ class LLMTransition(Transition):
             # crashing a long rollout.
             return state.copy()
         return WorldState(parsed)
+
+
+class PhasedTransition(Transition):
+    """Dynamics whose rules change over time: ordered (trigger, transition)
+    phases with sequential, irreversible advance.
+
+    A trigger is an int N (the phase becomes eligible once the phased step
+    counter reaches N) or a callable state -> bool. Phase 0's trigger is
+    ignored - it is the starting regime. Before delegating each step, the
+    NEXT phase's trigger is checked once; if it fires, the regime advances,
+    permanently (regimes do not revert, and at most one advance per step).
+    The active phase index is recorded in state[record_key] and a step
+    counter in record_key + "_steps", so trajectories stay replayable and
+    regime switches are visible in the record.
+
+    Every phase is constructed (and, when synthesized, verified) BEFORE the
+    run, preserving ahead-of-time verification. For parameter drift that
+    fits in state, prefer encoding the regime variable in state and
+    branching in the rules; PhasedTransition is for structural change.
+    """
+
+    def __init__(self, phases, record_key: str = "_phase"):
+        if not phases:
+            raise ValueError("PhasedTransition needs at least one phase")
+        self.phases = list(phases)
+        self.record_key = record_key
+
+    def step(self, state: WorldState, action: Action) -> WorldState:
+        s = state.copy()
+        index = int(s.get(self.record_key, 0))
+        steps = int(s.get(self.record_key + "_steps", 0))
+        if index + 1 < len(self.phases):
+            trigger = self.phases[index + 1][0]
+            fired = steps >= trigger if isinstance(trigger, int) else bool(trigger(s))
+            if fired:
+                index += 1
+        s = self.phases[index][1].step(s, action)
+        s[self.record_key] = index
+        s[self.record_key + "_steps"] = steps + 1
+        return s

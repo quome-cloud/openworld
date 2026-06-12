@@ -58,19 +58,25 @@ the atomic set, so cross-dataset comparison isn't confounded by task type.
 
 ## Run it
 
-```bash
-python datasets/openworld-swebench-staged/build_tasks.py    # regenerate tasks.jsonl
-pytest tests/test_swebench_staged.py                        # validate (offline)
+All operations go through the recipe (`recipes/owsb-staged-v1.json`):
 
-# real ablation (needs Ollama):
-python datasets/openworld-swebench-staged/run_comparison.py qwen2.5:1.5b qwen2.5:3b qwen2.5:7b
-python datasets/openworld-swebench-staged/run_comparison.py --mock          # offline smoke
+```bash
+python -m openworld.bench recipes/owsb-staged-v1.json run --mock   # offline smoke
+python -m openworld.bench recipes/owsb-staged-v1.json run          # Ollama ladder
+python -m openworld.bench recipes/owsb-staged-v1.json all --mock   # build+validate+run+card
 ```
 
-Results (with per-task paired records for significance testing) land in
-`results/comparison.json` alongside a printed markdown table — same format as the
-atomic set, so the two are read side by side: **flat Δ on atomic, positive Δ here**
-is the story.
+Results land in `results/<model>.json` (frozen result schema v1, one file
+per model); the dataset card is `CARD.md`.
+
+To rebuild `tasks.jsonl` directly: `python datasets/openworld-swebench-staged/build_tasks.py`
+(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owsb-staged-v1.json build`).
+
+To validate the dataset: `pytest tests/test_swebench_staged.py`
+
+Results (with per-task paired records for significance testing) land alongside
+a printed markdown table — same format as the atomic set, so the two are read
+side by side: **flat Δ on atomic, positive Δ here** is the story.
 
 ## Files
 
@@ -78,5 +84,5 @@ is the story.
 |---|---|
 | `build_tasks.py` | source of truth (`RAW` instances + `STAGE1_PATCHES`); writes `tasks.jsonl` |
 | `tasks.jsonl` | generated artifact the harness loads |
-| `run_comparison.py` | paired single-shot vs in-world runner (Wilson CIs, markdown table) |
-| `results/comparison.json` | latest run output |
+| `recipes/owsb-staged-v1.json` | recipe — use `python -m openworld.bench recipes/owsb-staged-v1.json <cmd>` to build/run/card |
+| `results/comparison.json` | original E29 ladder run cited by the paper — do not modify |

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "owsb-atomic",
+    "version": "v1",
+    "description": "20 atomic single-defect SWE program-repair instances, each with an explicit world-model spec and a pass_to_pass regression suite.",
+    "path": "datasets/openworld-swebench/tasks.jsonl"
+  },
+  "generator": {
+    "type": "hand",
+    "builder": "datasets/openworld-swebench/build_tasks.py",
+    "seed": null
+  },
+  "harness": {
+    "result_schema_version": 1
+  },
+  "eval": {
+    "models": [
+      "qwen2.5:1.5b",
+      "qwen2.5:3b",
+      "qwen2.5:7b",
+      "llama3.2"
+    ],
+    "budget": 4,
+    "temperature": 0.2,
+    "seed": 41
+  },
+  "artifacts": {
+    "tasks_jsonl_sha256": "2aa0f691d30ee9b67e2436b16c1c431500b7aa3d5a35639de42f9098a00df156"
+  }
+}

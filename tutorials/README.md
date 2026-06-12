@@ -1,6 +1,6 @@
 # OpenWorld Tutorials
 
-Four domain walkthroughs, each pairing a guide with a runnable script. Each one
+Five walkthroughs, each pairing a guide with a runnable script. Each one
 teaches a different part of the framework — read them in any order, but the
 healthcare tutorial is the gentlest introduction to dynamics synthesis.
 
@@ -10,6 +10,7 @@ healthcare tutorial is the gentlest introduction to dynamics synthesis.
 | [Legaltech: settlement negotiation](legaltech_settlement.md) | Litigation strategy | Multi-agent simulation, asymmetric policies, event-triggered objectives |
 | [Finance: portfolio rebalancing](finance_portfolio.md) | Trading / risk | Deterministic schedules inside state, float state, growth-vs-risk frontiers |
 | [Software engineering: sprint planning](software_engineering_sprint.md) | Eng management | The generator + critic two-model relay, validating synthesized code against ground truth |
+| [Benchmarking: build a dataset](benchmark_dataset.md) | Evaluation / benchmarks | The instance schema and validation gate, the paired single-shot vs in-world ablation, recipes and reproducibility tiers |
 
 All scripts run offline (they fall back to `MockLLM` or use hand-written
 dynamics); the healthcare and software engineering ones do live code synthesis
@@ -20,6 +21,7 @@ python tutorials/healthcare_triage.py qwen2.5:7b
 python tutorials/legaltech_settlement.py
 python tutorials/finance_portfolio.py
 python tutorials/software_engineering_sprint.py qwen2.5:7b qwen2.5:3b
+python tutorials/benchmark_dataset.py
 ```
 
 ## The shape every tutorial follows

@@ -296,3 +296,93 @@ def markdown_table(results: List[Dict[str, Any]]) -> str:
             f"{s['in_world_pass_at_1']:.0%} | {s['in_world_pass_at_budget']:.0%} | "
             f"{s['delta']:+.0%} | {mean_att} |")
     return "\n".join(lines)
+
+
+def cmd_build(recipe, freeze: bool = False) -> None:
+    """Re-run the pinned builder; verify (or --freeze) the artifact hash."""
+    import subprocess
+    import sys
+
+    builder = recipe["generator"]["builder"]
+    subprocess.run([sys.executable, str(builder)], check=True)
+    actual = sha256_file(recipe["dataset"]["path"])
+    frozen = recipe["artifacts"].get("tasks_jsonl_sha256")
+    if freeze:
+        raw = json.loads(recipe["_recipe_path"].read_text(encoding="utf-8"))
+        raw["artifacts"]["tasks_jsonl_sha256"] = actual
+        recipe["_recipe_path"].write_text(
+            json.dumps(raw, indent=2) + "\n", encoding="utf-8")
+        print(f"[frozen] artifacts.tasks_jsonl_sha256 = {actual[:12]}…")
+    elif frozen and frozen != actual:
+        raise SystemExit(
+            f"artifact drift: recipe pins {frozen[:12]}… but build produced "
+            f"{actual[:12]}… (rerun with --freeze to accept)")
+
+
+def main(argv=None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="python -m openworld.bench",
+                                     description=__doc__)
+    parser.add_argument("recipe", help="path to a recipes/*.json file")
+    parser.add_argument("command", choices=["build", "validate", "run", "card", "all"])
+    parser.add_argument("--mock", action="store_true",
+                        help="offline smoke run with a scripted MockLLM")
+    parser.add_argument("--models", nargs="*", default=None,
+                        help="override recipe eval.models")
+    parser.add_argument("--budget", type=int, default=None)
+    parser.add_argument("--freeze", action="store_true",
+                        help="with build: write the artifact hash into the recipe")
+    args = parser.parse_args(argv)
+
+    recipe = load_recipe(args.recipe)
+    report = None
+
+    if args.command in ("build", "all"):
+        cmd_build(recipe, freeze=args.freeze)
+    if args.command in ("validate", "all"):
+        report = validate_dataset(recipe)
+        bad = [c for c in report["checks"] if not c["ok"]]
+        print(f"[gate] {report['dataset']}: {report['n_instances']} instances, "
+              f"{'OK' if report['ok'] else 'FAILED'}")
+        for c in bad:
+            print(f"  FAIL {c['name']} {c['detail']}")
+        if bad and args.command == "validate":
+            return 1
+        if bad:
+            raise SystemExit("gate failed; not running evaluation")
+    if args.command in ("run", "all"):
+        results = []
+        if args.mock:
+            results.append(evaluate(recipe, "mock", mock_factory,
+                                    budget=args.budget, mock=True))
+        else:
+            from .llm import OllamaConnectionError, OllamaLLM
+
+            models = args.models or recipe["eval"]["models"]
+            slugs = [_model_slug(m) for m in models]
+            if len(set(slugs)) != len(slugs):
+                raise SystemExit(
+                    f"model names collide after filename slugging: {models}")
+            for model in models:
+                llm = OllamaLLM(model=model,
+                                temperature=recipe["eval"].get("temperature", 0.2),
+                                options={"seed": recipe["eval"].get("seed", 41)})
+                try:
+                    llm.ask("Reply with OK.")
+                except OllamaConnectionError as exc:
+                    raise SystemExit(f"model {model!r} unavailable: {exc}")
+                print(f"[{model}] budget {args.budget or recipe['eval']['budget']}")
+                results.append(evaluate(recipe, model,
+                                        lambda inst, _llm=llm: _llm,
+                                        budget=args.budget))
+        print("\n" + markdown_table(results))
+    if args.command in ("card", "all"):
+        if report is None:
+            report = validate_dataset(recipe)
+        write_card(recipe, report)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1032,6 +1032,34 @@ actions plus one travel option per incident route.}
 \label{fig:traversal}
 \end{figure}
 
+The three mechanisms interact, and the interaction is where realism lives:
+rules change \emph{inside} a composition, and embodied agents respond by
+moving. E33 (Figure~\ref{fig:dynamic}) is a deterministic demonstration of
+that loop. Two economies share a toll route; a greedy policy agent works
+wherever its scoped view shows the best rate. When the home economy's
+\texttt{PhasedTransition} enters austerity at step \DynSwitchStep{} (work
+yields zero and the \emph{observed} rate collapses), the agent's next
+observation prices the change, and at step \DynTravelStep{} it pays the
+\DynToll-coin toll and re-locates. World GDP ends at \DynGdpWith{} with the
+route against \DynGdpStranded{} without it---a mobility gain of
+\DynMobilityGain. Composition provides somewhere to go, dynamic rules
+provide the reason, and traversal is how behavior adapts; remove any one
+channel (the stranded counterfactual removes the route) and the regime shock
+becomes a permanent flatline instead of a re-allocation.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\linewidth]{figs/dynamic_traversal.png}
+\caption{\textbf{When the rules change, agents move} (E33, deterministic).
+Top: world GDP with and without the route; the shaded band is the home
+economy's austerity regime, entered at step \DynSwitchStep. The agent
+observes the collapsed rate, crosses at step \DynTravelStep{} (toll
+$-$\DynToll), and growth resumes in the destination economy; the stranded
+counterfactual flatlines, leaving a $+$\DynMobilityGain{} mobility gain.
+Bottom: the agent's location lane on the same time axis.}
+\label{fig:dynamic}
+\end{figure}
+
 E32 deserves an honest reading. Both phased and monolithic synthesized code
 track the regime switch exactly (\RegimePhasedExact{} and \RegimeMonoExact{}
 exact full rollouts; pre-boundary, boundary, and post-boundary accuracy all

@@ -30,6 +30,7 @@ EXPERIMENTS = [
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
+    "e33_dynamic_traversal",
 ]
 
 
@@ -663,6 +664,70 @@ def fig_traversal(e31):
     plt.close(fig)
 
 
+def fig_dynamic_traversal(e33):
+    s = e33["summary"]
+    wr, st = e33["with_route"], e33["stranded"]
+    steps = [r["step"] for r in wr]
+    switch, travel = s["c0_phase1_first_seen_at_step"], s["travel_step"]
+
+    fig, (ax, lane) = plt.subplots(
+        2, 1, figsize=(8.6, 4.7), sharex=True,
+        gridspec_kw={"height_ratios": [3.2, 0.8], "hspace": 0.08})
+
+    ax.axvspan(switch - 0.5, steps[-1] + 0.3, color=RED, alpha=0.05, zorder=0)
+    ax.axvline(switch - 0.5, color=RED, lw=1.0, ls=(0, (4, 3)), alpha=0.7)
+    ax.text(switch - 0.1, max(r["world_gdp"] for r in wr) * 0.98,
+            "c0 enters austerity\n(work yields 0)", fontsize=7.5, color=RED,
+            ha="left", va="top")
+    ax.plot(steps, [r["world_gdp"] for r in wr], "-o", color=TEAL, lw=2.2,
+            markersize=3.5, label="with route (agent re-locates)", zorder=5)
+    ax.plot(steps, [r["world_gdp"] for r in st], "--s", color=SLATE, lw=1.8,
+            markersize=3, label="no route (agent stranded)", zorder=4)
+    travel_gdp = next(r["world_gdp"] for r in wr if r["step"] == travel)
+    ax.annotate(f"agent crosses · toll −{s['toll_paid']}",
+                xy=(travel, travel_gdp), xytext=(travel + 1.6, travel_gdp - 9),
+                fontsize=7.5, color=ORANGE,
+                arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.1,
+                                connectionstyle="arc3,rad=0.25"))
+    final_w, final_s = wr[-1]["world_gdp"], st[-1]["world_gdp"]
+    ax.annotate("", xy=(steps[-1] + 0.25, final_w),
+                xytext=(steps[-1] + 0.25, final_s),
+                arrowprops=dict(arrowstyle="<->", color=TEAL, lw=1.2))
+    ax.text(steps[-1] - 0.15, (final_w + final_s) / 2,
+            f"+{s['mobility_gain']}\nmobility\ngain", fontsize=7.5, color=TEAL,
+            ha="right", va="center")
+    ax.set_ylabel("World GDP (derived aggregate)")
+    ax.set_ylim(0, final_w * 1.12)
+    ax.grid(alpha=0.22)
+    ax.legend(fontsize=7.5, loc="upper left")
+
+    # location lane (with-route scenario)
+    lane.axvspan(switch - 0.5, steps[-1] + 0.3, color=RED, alpha=0.05, zorder=0)
+    lane.broken_barh([(0.5, travel - 0.5 - 0.5)], (0.2, 0.6),
+                     facecolors=PURPLE, alpha=0.75)
+    lane.broken_barh([(travel + 0.5, steps[-1] - travel - 0.5 + 0.3)],
+                     (0.2, 0.6), facecolors=ORANGE, alpha=0.75)
+    lane.plot([travel], [0.5], marker="D", color="white", markersize=7,
+              markeredgecolor=ORANGE, markeredgewidth=1.6, zorder=5)
+    lane.text((0.5 + travel - 0.5) / 2, 0.5, "working in c0", fontsize=7.5,
+              color="white", ha="center", va="center", fontweight="bold")
+    lane.text((travel + 0.5 + steps[-1] + 0.3) / 2, 0.5, "working in c1",
+              fontsize=7.5, color="white", ha="center", va="center",
+              fontweight="bold")
+    lane.set_ylim(0, 1)
+    lane.set_yticks([0.5])
+    lane.set_yticklabels(["agent\nlocation"], fontsize=7)
+    lane.set_xlabel("Composite step")
+    lane.set_xlim(0.3, steps[-1] + 0.7)
+    lane.set_xticks(range(2, steps[-1] + 1, 2))
+    for spine in ("top", "right", "left"):
+        lane.spines[spine].set_visible(False)
+    lane.tick_params(left=False)
+    fig.subplots_adjust(left=0.09, right=0.975, top=0.97, bottom=0.13)
+    fig.savefig(FIGS / "dynamic_traversal.png", dpi=200)
+    plt.close(fig)
+
+
 def table_planning(e22):
     labels = {
         "code_d3": "\\textbf{Lookahead d=3 via synthesized code}",
@@ -773,7 +838,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "31"),
+        macro("NumExperiments", "32"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -941,6 +1006,16 @@ def numbers_tex(d):
         macro("RegimeLLMPre", f"{s32['llm_proxy']['mean_pre_boundary_accuracy']:.2f}"),
         macro("RegimeLLMPost", f"{s32['llm_proxy']['mean_post_boundary_accuracy']:.2f}"),
     ]
+    # E33 (dynamic rules x composition x traversal demonstration)
+    s33 = d["e33_dynamic_traversal"]["summary"]
+    lines += [
+        macro("DynSwitchStep", str(s33["c0_phase1_first_seen_at_step"])),
+        macro("DynTravelStep", str(s33["travel_step"])),
+        macro("DynToll", str(s33["toll_paid"])),
+        macro("DynGdpWith", str(s33["final_world_gdp_with_route"])),
+        macro("DynGdpStranded", str(s33["final_world_gdp_stranded"])),
+        macro("DynMobilityGain", str(s33["mobility_gain"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -964,6 +1039,7 @@ def main():
     fig_composition(data["e31_nested_fidelity"])
     fig_composition_cliff(data["e20_complexity"], data["e30_composition"])
     fig_traversal(data["e31_nested_fidelity"])
+    fig_dynamic_traversal(data["e33_dynamic_traversal"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])

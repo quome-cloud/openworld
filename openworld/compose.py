@@ -21,6 +21,7 @@ from .verify import Verifier, synthesize_transition
 from .world import World
 
 AGG_KEY = "_agg"
+AGENTS_KEY = "_agents"
 
 
 @dataclass
@@ -36,7 +37,7 @@ class Bridge:
     name: str
     a: str
     b: str
-    transition: Transition
+    transition: Optional[Transition] = None
     description: str = ""
     rules: Sequence[str] = ()
 
@@ -44,6 +45,20 @@ class Bridge:
         pair = WorldState({"a": state_a, "b": state_b})
         out = self.transition.step(pair, Action("flow"))
         return dict(out["a"]), dict(out["b"])
+
+
+@dataclass
+class Route(Bridge):
+    """A bridge agents may cross.
+
+    Inherits the optional per-step coupling `transition` (None = pure path);
+    adds `on_cross`: an optional Transition over the three-slot dict
+    {"agent": <attrs>, "a": <source slice>, "b": <destination slice>},
+    stepped with Action("cross") - tolls, visas, capacity - synthesizable
+    and verifiable like any other dynamics.
+    """
+
+    on_cross: Optional[Transition] = None
 
 
 @dataclass
@@ -88,6 +103,8 @@ class CompositeTransition(Transition):
                 for _ in range(c.timescales.get(ns, 1)):
                     s[ns] = dict(child.transition.step(
                         WorldState(s[ns]), Action(act, agent=action.agent)))
+        elif action.name == "travel":
+            return c._travel(s, action)
         elif ":" in action.name and action.name.split(":", 1)[0] in c.children:
             ns, act = action.name.split(":", 1)
             c._apply_bindings(s)
@@ -99,7 +116,11 @@ class CompositeTransition(Transition):
             return s  # unknown namespace or action: unchanged, no side effects
 
         for bridge in c.bridges:
-            s[bridge.a], s[bridge.b] = bridge.flow(s[bridge.a], s[bridge.b])
+            if bridge.transition is None:
+                continue
+            sa, sb = bridge.flow(c._resolve(s, bridge.a), c._resolve(s, bridge.b))
+            c._write_back(s, bridge.a, sa)
+            c._write_back(s, bridge.b, sb)
         s[AGG_KEY] = c._aggregates(s)
         return s
 
@@ -118,6 +139,7 @@ class CompositeWorld(World):
         default_actions: Optional[Dict[str, str]] = None,
         description: str = "",
         rules: Optional[list] = None,
+        agents: Optional[Dict[str, dict]] = None,
     ):
         self.children = dict(children)
         self.bridges = list(bridges)
@@ -125,15 +147,20 @@ class CompositeWorld(World):
         self.bindings = list(bindings)
         self.timescales = dict(timescales or {})
         self.default_actions = dict(default_actions or {})
+        self.agents = {k: dict(v) for k, v in (agents or {}).items()}
         initial: Dict[str, Any] = {
             ns: dict(child.initial_state) for ns, child in self.children.items()
         }
+        if agents:
+            initial[AGENTS_KEY] = {k: dict(v) for k, v in self.agents.items()}
         initial[AGG_KEY] = self._aggregates(initial)
         actions = [
             f"{ns}:{act}"
             for ns, child in self.children.items()
             for act in child.actions
         ] + ["tick"]
+        if any(isinstance(b, Route) for b in self.bridges):
+            actions.append("travel")
         super().__init__(
             name=name,
             description=description or (
@@ -156,6 +183,49 @@ class CompositeWorld(World):
             for part in binding.source_path:
                 value = value[part]
             state[binding.child][binding.key] = value
+
+    def _resolve(self, state: Dict[str, Any], path: str) -> dict:
+        node: Any = state
+        for part in path.split(":"):
+            node = node[part]
+        return dict(node)
+
+    def _write_back(self, state: Dict[str, Any], path: str, value: dict) -> None:
+        parts = path.split(":")
+        node: Any = state
+        for part in parts[:-1]:
+            node = node[part]
+        node[parts[-1]] = dict(value)
+
+    def _travel(self, s: WorldState, action: Action) -> WorldState:
+        """Move an agent along a Route; tolerant no-op when illegal."""
+        name = action.params.get("agent")
+        dest = action.params.get("to")
+        registry = s.get(AGENTS_KEY, {})
+        if name not in registry or not dest:
+            return s
+        here = registry[name]["at"]
+        route = next(
+            (r for r in self.bridges
+             if isinstance(r, Route) and {r.a, r.b} == {here, dest}),
+            None,
+        )
+        if route is None or dest == here:
+            return s
+        attrs = dict(registry[name])
+        src, dst = self._resolve(s, here), self._resolve(s, dest)
+        if route.on_cross is not None:
+            out = route.on_cross.step(
+                WorldState({"agent": attrs, "a": src, "b": dst}),
+                Action("cross", agent=name),
+            )
+            attrs, src, dst = dict(out["agent"]), dict(out["a"]), dict(out["b"])
+        attrs["at"] = dest
+        s[AGENTS_KEY] = {**registry, name: attrs}
+        self._write_back(s, here, src)
+        self._write_back(s, dest, dst)
+        s[AGG_KEY] = self._aggregates(s)
+        return s
 
 
 def compile_bridge(

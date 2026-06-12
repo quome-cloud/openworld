@@ -18,8 +18,7 @@
     "models": [
       "qwen2.5:1.5b",
       "qwen2.5:3b",
-      "qwen2.5:7b",
-      "llama3.2"
+      "qwen2.5:7b"
     ],
     "budget": 4,
     "temperature": 0.2,

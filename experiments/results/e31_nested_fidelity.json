@@ -1,0 +1,675 @@
+{
+  "structure": "region > {c0, c1} > {a, b}",
+  "total_money": 39,
+  "script": [
+    {
+      "name": "c0:b:work"
+    },
+    {
+      "name": "c0:b:trade"
+    },
+    {
+      "name": "tick"
+    },
+    {
+      "name": "travel",
+      "params": {
+        "agent": "trader",
+        "to": "c1:b"
+      }
+    },
+    {
+      "name": "c1:b:work"
+    },
+    {
+      "name": "c1:b:work"
+    },
+    {
+      "name": "c1:b:trade"
+    },
+    {
+      "name": "tick"
+    },
+    {
+      "name": "travel",
+      "params": {
+        "agent": "trader",
+        "to": "c0:b"
+      }
+    },
+    {
+      "name": "c1:a:work"
+    },
+    {
+      "name": "tick"
+    },
+    {
+      "name": "c0:a:work"
+    },
+    {
+      "name": "c0:a:trade"
+    },
+    {
+      "name": "c1:a:trade"
+    },
+    {
+      "name": "tick"
+    },
+    {
+      "name": "c0:b:work"
+    },
+    {
+      "name": "c1:b:trade"
+    },
+    {
+      "name": "c0:a:work"
+    },
+    {
+      "name": "tick"
+    },
+    {
+      "name": "c0:b:trade"
+    }
+  ],
+  "counts": {
+    "steps": 20,
+    "leaf_exact": 20,
+    "registry_match": 20,
+    "agg_consistent": 20,
+    "money_conserved": 20,
+    "observation_checks_passed": 2,
+    "observation_checks": 2
+  },
+  "all_pass": true,
+  "per_step": [
+    {
+      "step": 1,
+      "action": "c0:b:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 4,
+        "c0_a_gdp": 0,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 3,
+        "c0_b_gdp": 1,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 5,
+        "c1_a_gdp": 0,
+        "c1_b_treasury": 6,
+        "c1_b_goods": 3,
+        "c1_b_gdp": 0
+      },
+      "agent": {
+        "at": "c0:b",
+        "coins": 3
+      }
+    },
+    {
+      "step": 2,
+      "action": "c0:b:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 4,
+        "c0_a_gdp": 0,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 1,
+        "c0_b_gdp": 4,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 5,
+        "c1_a_gdp": 0,
+        "c1_b_treasury": 6,
+        "c1_b_goods": 3,
+        "c1_b_gdp": 0
+      },
+      "agent": {
+        "at": "c0:b",
+        "coins": 3
+      }
+    },
+    {
+      "step": 3,
+      "action": "tick",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 2,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 2,
+        "c0_b_gdp": 5,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 10,
+        "c1_a_gdp": 2,
+        "c1_b_treasury": 6,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 1
+      },
+      "agent": {
+        "at": "c0:b",
+        "coins": 3
+      }
+    },
+    {
+      "step": 4,
+      "action": "travel",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 2,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 2,
+        "c0_b_gdp": 5,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 10,
+        "c1_a_gdp": 2,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 1
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 5,
+      "action": "c1:b:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 2,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 2,
+        "c0_b_gdp": 5,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 10,
+        "c1_a_gdp": 2,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 3,
+        "c1_b_gdp": 3
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 6,
+      "action": "c1:b:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 2,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 2,
+        "c0_b_gdp": 5,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 10,
+        "c1_a_gdp": 2,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 5,
+        "c1_b_gdp": 5
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 7,
+      "action": "c1:b:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 2,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 2,
+        "c0_b_gdp": 5,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 10,
+        "c1_a_gdp": 2,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 3,
+        "c1_b_gdp": 6
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 8,
+      "action": "tick",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 8,
+        "c0_a_gdp": 4,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 3,
+        "c0_b_gdp": 6,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 15,
+        "c1_a_gdp": 4,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 9,
+      "action": "travel",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 8,
+        "c0_a_gdp": 4,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 3,
+        "c0_b_gdp": 6,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 15,
+        "c1_a_gdp": 4,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 10,
+      "action": "c1:a:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 6,
+        "c0_a_gdp": 4,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 3,
+        "c0_b_gdp": 6,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 20,
+        "c1_a_gdp": 6,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 11,
+      "action": "tick",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 8,
+        "c0_a_gdp": 6,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 4,
+        "c0_b_gdp": 7,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 25,
+        "c1_a_gdp": 8,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 12,
+      "action": "c0:a:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 8,
+        "c0_a_gdp": 7,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 4,
+        "c0_b_gdp": 7,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 27,
+        "c1_a_gdp": 8,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 13,
+      "action": "c0:a:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 9,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 4,
+        "c0_b_gdp": 7,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 27,
+        "c1_a_gdp": 8,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 14,
+      "action": "c1:a:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 9,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 4,
+        "c0_b_gdp": 7,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 23,
+        "c1_a_gdp": 11,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 15,
+      "action": "tick",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 7,
+        "c0_a_gdp": 11,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 5,
+        "c0_b_gdp": 8,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 28,
+        "c1_a_gdp": 13,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 16,
+      "action": "c0:b:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 11,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 6,
+        "c0_b_gdp": 9,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 30,
+        "c1_a_gdp": 13,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 17,
+      "action": "c1:b:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 11,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 6,
+        "c0_b_gdp": 9,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 30,
+        "c1_a_gdp": 13,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 18,
+      "action": "c0:a:work",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 12,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 6,
+        "c0_b_gdp": 9,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 32,
+        "c1_a_gdp": 13,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 19,
+      "action": "tick",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 7,
+        "c0_a_gdp": 14,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 7,
+        "c0_b_gdp": 10,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 37,
+        "c1_a_gdp": 15,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    },
+    {
+      "step": 20,
+      "action": "c0:b:trade",
+      "leaf_exact": true,
+      "registry_match": true,
+      "agg_consistent": true,
+      "money_conserved": true,
+      "total_money": 39,
+      "leaves": {
+        "c0_a_treasury": 10,
+        "c0_a_goods": 5,
+        "c0_a_gdp": 14,
+        "c0_b_treasury": 8,
+        "c0_b_goods": 5,
+        "c0_b_gdp": 13,
+        "c1_a_treasury": 12,
+        "c1_a_goods": 39,
+        "c1_a_gdp": 15,
+        "c1_b_treasury": 8,
+        "c1_b_goods": 1,
+        "c1_b_gdp": 7
+      },
+      "agent": {
+        "at": "c1:b",
+        "coins": 1
+      }
+    }
+  ],
+  "observation_checks": [
+    {
+      "location": "c1:b",
+      "local_ok": true,
+      "ancestors_ok": true,
+      "neighbor_ok": true,
+      "legal_actions_ok": true,
+      "legal_actions": [
+        "c1:b:work",
+        "c1:b:trade",
+        "c1:b:wait",
+        "travel:c0:b"
+      ],
+      "step": 4
+    },
+    {
+      "location": "c1:b",
+      "local_ok": true,
+      "ancestors_ok": true,
+      "neighbor_ok": true,
+      "legal_actions_ok": true,
+      "legal_actions": [
+        "c1:b:work",
+        "c1:b:trade",
+        "c1:b:wait",
+        "travel:c0:b"
+      ],
+      "step": 9
+    }
+  ],
+  "oracle_final": {
+    "c0_a_treasury": 10,
+    "c0_a_goods": 5,
+    "c0_a_gdp": 14,
+    "c0_b_treasury": 8,
+    "c0_b_goods": 5,
+    "c0_b_gdp": 13,
+    "c1_a_treasury": 12,
+    "c1_a_goods": 39,
+    "c1_a_gdp": 15,
+    "c1_b_treasury": 8,
+    "c1_b_goods": 1,
+    "c1_b_gdp": 7,
+    "trader_at": "c1:b",
+    "trader_coins": 1
+  },
+  "experiment": "e31_nested_fidelity",
+  "timestamp": "2026-06-12T09:16:22",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

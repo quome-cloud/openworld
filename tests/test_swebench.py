@@ -2,8 +2,11 @@
 
 import json
 
+import pytest
+
 from openworld import Action, MockLLM
 from openworld.swebench import (
+    DEFAULT_DATASET_PATH,
     SWEBenchInstance,
     build_swebench_world,
     initial_world_state,
@@ -200,3 +203,60 @@ def test_solve_in_world_exhausts_budget():
     record = solve_in_world(FIXTURE, llm, budget=2)
     assert record["solved"] is False
     assert record["attempts"] == 2
+
+
+@pytest.fixture(scope="module")
+def dataset():
+    assert DEFAULT_DATASET_PATH.exists(), "run datasets/openworld-swebench/build_tasks.py"
+    return load_dataset()
+
+
+def test_dataset_has_20_unique_instances(dataset):
+    ids = [i.instance_id for i in dataset]
+    assert len(ids) == 20
+    assert len(set(ids)) == 20
+
+
+def test_dataset_schema(dataset):
+    for inst in dataset:
+        assert inst.instance_id.startswith("openworld-swebench-")
+        for fld in ("module_name", "issue", "buggy_source", "reference_source"):
+            assert getattr(inst, fld).strip(), f"{inst.instance_id}: empty {fld}"
+        assert len(inst.fail_to_pass) >= 2, inst.instance_id
+        assert len(inst.pass_to_pass) >= 2, inst.instance_id
+        for key in ("name", "description", "initial_state", "actions", "rules", "invariants"):
+            assert key in inst.world, f"{inst.instance_id}: world missing {key}"
+        assert inst.world["actions"] == ["submit_patch"]
+
+
+def test_dataset_reference_passes_both_suites(dataset):
+    for inst in dataset:
+        result = run_instance_tests(inst.reference_source, inst)
+        assert result["solved"], (
+            f"{inst.instance_id}: reference fails: "
+            f"{result['fail_to_pass']['errors'] + result['pass_to_pass']['errors']}"
+        )
+
+
+def test_dataset_buggy_fails_f2p_and_passes_p2p(dataset):
+    for inst in dataset:
+        result = run_instance_tests(inst.buggy_source, inst)
+        assert result["fail_to_pass"]["passed"] == 0, (
+            f"{inst.instance_id}: a fail_to_pass test passes on the buggy source"
+        )
+        assert result["pass_to_pass"]["failed"] == 0, (
+            f"{inst.instance_id}: buggy source breaks a pass_to_pass test: "
+            f"{result['pass_to_pass']['errors']}"
+        )
+
+
+def test_dataset_world_initial_state_matches_recomputation(dataset):
+    for inst in dataset:
+        recomputed = initial_world_state(inst)
+        stored = inst.world["initial_state"]
+        for key in (
+            "fail_to_pass_passed", "fail_to_pass_failed",
+            "pass_to_pass_passed", "pass_to_pass_failed",
+            "attempts", "solved", "source",
+        ):
+            assert stored[key] == recomputed[key], f"{inst.instance_id}: {key} drifted"

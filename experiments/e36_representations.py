@@ -88,3 +88,147 @@ def joint_oracle(joint, active, action, k):
     out = {ns: dict(slice_) for ns, slice_ in joint.items() if ns.startswith("s")}
     out[f"s{active}"] = sector_step(out[f"s{active}"], action, SECTOR_PARAMS[active])
     return out
+
+
+# ---------------------------------------------------------------------------
+# Learners: generic numpy MLP (E12 algorithm) + 1-NN
+# ---------------------------------------------------------------------------
+
+class MLP:
+    """Two hidden layers, ReLU, MSE on next-state; trained full-batch (E12)."""
+
+    def __init__(self, n_in, n_out, hidden, seed=0):
+        rng = np.random.RandomState(seed)
+        self.w1 = rng.randn(n_in, hidden) * 0.1; self.b1 = np.zeros(hidden)
+        self.w2 = rng.randn(hidden, hidden) * 0.1; self.b2 = np.zeros(hidden)
+        self.w3 = rng.randn(hidden, n_out) * 0.1; self.b3 = np.zeros(n_out)
+
+    def forward(self, x):
+        self.h1 = np.maximum(0, x @ self.w1 + self.b1)
+        self.h2 = np.maximum(0, self.h1 @ self.w2 + self.b2)
+        return self.h2 @ self.w3 + self.b3
+
+    def train(self, x, y, epochs=2000, lr=1e-2):
+        """Full-batch gradient descent. Returns (first_loss, last_loss)."""
+        first = last = None
+        for ep in range(epochs):
+            p = self.forward(x); g = 2 * (p - y) / len(x)
+            gw3 = self.h2.T @ g; gh2 = (g @ self.w3.T) * (self.h2 > 0)
+            gw2 = self.h1.T @ gh2; gh1 = (gh2 @ self.w2.T) * (self.h1 > 0); gw1 = x.T @ gh1
+            self.w3 -= lr * gw3; self.b3 -= lr * g.sum(0)
+            self.w2 -= lr * gw2; self.b2 -= lr * gh2.sum(0)
+            self.w1 -= lr * gw1; self.b1 -= lr * gh1.sum(0)
+            loss = float(((p - y) ** 2).mean())
+            if ep == 0:
+                first = loss
+            last = loss
+        return first, last
+
+    def n_params(self):
+        return sum(a.size for a in (self.w1, self.b1, self.w2, self.b2, self.w3, self.b3))
+
+
+def knn_predict(train_x, train_y, q):
+    d = ((train_x - q) ** 2).sum(1)
+    return train_y[d.argmin()]
+
+
+# ---------------------------------------------------------------------------
+# Encoders. A "transition" is (joint, active, action, next_active_slice).
+#   joint encode  = concat per-sector [stock,output,waste]/G + action onehot
+#                   + active-sector onehot          (the MONOLITH's input)
+#   sector encode = [stock,output,waste]/G + action onehot   (a CHILD's input)
+# Labels = next active-slice values (raw ints; predictions round+clamp for
+# exact match). The update the action actually performs is to the active
+# sector; every condition is scored on exact-matching that next slice.
+# ---------------------------------------------------------------------------
+
+def action_onehot(action):
+    return [1.0 if action == a else 0.0 for a in ACTIONS]
+
+
+def sector_encode(slice_, action):
+    return [slice_[f] / G for f in FIELDS] + action_onehot(action)
+
+
+def joint_encode(joint, active, action, k):
+    vec = []
+    for i in range(k):
+        vec += [joint[f"s{i}"][f] / G for f in FIELDS]
+    vec += action_onehot(action)
+    vec += [1.0 if i == active else 0.0 for i in range(k)]
+    return vec
+
+
+def slice_label(next_slice):
+    return [float(next_slice[f]) for f in FIELDS]
+
+
+# ---------------------------------------------------------------------------
+# Data split (THE CRUX). Training = thin diagonal band: every sector's fields
+# within +/-1 of a shared base value v in 0..G, so each sector MARGINALLY
+# covers 0..G but the joint stays near the diagonal. Test = full random joint
+# product (each field iid uniform 0..G), overwhelmingly off-diagonal => novel
+# COMBINATIONS of per-sector values that were each individually seen.
+# ---------------------------------------------------------------------------
+
+def _band_joints(k, seed):
+    """Joints near the diagonal: every field within +/-1 of a base value v."""
+    rng = np.random.RandomState(seed)
+    joints = []
+    # For each base value v and a set of small perturbations, build joints
+    # where every sector's every field is clamp(v + delta), delta in {-1,0,1}.
+    for v in range(0, G + 1):
+        for _ in range(8):  # several perturbed joints per base value
+            joint = {}
+            for i in range(k):
+                joint[f"s{i}"] = {
+                    f: clamp(v + int(rng.randint(-1, 2))) for f in FIELDS
+                }
+            joints.append(joint)
+    return joints
+
+
+def make_train(k, n_cap=None, seed=11):
+    """Marginal-cover / joint-novel training transitions.
+
+    Each transition: (joint, active, action, next_active_slice). Returned as a
+    list of dicts so condition runners can build their own encodings.
+    """
+    joints = _band_joints(k, seed)
+    data = []
+    for joint in joints:
+        for active in range(k):
+            for action in ACTIONS:
+                nxt = sector_step(dict(joint[f"s{active}"]), action, SECTOR_PARAMS[active])
+                data.append({"joint": {f"s{i}": dict(joint[f"s{i}"]) for i in range(k)},
+                             "active": active, "action": action, "next_slice": nxt})
+    rng = np.random.RandomState(seed + 1)
+    rng.shuffle(data)
+    if n_cap is not None:
+        data = data[:n_cap]
+    return data
+
+
+def make_test(k, n=400, seed=99):
+    """Uniformly random joints over the full product (mostly off-diagonal)."""
+    rng = np.random.RandomState(seed)
+    data = []
+    for _ in range(n):
+        joint = {f"s{i}": {f: int(rng.randint(0, G + 1)) for f in FIELDS} for i in range(k)}
+        active = int(rng.randint(0, k))
+        action = ACTIONS[int(rng.randint(0, len(ACTIONS)))]
+        nxt = sector_step(dict(joint[f"s{active}"]), action, SECTOR_PARAMS[active])
+        data.append({"joint": joint, "active": active, "action": action, "next_slice": nxt})
+    return data
+
+
+def fraction_off_diagonal(data):
+    """Diagnostic: fraction of test joints whose sectors are NOT all near a
+    common base value (i.e. genuinely novel combinations vs the train band)."""
+    off = 0
+    for tx in data:
+        vals = [tx["joint"][ns][f] for ns in tx["joint"] for f in FIELDS]
+        if max(vals) - min(vals) > 2:
+            off += 1
+    return off / len(data)

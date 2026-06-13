@@ -738,13 +738,17 @@ def fig_sprint(e34):
         "greedy_jitter": (ORANGE, "-.", "^", "greedy + per-attempt seeds"),
     }
     fig, ax = plt.subplots(figsize=(6.4, 3.7))
-    for cond in e34["conditions"]:
-        name = cond["condition"]
+    # jitter variants first so the coincident pinned-seed dashes stay visible
+    order = ["round_robin_jitter", "greedy_jitter",
+             "fixed", "round_robin", "greedy"]
+    by_name = {c["condition"]: c for c in e34["conditions"]}
+    for z, name in enumerate(n for n in order if n in by_name):
+        cond = by_name[name]
         color, ls, marker, label = styles[name]
         xs = [0] + [e["attempt_index"] for e in cond["events"]]
         ys = [0] + [e["cumulative_solved"] for e in cond["events"]]
         ax.plot(xs, ys, ls, color=color, lw=1.9, marker=marker, markersize=3,
-                markevery=max(1, len(xs) // 16), label=label)
+                markevery=max(1, len(xs) // 16), label=label, zorder=3 + z)
     ax.axhline(e34["conditions"][0]["n_tasks"], color="#9CA3AF", lw=0.8,
                ls=(0, (1, 3)))
     ax.text(1, e34["conditions"][0]["n_tasks"] + 0.25, "all tasks",
@@ -1048,6 +1052,23 @@ def numbers_tex(d):
         macro("DynGdpWith", str(s33["final_world_gdp_with_route"])),
         macro("DynGdpStranded", str(s33["final_world_gdp_stranded"])),
         macro("DynMobilityGain", str(s33["mobility_gain"])),
+    ]
+    # E34 (sprint composite: attempt allocation on owsb-atomic)
+    s34 = {c["condition"]: c for c in d["e34_composite_swe"]["summary"]}
+
+    def sprint_solved(cond):
+        return f"{s34[cond]['solved']}/{s34[cond]['n_tasks']}"
+
+    lines += [
+        macro("SprintBudget", str(d["e34_composite_swe"]["total_budget"])),
+        macro("SprintFixedSolved", sprint_solved("fixed")),
+        macro("SprintFixedAttempts", str(s34["fixed"]["attempts_consumed"])),
+        macro("SprintRRSolved", sprint_solved("round_robin")),
+        macro("SprintGreedySolved", sprint_solved("greedy")),
+        macro("SprintGreedyTarpit",
+              str(max(s34["greedy"]["attempts_per_task"].values()))),
+        macro("SprintRRJitterSolved", sprint_solved("round_robin_jitter")),
+        macro("SprintGreedyJitterSolved", sprint_solved("greedy_jitter")),
     ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 

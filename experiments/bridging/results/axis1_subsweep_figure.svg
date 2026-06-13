@@ -1,68 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="700" height="420" font-family="monospace" font-size="11">
-<rect width="700" height="420" fill="#f9f9f9"/>
-<text x="350" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Axis 1b: Bridging Advantage vs. Polarization (N=100, 30 trials)</text>
-<text x="350" y="34" text-anchor="middle" font-size="10" fill="#555">Symmetric bimodal, centrist spillover, K=7 archetype-seeded</text>
-<rect x="65" y="60" width="605" height="300" fill="white" stroke="#ccc" stroke-width="1"/>
-<text x="367.5" y="405" text-anchor="middle" fill="#333">σ_between (cluster separation)</text>
-<text x="12" y="200.0" text-anchor="middle" fill="#333" transform="rotate(-90,12,200.0)">gap_fraction</text>
-<line x1="65" y1="350.0" x2="670" y2="350.0" stroke="#ddd" stroke-dasharray="4,3"/>
-<text x="61" y="364.0" text-anchor="end" fill="#555">0.00</text>
-<line x1="65" y1="275.0" x2="670" y2="275.0" stroke="#ddd" stroke-dasharray="4,3"/>
-<text x="61" y="289.0" text-anchor="end" fill="#555">0.25</text>
-<line x1="65" y1="200.0" x2="670" y2="200.0" stroke="#ddd" stroke-dasharray="4,3"/>
-<text x="61" y="214.0" text-anchor="end" fill="#555">0.50</text>
-<line x1="65" y1="125.0" x2="670" y2="125.0" stroke="#ddd" stroke-dasharray="4,3"/>
-<text x="61" y="139.0" text-anchor="end" fill="#555">0.75</text>
-<line x1="65" y1="50.0" x2="670" y2="50.0" stroke="#ddd" stroke-dasharray="4,3"/>
-<text x="61" y="64.0" text-anchor="end" fill="#555">1.00</text>
-<line x1="65.0" y1="60" x2="65.0" y2="360" stroke="#eee"/>
-<text x="65.0" y="375" text-anchor="middle" fill="#555">0.00</text>
-<line x1="291.9" y1="60" x2="291.9" y2="360" stroke="#eee"/>
-<text x="291.9" y="375" text-anchor="middle" fill="#555">0.30</text>
-<line x1="405.3" y1="60" x2="405.3" y2="360" stroke="#eee"/>
-<text x="405.3" y="375" text-anchor="middle" fill="#555">0.45</text>
-<line x1="518.8" y1="60" x2="518.8" y2="360" stroke="#eee"/>
-<text x="518.8" y="375" text-anchor="middle" fill="#555">0.60</text>
-<line x1="670.0" y1="60" x2="670.0" y2="360" stroke="#eee"/>
-<text x="670.0" y="375" text-anchor="middle" fill="#555">0.80</text>
-<path d="M 65.0,279.3 L 291.9,277.3 L 405.3,276.3 L 518.8,275.3 L 670.0,275.1" fill="none" stroke="#999" stroke-width="2.5"/>
-<circle cx="65.0" cy="279.3" r="4" fill="#999" fill-opacity="0.85"/>
-<circle cx="291.9" cy="277.3" r="4" fill="#999" fill-opacity="0.85"/>
-<circle cx="405.3" cy="276.3" r="4" fill="#999" fill-opacity="0.85"/>
-<circle cx="518.8" cy="275.3" r="4" fill="#999" fill-opacity="0.85"/>
-<circle cx="670.0" cy="275.1" r="4" fill="#999" fill-opacity="0.85"/>
-<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,275.1" fill="none" stroke="#4C72B0" stroke-width="2.5"/>
-<circle cx="65.0" cy="123.4" r="4" fill="#4C72B0" fill-opacity="0.85"/>
-<circle cx="291.9" cy="125.0" r="4" fill="#4C72B0" fill-opacity="0.85"/>
-<circle cx="405.3" cy="125.7" r="4" fill="#4C72B0" fill-opacity="0.85"/>
-<circle cx="518.8" cy="126.5" r="4" fill="#4C72B0" fill-opacity="0.85"/>
-<circle cx="670.0" cy="275.1" r="4" fill="#4C72B0" fill-opacity="0.85"/>
-<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,127.5" fill="none" stroke="#DD8452" stroke-width="2.5"/>
-<circle cx="65.0" cy="123.4" r="4" fill="#DD8452" fill-opacity="0.85"/>
-<circle cx="291.9" cy="125.0" r="4" fill="#DD8452" fill-opacity="0.85"/>
-<circle cx="405.3" cy="125.7" r="4" fill="#DD8452" fill-opacity="0.85"/>
-<circle cx="518.8" cy="126.5" r="4" fill="#DD8452" fill-opacity="0.85"/>
-<circle cx="670.0" cy="127.5" r="4" fill="#DD8452" fill-opacity="0.85"/>
-<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,127.5" fill="none" stroke="#55A868" stroke-width="2.5"/>
-<circle cx="65.0" cy="123.4" r="4" fill="#55A868" fill-opacity="0.85"/>
-<circle cx="291.9" cy="125.0" r="4" fill="#55A868" fill-opacity="0.85"/>
-<circle cx="405.3" cy="125.7" r="4" fill="#55A868" fill-opacity="0.85"/>
-<circle cx="518.8" cy="126.5" r="4" fill="#55A868" fill-opacity="0.85"/>
-<circle cx="670.0" cy="127.5" r="4" fill="#55A868" fill-opacity="0.85"/>
-<path d="M 65.0,50.0 L 291.9,50.0 L 405.3,50.0 L 518.8,50.0 L 670.0,50.0" fill="none" stroke="#C44E52" stroke-width="2.5"/>
-<circle cx="65.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
-<circle cx="291.9" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
-<circle cx="405.3" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
-<circle cx="518.8" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
-<circle cx="670.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
-<line x1="65" y1="400" x2="83" y2="400" stroke="#999" stroke-width="2.5"/>
-<text x="87" y="404" fill="#333">Z</text>
-<line x1="130" y1="400" x2="148" y2="400" stroke="#4C72B0" stroke-width="2.5"/>
-<text x="152" y="404" fill="#333">A</text>
-<line x1="195" y1="400" x2="213" y2="400" stroke="#DD8452" stroke-width="2.5"/>
-<text x="217" y="404" fill="#333">C_CN</text>
-<line x1="260" y1="400" x2="278" y2="400" stroke="#55A868" stroke-width="2.5"/>
-<text x="282" y="404" fill="#333">C_PP</text>
-<line x1="325" y1="400" x2="343" y2="400" stroke="#C44E52" stroke-width="2.5"/>
-<text x="347" y="404" fill="#333">D</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="440" font-family="monospace" font-size="11">
+<rect width="800" height="440" fill="#f9f9f9"/>
+<text x="400" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Axis 1b: Bridging Advantage vs. Polarization — Threshold Narrowed</text>
+<text x="400" y="34" text-anchor="middle" font-size="10" fill="#555">Symmetric bimodal, centrist spillover, K=7 archetype-seeded, N=100, 30 trials/cell</text>
+<rect x="65" y="65" width="705" height="310" fill="white" stroke="#ccc" stroke-width="1"/>
+<rect x="725.9" y="65" width="44.1" height="310" fill="#ffd70033"/>
+<text x="748.0" y="81" text-anchor="middle" fill="#997700" font-size="9">threshold</text>
+<text x="417.5" y="420" text-anchor="middle" fill="#333">σ_between (cluster separation)</text>
+<line x1="65" y1="365.0" x2="770" y2="365.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="379.0" text-anchor="end" fill="#555">0.00</text>
+<line x1="65" y1="287.5" x2="770" y2="287.5" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="301.5" text-anchor="end" fill="#555">0.25</text>
+<line x1="65" y1="210.0" x2="770" y2="210.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="224.0" text-anchor="end" fill="#555">0.50</text>
+<line x1="65" y1="132.5" x2="770" y2="132.5" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="146.5" text-anchor="end" fill="#555">0.75</text>
+<line x1="65" y1="55.0" x2="770" y2="55.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="69.0" text-anchor="end" fill="#555">1.00</text>
+<line x1="65.0" y1="65" x2="65.0" y2="375" stroke="#eee"/>
+<text x="65.0" y="390" text-anchor="middle" fill="#555">0.00</text>
+<line x1="329.4" y1="65" x2="329.4" y2="375" stroke="#eee"/>
+<text x="329.4" y="390" text-anchor="middle" fill="#555">0.30</text>
+<line x1="461.6" y1="65" x2="461.6" y2="375" stroke="#eee"/>
+<text x="461.6" y="390" text-anchor="middle" fill="#555">0.45</text>
+<line x1="593.7" y1="65" x2="593.7" y2="375" stroke="#eee"/>
+<text x="593.7" y="390" text-anchor="middle" fill="#555">0.60</text>
+<line x1="637.8" y1="65" x2="637.8" y2="375" stroke="#eee"/>
+<text x="637.8" y="390" text-anchor="middle" fill="#555">0.65</text>
+<line x1="681.9" y1="65" x2="681.9" y2="375" stroke="#eee"/>
+<text x="681.9" y="390" text-anchor="middle" fill="#555">0.70</text>
+<line x1="725.9" y1="65" x2="725.9" y2="375" stroke="#eee"/>
+<text x="725.9" y="390" text-anchor="middle" fill="#555">0.75</text>
+<line x1="770.0" y1="65" x2="770.0" y2="375" stroke="#eee"/>
+<text x="770.0" y="390" text-anchor="middle" fill="#555">0.80</text>
+<path d="M 65.0,291.9 L 329.4,289.9 L 461.6,288.9 L 593.7,287.9 L 637.8,287.5 L 681.9,287.2 L 725.9,287.1 L 770.0,287.6" fill="none" stroke="#999" stroke-width="2.5"/>
+<circle cx="65.0" cy="291.9" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="329.4" cy="289.9" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="461.6" cy="288.9" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="593.7" cy="287.9" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="637.8" cy="287.5" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="681.9" cy="287.2" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="725.9" cy="287.1" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="770.0" cy="287.6" r="4" fill="#999" fill-opacity="0.85"/>
+<path d="M 65.0,130.8 L 329.4,132.5 L 461.6,133.3 L 593.7,134.1 L 637.8,134.3 L 681.9,134.6 L 725.9,134.9 L 770.0,287.6" fill="none" stroke="#4C72B0" stroke-width="2.5"/>
+<circle cx="65.0" cy="130.8" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="329.4" cy="132.5" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="461.6" cy="133.3" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="593.7" cy="134.1" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="637.8" cy="134.3" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="681.9" cy="134.6" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="725.9" cy="134.9" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="770.0" cy="287.6" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<path d="M 65.0,130.8 L 329.4,132.5 L 461.6,133.3 L 593.7,134.1 L 637.8,134.3 L 681.9,134.6 L 725.9,134.9 L 770.0,135.1" fill="none" stroke="#DD8452" stroke-width="2.5"/>
+<circle cx="65.0" cy="130.8" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="329.4" cy="132.5" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="461.6" cy="133.3" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="593.7" cy="134.1" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="637.8" cy="134.3" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="681.9" cy="134.6" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="725.9" cy="134.9" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="770.0" cy="135.1" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<path d="M 65.0,130.8 L 329.4,132.5 L 461.6,133.3 L 593.7,134.1 L 637.8,134.3 L 681.9,134.6 L 725.9,134.9 L 770.0,135.1" fill="none" stroke="#55A868" stroke-width="2.5"/>
+<circle cx="65.0" cy="130.8" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="329.4" cy="132.5" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="461.6" cy="133.3" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="593.7" cy="134.1" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="637.8" cy="134.3" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="681.9" cy="134.6" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="725.9" cy="134.9" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="770.0" cy="135.1" r="4" fill="#55A868" fill-opacity="0.85"/>
+<path d="M 65.0,55.0 L 329.4,55.0 L 461.6,55.0 L 593.7,55.0 L 637.8,55.0 L 681.9,55.0 L 725.9,55.0 L 770.0,55.0" fill="none" stroke="#C44E52" stroke-width="2.5"/>
+<circle cx="65.0" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="329.4" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="461.6" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="593.7" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="637.8" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="681.9" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="725.9" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="770.0" cy="55.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<line x1="65" y1="420" x2="83" y2="420" stroke="#999" stroke-width="2.5"/>
+<text x="87" y="424" fill="#333">Z</text>
+<line x1="130" y1="420" x2="148" y2="420" stroke="#4C72B0" stroke-width="2.5"/>
+<text x="152" y="424" fill="#333">A</text>
+<line x1="195" y1="420" x2="213" y2="420" stroke="#DD8452" stroke-width="2.5"/>
+<text x="217" y="424" fill="#333">C_CN</text>
+<line x1="260" y1="420" x2="278" y2="420" stroke="#55A868" stroke-width="2.5"/>
+<text x="282" y="424" fill="#333">C_PP</text>
+<line x1="325" y1="420" x2="343" y2="420" stroke="#C44E52" stroke-width="2.5"/>
+<text x="347" y="424" fill="#333">D</text>
 </svg>

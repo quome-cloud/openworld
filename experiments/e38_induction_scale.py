@@ -54,7 +54,9 @@ def run_model(model):
         for rep in range(REPLICATES):
             r = random.Random(SEED + rep)
             traces = collect(k, r)
-            llm = OllamaLLM(model=model, temperature=0.4, options={"seed": SEED + rep})
+            # reasoning models (deepseek-r1) think long; give them headroom
+            llm = OllamaLLM(model=model, temperature=0.4, timeout=1800,
+                            options={"seed": SEED + rep})
             code, repro = induce_stripped(llm, traces)
             rows.append({
                 "k": k, "replicate": rep, "train_reproduction": repro,
@@ -81,7 +83,7 @@ def main():
     for model in MODELS:
         if model in ladder:
             continue
-        require_ollama(model)
+        require_ollama(model, timeout=1800)
         print(f"[{model}] inducing from traces")
         ladder[model] = run_model(model)
         save_results("e38_induction_scale", {

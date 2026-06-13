@@ -1,5 +1,7 @@
 # Benchmarking: Build Your Own World-Model Dataset
 
+*New to worlds and oracles? Read [OpenWorld for scikit-learn users](from_scikit_learn.md) first.*
+
 > Script: [`benchmark_dataset.py`](benchmark_dataset.py) — runs offline;
 > pass an Ollama model name to go live.
 

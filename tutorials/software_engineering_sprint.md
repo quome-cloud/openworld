@@ -1,5 +1,7 @@
 # Software Engineering: Sprint Planning with a Quality-Bar Dial
 
+*New to worlds and oracles? Read [OpenWorld for scikit-learn users](from_scikit_learn.md) first.*
+
 > Script: [`software_engineering_sprint.py`](software_engineering_sprint.py) —
 > runs offline; uses two live models when Ollama is up.
 

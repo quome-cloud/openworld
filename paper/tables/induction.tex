@@ -1,0 +1,12 @@
+\begin{tabular}{llcc}
+\toprule
+Method & Information given & In-dist. & $10\times$ OOD \\
+\midrule
+Code synthesis (rules) & rule text, 0 transitions & 1.00 & 1.00 \\
+\midrule
+\multicolumn{4}{l}{\emph{Equal information: 1000 random-policy transitions, no rule text}} \\
+\textbf{Code induction} & traces only & 0.43 & 0.43 \\
+MLP & traces only & 0.40 & 0.00 \\
+1-NN memorizer & traces only & 0.17 & 0.00 \\
+\bottomrule
+\end{tabular}

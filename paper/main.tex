@@ -1235,6 +1235,53 @@ composite learns from far less data, the symbolic composite from none.}
 \label{fig:representations}
 \end{figure}
 
+\subsection{Feeding the real world in: multimodal perception (E39--E40)}\label{sec:perception}
+The worlds so far are driven by symbolic inputs. A \emph{perception boundary}
+extends them to text, audio, and video without touching the verified core: an
+untrusted \texttt{Perceptor} maps raw input to a partial symbolic state update,
+a gate contract-checks it (owned fields, types, ranges), and only then does it
+reach the dynamics---before any transition runs. Raw media never enters state
+(only the resolved symbolic delta and a content hash), so determinism and
+bit-exact replay are preserved; perception is the one acknowledged fallible,
+non-deterministic layer, and is \emph{measured}, never reported as verified.
+
+This is what lets messy real-world observations drive an exact model of a
+real-world phenomenon. E40 takes a discrete SIR epidemic---the textbook case
+where the decision that matters is a multi-step \emph{forecast}, not a one-step
+read---and drives it from perceived day-0 inputs (a text situation report and a
+ward-photo frame, resolved through the boundary into $S,I,R$), then rolls the
+verified dynamics forward \PercHorizon{} days. The perceived world model
+forecasts the day-\PercHorizon{} infected count \emph{exactly}, both
+in-distribution (\PercWorldIn) and at $10\times$ population scale
+(\PercWorldOod), where an end-to-end MLP given the same inputs scores
+\PercMlpIn{} in-distribution (\PercMlpInTol{} within $\pm2$) and \PercMlpOod{}
+out of distribution (Figure~\ref{fig:perception}A): learning a 14-step
+nonlinear outcome directly neither fits nor extrapolates, while rolling a
+declared model forward is exact at any scale. Crucially, the value survives
+imperfect perception in a principled way. Because the dynamics add zero error,
+end-to-end forecast accuracy equals \emph{perception} accuracy
+(Figure~\ref{fig:perception}B): a perceptor right 75\% of the time yields 75\%
+correct forecasts, no worse. E39 confirms this decomposition holds exactly
+across perception error rates $0$--$0.9$ (\PercDecompHolds). The practical
+reading: a symbolic world model fed by perception models a real phenomenon as
+well as its declared rules and its perception allow---and the architecture
+keeps those two error sources separate and individually measurable, with the
+dynamics contributing none.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/perception.png}
+\caption{\textbf{Perceive-then-forecast (E40).} Multimodal day-0 inputs are
+perceived into the symbolic state of an SIR epidemic, then rolled forward
+\PercHorizon{} days by the verified world model. \textbf{A:} exact
+day-\PercHorizon{} forecast accuracy---the perceived world model is exact in
+and out of distribution; the end-to-end MLP fails and collapses at $10\times$
+scale. \textbf{B:} end-to-end forecast accuracy equals perception accuracy
+(the dynamics add zero error), so the system degrades only as fast as its
+perception does.}
+\label{fig:perception}
+\end{figure}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

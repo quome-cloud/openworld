@@ -4,7 +4,8 @@ import pytest
 
 from openworld import (
     Action, MockLLM, MockPerceptor, Observation, PerceptionError,
-    PerceptionGate, TextPerceptor, World,
+    PerceptionGate, TextPerceptor, TranscriptPerceptor, VisionPerceptor,
+    World, image_to_b64, sample_frames,
 )
 from openworld.transition import FunctionTransition
 
@@ -85,3 +86,70 @@ def test_gate_rejection_surfaces_through_observe():
     with pytest.raises(PerceptionError):
         world.observe(Observation("text", "hr 999"), bad)
     assert world.state["hr"] == 0  # rejected percept never touched the state
+
+
+# --- Phase 2: audio -------------------------------------------------------
+def test_transcript_perceptor_accepts_transcript_string():
+    llm = MockLLM(['{"hr": 92}'])
+    p = TranscriptPerceptor(llm, produces=["hr"], schema={"hr": int})
+    assert p.perceive(Observation("audio", "the patient's heart rate is 92")) == {"hr": 92}
+
+
+def test_transcript_perceptor_uses_injected_transcriber_for_bytes():
+    llm = MockLLM(['{"hr": 70}'])
+    transcribe = lambda data: "resting, hr seventy"   # stand-in ASR
+    p = TranscriptPerceptor(llm, produces=["hr"], transcribe=transcribe)
+    assert p.perceive(Observation("audio", b"\x00\x01\x02")) == {"hr": 70}
+
+
+def test_transcript_perceptor_needs_transcript_or_transcriber():
+    p = TranscriptPerceptor(MockLLM(['{}']), produces=["hr"])
+    with pytest.raises(PerceptionError, match="transcript"):
+        p.perceive(Observation("audio", b"\x00\x01"))
+
+
+# --- Phase 3: vision ------------------------------------------------------
+def test_image_to_b64_handles_bytes_and_path(tmp_path):
+    import base64
+    assert image_to_b64(b"abc") == base64.b64encode(b"abc").decode()
+    f = tmp_path / "frame.bin"
+    f.write_bytes(b"xyz")
+    assert image_to_b64(str(f)) == base64.b64encode(b"xyz").decode()
+
+
+def test_sample_frames_picks_evenly_and_caps():
+    assert sample_frames([0, 1, 2], 5) == [0, 1, 2]      # fewer than k -> all
+    assert sample_frames(list(range(10)), 1) == [0]
+    assert sample_frames(list(range(10)), 3) == [0, 4, 9]  # endpoints + middle (round-half-even)
+
+
+def test_vision_perceptor_extracts_from_image_via_mock_llm():
+    llm = MockLLM(['{"people": 2}'])
+    p = VisionPerceptor(llm, produces=["people"], schema={"people": (int, (0, 100))})
+    assert p.perceive(Observation("image", b"\x89PNGfake")) == {"people": 2}
+
+
+def test_ollama_chat_attaches_images_additively(monkeypatch):
+    # images must ride on the user message, not in the sampling options, and
+    # absence must leave the payload unchanged.
+    from openworld.llm import OllamaLLM
+    captured = {}
+
+    class FakeResp:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self): return b'{"message": {"content": "ok"}}'
+
+    def fake_urlopen(req, timeout=None):
+        captured["payload"] = __import__("json").loads(req.data.decode())
+        return FakeResp()
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+    llm = OllamaLLM(model="vis")
+    llm.ask("describe", images=["B64DATA"])
+    msgs = captured["payload"]["messages"]
+    assert msgs[-1]["role"] == "user" and msgs[-1]["images"] == ["B64DATA"]
+    assert "images" not in captured["payload"]["options"]   # not a sampling option
+    captured.clear()
+    llm.ask("plain")
+    assert all("images" not in m for m in captured["payload"]["messages"])  # additive

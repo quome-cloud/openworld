@@ -15,7 +15,8 @@ dynamics step over the committed state.
 """
 
 from openworld import (
-    Action, MockLLM, Observation, PerceptionError, TextPerceptor, World,
+    Action, MockLLM, Observation, PerceptionError, TextPerceptor,
+    TranscriptPerceptor, VisionPerceptor, World, sample_frames,
 )
 from openworld.transition import FunctionTransition
 
@@ -69,10 +70,31 @@ def main():
         print(f"gate rejected  : {exc}")
     assert bed.state["hr"] == 118  # unchanged: rejected percept never committed
 
-    print("\nThe core stayed symbolic and exact; perception is a separate, gated,")
-    print("measured layer. Audio and video plug into the SAME boundary as new")
+    # --- Phase 2: audio. Same boundary; the front of the pipe is transcription.
+    # Offline, the audio Observation carries a transcript string (a real ASR
+    # model would be injected as transcribe=...). Field extraction is identical.
+    audio = TranscriptPerceptor(MockLLM(['{"hr": 96}']), produces=["hr"],
+                                schema={"hr": (int, (20, 250))})
+    bed.observe(Observation("audio", "nurse dictation: heart rate ninety-six"), audio)
+    print(f"\naudio note     : hr={bed.state['hr']} (transcript -> symbolic, same gate)")
+
+    # --- Phase 3: video. A monitor frame read by a vision model into a symbolic
+    # field. Offline we use MockLLM; live, this is a vision-capable OllamaLLM and
+    # the image rides the additive images= channel. A segment is sampled frames.
+    vision = VisionPerceptor(MockLLM(['{"hr": 101}']), produces=["hr"],
+                             schema={"hr": (int, (20, 250))},
+                             prompt_hint="the bedside monitor showing the heart-rate readout")
+    frames = [f"frame_{i}_bytes".encode() for i in range(30)]   # a 30-frame clip
+    key = sample_frames(frames, 1)[0]                            # 1 representative frame
+    bed.observe(Observation("video_frame", key), vision)
+    print(f"monitor frame  : hr={bed.state['hr']} (pixels -> symbolic, same gate)")
+    bed.step(Action("monitor"))
+    print(f"after monitor  : stable={bed.state['stable']} minutes={bed.state['minutes']}")
+
+    print("\nText, audio, and video all entered through the SAME gated boundary as")
     print("Perceptor subclasses - additively, with no change to the world or its")
-    print("dynamics.")
+    print("verified dynamics. The core stayed symbolic and exact; perception is a")
+    print("separate, measured layer.")
 
 
 if __name__ == "__main__":

@@ -33,7 +33,8 @@ from .objectives import Dial, Objective, ObjectiveSuite
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
-    TextPerceptor,
+    TextPerceptor, TranscriptPerceptor, VisionPerceptor, image_to_b64,
+    sample_frames,
 )
 from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
@@ -95,6 +96,10 @@ __all__ = [
     "PerceptionError",
     "MockPerceptor",
     "TextPerceptor",
+    "TranscriptPerceptor",
+    "VisionPerceptor",
+    "image_to_b64",
+    "sample_frames",
     "Route",
     "SandboxError",
     "Simulation",

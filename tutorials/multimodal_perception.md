@@ -67,9 +67,34 @@ gate rejected  : field 'hr'=9000 out of range [20, 250]
   end-to-end error equals perception error — which the boundary makes
   measurable.
 
-## Where this goes
+## All three modalities, one boundary
 
-This is Phase 1 (text, offline). Audio (ASR/transcript → text path) and
-video/image (frame → vision model) are new `Perceptor` subclasses behind the
-identical boundary — additive, no change to the world or its dynamics. See the
-design spec at `docs/superpowers/specs/2026-06-13-multimodal-perception-design.md`.
+The script extends the same ICU bed to audio and video — same `observe()`, same
+gate, same dynamics:
+
+- **`TranscriptPerceptor`** (audio) — the front of the pipe is transcription.
+  Offline, the audio `Observation` carries a transcript string; live, you
+  inject `transcribe=<asr_model>`. Ollama has no native audio, so ASR is the
+  optional, guarded dependency; field extraction reuses the text path.
+- **`VisionPerceptor`** (image / video frame) — a frame is base64-encoded and
+  passed to a vision model through the additive `images=` channel on
+  `OllamaLLM` (works with any `BaseLLM`, so `MockLLM` drives it in tests). For a
+  clip, `sample_frames(frames, k)` picks evenly-spaced frames to perceive.
+
+```python
+bed.observe(Observation("audio", "heart rate ninety-six"), transcript_perceptor)
+bed.observe(Observation("video_frame", frame_bytes), vision_perceptor)
+```
+
+Every modality is a `Perceptor` subclass behind the identical, gated boundary —
+purely additive, no change to the world or its verified dynamics.
+
+## Why this stays honest at scale
+
+Perception is *measured, not proven*. The architecture makes the measurement
+clean: because the dynamics add zero error, **end-to-end error equals
+perception error**. The deterministic `experiments/e39_perception_fidelity.py`
+demonstrates exactly this decomposition — a perceptor that is wrong some of the
+time yields end-to-end accuracy equal to its perception accuracy, while the
+dynamics layer stays exact throughout. See the design spec at
+`docs/superpowers/specs/2026-06-13-multimodal-perception-design.md`.

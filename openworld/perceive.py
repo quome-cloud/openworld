@@ -17,9 +17,10 @@ commits, and every transition over it, remain deterministic and replayable.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from .llm import BaseLLM
 from .parsing import extract_json
@@ -124,6 +125,24 @@ class MockPerceptor(Perceptor):
         return dict(delta)
 
 
+_EXTRACT_SYSTEM = (
+    "You extract structured fields from input. Reply with ONLY a JSON object "
+    "containing exactly the requested fields and nothing else.")
+
+
+def _extract_fields(llm: BaseLLM, text: str, produces: List[str], system: str,
+                    images: Optional[List[str]] = None) -> Dict[str, Any]:
+    """Ask an LLM to extract `produces` from text (optionally with images) as
+    JSON; keep only owned fields. Shared by the text/audio/vision perceptors."""
+    prompt = (
+        f"Extract these fields as JSON: {produces}.\n\n"
+        f"Input:\n{text}\n\n"
+        f"Return only the JSON object with those keys.")
+    reply = llm.ask(prompt, system=system, **({"images": images} if images else {}))
+    data = extract_json(reply) or {}
+    return {k: data[k] for k in produces if k in data}
+
+
 class TextPerceptor(Perceptor):
     """Map free text to symbolic fields by asking an LLM to extract them as JSON.
 
@@ -132,21 +151,92 @@ class TextPerceptor(Perceptor):
     """
 
     modality = "text"
-    _SYSTEM = (
-        "You extract structured fields from text. Reply with ONLY a JSON object "
-        "containing exactly the requested fields and nothing else.")
 
     def __init__(self, llm: BaseLLM, produces: List[str],
                  schema: Optional[Dict[str, Any]] = None, system: Optional[str] = None):
         self.llm = llm
         self.produces = list(produces)
         self.schema = dict(schema or {})
-        self.system = system or self._SYSTEM
+        self.system = system or _EXTRACT_SYSTEM
 
     def perceive(self, observation: Observation) -> Dict[str, Any]:
-        prompt = (
-            f"Extract these fields as JSON: {self.produces}.\n\n"
-            f"Text:\n{observation.data}\n\n"
-            f"Return only the JSON object with those keys.")
-        data = extract_json(self.llm.ask(prompt, system=self.system)) or {}
-        return {k: data[k] for k in self.produces if k in data}
+        return _extract_fields(self.llm, str(observation.data), self.produces, self.system)
+
+
+class TranscriptPerceptor(Perceptor):
+    """Audio -> transcript -> symbolic fields. (Phase 2.)
+
+    Offline-friendly: an audio `Observation` may carry a transcript `str`
+    directly, or `bytes`/path plus an injected `transcribe` callable (e.g. a
+    Whisper-class ASR model). Field extraction reuses the text path. Ollama has
+    no native audio, so transcription is the (optional) front of this pipe.
+    """
+
+    modality = "audio"
+
+    def __init__(self, llm: BaseLLM, produces: List[str],
+                 schema: Optional[Dict[str, Any]] = None, system: Optional[str] = None,
+                 transcribe: Optional[Callable[[Any], str]] = None):
+        self.llm = llm
+        self.produces = list(produces)
+        self.schema = dict(schema or {})
+        self.system = system or _EXTRACT_SYSTEM
+        self.transcribe = transcribe
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        data = observation.data
+        if isinstance(data, str):
+            transcript = data
+        elif self.transcribe is not None:
+            transcript = self.transcribe(data)
+        else:
+            raise PerceptionError(
+                "audio observation needs a transcript str or a transcribe= callable")
+        return _extract_fields(self.llm, transcript, self.produces, self.system)
+
+
+def image_to_b64(data: Any) -> str:
+    """Encode image bytes, or the contents of a path, as base64 (for Ollama)."""
+    if isinstance(data, (bytes, bytearray)):
+        raw = bytes(data)
+    else:
+        with open(data, "rb") as fh:
+            raw = fh.read()
+    return base64.b64encode(raw).decode("ascii")
+
+
+def sample_frames(frames: List[Any], k: int) -> List[Any]:
+    """Pick `k` roughly evenly-spaced frames from a list (k>=1)."""
+    if k <= 0:
+        raise PerceptionError("k must be >= 1")
+    if len(frames) <= k:
+        return list(frames)
+    step = (len(frames) - 1) / (k - 1) if k > 1 else 0
+    return [frames[round(i * step)] for i in range(k)]
+
+
+class VisionPerceptor(Perceptor):
+    """Image / video frame -> symbolic fields via a vision LLM. (Phase 3.)
+
+    The `Observation.data` is image bytes or a path (single frame). The image
+    is base64-encoded and passed to the LLM via the additive `images=` channel;
+    works with any `BaseLLM` (a vision-capable `OllamaLLM` live, `MockLLM` in
+    tests). For a `video_segment`, sample frames with `sample_frames` and merge
+    the per-frame deltas in the caller (last-seen wins), or perceive frames
+    individually through `World.observe`.
+    """
+
+    modality = "image"
+
+    def __init__(self, llm: BaseLLM, produces: List[str],
+                 schema: Optional[Dict[str, Any]] = None, system: Optional[str] = None,
+                 prompt_hint: str = "the image"):
+        self.llm = llm
+        self.produces = list(produces)
+        self.schema = dict(schema or {})
+        self.system = system or _EXTRACT_SYSTEM
+        self.prompt_hint = prompt_hint
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        return _extract_fields(self.llm, self.prompt_hint, self.produces,
+                               self.system, images=[image_to_b64(observation.data)])

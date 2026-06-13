@@ -1,0 +1,21 @@
+\begin{tabular}{lcccc}
+\toprule
+Representation & $K{=}2$ & $K{=}3$ & $K{=}4$ & $K{=}5$ \\
+\midrule
+\multicolumn{5}{l}{\emph{Monolithic learner over the joint state}} \\
+Linear / ridge & 0.01 & 0.01 & 0.01 & 0.01 \\
+1-NN memorizer & 0.02 & 0.03 & 0.01 & 0.01 \\
+$k$-NN ($k{=}5$) & 0.03 & 0.03 & 0.01 & 0.01 \\
+Kernel SVR & 0.02 & 0.01 & 0.00 & 0.01 \\
+Gaussian process & 0.01 & 0.01 & 0.00 & 0.01 \\
+Random forest & 0.02 & 0.02 & 0.01 & 0.01 \\
+Hist.\ gradient boosting & 0.48 & 0.35 & 0.23 & 0.20 \\
+Koopman / EDMD (deg.\ 2) & 0.02 & 0.02 & 0.01 & 0.01 \\
+MLP (2 hidden) & 0.03 & 0.02 & 0.00 & 0.01 \\
+\midrule
+\multicolumn{5}{l}{\emph{Composite of small worlds (ours)}} \\
+Composite-learned (MLP) & 0.72 & 0.75 & 0.71 & 0.73 \\
+Composite-learned (trees) & 1.00 & 1.00 & 1.00 & 1.00 \\
+\textbf{Composite-symbolic} & 1.00 & 1.00 & 1.00 & 1.00 \\
+\bottomrule
+\end{tabular}

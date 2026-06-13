@@ -32,7 +32,11 @@ from e37_induction import (
     probe_acc_code, probe_acc_knn, probe_acc_mlp, train_mlp,
 )
 
-MODELS = ["qwen2.5:7b", "qwen3-coder:30b", "gpt-oss:20b", "deepseek-r1:14b"]
+MODELS = ["qwen2.5:7b", "qwen3-coder:30b", "gpt-oss:20b"]
+# deepseek-r1:14b excluded: its reasoning-trace length makes trace-induction
+# impractical on local hardware (timed out at 300s; ~27 min on the first of 6
+# calls at 1800s, VRAM-swapping). A methods limitation, not a result.
+EXCLUDED = ["deepseek-r1:14b (reasoning-trace length impractical for trace induction on local hardware)"]
 RESULTS_PATH = Path(__file__).resolve().parent / "results" / "e38_induction_scale.json"
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
@@ -86,11 +90,12 @@ def main():
         require_ollama(model, timeout=1800)
         print(f"[{model}] inducing from traces")
         ladder[model] = run_model(model)
-        save_results("e38_induction_scale", {
-            "ks": KS, "replicates": REPLICATES,
-            "anchor_note": "rule-text synthesis scores 1.00/1.00 (E37)",
-            "ladder": list(ladder.values()),
-        })
+    save_results("e38_induction_scale", {
+        "ks": KS, "replicates": REPLICATES,
+        "anchor_note": "rule-text synthesis scores 1.00/1.00 (E37)",
+        "excluded_models": EXCLUDED,
+        "ladder": [ladder[m] for m in MODELS if m in ladder],
+    })
     print(f"\n{'model':<18} in-dist(bigK)  ood(bigK)")
     for m in ladder.values():
         print(f"{m['model']:<18} {m['mean_in_dist_bigK']:>11.2f}  {m['mean_ood_bigK']:>9.2f}")

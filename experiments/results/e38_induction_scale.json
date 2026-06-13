@@ -1,0 +1,163 @@
+{
+  "ks": [
+    100,
+    1000
+  ],
+  "replicates": 3,
+  "anchor_note": "rule-text synthesis scores 1.00/1.00 (E37)",
+  "excluded_models": [
+    "deepseek-r1:14b (reasoning-trace length impractical for trace induction on local hardware)"
+  ],
+  "ladder": [
+    {
+      "model": "qwen2.5:7b",
+      "rows": [
+        {
+          "k": 100,
+          "replicate": 0,
+          "train_reproduction": 0.73,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 100,
+          "replicate": 1,
+          "train_reproduction": 0.82,
+          "probe_in_dist": 0.5,
+          "probe_ood_10x": 0.5
+        },
+        {
+          "k": 100,
+          "replicate": 2,
+          "train_reproduction": 0.71,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 1000,
+          "replicate": 0,
+          "train_reproduction": 0.722,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 1000,
+          "replicate": 1,
+          "train_reproduction": 0.832,
+          "probe_in_dist": 0.5,
+          "probe_ood_10x": 0.5
+        },
+        {
+          "k": 1000,
+          "replicate": 2,
+          "train_reproduction": 0.75,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        }
+      ],
+      "mean_in_dist_bigK": 0.43333333333333335,
+      "mean_ood_bigK": 0.43333333333333335
+    },
+    {
+      "model": "qwen3-coder:30b",
+      "rows": [
+        {
+          "k": 100,
+          "replicate": 0,
+          "train_reproduction": 0.95,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 100,
+          "replicate": 1,
+          "train_reproduction": 0.93,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        },
+        {
+          "k": 100,
+          "replicate": 2,
+          "train_reproduction": 0.89,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        },
+        {
+          "k": 1000,
+          "replicate": 0,
+          "train_reproduction": 0.952,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 1000,
+          "replicate": 1,
+          "train_reproduction": 0.908,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        },
+        {
+          "k": 1000,
+          "replicate": 2,
+          "train_reproduction": 0.903,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        }
+      ],
+      "mean_in_dist_bigK": 0.3333333333333333,
+      "mean_ood_bigK": 0.3333333333333333
+    },
+    {
+      "model": "gpt-oss:20b",
+      "rows": [
+        {
+          "k": 100,
+          "replicate": 0,
+          "train_reproduction": 0.97,
+          "probe_in_dist": 0.6,
+          "probe_ood_10x": 0.6
+        },
+        {
+          "k": 100,
+          "replicate": 1,
+          "train_reproduction": 0.93,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        },
+        {
+          "k": 100,
+          "replicate": 2,
+          "train_reproduction": 0.91,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        },
+        {
+          "k": 1000,
+          "replicate": 0,
+          "train_reproduction": 0.934,
+          "probe_in_dist": 0.6,
+          "probe_ood_10x": 0.6
+        },
+        {
+          "k": 1000,
+          "replicate": 1,
+          "train_reproduction": 0.908,
+          "probe_in_dist": 0.3,
+          "probe_ood_10x": 0.3
+        },
+        {
+          "k": 1000,
+          "replicate": 2,
+          "train_reproduction": 0.91,
+          "probe_in_dist": 0.4,
+          "probe_ood_10x": 0.4
+        }
+      ],
+      "mean_in_dist_bigK": 0.4333333333333333,
+      "mean_ood_bigK": 0.4333333333333333
+    }
+  ],
+  "experiment": "e38_induction_scale",
+  "timestamp": "2026-06-13T15:25:21",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

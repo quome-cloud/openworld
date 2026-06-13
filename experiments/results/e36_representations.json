@@ -1,0 +1,347 @@
+{
+  "grid_G": 6,
+  "fields": [
+    "stock",
+    "output",
+    "waste"
+  ],
+  "actions": [
+    "produce",
+    "recycle",
+    "wait"
+  ],
+  "sector_params": [
+    {
+      "cost": 1,
+      "gain": 2,
+      "rec": 1,
+      "thresh": 3,
+      "amt": 1
+    },
+    {
+      "cost": 2,
+      "gain": 1,
+      "rec": 2,
+      "thresh": 2,
+      "amt": 2
+    },
+    {
+      "cost": 1,
+      "gain": 3,
+      "rec": 1,
+      "thresh": 4,
+      "amt": 1
+    },
+    {
+      "cost": 2,
+      "gain": 2,
+      "rec": 1,
+      "thresh": 3,
+      "amt": 2
+    },
+    {
+      "cost": 1,
+      "gain": 1,
+      "rec": 2,
+      "thresh": 2,
+      "amt": 1
+    }
+  ],
+  "hidden_each": 32,
+  "leg_generalization": [
+    {
+      "k": 2,
+      "n_train": 336,
+      "n_test": 400,
+      "test_off_diagonal": 0.9675,
+      "sizing": {
+        "hidden_each": 32,
+        "child_total_params": 2758,
+        "monolith_hidden": 46,
+        "monolith_params": 2855
+      },
+      "monolith": {
+        "acc": 0.035,
+        "train_loss_first": 15.367638070766985,
+        "train_loss_last": 0.2016378249058128,
+        "n_params": 2855,
+        "hidden": 46
+      },
+      "knn1": {
+        "acc": 0.035
+      },
+      "composite_learned": {
+        "acc": 0.4725,
+        "child_losses": [
+          {
+            "sector": 0,
+            "n": 168,
+            "loss_first": 15.7487933823746,
+            "loss_last": 0.08255822085574825
+          },
+          {
+            "sector": 1,
+            "n": 168,
+            "loss_first": 14.892865041782807,
+            "loss_last": 0.11575697669105604
+          }
+        ],
+        "n_params": 2758,
+        "hidden_each": 32
+      },
+      "composite_symbolic": {
+        "acc": 1.0
+      }
+    },
+    {
+      "k": 3,
+      "n_train": 504,
+      "n_test": 400,
+      "test_off_diagonal": 0.9975,
+      "sizing": {
+        "hidden_each": 32,
+        "child_total_params": 4137,
+        "monolith_hidden": 56,
+        "monolith_params": 4259
+      },
+      "monolith": {
+        "acc": 0.0075,
+        "train_loss_first": 15.387036901498075,
+        "train_loss_last": 0.29206114281465806,
+        "n_params": 4259,
+        "hidden": 56
+      },
+      "knn1": {
+        "acc": 0.03
+      },
+      "composite_learned": {
+        "acc": 0.5675,
+        "child_losses": [
+          {
+            "sector": 0,
+            "n": 168,
+            "loss_first": 15.28623788012626,
+            "loss_last": 0.08983926801649116
+          },
+          {
+            "sector": 1,
+            "n": 168,
+            "loss_first": 14.757904798425445,
+            "loss_last": 0.12865118835419062
+          },
+          {
+            "sector": 2,
+            "n": 168,
+            "loss_first": 15.524118627348109,
+            "loss_last": 0.10190099155907577
+          }
+        ],
+        "n_params": 4137,
+        "hidden_each": 32
+      },
+      "composite_symbolic": {
+        "acc": 1.0
+      }
+    },
+    {
+      "k": 4,
+      "n_train": 672,
+      "n_test": 400,
+      "test_off_diagonal": 1.0,
+      "sizing": {
+        "hidden_each": 32,
+        "child_total_params": 5516,
+        "monolith_hidden": 64,
+        "monolith_params": 5635
+      },
+      "monolith": {
+        "acc": 0.005,
+        "train_loss_first": 15.07699459771483,
+        "train_loss_last": 0.31158244667397056,
+        "n_params": 5635,
+        "hidden": 64
+      },
+      "knn1": {
+        "acc": 0.015
+      },
+      "composite_learned": {
+        "acc": 0.485,
+        "child_losses": [
+          {
+            "sector": 0,
+            "n": 168,
+            "loss_first": 15.168390991285493,
+            "loss_last": 0.07838235538883055
+          },
+          {
+            "sector": 1,
+            "n": 168,
+            "loss_first": 14.45388290821412,
+            "loss_last": 0.1035352850023717
+          },
+          {
+            "sector": 2,
+            "n": 168,
+            "loss_first": 15.748673254135113,
+            "loss_last": 0.10322255457123107
+          },
+          {
+            "sector": 3,
+            "n": 168,
+            "loss_first": 15.834886081481743,
+            "loss_last": 0.1132552951078263
+          }
+        ],
+        "n_params": 5516,
+        "hidden_each": 32
+      },
+      "composite_symbolic": {
+        "acc": 1.0
+      }
+    },
+    {
+      "k": 5,
+      "n_train": 840,
+      "n_test": 400,
+      "test_off_diagonal": 1.0,
+      "sizing": {
+        "hidden_each": 32,
+        "child_total_params": 6895,
+        "monolith_hidden": 72,
+        "monolith_params": 7203
+      },
+      "monolith": {
+        "acc": 0.005,
+        "train_loss_first": 15.277592995567055,
+        "train_loss_last": 0.37528232644695675,
+        "n_params": 7203,
+        "hidden": 72
+      },
+      "knn1": {
+        "acc": 0.015
+      },
+      "composite_learned": {
+        "acc": 0.5575,
+        "child_losses": [
+          {
+            "sector": 0,
+            "n": 168,
+            "loss_first": 15.538289039407887,
+            "loss_last": 0.0939926148129431
+          },
+          {
+            "sector": 1,
+            "n": 168,
+            "loss_first": 15.029792108509914,
+            "loss_last": 0.10601952759062422
+          },
+          {
+            "sector": 2,
+            "n": 168,
+            "loss_first": 16.109811584453094,
+            "loss_last": 0.09823097573714949
+          },
+          {
+            "sector": 3,
+            "n": 168,
+            "loss_first": 14.598943844485293,
+            "loss_last": 0.11313748043636902
+          },
+          {
+            "sector": 4,
+            "n": 168,
+            "loss_first": 14.229539415484386,
+            "loss_last": 0.08464296819973251
+          }
+        ],
+        "n_params": 6895,
+        "hidden_each": 32
+      },
+      "composite_symbolic": {
+        "acc": 1.0
+      }
+    }
+  ],
+  "leg_interference": {
+    "k": 4,
+    "n_test_sector0": 90,
+    "sizing": {
+      "hidden_each": 32,
+      "child_total_params": 5516,
+      "monolith_hidden": 64,
+      "monolith_params": 5635
+    },
+    "monolith_sequential_retained": 0.0,
+    "monolith_sequential_stages": [
+      {
+        "after_sector": 0,
+        "sector0_acc": 0.5555555555555556,
+        "loss_first": 14.846255091566949,
+        "loss_last": 0.06499573756142817
+      },
+      {
+        "after_sector": 1,
+        "sector0_acc": 0.0,
+        "loss_first": 1.3387344386063025,
+        "loss_last": 0.07033001823261215
+      },
+      {
+        "after_sector": 2,
+        "sector0_acc": 0.011111111111111112,
+        "loss_first": 1.1673562947312737,
+        "loss_last": 0.05735221528941841
+      },
+      {
+        "after_sector": 3,
+        "sector0_acc": 0.0,
+        "loss_first": 1.2141720385871064,
+        "loss_last": 0.04222607572150744
+      }
+    ],
+    "monolith_joint_retained": 0.011111111111111112,
+    "composite_learned_retained": 0.6555555555555556,
+    "composite_symbolic_retained": 1.0
+  },
+  "leg_sample_efficiency": {
+    "k": 3,
+    "n_test": 400,
+    "max_train_available": 504,
+    "sizing": {
+      "hidden_each": 32,
+      "child_total_params": 4137,
+      "monolith_hidden": 56,
+      "monolith_params": 4259
+    },
+    "rows": [
+      {
+        "n_cap": 100,
+        "n_train_actual": 100,
+        "monolith_acc": 0.0175,
+        "monolith_loss_last": 0.18172789593967553,
+        "composite_learned_acc": 0.3475,
+        "composite_symbolic_acc": 1.0
+      },
+      {
+        "n_cap": 1000,
+        "n_train_actual": 504,
+        "monolith_acc": 0.0075,
+        "monolith_loss_last": 0.29206114281465806,
+        "composite_learned_acc": 0.5675,
+        "composite_symbolic_acc": 1.0
+      },
+      {
+        "n_cap": 10000,
+        "n_train_actual": 504,
+        "monolith_acc": 0.0075,
+        "monolith_loss_last": 0.29206114281465806,
+        "composite_learned_acc": 0.5675,
+        "composite_symbolic_acc": 1.0
+      }
+    ]
+  },
+  "sanity_symbolic_exact": true,
+  "note": "Training covers each sector's full MARGINAL value range but only a thin diagonal slice of the JOINT product; test is the full random joint product (novel combinations of seen per-part values). Composite needs only marginals; monolith needs the joint.",
+  "experiment": "e36_representations",
+  "timestamp": "2026-06-12T20:15:16",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

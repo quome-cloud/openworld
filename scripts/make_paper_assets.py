@@ -30,7 +30,7 @@ EXPERIMENTS = [
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
-    "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
+    "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal",
 ]
@@ -1017,6 +1017,42 @@ def fig_dynamic_traversal(e33):
     plt.close(fig)
 
 
+def fig_sprint_ladder(e35, e34):
+    """E35: the sprint allocation experiment across a model-capability ladder."""
+    n = e34["conditions"][0]["n_tasks"]
+    e34_by = {c["condition"]: c["solved"] for c in e34["conditions"]}
+    anchor = {"fixed": e34_by["fixed"], "round_robin": e34_by["round_robin"],
+              "greedy": e34_by["greedy"]}
+    ladder = {m: {c["condition"]: c["solved"] for c in cell["conditions"]}
+              for m, cell in e35["ladder"].items()}
+    models = ["qwen2.5:7b", "deepseek-r1:14b", "gpt-oss:20b", "qwen3-coder:30b"]
+    solved = {"qwen2.5:7b": anchor, **ladder}
+    conds = [("fixed", SLATE, "fixed 4/task"),
+             ("round_robin", BLUE, "round-robin"),
+             ("greedy", RED, "greedy min-failing")]
+
+    fig, ax = plt.subplots(figsize=(7.4, 3.6))
+    x = range(len(models))
+    width = 0.26
+    for ci, (cond, color, label) in enumerate(conds):
+        vals = [solved[m].get(cond, 0) for m in models]
+        xs = [i + (ci - 1) * width for i in x]
+        ax.bar(xs, vals, width, color=color, label=label)
+        for xi, v in zip(xs, vals):
+            ax.text(xi, v + 0.3, str(v), ha="center", fontsize=7)
+    ax.axhline(n, color="#9CA3AF", lw=0.8, ls=(0, (1, 3)))
+    ax.text(0, n + 0.3, f"all {n}", fontsize=7, color="#9CA3AF")
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([m.replace(":", "\n") for m in models], fontsize=7.5)
+    ax.set_ylabel(f"Tasks solved (of {n})")
+    ax.set_ylim(0, n + 2)
+    ax.set_xlabel("Repair model (increasing capability →)")
+    ax.legend(fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(FIGS / "sprint_ladder.png", dpi=200)
+    plt.close(fig)
+
+
 def fig_sprint(e34):
     """E34: solved-vs-budget curves per allocation condition on owsb-atomic."""
     styles = {
@@ -1164,7 +1200,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "39"),
+        macro("NumExperiments", "40"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1359,6 +1395,21 @@ def numbers_tex(d):
         macro("SprintRRJitterSolved", sprint_solved("round_robin_jitter")),
         macro("SprintGreedyJitterSolved", sprint_solved("greedy_jitter")),
     ]
+    # E35 (sprint allocation across a model-capability ladder)
+    e35 = d["e35_sprint_ladder"]["ladder"]
+    n35 = d["e35_sprint_ladder"]["conditions"][0]["n_tasks"] if "conditions" in d["e35_sprint_ladder"] else 20
+
+    def solved35(model, cond):
+        cell = {c["condition"]: c["solved"] for c in e35[model]["conditions"]}
+        return cell.get(cond)
+
+    lines += [
+        macro("LadderDeepseekFixed", str(solved35("deepseek-r1:14b", "fixed"))),
+        macro("LadderGptossFixed", str(solved35("gpt-oss:20b", "fixed"))),
+        macro("LadderQwenCoderFixed", str(solved35("qwen3-coder:30b", "fixed"))),
+        macro("LadderGptossGreedy", str(solved35("gpt-oss:20b", "greedy"))),
+        macro("LadderQwenCoderGreedy", str(solved35("qwen3-coder:30b", "greedy"))),
+    ]
     # E36 (representations: composition vs monolithic learners)
     e36 = d["e36_representations"]
     g36 = {r["k"]: r for r in e36["leg_generalization"]}
@@ -1478,6 +1529,7 @@ def main():
     fig_traversal(data["e31_nested_fidelity"])
     fig_dynamic_traversal(data["e33_dynamic_traversal"])
     fig_sprint(data["e34_composite_swe"])
+    fig_sprint_ladder(data["e35_sprint_ladder"], data["e34_composite_swe"])
     fig_representations(data["e36_representations"])
     fig_perception(data["e40_perceive_forecast"])
     fig_nonstationary(data["e41_nonstationary"])

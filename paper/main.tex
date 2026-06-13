@@ -1167,6 +1167,36 @@ collapses.}
 \label{tab:composition}
 \end{table}
 
+\subsection{The sprint allocation across a capability ladder (E35)}\label{sec:ladder}
+E34's finding---that reallocating a shared budget cannot raise the ceiling,
+and that a greedy ``closest-to-passing'' policy tarpits---was measured with a
+1.5B/7B repair model. E35 re-runs the three allocation conditions across a
+capability ladder spanning three model families (Figure~\ref{fig:sprint-ladder}):
+qwen2.5:7b (the E34 anchor), deepseek-r1:14b, gpt-oss:20b, and qwen3-coder:30b.
+Two patterns emerge, both clean. First, the fixed-protocol ceiling rises
+monotonically with capability---15, \LadderDeepseekFixed, \LadderGptossFixed,
+\LadderQwenCoderFixed{} of 20---so the benchmark discriminates model strength as
+intended. Second, the greedy tarpit is \emph{capability-gated}: catastrophic at
+7B (1/20, it sinks the whole budget into one near-miss), it progressively
+defangs with scale and at gpt-oss:20b not only stops tarpitting but clears the
+\emph{entire} board (\LadderGptossGreedy/20), with qwen3-coder:30b at
+\LadderQwenCoderGreedy/20. The allocation pathology, in other words, is a symptom
+of a model that cannot finish the task it fixates on; give it enough capability
+and the fixation becomes harmless. Across all four models and three families
+the qualitative reading of E34 holds---allocation policy is dominated by base
+capability---now with the capability axis made explicit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/sprint_ladder.png}
+\caption{\textbf{The sprint allocation across a capability ladder (E35).}
+Tasks solved on OpenWorld-SWE-bench under the three allocation conditions, by
+repair model (increasing capability left to right; budget 80). The
+fixed-protocol ceiling rises with capability; the greedy tarpit (a lone
+solved task at 7B) defangs with scale, clearing all 20 at gpt-oss:20b.}
+\label{fig:sprint-ladder}
+\end{figure}
+
 \subsection{Composition yields better representations (E36)}\label{sec:representations}
 E12 and E19 measured what a learner needs to match a \emph{single}
 synthesized world; E36 asks the representational question directly on

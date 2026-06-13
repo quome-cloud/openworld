@@ -22,7 +22,7 @@ Quickstart:
 """
 
 from .agent import Agent
-from .compose import (Aggregator, Binding, Bridge, CompositeWorld, Route, compile_bridge, legal_actions, observe)
+from .compose import (Aggregator, Binding, Bridge, CompositeWorld, Route, bridge_worlds, compile_bridge, legal_actions, observe)
 from .ethics import (
     Constraint, Delegate, MoralParliament, constrained, lexicographic,
     maximin, permitted_actions, weighted_sum,
@@ -55,6 +55,7 @@ __all__ = [
     "BaseLLM",
     "Binding",
     "Bridge",
+    "bridge_worlds",
     "Choice",
     "CodeTransition",
     "CompositeWorld",

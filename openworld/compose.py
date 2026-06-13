@@ -148,6 +148,15 @@ class CompositeWorld(World):
     ):
         self.children = dict(children)
         self.bridges = list(bridges)
+        for _bridge in self.bridges:
+            for _side in (_bridge.a, _bridge.b):
+                _top = _side.split(":")[0]
+                if _top not in self.children:
+                    raise ValueError(
+                        f"Bridge {_bridge.name!r} references {_side!r}, "
+                        f"which is not a child of {name!r}. "
+                        f"Children: {sorted(self.children)}"
+                    )
         self.aggregators = list(aggregators)
         self.bindings = list(bindings)
         self.timescales = dict(timescales or {})
@@ -257,6 +266,8 @@ def compile_bridge(
     b: str,
     description: str,
     rules: Sequence[str] = (),
+    world_a: Optional["World"] = None,
+    world_b: Optional["World"] = None,
     sample_a: Optional[dict] = None,
     sample_b: Optional[dict] = None,
     invariants: Sequence[tuple] = (),
@@ -270,8 +281,13 @@ def compile_bridge(
     generate -> verify relay (sandboxed smoke runs, invariants, optional
     critic) applies unchanged. Invariants are predicates over the two-slot
     state, which is where cross-world conservation laws live.
+
+    If world_a / world_b are provided, sample_a / sample_b are derived from
+    their initial_state when not explicitly supplied.
     """
-    initial = WorldState({"a": dict(sample_a or {}), "b": dict(sample_b or {})})
+    sample_a = sample_a or (dict(world_a.initial_state) if world_a else {})
+    sample_b = sample_b or (dict(world_b.initial_state) if world_b else {})
+    initial = WorldState({"a": dict(sample_a), "b": dict(sample_b)})
     verifier = Verifier(
         initial_state=initial,
         sample_actions=[Action("flow", agent="smoke_test_agent")],
@@ -291,6 +307,40 @@ def compile_bridge(
     )
     return Bridge(name=name, a=a, b=b, transition=transition,
                   description=description, rules=tuple(rules))
+
+
+def bridge_worlds(
+    llm: BaseLLM,
+    world_a: "World",
+    world_b: "World",
+    bridge_name: str,
+    description: str,
+    rules: Sequence[str] = (),
+    aggregators: Sequence[Aggregator] = (),
+    bindings: Sequence[Binding] = (),
+    timescales: Optional[Dict[str, int]] = None,
+    default_actions: Optional[Dict[str, str]] = None,
+    invariants: Sequence[tuple] = (),
+    critic: Optional[BaseLLM] = None,
+    max_iters: int = 4,
+) -> Tuple["Bridge", "CompositeWorld"]:
+    """Compile a bridge between two World objects and return (Bridge, CompositeWorld)."""
+    bridge = compile_bridge(
+        llm, bridge_name, world_a.name, world_b.name,
+        description, rules,
+        world_a=world_a, world_b=world_b,
+        invariants=invariants, critic=critic, max_iters=max_iters,
+    )
+    composite = CompositeWorld(
+        name=f"{world_a.name}+{world_b.name}",
+        children={world_a.name: world_a, world_b.name: world_b},
+        bridges=[bridge],
+        aggregators=list(aggregators),
+        bindings=list(bindings),
+        timescales=timescales,
+        default_actions=default_actions,
+    )
+    return bridge, composite
 
 
 def observe(composite: CompositeWorld, state: Dict[str, Any], agent_name: str) -> Dict[str, Any]:

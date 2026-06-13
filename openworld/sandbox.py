@@ -49,6 +49,23 @@ def load_transition_code(code: str, func_name: str = "transition") -> Callable:
     return func
 
 
+def run_fn(
+    fn: Callable,
+    state: Dict[str, Any],
+    action: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Execute a pre-loaded transition callable on (state, action)."""
+    try:
+        result = fn(copy.deepcopy(state), copy.deepcopy(action))
+    except Exception as exc:
+        raise SandboxError(f"transition(state, action) raised: {exc!r}") from exc
+    if not isinstance(result, dict):
+        raise SandboxError(
+            f"transition() must return a dict next-state, got {type(result).__name__}"
+        )
+    return result
+
+
 def run_transition_code(
     code: str,
     state: Dict[str, Any],

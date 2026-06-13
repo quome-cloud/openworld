@@ -18,7 +18,7 @@ from typing import Callable, Optional, Union
 
 from .llm import BaseLLM
 from .parsing import extract_json
-from .sandbox import run_transition_code
+from .sandbox import load_transition_code, run_fn, run_transition_code
 from .state import Action, WorldState
 
 
@@ -50,11 +50,10 @@ class CodeTransition(Transition):
     def __init__(self, code: str, func_name: str = "transition"):
         self.code = code
         self.func_name = func_name
+        self._fn = load_transition_code(code, func_name)  # compile once
 
     def step(self, state: WorldState, action: Action) -> WorldState:
-        result = run_transition_code(
-            self.code, dict(state), action.to_dict(), self.func_name
-        )
+        result = run_fn(self._fn, dict(state), action.to_dict())
         return WorldState(result)
 
     def save(self, path: Union[str, Path]) -> Path:

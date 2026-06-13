@@ -1324,6 +1324,48 @@ the frozen model never recovers.}
 \label{fig:nonstationary}
 \end{figure}
 
+\subsection{Agents traversing connected worlds with changing rules (E42)}\label{sec:traversal}
+E42 is the capstone: it combines composition, toll routes, non-stationary
+rules, and per-world perception, and asks whether an agent can track each
+world's rule \emph{at the belief level} as it hops between them and the rules
+change---including changes that happen while it is away. Two reservoir worlds
+are joined by a toll \texttt{Route}; each has its own changing regime and its
+own perception boundary; an agent hops every \AgentDwell{} steps
+(\AgentHops{} arrivals, \AgentTolls{} tolls paid), and four belief models
+predict the current world's next state from the same perceived observations
+(Figure~\ref{fig:agent-traversal}). The decisive contrast is between
+\emph{separating} a belief per world and \emph{sharing} one. The symbolic
+per-world monitor scores \AgentSymAcc{} and, crucially, returns to a world it
+left \emph{unchanged} almost for free (recovery \AgentSymUnchg{} steps),
+recovering to exact in \AgentSymChanged{} step when the world changed while it
+was away. The single shared learner scores \AgentSharedAcc---and pays a
+recovery cost of \AgentSharedUnchg{} steps even returning to a world that
+\emph{did not change}, because learning the other world overwrote its belief:
+catastrophic interference (the E36 result) now induced purely by traversal. A
+per-world sliding window avoids interference (\AgentWinAcc) but does not
+reliably re-identify an away-change within a single visit. The lesson threads
+the whole paper together: separating dynamics into per-world programs---the
+composition principle---is what lets an agent carry one world's rule across an
+absence intact and re-pin it from a few observations when it has changed, where
+an entangled belief cannot hold two worlds at once. The boundary is the
+familiar one: exact re-identification holds while the changed rule stays in the
+identifiable family.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/agent_traversal.png}
+\caption{\textbf{Agents traversing connected worlds with changing rules
+(E42).} Two worlds joined by a toll route, each non-stationary, each with its
+own perception boundary; an agent hops between them. \textbf{A:} prediction
+accuracy tracking the current world's rule across hops. \textbf{B:} recovery
+lag on arrival, split by whether the world's rule changed while the agent was
+away. The shared-belief learner pays an interference cost even returning to an
+\emph{unchanged} world; the per-world symbolic monitor returns nearly free and
+re-identifies away-changes in a step; the per-world window does not reliably
+recover from away-changes within a visit (hatched = no recovery).}
+\label{fig:agent-traversal}
+\end{figure}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

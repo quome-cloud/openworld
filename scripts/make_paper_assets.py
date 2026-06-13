@@ -32,7 +32,7 @@ EXPERIMENTS = [
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
     "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
-    "e41_nonstationary",
+    "e41_nonstationary", "e42_agent_traversal",
 ]
 
 
@@ -452,6 +452,57 @@ def table_representations(e36):
     lines += [f"\\textbf{{Composite-symbolic}} & {cells('composite_symbolic')} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "representations.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_agent_traversal(e42):
+    """E42: agent-belief accuracy + interference across hops between two worlds."""
+    s = e42["summary"]
+    order = ["oracle", "symbolic_per_world", "per_world_window", "shared_online"]
+    labels = {"oracle": "oracle", "symbolic_per_world": "symbolic per-world (ours)",
+              "per_world_window": "per-world window", "shared_online": "shared online"}
+    colors = {"oracle": SLATE, "symbolic_per_world": TEAL,
+              "per_world_window": BLUE, "shared_online": RED}
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.6, 3.4),
+                                   gridspec_kw={"width_ratios": [2, 3]})
+
+    # A. overall prediction accuracy across the hop schedule
+    accs = [s[m]["accuracy"] for m in order]
+    ax1.barh(range(len(order)), accs, color=[colors[m] for m in order])
+    for i, a in enumerate(accs):
+        ax1.text(a + 0.01, i, f"{a:.2f}", va="center", fontsize=8)
+    ax1.set_yticks(range(len(order)))
+    ax1.set_yticklabels([labels[m] for m in order], fontsize=7.5)
+    ax1.set_xlim(0, 1.12)
+    ax1.invert_yaxis()
+    ax1.set_xlabel("Prediction accuracy")
+    ax1.set_title("A. Tracking rules across hops", fontsize=9.5, loc="left")
+    ax1.grid(alpha=0.25, axis="x")
+
+    # B. recovery lag on arrival: unchanged vs silently-changed-while-away
+    methods = ["symbolic_per_world", "per_world_window", "shared_online"]
+    miss = max((s[m]["recovery_silently_changed_return"] or 0) for m in methods) + 2
+    width = 0.36
+    for mi, m in enumerate(methods):
+        u = s[m]["recovery_unchanged_return"]
+        c = s[m]["recovery_silently_changed_return"]
+        uval = miss if u is None else u
+        cval = miss if c is None else c
+        ax2.bar(mi - width / 2, uval, width, color=colors[m], alpha=0.55,
+                hatch="//" if u is None else None,
+                label="returns to unchanged world" if mi == 0 else None)
+        ax2.bar(mi + width / 2, cval, width, color=colors[m],
+                hatch="//" if c is None else None,
+                label="returns to silently-changed world" if mi == 0 else None)
+    ax2.set_xticks(range(len(methods)))
+    ax2.set_xticklabels(["symbolic\n(ours)", "per-world\nwindow", "shared\nonline"], fontsize=7.5)
+    ax2.set_ylabel("Recovery lag on arrival (steps)")
+    ax2.set_title("B. Cost of a hop (interference vs change-detection)", fontsize=9.5, loc="left")
+    ax2.legend(fontsize=7, loc="upper left")
+    ax2.grid(alpha=0.25, axis="y")
+
+    fig.tight_layout()
+    fig.savefig(FIGS / "agent_traversal.png", dpi=200)
+    plt.close(fig)
 
 
 def fig_nonstationary(e41):
@@ -1113,7 +1164,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "38"),
+        macro("NumExperiments", "39"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1383,6 +1434,24 @@ def numbers_tex(d):
         macro("NonStatFrozenAcc", acc(e41["static_frozen"]["accuracy"])),
         macro("NonStatChanges", str(len(chg))),
     ]
+    # E42 (agent traversal across connected non-stationary worlds)
+    e42 = d["e42_agent_traversal"]["summary"]
+
+    def lag(method, key):
+        v = e42[method][key]
+        return "never" if v is None else (f"{v:.0f}" if float(v).is_integer() else f"{v:.1f}")
+
+    lines += [
+        macro("AgentSymAcc", acc(e42["symbolic_per_world"]["accuracy"])),
+        macro("AgentSharedAcc", acc(e42["shared_online"]["accuracy"])),
+        macro("AgentWinAcc", acc(e42["per_world_window"]["accuracy"])),
+        macro("AgentSymUnchg", lag("symbolic_per_world", "recovery_unchanged_return")),
+        macro("AgentSharedUnchg", lag("shared_online", "recovery_unchanged_return")),
+        macro("AgentSymChanged", lag("symbolic_per_world", "recovery_silently_changed_return")),
+        macro("AgentTolls", str(d["e42_agent_traversal"]["tolls_paid"])),
+        macro("AgentHops", str(d["e42_agent_traversal"]["n_arrivals"])),
+        macro("AgentDwell", str(d["e42_agent_traversal"]["dwell"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1412,6 +1481,7 @@ def main():
     fig_representations(data["e36_representations"])
     fig_perception(data["e40_perceive_forecast"])
     fig_nonstationary(data["e41_nonstationary"])
+    fig_agent_traversal(data["e42_agent_traversal"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

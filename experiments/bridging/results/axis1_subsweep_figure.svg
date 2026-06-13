@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="420" font-family="monospace" font-size="11">
+<rect width="700" height="420" fill="#f9f9f9"/>
+<text x="350" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Axis 1b: Bridging Advantage vs. Polarization (N=100, 30 trials)</text>
+<text x="350" y="34" text-anchor="middle" font-size="10" fill="#555">Symmetric bimodal, centrist spillover, K=7 archetype-seeded</text>
+<rect x="65" y="60" width="605" height="300" fill="white" stroke="#ccc" stroke-width="1"/>
+<text x="367.5" y="405" text-anchor="middle" fill="#333">σ_between (cluster separation)</text>
+<text x="12" y="200.0" text-anchor="middle" fill="#333" transform="rotate(-90,12,200.0)">gap_fraction</text>
+<line x1="65" y1="350.0" x2="670" y2="350.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="364.0" text-anchor="end" fill="#555">0.00</text>
+<line x1="65" y1="275.0" x2="670" y2="275.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="289.0" text-anchor="end" fill="#555">0.25</text>
+<line x1="65" y1="200.0" x2="670" y2="200.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="214.0" text-anchor="end" fill="#555">0.50</text>
+<line x1="65" y1="125.0" x2="670" y2="125.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="139.0" text-anchor="end" fill="#555">0.75</text>
+<line x1="65" y1="50.0" x2="670" y2="50.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="64.0" text-anchor="end" fill="#555">1.00</text>
+<line x1="65.0" y1="60" x2="65.0" y2="360" stroke="#eee"/>
+<text x="65.0" y="375" text-anchor="middle" fill="#555">0.00</text>
+<line x1="291.9" y1="60" x2="291.9" y2="360" stroke="#eee"/>
+<text x="291.9" y="375" text-anchor="middle" fill="#555">0.30</text>
+<line x1="405.3" y1="60" x2="405.3" y2="360" stroke="#eee"/>
+<text x="405.3" y="375" text-anchor="middle" fill="#555">0.45</text>
+<line x1="518.8" y1="60" x2="518.8" y2="360" stroke="#eee"/>
+<text x="518.8" y="375" text-anchor="middle" fill="#555">0.60</text>
+<line x1="670.0" y1="60" x2="670.0" y2="360" stroke="#eee"/>
+<text x="670.0" y="375" text-anchor="middle" fill="#555">0.80</text>
+<path d="M 65.0,279.3 L 291.9,277.3 L 405.3,276.3 L 518.8,275.3 L 670.0,275.1" fill="none" stroke="#999" stroke-width="2.5"/>
+<circle cx="65.0" cy="279.3" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="291.9" cy="277.3" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="405.3" cy="276.3" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="518.8" cy="275.3" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="670.0" cy="275.1" r="4" fill="#999" fill-opacity="0.85"/>
+<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,275.1" fill="none" stroke="#4C72B0" stroke-width="2.5"/>
+<circle cx="65.0" cy="123.4" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="291.9" cy="125.0" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="405.3" cy="125.7" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="518.8" cy="126.5" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="670.0" cy="275.1" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,127.5" fill="none" stroke="#DD8452" stroke-width="2.5"/>
+<circle cx="65.0" cy="123.4" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="291.9" cy="125.0" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="405.3" cy="125.7" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="518.8" cy="126.5" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="670.0" cy="127.5" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<path d="M 65.0,123.4 L 291.9,125.0 L 405.3,125.7 L 518.8,126.5 L 670.0,127.5" fill="none" stroke="#55A868" stroke-width="2.5"/>
+<circle cx="65.0" cy="123.4" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="291.9" cy="125.0" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="405.3" cy="125.7" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="518.8" cy="126.5" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="670.0" cy="127.5" r="4" fill="#55A868" fill-opacity="0.85"/>
+<path d="M 65.0,50.0 L 291.9,50.0 L 405.3,50.0 L 518.8,50.0 L 670.0,50.0" fill="none" stroke="#C44E52" stroke-width="2.5"/>
+<circle cx="65.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="291.9" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="405.3" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="518.8" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="670.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<line x1="65" y1="400" x2="83" y2="400" stroke="#999" stroke-width="2.5"/>
+<text x="87" y="404" fill="#333">Z</text>
+<line x1="130" y1="400" x2="148" y2="400" stroke="#4C72B0" stroke-width="2.5"/>
+<text x="152" y="404" fill="#333">A</text>
+<line x1="195" y1="400" x2="213" y2="400" stroke="#DD8452" stroke-width="2.5"/>
+<text x="217" y="404" fill="#333">C_CN</text>
+<line x1="260" y1="400" x2="278" y2="400" stroke="#55A868" stroke-width="2.5"/>
+<text x="282" y="404" fill="#333">C_PP</text>
+<line x1="325" y1="400" x2="343" y2="400" stroke="#C44E52" stroke-width="2.5"/>
+<text x="347" y="404" fill="#333">D</text>
+</svg>

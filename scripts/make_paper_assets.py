@@ -32,6 +32,7 @@ EXPERIMENTS = [
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
     "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
+    "e41_nonstationary",
 ]
 
 
@@ -451,6 +452,63 @@ def table_representations(e36):
     lines += [f"\\textbf{{Composite-symbolic}} & {cells('composite_symbolic')} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "representations.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_nonstationary(e41):
+    """E41: adaptation to sudden unannounced rule changes."""
+    tl = e41["timeline"]
+    cp = e41["perfect_perception"]
+    warmup, changes = e41["warmup"], e41["changes"]
+    order = ["oracle_switch", "symbolic_refit", "window_1nn", "static_frozen"]
+    labels = {"oracle_switch": "oracle (knows change)",
+              "symbolic_refit": "symbolic monitor+refit (ours)",
+              "window_1nn": "sliding-window 1-NN", "static_frozen": "static frozen"}
+    colors = {"oracle_switch": SLATE, "symbolic_refit": TEAL,
+              "window_1nn": BLUE, "static_frozen": RED}
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3.4),
+                                   gridspec_kw={"width_ratios": [3, 2]})
+
+    # A. cumulative errors over time (regret); change markers
+    xs = list(range(warmup, warmup + len(tl["symbolic_refit"])))
+    for m in order:
+        cum, run = [], 0
+        for f in tl[m]:
+            run += (1 - f)
+            cum.append(run)
+        ax1.plot(xs, cum, color=colors[m], lw=2, label=labels[m])
+    for c in changes:
+        ax1.axvline(c, color="#9CA3AF", ls=(0, (3, 3)), lw=1)
+    ax1.text(changes[0] + 1, 1, "rule changes", fontsize=7, color="#6B7280")
+    ax1.set_xlabel("Step")
+    ax1.set_ylabel("Cumulative wrong predictions")
+    ax1.set_title("A. Regret over time (sudden changes marked)", fontsize=9.5, loc="left")
+    ax1.legend(fontsize=7, loc="upper left")
+    ax1.grid(alpha=0.25)
+
+    # B. recovery lag after each change (None -> "no recovery", drawn tall)
+    methods = ["symbolic_refit", "window_1nn", "static_frozen"]
+    width = 0.36
+    cap = max(len(tl["symbolic_refit"]), 1)
+    for ci, c in enumerate(changes):
+        for mi, m in enumerate(methods):
+            lag = cp[m]["recovery_lag"][str(c)]
+            val = cap if lag is None else lag
+            x = mi + (ci - 0.5) * width
+            ax2.bar(x, val, width, color=colors[m],
+                    hatch="//" if lag is None else None,
+                    label=labels[m] if ci == 0 else None)
+            if lag is None:
+                ax2.text(x, val * 0.5, "none", rotation=90, ha="center",
+                         va="center", fontsize=6, color="white")
+    ax2.set_xticks(range(len(methods)))
+    ax2.set_xticklabels(["symbolic\n(ours)", "window\n1-NN", "static\nfrozen"], fontsize=7)
+    ax2.set_ylabel("Recovery lag (steps)")
+    ax2.set_title("B. Steps to recover per change", fontsize=9.5, loc="left")
+    ax2.grid(alpha=0.25, axis="y")
+
+    fig.tight_layout()
+    fig.savefig(FIGS / "nonstationary.png", dpi=200)
+    plt.close(fig)
 
 
 def fig_perception(e40):
@@ -1055,7 +1113,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "37"),
+        macro("NumExperiments", "38"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1308,6 +1366,23 @@ def numbers_tex(d):
         macro("PercMlpInTol", acc(fc["mlp_in_dist_tol2"])),
         macro("PercDecompHolds", "yes" if e39["decomposition_holds"] else "no"),
     ]
+    # E41 (non-stationary: adapting to sudden unannounced rule changes)
+    e41 = d["e41_nonstationary"]["perfect_perception"]
+    chg = [str(c) for c in d["e41_nonstationary"]["changes"]]
+
+    def lag(method):
+        vals = e41[method]["recovery_lag"]
+        out = [vals[c] for c in chg]
+        return "/".join("never" if v is None else str(v) for v in out)
+
+    lines += [
+        macro("NonStatSymLag", lag("symbolic_refit")),
+        macro("NonStatWinLag", lag("window_1nn")),
+        macro("NonStatSymAcc", acc(e41["symbolic_refit"]["accuracy"])),
+        macro("NonStatWinAcc", acc(e41["window_1nn"]["accuracy"])),
+        macro("NonStatFrozenAcc", acc(e41["static_frozen"]["accuracy"])),
+        macro("NonStatChanges", str(len(chg))),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1336,6 +1411,7 @@ def main():
     fig_sprint(data["e34_composite_swe"])
     fig_representations(data["e36_representations"])
     fig_perception(data["e40_perceive_forecast"])
+    fig_nonstationary(data["e41_nonstationary"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

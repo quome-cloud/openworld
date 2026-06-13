@@ -1282,6 +1282,48 @@ perception does.}
 \label{fig:perception}
 \end{figure}
 
+\subsection{Adapting to sudden, unannounced rule changes (E41)}\label{sec:nonstationary}
+E32 handled a regime switch whose timing was \emph{known}, via a pre-verified
+\texttt{PhasedTransition}. E41 asks the harder question a non-stationary world
+poses: when the rules change suddenly and \emph{without announcement}, who
+notices, and how fast do they recover? A reservoir tracks toward a hidden
+target at a hidden rate; that regime jumps at \NonStatChanges{} unannounced
+times in a 120-step episode, and at each step the current level is read
+through the perception boundary and four predictors forecast the next level
+(Figure~\ref{fig:nonstationary}). A symbolic monitor that watches its own
+prediction error and re-identifies the rule from the post-change transient
+recovers in \NonStatSymLag{} step(s) at each change---snapping back to exact
+(\NonStatSymAcc{} overall). A standard sliding-window 1-NN recovers only as its
+window refills (\NonStatWinLag{} steps; \NonStatWinAcc{} overall, and only
+approximate), and a static model frozen on the first regime never recovers
+(\NonStatFrozenAcc), trailed against an oracle that knows the change times
+(0-lag, exact). The cumulative-error curves (Figure~\ref{fig:nonstationary}A)
+make the difference plain: the symbolic monitor's regret is nearly flat with a
+small step at each change, while the frozen model's climbs without bound. Under
+noisy perception the ranking is unchanged and every method's error floor rises
+by exactly the perception error---the E39 decomposition, now riding on top of
+the adaptation dynamics. The mechanism behind the fast recovery is the same one
+the paper rests on: because the dynamics are an explicit, identifiable program,
+a handful of post-change observations re-pin the rule exactly, where a
+statistical model must re-estimate over a window. The boundary is equally
+explicit: this holds when the changed rule stays within the identifiable family
+the monitor searches; a change to an undeclarable rule admits no exact
+recovery.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/nonstationary.png}
+\caption{\textbf{Adapting to sudden unannounced rule changes (E41).} A
+reservoir's hidden regime jumps at the marked steps; predictions run through
+the perception boundary. \textbf{A:} cumulative wrong predictions---the
+symbolic monitor (ours) stays nearly flat, the sliding-window learner steps up
+and slowly recovers, the static-frozen model climbs without bound, the oracle
+is flat at zero. \textbf{B:} recovery lag per change---\NonStatSymLag{} steps
+for the symbolic monitor (to exact) versus \NonStatWinLag{} for the window;
+the frozen model never recovers.}
+\label{fig:nonstationary}
+\end{figure}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

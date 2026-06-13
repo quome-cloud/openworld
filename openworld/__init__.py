@@ -31,6 +31,10 @@ from .judge import Judge
 from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
 from .objectives import Dial, Objective, ObjectiveSuite
 from .optimize import SweepPoint, SweepResult, sweep
+from .perceive import (
+    MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
+    TextPerceptor,
+)
 from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
 from .contextbench import (
@@ -85,6 +89,12 @@ __all__ = [
     "ObjectiveSuite",
     "OllamaConnectionError",
     "OllamaLLM",
+    "Observation",
+    "Perceptor",
+    "PerceptionGate",
+    "PerceptionError",
+    "MockPerceptor",
+    "TextPerceptor",
     "Route",
     "SandboxError",
     "Simulation",

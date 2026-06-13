@@ -95,3 +95,47 @@ class World:
     def reset(self) -> WorldState:
         self.state = self.initial_state.copy()
         return self.state
+
+    def observe(self, observations, perceptors) -> WorldState:
+        """Resolve raw observations to symbolic state via gated perceptors.
+
+        Additive and optional: a world that never calls `observe()` is
+        unchanged. Each observation is mapped to a partial symbolic delta by
+        its perceptor, contract-checked by a `PerceptionGate`, and committed
+        into the symbolic state BEFORE any `step()`. Provenance (modality,
+        produced fields, the delta, and a content hash of the raw input) is
+        recorded on `self.perceptions`; the raw media is never stored in state.
+
+        `perceptors` may be a single `Perceptor` (applied to every
+        observation), a list aligned 1:1 with `observations`, or a dict
+        mapping modality -> `Perceptor`.
+        """
+        from .perceive import Observation, PerceptionError, PerceptionGate, Perceptor
+
+        if isinstance(observations, Observation):
+            observations = [observations]
+        gate = PerceptionGate()
+        log = self.__dict__.setdefault("perceptions", [])
+
+        def resolve(obs, index):
+            if isinstance(perceptors, Perceptor):
+                return perceptors
+            if isinstance(perceptors, dict):
+                p = perceptors.get(obs.modality)
+                if p is None:
+                    raise PerceptionError(f"no perceptor for modality {obs.modality!r}")
+                return p
+            return perceptors[index]
+
+        for i, obs in enumerate(observations):
+            perceptor = resolve(obs, i)
+            delta = gate.check(perceptor, perceptor.perceive(obs))
+            self.state.update(delta)
+            log.append({
+                "modality": obs.modality,
+                "produces": list(delta),
+                "delta": dict(delta),
+                "input_sha256": obs.sha256,
+                "perceptor": type(perceptor).__name__,
+            })
+        return self.state

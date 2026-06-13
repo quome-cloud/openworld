@@ -31,6 +31,7 @@ EXPERIMENTS = [
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
+    "e37_induction",
 ]
 
 
@@ -286,6 +287,32 @@ def table_synthesis(e02, e16):
         "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     )
+
+
+def table_induction(e37):
+    """E37: equal-information induction (traces only) vs the rule-text anchor."""
+    anchor = e37["summary"]["code_from_rules"]
+    big = max(e37["summary"]["by_k"], key=lambda r: r["k"])  # representative K
+
+    def row(label, info, indist, ood):
+        return f"{label} & {info} & {indist:.2f} & {ood:.2f} \\\\"
+
+    lines = [
+        "\\begin{tabular}{llcc}", "\\toprule",
+        "Method & Information given & In-dist. & $10\\times$ OOD \\\\",
+        "\\midrule",
+        row("Code synthesis (rules)", "rule text, 0 transitions",
+            anchor["probe_in_dist"], anchor["probe_ood_10x"]),
+        "\\midrule",
+        "\\multicolumn{4}{l}{\\emph{Equal information: %d random-policy transitions, no rule text}} \\\\"
+        % big["k"],
+        row("\\textbf{Code induction}", "traces only",
+            big["code_from_traces_in_dist"], big["code_from_traces_ood"]),
+        row("MLP", "traces only", big["mlp_in_dist"], big["mlp_ood"]),
+        row("1-NN memorizer", "traces only", big["knn1_in_dist"], big["knn1_ood"]),
+        "\\bottomrule", "\\end{tabular}",
+    ]
+    (TABLES / "induction.tex").write_text("\n".join(lines) + "\n")
 
 
 def table_ladder(e19):
@@ -984,7 +1011,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "34"),
+        macro("NumExperiments", "35"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1212,6 +1239,19 @@ def numbers_tex(d):
         macro("RepMonoParams", str(g36[5]["monolith"]["n_params"])),
         macro("RepCompParams", str(g36[5]["composite_learned"]["n_params"])),
     ]
+    # E37 (equal-information induction from traces)
+    e37 = d["e37_induction"]
+    anc37 = e37["summary"]["code_from_rules"]
+    big37 = max(e37["summary"]["by_k"], key=lambda r: r["k"])
+    lines += [
+        macro("IndRulesIn", acc(anc37["probe_in_dist"])),
+        macro("IndRulesOod", acc(anc37["probe_ood_10x"])),
+        macro("IndTracesIn", acc(big37["code_from_traces_in_dist"])),
+        macro("IndTracesOod", acc(big37["code_from_traces_ood"])),
+        macro("IndMlpIn", acc(big37["mlp_in_dist"])),
+        macro("IndMlpOod", acc(big37["mlp_ood"])),
+        macro("IndKnnOod", acc(big37["knn1_ood"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1230,6 +1270,7 @@ def main():
     table_synthesis(data["e02_synthesis"], data["e16_cross_model"])
     table_tuning(data["e09_tuning_efficiency"])
     table_ladder(data["e19_scale_ladder"])
+    table_induction(data["e37_induction"])
     table_repair(data["e18_repair_loop"])
     fig_complexity(data["e20_complexity"])
     fig_composition(data["e31_nested_fidelity"])

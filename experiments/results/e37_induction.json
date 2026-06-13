@@ -1,0 +1,148 @@
+{
+  "model": "qwen2.5:7b",
+  "ks": [
+    100,
+    1000
+  ],
+  "replicates": 3,
+  "max_distinct_shown": 40,
+  "summary": {
+    "code_from_rules": {
+      "probe_in_dist": 1.0,
+      "probe_ood_10x": 1.0
+    },
+    "by_k": [
+      {
+        "k": 100,
+        "code_from_traces_in_dist": 0.43333333333333335,
+        "code_from_traces_ood": 0.43333333333333335,
+        "mlp_in_dist": 0.3666666666666667,
+        "mlp_ood": 0.0,
+        "knn1_in_dist": 0.10000000000000002,
+        "knn1_ood": 0.0
+      },
+      {
+        "k": 1000,
+        "code_from_traces_in_dist": 0.43333333333333335,
+        "code_from_traces_ood": 0.43333333333333335,
+        "mlp_in_dist": 0.39999999999999997,
+        "mlp_ood": 0.0,
+        "knn1_in_dist": 0.16666666666666666,
+        "knn1_ood": 0.0
+      }
+    ]
+  },
+  "rows": [
+    {
+      "k": 100,
+      "replicate": 0,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.73,
+        "probe_in_dist": 0.4,
+        "probe_ood_10x": 0.4
+      },
+      "mlp": {
+        "probe_in_dist": 0.3,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.1,
+        "probe_ood_10x": 0.0
+      }
+    },
+    {
+      "k": 100,
+      "replicate": 1,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.82,
+        "probe_in_dist": 0.5,
+        "probe_ood_10x": 0.5
+      },
+      "mlp": {
+        "probe_in_dist": 0.3,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.1,
+        "probe_ood_10x": 0.0
+      }
+    },
+    {
+      "k": 100,
+      "replicate": 2,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.71,
+        "probe_in_dist": 0.4,
+        "probe_ood_10x": 0.4
+      },
+      "mlp": {
+        "probe_in_dist": 0.5,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.1,
+        "probe_ood_10x": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "replicate": 0,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.722,
+        "probe_in_dist": 0.4,
+        "probe_ood_10x": 0.4
+      },
+      "mlp": {
+        "probe_in_dist": 0.3,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.2,
+        "probe_ood_10x": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "replicate": 1,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.832,
+        "probe_in_dist": 0.5,
+        "probe_ood_10x": 0.5
+      },
+      "mlp": {
+        "probe_in_dist": 0.4,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.2,
+        "probe_ood_10x": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "replicate": 2,
+      "n_distinct_shown": 40,
+      "code_from_traces": {
+        "train_reproduction": 0.75,
+        "probe_in_dist": 0.4,
+        "probe_ood_10x": 0.4
+      },
+      "mlp": {
+        "probe_in_dist": 0.5,
+        "probe_ood_10x": 0.0
+      },
+      "knn1": {
+        "probe_in_dist": 0.1,
+        "probe_ood_10x": 0.0
+      }
+    }
+  ],
+  "experiment": "e37_induction",
+  "timestamp": "2026-06-12T22:41:38",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

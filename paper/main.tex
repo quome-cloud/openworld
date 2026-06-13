@@ -184,10 +184,15 @@ further broadens the value machinery beyond its implicit consequentialism:
 Rawlsian and lexicographic aggregators, deontological side constraints
 enforced as action vetoes (eliminating the impermissible region a weighted
 sum cannot exclude), and a moral parliament that hedges across ethical
-theories. The central result: a training-free, verified, symbolic world
-model on consumer hardware eliminates compounding rollout error---the
-defining failure mode of learned world models---at zero training cost. All
-code, experiments, and this manuscript regenerate from a single repository.
+theories. The central result, within the symbolic-state regime these worlds
+inhabit: a training-free, verified, symbolic world model on consumer hardware
+eliminates compounding rollout error at zero training cost. The advantage is
+not merely an artifact of being handed the rules---on equal information
+(traces only, no rule text), code \emph{induction} still extrapolates where
+learned baselines collapse out of distribution (\IndTracesOod{} vs
+\IndMlpOod), though the rules-vs-traces gap (\IndRulesIn{} vs \IndTracesIn)
+measures what a specification genuinely buys. All code, experiments, and this
+manuscript regenerate from a single repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -645,6 +650,45 @@ line is the synthesized program, which uses no transitions at all. No trained
 baseline transfers out of distribution.}
 \label{fig:learned}
 \end{figure}
+
+\subsubsection{Induction on equal footing (E37)}\label{sec:induction}
+A fair objection to the comparison so far is an \emph{information asymmetry}:
+the synthesizer is handed the rules in natural language while the learned
+baselines must infer dynamics from sampled transitions. E37 removes it
+(Table~\ref{tab:induction}). The LLM is given \emph{only} observed
+$(\textrm{state},\textrm{action},\textrm{next})$ transitions---no rule
+text---and must induce a \texttt{transition()} program, accepted only if it
+reproduces the observed transitions; it is then held to the same in-dist and
+$10\times$ OOD probe suites as the MLP and 1-NN trained on the identical
+data. Two findings result, both honest. First, on equal information code
+induction beats statistical learning out of distribution by a wide margin:
+\IndTracesOod{} versus \IndMlpOod{} (MLP) and \IndKnnOod{} (1-NN), and the
+advantage is \emph{structural}---induced-code accuracy is identical
+in-distribution and at $10\times$ scale (\IndTracesIn{} vs \IndTracesOod, on
+every replicate), because the model induces symbolic rules that extrapolate,
+whereas the learned baselines fit magnitudes and collapse to zero OOD on
+every replicate. The compounding/extrapolation advantage is therefore not an
+artifact of being handed the rules. Second, induction is \emph{imperfect}:
+the 7B model recovers only \IndTracesIn{} of the probe behavior from traces
+(it misreads the subtle \texttt{debt}-dependent interaction), well below the
+rule-text anchor's \IndRulesIn. The gap between \IndRulesIn{} (rules) and
+\IndTracesIn{} (traces) is what the specification genuinely
+contributes---neither nothing nor everything---and is the honest measure of
+the asymmetry the headline comparison carried. Larger budgets do not close
+it here: the reachable transition set under a random policy saturates, so
+$K{=}100$ and $K{=}1000$ give the inducer essentially the same distinct
+examples.
+
+\begin{table}[htb]\centering\small
+\input{tables/induction.tex}
+\caption{E37, equal-information induction: exact probe accuracy when the LLM
+must induce dynamics from transitions alone (no rule text), against the MLP
+and 1-NN on the same data, plus the rule-text synthesis anchor. Code
+induction is imperfect but scale-invariant (in-dist $=$ OOD); the learned
+baselines collapse out of distribution; the rules-vs-traces gap measures what
+the specification buys.}
+\label{tab:induction}
+\end{table}
 
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
@@ -1235,7 +1279,12 @@ accuracy).
 \paragraph{Limitations.} (i) Scope: symbolic-state worlds; pixel-native
 domains remain the territory of learned models---the comparison here is
 within the symbolic regime, and neither the LLM proxy nor the numpy
-baselines is a trained Dreamer. (ii) Complexity: monolithic synthesis with a
+baselines is a trained Dreamer. The headline comparison also gives the
+synthesizer the rule text; E37 shows the structural OOD advantage survives
+removing that asymmetry (induction from traces alone), but induction is then
+imperfect (\IndTracesIn{} vs the rule-text \IndRulesIn), so part of the
+headline margin reflects the value of an explicit specification, not the
+representation alone. (ii) Complexity: monolithic synthesis with a
 7B generator is reliable at four interacting rules and unreliable past
 roughly eight (E20); the headline worlds sit below that cliff, and richer
 worlds will need compositional synthesis~\cite{poeworld2025} or larger

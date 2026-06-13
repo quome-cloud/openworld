@@ -690,6 +690,35 @@ the specification buys.}
 \label{tab:induction}
 \end{table}
 
+\paragraph{Is the induction ceiling a capability limit? (E38)} If $\sim$0.43
+reflects a weak 7B generator, a stronger model should close the rules-vs-traces
+gap. It does not (Figure~\ref{fig:induction-scale}). Re-running E37's
+trace-induction across \ScaleNumModels{} generators spanning three families
+holds the gap roughly fixed: \ScaleQwenSmall{} for qwen2.5:7b,
+\ScaleQwenCoder{} for the larger qwen3-coder:30b, and \ScaleGptoss{} for the
+reasoning model gpt-oss:20b---none approaching the rule-text anchor's 1.00, and
+every model exactly scale-invariant (in-distribution accuracy equals
+$10\times$-OOD accuracy). Notably the 30B coder \emph{reproduces} the observed
+traces best ($\sim$0.9 of training transitions) yet generalizes no better,
+fitting the shown examples without recovering the latent rule. The ceiling is
+therefore an \emph{identifiability} limit of the data, not a capability limit:
+random-policy transitions do not determine the subtle interaction, so no
+generator can recover it from them---closing the gap needs informative
+transitions (active experiment design), not a bigger model. (deepseek-r1:14b is
+excluded: its reasoning-trace length made trace-induction impractical on the
+local hardware.)
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/induction_scale.png}
+\caption{\textbf{Induction does not scale with generator capability (E38).}
+Trace-induction probe accuracy across three generator families; the rule-text
+anchor (E37) is 1.00. The gap is roughly flat in model size and exactly
+scale-invariant (in-dist $=$ OOD)---an identifiability limit of the data, not a
+capability limit.}
+\label{fig:induction-scale}
+\end{figure}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

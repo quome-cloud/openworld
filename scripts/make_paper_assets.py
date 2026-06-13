@@ -31,7 +31,7 @@ EXPERIMENTS = [
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
-    "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
+    "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal",
 ]
 
@@ -288,6 +288,35 @@ def table_synthesis(e02, e16):
         "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     )
+
+
+def fig_induction_scale(e38):
+    """E38: induction-from-traces does not improve with generator capability."""
+    ladder = e38["ladder"]
+    short = {"qwen2.5:7b": "qwen2.5\n7b", "qwen3-coder:30b": "qwen3-coder\n30b",
+             "gpt-oss:20b": "gpt-oss\n20b"}
+    models = [m["model"] for m in ladder]
+    fig, ax = plt.subplots(figsize=(6.0, 3.4))
+    x = range(len(models))
+    ax.axhline(1.0, color=TEAL, lw=1.8, ls=(0, (4, 3)),
+               label="rule-text synthesis (E37 anchor)")
+    ax.plot(x, [m["mean_in_dist_bigK"] for m in ladder], "-o", color=BLUE,
+            lw=2, markersize=6, label="induction from traces (in-dist)")
+    ax.plot(x, [m["mean_ood_bigK"] for m in ladder], "--s", color=RED,
+            lw=2, markersize=6, label="induction from traces (10× OOD)")
+    for xi, m in zip(x, ladder):
+        ax.text(xi, m["mean_in_dist_bigK"] + 0.04, f"{m['mean_in_dist_bigK']:.2f}",
+                ha="center", fontsize=8)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([short.get(m, m) for m in models], fontsize=8)
+    ax.set_ylabel("Exact probe accuracy")
+    ax.set_xlabel("Generator (increasing capability →)")
+    ax.set_ylim(0, 1.08)
+    ax.legend(fontsize=7.5, loc="center right")
+    ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
+    fig.tight_layout()
+    fig.savefig(FIGS / "induction_scale.png", dpi=200)
+    plt.close(fig)
 
 
 def table_induction(e37):
@@ -1200,7 +1229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "40"),
+        macro("NumExperiments", "41"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1456,6 +1485,14 @@ def numbers_tex(d):
         macro("IndMlpOod", acc(big37["mlp_ood"])),
         macro("IndKnnOod", acc(big37["knn1_ood"])),
     ]
+    # E38 (induction across the generator ladder)
+    L = {m["model"]: m for m in d["e38_induction_scale"]["ladder"]}
+    lines += [
+        macro("ScaleQwenSmall", acc(L["qwen2.5:7b"]["mean_in_dist_bigK"])),
+        macro("ScaleQwenCoder", acc(L["qwen3-coder:30b"]["mean_in_dist_bigK"])),
+        macro("ScaleGptoss", acc(L["gpt-oss:20b"]["mean_in_dist_bigK"])),
+        macro("ScaleNumModels", str(len(L))),
+    ]
     # E40 (perceive-then-forecast) + E39 (perception fidelity / decomposition)
     fc = d["e40_perceive_forecast"]["forecast_exact"]
     e39 = d["e39_perception_fidelity"]
@@ -1522,6 +1559,7 @@ def main():
     table_tuning(data["e09_tuning_efficiency"])
     table_ladder(data["e19_scale_ladder"])
     table_induction(data["e37_induction"])
+    fig_induction_scale(data["e38_induction_scale"])
     table_repair(data["e18_repair_loop"])
     fig_complexity(data["e20_complexity"])
     fig_composition(data["e31_nested_fidelity"])

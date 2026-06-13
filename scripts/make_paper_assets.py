@@ -385,6 +385,47 @@ def table_composition(e30, e32):
     )
 
 
+def table_representations(e36):
+    """E36 generalization zoo: exact accuracy on novel combinations by K."""
+    gen = {r["k"]: r for r in e36["leg_generalization"]}
+    ks = sorted(gen)
+    rows = [  # (display label, json key)
+        ("Linear / ridge", "ridge"),
+        ("1-NN memorizer", "knn1"),
+        ("$k$-NN ($k{=}5$)", "knn5"),
+        ("Kernel SVR", "svr"),
+        ("Gaussian process", "gp"),
+        ("Random forest", "random_forest"),
+        ("Hist.\\ gradient boosting", "hist_grad_boost"),
+        ("Koopman / EDMD (deg.\\ 2)", "koopman"),
+        ("MLP (2 hidden)", "monolith"),
+    ]
+
+    def cells(key):
+        out = []
+        for k in ks:
+            v = gen[k].get(key)
+            out.append("--" if not v or v.get("acc") is None else f"{v['acc']:.2f}")
+        return " & ".join(out)
+    lines = ["\\begin{tabular}{l" + "c" * len(ks) + "}", "\\toprule",
+             "Representation & " + " & ".join(f"$K{{=}}{k}$" for k in ks) + " \\\\",
+             "\\midrule",
+             "\\multicolumn{%d}{l}{\\emph{Monolithic learner over the joint state}} \\\\"
+             % (len(ks) + 1)]
+    for label, key in rows:
+        lines.append(f"{label} & {cells(key)} \\\\")
+    lines += ["\\midrule",
+              "\\multicolumn{%d}{l}{\\emph{Composite of small worlds (ours)}} \\\\"
+              % (len(ks) + 1),
+              f"Composite-learned (MLP) & {cells('composite_learned')} \\\\"]
+    if all(gen[k].get("composite_hgb") and gen[k]["composite_hgb"]["acc"] is not None
+           for k in ks):
+        lines.append(f"Composite-learned (trees) & {cells('composite_hgb')} \\\\")
+    lines += [f"\\textbf{{Composite-symbolic}} & {cells('composite_symbolic')} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "representations.tex").write_text("\n".join(lines) + "\n")
+
+
 def fig_representations(e36):
     """E36: composition vs monolithic learners on three representation tests."""
     gen = e36["leg_generalization"]
@@ -393,21 +434,30 @@ def fig_representations(e36):
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(11, 3.3))
 
     ks = [r["k"] for r in gen]
-    ax1.plot(ks, [r["composite_symbolic"]["acc"] for r in gen], "-D",
-             color=TEAL, lw=2, markersize=4, label="composite-symbolic (ours)")
-    ax1.plot(ks, [r["composite_learned"]["acc"] for r in gen], "-o",
-             color=BLUE, lw=2, markersize=4, label="composite-learned (ours)")
-    ax1.plot(ks, [r["monolith"]["acc"] for r in gen], "-s",
-             color=RED, lw=2, markersize=4, label="monolithic MLP")
-    ax1.plot(ks, [r["knn1"]["acc"] for r in gen], "--^",
-             color=SLATE, lw=1.6, markersize=4, label="1-NN memorizer")
+    mono_arms = ["monolith", "ridge", "knn1", "knn5", "svr", "gp",
+                 "random_forest", "hist_grad_boost", "koopman"]
+    lo = [min(r[a]["acc"] for a in mono_arms if r.get(a) and r[a]["acc"] is not None)
+          for r in gen]
+    hi = [max(r[a]["acc"] for a in mono_arms if r.get(a) and r[a]["acc"] is not None)
+          for r in gen]
+    ax1.fill_between(ks, lo, hi, color=RED, alpha=0.15,
+                     label="monolithic learners (9 families, range)")
+    ax1.plot(ks, [r["hist_grad_boost"]["acc"] for r in gen], "-s", color=RED,
+             lw=1.6, markersize=4, label="best monolith (boosted trees)")
+    if all(r.get("composite_hgb") and r["composite_hgb"]["acc"] is not None for r in gen):
+        ax1.plot(ks, [r["composite_hgb"]["acc"] for r in gen], "-^", color=PURPLE,
+                 lw=2, markersize=4, label="composite-learned (trees)")
+    ax1.plot(ks, [r["composite_learned"]["acc"] for r in gen], "-o", color=BLUE,
+             lw=2, markersize=4, label="composite-learned (MLP)")
+    ax1.plot(ks, [r["composite_symbolic"]["acc"] for r in gen], "-D", color=TEAL,
+             lw=2, markersize=4, label="composite-symbolic (ours)")
     ax1.set_xlabel("Number of parts (K)")
     ax1.set_ylabel("Exact accuracy on novel combinations")
     ax1.set_xticks(ks)
     ax1.set_ylim(-0.03, 1.05)
     ax1.set_title("A. Compositional generalization", fontsize=9.5, loc="left")
     ax1.grid(alpha=0.25)
-    ax1.legend(fontsize=6.5, loc="center right")
+    ax1.legend(fontsize=6.0, loc="center left")
 
     bars = [("monolith\n(sequential)", intf["monolith_sequential_retained"], RED),
             ("monolith\n(joint)", intf["monolith_joint_retained"], "#9CA3AF"),
@@ -1138,12 +1188,23 @@ def numbers_tex(d):
     def acc(cell):
         return f"{cell:.2f}"
 
+    mono_arms36 = ["monolith", "ridge", "knn1", "knn5", "svr", "gp",
+                   "random_forest", "hist_grad_boost", "koopman"]
+    n_mono = len([a for a in mono_arms36 if g36[5].get(a)])
+
+    def best_mono(k):
+        return max(g36[k][a]["acc"] for a in mono_arms36
+                   if g36[k].get(a) and g36[k][a]["acc"] is not None)
+
     lines += [
-        macro("RepMonoGenLo", acc(g36[2]["monolith"]["acc"])),
-        macro("RepMonoGenHi", acc(g36[5]["monolith"]["acc"])),
+        macro("RepNumMono", str(n_mono)),
+        macro("RepBestMonoLo", acc(best_mono(2))),
+        macro("RepBestMonoHi", acc(best_mono(5))),
         macro("RepCompGenLo", acc(g36[2]["composite_learned"]["acc"])),
         macro("RepCompGenHi", acc(g36[5]["composite_learned"]["acc"])),
-        macro("RepKnnGenHi", acc(g36[5]["knn1"]["acc"])),
+        macro("RepCompHgbHi", acc(g36[5]["composite_hgb"]["acc"])
+              if g36[5].get("composite_hgb") and g36[5]["composite_hgb"]["acc"] is not None
+              else "n/a"),
         macro("RepIntfMono", acc(i36["monolith_sequential_retained"])),
         macro("RepIntfComp", acc(i36["composite_learned_retained"])),
         macro("RepSampMonoLo", acc(se36[100]["monolith_acc"])),
@@ -1177,6 +1238,7 @@ def main():
     fig_dynamic_traversal(data["e33_dynamic_traversal"])
     fig_sprint(data["e34_composite_swe"])
     fig_representations(data["e36_representations"])
+    table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])

@@ -30,8 +30,8 @@ EXPERIMENTS = [
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
-    "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
-    "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
+    "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
+    "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal",
 ]
 
@@ -288,6 +288,35 @@ def table_synthesis(e02, e16):
         "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
     )
+
+
+def fig_induction_scale(e38):
+    """E38: induction-from-traces does not improve with generator capability."""
+    ladder = e38["ladder"]
+    short = {"qwen2.5:7b": "qwen2.5\n7b", "qwen3-coder:30b": "qwen3-coder\n30b",
+             "gpt-oss:20b": "gpt-oss\n20b"}
+    models = [m["model"] for m in ladder]
+    fig, ax = plt.subplots(figsize=(6.0, 3.4))
+    x = range(len(models))
+    ax.axhline(1.0, color=TEAL, lw=1.8, ls=(0, (4, 3)),
+               label="rule-text synthesis (E37 anchor)")
+    ax.plot(x, [m["mean_in_dist_bigK"] for m in ladder], "-o", color=BLUE,
+            lw=2, markersize=6, label="induction from traces (in-dist)")
+    ax.plot(x, [m["mean_ood_bigK"] for m in ladder], "--s", color=RED,
+            lw=2, markersize=6, label="induction from traces (10× OOD)")
+    for xi, m in zip(x, ladder):
+        ax.text(xi, m["mean_in_dist_bigK"] + 0.04, f"{m['mean_in_dist_bigK']:.2f}",
+                ha="center", fontsize=8)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([short.get(m, m) for m in models], fontsize=8)
+    ax.set_ylabel("Exact probe accuracy")
+    ax.set_xlabel("Generator (increasing capability →)")
+    ax.set_ylim(0, 1.08)
+    ax.legend(fontsize=7.5, loc="center right")
+    ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
+    fig.tight_layout()
+    fig.savefig(FIGS / "induction_scale.png", dpi=200)
+    plt.close(fig)
 
 
 def table_induction(e37):
@@ -1017,6 +1046,42 @@ def fig_dynamic_traversal(e33):
     plt.close(fig)
 
 
+def fig_sprint_ladder(e35, e34):
+    """E35: the sprint allocation experiment across a model-capability ladder."""
+    n = e34["conditions"][0]["n_tasks"]
+    e34_by = {c["condition"]: c["solved"] for c in e34["conditions"]}
+    anchor = {"fixed": e34_by["fixed"], "round_robin": e34_by["round_robin"],
+              "greedy": e34_by["greedy"]}
+    ladder = {m: {c["condition"]: c["solved"] for c in cell["conditions"]}
+              for m, cell in e35["ladder"].items()}
+    models = ["qwen2.5:7b", "deepseek-r1:14b", "gpt-oss:20b", "qwen3-coder:30b"]
+    solved = {"qwen2.5:7b": anchor, **ladder}
+    conds = [("fixed", SLATE, "fixed 4/task"),
+             ("round_robin", BLUE, "round-robin"),
+             ("greedy", RED, "greedy min-failing")]
+
+    fig, ax = plt.subplots(figsize=(7.4, 3.6))
+    x = range(len(models))
+    width = 0.26
+    for ci, (cond, color, label) in enumerate(conds):
+        vals = [solved[m].get(cond, 0) for m in models]
+        xs = [i + (ci - 1) * width for i in x]
+        ax.bar(xs, vals, width, color=color, label=label)
+        for xi, v in zip(xs, vals):
+            ax.text(xi, v + 0.3, str(v), ha="center", fontsize=7)
+    ax.axhline(n, color="#9CA3AF", lw=0.8, ls=(0, (1, 3)))
+    ax.text(0, n + 0.3, f"all {n}", fontsize=7, color="#9CA3AF")
+    ax.set_xticks(list(x))
+    ax.set_xticklabels([m.replace(":", "\n") for m in models], fontsize=7.5)
+    ax.set_ylabel(f"Tasks solved (of {n})")
+    ax.set_ylim(0, n + 2)
+    ax.set_xlabel("Repair model (increasing capability →)")
+    ax.legend(fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(FIGS / "sprint_ladder.png", dpi=200)
+    plt.close(fig)
+
+
 def fig_sprint(e34):
     """E34: solved-vs-budget curves per allocation condition on owsb-atomic."""
     styles = {
@@ -1164,7 +1229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "39"),
+        macro("NumExperiments", "41"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1359,6 +1424,21 @@ def numbers_tex(d):
         macro("SprintRRJitterSolved", sprint_solved("round_robin_jitter")),
         macro("SprintGreedyJitterSolved", sprint_solved("greedy_jitter")),
     ]
+    # E35 (sprint allocation across a model-capability ladder)
+    e35 = d["e35_sprint_ladder"]["ladder"]
+    n35 = d["e35_sprint_ladder"]["conditions"][0]["n_tasks"] if "conditions" in d["e35_sprint_ladder"] else 20
+
+    def solved35(model, cond):
+        cell = {c["condition"]: c["solved"] for c in e35[model]["conditions"]}
+        return cell.get(cond)
+
+    lines += [
+        macro("LadderDeepseekFixed", str(solved35("deepseek-r1:14b", "fixed"))),
+        macro("LadderGptossFixed", str(solved35("gpt-oss:20b", "fixed"))),
+        macro("LadderQwenCoderFixed", str(solved35("qwen3-coder:30b", "fixed"))),
+        macro("LadderGptossGreedy", str(solved35("gpt-oss:20b", "greedy"))),
+        macro("LadderQwenCoderGreedy", str(solved35("qwen3-coder:30b", "greedy"))),
+    ]
     # E36 (representations: composition vs monolithic learners)
     e36 = d["e36_representations"]
     g36 = {r["k"]: r for r in e36["leg_generalization"]}
@@ -1404,6 +1484,14 @@ def numbers_tex(d):
         macro("IndMlpIn", acc(big37["mlp_in_dist"])),
         macro("IndMlpOod", acc(big37["mlp_ood"])),
         macro("IndKnnOod", acc(big37["knn1_ood"])),
+    ]
+    # E38 (induction across the generator ladder)
+    L = {m["model"]: m for m in d["e38_induction_scale"]["ladder"]}
+    lines += [
+        macro("ScaleQwenSmall", acc(L["qwen2.5:7b"]["mean_in_dist_bigK"])),
+        macro("ScaleQwenCoder", acc(L["qwen3-coder:30b"]["mean_in_dist_bigK"])),
+        macro("ScaleGptoss", acc(L["gpt-oss:20b"]["mean_in_dist_bigK"])),
+        macro("ScaleNumModels", str(len(L))),
     ]
     # E40 (perceive-then-forecast) + E39 (perception fidelity / decomposition)
     fc = d["e40_perceive_forecast"]["forecast_exact"]
@@ -1471,6 +1559,7 @@ def main():
     table_tuning(data["e09_tuning_efficiency"])
     table_ladder(data["e19_scale_ladder"])
     table_induction(data["e37_induction"])
+    fig_induction_scale(data["e38_induction_scale"])
     table_repair(data["e18_repair_loop"])
     fig_complexity(data["e20_complexity"])
     fig_composition(data["e31_nested_fidelity"])
@@ -1478,6 +1567,7 @@ def main():
     fig_traversal(data["e31_nested_fidelity"])
     fig_dynamic_traversal(data["e33_dynamic_traversal"])
     fig_sprint(data["e34_composite_swe"])
+    fig_sprint_ladder(data["e35_sprint_ladder"], data["e34_composite_swe"])
     fig_representations(data["e36_representations"])
     fig_perception(data["e40_perceive_forecast"])
     fig_nonstationary(data["e41_nonstationary"])

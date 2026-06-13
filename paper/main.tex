@@ -690,6 +690,35 @@ the specification buys.}
 \label{tab:induction}
 \end{table}
 
+\paragraph{Is the induction ceiling a capability limit? (E38)} If $\sim$0.43
+reflects a weak 7B generator, a stronger model should close the rules-vs-traces
+gap. It does not (Figure~\ref{fig:induction-scale}). Re-running E37's
+trace-induction across \ScaleNumModels{} generators spanning three families
+holds the gap roughly fixed: \ScaleQwenSmall{} for qwen2.5:7b,
+\ScaleQwenCoder{} for the larger qwen3-coder:30b, and \ScaleGptoss{} for the
+reasoning model gpt-oss:20b---none approaching the rule-text anchor's 1.00, and
+every model exactly scale-invariant (in-distribution accuracy equals
+$10\times$-OOD accuracy). Notably the 30B coder \emph{reproduces} the observed
+traces best ($\sim$0.9 of training transitions) yet generalizes no better,
+fitting the shown examples without recovering the latent rule. The ceiling is
+therefore an \emph{identifiability} limit of the data, not a capability limit:
+random-policy transitions do not determine the subtle interaction, so no
+generator can recover it from them---closing the gap needs informative
+transitions (active experiment design), not a bigger model. (deepseek-r1:14b is
+excluded: its reasoning-trace length made trace-induction impractical on the
+local hardware.)
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/induction_scale.png}
+\caption{\textbf{Induction does not scale with generator capability (E38).}
+Trace-induction probe accuracy across three generator families; the rule-text
+anchor (E37) is 1.00. The gap is roughly flat in model size and exactly
+scale-invariant (in-dist $=$ OOD)---an identifiability limit of the data, not a
+capability limit.}
+\label{fig:induction-scale}
+\end{figure}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,
@@ -1166,6 +1195,36 @@ both synthesized conditions are perfect and the LLM next-state proxy
 collapses.}
 \label{tab:composition}
 \end{table}
+
+\subsection{The sprint allocation across a capability ladder (E35)}\label{sec:ladder}
+E34's finding---that reallocating a shared budget cannot raise the ceiling,
+and that a greedy ``closest-to-passing'' policy tarpits---was measured with a
+1.5B/7B repair model. E35 re-runs the three allocation conditions across a
+capability ladder spanning three model families (Figure~\ref{fig:sprint-ladder}):
+qwen2.5:7b (the E34 anchor), deepseek-r1:14b, gpt-oss:20b, and qwen3-coder:30b.
+Two patterns emerge, both clean. First, the fixed-protocol ceiling rises
+monotonically with capability---15, \LadderDeepseekFixed, \LadderGptossFixed,
+\LadderQwenCoderFixed{} of 20---so the benchmark discriminates model strength as
+intended. Second, the greedy tarpit is \emph{capability-gated}: catastrophic at
+7B (1/20, it sinks the whole budget into one near-miss), it progressively
+defangs with scale and at gpt-oss:20b not only stops tarpitting but clears the
+\emph{entire} board (\LadderGptossGreedy/20), with qwen3-coder:30b at
+\LadderQwenCoderGreedy/20. The allocation pathology, in other words, is a symptom
+of a model that cannot finish the task it fixates on; give it enough capability
+and the fixation becomes harmless. Across all four models and three families
+the qualitative reading of E34 holds---allocation policy is dominated by base
+capability---now with the capability axis made explicit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/sprint_ladder.png}
+\caption{\textbf{The sprint allocation across a capability ladder (E35).}
+Tasks solved on OpenWorld-SWE-bench under the three allocation conditions, by
+repair model (increasing capability left to right; budget 80). The
+fixed-protocol ceiling rises with capability; the greedy tarpit (a lone
+solved task at 7B) defangs with scale, clearing all 20 at gpt-oss:20b.}
+\label{fig:sprint-ladder}
+\end{figure}
 
 \subsection{Composition yields better representations (E36)}\label{sec:representations}
 E12 and E19 measured what a learner needs to match a \emph{single}

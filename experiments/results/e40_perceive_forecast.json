@@ -1,0 +1,37 @@
+{
+  "horizon": 14,
+  "n_test": 300,
+  "forecast_exact": {
+    "world_model_in_dist": 1.0,
+    "world_model_ood_10x": 1.0,
+    "mlp_in_dist": 0.01,
+    "mlp_ood_10x": 0.0,
+    "mlp_in_dist_tol2": 0.04666666666666667,
+    "mlp_ood_10x_tol2": 0.0
+  },
+  "degradation": [
+    {
+      "perception_error_rate": 0.0,
+      "perception_accuracy": 1.0,
+      "forecast_accuracy": 1.0
+    },
+    {
+      "perception_error_rate": 0.1,
+      "perception_accuracy": 0.9,
+      "forecast_accuracy": 0.9066666666666666
+    },
+    {
+      "perception_error_rate": 0.25,
+      "perception_accuracy": 0.75,
+      "forecast_accuracy": 0.75
+    },
+    {
+      "perception_error_rate": 0.5,
+      "perception_accuracy": 0.5,
+      "forecast_accuracy": 0.5066666666666667
+    }
+  ],
+  "experiment": "e40_perceive_forecast",
+  "timestamp": "2026-06-13T02:06:38",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -31,7 +31,7 @@ EXPERIMENTS = [
     "e28_swebench_ablation", "e29_swebench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e36_representations",
-    "e37_induction",
+    "e37_induction", "e39_perception_fidelity", "e40_perceive_forecast",
 ]
 
 
@@ -451,6 +451,50 @@ def table_representations(e36):
     lines += [f"\\textbf{{Composite-symbolic}} & {cells('composite_symbolic')} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "representations.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_perception(e40):
+    """E40: perceive-then-forecast - multimodal inputs to a verified world model."""
+    fc = e40["forecast_exact"]
+    degr = e40["degradation"]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.2, 3.3))
+
+    # A. forecast skill: world model vs end-to-end MLP, in-dist and 10x OOD
+    groups = ["in-distribution", "10× population (OOD)"]
+    x = [0, 1]
+    w = 0.36
+    ax1.bar([i - w / 2 for i in x],
+            [fc["world_model_in_dist"], fc["world_model_ood_10x"]], w,
+            color=TEAL, label="perceived world model (ours)")
+    ax1.bar([i + w / 2 for i in x],
+            [fc["mlp_in_dist"], fc["mlp_ood_10x"]], w,
+            color=RED, label="end-to-end MLP")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(groups, fontsize=8)
+    ax1.set_ylabel(f"Exact day-{e40['horizon']} forecast accuracy")
+    ax1.set_ylim(0, 1.08)
+    ax1.set_title("A. Multi-step forecast skill", fontsize=9.5, loc="left")
+    ax1.legend(fontsize=7.5, loc="upper right")
+    ax1.grid(alpha=0.25, axis="y")
+
+    # B. graceful degradation: forecast accuracy tracks perception accuracy
+    pa = [d["perception_accuracy"] for d in degr]
+    fa = [d["forecast_accuracy"] for d in degr]
+    ax2.plot([0, 1], [0, 1], ls=(0, (3, 3)), color=SLATE, lw=1,
+             label="y = x (dynamics add zero)")
+    ax2.plot(pa, fa, "-o", color=TEAL, lw=2, markersize=5,
+             label="perceive → world model")
+    ax2.set_xlabel("Perception accuracy")
+    ax2.set_ylabel("End-to-end forecast accuracy")
+    ax2.set_xlim(0.4, 1.03)
+    ax2.set_ylim(0.4, 1.03)
+    ax2.set_title("B. Error decomposition", fontsize=9.5, loc="left")
+    ax2.legend(fontsize=7.5, loc="upper left")
+    ax2.grid(alpha=0.25)
+
+    fig.tight_layout()
+    fig.savefig(FIGS / "perception.png", dpi=200)
+    plt.close(fig)
 
 
 def fig_representations(e36):
@@ -1011,7 +1055,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "35"),
+        macro("NumExperiments", "37"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1252,6 +1296,18 @@ def numbers_tex(d):
         macro("IndMlpOod", acc(big37["mlp_ood"])),
         macro("IndKnnOod", acc(big37["knn1_ood"])),
     ]
+    # E40 (perceive-then-forecast) + E39 (perception fidelity / decomposition)
+    fc = d["e40_perceive_forecast"]["forecast_exact"]
+    e39 = d["e39_perception_fidelity"]
+    lines += [
+        macro("PercHorizon", str(d["e40_perceive_forecast"]["horizon"])),
+        macro("PercWorldIn", acc(fc["world_model_in_dist"])),
+        macro("PercWorldOod", acc(fc["world_model_ood_10x"])),
+        macro("PercMlpIn", acc(fc["mlp_in_dist"])),
+        macro("PercMlpOod", acc(fc["mlp_ood_10x"])),
+        macro("PercMlpInTol", acc(fc["mlp_in_dist_tol2"])),
+        macro("PercDecompHolds", "yes" if e39["decomposition_holds"] else "no"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1279,6 +1335,7 @@ def main():
     fig_dynamic_traversal(data["e33_dynamic_traversal"])
     fig_sprint(data["e34_composite_swe"])
     fig_representations(data["e36_representations"])
+    fig_perception(data["e40_perceive_forecast"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

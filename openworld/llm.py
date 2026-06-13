@@ -58,6 +58,16 @@ class OllamaLLM(BaseLLM):
         self.keep_alive = keep_alive
 
     def chat(self, messages: List[Dict[str, str]], **options: Any) -> str:
+        # `images` (base64 list, for vision models) is a message attachment, not
+        # a sampling option: pull it out and attach to the last user turn. When
+        # absent, behavior is identical to before (additive).
+        images = options.pop("images", None)
+        if images:
+            messages = [dict(m) for m in messages]
+            for message in reversed(messages):
+                if message.get("role") == "user":
+                    message["images"] = list(images)
+                    break
         opts = {"temperature": self.temperature, **self.options, **options}
         payload = {
             "model": self.model,

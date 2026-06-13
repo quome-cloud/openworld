@@ -17,6 +17,7 @@ the gentlest introduction to dynamics synthesis.
 | [Finance: portfolio rebalancing](finance_portfolio.md) | Trading / risk | Deterministic schedules inside state, float state, growth-vs-risk frontiers |
 | [Software engineering: sprint planning](software_engineering_sprint.md) | Eng management | The generator + critic two-model relay, validating synthesized code against ground truth |
 | [Benchmarking: build a dataset](benchmark_dataset.md) | Evaluation / benchmarks | The instance schema and validation gate, the paired single-shot vs in-world ablation, recipes and reproducibility tiers |
+| [Multimodal: the perception boundary](multimodal_perception.md) | Multimodal inputs | Feeding text (and later audio/video) into a symbolic world via a gated, untrusted Perceptor — without touching the verified core |
 
 All scripts run offline (they fall back to `MockLLM` or use hand-written
 dynamics); the healthcare and software engineering ones do live code synthesis
@@ -29,6 +30,7 @@ python tutorials/finance_portfolio.py
 python tutorials/software_engineering_sprint.py qwen2.5:7b qwen2.5:3b
 python tutorials/benchmark_dataset.py
 python tutorials/from_scikit_learn.py
+python tutorials/multimodal_perception.py
 ```
 
 ## The shape every tutorial follows

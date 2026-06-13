@@ -1,0 +1,15 @@
+Cycle 5b: Fully-Random Slate Sensitivity Check
+K=7 random bundles/trial, N=20 personas, 50 trials
+
+Condition      med   mean            IQR       med   mean            IQR  
+            centrist                      off_axis                    
+--------------------------------------------------------------------------------
+Z           med=-0.015 mean=-0.031 IQR=[-0.204,0.133]    med=0.018 mean=-0.027 IQR=[-0.313,0.196]  
+A           med=0.222 mean=0.236 IQR=[0.120,0.334]    med=0.330 mean=0.328 IQR=[0.182,0.482]  
+C_CN        med=0.228 mean=0.259 IQR=[0.141,0.354]    med=0.345 mean=0.345 IQR=[0.228,0.482]  
+C_PP        med=0.226 mean=0.241 IQR=[0.136,0.369]    med=0.325 mean=0.318 IQR=[0.222,0.468]  
+D           med=1.000 mean=1.000 IQR=[1.000,1.000]    med=1.000 mean=1.000 IQR=[1.000,1.000]  
+
+C_CN vs A delta (C_CN_med - A_med):
+  centrist: C_CN=0.228  A=0.222  delta=+0.006  → C≈A (fragile)
+  off_axis: C_CN=0.345  A=0.330  delta=+0.016  → C≈A (fragile)

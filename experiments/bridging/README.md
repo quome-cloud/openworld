@@ -91,11 +91,31 @@ With the 5 archetype bundles always present, A always selects the same archetype
 of which 2 random bundles are added per trial (IQR=0 across 50 trials). Bridging algorithms
 are similarly stable — they lock onto the spillover-positive bundle via cross-cluster signal.
 
+**5. Bridging advantage is conditional on archetype availability (slate-composition sensitivity).**
+Sensitivity check (`run_cycle5b.py`): 50 trials with K=7 fully-random slates (no archetypes).
+
+| Condition | centrist (med) | off_axis (med) |
+|-----------|---------------|----------------|
+| A (majority) | 0.222 | 0.330 |
+| C_CN | 0.228 | 0.345 |
+| C_PP | 0.226 | 0.325 |
+
+With purely random slates, C_CN ≈ A (delta ≤ 0.016). The large bridging advantage from
+finding 4 requires that the centrist archetype bundle — which the spillover configuration
+rewards — is explicitly present in the slate. Without it, majority vote and bridging
+algorithms are equivalent: neither can reliably find a spillover-positive bundle it hasn't
+been shown.
+
+*Implication: bridging algorithms require structured candidate slates with broad coverage
+to outperform majority vote. Slate design is a load-bearing design choice, not a neutral
+setup parameter.*
+
 ## Reproducing the results
 
 ```bash
 # From the openworld repo root:
-python -m experiments.bridging.run_cycle5
+python -m experiments.bridging.run_cycle5   # archetype slates (main results)
+python -m experiments.bridging.run_cycle5b  # fully-random slates (sensitivity check)
 
 # Oracle PayoffTables are cached in experiments/bridging/.cache/ (gitignored).
 # First run for a new (n_personas, spillover_config) pair takes 2–5 min.
@@ -110,9 +130,12 @@ experiments/bridging/
 ├── policy.py            # PolicyBundle, PayoffTable, oracle precomputation
 ├── simulation.py        # Conditions Z/A/D, trial runner, CSV output
 ├── conditions_c.py      # Conditions C_CN (Community Notes) + C_PP (polarity-product)
-├── run_cycle5.py        # Experiment runner (Cycle 5: 50 trials × 5 cond × 2 config)
+├── run_cycle5.py        # Experiment runner (Cycle 5: 50 trials × 5 cond × 2 config, archetype slates)
+├── run_cycle5b.py       # Sensitivity check (Cycle 5b: fully-random slates, no archetypes)
 ├── results/
-│   ├── cycle5_results.csv      # 500 trial rows
-│   └── gap_fraction_boxplot.svg
+│   ├── cycle5_results.csv      # 500 trial rows (archetype slates)
+│   ├── gap_fraction_boxplot.svg
+│   ├── cycle5b_results.csv     # 500 trial rows (fully-random slates)
+│   └── cycle5b_summary.txt     # C vs A comparison, slate-sensitivity verdict
 └── .cache/              # Oracle PayoffTable pickle cache (gitignored)
 ```

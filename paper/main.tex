@@ -1072,6 +1072,45 @@ against its own rule text, so changing rules \emph{compose} with the E30
 result---adding a regime adds a phase, instead of multiplying the
 complexity of a single synthesis prompt.
 
+Finally, E34 puts the composite to work on the benchmark itself: a
+\emph{sprint world} whose twenty children are the OpenWorld-SWE-bench
+repair worlds, unmodified, with aggregators exposing open tasks and
+failing-test totals, and an allocation policy deciding which task receives
+each of \SprintBudget{} repair attempts (model, prompts, and sampling
+identical to the standard protocol). The standard fixed-budget protocol
+solves \SprintFixedSolved{}---the first model-ladder numbers for the
+expanded 20-instance suite---while consuming only \SprintFixedAttempts{}
+attempts (Figure~\ref{fig:sprint}). Reallocating the stranded budget raises
+nothing: round-robin over open tasks also ends at \SprintRRSolved, and a
+greedy closest-to-passing policy collapses to \SprintGreedySolved{} by
+sinking \SprintGreedyTarpit{} attempts into a single near-miss. Two
+mechanisms explain this, and both matter beyond this experiment. First,
+with the recipe's pinned sampling seed, a retry on an unchanged state is a
+verbatim replay---under pinned seeds, pass@$k$ quietly degenerates toward
+pass@1, a property of the evaluation protocol worth stating explicitly.
+Second, the pathology is not the seed's: with per-attempt seeds restoring
+genuine retry diversity, round-robin still ends at \SprintRRJitterSolved{}
+and greedy still tarpits at \SprintGreedyJitterSolved{}---committing to the
+nearest-to-done task is structurally wrong when that task is
+capability-bound, because it never gets done. The composite's measurable
+value here is efficiency and observability---round-robin reaches the
+plateau in roughly a third fewer attempts than the fixed protocol, and the
+sprint dashboard shows \emph{where} attempts stop paying---not a higher
+ceiling. Allocation cannot buy what the model cannot produce.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.78\linewidth]{figs/sprint.png}
+\caption{\textbf{The sprint world (E34):} tasks solved vs.\ repair attempts
+consumed on OpenWorld-SWE-bench (qwen2.5:7b, budget \SprintBudget). The
+allocation policies act through the composite's global view. No policy
+beats the fixed protocol's ceiling---the unsolved tail is capability-bound,
+and greedy's closest-to-passing heuristic tarpits on a single task with or
+without retry diversity---but round-robin reaches the plateau markedly
+faster.}
+\label{fig:sprint}
+\end{figure}
+
 \begin{table}[htb]\centering\small
 \input{tables/composition.tex}
 \caption{E30 (top): the same \CompRules-rule coupled system synthesized

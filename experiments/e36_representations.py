@@ -14,6 +14,31 @@ needs the joint) does not.
 """
 import numpy as np
 
+# --- Guarded sklearn import -------------------------------------------------
+# sklearn is OPTIONAL. The zero-dependency framework claim must hold: the
+# experiment runs on numpy alone. If sklearn is absent, the sklearn-backed
+# monolithic zoo arms (ridge/knn5/svr/gp/random_forest/hist_grad_boost) and
+# the composite_hgb arm are skipped and recorded as null/absent. The pure-numpy
+# "koopman" arm (EDMD, deg-2 lift) and the existing MLP/1-NN/composite arms
+# always run.
+try:
+    from sklearn.ensemble import (
+        HistGradientBoostingRegressor,
+        RandomForestRegressor,
+    )
+    from sklearn.gaussian_process import GaussianProcessRegressor
+    from sklearn.gaussian_process.kernels import RBF
+    from sklearn.linear_model import Ridge
+    from sklearn.multioutput import MultiOutputRegressor
+    from sklearn.neighbors import KNeighborsRegressor
+    from sklearn.svm import SVR
+    SKLEARN_AVAILABLE = True
+except ImportError:  # pragma: no cover - exercised only when sklearn absent
+    SKLEARN_AVAILABLE = False
+    print("[e36] sklearn not installed; skipping sklearn zoo arms "
+          "(ridge/knn5/svr/gp/random_forest/hist_grad_boost, composite_hgb). "
+          "Pure-numpy koopman + MLP/1-NN/composite arms still run.")
+
 from openworld import Action
 from openworld.compose import Aggregator, CompositeWorld
 from openworld.transition import Transition
@@ -311,6 +336,156 @@ def eval_knn(train, test, k):
     return {"acc": hits / len(test)}
 
 
+# ---------------------------------------------------------------------------
+# Monolithic learner ZOO (generalization leg only). Every arm trains on the
+# JOINT (state, active, action) encode -> next-active-slice label, and is scored
+# by the IDENTICAL round+clamp+exact-full-slice-match protocol as eval_monolith
+# (via _pred_slice). sklearn arms are guarded; "koopman" is pure numpy.
+# ---------------------------------------------------------------------------
+
+def _joint_xy(train, k):
+    x = np.array([joint_encode(tx["joint"], tx["active"], tx["action"], k) for tx in train])
+    y = np.array([slice_label(tx["next_slice"]) for tx in train])
+    return x, y
+
+
+def _score_regressor(model, train, test, k, extra=None):
+    """Fit a multi-output regressor on the joint encode, score by exact match."""
+    x, y = _joint_xy(train, k)
+    model.fit(x, y)
+    xt = np.array([joint_encode(tx["joint"], tx["active"], tx["action"], k) for tx in test])
+    preds = model.predict(xt)
+    preds = np.asarray(preds)
+    if preds.ndim == 1:                 # single-output safety (not expected here)
+        preds = preds[:, None]
+    hits = 0
+    for p, tx in zip(preds, test):
+        if _pred_slice(p) == tx["next_slice"]:
+            hits += 1
+    out = {"acc": hits / len(test)}
+    if extra:
+        out.update(extra)
+    return out
+
+
+def _absent(reason="sklearn not installed"):
+    return {"acc": None, "absent": True, "note": reason}
+
+
+def eval_ridge(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    return _score_regressor(Ridge(), train, test, k)
+
+
+def eval_knn5(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    return _score_regressor(KNeighborsRegressor(n_neighbors=5), train, test, k,
+                            extra={"n_neighbors": 5})
+
+
+def eval_svr(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    # SVR is single-output; wrap per-output.
+    return _score_regressor(MultiOutputRegressor(SVR()), train, test, k)
+
+
+def eval_gp(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    # GaussianProcessRegressor natively supports multi-output y (no wrapper).
+    gp = GaussianProcessRegressor(kernel=RBF(), random_state=0, normalize_y=True)
+    return _score_regressor(gp, train, test, k)
+
+
+def eval_random_forest(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    rf = RandomForestRegressor(n_estimators=100, random_state=0)
+    return _score_regressor(rf, train, test, k, extra={"n_estimators": 100})
+
+
+def eval_hist_grad_boost(train, test, k):
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    # HistGradientBoostingRegressor is single-output; wrap per-output.
+    hgb = MultiOutputRegressor(HistGradientBoostingRegressor(random_state=0))
+    return _score_regressor(hgb, train, test, k)
+
+
+# --- Pure-numpy Koopman / Extended DMD (deg-2 lift) -------------------------
+
+def _poly2_lift(x):
+    """Degree-2 polynomial feature lift in pure numpy: a bias column, the raw
+    features x, and all pairwise products (incl. squares) x_i*x_j (i<=j).
+    Shape (n, 1 + d + d(d+1)/2). This is the EDMD observable dictionary."""
+    x = np.asarray(x, dtype=float)
+    n, d = x.shape
+    cols = [np.ones((n, 1)), x]
+    for i in range(d):
+        cols.append(x[:, i:i + 1] * x[:, i:])     # x_i * x_j for j>=i (incl. square)
+    return np.hstack(cols)
+
+
+def eval_koopman(train, test, k):
+    """Koopman / EDMD (deg-2). Lift the joint encode with degree-2 polynomial
+    observables, fit a linear operator K by least squares lift(X) @ K ~= Y, then
+    predict lift(Xtest) @ K and round+clamp. Pure numpy - the no-sklearn arm."""
+    x, y = _joint_xy(train, k)
+    phi = _poly2_lift(x)
+    K, *_ = np.linalg.lstsq(phi, y, rcond=None)   # (n_lift, n_out)
+    xt = np.array([joint_encode(tx["joint"], tx["active"], tx["action"], k) for tx in test])
+    preds = _poly2_lift(xt) @ K
+    hits = sum(1 for p, tx in zip(preds, test) if _pred_slice(p) == tx["next_slice"])
+    return {"acc": hits / len(test), "lift": "poly_deg2", "n_lift": phi.shape[1]}
+
+
+# --- Composite with a non-MLP (HGB) child -----------------------------------
+
+class LearnedSectorRegressor(Transition):
+    """Plugs a fitted multi-output sklearn regressor into a CompositeWorld child,
+    rounding+clamping its prediction to an integer slice (same protocol as the
+    MLP-backed LearnedSectorTransition)."""
+    def __init__(self, model):
+        self.model = model
+
+    def step(self, state, action):
+        if action.name not in ACTIONS:
+            return state.copy()
+        x = np.array([sector_encode(dict(state), action.name)])
+        y = np.asarray(self.model.predict(x))[0]
+        return state.__class__({f: clamp(int(round(v))) for f, v in zip(FIELDS, y)})
+
+
+def eval_composite_hgb(train, test, k):
+    """Composite whose per-sector child is a HistGradientBoostingRegressor
+    (wrapped multi-output) instead of an MLP. Same per-sector training split and
+    same compose-and-score protocol as eval_composite_learned. Guarded."""
+    if not SKLEARN_AVAILABLE:
+        return _absent()
+    children = []
+    for i in range(k):
+        sub = [tx for tx in train if tx["active"] == i]
+        model = MultiOutputRegressor(HistGradientBoostingRegressor(random_state=0))
+        if sub:
+            x = np.array([sector_encode(tx["joint"][f"s{i}"], tx["action"]) for tx in sub])
+            yy = np.array([slice_label(tx["next_slice"]) for tx in sub])
+            model.fit(x, yy)
+        children.append(LearnedSectorRegressor(model))
+    comp = build_composite(k, child_transitions=children)
+    hits = 0
+    for tx in test:
+        st = comp.initial_state.copy()
+        for i in range(k):
+            st[f"s{i}"] = dict(tx["joint"][f"s{i}"])
+        out = comp.transition.step(st, Action(f's{tx["active"]}:{tx["action"]}'))
+        if dict(out[f's{tx["active"]}']) == tx["next_slice"]:
+            hits += 1
+    return {"acc": hits / len(test), "child": "hist_grad_boost"}
+
+
 def train_child_mlps(train, k, hidden_each, seed=0, epochs=2500, lr=1e-2):
     """Split train by active sector; train one small MLP per sector on its own
     sector-local transitions. Returns (mlps, per_child_loss, total_params)."""
@@ -391,12 +566,27 @@ def leg_generalization():
         comp = eval_composite_learned(train, test, k, sz["hidden_each"])
         sym = eval_composite_symbolic(test, k)
         symbolic_exact = symbolic_exact and (sym["acc"] == 1.0)
+        # Monolithic learner ZOO (joint-input, identical scoring as monolith).
+        ridge = eval_ridge(train, test, k)
+        knn5 = eval_knn5(train, test, k)
+        svr = eval_svr(train, test, k)
+        gp = eval_gp(train, test, k)
+        rf = eval_random_forest(train, test, k)
+        hgb = eval_hist_grad_boost(train, test, k)
+        koopman = eval_koopman(train, test, k)
+        comp_hgb = eval_composite_hgb(train, test, k)
         rows.append({
             "k": k, "n_train": len(train), "n_test": len(test),
             "test_off_diagonal": fraction_off_diagonal(test),
             "sizing": sz,
+            # existing arms
             "monolith": mono, "knn1": knn,
             "composite_learned": comp, "composite_symbolic": sym,
+            # monolithic zoo (sklearn-guarded except koopman which is pure numpy)
+            "ridge": ridge, "knn5": knn5, "svr": svr, "gp": gp,
+            "random_forest": rf, "hist_grad_boost": hgb, "koopman": koopman,
+            # non-MLP composite (sklearn-guarded)
+            "composite_hgb": comp_hgb,
         })
     return rows, symbolic_exact
 
@@ -522,13 +712,22 @@ def main():
     )
 
     # ---- tables ----
+    def _fmt(arm):
+        a = arm.get("acc")
+        return f"{a:>7.3f}" if isinstance(a, (int, float)) else f"{'absent':>7}"
+
+    zoo_arms = ["monolith", "ridge", "knn1", "knn5", "svr", "gp",
+                "random_forest", "hist_grad_boost", "koopman"]
     print("LEG 1 - Compositional generalization (exact next-slice acc, joint-novel test)")
-    print(f"  {'k':>2} {'monolith':>9} {'knn1':>7} {'comp-learn':>11} {'comp-sym':>9}"
-          f"  {'mono_p':>7} {'comp_p':>7}")
+    print("  Monolithic ZOO (joint input) + composite arms. acc='absent' => sklearn missing.")
+    header = "  " + f"{'k':>2} " + " ".join(f"{a[:8]:>8}" for a in zoo_arms)
+    header += f"  {'cmp-mlp':>8} {'cmp-hgb':>8} {'cmp-sym':>8}"
+    print(header)
     for r in gen_rows:
-        print(f"  {r['k']:>2} {r['monolith']['acc']:>9.3f} {r['knn1']['acc']:>7.3f} "
-              f"{r['composite_learned']['acc']:>11.3f} {r['composite_symbolic']['acc']:>9.3f}"
-              f"  {r['monolith']['n_params']:>7} {r['composite_learned']['n_params']:>7}")
+        line = "  " + f"{r['k']:>2} " + " ".join(_fmt(r[a]) for a in zoo_arms)
+        line += f"  {_fmt(r['composite_learned']):>8} {_fmt(r['composite_hgb']):>8} "
+        line += f"{_fmt(r['composite_symbolic']):>8}"
+        print(line)
 
     print("\nLEG 2 - Interference at k=4 (retained sector-0 acc)")
     print(f"  monolith sequential : {interference['monolith_sequential_retained']:.3f}")
@@ -555,6 +754,27 @@ def main():
         "leg_interference": interference,
         "leg_sample_efficiency": efficiency,
         "sanity_symbolic_exact": sanity_symbolic_exact,
+        "learner_families": {
+            "sklearn_available": SKLEARN_AVAILABLE,
+            "scope": ("The monolithic learner zoo + composite_hgb are added to the "
+                      "generalization leg ONLY; interference and sample_efficiency "
+                      "legs remain monolith-MLP vs composite."),
+            "sklearn_optional_arms": [
+                "ridge", "knn5", "svr", "gp", "random_forest",
+                "hist_grad_boost", "composite_hgb",
+            ],
+            "pure_numpy_arms": ["monolith", "knn1", "koopman",
+                                "composite_learned", "composite_symbolic"],
+            "koopman_note": ("koopman is pure-numpy Extended DMD: degree-2 polynomial "
+                             "lift (bias + raw + all pairwise products incl. squares), "
+                             "linear operator fit by np.linalg.lstsq, predict+round+clamp."),
+            "scoring": ("ALL monolithic arms (incl. continuous regressors) use the "
+                        "IDENTICAL protocol: round-to-int, clamp to [0,G], exact "
+                        "full-slice match - the same _pred_slice used by the MLP arm."),
+            "absent_handling": ("If sklearn is missing, optional arms record "
+                                "{'acc': null, 'absent': true}; the experiment still "
+                                "runs on numpy alone (zero-dependency claim holds)."),
+        },
         "note": (
             "Training covers each sector's full MARGINAL value range but only a "
             "thin diagonal slice of the JOINT product; test is the full random "

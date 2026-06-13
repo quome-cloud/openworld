@@ -51,9 +51,9 @@
   "leg_generalization": [
     {
       "k": 2,
-      "n_train": 336,
+      "n_train": 2058,
       "n_test": 400,
-      "test_off_diagonal": 0.9675,
+      "test_off_diagonal": 0.9975,
       "sizing": {
         "hidden_each": 32,
         "child_total_params": 2758,
@@ -61,29 +61,29 @@
         "monolith_params": 2855
       },
       "monolith": {
-        "acc": 0.035,
-        "train_loss_first": 15.367638070766985,
-        "train_loss_last": 0.2016378249058128,
+        "acc": 0.0325,
+        "train_loss_first": 14.583884309603318,
+        "train_loss_last": 0.12310779127058592,
         "n_params": 2855,
         "hidden": 46
       },
       "knn1": {
-        "acc": 0.035
+        "acc": 0.0225
       },
       "composite_learned": {
-        "acc": 0.4725,
+        "acc": 0.7225,
         "child_losses": [
           {
             "sector": 0,
-            "n": 168,
-            "loss_first": 15.7487933823746,
-            "loss_last": 0.08255822085574825
+            "n": 1029,
+            "loss_first": 14.739810894234836,
+            "loss_last": 0.07708488863999703
           },
           {
             "sector": 1,
-            "n": 168,
-            "loss_first": 14.892865041782807,
-            "loss_last": 0.11575697669105604
+            "n": 1029,
+            "loss_first": 14.33159447440342,
+            "loss_last": 0.1691356750007989
           }
         ],
         "n_params": 2758,
@@ -91,13 +91,42 @@
       },
       "composite_symbolic": {
         "acc": 1.0
+      },
+      "ridge": {
+        "acc": 0.0125
+      },
+      "knn5": {
+        "acc": 0.0275,
+        "n_neighbors": 5
+      },
+      "svr": {
+        "acc": 0.0225
+      },
+      "gp": {
+        "acc": 0.005
+      },
+      "random_forest": {
+        "acc": 0.0175,
+        "n_estimators": 100
+      },
+      "hist_grad_boost": {
+        "acc": 0.4825
+      },
+      "koopman": {
+        "acc": 0.0225,
+        "lift": "poly_deg2",
+        "n_lift": 78
+      },
+      "composite_hgb": {
+        "acc": 0.9975,
+        "child": "hist_grad_boost"
       }
     },
     {
       "k": 3,
-      "n_train": 504,
+      "n_train": 3087,
       "n_test": 400,
-      "test_off_diagonal": 0.9975,
+      "test_off_diagonal": 1.0,
       "sizing": {
         "hidden_each": 32,
         "child_total_params": 4137,
@@ -105,35 +134,35 @@
         "monolith_params": 4259
       },
       "monolith": {
-        "acc": 0.0075,
-        "train_loss_first": 15.387036901498075,
-        "train_loss_last": 0.29206114281465806,
+        "acc": 0.02,
+        "train_loss_first": 14.824007386449216,
+        "train_loss_last": 0.1285681683177571,
         "n_params": 4259,
         "hidden": 56
       },
       "knn1": {
-        "acc": 0.03
+        "acc": 0.0275
       },
       "composite_learned": {
-        "acc": 0.5675,
+        "acc": 0.7475,
         "child_losses": [
           {
             "sector": 0,
-            "n": 168,
-            "loss_first": 15.28623788012626,
-            "loss_last": 0.08983926801649116
+            "n": 1029,
+            "loss_first": 14.739810894234836,
+            "loss_last": 0.07708488863999721
           },
           {
             "sector": 1,
-            "n": 168,
-            "loss_first": 14.757904798425445,
-            "loss_last": 0.12865118835419062
+            "n": 1029,
+            "loss_first": 14.33159447440342,
+            "loss_last": 0.1691356750007989
           },
           {
             "sector": 2,
-            "n": 168,
-            "loss_first": 15.524118627348109,
-            "loss_last": 0.10190099155907577
+            "n": 1029,
+            "loss_first": 14.880615649601932,
+            "loss_last": 0.08855820113607052
           }
         ],
         "n_params": 4137,
@@ -141,11 +170,40 @@
       },
       "composite_symbolic": {
         "acc": 1.0
+      },
+      "ridge": {
+        "acc": 0.01
+      },
+      "knn5": {
+        "acc": 0.025,
+        "n_neighbors": 5
+      },
+      "svr": {
+        "acc": 0.01
+      },
+      "gp": {
+        "acc": 0.005
+      },
+      "random_forest": {
+        "acc": 0.0225,
+        "n_estimators": 100
+      },
+      "hist_grad_boost": {
+        "acc": 0.35
+      },
+      "koopman": {
+        "acc": 0.0175,
+        "lift": "poly_deg2",
+        "n_lift": 136
+      },
+      "composite_hgb": {
+        "acc": 1.0,
+        "child": "hist_grad_boost"
       }
     },
     {
       "k": 4,
-      "n_train": 672,
+      "n_train": 4116,
       "n_test": 400,
       "test_off_diagonal": 1.0,
       "sizing": {
@@ -155,41 +213,41 @@
         "monolith_params": 5635
       },
       "monolith": {
-        "acc": 0.005,
-        "train_loss_first": 15.07699459771483,
-        "train_loss_last": 0.31158244667397056,
+        "acc": 0.0025,
+        "train_loss_first": 14.571364904038111,
+        "train_loss_last": 0.12933956015798512,
         "n_params": 5635,
         "hidden": 64
       },
       "knn1": {
-        "acc": 0.015
+        "acc": 0.0075
       },
       "composite_learned": {
-        "acc": 0.485,
+        "acc": 0.7125,
         "child_losses": [
           {
             "sector": 0,
-            "n": 168,
-            "loss_first": 15.168390991285493,
-            "loss_last": 0.07838235538883055
+            "n": 1029,
+            "loss_first": 14.739810894234836,
+            "loss_last": 0.07708488863999717
           },
           {
             "sector": 1,
-            "n": 168,
-            "loss_first": 14.45388290821412,
-            "loss_last": 0.1035352850023717
+            "n": 1029,
+            "loss_first": 14.33159447440342,
+            "loss_last": 0.1691356750007989
           },
           {
             "sector": 2,
-            "n": 168,
-            "loss_first": 15.748673254135113,
-            "loss_last": 0.10322255457123107
+            "n": 1029,
+            "loss_first": 14.880615649601932,
+            "loss_last": 0.08855820113607048
           },
           {
             "sector": 3,
-            "n": 168,
-            "loss_first": 15.834886081481743,
-            "loss_last": 0.1132552951078263
+            "n": 1029,
+            "loss_first": 15.012497248196725,
+            "loss_last": 0.14435877154999618
           }
         ],
         "n_params": 5516,
@@ -197,11 +255,40 @@
       },
       "composite_symbolic": {
         "acc": 1.0
+      },
+      "ridge": {
+        "acc": 0.005
+      },
+      "knn5": {
+        "acc": 0.015,
+        "n_neighbors": 5
+      },
+      "svr": {
+        "acc": 0.0
+      },
+      "gp": {
+        "acc": 0.0025
+      },
+      "random_forest": {
+        "acc": 0.005,
+        "n_estimators": 100
+      },
+      "hist_grad_boost": {
+        "acc": 0.2325
+      },
+      "koopman": {
+        "acc": 0.0075,
+        "lift": "poly_deg2",
+        "n_lift": 210
+      },
+      "composite_hgb": {
+        "acc": 1.0,
+        "child": "hist_grad_boost"
       }
     },
     {
       "k": 5,
-      "n_train": 840,
+      "n_train": 5145,
       "n_test": 400,
       "test_off_diagonal": 1.0,
       "sizing": {
@@ -212,46 +299,46 @@
       },
       "monolith": {
         "acc": 0.005,
-        "train_loss_first": 15.277592995567055,
-        "train_loss_last": 0.37528232644695675,
+        "train_loss_first": 14.71577852199913,
+        "train_loss_last": 0.13121494120518043,
         "n_params": 7203,
         "hidden": 72
       },
       "knn1": {
-        "acc": 0.015
+        "acc": 0.01
       },
       "composite_learned": {
-        "acc": 0.5575,
+        "acc": 0.7325,
         "child_losses": [
           {
             "sector": 0,
-            "n": 168,
-            "loss_first": 15.538289039407887,
-            "loss_last": 0.0939926148129431
+            "n": 1029,
+            "loss_first": 14.739810894234836,
+            "loss_last": 0.07708488863999713
           },
           {
             "sector": 1,
-            "n": 168,
-            "loss_first": 15.029792108509914,
-            "loss_last": 0.10601952759062422
+            "n": 1029,
+            "loss_first": 14.33159447440342,
+            "loss_last": 0.1691356750007989
           },
           {
             "sector": 2,
-            "n": 168,
-            "loss_first": 16.109811584453094,
-            "loss_last": 0.09823097573714949
+            "n": 1029,
+            "loss_first": 14.880615649601936,
+            "loss_last": 0.08855820113607048
           },
           {
             "sector": 3,
-            "n": 168,
-            "loss_first": 14.598943844485293,
-            "loss_last": 0.11313748043636902
+            "n": 1029,
+            "loss_first": 15.012497248196725,
+            "loss_last": 0.1443587715499962
           },
           {
             "sector": 4,
-            "n": 168,
-            "loss_first": 14.229539415484386,
-            "loss_last": 0.08464296819973251
+            "n": 1029,
+            "loss_first": 13.887200084150232,
+            "loss_last": 0.07970065126678312
           }
         ],
         "n_params": 6895,
@@ -259,6 +346,35 @@
       },
       "composite_symbolic": {
         "acc": 1.0
+      },
+      "ridge": {
+        "acc": 0.005
+      },
+      "knn5": {
+        "acc": 0.0075,
+        "n_neighbors": 5
+      },
+      "svr": {
+        "acc": 0.0075
+      },
+      "gp": {
+        "acc": 0.01
+      },
+      "random_forest": {
+        "acc": 0.005,
+        "n_estimators": 100
+      },
+      "hist_grad_boost": {
+        "acc": 0.1975
+      },
+      "koopman": {
+        "acc": 0.0075,
+        "lift": "poly_deg2",
+        "n_lift": 300
+      },
+      "composite_hgb": {
+        "acc": 1.0,
+        "child": "hist_grad_boost"
       }
     }
   ],
@@ -271,41 +387,41 @@
       "monolith_hidden": 64,
       "monolith_params": 5635
     },
-    "monolith_sequential_retained": 0.0,
+    "monolith_sequential_retained": 0.03333333333333333,
     "monolith_sequential_stages": [
       {
         "after_sector": 0,
-        "sector0_acc": 0.5555555555555556,
-        "loss_first": 14.846255091566949,
-        "loss_last": 0.06499573756142817
+        "sector0_acc": 0.0,
+        "loss_first": 14.481489346254584,
+        "loss_last": 0.07952868373657856
       },
       {
         "after_sector": 1,
-        "sector0_acc": 0.0,
-        "loss_first": 1.3387344386063025,
-        "loss_last": 0.07033001823261215
+        "sector0_acc": 0.011111111111111112,
+        "loss_first": 0.4870569409535362,
+        "loss_last": 0.0945827723506199
       },
       {
         "after_sector": 2,
-        "sector0_acc": 0.011111111111111112,
-        "loss_first": 1.1673562947312737,
-        "loss_last": 0.05735221528941841
+        "sector0_acc": 0.022222222222222223,
+        "loss_first": 0.5533294156460147,
+        "loss_last": 0.04232198521001821
       },
       {
         "after_sector": 3,
-        "sector0_acc": 0.0,
-        "loss_first": 1.2141720385871064,
-        "loss_last": 0.04222607572150744
+        "sector0_acc": 0.03333333333333333,
+        "loss_first": 0.32856339832960113,
+        "loss_last": 0.061775246093878466
       }
     ],
     "monolith_joint_retained": 0.011111111111111112,
-    "composite_learned_retained": 0.6555555555555556,
+    "composite_learned_retained": 0.8333333333333334,
     "composite_symbolic_retained": 1.0
   },
   "leg_sample_efficiency": {
     "k": 3,
     "n_test": 400,
-    "max_train_available": 504,
+    "max_train_available": 3087,
     "sizing": {
       "hidden_each": 32,
       "child_total_params": 4137,
@@ -316,32 +432,55 @@
       {
         "n_cap": 100,
         "n_train_actual": 100,
-        "monolith_acc": 0.0175,
-        "monolith_loss_last": 0.18172789593967553,
-        "composite_learned_acc": 0.3475,
+        "monolith_acc": 0.0125,
+        "monolith_loss_last": 0.07272727237746625,
+        "composite_learned_acc": 0.6625,
         "composite_symbolic_acc": 1.0
       },
       {
         "n_cap": 1000,
-        "n_train_actual": 504,
-        "monolith_acc": 0.0075,
-        "monolith_loss_last": 0.29206114281465806,
-        "composite_learned_acc": 0.5675,
+        "n_train_actual": 1000,
+        "monolith_acc": 0.0175,
+        "monolith_loss_last": 0.13346274782052425,
+        "composite_learned_acc": 0.6875,
         "composite_symbolic_acc": 1.0
       },
       {
         "n_cap": 10000,
-        "n_train_actual": 504,
-        "monolith_acc": 0.0075,
-        "monolith_loss_last": 0.29206114281465806,
-        "composite_learned_acc": 0.5675,
+        "n_train_actual": 3087,
+        "monolith_acc": 0.02,
+        "monolith_loss_last": 0.1285681683177571,
+        "composite_learned_acc": 0.7475,
         "composite_symbolic_acc": 1.0
       }
     ]
   },
   "sanity_symbolic_exact": true,
+  "learner_families": {
+    "sklearn_available": true,
+    "scope": "The monolithic learner zoo + composite_hgb are added to the generalization leg ONLY; interference and sample_efficiency legs remain monolith-MLP vs composite.",
+    "sklearn_optional_arms": [
+      "ridge",
+      "knn5",
+      "svr",
+      "gp",
+      "random_forest",
+      "hist_grad_boost",
+      "composite_hgb"
+    ],
+    "pure_numpy_arms": [
+      "monolith",
+      "knn1",
+      "koopman",
+      "composite_learned",
+      "composite_symbolic"
+    ],
+    "koopman_note": "koopman is pure-numpy Extended DMD: degree-2 polynomial lift (bias + raw + all pairwise products incl. squares), linear operator fit by np.linalg.lstsq, predict+round+clamp.",
+    "scoring": "ALL monolithic arms (incl. continuous regressors) use the IDENTICAL protocol: round-to-int, clamp to [0,G], exact full-slice match - the same _pred_slice used by the MLP arm.",
+    "absent_handling": "If sklearn is missing, optional arms record {'acc': null, 'absent': true}; the experiment still runs on numpy alone (zero-dependency claim holds)."
+  },
   "note": "Training covers each sector's full MARGINAL value range but only a thin diagonal slice of the JOINT product; test is the full random joint product (novel combinations of seen per-part values). Composite needs only marginals; monolith needs the joint.",
   "experiment": "e36_representations",
-  "timestamp": "2026-06-12T20:15:16",
+  "timestamp": "2026-06-12T21:31:51",
   "platform": "macOS-26.5-arm64-arm-64bit"
 }

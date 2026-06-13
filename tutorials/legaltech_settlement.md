@@ -1,5 +1,7 @@
 # Legaltech: Settlement Negotiation with a Cooperativeness Dial
 
+*New to worlds and oracles? Read [OpenWorld for scikit-learn users](from_scikit_learn.md) first.*
+
 > Script: [`legaltech_settlement.py`](legaltech_settlement.py) — fully offline.
 
 A plaintiff demands $90k; the defense opens at $10k. Every turn of posturing

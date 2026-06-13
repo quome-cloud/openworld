@@ -1,5 +1,7 @@
 # Finance: Portfolio Rebalancing with a Caution Dial
 
+*New to worlds and oracles? Read [OpenWorld for scikit-learn users](from_scikit_learn.md) first.*
+
 > Script: [`finance_portfolio.py`](finance_portfolio.py) — fully offline.
 
 A trader rebalances a single position against a choppy-but-rising price path.

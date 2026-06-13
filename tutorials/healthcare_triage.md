@@ -1,5 +1,7 @@
 # Healthcare: ICU Triage with a Stewardship Dial
 
+*New to worlds and oracles? Read [OpenWorld for scikit-learn users](from_scikit_learn.md) first.*
+
 > Script: [`healthcare_triage.py`](healthcare_triage.py) — runs offline; does live
 > dynamics synthesis when Ollama is up.
 

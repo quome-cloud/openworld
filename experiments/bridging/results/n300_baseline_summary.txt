@@ -1,0 +1,14 @@
+N=300 Headline Baseline Summary
+K=7 archetype-seeded, P2 bimodal_sym, 50 trials/cell
+
+Condition  centrist (med)  off_axis (med)
+------------------------------------------
+Z                   0.157           0.158
+A                   0.764           0.821
+C_CN                0.764           0.821
+C_PP                0.764           0.821
+D                   1.000           1.000
+
+C_CN vs A delta:
+  centrist: C_CN=0.764  A=0.764  delta=+0.000
+  off_axis: C_CN=0.821  A=0.821  delta=+0.000

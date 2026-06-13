@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="460" font-family="monospace" font-size="11">
+<rect width="900" height="460" fill="#f9f9f9"/>
+<text x="450" y="18" text-anchor="middle" font-size="13" font-weight="bold" fill="#222">Axis 3: Gap Fraction vs Spillover Magnitude (N=100, 50 trials/cell)</text>
+<rect x="65" y="50" width="387" height="340" fill="white" stroke="#ccc" stroke-width="1"/>
+<text x="258" y="44" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">centrist spillover pattern</text>
+<line x1="65" y1="390.0" x2="452" y2="390.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="394.0" text-anchor="end" fill="#555">0.00</text>
+<line x1="65" y1="305.0" x2="452" y2="305.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="309.0" text-anchor="end" fill="#555">0.25</text>
+<line x1="65" y1="220.0" x2="452" y2="220.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="224.0" text-anchor="end" fill="#555">0.50</text>
+<line x1="65" y1="135.0" x2="452" y2="135.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="139.0" text-anchor="end" fill="#555">0.75</text>
+<line x1="65" y1="50.0" x2="452" y2="50.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<text x="61" y="54.0" text-anchor="end" fill="#555">1.00</text>
+<line x1="65.0" y1="50" x2="65.0" y2="390" stroke="#eee"/>
+<text x="65.0" y="406" text-anchor="middle" fill="#555">S1 (0.01)</text>
+<line x1="194.0" y1="50" x2="194.0" y2="390" stroke="#eee"/>
+<text x="194.0" y="406" text-anchor="middle" fill="#555">S2 (0.05)</text>
+<line x1="323.0" y1="50" x2="323.0" y2="390" stroke="#eee"/>
+<text x="323.0" y="406" text-anchor="middle" fill="#555">S3 (0.1)</text>
+<line x1="452.0" y1="50" x2="452.0" y2="390" stroke="#eee"/>
+<text x="452.0" y="406" text-anchor="middle" fill="#555">S4 (0.2)</text>
+<path d="M 65.0,373.7 L 194.0,387.3 L 323.0,390.0 L 452.0,390.0" fill="none" stroke="#999" stroke-width="2"/>
+<circle cx="65.0" cy="373.7" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="194.0" cy="387.3" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="323.0" cy="390.0" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="452.0" cy="390.0" r="4" fill="#999" fill-opacity="0.85"/>
+<path d="M 65.0,229.0 L 194.0,307.6 L 323.0,342.3 L 452.0,368.2" fill="none" stroke="#4C72B0" stroke-width="2"/>
+<circle cx="65.0" cy="229.0" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="194.0" cy="307.6" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="323.0" cy="342.3" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="452.0" cy="368.2" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<path d="M 65.0,68.8 L 194.0,166.3 L 323.0,209.3 L 452.0,241.4" fill="none" stroke="#DD8452" stroke-width="2"/>
+<circle cx="65.0" cy="68.8" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="194.0" cy="166.3" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="323.0" cy="209.3" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="452.0" cy="241.4" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<path d="M 65.0,68.8 L 194.0,166.3 L 323.0,209.3 L 452.0,241.4" fill="none" stroke="#55A868" stroke-width="2"/>
+<circle cx="65.0" cy="68.8" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="194.0" cy="166.3" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="323.0" cy="209.3" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="452.0" cy="241.4" r="4" fill="#55A868" fill-opacity="0.85"/>
+<path d="M 65.0,50.0 L 194.0,50.0 L 323.0,50.0 L 452.0,50.0" fill="none" stroke="#C44E52" stroke-width="2"/>
+<circle cx="65.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="194.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="323.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="452.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<rect x="492" y="50" width="387" height="340" fill="white" stroke="#ccc" stroke-width="1"/>
+<text x="685" y="44" text-anchor="middle" fill="#333" font-size="12" font-weight="bold">off_axis spillover pattern</text>
+<line x1="492" y1="390.0" x2="879" y2="390.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<line x1="492" y1="305.0" x2="879" y2="305.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<line x1="492" y1="220.0" x2="879" y2="220.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<line x1="492" y1="135.0" x2="879" y2="135.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<line x1="492" y1="50.0" x2="879" y2="50.0" stroke="#ddd" stroke-dasharray="4,3"/>
+<line x1="492.0" y1="50" x2="492.0" y2="390" stroke="#eee"/>
+<text x="492.0" y="406" text-anchor="middle" fill="#555">S1 (0.01)</text>
+<line x1="621.0" y1="50" x2="621.0" y2="390" stroke="#eee"/>
+<text x="621.0" y="406" text-anchor="middle" fill="#555">S2 (0.05)</text>
+<line x1="750.0" y1="50" x2="750.0" y2="390" stroke="#eee"/>
+<text x="750.0" y="406" text-anchor="middle" fill="#555">S3 (0.1)</text>
+<line x1="879.0" y1="50" x2="879.0" y2="390" stroke="#eee"/>
+<text x="879.0" y="406" text-anchor="middle" fill="#555">S4 (0.2)</text>
+<path d="M 492.0,357.6 L 621.0,375.0 L 750.0,385.4 L 879.0,390.0" fill="none" stroke="#999" stroke-width="2"/>
+<circle cx="492.0" cy="357.6" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="621.0" cy="375.0" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="750.0" cy="385.4" r="4" fill="#999" fill-opacity="0.85"/>
+<circle cx="879.0" cy="390.0" r="4" fill="#999" fill-opacity="0.85"/>
+<path d="M 492.0,205.9 L 621.0,276.0 L 750.0,332.0 L 879.0,365.6" fill="none" stroke="#4C72B0" stroke-width="2"/>
+<circle cx="492.0" cy="205.9" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="621.0" cy="276.0" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="750.0" cy="332.0" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<circle cx="879.0" cy="365.6" r="4" fill="#4C72B0" fill-opacity="0.85"/>
+<path d="M 492.0,50.0 L 621.0,172.0 L 750.0,273.4 L 879.0,334.4" fill="none" stroke="#DD8452" stroke-width="2"/>
+<circle cx="492.0" cy="50.0" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="621.0" cy="172.0" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="750.0" cy="273.4" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<circle cx="879.0" cy="334.4" r="4" fill="#DD8452" fill-opacity="0.85"/>
+<path d="M 492.0,50.0 L 621.0,172.0 L 750.0,273.4 L 879.0,334.4" fill="none" stroke="#55A868" stroke-width="2"/>
+<circle cx="492.0" cy="50.0" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="621.0" cy="172.0" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="750.0" cy="273.4" r="4" fill="#55A868" fill-opacity="0.85"/>
+<circle cx="879.0" cy="334.4" r="4" fill="#55A868" fill-opacity="0.85"/>
+<path d="M 492.0,50.0 L 621.0,50.0 L 750.0,50.0 L 879.0,50.0" fill="none" stroke="#C44E52" stroke-width="2"/>
+<circle cx="492.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="621.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="750.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<circle cx="879.0" cy="50.0" r="4" fill="#C44E52" fill-opacity="0.85"/>
+<line x1="65" y1="435" x2="83" y2="435" stroke="#999" stroke-width="2.5"/>
+<text x="87" y="439" fill="#333">Z</text>
+<line x1="130" y1="435" x2="148" y2="435" stroke="#4C72B0" stroke-width="2.5"/>
+<text x="152" y="439" fill="#333">A</text>
+<line x1="195" y1="435" x2="213" y2="435" stroke="#DD8452" stroke-width="2.5"/>
+<text x="217" y="439" fill="#333">C_CN</text>
+<line x1="260" y1="435" x2="278" y2="435" stroke="#55A868" stroke-width="2.5"/>
+<text x="282" y="439" fill="#333">C_PP</text>
+<line x1="325" y1="435" x2="343" y2="435" stroke="#C44E52" stroke-width="2.5"/>
+<text x="347" y="439" fill="#333">D</text>
+</svg>

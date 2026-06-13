@@ -1123,6 +1123,54 @@ collapses.}
 \label{tab:composition}
 \end{table}
 
+\subsection{Composition yields better representations (E36)}\label{sec:representations}
+E12 and E19 measured what a learner needs to match a \emph{single}
+synthesized world; E36 asks the representational question directly on
+\emph{factored} worlds, where composition's advantage should appear if it
+exists anywhere. The world is an economy of $K$ parametric sectors (the E30
+substrate); we sample transitions and learn, comparing a monolithic MLP and
+a 1-nearest-neighbor memorizer on the joint state against a composite of
+small per-sector learners (and the exact symbolic composite) on three axes a
+learned dynamics model is judged by (Figure~\ref{fig:representations}). The
+comparison is capacity-fair: the monolith is given at least as many
+parameters as the composite's children combined (\RepMonoParams{} vs.\
+\RepCompParams{} at $K{=}5$), so any gap is representational, not a matter of
+model size.
+
+\emph{Compositional generalization.} Training covers each sector's full
+marginal value range but only a thin slice of the joint product; the test
+set is the full product, dominated by sector-value \emph{combinations} never
+seen together. The composite needs only the marginals---each child sees its
+whole small local space---so its accuracy is flat in $K$ (learned
+\RepCompGenLo--\RepCompGenHi; symbolic exact). The monolith and the
+memorizer need the joint and collapse as the unseen fraction grows: by
+$K{=}5$ the monolithic MLP scores \RepMonoGenHi{} and 1-NN \RepKnnGenHi,
+roughly two orders of magnitude below the composite. \emph{Interference.}
+Trained on the sectors in sequence, the monolith forgets the first the moment
+it learns the second (retained accuracy \RepIntfMono); the composite stores
+each child separately and retains \RepIntfComp. \emph{Sample efficiency.} At
+100 training transitions the composite reaches \RepSampCompLo{} against the
+monolith's \RepSampMonoLo, and the symbolic composite needs none. The
+honest ceiling: the \emph{learned} composite tops out near 0.5---small MLPs
+do not nail an exact integer map even on covered marginals---so the decisive
+win is the three-tier gradient, monolithic learning collapses $\to$ factored
+learning helps by orders of magnitude $\to$ symbolic factoring is exact and
+training-free. Factoring the representation, not scaling the learner, is
+what buys generalization here.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\linewidth]{figs/representations.png}
+\caption{\textbf{Composition vs.\ monolithic learners (E36)} on a factored
+$K$-sector world, capacity-fair. \textbf{A:} exact accuracy on novel sector
+combinations---the composite is flat in $K$, the monolith and 1-NN collapse.
+\textbf{B:} accuracy retained on the first part after training through all
+$K$---the monolith suffers catastrophic interference, the composite does not.
+\textbf{C:} accuracy vs.\ training transitions---the composite learns from
+far less data, the symbolic composite from none.}
+\label{fig:representations}
+\end{figure}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

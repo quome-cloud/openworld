@@ -19,6 +19,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from .conditions_c import condition_c_community_notes, condition_c_polarity_product
 from .personas import ISSUES, Persona, generate_personas
 from .policy import (
     STANCES,
@@ -158,10 +159,16 @@ def run_trial(
             winner = condition_z(slate, rng)
         elif cond == "A":
             winner = condition_a(slate, personas)
+        elif cond == "C_CN":
+            winner = condition_c_community_notes(slate, personas)
+        elif cond == "C_PP":
+            winner = condition_c_polarity_product(slate, personas)
         elif cond == "D":
             winner = condition_d(table)
         else:
-            raise ValueError(f"Unknown condition: {cond!r} (supported: Z, A, D)")
+            raise ValueError(
+                f"Unknown condition: {cond!r} (supported: Z, A, C_CN, C_PP, D)"
+            )
 
         g_achieved = table.g_values[_bundle_index(winner)]
 

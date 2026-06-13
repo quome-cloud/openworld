@@ -1,0 +1,17 @@
+Adversarial Coalition Summary (N=100, K=7 archetype-seeded, P2)
+L-cluster: ideology<-0.05  R-cluster: ideology>0.05
+Attack: R zeroes endorsement for bundles with L-rate ≥ 50%
+
+Condition      centrist (med)  off_axis (med)
+----------------------------------------------
+Z                       0.184           0.206
+A                       0.278           0.405
+C_CN                    0.746           0.766
+C_CN_ADV                0.278           0.405
+C_PP                    0.746           0.766
+C_PP_ADV                0.228           0.331
+D                       1.000           1.000
+
+Adversarial degradation (C_CN vs C_CN_ADV):
+  centrist: clean=0.746  adversarial=0.278  degradation=+0.468
+  off_axis: clean=0.766  adversarial=0.405  degradation=+0.362

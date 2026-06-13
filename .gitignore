@@ -12,6 +12,9 @@ examples/orchard_dynamics.py
 orchard_dynamics.py
 autotune_triage_study.csv
 
+# Precomputed oracle cache (T344 bridging experiments)
+experiments/bridging/.cache/
+
 # LaTeX build intermediates
 paper/main.aux
 paper/main.bbl

@@ -33,7 +33,7 @@ EXPERIMENTS = [
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
-    "e44_emergent_economy",
+    "e44_emergent_economy", "e45_real_repo_induction",
 ]
 
 
@@ -426,6 +426,75 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_real_induction(e45):
+    """E45: inducing dynamics from real repo history. Left: exact-match (in-dist
+    + OOD), only the symbolic program is exact where neural/memorizer models
+    collapse. Right: OOD error (log) showing the collapse magnitude."""
+    s = e45["summary"]
+    methods = ["symbolic", "linear", "mlp", "knn1"]
+    labels = {"symbolic": "symbolic\n(ours)", "linear": "linear\nreg.",
+              "mlp": "MLP", "knn1": "1-NN"}
+    colors = {"symbolic": BLUE, "linear": SLATE, "mlp": ORANGE, "knn1": RED}
+    fig, (ax, axm) = plt.subplots(1, 2, figsize=(8.0, 3.4),
+                                  gridspec_kw={"width_ratios": [1.3, 1]})
+
+    x = range(len(methods))
+    w = 0.38
+    indist = [s["in_dist_exact"][m] for m in methods]
+    ood = [s["ood_exact"][m] for m in methods]
+    ax.bar([i - w / 2 for i in x], indist, w, color="#94A3B8", label="in-distribution")
+    ax.bar([i + w / 2 for i in x], ood, w,
+           color=[colors[m] for m in methods], label="out-of-distribution")
+    for i, (a, b) in enumerate(zip(indist, ood)):
+        ax.text(i - w / 2, a + 0.02, f"{a:.2f}", ha="center", fontsize=7)
+        ax.text(i + w / 2, b + 0.02, f"{b:.2f}", ha="center", fontsize=7)
+    ax.set_xticks(list(x)); ax.set_xticklabels([labels[m] for m in methods], fontsize=8.5)
+    ax.set_ylabel("Exact-match accuracy"); ax.set_ylim(0, 1.12)
+    ax.set_title("Exact recovery on held-out real commits", fontsize=9.5, loc="left")
+    ax.legend(fontsize=7.5, loc="upper right")
+
+    ood_mae = [max(s["ood_mae"][m], 1e-3) for m in methods]
+    bars = axm.bar([labels[m] for m in methods], ood_mae,
+                   color=[colors[m] for m in methods])
+    for b, v in zip(bars, [s["ood_mae"][m] for m in methods]):
+        axm.text(b.get_x() + b.get_width() / 2, max(v, 1e-3) * 1.3,
+                 f"{v:g}", ha="center", fontsize=7.5)
+    axm.set_yscale("log")
+    axm.set_ylabel("OOD mean abs. error (log)")
+    axm.set_title("Learned models collapse OOD", fontsize=9.5, loc="left")
+    axm.tick_params(axis="x", labelsize=8.5)
+
+    fig.suptitle("Inducing a verified world model from real repository history (E45)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "real_induction.png", dpi=200)
+    plt.close(fig)
+
+
+def table_real_induction(e45):
+    """E45: per-repo exact-match + the law-coverage of real commits."""
+    lines = ["\\begin{tabular}{lcccccc}", "\\toprule",
+             "& & \\multicolumn{2}{c}{Symbolic (ours)} & Linear & MLP & 1-NN \\\\",
+             "\\cmidrule(lr){3-4}",
+             "Repo & Law cov. & in-dist & OOD & OOD & OOD & OOD \\\\",
+             "\\midrule"]
+    for r in e45["repos"]:
+        i, o = r["in_dist"], r["ood"]
+        lines.append(
+            f"{r['repo']} & {r['law_coverage']:.3f} & "
+            f"{i['symbolic']['exact']:.2f} & {o['symbolic']['exact']:.2f} & "
+            f"{o['linear']['exact']:.2f} & {o['mlp']['exact']:.2f} & "
+            f"{o['knn1']['exact']:.2f} \\\\")
+    s = e45["summary"]
+    lines += ["\\midrule",
+              f"\\textbf{{Mean}} & {s['mean_law_coverage']:.3f} & "
+              f"{s['in_dist_exact']['symbolic']:.2f} & {s['ood_exact']['symbolic']:.2f} & "
+              f"{s['ood_exact']['linear']:.2f} & {s['ood_exact']['mlp']:.2f} & "
+              f"{s['ood_exact']['knn1']:.2f} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "real_induction.tex").write_text("\n".join(lines) + "\n")
 
 
 def table_induction(e37):
@@ -1338,7 +1407,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "43"),
+        macro("NumExperiments", "44"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1688,6 +1757,22 @@ def numbers_tex(d):
         macro("EconCoopWelfareGain",
               f"{100 * (c4['cooperative_welfare'] / c4['selfish_welfare'] - 1):.1f}"),
     ]
+    # E45 (inducing a verified world model from real repository history)
+    e45 = d["e45_real_repo_induction"]["summary"]
+    sx, ox = e45["in_dist_exact"], e45["ood_exact"]
+    om = e45["ood_mae"]
+    lines += [
+        macro("RealRepos", str(e45["n_repos"])),
+        macro("RealCoverage", f"{e45['mean_law_coverage']:.3f}"),
+        macro("RealSymIn", acc(sx["symbolic"])),
+        macro("RealSymOod", acc(ox["symbolic"])),
+        macro("RealLinOod", acc(ox["linear"])),
+        macro("RealMlpOod", acc(ox["mlp"])),
+        macro("RealKnnOod", acc(ox["knn1"])),
+        macro("RealSymOodMae", f"{om['symbolic']:g}"),
+        macro("RealMlpOodMae", f"{round(om['mlp'])}"),
+        macro("RealKnnOodMae", f"{round(om['knn1'])}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1722,6 +1807,8 @@ def main():
     fig_agent_traversal(data["e42_agent_traversal"])
     fig_active_induction(data["e43_active_induction"])
     fig_emergent_economy(data["e44_emergent_economy"])
+    fig_real_induction(data["e45_real_repo_induction"])
+    table_real_induction(data["e45_real_repo_induction"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

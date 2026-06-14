@@ -1520,6 +1520,67 @@ quantities; they emerge and are causally attributed by separable toggles.}
 \label{fig:economy}
 \end{figure}
 
+\subsection{Translating to the real world: inducing dynamics from real repository history (E45)}\label{sec:realworld}
+Every result so far lives in a synthetic oracle world with exact ground truth.
+E45 asks whether the central claims---exact recovery, OOD transfer,
+auditability---survive contact with real measured data. We treat a software
+repository as a world: its state (file counts and lines of Python) evolves as
+commits apply diffs. We mine real \mbox{(state, action, next state)} triples from
+\RealRepos{} open-source repositories (\texttt{requests}, \texttt{flask},
+\texttt{tqdm}), reading each commit's state directly from the git tree and its
+diff separately---so the laws we induce are empirical claims about git, not
+identities built by construction. We then induce the dynamics with the framework's
+own LLM synthesis+verify pipeline (the E37 path, qwen3-coder:30b), held to the
+same learned baselines as E12/E37.
+
+The synthesizer recovers the exact accounting laws---$\textrm{loc}' = \textrm{loc}
++ \textrm{insertions} - \textrm{deletions}$, and likewise for file counts---which
+hold on \RealCoverage{} of all real commits (the residual is genuine
+misspecification: binary files, renames, merges). The induced program is exact on
+held-out commits (\RealSymIn{} in-distribution, \RealSymOod{} OOD; mean absolute
+error \RealSymOodMae{} lines) and, on the out-of-distribution split (the
+top-decile largest commits), even edges linear regression (\RealLinOod), because
+the verification gate rejects the outlier commits that bias a least-squares fit.
+The nonlinear learned world models---the paper's actual learned baselines---
+\emph{collapse} on real data: the MLP and the 1-NN memorizer score \RealMlpOod{}
+and \RealKnnOod{} exact OOD with mean absolute errors of \RealMlpOodMae{} and
+\RealKnnOodMae{} lines (Figure~\ref{fig:real-induction}, Table~\ref{tab:real-induction}).
+
+We report one honest caveat prominently: this real law is \emph{linear}, so
+linear regression also captures it (\RealLinOod{} OOD)---the symbolic model's
+advantage over linear here is exactness on the clean subset plus an auditable,
+verification-certified program rather than an opaque set of near-unit
+coefficients. The advantage over the nonlinear learned models is categorical, and
+the advantage over linear becomes categorical too on the nonlinear worlds that
+make up the rest of the paper (E36 shows ridge and linear regression failing the
+floor-division sprint dynamics). The takeaway: on real, messy, out-of-sample data,
+the framework induces an exact, auditable program where learned world models
+either collapse or, at best, fit an unverifiable approximation---and it quantifies
+its own boundary by reporting exactly which real commits fall outside the law.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/real_induction.png}
+\caption{\textbf{Inducing a verified world model from real repository history
+(E45).} Mined from \RealRepos{} real repos. \textbf{Left:} exact-match accuracy
+on held-out real commits, in-distribution and OOD (top-decile-churn commits).
+Only the symbolic program (and, for this linear law, linear regression) is exact;
+the neural MLP and the 1-NN memorizer are not. \textbf{Right:} OOD mean absolute
+error (log scale)---the learned world models miss by hundreds of lines, the
+induced program by a fraction of one.}
+\label{fig:real-induction}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E45 real-repository induction.} Per-repo exact-match (fraction of
+held-out commits predicted exactly). ``Law cov.'' is the fraction of all real
+commits obeying the induced accounting law; the rest are real misspecification
+(binaries, renames, merges).}
+\label{tab:real-induction}
+\input{tables/real_induction}
+\end{table}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

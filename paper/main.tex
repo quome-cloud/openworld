@@ -1469,6 +1469,57 @@ recover from away-changes within a visit (hatched = no recovery).}
 \label{fig:agent-traversal}
 \end{figure}
 
+\subsection{An emergent economy from composed verified rules (E44)}\label{sec:economy}
+The final experiment scales composition from belief-tracking to a small open
+world: \EconAgents{} agents that gather, sell, and accumulate gold over
+\EconTicks{} ticks, assembled entirely from separable verified rules and the
+framework's \texttt{CompositeWorld}/\texttt{Aggregator} machinery. Each agent is
+a real child world whose tick produces goods (with a concave capital term, so
+wealth begets output at diminishing returns); the macro quantities we report---
+money supply, market price, and the wealth Gini---are \emph{aggregators} derived
+from the leaves, so a headline number can never drift from the micro state. The
+market price, the gold faucet (sale revenue), the burn-tax sink, and
+redistribution are each their own toggleable rule. Two properties make this more
+than a simulator demo. First, the macro phenomena \emph{emerge}: nothing in the
+rules targets a price level, an inflation rate, or an inequality coefficient.
+Second---because every rule is a separate verified component---we read each
+phenomenon's cause as a clean counterfactual by switching one rule on or off,
+which a black-box economy cannot offer.
+
+Four phenomena emerge and each yields to its causal toggle
+(Figure~\ref{fig:economy}). \textbf{Price formation:} the market price converges
+to a level set by supply and demand, not scripted---scarcer supply clears at a
+higher price (\EconScarcePrice{} vs.\ \EconAbundantPrice{} when supply doubles).
+\textbf{Inflation:} with the burn sink off, gold only enters and the money
+supply chases a fixed stock of goods, inflating price at slope
+\EconInflOffSlope{}/tick; turning the verified tax sink on bends that to
+\EconInflOnSlope{}---inflation isolated to one rule. \textbf{Inequality:} under
+selfish accumulation the Gini climbs to \EconGiniOff{} as capital compounds;
+enabling the redistribution rule collapses it to \EconGiniOn{}. \textbf{The
+selfish--cooperative dial:} flipping agents from individual gold-maximization to
+welfare-sharing raises \emph{total} welfare by \EconCoopWelfareGain\% (\EconSelfishWelfare{}
+$\to$ \EconCoopWelfare{} gold)---because concave capital means an equal spread
+produces more---yet the single greediest selfish agent still ends richer than
+any cooperator (\EconSelfishMax{} vs.\ \EconCoopMax{} gold). This is the E08
+welfare--fairness Pareto tension of the moral dial (\S\ref{sec:robustness}),
+now \emph{emerging} from a composed verified economy rather than declared as a
+scalar reward, and every tick the books balance exactly: total gold moves only
+by the faucet inflow minus the sink outflow, asserted throughout the run.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/emergent_economy.png}
+\caption{\textbf{Emergent economy from composed verified rules (E44).} Four
+macro phenomena, each isolated by toggling one verified rule. \textbf{A:} price
+converges to a supply-set level (scarcer supply $\Rightarrow$ higher price).
+\textbf{B:} money supply (log) inflates with the burn sink off; the sink curbs
+it. \textbf{C:} the wealth Gini rises under selfish accumulation; redistribution
+flattens it. \textbf{D:} cooperation raises total welfare while selfishness
+produces the single richest agent. Nothing in the rules targets these
+quantities; they emerge and are causally attributed by separable toggles.}
+\label{fig:economy}
+\end{figure}
+
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.

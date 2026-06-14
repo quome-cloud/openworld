@@ -34,6 +34,7 @@ EXPERIMENTS = [
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
+    "e47_relativity",
 ]
 
 
@@ -426,6 +427,93 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_relativity(e47):
+    """E47: relativity as a verified world model. Time dilation (exact vs
+    learned/Newtonian, OOD near c), velocity addition saturating at c, the twin
+    paradox worldline, and real atomic-clock validation (Hafele-Keating)."""
+    td, va = e47["time_dilation"], e47["velocity_addition"]
+    tw, hk, gp = e47["twin_paradox"], e47["hafele_keating"], e47["gps"]
+    fig, ((a, b), (c, d)) = plt.subplots(2, 2, figsize=(8.2, 6.2))
+
+    # A: time dilation
+    full_x = td["in_frac"] + td["ood_frac"]
+    full_y = td["in_truth"] + td["truth"]
+    a.plot(full_x, full_y, "-", color=BLUE, lw=2.2, label="symbolic (exact)")
+    a.plot(td["ood_frac"], td["learned"], "--", color=ORANGE, lw=2, label="learned (fit $v\\leq0.3c$)")
+    a.axhline(1.0, color=SLATE, lw=1.5, ls=":", label="Newtonian (no dilation)")
+    a.axvspan(0.3, 1.0, color="0.92", zorder=0)
+    a.text(0.62, 0.9, "OOD", color=SLATE, fontsize=8)
+    a.set_xlabel("speed $v/c$"); a.set_ylabel("clock rate ($1/\\gamma$)")
+    a.set_ylim(0, 1.08)
+    a.set_title("A. Time dilation: exact vs approximate", fontsize=9.5, loc="left")
+    a.legend(fontsize=7.5, loc="lower left")
+
+    # B: velocity addition
+    b.plot(va["fracs"], va["rel_over_c"], "-", color=BLUE, lw=2.2,
+           label="relativistic $(u{+}v)/(1{+}uv/c^2)$")
+    b.plot(va["fracs"], va["gal_over_c"], "--", color=RED, lw=2, label="Galilean $u{+}v$")
+    b.axhline(1.0, color=SLATE, lw=1.5, ls=":", label="$c$")
+    b.set_xlabel("each input speed ($/c$)"); b.set_ylabel("combined speed ($/c$)")
+    b.set_title("B. Velocity addition stays below $c$", fontsize=9.5, loc="left")
+    b.legend(fontsize=7.5, loc="upper left")
+
+    # C: twin paradox worldlines
+    n = len(tw["traj_stay"])
+    lab = [10.0 * i / n for i in range(n)]
+    c.plot(lab, tw["traj_stay"], "-", color=TEAL, lw=2.2, label="stay-at-home")
+    c.plot(lab, tw["traj_travel"], "-", color=PURPLE, lw=2.2, label="traveler (0.8c)")
+    c.annotate(f"{tw['symbolic']['diff_years']:.0f} yr younger",
+               xy=(10, tw["symbolic"]["travel_years"]),
+               xytext=(6.2, tw["symbolic"]["travel_years"] - 2.2), fontsize=8, color=PURPLE,
+               arrowprops=dict(arrowstyle="->", color=PURPLE, lw=1))
+    c.set_xlabel("lab-frame time (yr)"); c.set_ylabel("clock / proper time (yr)")
+    c.set_title("C. Twin paradox (changing reference)", fontsize=9.5, loc="left")
+    c.legend(fontsize=8, loc="upper left")
+
+    # D: Hafele-Keating model vs measured
+    x = [0, 1]
+    w = 0.36
+    model = [hk["model_east_ns"], hk["model_west_ns"]]
+    obs = [hk["pub_obs_east_ns"], hk["pub_obs_west_ns"]]
+    err = [hk["pub_obs_east_err"], hk["pub_obs_west_err"]]
+    d.bar([i - w / 2 for i in x], model, w, color=BLUE, label="symbolic model")
+    d.bar([i + w / 2 for i in x], obs, w, yerr=err, color=SLATE, capsize=4,
+          label="measured (1971)")
+    d.axhline(0, color="k", lw=0.8)
+    d.set_xticks(x); d.set_xticklabels(["eastward", "westward"], fontsize=9)
+    d.set_ylabel("clock shift vs ground (ns)")
+    d.set_title(f"D. Atomic clocks: GPS {gp['net_us_per_day']:+.0f}µs/day; Hafele–Keating",
+                fontsize=9.0, loc="left")
+    d.legend(fontsize=7.5, loc="upper left")
+
+    fig.suptitle("Relativity as a verified world model: reference frames and atomic clocks (E47)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(FIGS / "relativity.png", dpi=200)
+    plt.close(fig)
+
+
+def table_relativity(e47):
+    """E47: real atomic-clock validation, symbolic model vs measurement."""
+    gp, hk = e47["gps"], e47["hafele_keating"]
+    lines = ["\\begin{tabular}{llrr}", "\\toprule",
+             "Test & Effect & Symbolic model & Measured / documented \\\\",
+             "\\midrule",
+             f"GPS & SR (orbital $v$) & {gp['sr_us_per_day']:.1f} $\\mu$s/day & \\\\",
+             f"GPS & GR (altitude) & {gp['gr_us_per_day']:.1f} $\\mu$s/day & \\\\",
+             f"GPS & \\textbf{{net}} & \\textbf{{{gp['net_us_per_day']:+.1f} $\\mu$s/day}} "
+             f"& $\\sim$+38 $\\mu$s/day \\\\",
+             "\\midrule",
+             f"Hafele--Keating & eastward & {hk['model_east_ns']:.0f} ns & "
+             f"${hk['pub_obs_east_ns']}\\pm{hk['pub_obs_east_err']}$ ns \\\\",
+             f"Hafele--Keating & westward & {hk['model_west_ns']:.0f} ns & "
+             f"${hk['pub_obs_west_ns']}\\pm{hk['pub_obs_west_err']}$ ns \\\\",
+             f"Hafele--Keating & Newtonian & {hk['newtonian_east_ns']:.0f} / "
+             f"{hk['newtonian_west_ns']:.0f} ns & (off by $10^2$ ns) \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "relativity.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_next_token(e45):
@@ -1472,7 +1560,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "45"),
+        macro("NumExperiments", "46"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1855,6 +1943,24 @@ def numbers_tex(d):
         macro("NextTokDirectIn", acc(s45["llm_direct"]["in_dist"])),
         macro("NextTokDirectOod", acc(s45["llm_direct"]["ood"])),
     ]
+    # E47 (relativity as a verified world model)
+    e47 = d["e47_relativity"]
+    rtd, rtw, rg, rhk = (e47["time_dilation"], e47["twin_paradox"],
+                         e47["gps"], e47["hafele_keating"])
+    lines += [
+        macro("RelNewtErr", f"{rtd['newtonian_err_near_c']:.2f}"),
+        macro("RelLearnErr", f"{rtd['learned_err_near_c']:.2f}"),
+        macro("RelTwinStay", f"{rtw['symbolic']['stay_years']:.0f}"),
+        macro("RelTwinTravel", f"{rtw['symbolic']['travel_years']:.0f}"),
+        macro("RelTwinDiff", f"{rtw['symbolic']['diff_years']:.0f}"),
+        macro("RelGpsSR", f"{rg['sr_us_per_day']:.1f}"),
+        macro("RelGpsGR", f"{rg['gr_us_per_day']:.1f}"),
+        macro("RelGpsNet", f"{rg['net_us_per_day']:+.1f}"),
+        macro("RelHKModelEast", f"{rhk['model_east_ns']:.0f}"),
+        macro("RelHKModelWest", f"{rhk['model_west_ns']:.0f}"),
+        macro("RelHKObsEast", f"{rhk['pub_obs_east_ns']}\\pm{rhk['pub_obs_east_err']}"),
+        macro("RelHKObsWest", f"{rhk['pub_obs_west_ns']}\\pm{rhk['pub_obs_west_err']}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1892,6 +1998,8 @@ def main():
     fig_many_worlds(data["e46_many_worlds"])
     fig_next_token(data["e45_next_token"])
     table_next_token(data["e45_next_token"])
+    fig_relativity(data["e47_relativity"])
+    table_relativity(data["e47_relativity"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])

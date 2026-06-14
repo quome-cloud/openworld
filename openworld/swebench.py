@@ -224,11 +224,33 @@ def _feedback_prompt(instance: SWEBenchInstance, state: WorldState) -> str:
     )
 
 
-def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
-    """Condition A: one completion from issue + buggy module, no feedback."""
+def solve_single_shot(
+    instance: SWEBenchInstance, llm: BaseLLM, trace_sink=None
+) -> Dict[str, Any]:
+    """Condition A: one completion from issue + buggy module, no feedback.
+
+    If `trace_sink` is given, it is called once with the full (prompt,
+    completion, patch, pass/fail) record for this attempt — the raw material
+    for verified-trace distillation. Default None preserves byte-identical
+    behavior and adds no dependency.
+    """
     prompt = _base_prompt(instance, instance.buggy_source) + "\nProvide the corrected module."
-    patch = extract_code(_safe_ask(llm, prompt, SYSTEM_PROMPT))
+    raw = _safe_ask(llm, prompt, SYSTEM_PROMPT)
+    patch = extract_code(raw)
     result = run_instance_tests(patch, instance)
+    if trace_sink is not None:
+        trace_sink({
+            "instance_id": instance.instance_id,
+            "condition": "single_shot",
+            "attempt_idx": 0,
+            "system": SYSTEM_PROMPT,
+            "prompt": prompt,
+            "completion": raw,
+            "patch": patch,
+            "passed": result["solved"],
+            "fail_to_pass_failed": result["fail_to_pass"]["failed"],
+            "pass_to_pass_failed": result["pass_to_pass"]["failed"],
+        })
     return {
         "instance_id": instance.instance_id,
         "condition": "single_shot",
@@ -240,21 +262,40 @@ def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any
 
 
 def solve_in_world(
-    instance: SWEBenchInstance, llm: BaseLLM, budget: int = 4
+    instance: SWEBenchInstance, llm: BaseLLM, budget: int = 4, trace_sink=None
 ) -> Dict[str, Any]:
-    """Condition B: iterative repair inside the world, exact feedback each step."""
+    """Condition B: iterative repair inside the world, exact feedback each step.
+
+    If `trace_sink` is given, it is called once per attempt with the full
+    (prompt, completion, patch, pass/fail) record. The solving attempt's record
+    has passed=True — that (feedback-prompt -> passing patch) pair is a verified
+    training example. Default None preserves byte-identical behavior.
+    """
     world = build_swebench_world(instance)
     attempts_used = 0
     first_attempt_solved = False
     saw_regression = False
     for attempt in range(budget):
-        patch = extract_code(
-            _safe_ask(llm, _feedback_prompt(instance, world.state), SYSTEM_PROMPT)
-        )
+        prompt = _feedback_prompt(instance, world.state)
+        raw = _safe_ask(llm, prompt, SYSTEM_PROMPT)
+        patch = extract_code(raw)
         world.step(Action("submit_patch", params={"source": patch}))
         attempts_used = attempt + 1
         if world.state["pass_to_pass_failed"] > 0:
             saw_regression = True
+        if trace_sink is not None:
+            trace_sink({
+                "instance_id": instance.instance_id,
+                "condition": "in_world",
+                "attempt_idx": attempt,
+                "system": SYSTEM_PROMPT,
+                "prompt": prompt,
+                "completion": raw,
+                "patch": patch,
+                "passed": bool(world.state["solved"]),
+                "fail_to_pass_failed": world.state["fail_to_pass_failed"],
+                "pass_to_pass_failed": world.state["pass_to_pass_failed"],
+            })
         if world.state["solved"]:
             first_attempt_solved = attempt == 0
             break

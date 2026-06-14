@@ -330,12 +330,16 @@ def evaluate_contextbench(recipe, model, llm_factory, mock=False,
 
 
 def evaluate(recipe, model, llm_factory, budget=None, mock=False,
-             results_dir=None, seeds=None) -> Dict[str, Any]:
+             results_dir=None, seeds=None, trace_sink=None) -> Dict[str, Any]:
     """Run the paired ablation for one model; write one frozen-schema file.
 
     With multiple `seeds`, each instance is run once per seed (n_instances x
     n_seeds paired trials), tightening the CIs and powering the McNemar test.
     `llm_factory(instance, seed)` builds the model for a given seed.
+
+    If `trace_sink` is given, each attempt's full (prompt, completion, patch,
+    pass/fail) record is forwarded to it, annotated with `seed` and `model` —
+    the verified-trace harvest for distillation. Default None changes nothing.
     """
     from datetime import datetime
 
@@ -347,8 +351,13 @@ def evaluate(recipe, model, llm_factory, budget=None, mock=False,
     rows = []
     for inst in instances:
         for sd in seeds:
-            single = solve_single_shot(inst, llm_factory(inst, sd))
-            in_world = solve_in_world(inst, llm_factory(inst, sd), budget=budget)
+            sink = None
+            if trace_sink is not None:
+                sink = lambda rec, _sd=sd: trace_sink(
+                    {**rec, "seed": _sd, "model": model})
+            single = solve_single_shot(inst, llm_factory(inst, sd), trace_sink=sink)
+            in_world = solve_in_world(inst, llm_factory(inst, sd), budget=budget,
+                                      trace_sink=sink)
             rows.append({"instance_id": inst.instance_id, "seed": sd,
                          "single_shot": single, "in_world": in_world})
             tag = f" seed={sd}" if len(seeds) > 1 else ""
@@ -532,6 +541,11 @@ def main(argv=None) -> int:
                              "significance (McNemar); overrides recipe eval.seeds")
     parser.add_argument("--freeze", action="store_true",
                         help="with build: write the artifact hash into the recipe")
+    parser.add_argument("--log-traces", default=None, metavar="DIR",
+                        help="with run (swebench kind): append every attempt's "
+                             "(prompt, completion, patch, pass/fail) to "
+                             "DIR/<model>.traces.jsonl for verified-trace "
+                             "distillation. Does not alter results output.")
     args = parser.parse_args(argv)
 
     recipe = load_recipe(args.recipe)
@@ -563,8 +577,20 @@ def main(argv=None) -> int:
             if kind == "contextbench":
                 return evaluate_contextbench(recipe, model, factory,
                                              mock=mock, seeds=seeds)
-            return evaluate(recipe, model, factory,
-                            budget=args.budget, mock=mock, seeds=seeds)
+            sink, fh = None, None
+            if args.log_traces:
+                tdir = Path(args.log_traces)
+                tdir.mkdir(parents=True, exist_ok=True)
+                fh = open(tdir / f"{_model_slug(model)}.traces.jsonl",
+                          "a", encoding="utf-8")
+                sink = lambda rec, _fh=fh: (_fh.write(json.dumps(rec) + "\n"),
+                                            _fh.flush())
+            try:
+                return evaluate(recipe, model, factory, budget=args.budget,
+                                mock=mock, seeds=seeds, trace_sink=sink)
+            finally:
+                if fh is not None:
+                    fh.close()
 
         if args.mock:
             results.append(_run("mock", mock_factory, True))

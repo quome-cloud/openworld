@@ -33,7 +33,7 @@ EXPERIMENTS = [
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
-    "e44_emergent_economy",
+    "e44_emergent_economy", "e46_many_worlds",
 ]
 
 
@@ -426,6 +426,63 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_many_worlds(e46):
+    """E46: a factored store holds an exact version space over world spaces too
+    large to enumerate. Left: update+query time vs world count (factored grows
+    ~N^(1/#params); enumeration ~N and stops). Right: graceful degradation as a
+    mechanism couples w parameters (factor ~ d^w)."""
+    scale = e46["scale"]
+    coup = e46["coupling"]
+    fig, (ax, axc) = plt.subplots(1, 2, figsize=(8.0, 3.4))
+
+    n = [r["n_worlds"] for r in scale]
+    fct = [r["factored_ms"] for r in scale]
+    en_n = [r["n_worlds"] for r in scale if r["enum_ms"] is not None]
+    en = [r["enum_ms"] for r in scale if r["enum_ms"] is not None]
+    ax.plot(n, fct, "-o", color=BLUE, lw=2, markersize=4, label="factored store (ours)")
+    ax.plot(en_n, en, "--s", color=RED, lw=2, markersize=4, label="enumerated (E43-style)")
+    ax.annotate("enumeration\ninfeasible", xy=(en_n[-1], en[-1]),
+                xytext=(en_n[-1] * 50, en[-1] * 4), fontsize=8, color=RED,
+                arrowprops=dict(arrowstyle="->", color=RED, lw=1))
+    ax.set_xscale("log"); ax.set_yscale("log")
+    ax.set_xlabel("World-space size (number of worlds)")
+    ax.set_ylabel("Update + query time (ms)")
+    ax.set_title("Exact version space, far past enumeration", fontsize=9.5, loc="left")
+    ax.legend(fontsize=8, loc="upper left")
+
+    w = [r["w"] for r in coup]
+    fsize = [r["factor_size"] for r in coup]
+    ideal = [r["ideal_factored"] for r in coup]
+    axc.plot(w, fsize, "-o", color=ORANGE, lw=2, markersize=4, label="coupled factor ($d^w$)")
+    axc.plot(w, ideal, "--^", color=TEAL, lw=2, markersize=4, label="separable ideal ($wd$)")
+    axc.set_yscale("log")
+    axc.set_xlabel("Coupling width $w$ (params per mechanism)")
+    axc.set_ylabel("Factor size (entries)")
+    axc.set_title("Boundary: coupling costs (the #P analogue)", fontsize=9.5, loc="left")
+    axc.set_xticks(w)
+    axc.legend(fontsize=8, loc="upper left")
+
+    fig.suptitle("A database for many worlds: factored, semiring-annotated store (E46)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "many_worlds.png", dpi=200)
+    plt.close(fig)
+
+
+def table_many_worlds(e46):
+    """E46: factored vs enumerated cost across world-space sizes."""
+    lines = ["\\begin{tabular}{rrrr}", "\\toprule",
+             "Worlds & Consistent & Factored (ms) & Enumerated (ms) \\\\",
+             "\\midrule"]
+    for r in e46["scale"]:
+        en = "infeasible" if r["enum_ms"] is None else f"{r['enum_ms']:.0f}"
+        mant, exp = f"{r['n_worlds']:.1e}".split("e")
+        lines.append(f"${mant}\\times10^{{{int(exp)}}}$ & {r['consistent']:.0f} & "
+                     f"{r['factored_ms']:.2f} & {en} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "many_worlds.tex").write_text("\n".join(lines) + "\n")
 
 
 def table_induction(e37):
@@ -1338,7 +1395,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "43"),
+        macro("NumExperiments", "44"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1688,6 +1745,24 @@ def numbers_tex(d):
         macro("EconCoopWelfareGain",
               f"{100 * (c4['cooperative_welfare'] / c4['selfish_welfare'] - 1):.1f}"),
     ]
+    # E46 (factored many-worlds store)
+    e46 = d["e46_many_worlds"]["summary"]
+    big = d["e46_many_worlds"]["scale"][-1]
+    coup = d["e46_many_worlds"]["coupling"]
+
+    def sci(x):
+        m, e = f"{x:.0e}".split("e")
+        return f"{m}\\times10^{{{int(e)}}}"
+
+    lines += [
+        macro("ManyWorldsMax", f"${sci(e46['max_worlds'])}$"),
+        macro("ManyWorldsMaxMs", f"{e46['max_worlds_factored_ms']:.0f}"),
+        macro("ManyWorldsEnumMax", f"${sci(e46['enum_max_worlds'])}$"),
+        macro("ManyWorldsConsistent", str(big["consistent"])),
+        macro("ManyWorldsCoupleWidth", str(coup[-1]["w"])),
+        macro("ManyWorldsCoupleFactor", str(coup[-1]["factor_size"])),
+        macro("ManyWorldsCoupleIdeal", str(coup[-1]["ideal_factored"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1722,6 +1797,8 @@ def main():
     fig_agent_traversal(data["e42_agent_traversal"])
     fig_active_induction(data["e43_active_induction"])
     fig_emergent_economy(data["e44_emergent_economy"])
+    fig_many_worlds(data["e46_many_worlds"])
+    table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

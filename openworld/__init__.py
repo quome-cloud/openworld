@@ -29,6 +29,8 @@ from .ethics import (
 )
 from .judge import Judge
 from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
+from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
+                         WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
@@ -86,6 +88,12 @@ __all__ = [
     "LLMTransition",
     "PhasedTransition",
     "MockLLM",
+    "BOOLEAN",
+    "COUNTING",
+    "PROBABILITY",
+    "Mechanism",
+    "Semiring",
+    "WorldStore",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

@@ -32,6 +32,7 @@ from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
 from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
+from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
@@ -94,6 +95,10 @@ __all__ = [
     "Mechanism",
     "Semiring",
     "WorldStore",
+    "LOG",
+    "TROPICAL",
+    "Skill",
+    "TrajectorySpace",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

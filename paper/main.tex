@@ -822,6 +822,63 @@ past it.}
 \input{tables/many_worlds}
 \end{table}
 
+\subsubsection{Path integrals over learning trajectories (E49)}\label{sec:path-integral}
+E46 searches the space of worlds for a problem; E49 asks how an agent should
+\emph{traverse} that space---in what order to master worlds---to solve a new,
+out-of-distribution problem as directly as possible. We cast it as a path
+integral over learning trajectories: a trajectory is an ordering of skills to
+learn, weighted by $e^{-\beta S}$ with action $S$ the total learning cost; the
+sum is dominated by the least-action path, the most direct curriculum. Crucially
+this needs \emph{no new machinery}: a path integral is a sum over paths, which is
+a semiring computation, so we reuse the E46 \texttt{Semiring} and swap the value
+ring---tropical $(\min,+)$ for the least-action path, log (log-sum-exp,~$+$) for
+the full partition function---and run a forward/backward dynamic program over
+capability-states. The combinatorially many trajectories are summed
+\emph{without enumeration}: \PathTraj{} distinct trajectories are accounted for by
+a DP over just \PathStates{} states.
+
+Skills compose cheaply once their prerequisites are mastered and are expensive to
+learn from scratch, and the target (``\PathGoal'') is a \emph{novel composition},
+so the least-action path reuses mastered sub-worlds---compositional transfer
+rather than learning the target blind. The agent's trajectory is built
+\emph{from its spec}: a senior SWE, a director, and a CEO start with different
+capabilities and get different optimal curricula to the same goal (cost
+\PathSweCost{}, \PathDirCost{}, \PathCeoCost{} respectively;
+Table~\ref{tab:path-integral}, Figure~\ref{fig:path-integral}). All three are
+far below unplanned baselines---random ordering averages \PathRandom{} because it
+pays the from-scratch penalty for learning composites before their
+prerequisites---and far below learning the goal from scratch (\PathScratch{}), a
+$\PathSpeedup\times$ compositional-transfer speedup. As the inverse temperature
+$\beta$ grows the free energy $-\tfrac1\beta\log Z$ rises from the
+entropy-dominated regime (many near-equivalent orderings) to the least-action
+cost---the path integral collapsing onto the optimal curriculum---while the
+forward$\times$backward marginals flag exactly the worlds that lie on it. The
+bridge is the point: one semiring engine now answers version-space, counting,
+posterior \emph{and} optimal-trajectory queries over composite-world spaces, and
+turns an agent spec into a concrete learning path toward an OOD goal.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/path_integral.png}
+\caption{\textbf{Path integrals over learning trajectories (E49).} \textbf{A:}
+per-agent least-action curriculum cost vs.\ unplanned baselines and the
+from-scratch reference. \textbf{B:} path-integral marginals (the worlds on the
+optimal path). \textbf{C:} free energy $-\tfrac1\beta\log Z$ rises to the
+least-action cost as $\beta$ grows---the integral collapsing onto the optimal
+curriculum. \textbf{D:} \PathTraj{} trajectories summed over \PathStates{} DP
+states (no enumeration).}
+\label{fig:path-integral}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E49 agent-spec $\to$ trajectory.} Least-action curriculum cost
+to the OOD goal by starting role, vs.\ unplanned baselines; the from-scratch
+(no-transfer) cost is \PathScratch{}.}
+\label{tab:path-integral}
+\input{tables/path_integral}
+\end{table}
+
 \subsubsection{Next-token world models: exact length generalization (E45)}\label{sec:next-token}
 The induction results so far live in the framework's own state--action worlds.
 E45 lands the same thesis on the LLM field's native task---next-token

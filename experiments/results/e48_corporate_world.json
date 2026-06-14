@@ -1,0 +1,175 @@
+{
+  "divisions": {
+    "database": {
+      "a": 2.0,
+      "R0": 200,
+      "hc": 10
+    },
+    "serverless": {
+      "a": 1.0,
+      "R0": 250,
+      "hc": 8
+    },
+    "storage": {
+      "a": 0.6,
+      "R0": 400,
+      "hc": 12
+    },
+    "compute": {
+      "a": 1.5,
+      "R0": 300,
+      "hc": 10
+    },
+    "networking": {
+      "a": 0.4,
+      "R0": 350,
+      "hc": 9
+    }
+  },
+  "budget": 60.0,
+  "total_revenue": 1500,
+  "pareto": [
+    {
+      "rho": 0.0,
+      "company_growth": 0.1151555469788581,
+      "promo_gini": 0.48987471436451013,
+      "top_impact": 8.892320230027654
+    },
+    {
+      "rho": 0.1,
+      "company_growth": 0.11351512910915094,
+      "promo_gini": 0.4568695232317972,
+      "top_impact": 8.43599568314394
+    },
+    {
+      "rho": 0.2,
+      "company_growth": 0.11029481635763079,
+      "promo_gini": 0.43181503135171373,
+      "top_impact": 7.953533004815361
+    },
+    {
+      "rho": 0.3,
+      "company_growth": 0.1061736166682646,
+      "promo_gini": 0.4086401105820703,
+      "top_impact": 7.439848879604433
+    },
+    {
+      "rho": 0.4,
+      "company_growth": 0.10127866237065894,
+      "promo_gini": 0.3851993453723279,
+      "top_impact": 6.887961632008081
+    },
+    {
+      "rho": 0.5,
+      "company_growth": 0.09558313455236968,
+      "promo_gini": 0.3674441038311582,
+      "top_impact": 6.287819935134875
+    },
+    {
+      "rho": 0.6,
+      "company_growth": 0.0889506344802933,
+      "promo_gini": 0.35077708690919196,
+      "top_impact": 5.623997122095959
+    },
+    {
+      "rho": 0.7,
+      "company_growth": 0.08109423090278546,
+      "promo_gini": 0.33014647300361655,
+      "top_impact": 4.8705243785456735
+    },
+    {
+      "rho": 0.8,
+      "company_growth": 0.07141134610056847,
+      "promo_gini": 0.3268228481497708,
+      "top_impact": 3.97676650240768
+    },
+    {
+      "rho": 0.9,
+      "company_growth": 0.05830373399187359,
+      "promo_gini": 0.33707449007082246,
+      "top_impact": 2.9469439703663802
+    },
+    {
+      "rho": 1.0,
+      "company_growth": 0.02478709341572747,
+      "promo_gini": 0.7551020408163263,
+      "top_impact": 3.0983866769659336
+    }
+  ],
+  "value_of_action": {
+    "baseline": 122.51771944360648,
+    "ceo_gain": 25.16926955677907,
+    "director_gain": 13.613079938178501,
+    "ic_gain": 6.448301023347696,
+    "ceo_pct": 20.543370927145116,
+    "director_pct": 11.111111111111112,
+    "ic_pct": 5.263157894736832
+  },
+  "perception": {
+    "period": "2026-Q3",
+    "true_growth": {
+      "database": 42.0,
+      "serverless": 28.000000000000004,
+      "storage": 11.0,
+      "compute": 33.0,
+      "networking": 8.0
+    },
+    "division_signal": {
+      "ceo_extract_err": 7.105427357601002e-16,
+      "ceo_growth_gap": 0.0,
+      "director_extract_err": 7.105427357601002e-16,
+      "ceo_perceived": {
+        "database": 42.0,
+        "serverless": 28.0,
+        "storage": 11.0,
+        "compute": 33.0,
+        "networking": 8.0
+      },
+      "director_perceived": {
+        "database": 42.0,
+        "serverless": 28.0,
+        "storage": 11.0,
+        "compute": 33.0,
+        "networking": 8.0
+      }
+    },
+    "individual_signal": {
+      "recover_from_one_on_one": 1.0,
+      "recover_from_all_hands": 0.0,
+      "n_sampled": 5
+    },
+    "ground_truth_growth": 0.11446860091984312,
+    "corpus": {
+      "n_records": 123,
+      "periods": [
+        "2026-Q1",
+        "2026-Q2",
+        "2026-Q3"
+      ]
+    }
+  },
+  "policies": {
+    "ceo": {
+      "principled": 0.1151555469788581,
+      "greedy": 0.09553038553107718
+    },
+    "director": {
+      "principled": 0.09553038553107718,
+      "greedy": 0.08597734697796945
+    },
+    "ic": {
+      "principled": 0.09553038553107718,
+      "greedy": 0.09075386625452332
+    }
+  },
+  "x_aligned": {
+    "database": 0.5148005148005148,
+    "serverless": 0.1287001287001287,
+    "storage": 0.04633204633204633,
+    "compute": 0.28957528957528955,
+    "networking": 0.020592020592020595
+  },
+  "experiment": "e48_corporate_world",
+  "timestamp": "2026-06-14T13:59:03",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -993,6 +993,63 @@ Hafele--Keating uses flight-averaged parameters.}
 \input{tables/relativity}
 \end{table}
 
+\subsubsection{A composite corporate world: individual, division, and company goals (E48)}\label{sec:corporate}
+The framework's structural primitives---nested composition, aggregation,
+hierarchical observation, multi-level objectives---map almost one-to-one onto an
+organization, so E48 models a DigitalOcean-style PaaS company
+(\CorpDivisions{} divisions, \$\CorpRevenue{}M revenue) as a nested
+\texttt{CompositeWorld}: company $\triangleright$ divisions $\triangleright$
+individuals, with revenue rolled up by \texttt{Aggregator}s and agents (senior
+SWE, director, CEO) acting at different scope (Figure~\ref{fig:corporate},
+Table~\ref{tab:corporate}). Division revenue has diminishing returns in effort,
+so the company-optimal allocation spreads effort by marginal return---and
+individual-optimal diverges from it. Perception is supplied by
+\textbf{openworld-corp}, a committed dataset of \CorpTranscripts{} LLM-generated,
+state-grounded transcripts (all-hands, exec staff, division reviews, retros,
+standups, 1:1s, Slack) across three quarters; it is meant to be \emph{used}---
+swap the org seed or drop in a real company's transcripts (same schema) to run
+the model on an actual organization.
+
+Four agent-level results. \emph{Individual vs collective}: as a selfishness dial
+turns agents from company-aligned to promotion-chasing, company growth falls from
+\CorpAlignedGrowth\% to \CorpSelfishGrowth\% while the promotion Gini rises from
+\CorpAlignedGini{} to \CorpSelfishGini---local optimization concentrates rewards
+and starves the aggregate (the E44/E08 Pareto on an org chart). \emph{Value-of-
+action}: optimizing each level's decision in turn, the CEO's portfolio
+reallocation is the dominant lever ($+\CorpCeoPct\%$ company growth) over a
+director's ($+\CorpDirPct\%$) and an IC's ($+\CorpIcPct\%$)---leverage lives at
+the top. \emph{Perception is granularity-bound}: division-level metrics are
+recoverable from both the all-hands and a division review (they are stated), but
+the individual promotion signal is recovered \CorpIndivOneOnOne\% of the time
+from a 1:1 and \CorpIndivAllHands\% from the all-hands---aggregate meetings
+preserve division state and lose individual state, so an agent must traverse to
+the right meeting for the right decision (the hierarchical-observation contract,
+\S\ref{sec:traversal}). \emph{Navigation policy}: at every level a principled
+(marginal-value) policy beats a greedy one. Throughout, the revenue aggregator
+never drifts from the leaves---the composite stays exact.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.96\linewidth]{figs/corporate_world.png}
+\caption{\textbf{A composite corporate world (E48).} \textbf{Top:} the org as a
+nested \texttt{CompositeWorld} (company $\triangleright$ divisions
+$\triangleright$ individuals); revenue aggregates upward; agents act at their
+level. \textbf{A:} selfishness trades company growth for a higher promotion Gini.
+\textbf{B:} value-of-action by level---the CEO's allocation is the dominant lever.
+\textbf{C:} from \CorpTranscripts{} real transcripts, division metrics are
+recoverable from any meeting but the individual promo signal only from 1:1s.
+\textbf{D:} a principled per-role policy beats greedy.}
+\label{fig:corporate}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E48 agent-level results} on the composite corporate world with
+the openworld-corp transcript dataset as perception.}
+\label{tab:corporate}
+\input{tables/corporate_world}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

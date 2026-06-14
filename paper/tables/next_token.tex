@@ -1,0 +1,14 @@
+\begin{tabular}{llcccc}
+\toprule
+Task & Split & Symbolic & n-gram & window-MLP & LLM-direct \\
+\midrule
+parity & in-dist & 1.00 & 0.49 & 0.50 & 0.56 \\
+ & OOD & 1.00 & 0.44 & 0.46 & 0.50 \\
+dyck & in-dist & 1.00 & 0.65 & 0.76 & 0.81 \\
+ & OOD & 1.00 & 0.33 & 0.38 & 0.31 \\
+copy & in-dist & 1.00 & 0.25 & 0.26 & 0.62 \\
+ & OOD & 1.00 & 0.21 & 0.17 & 0.31 \\
+\midrule
+\textbf{Mean} & OOD & 1.00 & 0.33 & 0.34 & 0.38 \\
+\bottomrule
+\end{tabular}

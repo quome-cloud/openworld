@@ -822,6 +822,120 @@ past it.}
 \input{tables/many_worlds}
 \end{table}
 
+\subsubsection{Next-token world models: exact length generalization (E45)}\label{sec:next-token}
+The induction results so far live in the framework's own state--action worlds.
+E45 lands the same thesis on the LLM field's native task---next-token
+prediction---and its native failure, length generalization on algorithmic
+sequences. The framing is ``synthesize the rule, don't \emph{be} the rule'': the
+\emph{same} local model (qwen3-coder:30b), given short solved examples, is used two
+ways---asked to predict the next character directly, and asked to synthesise a
+verified program (a world model of the sequence's generator) that is then run.
+We use \NextTokTasks{} deterministic tasks whose next character needs memory a
+fixed window cannot hold: \texttt{parity} (running XOR), \texttt{dyck}
+(bracket-nesting depth), and \texttt{copy} (a long-range retrieval: the answer is
+the first character of the context). Models are trained on lengths up to
+\NextTokTrainLen{} and tested out to \NextTokMaxLen{}.
+
+Where synthesis recovers the rule it does so exactly, and the induced program is
+\emph{length-invariant by construction}: it is exact at every length on
+\NextTokExactTasks/\NextTokTasks{} tasks (\NextTokSymOod{} mean out-of-distribution
+accuracy), because it recomputes its state from the whole prefix rather than a
+fixed window (Figure~\ref{fig:next-token}, Table~\ref{tab:next-token}). Every
+learned alternative decays with length: the $n$-gram (\NextTokNgramOod{} OOD) and
+the fixed-window MLP (\NextTokMlpOod{}) cannot represent unbounded-memory rules,
+and the \emph{same} 30B predicting directly---good in-distribution
+(\NextTokDirectIn)---falls to \NextTokDirectOod{} out of distribution: the
+canonical transformer length-generalization failure, with the synthesise-a-program
+mode of the identical model as the remedy.
+
+We report two honest exclusions rather than cherry-pick. \texttt{incr} (binary
+increment with carry) is excluded because the 30B synthesis call times out on the
+local hardware. \texttt{modk} (running count modulo $k$) is more interesting: short
+training contexts rarely force the modulus to wrap, so synthesis recovers the
+simpler unbounded-count rule, which the verification gate correctly rejects
+(reproduction $<1$)---an \emph{identifiability} gap (\S\ref{sec:active-induction}),
+not a representational one. The scope is likewise honest: natural-language
+next-token prediction is not a finite automaton, so this applies where the
+next-token process has exact structure (code, formal languages,
+grammar/JSON-constrained generation, tool and protocol outputs)---a real LLM
+application surface, not a claim to replace language models.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/next_token.png}
+\caption{\textbf{Next-token world models (E45).} \textbf{Left:} next-character
+accuracy vs.\ sequence length (mean over tasks). The induced symbolic program
+stays exact past the training lengths; the $n$-gram, the fixed-window MLP, and the
+\emph{same} LLM predicting directly all decay. \textbf{Right:} mean
+out-of-distribution accuracy by method. Same model, two modes: synthesising a
+verified program length-generalises where predicting tokens directly does not.}
+\label{fig:next-token}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E45 next-token length generalization.} Per-task next-character
+exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
+\NextTokMaxLen). Only the synthesised symbolic program is exact OOD.}
+\label{tab:next-token}
+\input{tables/next_token}
+\end{table}
+
+\subsubsection{Relativity as a verified world model: reference frames and atomic clocks (E47)}\label{sec:relativity}
+Reference frames and changing references are the framework's composition and
+non-stationarity story in the language of physics, so E47 encodes special and
+general relativity as a verified world model and validates it against real
+atomic-clock data. The world's state carries each agent's velocity and proper
+time (its atomic clock); the verified transition advances a clock by the
+time-dilated amount $\Delta\tau=\Delta t/\gamma$ with
+$\gamma=1/\sqrt{1-v^2/c^2}$; a \emph{changing reference} is a velocity-change
+action and \emph{agent observation} is one frame reading another's clock through
+the Lorentz transform (Figure~\ref{fig:relativity}).
+
+Four results. (i) \emph{Time dilation} is exact for the symbolic model at every
+speed, whereas a learned fit on low-speed data diverges as $v\to c$ (error
+\RelLearnErr{} of a clock tick at $0.999c$) and the Newtonian ``no dilation''
+model is off by \RelNewtErr---the classical physics that real clocks disprove.
+(ii) Relativistic velocity addition stays below $c$ while the Galilean sum runs
+superluminal. (iii) The \emph{twin paradox}, simulated as an agent worldline with
+a turnaround, has the traveler return \RelTwinDiff{} years younger
+(\RelTwinTravel{} vs.\ \RelTwinStay{}) while the frame-naive model ages both
+identically---the asymmetry is entirely the change of reference. (iv) Most
+tellingly, the same verified model reproduces \emph{real measurements}: from
+first principles the GPS clock correction is $\RelGpsSR$ (SR) $+\,\RelGpsGR$ (GR)
+$=\RelGpsNet$~$\mu$s/day, matching the documented $\sim$+38; and at
+flight-averaged parameters the Hafele--Keating shifts come out eastward
+\RelHKModelEast~ns and westward \RelHKModelWest~ns, inside the 1971 measured
+$\RelHKObsEast$~ns and $\RelHKObsWest$~ns (the east/west asymmetry exists only
+because of relativity in the rotating frame; the Newtonian model predicts zero).
+A verified-code world model, declared from textbook physics, is exact in the
+relativistic regime and lands inside the error bars of a real atomic-clock
+experiment---the same exact-vs-approximate story as the rest of the paper, now in
+a domain where the ``approximate'' (classical) model is known to fail and is
+corrected for daily in orbit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/relativity.png}
+\caption{\textbf{Relativity as a verified world model (E47).} \textbf{A:} the
+moving-clock rate $1/\gamma$---symbolic exact, a low-speed learned fit diverges
+OOD near $c$, Newtonian shows none. \textbf{B:} velocity addition stays below
+$c$; the Galilean sum does not. \textbf{C:} the twin paradox as an agent
+worldline---the traveler returns \RelTwinDiff{} years younger. \textbf{D:}
+real atomic clocks---the model's Hafele--Keating eastward/westward shifts vs.\ the
+1971 measurements (GPS net $\RelGpsNet\,\mu$s/day in the title).}
+\label{fig:relativity}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E47 atomic-clock validation.} The verified relativistic model
+vs.\ real/documented measurements. GPS is computed from first principles;
+Hafele--Keating uses flight-averaged parameters.}
+\label{tab:relativity}
+\input{tables/relativity}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

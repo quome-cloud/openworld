@@ -33,6 +33,7 @@ EXPERIMENTS = [
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
+    "e44_emergent_economy",
 ]
 
 
@@ -366,6 +367,64 @@ def fig_active_induction(e43):
                  fontsize=10.5, x=0.02, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     fig.savefig(FIGS / "active_induction.png", dpi=200)
+    plt.close(fig)
+
+
+def fig_emergent_economy(e44):
+    """E44: four macro phenomena emerging from composed verified rules, each
+    isolated by a causal toggle on one rule."""
+    c1, c2 = e44["claim1_price_formation"], e44["claim2_inflation"]
+    c3, c4 = e44["claim3_inequality"], e44["claim4_dial"]
+    fig, axes = plt.subplots(2, 2, figsize=(8.2, 6.0))
+    (a1, a2), (a3, a4) = axes
+
+    # A: price formation
+    a1.plot(c1["scarce_traj"], color=BLUE, lw=2, label="scarce supply")
+    a1.plot(c1["abundant_traj"], color=ORANGE, lw=2, label="abundant supply")
+    a1.axhline(c1["scarce_supply_price"], color=BLUE, lw=0.8, ls=":")
+    a1.axhline(c1["abundant_supply_price"], color=ORANGE, lw=0.8, ls=":")
+    a1.set_title("A. Price formation: scarcity sets the price", fontsize=9.5, loc="left")
+    a1.set_xlabel("Tick"); a1.set_ylabel("Market price")
+    a1.legend(fontsize=8, loc="center right")
+
+    # B: inflation (money supply, log scale), burn sink off vs on
+    a2.plot(c2["off_money_traj"], color=RED, lw=2, label="burn sink OFF (faucet only)")
+    a2.plot(c2["on_money_traj"], color=TEAL, lw=2, label="burn sink ON")
+    a2.set_yscale("log")
+    a2.set_title("B. Inflation: a sink curbs the money supply", fontsize=9.5, loc="left")
+    a2.set_xlabel("Tick"); a2.set_ylabel("Money supply (log)")
+    a2.legend(fontsize=8, loc="lower right")
+
+    # C: inequality (Gini), redistribution off vs on
+    a3.plot(c3["off_gini_traj"], color=RED, lw=2, label="redistribution OFF")
+    a3.plot(c3["on_gini_traj"], color=TEAL, lw=2, label="redistribution ON")
+    a3.set_title("C. Inequality emerges; redistribution flattens it",
+                 fontsize=9.5, loc="left")
+    a3.set_xlabel("Tick"); a3.set_ylabel("Wealth Gini")
+    a3.set_ylim(bottom=0)
+    a3.legend(fontsize=8, loc="center right")
+
+    # D: selfish vs cooperative dial (welfare + top-agent gold)
+    groups = ["total\nwelfare", "richest\nagent"]
+    selfish = [c4["selfish_welfare"], c4["selfish_max_gold"]]
+    coop = [c4["cooperative_welfare"], c4["cooperative_max_gold"]]
+    x = range(len(groups))
+    w = 0.38
+    a4.bar([i - w / 2 for i in x], selfish, w, color=PURPLE, label="selfish")
+    a4.bar([i + w / 2 for i in x], coop, w, color=TEAL, label="cooperative")
+    for i, (sv, cv) in enumerate(zip(selfish, coop)):
+        a4.text(i - w / 2, sv, f"{sv:.0f}", ha="center", va="bottom", fontsize=7.5)
+        a4.text(i + w / 2, cv, f"{cv:.0f}", ha="center", va="bottom", fontsize=7.5)
+    a4.set_xticks(list(x)); a4.set_xticklabels(groups, fontsize=8.5)
+    a4.set_title("D. Dial: cooperation lifts the total, selfishness the top",
+                 fontsize=9.5, loc="left")
+    a4.set_ylabel("Gold")
+    a4.legend(fontsize=8, loc="upper right")
+
+    fig.suptitle("Emergent economy from composed verified rules (E44)",
+                 fontsize=11, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
 
 
@@ -1279,7 +1338,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "42"),
+        macro("NumExperiments", "43"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1605,6 +1664,30 @@ def numbers_tex(d):
         macro("ActiveClairSteps", steps(e43["clairvoyant_mean_steps"])),
         macro("ActivePassiveUnresolved", str(e43["passive_unresolved"])),
     ]
+    # E44 (emergent economy: macro phenomena from composed verified rules)
+    e44 = d["e44_emergent_economy"]
+    c1, c2 = e44["claim1_price_formation"], e44["claim2_inflation"]
+    c3, c4 = e44["claim3_inequality"], e44["claim4_dial"]
+
+    def num(x):
+        return f"{x:.0f}" if float(x).is_integer() else f"{x:.2f}"
+
+    lines += [
+        macro("EconAgents", str(e44["n_agents"])),
+        macro("EconTicks", str(e44["horizon"])),
+        macro("EconScarcePrice", f"{round(c1['scarce_supply_price'])}"),
+        macro("EconAbundantPrice", f"{round(c1['abundant_supply_price'])}"),
+        macro("EconInflOffSlope", num(c2["burn_off_price_slope"])),
+        macro("EconInflOnSlope", num(c2["burn_on_price_slope"])),
+        macro("EconGiniOff", f"{c3['redist_off_gini']:.2f}"),
+        macro("EconGiniOn", f"{c3['redist_on_gini']:.3f}"),
+        macro("EconSelfishWelfare", f"{round(c4['selfish_welfare']):,}"),
+        macro("EconCoopWelfare", f"{round(c4['cooperative_welfare']):,}"),
+        macro("EconSelfishMax", f"{round(c4['selfish_max_gold']):,}"),
+        macro("EconCoopMax", f"{round(c4['cooperative_max_gold']):,}"),
+        macro("EconCoopWelfareGain",
+              f"{100 * (c4['cooperative_welfare'] / c4['selfish_welfare'] - 1):.1f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1638,6 +1721,7 @@ def main():
     fig_nonstationary(data["e41_nonstationary"])
     fig_agent_traversal(data["e42_agent_traversal"])
     fig_active_induction(data["e43_active_induction"])
+    fig_emergent_economy(data["e44_emergent_economy"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

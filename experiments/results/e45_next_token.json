@@ -1,0 +1,217 @@
+{
+  "synth_model": "qwen3-coder:30b",
+  "direct_model": "qwen3-coder:30b",
+  "tasks": [
+    "parity",
+    "dyck",
+    "copy"
+  ],
+  "excluded_tasks": [
+    "incr (binary increment): 30B synthesis times out on local hardware",
+    "modk (count mod k): short training under-determines the modulus; synthesis recovers only the unbounded-count rule (repro<1)"
+  ],
+  "k": 5,
+  "l_train": 12,
+  "eval_sizes": [
+    8,
+    12,
+    20,
+    40,
+    80,
+    120
+  ],
+  "direct_sizes": [
+    8,
+    12,
+    40,
+    120
+  ],
+  "summary": {
+    "symbolic": {
+      "in_dist": 1.0,
+      "ood": 1.0
+    },
+    "ngram": {
+      "in_dist": 0.462,
+      "ood": 0.325
+    },
+    "window_mlp": {
+      "in_dist": 0.508,
+      "ood": 0.34
+    },
+    "llm_direct": {
+      "in_dist": 0.666,
+      "ood": 0.375
+    }
+  },
+  "per_task": [
+    {
+      "task": "parity",
+      "train_reproduction": 1.0,
+      "synthesized_code": "def transition(state, action):\n    prefix = state['prefix']\n    # Count number of 1s in prefix before the '='\n    count_ones = prefix.count('1')\n    # Return 'E' if even number of 1s, 'O' if odd\n    if count_ones % 2 == 0:\n        return {'next': 'E'}\n    else:\n        return {'next': 'O'}",
+      "curves": {
+        "symbolic": {
+          "8": 1.0,
+          "12": 1.0,
+          "20": 1.0,
+          "40": 1.0,
+          "80": 1.0,
+          "120": 1.0
+        },
+        "ngram": {
+          "8": 0.5,
+          "12": 0.475,
+          "20": 0.525,
+          "40": 0.375,
+          "80": 0.425,
+          "120": 0.45
+        },
+        "window_mlp": {
+          "8": 0.575,
+          "12": 0.425,
+          "20": 0.45,
+          "40": 0.475,
+          "80": 0.525,
+          "120": 0.4
+        },
+        "llm_direct": {
+          "8": 0.75,
+          "12": 0.375,
+          "40": 0.5,
+          "120": 0.5
+        }
+      },
+      "split": {
+        "symbolic": {
+          "in_dist": 1.0,
+          "ood": 1.0
+        },
+        "ngram": {
+          "in_dist": 0.487,
+          "ood": 0.444
+        },
+        "window_mlp": {
+          "in_dist": 0.5,
+          "ood": 0.463
+        },
+        "llm_direct": {
+          "in_dist": 0.562,
+          "ood": 0.5
+        }
+      }
+    },
+    {
+      "task": "dyck",
+      "train_reproduction": 1.0,
+      "synthesized_code": "def transition(state, action):\n    prefix = state['prefix']\n    \n    # Count unmatched opening parentheses\n    stack_count = 0\n    for char in prefix:\n        if char == '(':\n            stack_count += 1\n        elif char == ')':\n            if stack_count > 0:\n                stack_count -= 1\n    \n    # Return the count as a character\n    return {'next': str(stack_count)}",
+      "curves": {
+        "symbolic": {
+          "8": 1.0,
+          "12": 1.0,
+          "20": 1.0,
+          "40": 1.0,
+          "80": 1.0,
+          "120": 1.0
+        },
+        "ngram": {
+          "8": 0.7,
+          "12": 0.6,
+          "20": 0.4,
+          "40": 0.3,
+          "80": 0.225,
+          "120": 0.375
+        },
+        "window_mlp": {
+          "8": 0.825,
+          "12": 0.7,
+          "20": 0.475,
+          "40": 0.275,
+          "80": 0.325,
+          "120": 0.45
+        },
+        "llm_direct": {
+          "8": 0.75,
+          "12": 0.875,
+          "40": 0.25,
+          "120": 0.375
+        }
+      },
+      "split": {
+        "symbolic": {
+          "in_dist": 1.0,
+          "ood": 1.0
+        },
+        "ngram": {
+          "in_dist": 0.65,
+          "ood": 0.325
+        },
+        "window_mlp": {
+          "in_dist": 0.762,
+          "ood": 0.381
+        },
+        "llm_direct": {
+          "in_dist": 0.812,
+          "ood": 0.312
+        }
+      }
+    },
+    {
+      "task": "copy",
+      "train_reproduction": 1.0,
+      "synthesized_code": "def transition(state, action):\n    return {'next': state['prefix'][0]}",
+      "curves": {
+        "symbolic": {
+          "8": 1.0,
+          "12": 1.0,
+          "20": 1.0,
+          "40": 1.0,
+          "80": 1.0,
+          "120": 1.0
+        },
+        "ngram": {
+          "8": 0.275,
+          "12": 0.225,
+          "20": 0.225,
+          "40": 0.175,
+          "80": 0.225,
+          "120": 0.2
+        },
+        "window_mlp": {
+          "8": 0.375,
+          "12": 0.15,
+          "20": 0.15,
+          "40": 0.2,
+          "80": 0.2,
+          "120": 0.15
+        },
+        "llm_direct": {
+          "8": 0.5,
+          "12": 0.75,
+          "40": 0.125,
+          "120": 0.5
+        }
+      },
+      "split": {
+        "symbolic": {
+          "in_dist": 1.0,
+          "ood": 1.0
+        },
+        "ngram": {
+          "in_dist": 0.25,
+          "ood": 0.206
+        },
+        "window_mlp": {
+          "in_dist": 0.263,
+          "ood": 0.175
+        },
+        "llm_direct": {
+          "in_dist": 0.625,
+          "ood": 0.312
+        }
+      }
+    }
+  ],
+  "experiment": "e45_next_token",
+  "timestamp": "2026-06-14T07:11:50",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

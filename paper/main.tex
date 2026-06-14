@@ -822,6 +822,65 @@ past it.}
 \input{tables/many_worlds}
 \end{table}
 
+\subsubsection{Next-token world models: exact length generalization (E45)}\label{sec:next-token}
+The induction results so far live in the framework's own state--action worlds.
+E45 lands the same thesis on the LLM field's native task---next-token
+prediction---and its native failure, length generalization on algorithmic
+sequences. The framing is ``synthesize the rule, don't \emph{be} the rule'': the
+\emph{same} local model (qwen3-coder:30b), given short solved examples, is used two
+ways---asked to predict the next character directly, and asked to synthesise a
+verified program (a world model of the sequence's generator) that is then run.
+We use \NextTokTasks{} deterministic tasks whose next character needs memory a
+fixed window cannot hold: \texttt{parity} (running XOR), \texttt{dyck}
+(bracket-nesting depth), and \texttt{copy} (a long-range retrieval: the answer is
+the first character of the context). Models are trained on lengths up to
+\NextTokTrainLen{} and tested out to \NextTokMaxLen{}.
+
+Where synthesis recovers the rule it does so exactly, and the induced program is
+\emph{length-invariant by construction}: it is exact at every length on
+\NextTokExactTasks/\NextTokTasks{} tasks (\NextTokSymOod{} mean out-of-distribution
+accuracy), because it recomputes its state from the whole prefix rather than a
+fixed window (Figure~\ref{fig:next-token}, Table~\ref{tab:next-token}). Every
+learned alternative decays with length: the $n$-gram (\NextTokNgramOod{} OOD) and
+the fixed-window MLP (\NextTokMlpOod{}) cannot represent unbounded-memory rules,
+and the \emph{same} 30B predicting directly---good in-distribution
+(\NextTokDirectIn)---falls to \NextTokDirectOod{} out of distribution: the
+canonical transformer length-generalization failure, with the synthesise-a-program
+mode of the identical model as the remedy.
+
+We report two honest exclusions rather than cherry-pick. \texttt{incr} (binary
+increment with carry) is excluded because the 30B synthesis call times out on the
+local hardware. \texttt{modk} (running count modulo $k$) is more interesting: short
+training contexts rarely force the modulus to wrap, so synthesis recovers the
+simpler unbounded-count rule, which the verification gate correctly rejects
+(reproduction $<1$)---an \emph{identifiability} gap (\S\ref{sec:active-induction}),
+not a representational one. The scope is likewise honest: natural-language
+next-token prediction is not a finite automaton, so this applies where the
+next-token process has exact structure (code, formal languages,
+grammar/JSON-constrained generation, tool and protocol outputs)---a real LLM
+application surface, not a claim to replace language models.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/next_token.png}
+\caption{\textbf{Next-token world models (E45).} \textbf{Left:} next-character
+accuracy vs.\ sequence length (mean over tasks). The induced symbolic program
+stays exact past the training lengths; the $n$-gram, the fixed-window MLP, and the
+\emph{same} LLM predicting directly all decay. \textbf{Right:} mean
+out-of-distribution accuracy by method. Same model, two modes: synthesising a
+verified program length-generalises where predicting tokens directly does not.}
+\label{fig:next-token}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E45 next-token length generalization.} Per-task next-character
+exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
+\NextTokMaxLen). Only the synthesised symbolic program is exact OOD.}
+\label{tab:next-token}
+\input{tables/next_token}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

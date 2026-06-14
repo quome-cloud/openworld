@@ -33,7 +33,7 @@ EXPERIMENTS = [
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
-    "e44_emergent_economy", "e46_many_worlds",
+    "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
 ]
 
 
@@ -426,6 +426,83 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_next_token(e45):
+    """E45: next-char accuracy vs sequence length. The induced symbolic program
+    stays exact at every length; fixed-memory neural models and the same LLM
+    predicting directly decay - the length-generalization story on the LLM's
+    home turf."""
+    tasks = e45["per_task"]
+    methods = ["symbolic", "ngram", "window_mlp", "llm_direct"]
+    labels = {"symbolic": "symbolic (ours)", "ngram": "n-gram",
+              "window_mlp": "window-MLP", "llm_direct": "LLM-direct (same model)"}
+    colors = {"symbolic": BLUE, "ngram": ORANGE, "window_mlp": PURPLE, "llm_direct": RED}
+    styles = {"symbolic": "-o", "ngram": "--s", "window_mlp": "--^", "llm_direct": ":D"}
+    # mean accuracy across tasks at each evaluated length, per method
+    sizes = sorted({int(s) for t in tasks for s in t["curves"]["symbolic"]})
+    fig, (ax, axb) = plt.subplots(1, 2, figsize=(8.2, 3.4),
+                                  gridspec_kw={"width_ratios": [1.5, 1]})
+
+    def mean_at(method, size):
+        vals = [t["curves"][method].get(str(size), t["curves"][method].get(size))
+                for t in tasks if str(size) in t["curves"][method]
+                or size in t["curves"][method]]
+        vals = [v for v in vals if v is not None]
+        return sum(vals) / len(vals) if vals else None
+
+    for m in methods:
+        xs, ys = [], []
+        for s in sizes:
+            v = mean_at(m, s)
+            if v is not None:
+                xs.append(s); ys.append(v)
+        ax.plot(xs, ys, styles[m], color=colors[m], lw=2, markersize=5, label=labels[m])
+    ax.axvline(e45["l_train"], color=SLATE, lw=1, ls=":")
+    ax.text(e45["l_train"] * 1.05, 0.05, "train→ | ←OOD", fontsize=7.5, color=SLATE)
+    ax.set_xscale("log")
+    ax.set_xlabel("Sequence length"); ax.set_ylabel("Next-char exact accuracy")
+    ax.set_ylim(0, 1.05)
+    ax.set_title("Length generalization (mean over tasks)", fontsize=9.5, loc="left")
+    ax.legend(fontsize=7.5, loc="center left")
+
+    s = e45["summary"]
+    bars = axb.bar([labels[m].split(" ")[0] for m in methods],
+                   [s[m]["ood"] for m in methods], color=[colors[m] for m in methods])
+    for b, m in zip(bars, methods):
+        axb.text(b.get_x() + b.get_width() / 2, s[m]["ood"] + 0.02,
+                 f"{s[m]['ood']:.2f}", ha="center", fontsize=8)
+    axb.set_ylabel("Mean OOD accuracy"); axb.set_ylim(0, 1.05)
+    axb.set_title("Out-of-distribution (longer)", fontsize=9.5, loc="left")
+    axb.tick_params(axis="x", labelsize=7.5)
+
+    fig.suptitle("Next-token world models: synthesize the rule, don't be the rule (E45)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "next_token.png", dpi=200)
+    plt.close(fig)
+
+
+def table_next_token(e45):
+    """E45: per-task in-dist vs OOD next-char accuracy by method."""
+    methods = ["symbolic", "ngram", "window_mlp", "llm_direct"]
+    head = ["\\begin{tabular}{ll" + "c" * len(methods) + "}", "\\toprule",
+            "Task & Split & Symbolic & n-gram & window-MLP & LLM-direct \\\\",
+            "\\midrule"]
+    rows = []
+    for t in e45["per_task"]:
+        for split in ("in_dist", "ood"):
+            cells = " & ".join(
+                "--" if t["split"][m][split] is None else f"{t['split'][m][split]:.2f}"
+                for m in methods)
+            lab = t["task"] if split == "in_dist" else ""
+            sp = "in-dist" if split == "in_dist" else "OOD"
+            rows.append(f"{lab} & {sp} & {cells} \\\\")
+    s = e45["summary"]
+    foot = ["\\midrule",
+            "\\textbf{Mean} & OOD & " + " & ".join(f"{s[m]['ood']:.2f}" for m in methods)
+            + " \\\\", "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "next_token.tex").write_text("\n".join(head + rows + foot) + "\n")
 
 
 def fig_many_worlds(e46):
@@ -1395,7 +1472,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "44"),
+        macro("NumExperiments", "45"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1763,6 +1840,21 @@ def numbers_tex(d):
         macro("ManyWorldsCoupleFactor", str(coup[-1]["factor_size"])),
         macro("ManyWorldsCoupleIdeal", str(coup[-1]["ideal_factored"])),
     ]
+    # E45 (next-token world models: length generalization)
+    e45 = d["e45_next_token"]
+    s45 = e45["summary"]
+    n_exact = sum(1 for t in e45["per_task"] if t["split"]["symbolic"]["ood"] == 1.0)
+    lines += [
+        macro("NextTokTasks", str(len(e45["per_task"]))),
+        macro("NextTokExactTasks", str(n_exact)),
+        macro("NextTokMaxLen", str(max(e45["eval_sizes"]))),
+        macro("NextTokTrainLen", str(e45["l_train"])),
+        macro("NextTokSymOod", acc(s45["symbolic"]["ood"])),
+        macro("NextTokNgramOod", acc(s45["ngram"]["ood"])),
+        macro("NextTokMlpOod", acc(s45["window_mlp"]["ood"])),
+        macro("NextTokDirectIn", acc(s45["llm_direct"]["in_dist"])),
+        macro("NextTokDirectOod", acc(s45["llm_direct"]["ood"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1798,6 +1890,8 @@ def main():
     fig_active_induction(data["e43_active_induction"])
     fig_emergent_economy(data["e44_emergent_economy"])
     fig_many_worlds(data["e46_many_worlds"])
+    fig_next_token(data["e45_next_token"])
+    table_next_token(data["e45_next_token"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])

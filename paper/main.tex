@@ -881,6 +881,61 @@ exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
 \input{tables/next_token}
 \end{table}
 
+\subsubsection{Relativity as a verified world model: reference frames and atomic clocks (E47)}\label{sec:relativity}
+Reference frames and changing references are the framework's composition and
+non-stationarity story in the language of physics, so E47 encodes special and
+general relativity as a verified world model and validates it against real
+atomic-clock data. The world's state carries each agent's velocity and proper
+time (its atomic clock); the verified transition advances a clock by the
+time-dilated amount $\Delta\tau=\Delta t/\gamma$ with
+$\gamma=1/\sqrt{1-v^2/c^2}$; a \emph{changing reference} is a velocity-change
+action and \emph{agent observation} is one frame reading another's clock through
+the Lorentz transform (Figure~\ref{fig:relativity}).
+
+Four results. (i) \emph{Time dilation} is exact for the symbolic model at every
+speed, whereas a learned fit on low-speed data diverges as $v\to c$ (error
+\RelLearnErr{} of a clock tick at $0.999c$) and the Newtonian ``no dilation''
+model is off by \RelNewtErr---the classical physics that real clocks disprove.
+(ii) Relativistic velocity addition stays below $c$ while the Galilean sum runs
+superluminal. (iii) The \emph{twin paradox}, simulated as an agent worldline with
+a turnaround, has the traveler return \RelTwinDiff{} years younger
+(\RelTwinTravel{} vs.\ \RelTwinStay{}) while the frame-naive model ages both
+identically---the asymmetry is entirely the change of reference. (iv) Most
+tellingly, the same verified model reproduces \emph{real measurements}: from
+first principles the GPS clock correction is $\RelGpsSR$ (SR) $+\,\RelGpsGR$ (GR)
+$=\RelGpsNet$~$\mu$s/day, matching the documented $\sim$+38; and at
+flight-averaged parameters the Hafele--Keating shifts come out eastward
+\RelHKModelEast~ns and westward \RelHKModelWest~ns, inside the 1971 measured
+$\RelHKObsEast$~ns and $\RelHKObsWest$~ns (the east/west asymmetry exists only
+because of relativity in the rotating frame; the Newtonian model predicts zero).
+A verified-code world model, declared from textbook physics, is exact in the
+relativistic regime and lands inside the error bars of a real atomic-clock
+experiment---the same exact-vs-approximate story as the rest of the paper, now in
+a domain where the ``approximate'' (classical) model is known to fail and is
+corrected for daily in orbit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/relativity.png}
+\caption{\textbf{Relativity as a verified world model (E47).} \textbf{A:} the
+moving-clock rate $1/\gamma$---symbolic exact, a low-speed learned fit diverges
+OOD near $c$, Newtonian shows none. \textbf{B:} velocity addition stays below
+$c$; the Galilean sum does not. \textbf{C:} the twin paradox as an agent
+worldline---the traveler returns \RelTwinDiff{} years younger. \textbf{D:}
+real atomic clocks---the model's Hafele--Keating eastward/westward shifts vs.\ the
+1971 measurements (GPS net $\RelGpsNet\,\mu$s/day in the title).}
+\label{fig:relativity}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E47 atomic-clock validation.} The verified relativistic model
+vs.\ real/documented measurements. GPS is computed from first principles;
+Hafele--Keating uses flight-averaged parameters.}
+\label{tab:relativity}
+\input{tables/relativity}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

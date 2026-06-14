@@ -32,7 +32,7 @@ EXPERIMENTS = [
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
-    "e41_nonstationary", "e42_agent_traversal",
+    "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
 ]
 
 
@@ -316,6 +316,56 @@ def fig_induction_scale(e38):
     ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "induction_scale.png", dpi=200)
+    plt.close(fig)
+
+
+def fig_active_induction(e43):
+    """E43: acting to disambiguate identifies the rule where passive observation
+    plateaus. Left: candidate-elimination curves for a hidden rule the passive
+    policy never resolves. Right: mean steps-to-identify across hidden rules."""
+    rows = e43["rows"]
+    s = e43["summary"]
+    # representative rule: one the passive policy never resolves (high k)
+    rep = next((r for r in rows if r["passive_steps"] is None), rows[0])
+    fig, (axc, axb) = plt.subplots(1, 2, figsize=(7.4, 3.2),
+                                   gridspec_kw={"width_ratios": [1.5, 1]})
+
+    ac, pc = rep["active_curve"], rep["passive_curve"]
+    axc.plot(range(1, len(ac) + 1), ac, "-o", color=BLUE, lw=2, markersize=3,
+             label="active (acts to disambiguate)")
+    axc.plot(range(1, len(pc) + 1), pc, "--s", color=RED, lw=2, markersize=3,
+             label="passive (random policy)")
+    axc.axhline(1, color=SLATE, lw=1, ls=":")
+    if rep["active_steps"]:
+        axc.annotate("identified", xy=(rep["active_steps"], 1),
+                     xytext=(rep["active_steps"] + 6, 6), fontsize=8, color=BLUE,
+                     arrowprops=dict(arrowstyle="->", color=BLUE, lw=1))
+    axc.text(len(pc), pc[-1] + 1.5, "passive plateaus", fontsize=8, color=RED,
+             ha="right")
+    axc.set_yscale("log")
+    axc.set_xlabel("Transitions observed")
+    axc.set_ylabel("Candidate rules remaining")
+    axc.set_title(f"Eliminating {s['n_candidates']} candidates "
+                  f"($k$={rep['true_rule']['k']})", fontsize=9, loc="left")
+    axc.legend(fontsize=7.5, loc="upper right")
+
+    labels = ["passive", "active\n(ours)", "clairvoyant\n(knows rule)"]
+    vals = [s["passive_mean_steps"], s["active_mean_steps"],
+            s["clairvoyant_mean_steps"]]
+    colors = [RED, BLUE, TEAL]
+    bars = axb.bar(labels, vals, color=colors)
+    for b, v in zip(bars, vals):
+        axb.text(b.get_x() + b.get_width() / 2, v + 0.3, f"{v:.1f}",
+                 ha="center", fontsize=8)
+    axb.text(0, 1.2, f"{s['passive_unresolved']}/{s['n_rules']}\nnever", ha="center",
+             fontsize=7.5, color="white", weight="bold")
+    axb.set_ylabel("Mean steps to identify")
+    axb.set_title("Lower is better", fontsize=9, loc="left")
+    axb.tick_params(axis="x", labelsize=7.5)
+    fig.suptitle("Active world-model induction: acting beats observing",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.savefig(FIGS / "active_induction.png", dpi=200)
     plt.close(fig)
 
 
@@ -1229,7 +1279,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "41"),
+        macro("NumExperiments", "42"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1540,6 +1590,21 @@ def numbers_tex(d):
         macro("AgentHops", str(d["e42_agent_traversal"]["n_arrivals"])),
         macro("AgentDwell", str(d["e42_agent_traversal"]["dwell"])),
     ]
+    # E43 (active world-model induction: acting beats passive observation)
+    e43 = d["e43_active_induction"]["summary"]
+
+    def steps(x):
+        return f"{x:.1f}" if x is not None else "n/a"
+
+    lines += [
+        macro("ActiveCands", str(e43["n_candidates"])),
+        macro("ActiveRules", str(e43["n_rules"])),
+        macro("ActiveBudget", str(e43["budget"])),
+        macro("ActiveMeanSteps", steps(e43["active_mean_steps"])),
+        macro("ActivePassiveSteps", steps(e43["passive_mean_steps"])),
+        macro("ActiveClairSteps", steps(e43["clairvoyant_mean_steps"])),
+        macro("ActivePassiveUnresolved", str(e43["passive_unresolved"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -1572,6 +1637,7 @@ def main():
     fig_perception(data["e40_perceive_forecast"])
     fig_nonstationary(data["e41_nonstationary"])
     fig_agent_traversal(data["e42_agent_traversal"])
+    fig_active_induction(data["e43_active_induction"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])

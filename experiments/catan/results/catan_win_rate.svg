@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="544" height="300">
+<style>text{font-family:monospace;font-size:11px}</style>
+<rect width="544" height="300" fill="#0a0a0a"/>
+<line x1="80" y1="20" x2="80" y2="220" stroke="#444" stroke-width="1"/>
+<line x1="80" y1="220" x2="524" y2="220" stroke="#444" stroke-width="1"/>
+<text x="75" y="224" fill="#888" text-anchor="end">0%</text>
+<line x1="80" y1="220" x2="524" y2="220" stroke="#222" stroke-width="1"/>
+<text x="75" y="174" fill="#888" text-anchor="end">25%</text>
+<line x1="80" y1="170" x2="524" y2="170" stroke="#222" stroke-width="1"/>
+<text x="75" y="124" fill="#888" text-anchor="end">50%</text>
+<line x1="80" y1="120" x2="524" y2="120" stroke="#222" stroke-width="1"/>
+<text x="75" y="74" fill="#888" text-anchor="end">75%</text>
+<line x1="80" y1="70" x2="524" y2="70" stroke="#222" stroke-width="1"/>
+<text x="75" y="24" fill="#888" text-anchor="end">100%</text>
+<line x1="80" y1="20" x2="524" y2="20" stroke="#222" stroke-width="1"/>
+<rect x="90" y="178" width="40" height="42" fill="#4a90d9" opacity="0.85"/>
+<text x="110" y="174" fill="#ccc" text-anchor="middle">21%</text>
+<rect x="136" y="192" width="40" height="28" fill="#e07b54" opacity="0.85"/>
+<text x="156" y="188" fill="#ccc" text-anchor="middle">14%</text>
+<text x="133" y="238" fill="#aaa" text-anchor="middle">(a)</text>
+<rect x="196" y="156" width="40" height="64" fill="#4a90d9" opacity="0.85"/>
+<text x="216" y="152" fill="#ccc" text-anchor="middle">32%</text>
+<rect x="242" y="149" width="40" height="71" fill="#e07b54" opacity="0.85"/>
+<text x="262" y="145" fill="#ccc" text-anchor="middle">36%</text>
+<text x="239" y="238" fill="#aaa" text-anchor="middle">(b)</text>
+<rect x="302" y="167" width="40" height="53" fill="#4a90d9" opacity="0.85"/>
+<text x="322" y="163" fill="#ccc" text-anchor="middle">27%</text>
+<rect x="348" y="149" width="40" height="71" fill="#e07b54" opacity="0.85"/>
+<text x="368" y="145" fill="#ccc" text-anchor="middle">36%</text>
+<text x="345" y="238" fill="#aaa" text-anchor="middle">(c)</text>
+<rect x="408" y="180" width="40" height="40" fill="#4a90d9" opacity="0.85"/>
+<text x="428" y="176" fill="#ccc" text-anchor="middle">20%</text>
+<rect x="454" y="180" width="40" height="40" fill="#e07b54" opacity="0.85"/>
+<text x="474" y="176" fill="#ccc" text-anchor="middle">20%</text>
+<text x="451" y="238" fill="#aaa" text-anchor="middle">(d)</text>
+<rect x="80" y="258" width="14" height="10" fill="#4a90d9"/>
+<text x="98" y="267" fill="#aaa">No counter-alliance</text>
+<rect x="240" y="258" width="14" height="10" fill="#e07b54"/>
+<text x="258" y="267" fill="#aaa">Counter-alliance</text>
+<text x="272" y="286" fill="#666" text-anchor="middle">Alliance (P1+P2) win rate by coordination condition</text>
+</svg>

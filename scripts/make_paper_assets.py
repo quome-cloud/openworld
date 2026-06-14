@@ -34,7 +34,7 @@ EXPERIMENTS = [
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
-    "e47_relativity", "e49_path_integral", "e48_corporate_world",
+    "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
 ]
 
 
@@ -541,6 +541,78 @@ def table_corporate_world(e48):
              "perception is granularity-bound \\\\",
              "\\bottomrule", "\\end{tabular}"]
     (TABLES / "corporate_world.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_trading(e50):
+    """E50: same-day trading world model. Equity curves (honest OOS vs lookahead
+    vs SPY vs random), cost fragility, synthetic-edge validation, and risk-
+    adjusted honesty."""
+    cur = e50["equity_curves"]
+    real = e50["real"]
+    fig, ((a, b), (c, d)) = plt.subplots(2, 2, figsize=(8.4, 6.4))
+
+    # A: equity curves
+    a.plot(cur["lookahead"], color=SLATE, lw=1.6, ls=":", label="lookahead (cheating)")
+    a.plot(cur["honest"], color=BLUE, lw=2, label="honest OOS (after cost)")
+    a.plot(cur["spy"], color=TEAL, lw=2, label="buy-and-hold SPY")
+    a.plot(cur["random"], color=RED, lw=1.4, label="random")
+    a.axhline(1.0, color="k", lw=0.6)
+    a.set_ylabel("equity (×)"); a.set_xlabel("trading day")
+    a.set_yscale("log")
+    a.set_title("A. Equity curves (walk-forward)", fontsize=9.5, loc="left")
+    a.legend(fontsize=7, loc="upper left")
+
+    # B: cost fragility
+    cs = e50["cost_sweep_annualized"]
+    ks = list(cs)
+    bars = b.bar(ks, [cs[k] * 100 for k in ks],
+                 color=[BLUE if cs[k] > 0 else RED for k in ks])
+    b.axhline(0, color="k", lw=0.7)
+    b.set_ylabel("annualized return (%)")
+    b.set_title("B. Cost fragility (edge vanishes)", fontsize=9.5, loc="left")
+    b.tick_params(axis="x", labelsize=8)
+
+    # C: synthetic validation (detector recovers a known edge)
+    syn = e50["synthetic"]
+    c.bar(["strategy", "random"], [syn["strategy"]["sharpe"], syn["random"]["sharpe"]],
+          color=[BLUE, RED])
+    c.set_ylabel("Sharpe")
+    c.set_title("C. Synthetic validation (known +40bps edge)", fontsize=9.5, loc="left")
+
+    # D: risk-adjusted honesty (Sharpe) vs SPY
+    series = [("honest\n(cost)", real["honest_oos"]["sharpe"], BLUE),
+              ("honest\n(0bps)", real["honest_no_cost"]["sharpe"], "#94A3B8"),
+              ("lookahead", real["lookahead"]["sharpe"], SLATE),
+              ("SPY", real["spy_buy_hold"]["sharpe"], TEAL)]
+    d.bar([s[0] for s in series], [s[1] for s in series], color=[s[2] for s in series])
+    for i, s in enumerate(series):
+        d.text(i, s[1] + 0.02, f"{s[1]:.2f}", ha="center", fontsize=7.5)
+    d.set_ylabel("Sharpe (out-of-sample)")
+    d.set_title("D. Risk-adjusted: honest < SPY", fontsize=9.5, loc="left")
+    d.tick_params(axis="x", labelsize=7.5)
+
+    fig.suptitle("Same-day trading world model: honest out-of-sample on real data (E50)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(FIGS / "trading.png", dpi=200)
+    plt.close(fig)
+
+
+def table_trading(e50):
+    """E50: honest OOS vs baselines (after cost)."""
+    r = e50["real"]
+    rows = [("Honest OOS (after cost)", r["honest_oos"]),
+            ("Honest (no cost)", r["honest_no_cost"]),
+            ("Lookahead (cheating)", r["lookahead"]),
+            ("Buy-and-hold SPY", r["spy_buy_hold"]),
+            ("Random", r["random"])]
+    lines = ["\\begin{tabular}{lrrr}", "\\toprule",
+             "Strategy & Annualized & Sharpe & Hit rate \\\\", "\\midrule"]
+    for name, m in rows:
+        hit = f"{m.get('hit_rate', float('nan')):.2f}" if "hit_rate" in m else "--"
+        lines.append(f"{name} & {m['annualized'] * 100:+.1f}\\% & {m['sharpe']:.2f} & {hit} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "trading.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_path_integral(e49):
@@ -1798,7 +1870,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "48"),
+        macro("NumExperiments", "49"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2236,6 +2308,27 @@ def numbers_tex(d):
         macro("CorpIndivOneOnOne", f"{cisig['recover_from_one_on_one'] * 100:.0f}"),
         macro("CorpIndivAllHands", f"{cisig['recover_from_all_hands'] * 100:.0f}"),
     ]
+    # E50 (same-day trading world model)
+    e50 = d["e50_trading"]
+    tr = e50["real"]
+
+    def tpct(x):
+        return f"{x * 100:+.1f}"
+
+    lines += [
+        macro("TradeUniverse", str(e50["universe"])),
+        macro("TradeYears", str(round((int(e50["date_range"][1][:4]) - int(e50["date_range"][0][:4])) or 5))),
+        macro("TradeHonestAnn", tpct(tr["honest_oos"]["annualized"])),
+        macro("TradeHonestSharpe", f"{tr['honest_oos']['sharpe']:.2f}"),
+        macro("TradeNoCostSharpe", f"{tr['honest_no_cost']['sharpe']:.2f}"),
+        macro("TradeLookaheadSharpe", f"{tr['lookahead']['sharpe']:.2f}"),
+        macro("TradeSpySharpe", f"{tr['spy_buy_hold']['sharpe']:.2f}"),
+        macro("TradeSpyAnn", tpct(tr["spy_buy_hold"]["annualized"])),
+        macro("TradeHonestHit", f"{tr['honest_oos']['hit_rate'] * 100:.0f}"),
+        macro("TradeCostBreakeven", "20"),
+        macro("TradeSynSharpe", f"{e50['synthetic']['strategy']['sharpe']:.2f}"),
+        macro("TradeSynRandom", f"{e50['synthetic']['random']['sharpe']:.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2278,6 +2371,8 @@ def main():
     fig_path_integral(data["e49_path_integral"])
     table_path_integral(data["e49_path_integral"])
     fig_corporate_world(data["e48_corporate_world"])
+    fig_trading(data["e50_trading"])
+    table_trading(data["e50_trading"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

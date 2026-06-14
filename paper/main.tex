@@ -1054,6 +1054,56 @@ the openworld-corp transcript dataset as perception.}
 \input{tables/corporate_world}
 \end{table}
 
+\subsubsection{A same-day trading world model: honest out-of-sample on real markets (E50)}\label{sec:trading}
+E50 applies the framework to a deliberately hard, near-efficient real-world
+problem: from \TradeUniverse{} large-cap tickers' history (real OHLC via
+yfinance, \TradeYears{} years), rank the ticker most likely to rise and recommend
+the same-day entry---buy at the open (capture the intraday segment, close→open
+$\to$ open→close) or at the close (capture the overnight segment). Each ticker is
+a world with verified, auditable estimators of P(up) per segment; selection is a
+many-worlds pick of the highest expected move; timing is the open/close choice.
+The value here is not alpha---it is \emph{rigor}: an exact, auditable model and an
+honest walk-forward, no-lookahead, after-cost backtest that makes overfitting
+visible, where a black-box predictor would hide it.
+
+The result is reported as-is (Figure~\ref{fig:trading}, Table~\ref{tab:trading}).
+On a synthetic market with a \emph{known} $+40$\,bps overnight edge the detector
+recovers it cleanly (Sharpe \TradeSynSharpe{} vs.\ \TradeSynRandom{} random), so a
+weak real result reads as ``market efficient'', not ``detector broken.'' On real
+data the honest out-of-sample strategy returns \TradeHonestAnn\% annualized after
+cost---nominally above buy-and-hold SPY (\TradeSpyAnn\%)---but its hit rate is
+only \TradeHonestHit\%, its risk-adjusted return is \emph{below} SPY (Sharpe
+\TradeHonestSharpe{} vs.\ \TradeSpySharpe{}), and the edge is cost-fragile: the
+no-cost Sharpe is \TradeNoCostSharpe{} (close to the lookahead-cheating
+\TradeLookaheadSharpe{}) and the annualized return crosses zero around
+\TradeCostBreakeven\,bps round-trip. In other words, most of the apparent edge is
+transaction cost and overfitting; what survives does not beat simply holding the
+index on a risk-adjusted basis. That honest verdict---and the auditable,
+cost-swept, no-lookahead protocol that produces it---is the contribution; the
+model also emits a concrete daily recommendation (ticker + open/close entry) for
+live forward-testing, with the obvious caveat that this is not investment advice.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/trading.png}
+\caption{\textbf{Same-day trading world model (E50).} \textbf{A:} walk-forward
+equity (log) of the honest after-cost strategy vs.\ lookahead, buy-and-hold SPY,
+and random. \textbf{B:} cost fragility---annualized return vs.\ round-trip cost,
+crossing zero near \TradeCostBreakeven\,bps. \textbf{C:} on a synthetic market
+with a known edge the detector recovers it. \textbf{D:} risk-adjusted, the honest
+strategy ($\,$\TradeHonestSharpe{}$\,$) trails SPY ($\,$\TradeSpySharpe{}$\,$);
+the no-cost/lookahead Sharpes show how much is overfitting and cost.}
+\label{fig:trading}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E50 honest out-of-sample backtest} (real OHLC, walk-forward,
+no lookahead). The honest after-cost strategy does not beat SPY risk-adjusted.}
+\label{tab:trading}
+\input{tables/trading}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

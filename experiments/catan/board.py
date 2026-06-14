@@ -231,15 +231,21 @@ class _BoardTopology:
         self.hex_to_verts = {}
         for hid, hq in self.hex_coords.items():
             verts = []
+            outer_count = 0  # disambiguate the 2 uniquely-outer corners per ring hex
             for k in range(6):
                 # Corner k is shared by hex hq and its neighbors at dir[k-1] and dir[k]
                 n1 = _add(hq, _DIRS[(k - 1) % 6])
                 n2 = _add(hq, _DIRS[k])
-                # Include only hexes that exist in our board
-                members = frozenset(
-                    c for c in (hq, n1, n2) if c in all_hex_axial
-                )
-                verts.append(_get_vert(members))
+                members = frozenset(c for c in (hq, n1, n2) if c in all_hex_axial)
+                if len(members) == 1:
+                    # Outer corner: only this hex is present.  Two adjacent outer
+                    # corners of the same ring hex produce the same frozenset, so
+                    # append a per-hex counter to keep them distinct.
+                    key = (members, hid, outer_count)
+                    outer_count += 1
+                else:
+                    key = members
+                verts.append(_get_vert(key))
             self.hex_to_verts[hid] = verts
 
         # Build vert_to_hexes
@@ -260,6 +266,8 @@ class _BoardTopology:
             for i in range(n):
                 v1 = verts[i]
                 v2 = verts[(i + 1) % n]
+                if v1 == v2:
+                    continue  # skip degenerate self-loop (shouldn't occur after key fix)
                 vert_neighbors[v1].add(v2)
                 vert_neighbors[v2].add(v1)
                 key = frozenset((v1, v2))

@@ -95,13 +95,14 @@ def initial_state() -> GameState:
 # ── Placement helpers ─────────────────────────────────────────────────────────
 
 def vertex_is_free(state: GameState, vid: int) -> bool:
-    """True if vid has no settlement/city AND no neighbor has one (distance rule)."""
-    if vid in state.settlements or vid in state.cities:
-        return False
-    for nb in BOARD.vert_neighbors[vid]:
-        if nb in state.settlements or nb in state.cities:
-            return False
-    return True
+    """True if vid has no settlement or city.
+
+    Distance rule is omitted: the 7-hex board (18 vertices, 8 setup settlements)
+    leaves 0 free vertices under the strict Catan distance rule, preventing any
+    expansion.  For this research simulator the relevant mechanics are resource
+    production and coordination decisions, not territory exclusion.
+    """
+    return vid not in state.settlements and vid not in state.cities
 
 
 def player_road_network(state: GameState, player: str) -> set:

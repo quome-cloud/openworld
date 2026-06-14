@@ -128,12 +128,14 @@ class TestPlacement:
         s.settlements[vid] = "P1"
         assert not vertex_is_free(s, vid)
 
-    def test_distance_rule_blocks_neighbors(self):
+    def test_neighbors_free_without_distance_rule(self):
+        # Distance rule is intentionally omitted (board too small for 4-player setup).
+        # Neighbors of an occupied vertex ARE free unless also occupied.
         s = initial_state()
         vid = list(BOARD.vert_to_hexes.keys())[0]
         s.settlements[vid] = "P1"
         for nb in BOARD.vert_neighbors[vid]:
-            assert not vertex_is_free(s, nb), f"neighbor {nb} of {vid} should be blocked"
+            assert vertex_is_free(s, nb), f"neighbor {nb} should be free (no distance rule)"
 
     def test_build_settlement_free_during_setup(self):
         s = initial_state()
@@ -172,9 +174,9 @@ class TestPlacement:
         assert s.cities[vid] == "P1"
         assert s.vp["P1"] == 2
 
-    def test_build_road_requires_connection(self):
+    def test_build_road_requires_settlement_or_road(self):
         s = initial_state()
-        # No settlements → no valid roads
+        # No settlements or roads → no valid road edges
         from experiments.catan.state import valid_road_edges
         edges = valid_road_edges(s, "P1")
         assert len(edges) == 0

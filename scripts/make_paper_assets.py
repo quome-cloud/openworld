@@ -435,7 +435,41 @@ def fig_relativity(e47):
     paradox worldline, and real atomic-clock validation (Hafele-Keating)."""
     td, va = e47["time_dilation"], e47["velocity_addition"]
     tw, hk, gp = e47["twin_paradox"], e47["hafele_keating"], e47["gps"]
-    fig, ((a, b), (c, d)) = plt.subplots(2, 2, figsize=(8.2, 6.2))
+    fig = plt.figure(figsize=(8.2, 8.6))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.05, 1.0, 1.0], hspace=0.55,
+                          wspace=0.28)
+    sch = fig.add_subplot(gs[0, :])
+    a = fig.add_subplot(gs[1, 0]); b = fig.add_subplot(gs[1, 1])
+    c = fig.add_subplot(gs[2, 0]); d = fig.add_subplot(gs[2, 1])
+
+    # --- top: the relativity world as a composition --------------------------
+    sch.set_xlim(0, 10); sch.set_ylim(0, 2.85); sch.axis("off")
+    _panel(sch, 0.25, 0.2, 9.5, 2.45, "lab frame  ·  observer (reference)", SLATE,
+           alpha_fill=0.03)
+    _chip(sch, 8.35, 2.42, "_agg: τ = ∫ dt/γ", SLATE, fontsize=6.8)
+    _card(sch, 0.95, 0.72, 2.7, 1.25, "frame A — at rest",
+          ["agent: stay-at-home", "atomic clock  τ_A", "rate 1/γ = 1.00"],
+          bold_edge=TEAL)
+    _card(sch, 6.35, 0.72, 2.7, 1.25, "frame B — moving (0.8c)",
+          ["agent: traveler", "atomic clock  τ_B", "rate 1/γ = 0.60"],
+          bold_edge=PURPLE)
+    # bridge: the Lorentz transform couples the two frames (each sees the other slow)
+    sch.add_patch(FancyArrowPatch((3.72, 1.5), (6.28, 1.5),
+                                  connectionstyle="arc3,rad=-0.32",
+                                  arrowstyle="<|-|>", mutation_scale=13,
+                                  color=TEAL, lw=2.4, zorder=5))
+    _chip(sch, 5.0, 2.18, "bridge: Lorentz transform · γ=1.67", TEAL, fontsize=7)
+    # route: the agent changes reference (the turnaround) -> ages less
+    sch.add_patch(FancyArrowPatch((2.3, 0.6), (7.7, 0.6),
+                                  connectionstyle="arc3,rad=0.22",
+                                  arrowstyle="<|-|>", mutation_scale=11,
+                                  color=ORANGE, lw=1.9, ls=(0, (5, 2)), zorder=4))
+    sch.plot([5.0], [0.3], "o", color=PURPLE, markersize=8, zorder=6)
+    sch.text(5.0, 0.06, "route: agent changes reference (turnaround) → ages less",
+             ha="center", fontsize=6.8, color=ORANGE)
+    sch.set_title("The composite world: reference frames coupled by the Lorentz "
+                  "transform; agents carry atomic clocks and cross frames",
+                  fontsize=8.6, loc="left", color="#334155")
 
     # A: time dilation
     full_x = td["in_frac"] + td["ood_frac"]
@@ -489,8 +523,8 @@ def fig_relativity(e47):
     d.legend(fontsize=7.5, loc="upper left")
 
     fig.suptitle("Relativity as a verified world model: reference frames and atomic clocks (E47)",
-                 fontsize=10.5, x=0.02, ha="left")
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+                 fontsize=10.5, x=0.02, ha="left", y=0.995)
+    fig.subplots_adjust(top=0.945, bottom=0.055, left=0.09, right=0.97)
     fig.savefig(FIGS / "relativity.png", dpi=200)
     plt.close(fig)
 

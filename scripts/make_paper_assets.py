@@ -34,7 +34,7 @@ EXPERIMENTS = [
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
-    "e47_relativity",
+    "e47_relativity", "e49_path_integral",
 ]
 
 
@@ -427,6 +427,96 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_path_integral(e49):
+    """E49: path integral over learning trajectories. Per-agent least-action vs
+    unplanned baselines; path-integral marginals concentrating with beta; free
+    energy approaching the least-action cost; trajectories-vs-DP tractability."""
+    pa = e49["per_agent"]
+    fig, ((a, b), (c, d)) = plt.subplots(2, 2, figsize=(8.4, 6.2))
+
+    # A: per-agent least-action vs baselines
+    roles = list(pa)
+    series = [("least action", "least_action_cost", BLUE),
+              ("greedy", None, TEAL), ("random", None, ORANGE), ("eager", None, RED)]
+    x = range(len(roles))
+    w = 0.2
+    for k, (lab, key, col) in enumerate(series):
+        if key:
+            vals = [pa[r][key] for r in roles]
+        else:
+            bk = {"greedy": "greedy", "random": "random_mean", "eager": "eager"}[lab]
+            vals = [pa[r]["baselines"][bk] for r in roles]
+        a.bar([i + (k - 1.5) * w for i in x], vals, w, color=col, label=lab)
+    a.axhline(e49["transfer"]["from_scratch"], color=SLATE, lw=1.2, ls=":",
+              label="from scratch")
+    a.set_xticks(list(x)); a.set_xticklabels(roles, fontsize=8.5)
+    a.set_ylabel("learning cost (action)")
+    a.set_title("A. Agent spec → least-action curriculum", fontsize=9.5, loc="left")
+    a.legend(fontsize=7, ncol=2)
+
+    # B: path-integral marginals, low vs high beta (concentration)
+    mlo = e49["marginals_by_beta"]["0.2"]
+    mhi = e49["marginals_by_beta"]["10.0"]
+    order = sorted(mhi, key=lambda k: -mhi[k])
+    xs = range(len(order))
+    b.bar([i - 0.2 for i in xs], [mlo[k] for k in order], 0.4, color="#94A3B8",
+          label=r"$\beta$=0.2 (explore)")
+    b.bar([i + 0.2 for i in xs], [mhi[k] for k in order], 0.4, color=PURPLE,
+          label=r"$\beta$=10 (exploit)")
+    b.set_xticks(list(xs))
+    b.set_xticklabels([k.replace("_", "\n") for k in order], fontsize=5.5, rotation=0)
+    b.set_ylabel("path-integral marginal")
+    b.set_title("B. Which worlds to learn (forward×backward)", fontsize=9.5, loc="left")
+    b.legend(fontsize=7.5)
+
+    # C: free energy -> least action as beta grows
+    betas = e49["betas"]
+    fe = [e49["free_energy_by_beta"][str(bb)] for bb in betas]
+    c.plot(betas, fe, "-o", color=BLUE, lw=2, markersize=4, label=r"$-\frac{1}{\beta}\log Z$")
+    c.axhline(e49["transfer"]["least_action_cost"], color=RED, lw=1.5, ls="--",
+              label="least action")
+    c.set_xscale("log")
+    c.set_xlabel(r"inverse temperature $\beta$"); c.set_ylabel("free energy")
+    c.set_title("C. Path integral → least action", fontsize=9.5, loc="left")
+    c.legend(fontsize=8, loc="lower right")
+
+    # D: tractability — trajectories summed vs DP states
+    t = e49["tractability"]
+    bars = d.bar(["trajectories\n(summed)", "DP states\n(computed)"],
+                 [t["n_trajectories"], t["n_dp_states"]], color=[ORANGE, BLUE])
+    for bar, v in zip(bars, [t["n_trajectories"], t["n_dp_states"]]):
+        d.text(bar.get_x() + bar.get_width() / 2, v * 1.1, f"{v:,}", ha="center", fontsize=8)
+    d.set_yscale("log")
+    d.set_ylabel("count (log)")
+    d.set_title("D. Infinite trajectories, summed without enumerating", fontsize=9.0, loc="left")
+
+    fig.suptitle("Path integrals over composite-world learning trajectories (E49)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(FIGS / "path_integral.png", dpi=200)
+    plt.close(fig)
+
+
+def table_path_integral(e49):
+    """E49: per-agent least-action curriculum cost vs unplanned baselines."""
+    pa = e49["per_agent"]
+    lines = ["\\begin{tabular}{lcccc}", "\\toprule",
+             "Agent spec & Least action & Greedy & Random & Eager \\\\",
+             "\\midrule"]
+    for role, d in pa.items():
+        bl = d["baselines"]
+        lines.append(f"{role.replace('_', ' ')} & "
+                     f"\\textbf{{{d['least_action_cost']:.0f}}} & {bl['greedy']:.0f} & "
+                     f"{bl['random_mean']:.0f} & {bl['eager']:.0f} \\\\")
+    sp = e49["transfer"]
+    lines += ["\\midrule",
+              f"\\multicolumn{{5}}{{l}}{{\\emph{{Goal from scratch (no transfer): "
+              f"{sp['from_scratch']:.0f} — least-action path is {sp['speedup']:.1f}$\\times$ "
+              f"cheaper}}}} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "path_integral.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_relativity(e47):
@@ -1560,7 +1650,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "46"),
+        macro("NumExperiments", "47"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -1961,6 +2051,24 @@ def numbers_tex(d):
         macro("RelHKObsEast", f"{rhk['pub_obs_east_ns']}\\pm{rhk['pub_obs_east_err']}"),
         macro("RelHKObsWest", f"{rhk['pub_obs_west_ns']}\\pm{rhk['pub_obs_west_err']}"),
     ]
+    # E49 (path integrals over learning trajectories)
+    e49 = d["e49_path_integral"]
+    pa49 = e49["per_agent"]
+
+    def cur(role):
+        return " $\\to$ ".join(s.replace("_", " ") for s in pa49[role]["curriculum"])
+
+    lines += [
+        macro("PathGoal", e49["goal"].replace("_", " ")),
+        macro("PathSweCost", f"{pa49['senior_swe']['least_action_cost']:.0f}"),
+        macro("PathDirCost", f"{pa49['director']['least_action_cost']:.0f}"),
+        macro("PathCeoCost", f"{pa49['ceo']['least_action_cost']:.0f}"),
+        macro("PathScratch", f"{e49['transfer']['from_scratch']:.0f}"),
+        macro("PathSpeedup", f"{e49['transfer']['speedup']:.1f}"),
+        macro("PathRandom", f"{pa49['senior_swe']['baselines']['random_mean']:.0f}"),
+        macro("PathTraj", f"{e49['tractability']['n_trajectories']:,}"),
+        macro("PathStates", str(e49["tractability"]["n_dp_states"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2000,6 +2108,8 @@ def main():
     table_next_token(data["e45_next_token"])
     fig_relativity(data["e47_relativity"])
     table_relativity(data["e47_relativity"])
+    fig_path_integral(data["e49_path_integral"])
+    table_path_integral(data["e49_path_integral"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])

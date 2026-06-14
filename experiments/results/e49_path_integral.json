@@ -1,0 +1,152 @@
+{
+  "goal": "turnaround_division",
+  "library_size": 9,
+  "per_agent": {
+    "senior_swe": {
+      "initial": [
+        "data_perception",
+        "financial_modeling"
+      ],
+      "curriculum": [
+        "market_analysis",
+        "budget_allocation",
+        "revenue_dynamics",
+        "portfolio_optimization",
+        "team_management",
+        "division_growth",
+        "turnaround_division"
+      ],
+      "least_action_cost": 15.0,
+      "baselines": {
+        "random_mean": 113.4,
+        "eager": 90.0,
+        "greedy": 15.0
+      }
+    },
+    "director": {
+      "initial": [
+        "team_management",
+        "revenue_dynamics",
+        "market_analysis"
+      ],
+      "curriculum": [
+        "data_perception",
+        "financial_modeling",
+        "budget_allocation",
+        "portfolio_optimization",
+        "division_growth",
+        "turnaround_division"
+      ],
+      "least_action_cost": 13.0,
+      "baselines": {
+        "random_mean": 93.9,
+        "eager": 90.0,
+        "greedy": 13.0
+      }
+    },
+    "ceo": {
+      "initial": [
+        "budget_allocation",
+        "portfolio_optimization",
+        "market_analysis"
+      ],
+      "curriculum": [
+        "data_perception",
+        "financial_modeling",
+        "team_management",
+        "revenue_dynamics",
+        "division_growth",
+        "turnaround_division"
+      ],
+      "least_action_cost": 13.0,
+      "baselines": {
+        "random_mean": 85.9,
+        "eager": 90.0,
+        "greedy": 13.0
+      }
+    }
+  },
+  "transfer": {
+    "least_action_cost": 15.0,
+    "from_scratch": 90,
+    "speedup": 6.0
+  },
+  "tractability": {
+    "n_trajectories": 1957,
+    "n_dp_states": 128
+  },
+  "marginals_by_beta": {
+    "0.2": {
+      "market_analysis": 0.9998813826050988,
+      "revenue_dynamics": 0.9999928766410284,
+      "turnaround_division": 1.0,
+      "team_management": 0.9990352974158159,
+      "financial_modeling": 0.0,
+      "budget_allocation": 0.9994560216125539,
+      "division_growth": 0.9999998563055738,
+      "portfolio_optimization": 0.9999998510486268,
+      "data_perception": 0.0
+    },
+    "0.5": {
+      "market_analysis": 0.9999999997873044,
+      "revenue_dynamics": 0.9999999999999858,
+      "turnaround_division": 1.0,
+      "team_management": 0.9999999116481278,
+      "financial_modeling": 0.0,
+      "budget_allocation": 0.9999999891212098,
+      "division_growth": 1.0000000000000009,
+      "portfolio_optimization": 1.0,
+      "data_perception": 0.0
+    },
+    "1.0": {
+      "market_analysis": 1.0,
+      "revenue_dynamics": 0.9999999999999982,
+      "turnaround_division": 1.0,
+      "team_management": 0.9999999999999822,
+      "financial_modeling": 0.0,
+      "budget_allocation": 1.0,
+      "division_growth": 1.0,
+      "portfolio_optimization": 1.0,
+      "data_perception": 0.0
+    },
+    "3.0": {
+      "market_analysis": 1.0,
+      "revenue_dynamics": 1.0,
+      "turnaround_division": 1.0,
+      "team_management": 1.0,
+      "financial_modeling": 0.0,
+      "budget_allocation": 1.000000000000007,
+      "division_growth": 1.0,
+      "portfolio_optimization": 1.0,
+      "data_perception": 0.0
+    },
+    "10.0": {
+      "market_analysis": 1.0,
+      "revenue_dynamics": 1.0,
+      "turnaround_division": 1.0,
+      "team_management": 0.9999999999999716,
+      "financial_modeling": 0.0,
+      "budget_allocation": 1.0,
+      "division_growth": 1.0,
+      "portfolio_optimization": 1.0000000000000284,
+      "data_perception": 0.0
+    }
+  },
+  "free_energy_by_beta": {
+    "0.2": -0.3,
+    "0.5": 8.91,
+    "1.0": 11.96,
+    "3.0": 13.99,
+    "10.0": 14.7
+  },
+  "betas": [
+    0.2,
+    0.5,
+    1.0,
+    3.0,
+    10.0
+  ],
+  "experiment": "e49_path_integral",
+  "timestamp": "2026-06-14T13:00:40",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

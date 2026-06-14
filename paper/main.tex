@@ -719,6 +719,50 @@ capability limit.}
 \label{fig:induction-scale}
 \end{figure}
 
+\subsubsection{Acting closes the gap that scale cannot (E43)}\label{sec:active-induction}
+E38 names the bottleneck---identifiability, not capability---and points to the
+fix: \emph{informative} transitions rather than a bigger generator. E43 tests
+that fix directly. We cast dynamics recovery as version-space elimination over a
+candidate family of \ActiveCands{} sprint rules that parameterize the unknowns
+(ship's debt increment, the divisor $k$ in the subtle $\textrm{bugs} \mathrel{+}=
+\textrm{debt} \div k$ interaction, and the fix/refactor magnitudes); a candidate
+is eliminated the moment its predicted next state disagrees with an observed
+transition. We compare three probing policies on \ActiveRules{} hidden true
+rules: a \emph{passive} random policy (the E38 setting), an \emph{active} policy
+that picks the action most splitting the surviving candidates and tie-breaks
+toward \texttt{ship} to build the debt that makes $k$ observable, and a
+\emph{clairvoyant} reference that already knows the rule and greedily removes the
+most candidates per step.
+
+Acting wins decisively (Figure~\ref{fig:active-induction}). The active policy
+identifies the exact rule in \ActiveMeanSteps{} transitions on average, versus
+\ActivePassiveSteps{} for the passive policy---and crucially, passive
+observation \emph{never} resolves \ActivePassiveUnresolved{}/\ActiveRules{} of
+the hidden rules within the budget, precisely the high-$k$ rules whose
+interaction only surfaces at debt the random policy rarely reaches. This is the
+E38 ceiling reproduced as a plateau (Figure~\ref{fig:active-induction}, left):
+no amount of passive data crosses it. The active policy, knowing nothing about
+the rule, matches the clairvoyant reference within a step on average
+(\ActiveMeanSteps{} vs.\ \ActiveClairSteps{}) and occasionally beats it---the
+non-myopic ``build debt now to disambiguate later'' move is exactly what the
+greedy reference, optimizing per-step, fails to make. The lesson sharpens E38's:
+when traces underdetermine the dynamics, the leverage is in \emph{choosing} the
+transitions, and a world model the agent can act inside is what makes that
+choice expressible.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/active_induction.png}
+\caption{\textbf{Acting beats observing for rule identification (E43).} Left:
+candidate rules remaining (log scale) as transitions accrue, for a hidden rule
+the passive policy never resolves---active elimination drives \ActiveCands{}
+candidates to one while passive observation plateaus. Right: mean steps to
+identify across \ActiveRules{} hidden rules; the active policy (knowing nothing)
+matches the rule-knowing clairvoyant reference, while the passive policy is both
+slower and leaves \ActivePassiveUnresolved{}/\ActiveRules{} rules unresolved.}
+\label{fig:active-induction}
+\end{figure}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

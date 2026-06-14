@@ -1,0 +1,133 @@
+{
+  "enum_cap": 2000000,
+  "hidden_rule": {
+    "ship_debt": 1,
+    "k": 4,
+    "fix": 2,
+    "refactor": 2
+  },
+  "summary": {
+    "max_worlds": 1000028258199628641,
+    "max_worlds_factored_ms": 191.13,
+    "enum_max_worlds": 810000,
+    "correctness": {
+      "count_ok": true,
+      "marginal_ok": true,
+      "expected_ok": true,
+      "n_consistent": 11
+    },
+    "semirings": {
+      "true_world_possible": true,
+      "n_worlds_remaining": 11,
+      "posterior_k_mode": 4,
+      "posterior_k_at_truth": 1.0
+    }
+  },
+  "scale": [
+    {
+      "d": 10,
+      "n_worlds": 10000,
+      "factored_ms": 0.075,
+      "enum_ms": 17.6,
+      "consistent": 9
+    },
+    {
+      "d": 20,
+      "n_worlds": 160000,
+      "factored_ms": 0.133,
+      "enum_ms": 276.6,
+      "consistent": 19
+    },
+    {
+      "d": 30,
+      "n_worlds": 810000,
+      "factored_ms": 0.213,
+      "enum_ms": 1345.4,
+      "consistent": 29
+    },
+    {
+      "d": 50,
+      "n_worlds": 6250000,
+      "factored_ms": 0.34,
+      "enum_ms": null,
+      "consistent": 49
+    },
+    {
+      "d": 100,
+      "n_worlds": 100000000,
+      "factored_ms": 0.624,
+      "enum_ms": null,
+      "consistent": 99
+    },
+    {
+      "d": 300,
+      "n_worlds": 8100000000,
+      "factored_ms": 1.796,
+      "enum_ms": null,
+      "consistent": 299
+    },
+    {
+      "d": 1000,
+      "n_worlds": 1000000000000,
+      "factored_ms": 5.902,
+      "enum_ms": null,
+      "consistent": 999
+    },
+    {
+      "d": 3000,
+      "n_worlds": 81000000000000,
+      "factored_ms": 17.598,
+      "enum_ms": null,
+      "consistent": 2999
+    },
+    {
+      "d": 10000,
+      "n_worlds": 10000000000000000,
+      "factored_ms": 60.482,
+      "enum_ms": null,
+      "consistent": 9999
+    },
+    {
+      "d": 31623,
+      "n_worlds": 1000028258199628641,
+      "factored_ms": 191.13,
+      "enum_ms": null,
+      "consistent": 31622
+    }
+  ],
+  "coupling": [
+    {
+      "w": 1,
+      "factor_size": 8,
+      "ideal_factored": 8,
+      "observe_ms": 0.009
+    },
+    {
+      "w": 2,
+      "factor_size": 64,
+      "ideal_factored": 16,
+      "observe_ms": 0.045
+    },
+    {
+      "w": 3,
+      "factor_size": 512,
+      "ideal_factored": 24,
+      "observe_ms": 0.364
+    },
+    {
+      "w": 4,
+      "factor_size": 4096,
+      "ideal_factored": 32,
+      "observe_ms": 3.428
+    },
+    {
+      "w": 5,
+      "factor_size": 32768,
+      "ideal_factored": 40,
+      "observe_ms": 29.137
+    }
+  ],
+  "experiment": "e46_many_worlds",
+  "timestamp": "2026-06-13T23:18:43",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

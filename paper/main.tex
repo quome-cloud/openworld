@@ -763,6 +763,65 @@ slower and leaves \ActivePassiveUnresolved{}/\ActiveRules{} rules unresolved.}
 \label{fig:active-induction}
 \end{figure}
 
+\subsubsection{A database for many worlds: holding a non-enumerable version space (E46)}\label{sec:many-worlds}
+E43 maintains its version space as an explicit list of candidate worlds, which
+works for hundreds but cannot survive the regime where parameter counts and
+ranges grow and the world space becomes effectively infinite. E46 supplies the
+data structure that does. The transition of a parametric world family decomposes
+into \emph{mechanisms}, each predicting one observable of the next state from the
+observed state and a small \emph{scope} of parameters (for the sprint family:
+the ship debt increment depends only on \texttt{ship\_debt}, the bug interaction
+only on $k$, and so on). Because each transition is observed in full, the
+likelihood factorises over observables, so the store keeps one small factor per
+mechanism scope rather than the global product---a finite, symbolic
+representation of an enormous world set, in the spirit of conditional-table and
+provenance-semiring databases. The factor values live in a pluggable semiring,
+so the \emph{same} store answers Boolean (is a world still possible?), counting
+(how many worlds remain?), and probability (a posterior over parameters)
+queries; an observation reweights only the touched factors, and a prediction
+marginalises only the relevant one.
+
+The payoff is the version-space result scaled past enumeration
+(Figure~\ref{fig:many-worlds}, Table~\ref{tab:many-worlds}). On small spaces the
+factored store's count, marginals, and expected-next-state match brute-force
+enumeration \emph{exactly}. On large ones it maintains an exact version space and
+posterior over \ManyWorldsMax{} worlds in \ManyWorldsMaxMs{}\,ms---narrowing them
+to \ManyWorldsConsistent{} consistent worlds and peaking the posterior on the
+true rule---where the explicit enumeration of E43 is infeasible beyond
+\ManyWorldsEnumMax{}. Update and query cost scale as the \emph{sum} of the
+parameter-domain sizes rather than their product. The honest boundary is the
+probabilistic-database one: when a mechanism couples $w$ parameters
+non-separably its factor grows as $d^{w}$ (at $w{=}\ManyWorldsCoupleWidth$ the
+factor holds \ManyWorldsCoupleFactor{} entries versus \ManyWorldsCoupleIdeal{}
+for the separable ideal), degrading toward enumeration---the $\#$P-hardness of
+exact query evaluation, surfaced and measured rather than hidden. Together with
+E43 this is active inference over a world space too large to write down:
+\S\ref{sec:active-induction} chooses actions to shrink the set, E46 holds and
+queries it.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/many_worlds.png}
+\caption{\textbf{A factored, semiring-annotated store for many worlds (E46).}
+\textbf{Left:} update+query time vs.\ world-space size; the factored store stays
+cheap to \ManyWorldsMax{} worlds (cost $\sim$ the \emph{sum} of domain sizes)
+while explicit enumeration (E43-style) grows with the world count and becomes
+infeasible past \ManyWorldsEnumMax. \textbf{Right:} the honest boundary---a
+mechanism coupling $w$ parameters has a factor of size $d^{w}$, degrading toward
+enumeration as coupling grows (the $\#$P analogue).}
+\label{fig:many-worlds}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E46 factored vs.\ enumerated version space.} ``Consistent'' is
+the number of worlds surviving the same observed transitions; the factored store
+matches brute force exactly where enumeration is feasible and continues far
+past it.}
+\label{tab:many-worlds}
+\input{tables/many_worlds}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

@@ -34,7 +34,7 @@ EXPERIMENTS = [
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
-    "e47_relativity", "e49_path_integral",
+    "e47_relativity", "e49_path_integral", "e48_corporate_world",
 ]
 
 
@@ -427,6 +427,120 @@ def fig_emergent_economy(e44):
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(FIGS / "emergent_economy.png", dpi=200)
     plt.close(fig)
+
+
+def fig_corporate_world(e48):
+    """E48: a composite company world. Top: the org as a nested CompositeWorld
+    with revenue aggregators and agents at three levels. Then: individual-vs-
+    collective Pareto, value-of-action by level, granularity-bound perception
+    from real transcripts, and per-role policy."""
+    divs = e48["divisions"]
+    names = list(divs)
+    fig = plt.figure(figsize=(8.4, 9.0))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1.0, 1.0, 1.0], hspace=0.5, wspace=0.28)
+    sch = fig.add_subplot(gs[0, :])
+    a = fig.add_subplot(gs[1, 0]); b = fig.add_subplot(gs[1, 1])
+    c = fig.add_subplot(gs[2, 0]); dax = fig.add_subplot(gs[2, 1])
+
+    # --- top: org composite schematic ---
+    sch.set_xlim(0, 10); sch.set_ylim(0, 2.9); sch.axis("off")
+    _panel(sch, 0.2, 0.25, 9.6, 2.5, "company  ·  Nimbus Cloud (CompositeWorld)",
+           SLATE, alpha_fill=0.03)
+    _chip(sch, 8.3, 2.55, "_agg: revenue=Σ", SLATE, fontsize=6.8)
+    xs = [0.55 + i * 1.85 for i in range(len(names))]
+    for x, n in zip(xs, names):
+        _card(sch, x, 0.95, 1.62, 1.15, n,
+              [f"${divs[n]['R0']}M", f"a={divs[n]['a']}"], bold_edge=BLUE)
+        for k in range(min(4, divs[n]["hc"])):              # ICs as dots
+            sch.plot([x + 0.25 + k * 0.32], [0.7], "o", ms=4, color=TEAL, zorder=5)
+        sch.add_patch(FancyArrowPatch((x + 0.81, 2.12), (8.3, 2.42),
+                                      arrowstyle="-|>", mutation_scale=6,
+                                      ls=(0, (2, 2)), color=BLUE, lw=0.7, alpha=0.5))
+    sch.text(0.4, 2.42, "CEO → budget across divisions", fontsize=6.6, color=SLATE, zorder=6)
+    sch.text(0.4, 2.2, "director → within division", fontsize=6.6, color=BLUE, zorder=6)
+    sch.text(0.4, 0.5, "SWE → own project   (ICs ●)", fontsize=6.6, color=TEAL, zorder=6)
+    sch.set_title("The composite world: company > divisions > individuals; revenue "
+                  "aggregates upward; agents act at their level",
+                  fontsize=8.6, loc="left", color="#334155")
+
+    # A: individual vs collective Pareto
+    par = e48["pareto"]
+    rho = [p["rho"] for p in par]
+    a.plot(rho, [p["company_growth"] for p in par], "-o", color=BLUE, lw=2,
+           markersize=3, label="company growth")
+    a.set_xlabel("selfishness dial $\\rho$"); a.set_ylabel("company growth", color=BLUE)
+    a.tick_params(axis="y", labelcolor=BLUE)
+    a2 = a.twinx()
+    a2.plot(rho, [p["promo_gini"] for p in par], "--s", color=RED, lw=2,
+            markersize=3, label="promotion Gini")
+    a2.set_ylabel("promotion Gini", color=RED); a2.tick_params(axis="y", labelcolor=RED)
+    a.set_title("A. Individual vs collective", fontsize=9.5, loc="left")
+
+    # B: value-of-action by level
+    voa = e48["value_of_action"]
+    levels = ["ceo", "director", "ic"]
+    bars = b.bar(["CEO", "director", "IC"], [voa[f"{l}_pct"] for l in levels],
+                 color=[SLATE, BLUE, TEAL])
+    for bar, l in zip(bars, levels):
+        b.text(bar.get_x() + bar.get_width() / 2, voa[f"{l}_pct"] + 0.3,
+               f"+{voa[f'{l}_pct']:.0f}%", ha="center", fontsize=8)
+    b.set_ylabel("marginal company growth (%)")
+    b.set_title("B. Value-of-action by level", fontsize=9.5, loc="left")
+
+    # C: granularity-bound perception (from real transcripts)
+    isig = e48["perception"]["individual_signal"]
+    groups = ["division metric\n(growth)", "individual\n(promo signal)"]
+    src_a = [1.0, isig["recover_from_all_hands"]]            # all-hands
+    src_b = [1.0, isig["recover_from_one_on_one"]]           # review / 1:1
+    xg = range(len(groups)); w = 0.36
+    c.bar([i - w / 2 for i in xg], src_a, w, color=SLATE, label="all-hands (aggregate)")
+    c.bar([i + w / 2 for i in xg], src_b, w, color=TEAL, label="review / 1:1 (local)")
+    c.set_xticks(list(xg)); c.set_xticklabels(groups, fontsize=8)
+    c.set_ylabel("signal recovered"); c.set_ylim(0, 1.15)
+    c.set_title(f"C. Perception ({e48['perception']['corpus']['n_records']} real transcripts)",
+                fontsize=9.5, loc="left")
+    c.legend(fontsize=7, loc="upper right")
+
+    # D: per-role policy, principled vs greedy
+    pol = e48["policies"]
+    roles = ["ceo", "director", "ic"]
+    xr = range(len(roles))
+    dax.bar([i - w / 2 for i in xr], [pol[r]["greedy"] for r in roles], w,
+            color=ORANGE, label="greedy")
+    dax.bar([i + w / 2 for i in xr], [pol[r]["principled"] for r in roles], w,
+            color=BLUE, label="principled")
+    dax.set_xticks(list(xr)); dax.set_xticklabels(["CEO", "director", "IC"], fontsize=8.5)
+    dax.set_ylabel("company growth")
+    dax.set_title("D. Navigation policy per role", fontsize=9.5, loc="left")
+    dax.legend(fontsize=7.5)
+
+    fig.suptitle("A composite corporate world: individual, division, and company goals (E48)",
+                 fontsize=10.5, x=0.02, ha="left", y=0.995)
+    fig.subplots_adjust(top=0.945, bottom=0.05, left=0.09, right=0.95)
+    fig.savefig(FIGS / "corporate_world.png", dpi=200)
+    plt.close(fig)
+
+
+def table_corporate_world(e48):
+    """E48: the four agent-level results."""
+    par, voa = e48["pareto"], e48["value_of_action"]
+    isig = e48["perception"]["individual_signal"]
+    aligned, selfish = par[0], par[-1]
+    lines = ["\\begin{tabular}{lll}", "\\toprule",
+             "Question & Result & Takeaway \\\\", "\\midrule",
+             f"Individual vs collective & growth {aligned['company_growth'] * 100:.0f}\\% "
+             f"(aligned) vs {selfish['company_growth'] * 100:.0f}\\% (selfish), Gini "
+             f"{aligned['promo_gini']:.2f}$\\to${selfish['promo_gini']:.2f} & "
+             "selfish concentration hurts the aggregate \\\\",
+             f"Value-of-action & CEO +{voa['ceo_pct']:.0f}\\%, director "
+             f"+{voa['director_pct']:.0f}\\%, IC +{voa['ic_pct']:.0f}\\% & "
+             "leverage lives at the top \\\\",
+             f"Perception (real transcripts) & individual signal "
+             f"{isig['recover_from_one_on_one'] * 100:.0f}\\% (1:1) vs "
+             f"{isig['recover_from_all_hands'] * 100:.0f}\\% (all-hands) & "
+             "perception is granularity-bound \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "corporate_world.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_path_integral(e49):
@@ -1684,7 +1798,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "47"),
+        macro("NumExperiments", "48"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2103,6 +2217,25 @@ def numbers_tex(d):
         macro("PathTraj", f"{e49['tractability']['n_trajectories']:,}"),
         macro("PathStates", str(e49["tractability"]["n_dp_states"])),
     ]
+    # E48 (composite corporate world)
+    e48 = d["e48_corporate_world"]
+    cpar, cvoa = e48["pareto"], e48["value_of_action"]
+    cisig = e48["perception"]["individual_signal"]
+    cal, csel = cpar[0], cpar[-1]
+    lines += [
+        macro("CorpDivisions", str(len(e48["divisions"]))),
+        macro("CorpRevenue", str(e48["total_revenue"])),
+        macro("CorpAlignedGrowth", f"{cal['company_growth'] * 100:.0f}"),
+        macro("CorpSelfishGrowth", f"{csel['company_growth'] * 100:.0f}"),
+        macro("CorpAlignedGini", f"{cal['promo_gini']:.2f}"),
+        macro("CorpSelfishGini", f"{csel['promo_gini']:.2f}"),
+        macro("CorpCeoPct", f"{cvoa['ceo_pct']:.0f}"),
+        macro("CorpDirPct", f"{cvoa['director_pct']:.0f}"),
+        macro("CorpIcPct", f"{cvoa['ic_pct']:.0f}"),
+        macro("CorpTranscripts", str(e48["perception"]["corpus"]["n_records"])),
+        macro("CorpIndivOneOnOne", f"{cisig['recover_from_one_on_one'] * 100:.0f}"),
+        macro("CorpIndivAllHands", f"{cisig['recover_from_all_hands'] * 100:.0f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2144,6 +2277,8 @@ def main():
     table_relativity(data["e47_relativity"])
     fig_path_integral(data["e49_path_integral"])
     table_path_integral(data["e49_path_integral"])
+    fig_corporate_world(data["e48_corporate_world"])
+    table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])

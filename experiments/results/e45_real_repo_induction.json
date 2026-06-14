@@ -1,0 +1,180 @@
+{
+  "model": "qwen3-coder:30b",
+  "state_fields": [
+    "files",
+    "py_files",
+    "py_loc"
+  ],
+  "action_fields": [
+    "a_added",
+    "a_deleted",
+    "a_py_added",
+    "a_py_deleted",
+    "a_py_ins",
+    "a_py_del"
+  ],
+  "ood_frac": 0.1,
+  "window": 600,
+  "summary": {
+    "n_repos": 3,
+    "mean_law_coverage": 0.995,
+    "in_dist_exact": {
+      "symbolic": 1.0,
+      "linear": 1.0,
+      "mlp": 0.0,
+      "knn1": 0.42
+    },
+    "ood_exact": {
+      "symbolic": 0.986,
+      "linear": 0.961,
+      "mlp": 0.0,
+      "knn1": 0.0
+    },
+    "in_dist_mae": {
+      "symbolic": 0.0,
+      "linear": 0.0,
+      "mlp": 53.527,
+      "knn1": 62.06
+    },
+    "ood_mae": {
+      "symbolic": 0.007,
+      "linear": 0.03,
+      "mlp": 279.78,
+      "knn1": 404.79
+    }
+  },
+  "repos": [
+    {
+      "repo": "requests",
+      "n_transitions": 599,
+      "law_coverage": 0.9967,
+      "train_reproduction": 0.998,
+      "synthesized_code": "def transition(state, action):\n    new_state = state.copy()\n    \n    # Update files count based on added/deleted files\n    new_state['files'] = state['files'] + action['a_added'] - action['a_deleted']\n    \n    # Update py_files count based on added/deleted python files\n    new_state['py_files'] = state['py_files'] + action['a_py_added'] - action['a_py_deleted']\n    \n    # Update py_loc count based on added/deleted python lines\n    new_state['py_loc'] = state['py_loc'] + action['a_py_ins'] - action['a_py_del']\n    \n    return new_state",
+      "in_dist": {
+        "symbolic": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "linear": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 31.47
+        },
+        "knn1": {
+          "exact": 0.62,
+          "mae": 9.58
+        }
+      },
+      "ood": {
+        "symbolic": {
+          "exact": 0.983,
+          "mae": 0.01
+        },
+        "linear": {
+          "exact": 0.932,
+          "mae": 0.07
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 244.21
+        },
+        "knn1": {
+          "exact": 0.0,
+          "mae": 164.2
+        }
+      }
+    },
+    {
+      "repo": "flask",
+      "n_transitions": 599,
+      "law_coverage": 1.0,
+      "train_reproduction": 1.0,
+      "synthesized_code": "def transition(state, action):\n    next_state = state.copy()\n    \n    # Update files count: a_added - a_deleted\n    next_state['files'] = state['files'] + action['a_added'] - action['a_deleted']\n    \n    # Update py_files count: a_py_added - a_py_deleted\n    next_state['py_files'] = state['py_files'] + action['a_py_added'] - action['a_py_deleted']\n    \n    # Update py_loc count: a_py_ins - a_py_del\n    next_state['py_loc'] = state['py_loc'] + action['a_py_ins'] - action['a_py_del']\n    \n    return next_state",
+      "in_dist": {
+        "symbolic": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "linear": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 46.67
+        },
+        "knn1": {
+          "exact": 0.509,
+          "mae": 18.82
+        }
+      },
+      "ood": {
+        "symbolic": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "linear": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 78.04
+        },
+        "knn1": {
+          "exact": 0.0,
+          "mae": 201.06
+        }
+      }
+    },
+    {
+      "repo": "tqdm",
+      "n_transitions": 427,
+      "law_coverage": 0.9883,
+      "train_reproduction": 0.987,
+      "synthesized_code": "def transition(state, action):\n    next_state = state.copy()\n    \n    # Update files and py_files counts based on added/deleted files\n    next_state['files'] += action['a_added'] - action['a_deleted']\n    next_state['py_files'] += action['a_py_added'] - action['a_py_deleted']\n    \n    # Update py_loc based on py_ins and py_del\n    next_state['py_loc'] += action['a_py_ins'] - action['a_py_del']\n    \n    return next_state",
+      "in_dist": {
+        "symbolic": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "linear": {
+          "exact": 1.0,
+          "mae": 0.0
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 82.44
+        },
+        "knn1": {
+          "exact": 0.13,
+          "mae": 157.78
+        }
+      },
+      "ood": {
+        "symbolic": {
+          "exact": 0.976,
+          "mae": 0.01
+        },
+        "linear": {
+          "exact": 0.952,
+          "mae": 0.02
+        },
+        "mlp": {
+          "exact": 0.0,
+          "mae": 517.09
+        },
+        "knn1": {
+          "exact": 0.0,
+          "mae": 849.11
+        }
+      }
+    }
+  ],
+  "experiment": "e45_real_repo_induction",
+  "timestamp": "2026-06-13T21:19:33",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -1,0 +1,932 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "nation",
+  "description": "A nation of two regions, each of two cities: GDP rolls up the hierarchy (city -> region -> nation).",
+  "card": {
+    "version": "0.9",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "economy",
+      "nested",
+      "world-of-worlds"
+    ],
+    "lineage": "nation > region > city",
+    "metrics": {},
+    "description": "A nation of two regions, each of two cities: GDP rolls up the hierarchy (city -> region -> nation)."
+  },
+  "state_schema": {
+    "north": "dict",
+    "south": "dict",
+    "_agg": "dict"
+  },
+  "initial_state": {
+    "north": {
+      "west": {
+        "treasury": 10,
+        "goods": 4
+      },
+      "east": {
+        "treasury": 10,
+        "goods": 4
+      },
+      "_agg": {
+        "region_gdp": 28
+      }
+    },
+    "south": {
+      "west": {
+        "treasury": 10,
+        "goods": 4
+      },
+      "east": {
+        "treasury": 10,
+        "goods": 4
+      },
+      "_agg": {
+        "region_gdp": 28
+      }
+    },
+    "_agg": {
+      "nation_gdp": 56
+    }
+  },
+  "actions": [
+    "north:west:produce",
+    "north:west:sell",
+    "north:east:produce",
+    "north:east:sell",
+    "north:tick",
+    "south:west:produce",
+    "south:west:sell",
+    "south:east:produce",
+    "south:east:sell",
+    "south:tick",
+    "tick"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "composite"
+  },
+  "composite": {
+    "children": {
+      "north": {
+        "openworld_spec_version": "1.0",
+        "name": "north-region",
+        "description": "The north-region: two cities that trade and roll up GDP.",
+        "card": {
+          "version": "0.1",
+          "license": null,
+          "authors": [],
+          "tags": [],
+          "lineage": null,
+          "metrics": {},
+          "description": "The north-region: two cities that trade and roll up GDP."
+        },
+        "state_schema": {
+          "west": "dict",
+          "east": "dict",
+          "_agg": "dict"
+        },
+        "initial_state": {
+          "west": {
+            "treasury": 10,
+            "goods": 4
+          },
+          "east": {
+            "treasury": 10,
+            "goods": 4
+          },
+          "_agg": {
+            "region_gdp": 28
+          }
+        },
+        "actions": [
+          "west:produce",
+          "west:sell",
+          "east:produce",
+          "east:sell",
+          "tick"
+        ],
+        "rules": [],
+        "transition": {
+          "kind": "composite"
+        },
+        "composite": {
+          "children": {
+            "west": {
+              "openworld_spec_version": "1.0",
+              "name": "ironforge",
+              "description": "The city economy of ironforge.",
+              "card": {
+                "version": "0.1",
+                "license": null,
+                "authors": [],
+                "tags": [],
+                "lineage": null,
+                "metrics": {},
+                "description": "The city economy of ironforge."
+              },
+              "state_schema": {
+                "treasury": "int",
+                "goods": "int"
+              },
+              "initial_state": {
+                "treasury": 10,
+                "goods": 4
+              },
+              "actions": [
+                "produce",
+                "sell"
+              ],
+              "rules": [
+                "'produce' adds 2 goods; 'sell' trades 1 good for 3 treasury."
+              ],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] == \"produce\":\n        s[\"goods\"] = s[\"goods\"] + 2\n    elif action[\"name\"] == \"sell\" and s[\"goods\"] > 0:\n        s[\"goods\"] = s[\"goods\"] - 1\n        s[\"treasury\"] = s[\"treasury\"] + 3\n    return s\n"
+              },
+              "preview": {
+                "steps": 12,
+                "action": "sell",
+                "series": {
+                  "treasury": [
+                    10.0,
+                    13.0,
+                    16.0,
+                    19.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0
+                  ],
+                  "goods": [
+                    4.0,
+                    3.0,
+                    2.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                },
+                "graph": {
+                  "kind": "state",
+                  "nodes": [
+                    {
+                      "id": 0,
+                      "label": [
+                        "goods 4",
+                        "treasury 10"
+                      ],
+                      "initial": true
+                    },
+                    {
+                      "id": 1,
+                      "label": [
+                        "goods 6",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 2,
+                      "label": [
+                        "goods 3",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 3,
+                      "label": [
+                        "goods 8",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 4,
+                      "label": [
+                        "goods 5",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 5,
+                      "label": [
+                        "goods 2",
+                        "treasury 16"
+                      ],
+                      "initial": false
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "src": 0,
+                      "dst": 1,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 0,
+                      "dst": 2,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 3,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 4,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 4,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 5,
+                      "action": "sell"
+                    }
+                  ],
+                  "truncated": true
+                }
+              }
+            },
+            "east": {
+              "openworld_spec_version": "1.0",
+              "name": "steeltown",
+              "description": "The city economy of steeltown.",
+              "card": {
+                "version": "0.1",
+                "license": null,
+                "authors": [],
+                "tags": [],
+                "lineage": null,
+                "metrics": {},
+                "description": "The city economy of steeltown."
+              },
+              "state_schema": {
+                "treasury": "int",
+                "goods": "int"
+              },
+              "initial_state": {
+                "treasury": 10,
+                "goods": 4
+              },
+              "actions": [
+                "produce",
+                "sell"
+              ],
+              "rules": [
+                "'produce' adds 2 goods; 'sell' trades 1 good for 3 treasury."
+              ],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] == \"produce\":\n        s[\"goods\"] = s[\"goods\"] + 2\n    elif action[\"name\"] == \"sell\" and s[\"goods\"] > 0:\n        s[\"goods\"] = s[\"goods\"] - 1\n        s[\"treasury\"] = s[\"treasury\"] + 3\n    return s\n"
+              },
+              "preview": {
+                "steps": 12,
+                "action": "sell",
+                "series": {
+                  "treasury": [
+                    10.0,
+                    13.0,
+                    16.0,
+                    19.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0
+                  ],
+                  "goods": [
+                    4.0,
+                    3.0,
+                    2.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                },
+                "graph": {
+                  "kind": "state",
+                  "nodes": [
+                    {
+                      "id": 0,
+                      "label": [
+                        "goods 4",
+                        "treasury 10"
+                      ],
+                      "initial": true
+                    },
+                    {
+                      "id": 1,
+                      "label": [
+                        "goods 6",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 2,
+                      "label": [
+                        "goods 3",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 3,
+                      "label": [
+                        "goods 8",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 4,
+                      "label": [
+                        "goods 5",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 5,
+                      "label": [
+                        "goods 2",
+                        "treasury 16"
+                      ],
+                      "initial": false
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "src": 0,
+                      "dst": 1,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 0,
+                      "dst": 2,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 3,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 4,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 4,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 5,
+                      "action": "sell"
+                    }
+                  ],
+                  "truncated": true
+                }
+              }
+            }
+          },
+          "bridges": [
+            {
+              "name": "trade",
+              "a": "west",
+              "b": "east",
+              "description": "cities trade surplus goods",
+              "rules": [],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    a = dict(state[\"a\"]); b = dict(state[\"b\"])\n    if a[\"goods\"] > b[\"goods\"] + 2:\n        a[\"goods\"] -= 1; b[\"goods\"] += 1\n    return {\"a\": a, \"b\": b}\n"
+              },
+              "kind": "bridge"
+            }
+          ],
+          "aggregators": [
+            {
+              "name": "region_gdp",
+              "func_name": "region_gdp",
+              "source": "def region_gdp(children):\n    return sum(c.get(\"treasury\", 0) + c.get(\"goods\", 0) for c in children.values())\n"
+            }
+          ],
+          "bindings": [],
+          "timescales": {},
+          "default_actions": {
+            "west": "produce",
+            "east": "produce"
+          },
+          "agents": {}
+        },
+        "preview": {
+          "steps": 12,
+          "action": "tick",
+          "series": {
+            "region_gdp": [
+              28.0,
+              32.0,
+              36.0,
+              40.0,
+              44.0,
+              48.0,
+              52.0,
+              56.0,
+              60.0,
+              64.0,
+              68.0,
+              72.0,
+              76.0
+            ]
+          },
+          "graph": {}
+        }
+      },
+      "south": {
+        "openworld_spec_version": "1.0",
+        "name": "south-region",
+        "description": "The south-region: two cities that trade and roll up GDP.",
+        "card": {
+          "version": "0.1",
+          "license": null,
+          "authors": [],
+          "tags": [],
+          "lineage": null,
+          "metrics": {},
+          "description": "The south-region: two cities that trade and roll up GDP."
+        },
+        "state_schema": {
+          "west": "dict",
+          "east": "dict",
+          "_agg": "dict"
+        },
+        "initial_state": {
+          "west": {
+            "treasury": 10,
+            "goods": 4
+          },
+          "east": {
+            "treasury": 10,
+            "goods": 4
+          },
+          "_agg": {
+            "region_gdp": 28
+          }
+        },
+        "actions": [
+          "west:produce",
+          "west:sell",
+          "east:produce",
+          "east:sell",
+          "tick"
+        ],
+        "rules": [],
+        "transition": {
+          "kind": "composite"
+        },
+        "composite": {
+          "children": {
+            "west": {
+              "openworld_spec_version": "1.0",
+              "name": "portville",
+              "description": "The city economy of portville.",
+              "card": {
+                "version": "0.1",
+                "license": null,
+                "authors": [],
+                "tags": [],
+                "lineage": null,
+                "metrics": {},
+                "description": "The city economy of portville."
+              },
+              "state_schema": {
+                "treasury": "int",
+                "goods": "int"
+              },
+              "initial_state": {
+                "treasury": 10,
+                "goods": 4
+              },
+              "actions": [
+                "produce",
+                "sell"
+              ],
+              "rules": [
+                "'produce' adds 2 goods; 'sell' trades 1 good for 3 treasury."
+              ],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] == \"produce\":\n        s[\"goods\"] = s[\"goods\"] + 2\n    elif action[\"name\"] == \"sell\" and s[\"goods\"] > 0:\n        s[\"goods\"] = s[\"goods\"] - 1\n        s[\"treasury\"] = s[\"treasury\"] + 3\n    return s\n"
+              },
+              "preview": {
+                "steps": 12,
+                "action": "sell",
+                "series": {
+                  "treasury": [
+                    10.0,
+                    13.0,
+                    16.0,
+                    19.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0
+                  ],
+                  "goods": [
+                    4.0,
+                    3.0,
+                    2.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                },
+                "graph": {
+                  "kind": "state",
+                  "nodes": [
+                    {
+                      "id": 0,
+                      "label": [
+                        "goods 4",
+                        "treasury 10"
+                      ],
+                      "initial": true
+                    },
+                    {
+                      "id": 1,
+                      "label": [
+                        "goods 6",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 2,
+                      "label": [
+                        "goods 3",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 3,
+                      "label": [
+                        "goods 8",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 4,
+                      "label": [
+                        "goods 5",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 5,
+                      "label": [
+                        "goods 2",
+                        "treasury 16"
+                      ],
+                      "initial": false
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "src": 0,
+                      "dst": 1,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 0,
+                      "dst": 2,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 3,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 4,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 4,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 5,
+                      "action": "sell"
+                    }
+                  ],
+                  "truncated": true
+                }
+              }
+            },
+            "east": {
+              "openworld_spec_version": "1.0",
+              "name": "baytown",
+              "description": "The city economy of baytown.",
+              "card": {
+                "version": "0.1",
+                "license": null,
+                "authors": [],
+                "tags": [],
+                "lineage": null,
+                "metrics": {},
+                "description": "The city economy of baytown."
+              },
+              "state_schema": {
+                "treasury": "int",
+                "goods": "int"
+              },
+              "initial_state": {
+                "treasury": 10,
+                "goods": 4
+              },
+              "actions": [
+                "produce",
+                "sell"
+              ],
+              "rules": [
+                "'produce' adds 2 goods; 'sell' trades 1 good for 3 treasury."
+              ],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] == \"produce\":\n        s[\"goods\"] = s[\"goods\"] + 2\n    elif action[\"name\"] == \"sell\" and s[\"goods\"] > 0:\n        s[\"goods\"] = s[\"goods\"] - 1\n        s[\"treasury\"] = s[\"treasury\"] + 3\n    return s\n"
+              },
+              "preview": {
+                "steps": 12,
+                "action": "sell",
+                "series": {
+                  "treasury": [
+                    10.0,
+                    13.0,
+                    16.0,
+                    19.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0,
+                    22.0
+                  ],
+                  "goods": [
+                    4.0,
+                    3.0,
+                    2.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                },
+                "graph": {
+                  "kind": "state",
+                  "nodes": [
+                    {
+                      "id": 0,
+                      "label": [
+                        "goods 4",
+                        "treasury 10"
+                      ],
+                      "initial": true
+                    },
+                    {
+                      "id": 1,
+                      "label": [
+                        "goods 6",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 2,
+                      "label": [
+                        "goods 3",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 3,
+                      "label": [
+                        "goods 8",
+                        "treasury 10"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 4,
+                      "label": [
+                        "goods 5",
+                        "treasury 13"
+                      ],
+                      "initial": false
+                    },
+                    {
+                      "id": 5,
+                      "label": [
+                        "goods 2",
+                        "treasury 16"
+                      ],
+                      "initial": false
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "src": 0,
+                      "dst": 1,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 0,
+                      "dst": 2,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 3,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 1,
+                      "dst": 4,
+                      "action": "sell"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 4,
+                      "action": "produce"
+                    },
+                    {
+                      "src": 2,
+                      "dst": 5,
+                      "action": "sell"
+                    }
+                  ],
+                  "truncated": true
+                }
+              }
+            }
+          },
+          "bridges": [
+            {
+              "name": "trade",
+              "a": "west",
+              "b": "east",
+              "description": "cities trade surplus goods",
+              "rules": [],
+              "transition": {
+                "kind": "code",
+                "func_name": "transition",
+                "code": "\ndef transition(state, action):\n    a = dict(state[\"a\"]); b = dict(state[\"b\"])\n    if a[\"goods\"] > b[\"goods\"] + 2:\n        a[\"goods\"] -= 1; b[\"goods\"] += 1\n    return {\"a\": a, \"b\": b}\n"
+              },
+              "kind": "bridge"
+            }
+          ],
+          "aggregators": [
+            {
+              "name": "region_gdp",
+              "func_name": "region_gdp",
+              "source": "def region_gdp(children):\n    return sum(c.get(\"treasury\", 0) + c.get(\"goods\", 0) for c in children.values())\n"
+            }
+          ],
+          "bindings": [],
+          "timescales": {},
+          "default_actions": {
+            "west": "produce",
+            "east": "produce"
+          },
+          "agents": {}
+        },
+        "preview": {
+          "steps": 12,
+          "action": "tick",
+          "series": {
+            "region_gdp": [
+              28.0,
+              32.0,
+              36.0,
+              40.0,
+              44.0,
+              48.0,
+              52.0,
+              56.0,
+              60.0,
+              64.0,
+              68.0,
+              72.0,
+              76.0
+            ]
+          },
+          "graph": {}
+        }
+      }
+    },
+    "bridges": [],
+    "aggregators": [
+      {
+        "name": "nation_gdp",
+        "func_name": "nation_gdp",
+        "source": "def nation_gdp(children):\n    return sum(c.get(\"_agg\", {}).get(\"region_gdp\", 0) for c in children.values())\n"
+      }
+    ],
+    "bindings": [],
+    "timescales": {},
+    "default_actions": {
+      "north": "tick",
+      "south": "tick"
+    },
+    "agents": {}
+  },
+  "preview": {
+    "steps": 12,
+    "action": "tick",
+    "series": {
+      "nation_gdp": [
+        56.0,
+        64.0,
+        72.0,
+        80.0,
+        88.0,
+        96.0,
+        104.0,
+        112.0,
+        120.0,
+        128.0,
+        136.0,
+        144.0,
+        152.0
+      ]
+    },
+    "graph": {}
+  }
+}

@@ -17,7 +17,7 @@ Deterministic/offline; standard library only.
 
 from pathlib import Path
 
-from openworld import (Aggregator, Bridge, CodeTransition, CompositeWorld,
+from openworld import (Aggregator, Bridge, CodeTransition, CompositeWorld, World,
                        from_spec, render_card, render_gallery, spec_to_json,
                        to_spec, validate_spec)
 from openworld.state import Action
@@ -41,6 +41,65 @@ def transition(state, action):
         b["critical_waiting"] += 1
     return {"a": a, "b": b}
 """
+
+
+# ---- a genuinely nested "world of worlds": nation > region > city ----------
+CITY_CODE = """
+def transition(state, action):
+    s = dict(state)
+    if action["name"] == "produce":
+        s["goods"] = s["goods"] + 2
+    elif action["name"] == "sell" and s["goods"] > 0:
+        s["goods"] = s["goods"] - 1
+        s["treasury"] = s["treasury"] + 3
+    return s
+"""
+
+CITY_TRADE = """
+def transition(state, action):
+    a = dict(state["a"]); b = dict(state["b"])
+    if a["goods"] > b["goods"] + 2:
+        a["goods"] -= 1; b["goods"] += 1
+    return {"a": a, "b": b}
+"""
+
+
+def region_gdp(children):
+    return sum(c.get("treasury", 0) + c.get("goods", 0) for c in children.values())
+
+
+def nation_gdp(children):
+    return sum(c.get("_agg", {}).get("region_gdp", 0) for c in children.values())
+
+
+def _city(name):
+    return World(name=name, description=f"The city economy of {name}.",
+                 initial_state={"treasury": 10, "goods": 4},
+                 actions=["produce", "sell"],
+                 rules=["'produce' adds 2 goods; 'sell' trades 1 good for 3 treasury."],
+                 transition=CodeTransition(CITY_CODE))
+
+
+def _region(name, c1, c2):
+    return CompositeWorld(
+        name=name, children={"west": _city(c1), "east": _city(c2)},
+        bridges=[Bridge(name="trade", a="west", b="east",
+                        transition=CodeTransition(CITY_TRADE),
+                        description="cities trade surplus goods")],
+        aggregators=[Aggregator(name="region_gdp", fn=region_gdp)],
+        default_actions={"west": "produce", "east": "produce"},
+        description=f"The {name}: two cities that trade and roll up GDP.")
+
+
+def nation_world():
+    return CompositeWorld(
+        name="nation",
+        children={"north": _region("north-region", "ironforge", "steeltown"),
+                  "south": _region("south-region", "portville", "baytown")},
+        aggregators=[Aggregator(name="nation_gdp", fn=nation_gdp)],
+        default_actions={"north": "tick", "south": "tick"},
+        description="A nation of two regions, each of two cities: GDP rolls up "
+                    "the hierarchy (city -> region -> nation).")
 
 
 def hospital_network():
@@ -83,6 +142,9 @@ WORLDS = [
     (hospital_network, ["tick", "tick", "north:treat_critical", "tick"], None,
      {"version": "0.9", "license": "MIT", "lineage": "composed from triage",
       "tags": ["healthcare", "composite", "multi-world"]}),
+    (nation_world, ["tick", "tick", "north:tick"], None,
+     {"version": "0.9", "license": "MIT", "lineage": "nation > region > city",
+      "tags": ["economy", "nested", "world-of-worlds"]}),
 ]
 
 

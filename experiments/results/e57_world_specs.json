@@ -1,5 +1,5 @@
 {
-  "n_worlds": 4,
+  "n_worlds": 5,
   "all_validated": true,
   "all_round_trip_exact": true,
   "rows": [
@@ -42,10 +42,20 @@
       "spec_bytes": 16192,
       "n_actions": 7,
       "problems": []
+    },
+    {
+      "name": "nation",
+      "kind": "composite",
+      "n_children": 2,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 26961,
+      "n_actions": 11,
+      "problems": []
     }
   ],
   "gallery_dir": "gallery",
   "experiment": "e57_world_specs",
-  "timestamp": "2026-06-14T22:02:48",
+  "timestamp": "2026-06-14T22:16:29",
   "platform": "macOS-26.5-arm64-arm-64bit"
 }

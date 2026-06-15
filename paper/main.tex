@@ -1151,6 +1151,58 @@ and the power law of outcomes.}
 \input{tables/startups}
 \end{table}
 
+\subsubsection{Wavelet denoising as a perception$\to$world$\to$emit loop (E52)}\label{sec:denoise}
+A wavelet denoiser is a clean instance of the perception boundary: a noisy
+continuous signal is mapped to a \emph{sparse symbolic state} (the few
+significant wavelet coefficients --- real structure separated from dense noise),
+a declared, auditable rule shrinks the noise coefficients (soft-threshold at the
+universal $\lambda=\sigma\sqrt{2\ln N}$, $\sigma$ the robust MAD estimate), and
+the inverse transform emits the cleaned signal. We implement the transform in
+numpy (orthonormal Haar, bit-exact perfect reconstruction --- max round-trip
+error \DenoisePR{}, a built-in invariant), with the multi-resolution
+decomposition as a composite of scale sub-bands. On noisy input the symbolic
+state is \DenoiseSparsity\% zero (the compactness the threshold buys).
+
+The honest result is a basis-match story (Figure~\ref{fig:denoise},
+Table~\ref{tab:denoise}). On \emph{discontinuous} signals (Donoho's blocks and
+heavisine), where the wavelet basis matches the structure, the parameter-free
+wavelet denoiser gains \DenoiseEdgeWavelet\,dB SNR --- beating even an
+\emph{optimally tuned} low-pass (\DenoiseEdgeTuned\,dB) and a naive one
+(\DenoiseEdgeNaive\,dB), because Fourier filtering blurs and rings the jumps the
+wavelet preserves. It is also parameter-free: the low-pass must be hand-tuned to
+rise from \DenoiseNaiveMean{} to \DenoiseTunedMean\,dB, while the wavelet's
+threshold is automatic. We report the mismatches rather than hide them: on
+\emph{smooth/oscillatory} signals (bumps, doppler) a Fourier low-pass matches the
+structure better (\DenoiseSmoothTuned{} vs.\ \DenoiseSmoothWavelet\,dB), and on
+\emph{harmonic speech} the Haar basis is simply wrong (\DenoiseSpeech\,dB ---
+harmonics are sparse in Fourier, not Haar; a smoother db/sym or learned basis is
+needed). The lesson is the framework's, in signal form: a verified, auditable,
+training-free world model wins precisely where its declared structure matches the
+signal's, and the experiment makes that boundary visible. The model emits
+before/after \texttt{.wav} files (blocks, doppler, speech) to listen to.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/denoise.png}
+\caption{\textbf{Wavelet denoising as perceive$\to$world$\to$emit (E52).}
+\textbf{A:} SNR gain by signal --- wavelet wins on discontinuous signals, a
+low-pass on smooth ones (basis match). \textbf{B:} on blocks, the wavelet keeps
+the edges; the tuned low-pass blurs and rings them. \textbf{C:} the sparse
+symbolic state --- a few coefficients above the universal threshold,
+\DenoiseSparsity\% zeroed. \textbf{D:} edges (wavelet wins, parameter-free) vs.\
+smooth (Fourier wins).}
+\label{fig:denoise}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E52 denoising SNR gain (dB)} by signal and method. The
+parameter-free wavelet wins on edge/discontinuity signals even vs.\ a tuned
+low-pass; basis mismatches (smooth, speech) reported honestly.}
+\label{tab:denoise}
+\input{tables/denoise}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

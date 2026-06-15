@@ -35,7 +35,7 @@ EXPERIMENTS = [
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
-    "e51_startups",
+    "e51_startups", "e52_denoise",
 ]
 
 
@@ -688,6 +688,80 @@ def table_startups(e51):
               f"Value Gini & {pw['value_gini']:.2f} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "startups.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_denoise(e52):
+    """E52: wavelet denoising as perceive->world->emit. Per-signal SNR gain,
+    edge preservation vs low-pass, the sparse symbolic state, and the
+    edge-vs-smooth basis-match summary."""
+    fig, ((a, b), (c, dax)) = plt.subplots(2, 2, figsize=(8.4, 6.6))
+    ps = e52["per_signal"]
+    sigs = list(ps)
+
+    # A: per-signal SNR gain by method
+    x = range(len(sigs)); w = 0.27
+    for k, (m, col) in enumerate([("wavelet", BLUE), ("lowpass", ORANGE),
+                                  ("tuned_lowpass", SLATE)]):
+        a.bar([i + (k - 1) * w for i in x], [ps[s][m] for s in sigs], w,
+              color=col, label=m.replace("_", " "))
+    a.axhline(0, color="k", lw=0.6)
+    a.set_xticks(list(x)); a.set_xticklabels(sigs, fontsize=7.5, rotation=20)
+    a.set_ylabel("SNR gain (dB)")
+    a.set_title("A. SNR gain by signal (basis match)", fontsize=9.3, loc="left")
+    a.legend(fontsize=7, loc="upper right")
+
+    # B: edge preservation (blocks segment)
+    wf = e52["waveform"]
+    b.plot(wf["noisy"], color="0.75", lw=0.6, label="noisy")
+    b.plot(wf["clean"], color="k", lw=1.4, label="clean")
+    b.plot(wf["wavelet"], color=BLUE, lw=1.4, label="wavelet")
+    b.plot(wf["lowpass"], color=SLATE, lw=1.2, ls="--", label="tuned low-pass")
+    b.set_title("B. Wavelet keeps edges; low-pass blurs/rings", fontsize=9.3, loc="left")
+    b.set_xlabel("sample"); b.legend(fontsize=6.5, loc="upper right")
+
+    # C: sparse symbolic state (sorted detail-coefficient magnitudes)
+    cm = e52["coeff_mag"]
+    c.semilogy(range(1, len(cm) + 1), [max(v, 1e-4) for v in cm], color=BLUE, lw=1.6)
+    c.axhline(e52["threshold"], color=RED, lw=1.3, ls="--", label="universal threshold")
+    c.set_xlabel("coefficient rank"); c.set_ylabel("|coefficient| (log)")
+    c.set_title(f"C. Sparse state: {e52['noisy_sparsity']:.0%} of coeffs zeroed",
+                fontsize=9.3, loc="left")
+    c.legend(fontsize=7.5)
+
+    # D: edge-vs-smooth, wavelet vs tuned low-pass
+    ed, sm = e52["edges_delta"], e52["smooth_delta"]
+    cats = ["edge\n(blocks,\nheavisine)", "smooth\n(bumps,\ndoppler)"]
+    xc = range(len(cats))
+    dax.bar([i - 0.2 for i in xc], [ed["wavelet"], sm["wavelet"]], 0.4, color=BLUE,
+            label="wavelet (no tuning)")
+    dax.bar([i + 0.2 for i in xc], [ed["tuned_lowpass"], sm["tuned_lowpass"]], 0.4,
+            color=SLATE, label="tuned low-pass")
+    dax.set_xticks(list(xc)); dax.set_xticklabels(cats, fontsize=7.5)
+    dax.set_ylabel("SNR gain (dB)")
+    dax.set_title("D. Edges: wavelet wins; smooth: Fourier wins", fontsize=9.0, loc="left")
+    dax.legend(fontsize=7.5)
+
+    fig.suptitle("Wavelet denoising as a perception->world->emit loop (E52)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(FIGS / "denoise.png", dpi=200)
+    plt.close(fig)
+
+
+def table_denoise(e52):
+    """E52: SNR gain (dB) by signal and method."""
+    ps = e52["per_signal"]
+    methods = ["wavelet", "lowpass", "tuned_lowpass"]
+    lines = ["\\begin{tabular}{lrrr}", "\\toprule",
+             "Signal & Wavelet & Low-pass & Tuned low-pass \\\\", "\\midrule"]
+    for s in ps:
+        lines.append(f"{s} & {ps[s]['wavelet']:+.1f} & {ps[s]['lowpass']:+.1f} & "
+                     f"{ps[s]['tuned_lowpass']:+.1f} \\\\")
+    lines += ["\\midrule",
+              f"\\textbf{{Edge mean}} & \\textbf{{{e52['edges_delta']['wavelet']:+.1f}}} & "
+              f"{e52['edges_delta']['lowpass']:+.1f} & {e52['edges_delta']['tuned_lowpass']:+.1f} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "denoise.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_path_integral(e49):
@@ -1945,7 +2019,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "50"),
+        macro("NumExperiments", "51"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2420,6 +2494,21 @@ def numbers_tex(d):
         macro("StartupSpearman", f"{pr51['spearman_m6_vs_final']:.2f}"),
         macro("StartupTopOverlap", f"{pr51['top_decile_overlap'] * 100:.0f}"),
     ]
+    # E52 (wavelet denoising)
+    e52 = d["e52_denoise"]
+    ed52, sm52 = e52["edges_delta"], e52["smooth_delta"]
+    lines += [
+        macro("DenoiseSparsity", f"{e52['noisy_sparsity'] * 100:.0f}"),
+        macro("DenoisePR", f"{e52['pr_max_error']:.0e}"),
+        macro("DenoiseEdgeWavelet", f"{ed52['wavelet']:+.1f}"),
+        macro("DenoiseEdgeTuned", f"{ed52['tuned_lowpass']:+.1f}"),
+        macro("DenoiseEdgeNaive", f"{ed52['lowpass']:+.1f}"),
+        macro("DenoiseSmoothWavelet", f"{sm52['wavelet']:+.1f}"),
+        macro("DenoiseSmoothTuned", f"{sm52['tuned_lowpass']:+.1f}"),
+        macro("DenoiseNaiveMean", f"{e52['naive_mean']:+.1f}"),
+        macro("DenoiseTunedMean", f"{e52['tuned_mean']:+.1f}"),
+        macro("DenoiseSpeech", f"{e52['speech_gain']:+.1f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2466,6 +2555,8 @@ def main():
     table_trading(data["e50_trading"])
     fig_startups(data["e51_startups"])
     table_startups(data["e51_startups"])
+    fig_denoise(data["e52_denoise"])
+    table_denoise(data["e52_denoise"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

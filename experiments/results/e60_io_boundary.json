@@ -1,0 +1,43 @@
+{
+  "n_tickets": 40,
+  "n_issues": 8,
+  "routing": {
+    "semantic": 1.0,
+    "exact_key": 0.0
+  },
+  "gates": {
+    "bad_inputs": 3,
+    "caught_input": 3,
+    "caught_output": 1,
+    "good_output_passes": true
+  },
+  "resolution_rate": 1.0,
+  "components_exercised": {
+    "JSONPerceptor": true,
+    "RegexPerceptor": true,
+    "MemoryStore": true,
+    "ToolEmitter": true,
+    "ToolRegistry": true,
+    "CodeEmitter": true,
+    "EmissionGate": true,
+    "PerceptionGate": true
+  },
+  "spec_perceptors": [
+    "JSONPerceptor",
+    "RegexPerceptor"
+  ],
+  "spec_emit_kinds": [
+    "code",
+    "tool"
+  ],
+  "validated": true,
+  "round_trip": true,
+  "live_reply": {
+    "ran": true,
+    "reply": "Hi there! We've restarted the spooler service, so your printer should be back to normal soon. If you're still having issues, feel free to let us know!"
+  },
+  "problems": [],
+  "experiment": "e60_io_boundary",
+  "timestamp": "2026-06-15T11:04:22",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

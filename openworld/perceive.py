@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import json as _json
+import re as _re
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
@@ -26,6 +28,10 @@ from .llm import BaseLLM
 from .parsing import extract_json
 
 MODALITIES = ("text", "audio", "image", "video_frame", "video_segment")
+
+
+class EmissionError(ValueError):
+    """Raised when a world's emitted output violates its declared output contract."""
 
 
 class PerceptionError(ValueError):
@@ -153,6 +159,68 @@ class CodePerceptor(Perceptor):
         return dict(result) if isinstance(result, dict) else {}
 
 
+class JSONPerceptor(Perceptor):
+    """Map a JSON / dict payload (API response, webhook, form) to state fields by
+    dotted key paths. Declarative and deterministic -- no code execution, so it is
+    safe to reconstruct from a spec without opting into code. Output is gated."""
+
+    def __init__(self, paths: Dict[str, str], schema: Optional[Dict[str, Any]] = None,
+                 modality: str = "text"):
+        self.paths = dict(paths)               # produced field -> "a.b.c" path
+        self.produces = list(paths)
+        self.schema = dict(schema or {})
+        self.modality = modality
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        data = observation.data if isinstance(observation, Observation) else observation
+        if isinstance(data, (str, bytes)):
+            try:
+                data = _json.loads(data)
+            except Exception:
+                return {}
+        out: Dict[str, Any] = {}
+        for field, path in self.paths.items():
+            cur = data
+            ok = True
+            for part in str(path).split("."):
+                if isinstance(cur, dict) and part in cur:
+                    cur = cur[part]
+                else:
+                    ok = False
+                    break
+            if ok:
+                out[field] = cur
+        return out
+
+
+class RegexPerceptor(Perceptor):
+    """Extract named regex groups into state fields. Declarative + deterministic
+    (no code execution); optional per-field casts (e.g. int). Output is gated."""
+
+    def __init__(self, pattern: str, schema: Optional[Dict[str, Any]] = None,
+                 modality: str = "text", casts: Optional[Dict[str, Callable]] = None):
+        self.pattern = pattern
+        self._re = _re.compile(pattern)
+        self.produces = list(self._re.groupindex)
+        self.schema = dict(schema or {})
+        self.modality = modality
+        self.casts = dict(casts or {})
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        data = observation.data if isinstance(observation, Observation) else observation
+        m = self._re.search(str(data))
+        if not m:
+            return {}
+        out = {k: v for k, v in m.groupdict().items() if v is not None}
+        for k, cast in self.casts.items():
+            if k in out:
+                try:
+                    out[k] = cast(out[k])
+                except Exception:
+                    pass
+        return out
+
+
 _EMIT_SYSTEM = ("You write the world's output. Use only the provided fields; "
                 "reply with the text and nothing else.")
 
@@ -168,11 +236,12 @@ class LLMEmitter:
     modality = "text"
 
     def __init__(self, llm: "BaseLLM", template: str, reads: List[str],
-                 system: Optional[str] = None):
+                 system: Optional[str] = None, schema: Optional[Dict[str, Any]] = None):
         self.llm = llm
         self.template = template
         self.reads = list(reads)
         self.system = system or _EMIT_SYSTEM
+        self.schema = dict(schema or {})
 
     def emit(self, state: Dict[str, Any]) -> str:
         fields = {k: state.get(k) for k in self.reads}
@@ -181,6 +250,105 @@ class LLMEmitter:
         except Exception:
             prompt = self.template + "\n" + ", ".join(f"{k}={v}" for k, v in fields.items())
         return self.llm.ask(prompt, system=self.system)
+
+
+class CodeEmitter:
+    """Deterministic, verified-code output: `def emit(state) -> str|dict`, run in the
+    sandbox. The mirror of CodePerceptor on the output side -- serializable, and runs
+    server-side with no LLM. Declare a `schema` to have an EmissionGate contract-check
+    structured output before it leaves the world."""
+
+    modality = "text"
+
+    def __init__(self, code: str, reads: Optional[List[str]] = None,
+                 func_name: str = "emit", schema: Optional[Dict[str, Any]] = None):
+        self.code = code
+        self.reads = list(reads or [])
+        self.func_name = func_name
+        self.schema = dict(schema or {})
+
+    def emit(self, state: Dict[str, Any]):
+        from .sandbox import load_transition_code
+        func = load_transition_code(self.code, self.func_name)
+        ctx = {k: state.get(k) for k in self.reads} if self.reads else dict(state)
+        return func(ctx)
+
+
+class ToolRegistry:
+    """A registry of tools the world may invoke to act on the outside. Handlers must
+    be registered explicitly (no arbitrary execution); each may declare an args
+    schema that is contract-checked before the handler runs."""
+
+    def __init__(self):
+        self._tools: Dict[str, Dict[str, Any]] = {}
+
+    def register(self, name: str, handler: Callable[[Dict[str, Any]], Any],
+                 schema: Optional[Dict[str, Any]] = None) -> None:
+        self._tools[name] = {"handler": handler, "schema": dict(schema or {})}
+
+    def names(self) -> List[str]:
+        return list(self._tools)
+
+    def call(self, name: str, args: Dict[str, Any]) -> Any:
+        if name not in self._tools:
+            raise EmissionError(f"unknown tool {name!r}; registered: {self.names()}")
+        spec = self._tools[name]["schema"]
+        EmissionGate().check_schema(spec, dict(args))
+        return self._tools[name]["handler"](dict(args))
+
+
+class ToolEmitter:
+    """The act-on-the-world boundary: verified code chooses a tool call
+    `{name, args}` from state; if a ToolRegistry is given, the call is executed and
+    its result attached. This is how a world (or brain) takes real actions."""
+
+    modality = "action"
+
+    def __init__(self, code: str, registry: Optional[ToolRegistry] = None,
+                 reads: Optional[List[str]] = None, func_name: str = "choose_tool"):
+        self.code = code
+        self.registry = registry
+        self.reads = list(reads or [])
+        self.func_name = func_name
+
+    def emit(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        from .sandbox import load_transition_code
+        func = load_transition_code(self.code, self.func_name)
+        ctx = {k: state.get(k) for k in self.reads} if self.reads else dict(state)
+        call = func(ctx)
+        if not isinstance(call, dict) or "name" not in call:
+            call = {"name": "noop", "args": {}}
+        call.setdefault("args", {})
+        if self.registry is not None:
+            call["result"] = self.registry.call(call["name"], call["args"])
+        return call
+
+
+class EmissionGate:
+    """Contract-check an emitted output before it leaves the world -- the mirror of
+    PerceptionGate on the way out. `check` reads the emitter's declared `schema`;
+    `check_schema` validates an explicit schema (used for tool args)."""
+
+    def check(self, emitter: Any, output: Any) -> Any:
+        return self.check_schema(getattr(emitter, "schema", {}) or {}, output)
+
+    def check_schema(self, schema: Dict[str, Any], output: Any) -> Any:
+        if not schema or not isinstance(output, dict):
+            return output
+        for key, value in output.items():
+            spec = schema.get(key)
+            if spec is None:
+                continue
+            typ, bounds = (spec if isinstance(spec, tuple) else (spec, None))
+            if isinstance(typ, type) and not isinstance(value, typ):
+                raise EmissionError(
+                    f"output field {key!r} expected {typ.__name__}, got "
+                    f"{type(value).__name__}")
+            if bounds is not None and not (bounds[0] <= value <= bounds[1]):
+                raise EmissionError(
+                    f"output field {key!r}={value} out of range "
+                    f"[{bounds[0]}, {bounds[1]}]")
+        return dict(output)
 
 
 _EXTRACT_SYSTEM = (

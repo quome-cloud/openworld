@@ -35,6 +35,11 @@ from .objectives import Dial, Objective, ObjectiveSuite
 from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
 from .wavelets import denoise as wavelet_denoise
 from .wavelets import dwt, idwt, sparsity
+from .sheaf import (glue, is_consistent, localize_fault, majority_glue,
+                    obstruction_norm)
+from .intervals import Affine, Interval
+from .infogeom import bayes_update, expected_info_gain, fisher_information
+from .transport import kl_hist, wasserstein1
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
@@ -105,6 +110,18 @@ __all__ = [
     "dwt",
     "idwt",
     "sparsity",
+    "glue",
+    "is_consistent",
+    "localize_fault",
+    "majority_glue",
+    "obstruction_norm",
+    "Affine",
+    "Interval",
+    "bayes_update",
+    "expected_info_gain",
+    "fisher_information",
+    "kl_hist",
+    "wasserstein1",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

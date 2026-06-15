@@ -1,0 +1,120 @@
+{
+  "a_lo": 0.7,
+  "a_hi": 0.95,
+  "x0": 5.0,
+  "horizons": [
+    6,
+    12,
+    24,
+    36
+  ],
+  "rows": [
+    {
+      "T": 6,
+      "true": [
+        6.325,
+        19.706
+      ],
+      "interval": [
+        2.059,
+        38.114
+      ],
+      "interval_width": 36.055,
+      "affine": [
+        6.325,
+        24.216
+      ],
+      "affine_width": 17.892,
+      "mc": [
+        7.712,
+        19.293
+      ],
+      "mc_width": 11.581,
+      "true_width": 13.381,
+      "affine_sound": true,
+      "interval_sound": true,
+      "mc_misses_hi": 0.413
+    },
+    {
+      "T": 12,
+      "true": [
+        7.298,
+        21.467
+      ],
+      "interval": [
+        1.713,
+        62.455
+      ],
+      "interval_width": 60.742,
+      "affine": [
+        7.298,
+        29.719
+      ],
+      "affine_width": 22.421,
+      "mc": [
+        10.528,
+        20.934
+      ],
+      "mc_width": 10.406,
+      "true_width": 14.169,
+      "affine_sound": true,
+      "interval_sound": true,
+      "mc_misses_hi": 0.533
+    },
+    {
+      "T": 24,
+      "true": [
+        8.54,
+        23.419
+      ],
+      "interval": [
+        1.667,
+        93.501
+      ],
+      "interval_width": 91.834,
+      "affine": [
+        8.54,
+        31.163
+      ],
+      "affine_width": 22.623,
+      "mc": [
+        13.978,
+        21.389
+      ],
+      "mc_width": 7.411,
+      "true_width": 14.879,
+      "affine_sound": true,
+      "interval_sound": true,
+      "mc_misses_hi": 2.03
+    },
+    {
+      "T": 36,
+      "true": [
+        9.211,
+        26.056
+      ],
+      "interval": [
+        1.667,
+        110.278
+      ],
+      "interval_width": 108.611,
+      "affine": [
+        9.211,
+        30.759
+      ],
+      "affine_width": 21.548,
+      "mc": [
+        15.187,
+        22.04
+      ],
+      "mc_width": 6.853,
+      "true_width": 16.844,
+      "affine_sound": true,
+      "interval_sound": true,
+      "mc_misses_hi": 4.015
+    }
+  ],
+  "experiment": "e54_bounds",
+  "timestamp": "2026-06-14T20:03:52",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

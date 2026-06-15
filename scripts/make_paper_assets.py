@@ -36,7 +36,7 @@ EXPERIMENTS = [
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
     "e51_startups", "e52_denoise", "e53_sheaf",
-    "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs",
+    "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain",
 ]
 
 
@@ -2229,7 +2229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "56"),
+        macro("NumExperiments", "57"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2771,6 +2771,16 @@ def numbers_tex(d):
         macro("SpecsRoundTrip", f"{nexact}/{e57['n_worlds']}"),
         macro("SpecsComponents", "9"),
     ]
+    # E58 (brain simulator)
+    e58 = d["e58_brain"]
+    lines += [
+        macro("BrainNodes", str(e58["env"]["nodes"])),
+        macro("BrainOptimal", str(e58["env"]["optimal_len"])),
+        macro("BrainFinal", str(e58["panelA_brain_final"])),
+        macro("BrainNoMem", f"{e58['panelA_means']['no_memory']:.0f}"),
+        macro("BrainRandom", f"{e58['panelA_means']['random']:.0f}"),
+        macro("BrainPlateau", str(e58["plateau_depth"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2823,6 +2833,56 @@ def table_world_specs(e57):
                      f"{r['spec_bytes'] / 1024:.1f} \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (TABLES / "world_specs.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_brain(e58):
+    """E58: a brain simulator. Memory-augmented tree-of-thoughts ReAct learns to
+    the optimal path while memoryless/random do not; and lookahead depth helps
+    only up to the needed horizon."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.5))
+    cur = e58["panelA_curves"]
+    L = e58["env"]["optimal_len"]
+    ep = range(1, e58["episodes"] + 1)
+    a.plot(ep, cur["brain"], "-o", color=BLUE, lw=2, markersize=4,
+           label="brain (persistent memory)")
+    a.plot(ep, cur["no_memory"], "-s", color=ORANGE, lw=2, markersize=4,
+           label="no memory (wiped each episode)")
+    a.plot(ep, cur["random"], "-^", color=SLATE, lw=1.8, markersize=4, label="random")
+    a.axhline(L, color=TEAL, ls="--", lw=1.5, label=f"optimal (L={L})")
+    a.set_xlabel("episode"); a.set_ylabel("steps to goal")
+    a.set_title("A. Memory wins: the brain learns to optimal", fontsize=9.3, loc="left")
+    a.legend(fontsize=7)
+
+    d = e58["depths"]
+    b.plot(d, e58["panelB_steps"], "-o", color=BLUE, lw=2, markersize=4)
+    b.set_xlabel("planning depth $D$"); b.set_ylabel("mean steps to goal", color=BLUE)
+    b.tick_params(axis="y", labelcolor=BLUE)
+    b.axvline(e58["plateau_depth"], color=SLATE, ls=":", lw=1.2)
+    b.text(e58["plateau_depth"] + 0.1, max(e58["panelB_steps"]) * 0.8,
+           f"plateau\nD={e58['plateau_depth']}", fontsize=7.5, color=SLATE)
+    bb = b.twinx()
+    bb.plot(d, e58["panelB_success"], "-^", color=TEAL, lw=2, markersize=4)
+    bb.set_ylabel("success rate", color=TEAL); bb.tick_params(axis="y", labelcolor=TEAL)
+    bb.set_ylim(0, 1.08)
+    b.set_title("B. How much to think: depth helps, then plateaus", fontsize=9.3, loc="left")
+
+    fig.suptitle("Brain simulator: tree-of-thoughts ReAct with real memory (E58)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "brain.png", dpi=200)
+    plt.close(fig)
+
+
+def table_brain(e58):
+    m = e58["panelA_means"]
+    cur = e58["panelA_curves"]
+    lines = ["\\begin{tabular}{lrr}", "\\toprule",
+             "Agent & Mean steps & Final episode \\\\", "\\midrule",
+             f"brain (persistent memory) & {m['brain']:.1f} & {cur['brain'][-1]} \\\\",
+             f"no memory (wiped) & {m['no_memory']:.1f} & {cur['no_memory'][-1]} \\\\",
+             f"random & {m['random']:.1f} & {cur['random'][-1]} \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "brain.tex").write_text("\n".join(lines) + "\n")
 
 
 def main():
@@ -2880,6 +2940,8 @@ def main():
     table_transport(data["e56_transport"])
     fig_world_specs(data["e57_world_specs"])
     table_world_specs(data["e57_world_specs"])
+    fig_brain(data["e58_brain"])
+    table_brain(data["e58_brain"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

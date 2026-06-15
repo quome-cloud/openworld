@@ -23,24 +23,26 @@ from .spec import SPEC_VERSION, to_spec
 from .world import World
 
 _THEMES = {
+    # Editorial "atlas": ink + electric blue (primary) + ochre (secondary) +
+    # teal (tertiary) form a systematic depth ramp. No purple gradients.
     "light": {
-        "bg0": "#ffffff", "bg1": "#eef2f8", "text": "#0f172a", "muted": "#64748b",
-        "accent": "#2563eb", "accent2": "#7c3aed", "node0": "#ffffff",
-        "node1": "#eef2ff", "edge": "#2563eb", "chipbg": "#eef2ff",
-        "chiptx": "#3730a3", "line": "#e2e8f0", "good": "#059669",
-        "agg": "#7c3aed", "shadow": "#0f172a", "shadowO": "0.16",
-        "panelStroke": "#dfe4ec", "grid": "#9fb3d1",
+        "bg0": "#fcfbf8", "bg1": "#eef0ec", "text": "#16202e", "muted": "#5b6675",
+        "accent": "#1d4ed8", "accent2": "#b45309", "brand2": "#0891b2",
+        "node0": "#ffffff", "node1": "#eef1f6", "edge": "#1d4ed8",
+        "chipbg": "#eaeef6", "chiptx": "#1e3a8a", "line": "#dde2ea",
+        "good": "#0f766e", "agg": "#0f766e", "shadow": "#16202e", "shadowO": "0.14",
+        "panelStroke": "#dde2ea", "grid": "#8aa0c2",
     },
     "dark": {
-        "bg0": "#0c111c", "bg1": "#141d2e", "text": "#e7ecf5", "muted": "#93a4bd",
-        "accent": "#5b9dff", "accent2": "#b18bff", "node0": "#1b2435",
-        "node1": "#141c2b", "edge": "#5b9dff", "chipbg": "#1d2740",
-        "chiptx": "#c7d6ff", "line": "#26324a", "good": "#34d399",
-        "agg": "#b18bff", "shadow": "#000000", "shadowO": "0.5",
-        "panelStroke": "#26324a", "grid": "#33486b",
+        "bg0": "#0d1320", "bg1": "#131c2e", "text": "#e9eef7", "muted": "#90a1ba",
+        "accent": "#5b9dff", "accent2": "#e0a050", "brand2": "#38bdf8",
+        "node0": "#1b2435", "node1": "#141d2c", "edge": "#5b9dff",
+        "chipbg": "#1d2740", "chiptx": "#cdddff", "line": "#27344c",
+        "good": "#2dd4bf", "agg": "#2dd4bf", "shadow": "#000000", "shadowO": "0.5",
+        "panelStroke": "#27344c", "grid": "#33486b",
     },
 }
-_SERIES = ["#2563eb", "#0f9d8f", "#d97706", "#db2777", "#7c3aed"]
+_SERIES = ["#1d4ed8", "#0f766e", "#b45309", "#9d2449", "#0891b2"]
 REACTFLOW_PLAYGROUND = "https://play.reactflow.dev"
 MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 SERIF = "'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif"
@@ -110,7 +112,7 @@ def _defs(c: Dict[str, str]) -> str:
         f'<stop offset="1" stop-color="{c["node1"]}"/></linearGradient>'
         f'<linearGradient id="gacc" x1="0" y1="0" x2="1" y2="0">'
         f'<stop offset="0" stop-color="{c["accent"]}"/>'
-        f'<stop offset="1" stop-color="{c["accent2"]}"/></linearGradient>'
+        f'<stop offset="1" stop-color="{c["brand2"]}"/></linearGradient>'
         f'<linearGradient id="garea" x1="0" y1="0" x2="0" y2="1">'
         f'<stop offset="0" stop-color="{c["accent"]}" stop-opacity="0.34"/>'
         f'<stop offset="1" stop-color="{c["accent"]}" stop-opacity="0"/>'
@@ -128,8 +130,9 @@ def _defs(c: Dict[str, str]) -> str:
         f'<pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">'
         f'<path d="M24 0 H0 V24" fill="none" stroke="{c["grid"]}" stroke-width="0.6" '
         f'opacity="0.35"/></pattern>'
-        f'<pattern id="gridFine" width="6" height="6" patternUnits="userSpaceOnUse">'
-        f'<circle cx="0.7" cy="0.7" r="0.7" fill="{c["grid"]}" opacity="0.18"/></pattern>'
+        f'<pattern id="gridFine" width="22" height="22" patternUnits="userSpaceOnUse">'
+        f'<path d="M22 0 H0 V22" fill="none" stroke="{c["grid"]}" stroke-width="0.5" '
+        f'opacity="0.28"/></pattern>'
         f'<filter id="glow" x="-60%" y="-60%" width="220%" height="220%">'
         f'<feGaussianBlur stdDeviation="2.4" result="b"/><feMerge>'
         f'<feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
@@ -137,13 +140,17 @@ def _defs(c: Dict[str, str]) -> str:
 
 
 def _globe(x: float, y: float, r: float, c: Dict[str, str]) -> str:
+    """A bespoke 'worlds within worlds' mark: three nested rounded squares in the
+    depth ramp (blue -> ochre -> teal core)."""
+    s = 2 * r
     return (f'<g transform="translate({x:.1f},{y:.1f})">'
-            f'<circle r="{r}" fill="url(#gacc)"/>'
-            f'<circle r="{r}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.1"/>'
-            f'<ellipse rx="{r*0.45:.1f}" ry="{r}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1"/>'
-            f'<line x1="{-r}" y1="0" x2="{r}" y2="0" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1"/>'
-            f'<line x1="{-r*0.86:.1f}" y1="{-r*0.5:.1f}" x2="{r*0.86:.1f}" y2="{-r*0.5:.1f}" stroke="#ffffff" stroke-opacity="0.4" stroke-width="0.9"/>'
-            f'<line x1="{-r*0.86:.1f}" y1="{r*0.5:.1f}" x2="{r*0.86:.1f}" y2="{r*0.5:.1f}" stroke="#ffffff" stroke-opacity="0.4" stroke-width="0.9"/>'
+            f'<rect x="{-r:.1f}" y="{-r:.1f}" width="{s:.1f}" height="{s:.1f}" '
+            f'rx="{r*0.34:.1f}" fill="none" stroke="{c["accent"]}" stroke-width="2.1"/>'
+            f'<rect x="{-r*0.6:.1f}" y="{-r*0.6:.1f}" width="{r*1.2:.1f}" '
+            f'height="{r*1.2:.1f}" rx="{r*0.24:.1f}" fill="none" '
+            f'stroke="{c["accent2"]}" stroke-width="1.9"/>'
+            f'<rect x="{-r*0.24:.1f}" y="{-r*0.24:.1f}" width="{r*0.48:.1f}" '
+            f'height="{r*0.48:.1f}" rx="{r*0.12:.1f}" fill="{c["good"]}"/>'
             f'</g>')
 
 
@@ -351,9 +358,10 @@ def _compact_state_lines(spec: Dict[str, Any], n: int = 3) -> List[str]:
     return out
 
 
-def _leaf_card(spec: Dict[str, Any], x: float, y: float, c: Dict[str, str]):
+def _leaf_card(spec: Dict[str, Any], x: float, y: float, c: Dict[str, str],
+              depth: int = 0):
     w, h = LEAFW, LEAFH
-    acc = c["accent"]
+    acc = _depth_color(c, depth)
     out = [f'<g filter="url(#sh)"><rect x="{x:.1f}" y="{y:.1f}" width="{w}" '
            f'height="{h}" rx="13" fill="url(#gnode)" stroke="{c["line"]}" '
            f'stroke-width="1.1"/></g>',
@@ -383,7 +391,7 @@ def _draw_world(spec: Dict[str, Any], x: float, y: float, c: Dict[str, str],
                 depth: int = 0):
     comp = spec.get("composite")
     if not comp:
-        return _leaf_card(spec, x, y, c)
+        return _leaf_card(spec, x, y, c, depth)
     ch = comp.get("children", {})
     pad, head, gap, foot = 20, 52, 30, 16
     sizes = {ns: _measure_world(child) for ns, child in ch.items()}
@@ -862,15 +870,40 @@ def to_reactflow(world_or_spec: Union[World, Dict[str, Any]]) -> Dict[str, Any]:
     return {"nodes": nodes, "edges": edges, "playground": REACTFLOW_PLAYGROUND}
 
 
+def _thumb(spec: Dict[str, Any], x: float, y: float, w: float, h: float,
+          c: Dict[str, str], idx: int) -> str:
+    """A scaled, clipped thumbnail of the world's actual graph for a gallery tile."""
+    if spec.get("composite"):
+        inner, gw, gh = _draw_world(spec, 0.0, 0.0, c, 0)
+    else:
+        nodes, edges = _leaf_graph(spec)
+        if not nodes:
+            nodes = [{"id": "only", "label": [spec["name"]], "kind": "world",
+                      "initial": True}]
+            edges = []
+        gw = 360.0
+        inner, gh = _graph_layout(nodes, edges, 0.0, 0.0, gw, c, min_h=130)
+    s = min(w / gw, h / gh) if gw and gh else 1.0
+    ox = x + (w - gw * s) / 2
+    oy = y + (h - gh * s) / 2
+    cid = f"thc{idx}"
+    return (f'<clipPath id="{cid}"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+            f'height="{h:.1f}" rx="10"/></clipPath>'
+            f'<g clip-path="url(#{cid})"><g transform="translate({ox:.1f},{oy:.1f}) '
+            f'scale({s:.4f})">{inner}</g></g>')
+
+
 def render_gallery(specs: List[Dict[str, Any]], path: Optional[Union[str, Path]] = None,
                    theme: str = "light", title: str = "OpenWorld model gallery",
                    card_ext: str = ".svg") -> str:
-    """Render an SVG contact sheet: clickable tiles linking to each ``<name>.svg``."""
+    """Render an SVG contact sheet: clickable tiles, each with a thumbnail of the
+    world's graph, linking to its ``<name>.svg`` card."""
     c = _THEMES.get(theme, _THEMES["light"])
     cols = 3
-    tw, th, gap = 270, 150, 22
+    tw, th, gap = 300, 248, 24
+    thumb_h = 120
     rows = (len(specs) + cols - 1) // cols
-    gx0, gy0 = PAD + 6, 92
+    gx0, gy0 = PAD + 8, 110
     Hgal = gy0 + rows * (th + gap) + PAD
     Wgal = gx0 * 2 + cols * tw + (cols - 1) * gap
 
@@ -881,27 +914,32 @@ def render_gallery(specs: List[Dict[str, Any]], path: Optional[Union[str, Path]]
         y = gy0 + r * (th + gap)
         comp = spec.get("composite")
         card = spec.get("card", {})
-        meta = ("leaf world" if not comp else
+        meta = ("leaf · state machine" if not comp else
                 f'{len(comp.get("children", {}))} worlds · '
                 f'{len(comp.get("bridges", []))} bridges')
         tiles.append(f'<a href="{_esc(spec["name"] + card_ext)}">')
-        tiles.append(f'<g filter="url(#sh)"><rect x="{x}" y="{y}" width="{tw}" '
+        tiles.append(f'<g filter="url(#shsoft)"><rect x="{x}" y="{y}" width="{tw}" '
                      f'height="{th}" rx="16" fill="url(#gnode)" stroke="{c["line"]}" '
                      f'stroke-width="1"/></g>')
         tiles.append(f'<rect x="{x}" y="{y}" width="{tw}" height="5" rx="2.5" fill="url(#gacc)"/>')
-        tiles.append(_globe(x + 24, y + 36, 12, c))
-        tiles.append(_t(x + 44, y + 40, spec["name"], 17, "800", c["text"]))
-        tiles.append(_t(x + 18, y + 66, meta, 12, "600", c["muted"]))
+        tiles.append(_globe(x + 26, y + 36, 11, c))
+        tiles.append(_t(x + 46, y + 40, spec["name"], 17, "700", c["text"], family=SERIF))
+        tiles.append(_t(x + 18, y + 62, meta, 10.5, "600", c["muted"], family=MONO))
+        # thumbnail of the graph, framed
+        ty = y + 74
+        tiles.append(f'<rect x="{x+14:.1f}" y="{ty:.1f}" width="{tw-28}" height="{thumb_h}" '
+                     f'rx="11" fill="{c["node1"]}" stroke="{c["line"]}" stroke-width="1"/>')
+        tiles.append(_thumb(spec, x + 14, ty, tw - 28, thumb_h, c, i))
         txx = x + 18
         for tg in card.get("tags", [])[:3]:
-            pill, pw = _pill(txx, y + 80, tg, c, font=11)
+            pill, pw = _pill(txx, ty + thumb_h + 12, tg, c, font=10)
             tiles.append(pill)
-            txx += pw + 7
-        tiles.append(_t(x + 18, y + th - 16, f"v{card.get('version', '0.1')}",
-                        11.5, "700", c["muted"]))
+            txx += pw + 6
+        tiles.append(_t(x + 18, y + th - 15, f"v{card.get('version', '0.1')}",
+                        11, "700", c["muted"], family=MONO))
         if card.get("license"):
-            tiles.append(_t(x + tw - 18, y + th - 16, card["license"], 11.5, "700",
-                            c["good"], anchor="end"))
+            tiles.append(_t(x + tw - 18, y + th - 15, card["license"], 11, "700",
+                            c["good"], anchor="end", family=MONO))
         tiles.append("</a>")
 
     doc = (
@@ -911,9 +949,12 @@ def render_gallery(specs: List[Dict[str, Any]], path: Optional[Union[str, Path]]
         f'font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
         + _defs(c)
         + f'<rect x="0" y="0" width="{Wgal}" height="{Hgal}" fill="url(#gbg)"/>'
-        + _globe(gx0 + 12, 50, 16, c)
-        + _t(gx0 + 38, 56, title, 26, "800", c["text"])
-        + _t(gx0 + 38, 76, f"{len(specs)} world models", 13, "600", c["muted"])
+        + f'<rect x="0" y="0" width="{Wgal}" height="{Hgal}" fill="url(#gridFine)"/>'
+        + _globe(gx0 + 13, 54, 16, c)
+        + _t(gx0 + 40, 50, "OPENWORLD", 9.5, "700", c["accent"], spacing="2.4", family=MONO)
+        + _t(gx0 + 40, 74, title, 27, "700", c["text"], family=SERIF)
+        + _t(Wgal - gx0, 64, f"{len(specs)} world models", 13, "600", c["muted"],
+             anchor="end", family=MONO)
         + "".join(tiles) + "</svg>")
     if path is not None:
         Path(path).write_text(doc, encoding="utf-8")

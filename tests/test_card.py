@@ -39,7 +39,7 @@ def test_card_renders_composition_graph_and_writes_file(tmp_path):
     out = tmp_path / "economy.svg"
     svg = render_card(economy_world(), path=out, theme="dark")
     assert out.exists() and out.read_text(encoding="utf-8") == svg
-    assert "#0c111c" in svg                             # dark theme background
+    assert "#0d1320" in svg                             # dark theme background
     assert "shop" in svg and "market" in svg           # child nodes
     assert "restock" in svg                             # bridge edge label
     assert "total_value" in svg                         # aggregator node

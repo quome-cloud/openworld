@@ -1,0 +1,61 @@
+{
+  "n_worlds": 5,
+  "all_validated": true,
+  "all_round_trip_exact": true,
+  "rows": [
+    {
+      "name": "sprint",
+      "kind": "leaf",
+      "n_children": 0,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 4370,
+      "n_actions": 3,
+      "problems": []
+    },
+    {
+      "name": "triage",
+      "kind": "leaf",
+      "n_children": 0,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 6294,
+      "n_actions": 3,
+      "problems": []
+    },
+    {
+      "name": "orchard",
+      "kind": "leaf",
+      "n_children": 0,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 1845,
+      "n_actions": 2,
+      "problems": []
+    },
+    {
+      "name": "hospital-network",
+      "kind": "composite",
+      "n_children": 2,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 16291,
+      "n_actions": 7,
+      "problems": []
+    },
+    {
+      "name": "nation",
+      "kind": "composite",
+      "n_children": 2,
+      "validated": true,
+      "round_trip_exact": true,
+      "spec_bytes": 27060,
+      "n_actions": 11,
+      "problems": []
+    }
+  ],
+  "gallery_dir": "gallery",
+  "experiment": "e57_world_specs",
+  "timestamp": "2026-06-14T23:22:38",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

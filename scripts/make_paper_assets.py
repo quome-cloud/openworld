@@ -36,7 +36,7 @@ EXPERIMENTS = [
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
     "e51_startups", "e52_denoise", "e53_sheaf",
-    "e54_bounds", "e55_infogeom", "e56_transport",
+    "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs",
 ]
 
 
@@ -1727,7 +1727,7 @@ def fig_complexity(e20):
 # ---------------------------------------------------------------------------
 # Composition figures (E30/E31): drawn with patches in the house palette.
 # ---------------------------------------------------------------------------
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # noqa: E402
+from matplotlib.patches import FancyArrowPatch, FancyBboxPatch, Patch  # noqa: E402
 
 RED = "#B91C1C"
 
@@ -2229,7 +2229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "55"),
+        macro("NumExperiments", "56"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2763,7 +2763,66 @@ def numbers_tex(d):
         macro("TransportWSlope", f"{c56['w_far_rel_slope']:.3f}"),
         macro("TransportKlSlope", f"{c56['kl_far_rel_slope']:.3f}"),
     ]
+    # E57 (world-model specs + cards)
+    e57 = d["e57_world_specs"]
+    nexact = sum(1 for r in e57["rows"] if r["round_trip_exact"])
+    lines += [
+        macro("SpecsNumWorlds", str(e57["n_worlds"])),
+        macro("SpecsRoundTrip", f"{nexact}/{e57['n_worlds']}"),
+        macro("SpecsComponents", "9"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_world_specs(e57):
+    """E57: portable world-model specs. Lossless round-trip + spec size per world,
+    and the set of world-model components the spec captures."""
+    rows = e57["rows"]
+    fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.6))
+
+    names = [r["name"] for r in rows]
+    kb = [r["spec_bytes"] / 1024 for r in rows]
+    cols = [TEAL if r["kind"] == "composite" else BLUE for r in rows]
+    a.barh(range(len(rows)), kb, color=cols)
+    a.set_yticks(range(len(rows)))
+    a.set_yticklabels(names, fontsize=8)
+    a.invert_yaxis()
+    for i, r in enumerate(rows):
+        if r["round_trip_exact"]:
+            a.text(kb[i] + max(kb) * 0.02, i, "exact", va="center", fontsize=7.5,
+                   color=TEAL, fontweight="bold")
+    a.set_xlim(0, max(kb) * 1.25)
+    a.set_xlabel("spec size (KB)")
+    a.set_title("A. Portable spec, lossless round-trip", fontsize=9.5, loc="left")
+    handles = [Patch(color=BLUE, label="leaf"), Patch(color=TEAL, label="composite")]
+    a.legend(handles=handles, fontsize=7.5, loc="upper right")
+
+    comps = ["state schema (+ values)", "actions", "rules (declared contract)",
+             "dynamics (verified code)", "perception (perceive)", "emit (outputs)",
+             "objectives", "metrics", "composition (recursive)"]
+    b.axis("off")
+    b.set_title("B. World-model components the spec captures", fontsize=9.5, loc="left")
+    for i, name in enumerate(comps):
+        y = 0.96 - i * 0.108
+        b.scatter([0.04], [y], s=42, color=TEAL, transform=b.transAxes, zorder=3)
+        b.text(0.10, y, name, fontsize=9, transform=b.transAxes, va="center")
+
+    fig.suptitle("World-model specs: a portable, lossless, complete artifact (E57)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "world_specs.png", dpi=200)
+    plt.close(fig)
+
+
+def table_world_specs(e57):
+    lines = ["\\begin{tabular}{llrcr}", "\\toprule",
+             "World & Kind & Children & Round-trip & Spec (KB) \\\\", "\\midrule"]
+    for r in e57["rows"]:
+        rt = "exact" if r["round_trip_exact"] else "lossy"
+        lines.append(f"{r['name']} & {r['kind']} & {r['n_children']} & {rt} & "
+                     f"{r['spec_bytes'] / 1024:.1f} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "world_specs.tex").write_text("\n".join(lines) + "\n")
 
 
 def main():
@@ -2819,6 +2878,8 @@ def main():
     table_infogeom(data["e55_infogeom"])
     fig_transport(data["e56_transport"])
     table_transport(data["e56_transport"])
+    fig_world_specs(data["e57_world_specs"])
+    table_world_specs(data["e57_world_specs"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

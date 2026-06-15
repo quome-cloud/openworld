@@ -58,6 +58,9 @@ def main(argv=None):
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--heldout-frac", type=float, default=0.3,
                     help="fraction of instances reserved for eval (default 0.3)")
+    ap.add_argument("--split-salt", default="owsb-distill-v1",
+                    help="salt for the deterministic instance split (vary it to "
+                         "test split robustness)")
     args = ap.parse_args(argv)
 
     files = []
@@ -89,7 +92,7 @@ def main(argv=None):
             verified.setdefault(r["instance_id"], set()).add(r["patch"])
 
     all_instances = sorted({r["instance_id"] for r in records})
-    heldout = _heldout(all_instances, args.heldout_frac)
+    heldout = _heldout(all_instances, args.heldout_frac, salt=args.split_salt)
     train_instances = [i for i in all_instances if i not in heldout]
 
     out = Path(args.out_dir)
@@ -129,7 +132,7 @@ def main(argv=None):
         "n_train_instances_with_patches": len(train_instances) - len(train_only_no_patch),
         "train_instances_without_verified_patch": sorted(train_only_no_patch),
         "n_sft_pairs": n_pairs,
-        "split_salt": "owsb-distill-v1",
+        "split_salt": args.split_salt,
     }
     (out / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 

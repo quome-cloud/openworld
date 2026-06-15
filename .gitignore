@@ -5,7 +5,14 @@ build/
 dist/
 .pytest_cache/
 .venv/
+.venv-distill/
 venv/
+
+# distillation experiment artifacts (regenerable; not source)
+/sft/
+/traces/
+tooling/distill/adapters/
+tooling/distill/eval/
 
 # artifacts written by examples
 examples/orchard_dynamics.py

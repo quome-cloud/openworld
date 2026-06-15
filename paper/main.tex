@@ -1421,6 +1421,61 @@ exact) at a few KB each.}
 \input{tables/world_specs}
 \end{table}
 
+\subsubsection{A brain simulator: tree-of-thoughts ReAct with real memory (E58)}\label{sec:brain}
+As a capstone for composition + perception + agency, we build a \emph{brain} as a
+world-of-worlds (Figure~\ref{fig:brain-card}): a \textsc{conscious} world (working
+memory --- the current thought and plan), an \textsc{unconscious} world (long-term,
+content-addressable memory: a learned transition model and cached plans), and an
+\textsc{environment} world the brain acts on. A perceptor maps an outside situation
+into the conscious world; bridges \emph{retrieve} memories into working memory,
+\emph{consolidate} experience into long-term memory, and \emph{act} on the
+environment --- the perceive$\to$world$\to$act loop. The whole brain serializes to a
+spec and round-trips losslessly (\S\ref{sec:specs}).
+
+An agent runs a ReAct loop with \emph{tree-of-thoughts}: perceive $\to$ retrieve
+$\to$ \emph{think} (expand a depth-$D$ tree over the learned model to find a plan to
+the goal) $\to$ act on the real environment $\to$ observe $\to$ consolidate. Memory
+is real and persistent, so a re-encountered situation is recalled, not re-derived.
+On a deterministic $\BrainNodes$-node navigation environment (optimal path length
+$L=\BrainOptimal$), two results hold (Figure~\ref{fig:brain}, Table~\ref{tab:brain}):
+\textbf{(A) memory wins} --- the brain's persistent unconscious drives steps-to-goal
+down to the optimal $L=\BrainFinal$ within a couple of episodes, while a memoryless
+agent (unconscious wiped each episode) stays flat at $\sim\BrainNoMem$ and a random
+agent flails at $\sim\BrainRandom$; \textbf{(B) how much to think} --- with the model
+known, steps fall as the planning depth $D$ rises and \emph{plateau} once
+$D\!\geq\!$ the needed horizon (here $D=\BrainPlateau$): bounded simulated lookahead
+helps exactly up to the goal horizon, and no further. This is a controlled synthetic
+cognitive task, not a claim about real brains --- it shows the framework can compose
+a brain-like architecture and that memory and bounded lookahead measurably help.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/brain_card.png}
+\caption{\textbf{The brain as a world-of-worlds (E58).} A generated model card:
+a \textsc{conscious} and an \textsc{unconscious} world plus the
+\textsc{environment}, coupled by retrieve/consolidate/act bridges, with a perception
+boundary in and an action boundary out.}
+\label{fig:brain-card}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/brain.png}
+\caption{\textbf{Tree-of-thoughts ReAct with real memory (E58).} \textbf{A:} a
+brain with persistent memory learns to the optimal path; memoryless and random do
+not. \textbf{B:} steps-to-goal fall with planning depth and plateau once depth
+reaches the goal horizon (success rate, right axis, saturates at 1.0).}
+\label{fig:brain}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E58 brain agents}: mean and final-episode steps-to-goal (optimal
+$L=\BrainOptimal$). Persistent memory reaches optimal; memoryless/random do not.}
+\label{tab:brain}
+\input{tables/brain}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

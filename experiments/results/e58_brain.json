@@ -1,0 +1,79 @@
+{
+  "env": {
+    "nodes": 12,
+    "tools": 4,
+    "optimal_len": 4
+  },
+  "episodes": 8,
+  "panelA_curves": {
+    "brain": [
+      22,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "no_memory": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "random": [
+      9,
+      38,
+      40,
+      40,
+      25,
+      40,
+      40,
+      40
+    ]
+  },
+  "panelA_means": {
+    "brain": 6.25,
+    "no_memory": 22.0,
+    "random": 34.0
+  },
+  "panelA_brain_final": 4,
+  "panelA_optimal_gap": 0,
+  "depths": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "panelB_steps": [
+    19.42,
+    7.33,
+    3.42,
+    1.92,
+    1.92,
+    1.92
+  ],
+  "panelB_success": [
+    0.583,
+    0.875,
+    0.958,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "plateau_depth": 3,
+  "brain_validated": true,
+  "brain_round_trip": true,
+  "brain_children": 3,
+  "problems": [],
+  "experiment": "e58_brain",
+  "timestamp": "2026-06-15T09:20:29",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

@@ -1363,6 +1363,64 @@ KL.}
 \input{tables/transport}
 \end{table}
 
+\subsubsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
+For world models to be shared the way trained models are, a world needs a
+\emph{portable, complete, lossless} serialization --- the unit a ``marketplace
+for world models'' would host. We define a JSON spec that captures every
+component of a world model (Figure~\ref{fig:world-specs}B): its name and
+metadata, state schema and concrete initial state, action set, the
+natural-language \emph{rules} (the declared contract), the verified dynamics (as
+executable code, recursively for composites), the \emph{perception} boundary
+(perceptors: modality, the state fields they produce, and a typed schema), the
+symmetric \emph{emit} boundary, objectives, and evaluation metrics. Composition
+is recursive, so a world-of-worlds (\S\ref{sec:composition}) serializes whole.
+
+The spec is lossless: \texttt{from\_spec(to\_spec(w),\,allow\_code=True)}
+reconstructs a runnable world whose rollout reproduces the original exactly. On
+\SpecsNumWorlds{} worlds spanning leaves and a two-level nested composite, all
+round-trip exactly and pass the publish-gate validator
+(Table~\ref{tab:worldspecs}, Figure~\ref{fig:world-specs}A). For untrusted
+downloads the embedded code is inert unless execution is explicitly opted into ---
+a trust gate, not a sandbox. From a spec the framework renders a self-contained
+SVG \emph{model card} (Figure~\ref{fig:world-card}): a leaf world is drawn as its
+actual state-transition automaton (computed by BFS from the initial state) with
+the perceive$\to$world$\to$emit boundary shown explicitly, and a composite as its
+recursively nested dataflow of child worlds, bridges, and aggregator roll-ups.
+The same spec also exports to Mermaid and to React Flow (a node/edge graph with
+nested parent groups) for interactive use, and a gallery contact sheet indexes a
+collection. The contribution is not a new result but an \emph{interface}: the
+paper's world models become publishable, inspectable, verifiable artifacts.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/world_specs.png}
+\caption{\textbf{Portable world-model specs (E57).} \textbf{A:} every spec
+round-trips losslessly (exact rollout reproduction) at a few KB per world.
+\textbf{B:} the nine world-model components the spec captures, from state and
+rules to the perception/emit boundary, objectives, and metrics.}
+\label{fig:world-specs}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.74\linewidth]{figs/world_card.png}
+\caption{\textbf{A generated model card} rendered from a world's spec (the triage
+world). The graph shows the state-transition automaton with the
+perceive$\to$world$\to$emit boundary (dashed sensor input, dashed output);
+side panels list the state schema, actions, dynamics, objectives, perception,
+emit, a sample rollout, metrics, and the declared rules. One self-contained SVG.}
+\label{fig:world-card}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E57 spec round-trip} across \SpecsNumWorlds{} worlds (leaves and
+a nested composite): all validate and reconstruct exactly (\SpecsRoundTrip{}
+exact) at a few KB each.}
+\label{tab:worldspecs}
+\input{tables/world_specs}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

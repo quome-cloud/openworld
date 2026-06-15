@@ -1,0 +1,14 @@
+\begin{tabular}{lll c}
+\toprule
+Component & Boundary & Role & Exercised \\
+\midrule
+JSONPerceptor & perceive & ingest a structured ticket payload & \checkmark \\
+RegexPerceptor & perceive & pull fields from free text & \checkmark \\
+PerceptionGate & perceive & reject out-of-contract input & \checkmark \\
+MemoryStore & recall & semantic recall of past resolutions & \checkmark \\
+CodeEmitter & emit & deterministic verified-code report & \checkmark \\
+ToolEmitter & act & choose + execute a registered tool & \checkmark \\
+ToolRegistry & act & typed, validated tool dispatch & \checkmark \\
+EmissionGate & emit & reject out-of-contract output & \checkmark \\
+\bottomrule
+\end{tabular}

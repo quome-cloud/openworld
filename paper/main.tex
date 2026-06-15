@@ -1520,6 +1520,46 @@ optimized brain reaches $\ArchOpt$ ($+\ArchLift$ over the bare LLM).}
 \input{tables/brain_arch}
 \end{table}
 
+\subsubsection{The perceive $\to$ world $\to$ emit $\to$ act boundary (E60)}\label{sec:ioboundary}
+A world model is only useful to a developer if real inputs can get \emph{in} and real
+actions can get \emph{out} under a checkable contract. E60 assembles a support-desk
+world from the framework's full I/O boundary and validates each piece as a working,
+serializable component. A \texttt{JSONPerceptor} ingests a structured ticket and a
+\texttt{RegexPerceptor} pulls fields from free text, each guarded by a
+\texttt{PerceptionGate}; a content-addressable \texttt{MemoryStore} recalls the closest
+past resolution; a \texttt{ToolEmitter} backed by a typed \texttt{ToolRegistry} executes
+the chosen fix; and a verified-code \texttt{CodeEmitter} writes the report, contract-checked
+by an \texttt{EmissionGate}. On $\IOTickets$ paraphrased tickets, semantic recall routes
+$\IOSem\%$ to the correct tool where exact-key matching scores $\IOExact\%$
+(Figure~\ref{fig:io-boundary}A), and the assembled world resolves $\IORes\%$ end to end
+through real tool calls. The contract gates catch every injected fault --- all
+$\IOGateIn$ malformed inputs and the out-of-contract output
+(Figure~\ref{fig:io-boundary}B) --- while passing valid traffic. The entire world,
+spanning all $\IOComponents$ components, serializes to a spec and round-trips losslessly
+with no LLM in the loop (an optional Ollama run uses an \texttt{LLMEmitter} to draft the
+customer-facing reply), making the perceive/emit/act boundary a portable, deterministically
+verifiable artifact (Table~\ref{tab:ioboundary}).
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/io_boundary.png}
+\caption{\textbf{A working I/O boundary (E60).} \textbf{A:} semantic recall routes
+paraphrased tickets ($\IOSem\%$) where exact-key matching fails ($\IOExact\%$), and the
+assembled world resolves $\IORes\%$ end to end via real tool calls. \textbf{B:} the
+perception and emission gates reject every injected malformed input and out-of-contract
+output.}
+\label{fig:io-boundary}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E60 I/O components.} Each perceptor, emitter, gate, and the memory
+store, the boundary it sits on, and confirmation that the serializable support-desk
+world exercises it.}
+\label{tab:ioboundary}
+\input{tables/io_boundary}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

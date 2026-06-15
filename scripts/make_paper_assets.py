@@ -37,6 +37,7 @@ EXPERIMENTS = [
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
+    "e60_io_boundary",
 ]
 
 
@@ -2229,7 +2230,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "58"),
+        macro("NumExperiments", "59"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2790,6 +2791,17 @@ def numbers_tex(d):
         macro("ArchLift", f"{e59['lift_over_bare']:.2f}"),
         macro("ArchConfigs", str(e59["n_configs"])),
     ]
+    # E60 (the perceive -> world -> emit -> act boundary)
+    e60 = d["e60_io_boundary"]
+    lines += [
+        macro("IOSem", f"{e60['routing']['semantic'] * 100:.0f}"),
+        macro("IOExact", f"{e60['routing']['exact_key'] * 100:.0f}"),
+        macro("IORes", f"{e60['resolution_rate'] * 100:.0f}"),
+        macro("IOTickets", str(e60["n_tickets"])),
+        macro("IOGateIn", str(e60["gates"]["caught_input"])),
+        macro("IOGateBad", str(e60["gates"]["bad_inputs"])),
+        macro("IOComponents", str(len(e60["components_exercised"]))),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2937,6 +2949,67 @@ def table_brain_arch(e59):
     (TABLES / "brain_arch.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_io_boundary(e60):
+    """E60: the perceive -> world -> emit -> act boundary. Semantic recall routes
+    paraphrased tickets where exact-key fails; the assembled world acts via real
+    tool calls; contract gates reject every malformed input/output."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.5))
+
+    labels = ["exact-key\nrecall", "semantic\nrecall", "end-to-end\nresolution"]
+    vals = [e60["routing"]["exact_key"], e60["routing"]["semantic"], e60["resolution_rate"]]
+    cols = [SLATE, TEAL, BLUE]
+    a.bar(range(3), vals, color=cols)
+    a.set_xticks(range(3)); a.set_xticklabels(labels, fontsize=8)
+    a.set_ylabel("accuracy"); a.set_ylim(0, 1.12)
+    for i, v in enumerate(vals):
+        a.text(i, v + 0.02, f"{v:.2f}", ha="center", fontsize=8.5)
+    a.set_title(f"A. Routing & acting ({e60['n_tickets']} paraphrased tickets)",
+                fontsize=9.3, loc="left")
+
+    g = e60["gates"]
+    gl = ["malformed\ninput", "out-of-contract\noutput"]
+    seen = [g["bad_inputs"], 1]
+    caught = [g["caught_input"], g["caught_output"]]
+    x = range(len(gl))
+    b.bar([i - 0.2 for i in x], seen, width=0.4, color=SLATE, label="injected")
+    b.bar([i + 0.2 for i in x], caught, width=0.4, color=ORANGE, label="caught by gate")
+    b.set_xticks(list(x)); b.set_xticklabels(gl, fontsize=8)
+    b.set_ylabel("count"); b.set_ylim(0, max(seen) + 1.2)
+    for i in x:
+        b.text(i + 0.2, caught[i] + 0.05, str(caught[i]), ha="center", fontsize=8.5)
+    b.set_title("B. Contract gates catch every fault", fontsize=9.3, loc="left")
+    b.legend(fontsize=8, loc="upper right")
+
+    fig.suptitle("The perceive → world → emit → act boundary, validated end to end (E60)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "io_boundary.png", dpi=200)
+    plt.close(fig)
+
+
+def table_io_boundary(e60):
+    """One row per I/O component, with the role it plays and whether the E60 world
+    exercises it as a working, serializable piece."""
+    rows = [
+        ("JSONPerceptor", "perceive", "ingest a structured ticket payload"),
+        ("RegexPerceptor", "perceive", "pull fields from free text"),
+        ("PerceptionGate", "perceive", "reject out-of-contract input"),
+        ("MemoryStore", "recall", "semantic recall of past resolutions"),
+        ("CodeEmitter", "emit", "deterministic verified-code report"),
+        ("ToolEmitter", "act", "choose + execute a registered tool"),
+        ("ToolRegistry", "act", "typed, validated tool dispatch"),
+        ("EmissionGate", "emit", "reject out-of-contract output"),
+    ]
+    cov = e60["components_exercised"]
+    lines = ["\\begin{tabular}{lll c}", "\\toprule",
+             "Component & Boundary & Role & Exercised \\\\", "\\midrule"]
+    for name, boundary, role in rows:
+        mark = "\\checkmark" if cov.get(name) else "--"
+        lines.append(f"{name} & {boundary} & {role} & {mark} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "io_boundary.tex").write_text("\n".join(lines) + "\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -2996,6 +3069,8 @@ def main():
     table_brain(data["e58_brain"])
     fig_brain_arch(data["e59_brain_arch"])
     table_brain_arch(data["e59_brain_arch"])
+    fig_io_boundary(data["e60_io_boundary"])
+    table_io_boundary(data["e60_io_boundary"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

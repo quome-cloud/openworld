@@ -29,6 +29,7 @@ from .ethics import (
 )
 from .judge import Judge
 from .llm import BaseLLM, MockLLM, OllamaConnectionError, OllamaLLM
+from .memory import MemoryStore
 from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
@@ -45,9 +46,10 @@ from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
 from .card import render_card, render_gallery, to_reactflow
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
-    CodePerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
-    PerceptionGate, Perceptor, TextPerceptor, TranscriptPerceptor, VisionPerceptor,
-    image_to_b64,
+    CodeEmitter, CodePerceptor, EmissionError, EmissionGate, JSONPerceptor,
+    LLMEmitter, MockPerceptor, Observation, PerceptionError, PerceptionGate,
+    Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter, ToolRegistry,
+    TranscriptPerceptor, VisionPerceptor, image_to_b64,
     sample_frames,
 )
 from .sandbox import SandboxError
@@ -147,7 +149,15 @@ __all__ = [
     "PerceptionError",
     "MockPerceptor",
     "CodePerceptor",
+    "JSONPerceptor",
+    "RegexPerceptor",
     "LLMEmitter",
+    "CodeEmitter",
+    "ToolEmitter",
+    "ToolRegistry",
+    "EmissionGate",
+    "EmissionError",
+    "MemoryStore",
     "TextPerceptor",
     "TranscriptPerceptor",
     "VisionPerceptor",

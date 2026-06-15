@@ -437,21 +437,37 @@ def _perceptor_to_spec(p: Any) -> Dict[str, Any]:
          "produces": list(getattr(p, "produces", [])),
          "schema": {k: _schema_field_to_spec(v)
                     for k, v in getattr(p, "schema", {}).items()}}
-    code = getattr(p, "code", None)
-    if code is not None:                                   # CodePerceptor: runnable
-        d["code"] = code
+    if getattr(p, "code", None) is not None:               # CodePerceptor: runnable
+        d["code"] = p.code
         d["func_name"] = getattr(p, "func_name", "perceive")
+    if getattr(p, "paths", None) is not None:              # JSONPerceptor: declarative
+        d["paths"] = dict(p.paths)
+    if getattr(p, "pattern", None) is not None:            # RegexPerceptor: declarative
+        d["pattern"] = p.pattern
+        if getattr(p, "casts", None):
+            d["casts"] = {k: getattr(c, "__name__", str(c)) for k, c in p.casts.items()}
     return d
 
 
 def _perceptor_from_spec(d: Dict[str, Any], allow_code: bool) -> Any:
-    """Reconstruct a runnable perceptor when possible (CodePerceptor under
-    allow_code). Descriptor-only perceptors (Mock/Text/Vision) cannot be rebuilt
-    from a spec and return None."""
-    if d.get("kind") == "CodePerceptor" and allow_code and d.get("code"):
+    """Reconstruct a perceptor when possible. JSON/Regex are declarative and always
+    rebuilt; CodePerceptor runs code so it needs allow_code. Descriptor-only
+    perceptors (Mock/Text/Vision) cannot be rebuilt and return None."""
+    kind = d.get("kind")
+    schema = {k: _schema_field_from_spec(v) for k, v in d.get("schema", {}).items()}
+    schema = {k: v for k, v in schema.items() if v is not None}
+    if kind == "JSONPerceptor" and d.get("paths") is not None:
+        from .perceive import JSONPerceptor
+        return JSONPerceptor(paths=d["paths"], schema=schema,
+                             modality=d.get("modality", "text"))
+    if kind == "RegexPerceptor" and d.get("pattern") is not None:
+        from .perceive import RegexPerceptor
+        casts = {k: _SCHEMA_TYPES.get(c) for k, c in d.get("casts", {}).items()
+                 if _SCHEMA_TYPES.get(c)}
+        return RegexPerceptor(pattern=d["pattern"], schema=schema,
+                              modality=d.get("modality", "text"), casts=casts)
+    if kind == "CodePerceptor" and allow_code and d.get("code"):
         from .perceive import CodePerceptor
-        schema = {k: _schema_field_from_spec(v) for k, v in d.get("schema", {}).items()}
-        schema = {k: v for k, v in schema.items() if v is not None}
         return CodePerceptor(code=d["code"], produces=d.get("produces", []),
                              schema=schema, modality=d.get("modality", "text"),
                              func_name=d.get("func_name", "perceive"))
@@ -469,10 +485,23 @@ def _emit_to_spec(e: Any) -> Dict[str, Any]:
             if e.get(k):
                 out[k] = e[k]
         return out
-    # an object emitter (e.g. LLMEmitter): a template-driven LLM text-out channel
+    # an object emitter (LLMEmitter / CodeEmitter / ToolEmitter)
+    name = type(e).__name__
     out = {"modality": getattr(e, "modality", "data"),
-           "fields": list(getattr(e, "fields", None) or getattr(e, "reads", []))}
-    if getattr(e, "template", None):
+           "fields": list(getattr(e, "reads", None) or getattr(e, "fields", []))}
+    if name == "ToolEmitter":
+        out["kind"] = "tool"
+        out["code"] = e.code
+        out["func_name"] = e.func_name
+        if getattr(e, "registry", None) is not None:
+            out["tools"] = e.registry.names()
+    elif name == "CodeEmitter":
+        out["kind"] = "code"
+        out["code"] = e.code
+        out["func_name"] = e.func_name
+        if getattr(e, "schema", None):
+            out["schema"] = {k: _schema_field_to_spec(v) for k, v in e.schema.items()}
+    elif getattr(e, "template", None):                     # LLMEmitter
         out["kind"] = "llm"
         out["template"] = e.template
     if getattr(e, "report", None):

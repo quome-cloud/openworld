@@ -33,6 +33,8 @@ from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
 from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
+from .wavelets import denoise as wavelet_denoise
+from .wavelets import dwt, idwt, sparsity
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
@@ -99,6 +101,10 @@ __all__ = [
     "TROPICAL",
     "Skill",
     "TrajectorySpace",
+    "wavelet_denoise",
+    "dwt",
+    "idwt",
+    "sparsity",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

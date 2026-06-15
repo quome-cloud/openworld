@@ -316,6 +316,9 @@ def fig_induction_scale(e38):
     ax.set_ylabel("Exact probe accuracy")
     ax.set_xlabel("Generator (increasing capability →)")
     ax.set_ylim(0, 1.08)
+    # Add horizontal margin so the rightmost marker and its centered value
+    # label sit fully inside the axes instead of running off the right edge.
+    ax.set_xlim(-0.4, len(models) - 1 + 0.4)
     ax.legend(fontsize=7.5, loc="center right")
     ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
     fig.tight_layout()
@@ -341,8 +344,11 @@ def fig_active_induction(e43):
              label="passive (random policy)")
     axc.axhline(1, color=SLATE, lw=1, ls=":")
     if rep["active_steps"]:
+        # Offset the "identified" label up and to the right into clear space so
+        # it no longer sits on top of the descending curves / the arrow.
         axc.annotate("identified", xy=(rep["active_steps"], 1),
-                     xytext=(rep["active_steps"] + 6, 6), fontsize=8, color=BLUE,
+                     xytext=(rep["active_steps"] + 9, 13), fontsize=8, color=BLUE,
+                     ha="left", va="center",
                      arrowprops=dict(arrowstyle="->", color=BLUE, lw=1))
     axc.text(len(pc), pc[-1] + 1.5, "passive plateaus", fontsize=8, color=RED,
              ha="right")
@@ -353,7 +359,7 @@ def fig_active_induction(e43):
                   f"($k$={rep['true_rule']['k']})", fontsize=9, loc="left")
     axc.legend(fontsize=7.5, loc="upper right")
 
-    labels = ["passive", "active\n(ours)", "clairvoyant\n(knows rule)"]
+    labels = ["passive", "active", "clairvoyant\n(knows rule)"]
     vals = [s["passive_mean_steps"], s["active_mean_steps"],
             s["clairvoyant_mean_steps"]]
     colors = [RED, BLUE, TEAL]
@@ -363,6 +369,8 @@ def fig_active_induction(e43):
                  ha="center", fontsize=8)
     axb.text(0, 1.2, f"{s['passive_unresolved']}/{s['n_rules']}\nnever", ha="center",
              fontsize=7.5, color="white", weight="bold")
+    # Headroom so the tallest bar's value label is not clipped off the top.
+    axb.set_ylim(0, max(vals) * 1.15)
     axb.set_ylabel("Mean steps to identify")
     axb.set_title("Lower is better", fontsize=9, loc="left")
     axb.tick_params(axis="x", labelsize=7.5)
@@ -1313,7 +1321,7 @@ def table_many_worlds(e46):
     for r in e46["scale"]:
         en = "infeasible" if r["enum_ms"] is None else f"{r['enum_ms']:.0f}"
         mant, exp = f"{r['n_worlds']:.1e}".split("e")
-        lines.append(f"${mant}\\times10^{{{int(exp)}}}$ & {r['consistent']:.0f} & "
+        lines.append(f"${mant}\\times10^{{{int(exp)}}}$ & {r['consistent']:,.0f} & "
                      f"{r['factored_ms']:.2f} & {en} \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (TABLES / "many_worlds.tex").write_text("\n".join(lines) + "\n")
@@ -2592,7 +2600,7 @@ def numbers_tex(d):
         macro("ManyWorldsMax", f"${sci(e46['max_worlds'])}$"),
         macro("ManyWorldsMaxMs", f"{e46['max_worlds_factored_ms']:.0f}"),
         macro("ManyWorldsEnumMax", f"${sci(e46['enum_max_worlds'])}$"),
-        macro("ManyWorldsConsistent", str(big["consistent"])),
+        macro("ManyWorldsConsistent", f"{big['consistent']:,}"),
         macro("ManyWorldsCoupleWidth", str(coup[-1]["w"])),
         macro("ManyWorldsCoupleFactor", str(coup[-1]["factor_size"])),
         macro("ManyWorldsCoupleIdeal", str(coup[-1]["ideal_factored"])),

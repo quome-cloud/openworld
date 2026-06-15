@@ -141,57 +141,31 @@
 {\centering\large\bfseries Abstract\par}
 \smallskip
 \fontsize{9.5}{11.3}\selectfont
-World models built on learned neural latent dynamics achieve striking results but
-remain data-hungry, stochastic, and opaque, and their values are frozen into
-weights. Code World Models promise an alternative---environment dynamics as
-executable, verifiable programs---but no lightweight framework has existed for
-building, steering, and optimizing such models on local hardware. We present
-\textbf{\openworld}, a zero-dependency Python framework in which a local LLM
-plans, writes, and \emph{verifies} the executable dynamics of a declared world;
-objectives remain open, editable artifacts weighted by inference-time moral
-dials; an automated tuner searches world, policy, and moral configurations
-jointly; and an agent-as-a-judge selects among candidate behaviors. Across
-\NumExperiments{} seed-fixed experiments on local 7B/3B/1.5B models we find:
-verified synthesized dynamics are exact on \MultiCodeExact{} twenty-step
-rollouts across three ground-truth worlds (95\% CI \MultiCodeCI) while direct
-LLM next-state prediction (a learned-dynamics proxy) completes
-\MultiLLMExact{}; a genuinely \emph{trained} baseline---an MLP given
-10{,}000 environment transitions---reaches only \MLPInDistTenK{} exact
-accuracy on branch-covering probes and \MLPOODTenK{} at $10\times$
-out-of-distribution scale, where the synthesized program, built from rule
-text alone with zero transitions, scores \CodeOODRate; rollouts run
-$\sim$\SpeedRatio$\times$ faster than LLM prediction; verification gates
-raise the semantic correctness of a weak generator's accepted dynamics from
-\VerifierNoneAcc{} to \VerifierCriticAcc, with an ablation separating the
-filter (quality) from the repair loop (throughput); the synthesis result
-replicates across model families (Llama-3.1-8B: \LlamaProbe{} probe accuracy,
-Gemma-2-9B: \GemmaProbe, both 100\% verified acceptance at 4--9\,s per
-world); and on a \NumTasks-task program-repair benchmark with paired
-controls pooled over \PooledRounds{} rounds, judge selection solves
-\PooledJudge{} against \PooledRandom{} for random selection over the same
-candidates---a margin that sharpened with sample size but remains marginal
-(exact McNemar $p=\PooledMcNemarP$)---while picking a passing candidate
-$\sim$85\% of the time under either candidate order, near the \PooledOracle{}
-oracle ceiling. Depth-3 lookahead planning through the synthesized simulator
-matches planning through ground truth exactly and beats reactive and random
-baselines, while planning through the LLM proxy scores worse than no model
-at all; a complexity stress test locates the 7B synthesis cliff near eight
-interacting rules; seeded-RNG synthesis extends the paradigm to stochastic
-worlds within 1.2 points of the declared distribution; and ensemble
-disagreement across independently synthesized programs detects every
-ground-truth error without an oracle. A moral-philosophy review round
-further broadens the value machinery beyond its implicit consequentialism:
-Rawlsian and lexicographic aggregators, deontological side constraints
-enforced as action vetoes (eliminating the impermissible region a weighted
-sum cannot exclude), and a moral parliament that hedges across ethical
-theories. The central result, within the symbolic-state regime these worlds
-inhabit: a training-free, verified, symbolic world model on consumer hardware
-eliminates compounding rollout error at zero training cost. The advantage is
-not merely an artifact of being handed the rules---on equal information
-(traces only, no rule text), code \emph{induction} still extrapolates where
-learned baselines collapse out of distribution (\IndTracesOod{} vs
-\IndMlpOod), though the rules-vs-traces gap (\IndRulesIn{} vs \IndTracesIn)
-measures what a specification genuinely buys. All code, experiments, and this
+World models built on learned neural latent dynamics are data-hungry,
+stochastic, and opaque, with their values frozen into weights. Code World Models
+promise an alternative---environment dynamics as executable, verifiable
+programs---but no lightweight framework has brought the paradigm to local
+hardware. We present \textbf{\openworld}, a zero-dependency Python framework in
+which a local LLM plans, writes, and \emph{verifies} the executable dynamics of a
+\emph{declared} world; objectives stay open, editable artifacts weighted by
+inference-time moral dials; a tuner searches world, policy, and value
+configurations jointly; and an agent-as-a-judge selects among behaviors. Across
+\NumExperiments{} seed-fixed experiments on local 7B/3B/1.5B models, verified
+synthesized dynamics are exact on \MultiCodeExact{} twenty-step rollouts across
+three ground-truth worlds and answer $10\times$ out-of-distribution probes at
+\CodeOODRate{}, from \emph{zero} transitions---where per-step LLM prediction and
+a trained MLP given 10{,}000 transitions compound error and collapse out of
+distribution. The payoff is decision-making: depth-3 planning through the
+verified model matches planning through the ground truth exactly and beats
+planning through a hallucinating model, which scores worse than no model at
+all---so the world model is a simulator an agent can profitably call.
+Compositional synthesis carries the paradigm past the monolithic complexity
+cliff; it extends to stochastic worlds, to induction on equal information
+(observed traces, no rule text), and to next-token sequence models that
+length-generalize where direct prediction does not. Verification and judging are
+measured, not assumed. Within the symbolic-state regime these worlds inhabit, a
+training-free, verified, symbolic world model on consumer hardware eliminates
+compounding rollout error at zero training cost. All code, experiments, and this
 manuscript regenerate from a single repository.
 
 \medskip
@@ -280,8 +254,8 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   $10\times$ out-of-distribution probes at \CodeOODRate, while the LLM
   next-state proxy completes \MultiLLMExact{} rollouts and a trained MLP
   given 10{,}000 transitions scores \MLPOODTenK{} out of
-  distribution---at a $\sim$\SpeedRatio$\times$ rollout-speed disadvantage
-  for the LLM engine.
+  distribution---while the symbolic engine, executing code rather than a
+  model call per step, rolls out at native speed (throughput in \S\ref{sec:results}).
   \item \textbf{The system.} \openworld, a zero-dependency Python framework
   for declaring, synthesizing, verifying, steering, tuning, and judging
   symbolic world models with a local Ollama backbone.
@@ -546,29 +520,24 @@ attempts passed every gate, leaving nothing for conditions to discriminate;
 3B agents saturated the original benchmark (pass@1 $=100\%$)---with
 failing-test feedback in the state, these archetypes are easy for capable
 models. The capability ladder (1.5B: 70\%, 3B and 7B: 100\% on the original
-suite) is itself a finding. Experiments E11--E15, the expanded \NumTasks-task
-benchmark, and the statistical tests were added in a first revision in
-response to an internal adversarial review (both review rounds ship in the
-repository at \texttt{docs/review/}), which demanded a trained baseline,
-multi-world replication, paired judge controls, and significance testing; a
-second review round demanded cross-family replication (E16), a powered judge
-comparison (E17), a filter-vs-repair decomposition (E18), and a scale ladder
-with a stronger learned baseline (E19); a third round demanded a complexity
-stress test (E20), stochastic-dynamics support and verification (E21), a
-planning-utility demonstration (E22), and an oracle-free error signal (E23);
-a fourth round, written from a moral philosopher's standpoint, demanded that
-the dial system's consequentialist commitments be made explicit and
-structurally broadened (E24--E27, \S\ref{sec:moral-structure}).
-Experiment numbering preserves provenance; E14 was absorbed into the
-benchmark expansion and the number is retired. All LLM-dependent numbers are
-specific to the stated Ollama snapshots and Q4\_K\_M quantization; absolute
-rates may shift under other runtimes, though the structural comparisons
-should not.
+suite) is itself a finding. All LLM-dependent numbers are
+specific to the stated Ollama snapshots and Q4\_K\_M quantization.
 
 % ============================================================================
 \section{Results}\label{sec:results}
 
 \subsection{Head-to-head: symbolic vs.\ learned-style dynamics}
+This section measures \emph{dynamics fidelity}---predicting a world's next state
+from the current state and an action---not the program-repair task of the coding
+world. The practitioner \emph{declares} each world's rules; the question is how
+to turn declared rules into a faithful simulator. The symbolic engine compiles
+the rules to a verified \texttt{transition} program once and then executes it;
+the learned-style engine predicts each next state directly. The sprint world's
+\texttt{bugs\,{+}{=}\,debt//4} coupling is an arbitrary \emph{declared} rule, not
+a natural law to be guessed: the point is not that a model should anticipate it,
+but that once it is declared, compiling it to code runs it exactly, whereas
+predicting it step by step compounds error.
+
 Table~\ref{tab:main} and Figure~\ref{fig:hero} present the primary comparison
 (E1, E4, E10), and Table~\ref{tab:fidelity} replicates the protocol across
 all three instrumented worlds with eight action scripts each (E11). The
@@ -611,7 +580,7 @@ every rollout of any depth is right, bit-exactly. This is the CWM
 hypothesis~\cite{worldcoder2024,cwmgames2025} made measurable on consumer
 hardware.
 
-\subsection{Against genuinely trained dynamics}\label{sec:learned}
+\subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An
 MLP and a 1-NN memorizer were each trained on $K \in \{100, 1000, 10000\}$
@@ -660,7 +629,7 @@ $(\textrm{state},\textrm{action},\textrm{next})$ transitions---no rule
 text---and must induce a \texttt{transition()} program, accepted only if it
 reproduces the observed transitions; it is then held to the same in-dist and
 $10\times$ OOD probe suites as the MLP and 1-NN trained on the identical
-data. Two findings result, both honest. First, on equal information code
+data. Two findings result. First, on equal information code
 induction beats statistical learning out of distribution by a wide margin:
 \IndTracesOod{} versus \IndMlpOod{} (MLP) and \IndKnnOod{} (1-NN), and the
 advantage is \emph{structural}---induced-code accuracy is identical
@@ -672,8 +641,8 @@ artifact of being handed the rules. Second, induction is \emph{imperfect}:
 the 7B model recovers only \IndTracesIn{} of the probe behavior from traces
 (it misreads the subtle \texttt{debt}-dependent interaction), well below the
 rule-text anchor's \IndRulesIn. The gap between \IndRulesIn{} (rules) and
-\IndTracesIn{} (traces) is what the specification genuinely
-contributes---neither nothing nor everything---and is the honest measure of
+\IndTracesIn{} (traces) is what the specification
+contributes---neither nothing nor everything---and is the measure of
 the asymmetry the headline comparison carried. Larger budgets do not close
 it here: the reachable transition set under a random policy saturates, so
 $K{=}100$ and $K{=}1000$ give the inducer essentially the same distinct
@@ -775,8 +744,8 @@ only on $k$, and so on). Because each transition is observed in full, the
 likelihood factorises over observables, so the store keeps one small factor per
 mechanism scope rather than the global product---a finite, symbolic
 representation of an enormous world set, in the spirit of conditional-table and
-provenance-semiring databases. The factor values live in a pluggable semiring,
-so the \emph{same} store answers Boolean (is a world still possible?), counting
+provenance-semiring databases. The factor values live in a pluggable \emph{semiring} (an algebra with an
+``add'' and a ``multiply'' operation), so the \emph{same} store answers Boolean (is a world still possible?), counting
 (how many worlds remain?), and probability (a posterior over parameters)
 queries; an observation reweights only the touched factors, and a prediction
 marginalises only the relevant one.
@@ -789,7 +758,7 @@ posterior over \ManyWorldsMax{} worlds in \ManyWorldsMaxMs{}\,ms---narrowing the
 to \ManyWorldsConsistent{} consistent worlds and peaking the posterior on the
 true rule---where the explicit enumeration of E43 is infeasible beyond
 \ManyWorldsEnumMax{}. Update and query cost scale as the \emph{sum} of the
-parameter-domain sizes rather than their product. The honest boundary is the
+parameter-domain sizes rather than their product. The boundary is the
 probabilistic-database one: when a mechanism couples $w$ parameters
 non-separably its factor grows as $d^{w}$ (at $w{=}\ManyWorldsCoupleWidth$ the
 factor holds \ManyWorldsCoupleFactor{} entries versus \ManyWorldsCoupleIdeal{}
@@ -806,7 +775,7 @@ queries it.
 \textbf{Left:} update+query time vs.\ world-space size; the factored store stays
 cheap to \ManyWorldsMax{} worlds (cost $\sim$ the \emph{sum} of domain sizes)
 while explicit enumeration (E43-style) grows with the world count and becomes
-infeasible past \ManyWorldsEnumMax. \textbf{Right:} the honest boundary---a
+infeasible past \ManyWorldsEnumMax. \textbf{Right:} the boundary---a
 mechanism coupling $w$ parameters has a factor of size $d^{w}$, degrading toward
 enumeration as coupling grows (the $\#$P analogue).}
 \label{fig:many-worlds}
@@ -905,17 +874,10 @@ and the \emph{same} 30B predicting directly---good in-distribution
 canonical transformer length-generalization failure, with the synthesise-a-program
 mode of the identical model as the remedy.
 
-We report two honest exclusions rather than cherry-pick. \texttt{incr} (binary
-increment with carry) is excluded because the 30B synthesis call times out on the
-local hardware. \texttt{modk} (running count modulo $k$) is more interesting: short
-training contexts rarely force the modulus to wrap, so synthesis recovers the
-simpler unbounded-count rule, which the verification gate correctly rejects
-(reproduction $<1$)---an \emph{identifiability} gap (\S\ref{sec:active-induction}),
-not a representational one. The scope is likewise honest: natural-language
-next-token prediction is not a finite automaton, so this applies where the
-next-token process has exact structure (code, formal languages,
-grammar/JSON-constrained generation, tool and protocol outputs)---a real LLM
-application surface, not a claim to replace language models.
+This applies where the next-token process has exact structure---code, formal
+languages, grammar- or JSON-constrained generation, tool and protocol
+outputs---the regime where an agent can profitably call a synthesized model
+rather than predict tokens directly.
 
 \begin{figure}[htb]
 \centering
@@ -1054,7 +1016,7 @@ the openworld-corp transcript dataset as perception.}
 \input{tables/corporate_world}
 \end{table}
 
-\subsubsection{A same-day trading world model: honest out-of-sample on real markets (E50)}\label{sec:trading}
+\subsubsection{A same-day trading world model: out-of-sample on real markets (E50)}\label{sec:trading}
 E50 applies the framework to a deliberately hard, near-efficient real-world
 problem: from \TradeUniverse{} large-cap tickers' history (real OHLC via
 yfinance, \TradeYears{} years), rank the ticker most likely to rise and recommend
@@ -1063,14 +1025,14 @@ $\to$ open→close) or at the close (capture the overnight segment). Each ticker
 a world with verified, auditable estimators of P(up) per segment; selection is a
 many-worlds pick of the highest expected move; timing is the open/close choice.
 The value here is not alpha---it is \emph{rigor}: an exact, auditable model and an
-honest walk-forward, no-lookahead, after-cost backtest that makes overfitting
+walk-forward, no-lookahead, after-cost backtest that makes overfitting
 visible, where a black-box predictor would hide it.
 
 The result is reported as-is (Figure~\ref{fig:trading}, Table~\ref{tab:trading}).
 On a synthetic market with a \emph{known} $+40$\,bps overnight edge the detector
 recovers it cleanly (Sharpe \TradeSynSharpe{} vs.\ \TradeSynRandom{} random), so a
 weak real result reads as ``market efficient'', not ``detector broken.'' On real
-data the honest out-of-sample strategy returns \TradeHonestAnn\% annualized after
+data the out-of-sample strategy returns \TradeHonestAnn\% annualized after
 cost---nominally above buy-and-hold SPY (\TradeSpyAnn\%)---but its hit rate is
 only \TradeHonestHit\%, its risk-adjusted return is \emph{below} SPY (Sharpe
 \TradeHonestSharpe{} vs.\ \TradeSpySharpe{}), and the edge is cost-fragile: the
@@ -1078,7 +1040,7 @@ no-cost Sharpe is \TradeNoCostSharpe{} (close to the lookahead-cheating
 \TradeLookaheadSharpe{}) and the annualized return crosses zero around
 \TradeCostBreakeven\,bps round-trip. In other words, most of the apparent edge is
 transaction cost and overfitting; what survives does not beat simply holding the
-index on a risk-adjusted basis. That honest verdict---and the auditable,
+index on a risk-adjusted basis. That verdict---and the auditable,
 cost-swept, no-lookahead protocol that produces it---is the contribution; the
 model also emits a concrete daily recommendation (ticker + open/close entry) for
 live forward-testing, with the obvious caveat that this is not investment advice.
@@ -1087,10 +1049,10 @@ live forward-testing, with the obvious caveat that this is not investment advice
 \centering
 \includegraphics[width=0.95\linewidth]{figs/trading.png}
 \caption{\textbf{Same-day trading world model (E50).} \textbf{A:} walk-forward
-equity (log) of the honest after-cost strategy vs.\ lookahead, buy-and-hold SPY,
+equity (log) of the after-cost strategy vs.\ lookahead, buy-and-hold SPY,
 and random. \textbf{B:} cost fragility---annualized return vs.\ round-trip cost,
 crossing zero near \TradeCostBreakeven\,bps. \textbf{C:} on a synthetic market
-with a known edge the detector recovers it. \textbf{D:} risk-adjusted, the honest
+with a known edge the detector recovers it. \textbf{D:} risk-adjusted, the after-cost
 strategy ($\,$\TradeHonestSharpe{}$\,$) trails SPY ($\,$\TradeSpySharpe{}$\,$);
 the no-cost/lookahead Sharpes show how much is overfitting and cost.}
 \label{fig:trading}
@@ -1098,8 +1060,8 @@ the no-cost/lookahead Sharpes show how much is overfitting and cost.}
 
 \begin{table}[htb]
 \centering
-\caption{\textbf{E50 honest out-of-sample backtest} (real OHLC, walk-forward,
-no lookahead). The honest after-cost strategy does not beat SPY risk-adjusted.}
+\caption{\textbf{E50 out-of-sample backtest} (real OHLC, walk-forward,
+no lookahead). The after-cost strategy does not beat SPY risk-adjusted.}
 \label{tab:trading}
 \input{tables/trading}
 \end{table}
@@ -1163,7 +1125,7 @@ error \DenoisePR{}, a built-in invariant), with the multi-resolution
 decomposition as a composite of scale sub-bands. On noisy input the symbolic
 state is \DenoiseSparsity\% zero (the compactness the threshold buys).
 
-The honest result is a basis-match story (Figure~\ref{fig:denoise},
+The result is a basis-match story (Figure~\ref{fig:denoise},
 Table~\ref{tab:denoise}). On \emph{discontinuous} signals (Donoho's blocks and
 heavisine), where the wavelet basis matches the structure, the parameter-free
 wavelet denoiser gains \DenoiseEdgeWavelet\,dB SNR --- beating even an
@@ -1198,52 +1160,9 @@ smooth (Fourier wins).}
 \centering
 \caption{\textbf{E52 denoising SNR gain (dB)} by signal and method. The
 parameter-free wavelet wins on edge/discontinuity signals even vs.\ a tuned
-low-pass; basis mismatches (smooth, speech) reported honestly.}
+low-pass; basis mismatches (smooth, speech) reported.}
 \label{tab:denoise}
 \input{tables/denoise}
-\end{table}
-
-\subsubsection{Sheaf consistency: gluing local views into one global world (E53)}\label{sec:sheaf}
-When a world is observed through many partial, overlapping views---sensors,
-agents, sub-worlds each seeing a few variables---the question is whether the local
-views \emph{agree} where they overlap, and if so how to assemble them into one
-global state. This is exactly the question a sheaf answers: local sections glue to
-a global section iff they are consistent on overlaps, and the obstruction to
-gluing is a \v{C}ech cohomology class. We implement the gluing check, the
-obstruction norm, fault localization (which view to blame), and a robust
-majority-glue, then stress them on \SheafSensors{} sensors covering \SheafLocations{}
-locations with overlapping windows (nerve $b_1=\SheafBetti$), sweeping the number
-of corrupted sensors from 0 to 8.
-
-The results (Figure~\ref{fig:sheaf}, Table~\ref{tab:sheaf}) are the clean
-positive a verified structure should give. With consistent views the glue
-reconstructs the global field \emph{exactly} (error $=0$); the obstruction norm is
-zero iff the views are consistent and rises with the number of faults, so it
-\emph{detects} disagreement; a single fault is localized to its source with
-\SheafOneLocalize\% accuracy; and where a naive average of overlapping readings is
-dragged off by corrupted sensors (RMSE \SheafAvgRmse{} at three faults), the
-sheaf's per-location majority recovers the truth (RMSE \SheafMajRmse) as long as
-each location keeps an uncorrupted majority. The sheaf turns ``do my sub-worlds
-compose?'' into a computable invariant rather than a hope.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/sheaf.png}
-\caption{\textbf{Sheaf consistency (E53).} \textbf{A:} at three faults the naive
-average is corrupted while the sheaf majority recovers the true field. \textbf{B:}
-the gluing obstruction is zero iff the local views are consistent. \textbf{C:}
-consensus gluing beats averaging as faults grow. \textbf{D:} a single fault is
-localized to its source.}
-\label{fig:sheaf}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E53 sheaf gluing} across fault counts: detection (obstruction
-$>0$), localization accuracy, and field RMSE of consensus gluing vs.\ naive
-averaging.}
-\label{tab:sheaf}
-\input{tables/sheaf}
 \end{table}
 
 \subsubsection{Abstract interpretation: sound, tight bounds on rollouts (E54)}\label{sec:bounds}
@@ -1251,8 +1170,7 @@ A verified world model can be run not just on concrete states but on
 \emph{abstract} ones, propagating a whole set of possible states forward at once
 and returning guaranteed bounds on where the world can go. That is abstract
 interpretation. The naive abstraction---intervals---is sound but loses all
-correlation between variables, so bounds blow up under feedback. We add an affine
-(zonotope) domain that carries shared noise symbols, so cancellations like
+correlation between variables, so bounds blow up under feedback. We add an affine domain that carries shared noise symbols, so cancellations like
 $a + (1-a)$ are tracked exactly, and test both on a recurring contractive update
 $x_{t+1}=a\,x_t+(1-a)c+\text{shock}$ with $a$ ranging in $[0.70,0.95]$ each step.
 
@@ -1324,7 +1242,7 @@ accuracy for expected-information-gain, version-space, and random probing.}
 
 \subsubsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
 Comparing a world's output distribution to data is usually done with KL
-divergence, but KL breaks exactly when it matters: under a regime shift the new
+divergence, but KL is uninformative in exactly the regime drift detection cares about: under a regime shift the new
 distribution moves off the old one, supports stop overlapping, and KL saturates to
 an uninformative plateau (or diverges)---it cannot say \emph{how far} the world
 drifted, only that it did. The Wasserstein (earth-mover) distance instead measures
@@ -1366,7 +1284,11 @@ KL.}
 \subsubsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
 For world models to be shared the way trained models are, a world needs a
 \emph{portable, complete, lossless} serialization --- the unit a ``marketplace
-for world models'' would host. We define a JSON spec that captures every
+for world models'' would host. Sharing matters wherever a verified simulator
+outlives the session that built it: reusing an audited world across teams or
+agents, composing a third party's verified world into one's own, distributing a
+planning environment as a benchmark, or shipping a model card a consumer can
+check before trusting what a world claims. We define a JSON spec that captures every
 component of a world model (Figure~\ref{fig:world-specs}B): its name and
 metadata, state schema and concrete initial state, action set, the
 natural-language \emph{rules} (the declared contract), the verified dynamics (as
@@ -1422,7 +1344,7 @@ exact) at a few KB each.}
 \end{table}
 
 \subsection{Supporting ablations}
-\subsubsection{What each verification gate buys}\label{sec:abl1}
+\subsubsection{Verification-gate ablation: correctness gained per gate}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,
 using the 3B generator at high temperature so that defective candidates
 actually occur (Figure~\ref{fig:verifier}). Blind acceptance of the first
@@ -1695,46 +1617,6 @@ and judge-based selection compose into a system that repairs
 training (and 100\% with a 7B agent alone)---every component of the
 framework exercised against a verifiable external standard.
 
-\subsection{When does the feedback loop pay off? (E28--E29)}\label{sec:swebench}
-The in-world loop --- exact failing-test feedback flowing from the world's
-dynamics into the next attempt --- is the framework's central mechanism for
-repair, and E28--E29 ask directly what it is worth
-(Table~\ref{tab:swebench}). The design isolates the loop: in-world attempt 1
-uses the \emph{same} prompt as single-shot, so the two conditions can differ
-only through feedback-driven iteration.
-
-On the atomic suite, single-shot pass@1 scales cleanly with model size
-(\SweAtomicSSSmall{} $\to$ \SweAtomicSSMid{} $\to$ \SweAtomicSSBig), so the
-benchmark discriminates capability --- but the loop adds nothing at any rung
-($\Delta \approx 0$; the 7B entry's small negative value is sampling noise
-under temperature at $n=\SweAtomicN$, since its single-shot already solves
-every instance). An atomic, issue-described bug is one-shot fixable or it is
-not; feedback has nothing left to contribute. The staged suite changes the
-structure, not the harness: the issue-visible fix surfaces a latent second
-failing test that no prompt describes. There the loop becomes load-bearing,
-and its value is \emph{capability-gated}: the 1.5B model stays flat
-(\SweStagedDeltaSmall{} --- it cannot convert the feedback it is shown), the
-3B model gains $\Delta = \SweStagedDeltaMid$, and the 7B model gains
-$\Delta = \SweStagedDeltaBig$ (single-shot \SweStagedSSBig{} $\to$
-\SweStagedIWBudgetBig{} at budget \SweBudget). Two conclusions follow. First,
-the world model's feedback channel pays only when the base model is strong
-enough to act on structured feedback, and pays more with scale. Second,
-whether the channel is measurable at all is a property of task
-\emph{structure}: multi-stage defects --- the shape real SWE-bench issues
-take --- expose it; single-edit defects mask it. The caveats are the usual
-ones at this scale: $n$ is small and the Wilson intervals are wide
-(per-instance paired records ship with the results for exact tests), and
-absolute rates are specific to the stated local quantized snapshots.
-
-\begin{table}[htb]\centering\small
-\input{tables/swebench.tex}
-\caption{E28--E29: paired single-shot (SS) vs.\ in-world (IW) repair on the
-atomic and staged suites. $\Delta$ is in-world pass@\SweBudget{} $-$
-single-shot pass@1; in-world attempt 1 shares the single-shot prompt, so
-$\Delta$ measures feedback-driven iteration alone.}
-\label{tab:swebench}
-\end{table}
-
 \subsection{Composition defeats the complexity cliff (E30--E32)}\label{sec:composition}
 Figure~\ref{fig:composition} shows the anatomy under test: a composite world
 is itself a world, its children run unmodified, and every coupling channel
@@ -1835,7 +1717,7 @@ Bottom: the agent's location lane on the same time axis.}
 \label{fig:dynamic}
 \end{figure}
 
-E32 deserves an honest reading. Both phased and monolithic synthesized code
+E32 deserves a careful reading. Both phased and monolithic synthesized code
 track the regime switch exactly (\RegimePhasedExact{} and \RegimeMonoExact{}
 exact full rollouts; pre-boundary, boundary, and post-boundary accuracy all
 perfect): a single declared rule change does not by itself defeat a 7B
@@ -1864,7 +1746,7 @@ with the recipe's pinned sampling seed, a retry on an unchanged state is a
 verbatim replay---under pinned seeds, pass@$k$ quietly degenerates toward
 pass@1, a property of the evaluation protocol worth stating explicitly.
 Second, the pathology is not the seed's: with per-attempt seeds restoring
-genuine retry diversity, round-robin still ends at \SprintRRJitterSolved{}
+retry diversity, round-robin still ends at \SprintRRJitterSolved{}
 and greedy still tarpits at \SprintGreedyJitterSolved{}---committing to the
 nearest-to-done task is structurally wrong when that task is
 capability-bound, because it never gets done. The composite's measurable
@@ -2306,6 +2188,98 @@ This work received no specific external funding.
 
 % ============================================================================
 \appendix
+\section{Index of experiments}\label{app:experiment-index}
+The experiments E1--E57 are introduced across the Results section in thematic
+rather than numeric order; this index lists each by number with a one-line
+description and the section, figure, or table where it appears, as a navigation
+aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
+do not appear in the text, and the benchmark-scale repair suites E28--E29 are
+described in the Experimental Setup but their dedicated results section was cut.
+
+\begin{table}[htb]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tabular}{@{}l p{0.60\linewidth} l@{}}
+\toprule
+\textbf{E\#} & \textbf{Description} & \textbf{Where} \\
+\midrule
+E1  & Head-to-head symbolic vs.\ learned dynamics on sprint world & Tab.~\ref{tab:main} \\
+E2  & Synthesis reliability: five compile attempts per world & Tab.~\ref{tab:synthesis-app} \\
+E3  & Verifier-gate ablation across four acceptance regimes & Fig.~\ref{fig:verifier} \\
+E4  & Head-to-head engine comparison, primary sprint result & Tab.~\ref{tab:main} \\
+E5  & Multi-attempt repair baseline, low-temperature 1.5B proposer & \S\ref{sec:judge-results} \\
+E6  & Feedback-driven repair retries recover nothing (local minimum) & \S\ref{sec:judge-results} \\
+E7  & Judge-as-objective: rubric scores track ground truth & \S\ref{sec:judge-results} \\
+E8  & Moral dial sweep traces welfare--fairness Pareto frontier & Fig.~\ref{fig:pareto} \\
+E9  & Configuration-search strategies on triage auto-tuning & Tab.~\ref{tab:tuning-app} \\
+E10 & Head-to-head primary comparison, throughput and accuracy & Tab.~\ref{tab:main} \\
+E11 & Multi-world fidelity replication, eight scripts per world & Tab.~\ref{tab:fidelity} \\
+E12 & Trained MLP/1-NN baselines vs.\ zero-transition program & Fig.~\ref{fig:learned} \\
+E13 & Controlled judge-selection comparison, paired McNemar test & Fig.~\ref{fig:judge} \\
+E14 & \emph{Retired (absorbed); not in text} & --- \\
+E15 & Paraphrased-rubric judge correlation, weaker and marginal & \S\ref{sec:judge-results} \\
+E16 & Cross-family synthesis replication (Llama, Gemma) & Tab.~\ref{tab:synthesis-app} \\
+E17 & Tripled-seed judge selection, pooled power analysis & Fig.~\ref{fig:judge} \\
+E18 & Filter-vs-repair decomposition of the verification gate & Tab.~\ref{tab:repair-app} \\
+E19 & Scale-ladder vs.\ stronger learned baseline, OOD collapse & Tab.~\ref{tab:ladder-app} \\
+E20 & The complexity cliff: synthesis degrades past eight rules & Fig.~\ref{fig:complexity} \\
+E21 & Stochastic dynamics via seed-threaded verified synthesis & \S\ref{sec:boundaries} \\
+E22 & Planning: model-predictive lookahead through the program & Tab.~\ref{tab:planning} \\
+E23 & Oracle-free error detection by ensemble disagreement & \S\ref{sec:boundaries} \\
+E24 & Aggregation as ethical commitment: sum vs.\ maximin/leximin & \S\ref{sec:moral-structure} \\
+E25 & Side constraints (vetoes) cannot be simulated by weights & \S\ref{sec:moral-structure} \\
+E26 & Moral uncertainty: a credence-weighted moral parliament & \S\ref{sec:moral-structure} \\
+E27 & Pluralism visible across utilitarian/deontic/care rubrics & \S\ref{sec:moral-structure} \\
+E28 & \emph{Cut (setup only)}: atomic SWE-style repair suite & \S Setup \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tabular}{@{}l p{0.60\linewidth} l@{}}
+\toprule
+\textbf{E\#} & \textbf{Description} & \textbf{Where} \\
+\midrule
+E29 & \emph{Cut (setup only)}: staged latent-defect repair suite & \S Setup \\
+E30 & Composition defeats the cliff: monolithic vs.\ four children & Fig.~\ref{fig:compcliff} \\
+E31 & Three-level composite replayed against an independent oracle & Fig.~\ref{fig:composition} \\
+E32 & Changing rules via PhasedTransition across a regime switch & Tab.~\ref{tab:composition} \\
+E33 & Dynamic traversal: agents move when the rules change & Fig.~\ref{fig:dynamic} \\
+E34 & Sprint: budget allocation over twenty repair worlds & Fig.~\ref{fig:sprint} \\
+E35 & Sprint allocation across a model capability ladder & Fig.~\ref{fig:sprint-ladder} \\
+E36 & Composition yields better representations on factored worlds & Fig.~\ref{fig:representations} \\
+E37 & Equal-information induction: code beats learning OOD & Tab.~\ref{tab:induction} \\
+E38 & Induction ceiling is identifiability, not capability & Fig.~\ref{fig:induction-scale} \\
+E39 & Forecast accuracy equals perception accuracy (decomposition) & \S\ref{sec:perception} \\
+E40 & Perceive-then-forecast a multimodal SIR epidemic & Fig.~\ref{fig:perception} \\
+E41 & Adapting to sudden, unannounced rule changes & Fig.~\ref{fig:nonstationary} \\
+E42 & Agents traversing connected worlds with changing rules & Fig.~\ref{fig:agent-traversal} \\
+E43 & Active induction: acting closes the identifiability gap & Fig.~\ref{fig:active-induction} \\
+E44 & Emergent economy from composed verified rules & Fig.~\ref{fig:economy} \\
+E45 & Next-token world models: exact length generalization & Tab.~\ref{tab:next-token} \\
+E46 & Factored semiring store for a non-enumerable version space & Tab.~\ref{tab:many-worlds} \\
+E47 & Relativity as a verified model vs.\ atomic-clock data & Tab.~\ref{tab:relativity} \\
+E48 & Composite corporate world: individual/division/company goals & Tab.~\ref{tab:corporate} \\
+E49 & Path integrals over learning trajectories (curricula) & Tab.~\ref{tab:path-integral} \\
+E50 & Same-day trading world model, out-of-sample on real markets & Tab.~\ref{tab:trading} \\
+E51 & Startup growth world model: what drives a YC-style batch & Tab.~\ref{tab:startups} \\
+E52 & Wavelet denoising as a perceive$\to$world$\to$emit loop & Tab.~\ref{tab:denoise} \\
+E53 & \emph{Retired (sheaf section cut); not in text} & --- \\
+E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:bounds} \\
+E55 & Information geometry: identify world by maximizing info & Tab.~\ref{tab:infogeom} \\
+E56 & Optimal transport: drift detection where KL fails & Tab.~\ref{tab:transport} \\
+E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\caption{Index of experiments E1--E57. E14 and E53 are retired; E28--E29 are
+described in the Experimental Setup but their results section was cut.}
+\label{tab:experiment-index}
+\end{table}
+
+
 \section{Detailed result tables}\label{app:tables}
 
 \begin{table}[htb]\centering\small

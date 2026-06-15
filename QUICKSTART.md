@@ -17,10 +17,12 @@ included layer.
 openworld build "a support-ticket queue you can paste a ticket into" --name intake
 ```
 
-This scaffolds `build/intake.py` + `build/BUILD.md` and opens an interactive
-**Claude Code** session in tmux that authors and verifies the world, then writes
-`specs/intake.json`. (No tmux/claude? It prints the scaffold + the exact prompt to
-run manually.) The result is a portable [world spec](openworld/spec.py): state,
+This scaffolds `build/intake.py` + `build/BUILD.md` and has **Claude Code** author
+and verify the world, then write `specs/intake.json`. If `tmux` is installed it
+runs in an interactive, attachable pane (`tmux attach -t ow-build-intake`);
+otherwise it drives Claude Code **headlessly** (`claude -p`) — no tmux required.
+(No `claude` CLI at all? It prints the scaffold + the exact prompt to run
+manually.) The result is a portable [world spec](openworld/spec.py): state,
 actions, rules, verified dynamics, and — for input — a `CodePerceptor` and an
 `emit` report.
 

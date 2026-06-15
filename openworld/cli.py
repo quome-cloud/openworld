@@ -32,19 +32,36 @@ console = Console()
 # wordmark + tagline, echoing assets/logo.svg.
 _B, _O, _T, _INK = "#1d4ed8", "#b45309", "#0f766e", "bold #16202e"
 
+# Wide-terminal figlet wordmark (ANSI Shadow), drawn with a blue->teal gradient.
+_FIGLET = r"""
+ ██████╗ ██████╗ ███████╗███╗   ██╗██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗
+██╔═══██╗██╔══██╗██╔════╝████╗  ██║██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗
+██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║
+██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
+╚██████╔╝██║     ███████╗██║ ╚████║╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
+ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝
+""".strip("\n").splitlines()
+_GRADIENT = ["#1d4ed8", "#2160c4", "#1f73ad", "#168a90", "#12807a", "#0f766e"]
+
 
 def _banner() -> None:
-    L = [
-        f"  [{_B}]┌───────┐[/]",
-        f"  [{_B}]│[/] [{_O}]┌───┐[/] [{_B}]│[/]   [{_INK}]OpenWorld[/]",
-        f"  [{_B}]│[/] [{_O}]│[/] [{_T}]▪[/] [{_O}]│[/] [{_B}]│[/]   "
-        f"[dim]verified symbolic world models[/]",
-        f"  [{_B}]│[/] [{_O}]└───┘[/] [{_B}]│[/]   [{_B}]build · optimize · deploy[/]",
-        f"  [{_B}]└───────┘[/]",
-    ]
     console.print()
-    for line in L:
-        console.print(line, highlight=False)
+    fw = max(len(line) for line in _FIGLET)
+    if console.size.width >= fw + 4:                       # wide terminal: figlet
+        for line, col in zip(_FIGLET, _GRADIENT):
+            console.print(f"[{col}]{line}[/]", highlight=False)
+        console.print(f"      [dim]verified symbolic world models[/]    "
+                      f"[{_B}]build · optimize · deploy[/]", highlight=False)
+    else:                                                  # narrow: compact mark
+        for line in (
+            f"  [{_B}]┌───────┐[/]",
+            f"  [{_B}]│[/] [{_O}]┌───┐[/] [{_B}]│[/]   [{_INK}]OpenWorld[/]",
+            f"  [{_B}]│[/] [{_O}]│[/] [{_T}]▪[/] [{_O}]│[/] [{_B}]│[/]   "
+            f"[dim]verified symbolic world models[/]",
+            f"  [{_B}]│[/] [{_O}]└───┘[/] [{_B}]│[/]   [{_B}]build · optimize · deploy[/]",
+            f"  [{_B}]└───────┘[/]",
+        ):
+            console.print(line, highlight=False)
     console.print()
 
 

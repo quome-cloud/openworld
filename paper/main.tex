@@ -141,10 +141,14 @@
 {\centering\large\bfseries Abstract\par}
 \smallskip
 \fontsize{9.5}{11.3}\selectfont
-World models built on learned neural latent dynamics achieve striking results but
-remain data-hungry, stochastic, and opaque, and their values are frozen into
-weights. Code World Models promise an alternative---environment dynamics as
-executable, verifiable programs---but no lightweight framework has existed for
+World models built on learned neural latent dynamics---including the pixel, video,
+and 3D ``spatial-intelligence'' generators that now dominate the term---achieve
+striking results but remain data-hungry, stochastic, and opaque, and their values
+are frozen into weights. We study a different, complementary species: \emph{symbolic}
+world models whose dynamics are executable, verifiable \emph{code} over a typed
+symbolic state (not pixels or latents). Code World Models promise this alternative%
+---environment dynamics as executable, verifiable programs---but no lightweight
+framework has existed for
 building, steering, and optimizing such models on local hardware. We present
 \textbf{\openworld}, a zero-dependency Python framework in which a local LLM
 plans, writes, and \emph{verifies} the executable dynamics of a declared world;
@@ -210,26 +214,53 @@ value alignment; agents-as-a-judge; local LLMs.
 
 % ============================================================================
 \section{Introduction}
-A world model is an agent's internal simulator: a mechanism that predicts how
-the environment evolves under action, enabling planning ``in imagination''
-rather than by trial in the world~\cite{ha2018world}. The dominant research
-line learns this simulator as a neural network over latent states---from the
-V--M--C triad of Ha and Schmidhuber~\cite{ha2018world} through the RSSM-based
-Dreamer family~\cite{dreamerv3}, value-equivalent planning in
-MuZero~\cite{muzero}, autoregressive token models such as IRIS~\cite{iris2023}
-and $\Delta$-IRIS~\cite{deltairis2024}, diffusion dynamics in
-DIAMOND~\cite{diamond2024}, and internet-scale generative environments in
-Genie~\cite{genie2024}. These systems share three structural costs: they are
-\emph{data-hungry} (millions of environment steps, or internet-scale video),
-\emph{compounding} (every learned transition adds error that accumulates over
-a rollout), and \emph{opaque} (dynamics and values alike live in continuous
-weights that cannot be inspected, edited, or audited).
+A world model is an agent's internal simulator: given a state and an action, it
+predicts the next state (and/or observation), letting the agent plan ``in
+imagination'' rather than by trial in the world~\cite{ha2018world}. That
+\emph{genus} is shared across the field; research programs diverge on \emph{how the
+model represents state and how it is obtained}, and the term today names two largely
+disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
+generative}: a neural network learned from large amounts of data whose state is a
+continuous latent---or pixels, video, or a 3D scene---and whose output is a
+\emph{generated observation}. It runs from the V--M--C triad of Ha and
+Schmidhuber~\cite{ha2018world} through the RSSM-based Dreamer
+family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
+autoregressive token models such as IRIS~\cite{iris2023} and
+$\Delta$-IRIS~\cite{deltairis2024}, and diffusion dynamics in
+DIAMOND~\cite{diamond2024}; and, most prominently in recent generative AI, to
+interactive generative environments and ``spatial intelligence''---internet-scale
+video and 3D world generators such as Genie~\cite{genie2024}, video-generation-as-%
+simulator (Sora)~\cite{sora2024}, and Fei-Fei Li's World
+Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
+costs: they are \emph{data-hungry} (millions of environment steps, or
+internet-scale video), \emph{compounding} (every learned transition adds error
+that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
+live in continuous weights that cannot be inspected, edited, or audited).
 
-Code World Models (CWMs) invert the bargain: represent dynamics as executable
-programs synthesized by an LLM, gaining verifiability, compute-cheap rollouts,
-and out-of-distribution generalization by construction~\cite{worldcoder2024,
-gifmcts2024, poeworld2025, cwmgames2025}. Yet CWM research has remained a set
-of bespoke systems aimed at particular benchmarks. There has been no general,
+\paragraph{What ``world model'' means in this paper.} Because the term has come to
+connote those generative, pixel- and 3D-native systems, we state our usage plainly.
+We use \emph{world model} in its original, narrower sense---a forward predictor of
+the next \emph{state} for planning---and we restrict the state to a \emph{symbolic}
+object: a typed record of named variables (counts, prices, positions, flags), not
+pixels, latents, or 3D geometry. Our world models are therefore the second species,
+\emph{Code World Models} (CWMs): the transition is an explicit, human-readable
+\emph{program} over that symbolic state, synthesized by an LLM from a declared rule
+set and verified before use, and a rollout returns the next symbolic state
+\emph{exactly} rather than a generated image, with \emph{zero} training data. This
+is the same genus as the perceptual models above (a simulator the agent rolls
+forward) but a different species---and an intentionally complementary one.
+OpenWorld targets domains that can be \emph{specified} symbolically (inventories,
+markets, schedules, negotiations, physics with known equations); it is \emph{not} a
+pixel-native, perceptual, or open-world-3D model and does not generate images,
+video, or scenes. Where the spatial-intelligence systems \emph{learn what cannot be
+told}, OpenWorld \emph{writes down what can be told, and verifies it}; the two are
+better read as adjacent tools than as competitors.
+
+This Code World Model bargain---programs instead of weights---buys verifiability,
+compute-cheap rollouts, and out-of-distribution generalization by
+construction~\cite{worldcoder2024, gifmcts2024, poeworld2025, cwmgames2025}. Yet
+CWM research has remained a set of bespoke systems aimed at particular benchmarks.
+There has been no general,
 lightweight framework that lets a practitioner \emph{declare} a world, have a
 local model write and verify its dynamics, steer behavior through declared
 value weights, and optimize the whole configuration against a goal---the
@@ -339,6 +370,7 @@ MuZero~\cite{muzero} & value-equivalent latent planning & ungrounded states; inc
 IRIS / $\Delta$-IRIS~\cite{iris2023,deltairis2024} & VQ tokens + autoregressive transformer & token budgets; drift over horizon \\
 DIAMOND~\cite{diamond2024} & diffusion dynamics in pixel space & GPU-heavy; no symbolic audit \\
 Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale compute; closed \\
+Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\

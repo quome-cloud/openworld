@@ -1203,6 +1203,166 @@ low-pass; basis mismatches (smooth, speech) reported honestly.}
 \input{tables/denoise}
 \end{table}
 
+\subsubsection{Sheaf consistency: gluing local views into one global world (E53)}\label{sec:sheaf}
+When a world is observed through many partial, overlapping views---sensors,
+agents, sub-worlds each seeing a few variables---the question is whether the local
+views \emph{agree} where they overlap, and if so how to assemble them into one
+global state. This is exactly the question a sheaf answers: local sections glue to
+a global section iff they are consistent on overlaps, and the obstruction to
+gluing is a \v{C}ech cohomology class. We implement the gluing check, the
+obstruction norm, fault localization (which view to blame), and a robust
+majority-glue, then stress them on \SheafSensors{} sensors covering \SheafLocations{}
+locations with overlapping windows (nerve $b_1=\SheafBetti$), sweeping the number
+of corrupted sensors from 0 to 8.
+
+The results (Figure~\ref{fig:sheaf}, Table~\ref{tab:sheaf}) are the clean
+positive a verified structure should give. With consistent views the glue
+reconstructs the global field \emph{exactly} (error $=0$); the obstruction norm is
+zero iff the views are consistent and rises with the number of faults, so it
+\emph{detects} disagreement; a single fault is localized to its source with
+\SheafOneLocalize\% accuracy; and where a naive average of overlapping readings is
+dragged off by corrupted sensors (RMSE \SheafAvgRmse{} at three faults), the
+sheaf's per-location majority recovers the truth (RMSE \SheafMajRmse) as long as
+each location keeps an uncorrupted majority. The sheaf turns ``do my sub-worlds
+compose?'' into a computable invariant rather than a hope.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/sheaf.png}
+\caption{\textbf{Sheaf consistency (E53).} \textbf{A:} at three faults the naive
+average is corrupted while the sheaf majority recovers the true field. \textbf{B:}
+the gluing obstruction is zero iff the local views are consistent. \textbf{C:}
+consensus gluing beats averaging as faults grow. \textbf{D:} a single fault is
+localized to its source.}
+\label{fig:sheaf}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E53 sheaf gluing} across fault counts: detection (obstruction
+$>0$), localization accuracy, and field RMSE of consensus gluing vs.\ naive
+averaging.}
+\label{tab:sheaf}
+\input{tables/sheaf}
+\end{table}
+
+\subsubsection{Abstract interpretation: sound, tight bounds on rollouts (E54)}\label{sec:bounds}
+A verified world model can be run not just on concrete states but on
+\emph{abstract} ones, propagating a whole set of possible states forward at once
+and returning guaranteed bounds on where the world can go. That is abstract
+interpretation. The naive abstraction---intervals---is sound but loses all
+correlation between variables, so bounds blow up under feedback. We add an affine
+(zonotope) domain that carries shared noise symbols, so cancellations like
+$a + (1-a)$ are tracked exactly, and test both on a recurring contractive update
+$x_{t+1}=a\,x_t+(1-a)c+\text{shock}$ with $a$ ranging in $[0.70,0.95]$ each step.
+
+Over a \BoundsHorizon-step horizon (Figure~\ref{fig:bounds},
+Table~\ref{tab:bounds}) the affine bound stays tight---width \BoundsAffineWidth{}
+against the true reachable width \BoundsTrueWidth---while the interval bound
+explodes to \BoundsIntervalWidth{} by losing the $a/(1-a)$ correlation. Both
+abstract methods are \emph{sound} (they always enclose the truth); a Monte-Carlo
+envelope of the same system is tighter but \emph{unsound}, missing the true
+maximum by up to \BoundsMcMiss{} units---the failure mode that matters when the
+bound is a safety guarantee. Abstract interpretation gives the world model a
+``worst-case rollout'' it can actually certify.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/bounds.png}
+\caption{\textbf{Abstract interpretation (E54).} \textbf{A:} bound width vs.\
+horizon---affine tracks the true reachable set; intervals explode; Monte Carlo is
+tight but unsound. \textbf{B:} the sound domains always enclose the truth, while
+Monte Carlo under-covers the high end.}
+\label{fig:bounds}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E54 reachable-set bounds} by horizon: true width vs.\ affine and
+interval bound widths, and the amount by which an unsound Monte-Carlo envelope
+misses the truth.}
+\label{tab:bounds}
+\input{tables/bounds}
+\end{table}
+
+\subsubsection{Information geometry: identify the world by maximizing information (E55)}\label{sec:infogeom}
+When the true world is one of $K$ candidates and each probe yields a noisy,
+world-dependent outcome, the right next experiment is the one whose outcome
+carries the most information about which world is true---the expected information
+gain (mutual information between outcome and world identity under the current
+posterior), the information-geometric / optimal-experiment criterion. This
+sharpens the active-induction story (\S\ref{sec:active-induction}) and the
+many-worlds posterior (\S\ref{sec:many-worlds}): choose probes by information,
+update by Bayes. We compare it to random probing and to the count-based
+version-space heuristic on \InfoGeomWorlds{} candidate worlds and \InfoGeomProbes{}
+probes.
+
+Expected information gain identifies the true world in \InfoGeomEig{} probes on
+average, against \InfoGeomHeuristic{} for the version-space heuristic and
+\InfoGeomRandom{} for random probing (Figure~\ref{fig:infogeom},
+Table~\ref{tab:infogeom}), at essentially perfect accuracy. The reason is
+adaptivity: as the posterior concentrates, the criterion stops re-confirming what
+is already known and picks probes that separate the worlds still in
+contention---something the probability-blind count heuristic cannot do.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/infogeom.png}
+\caption{\textbf{Information geometry (E55).} \textbf{A:} posterior entropy
+collapses fastest under expected-information-gain probing. \textbf{B:} mean probes
+to identify the world---information-guided $<$ heuristic $<$ random.}
+\label{fig:infogeom}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E55 world identification}: mean probes to identify and final
+accuracy for expected-information-gain, version-space, and random probing.}
+\label{tab:infogeom}
+\input{tables/infogeom}
+\end{table}
+
+\subsubsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
+Comparing a world's output distribution to data is usually done with KL
+divergence, but KL breaks exactly when it matters: under a regime shift the new
+distribution moves off the old one, supports stop overlapping, and KL saturates to
+an uninformative plateau (or diverges)---it cannot say \emph{how far} the world
+drifted, only that it did. The Wasserstein (earth-mover) distance instead measures
+how far probability mass must move, so it stays finite, scales with the size of
+the shift, and gives a usable gradient even across disjoint supports. We use the
+closed-form 1-D Wasserstein (the $L_1$ distance between quantile functions) for
+scalar world outputs.
+
+On a four-regime stream the consecutive-window Wasserstein distance spikes at
+each shift and localizes both true change-points (\TransportTrueShifts{}) exactly
+(Figure~\ref{fig:transport}, Table~\ref{tab:transport}). The sharper result is
+calibration: fitting a world's mean to data from a cold start whose support does
+not overlap the target ($\mu^*=8$), minimizing Wasserstein recovers
+$\hat\mu=\TransportMuHat$ because the objective slopes toward the target
+everywhere (far-region relative slope \TransportWSlope), whereas the KL objective
+is flat there (slope \TransportKlSlope)---no descent direction at all. Optimal
+transport is the distance that lets a world model be \emph{calibrated and
+monitored} across the very shifts where KL goes blind.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/transport.png}
+\caption{\textbf{Optimal transport (E56).} \textbf{A:} consecutive-window
+Wasserstein distance spikes at and localizes each regime shift. \textbf{B:} as a
+calibration objective Wasserstein descends toward the target from a cold start
+while the KL objective is flat (saturated) on non-overlapping supports.}
+\label{fig:transport}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E56 transport vs.\ KL}: localized regime shifts, the recovered
+target mean, and the far-region objective slope (gradient) for Wasserstein vs.\
+KL.}
+\label{tab:transport}
+\input{tables/transport}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

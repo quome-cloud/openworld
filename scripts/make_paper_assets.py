@@ -35,7 +35,8 @@ EXPERIMENTS = [
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
-    "e51_startups", "e52_denoise",
+    "e51_startups", "e52_denoise", "e53_sheaf",
+    "e54_bounds", "e55_infogeom", "e56_transport",
 ]
 
 
@@ -762,6 +763,215 @@ def table_denoise(e52):
               f"{e52['edges_delta']['lowpass']:+.1f} & {e52['edges_delta']['tuned_lowpass']:+.1f} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "denoise.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_sheaf(e53):
+    """E53: sheaf consistency. Field recovery, detection, correction vs averaging,
+    and localization across fault counts."""
+    fig, ((a, b), (c, dax)) = plt.subplots(2, 2, figsize=(8.4, 6.4))
+    rows = e53["rows"]
+    nf = [r["n_faults"] for r in rows]
+
+    # A: the field at 3 faults - truth, corrupted average, majority recovery
+    snap = e53["snapshots"]["3"]
+    xs = range(len(snap["truth"]))
+    a.plot(xs, snap["truth"], color="k", lw=1.6, label="true field")
+    a.plot(xs, snap["average"], color=RED, lw=1.2, ls="--", label="naive average (corrupted)")
+    a.plot(xs, snap["majority"], color=BLUE, lw=1.4, label="sheaf majority (recovered)")
+    a.set_xlabel("location"); a.set_ylabel("value")
+    a.set_title("A. Glue the global field (3 faults)", fontsize=9.3, loc="left")
+    a.legend(fontsize=6.8, loc="upper right")
+
+    # B: detection - obstruction norm vs faults
+    b.plot(nf, [r["obstruction"] for r in rows], "-o", color=PURPLE, lw=2, markersize=4)
+    b.set_xlabel("# faulty sensors"); b.set_ylabel("gluing obstruction")
+    b.set_title("B. Detection: obstruction = 0 iff consistent", fontsize=9.3, loc="left")
+
+    # C: correction error - majority vs average
+    c.plot(nf, [r["majority_rmse"] for r in rows], "-o", color=BLUE, lw=2,
+           markersize=4, label="sheaf majority")
+    c.plot(nf, [r["average_rmse"] for r in rows], "--s", color=RED, lw=2,
+           markersize=4, label="naive average")
+    c.set_xlabel("# faulty sensors"); c.set_ylabel("field RMSE")
+    c.set_title("C. Correction: consensus beats averaging", fontsize=9.3, loc="left")
+    c.legend(fontsize=7.5)
+
+    # D: localization accuracy
+    dax.plot(nf, [r["localize_acc"] for r in rows], "-o", color=TEAL, lw=2, markersize=4)
+    dax.set_ylim(0, 1.08); dax.set_xlabel("# faulty sensors")
+    dax.set_ylabel("localization accuracy")
+    dax.set_title("D. Localize the fault to its source", fontsize=9.3, loc="left")
+
+    fig.suptitle("Sheaf consistency: gluing local views into a global world (E53)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(FIGS / "sheaf.png", dpi=200)
+    plt.close(fig)
+
+
+def table_sheaf(e53):
+    lines = ["\\begin{tabular}{rccrr}", "\\toprule",
+             "Faults & Detected & Localize & Majority RMSE & Average RMSE \\\\",
+             "\\midrule"]
+    for r in e53["rows"]:
+        lines.append(f"{r['n_faults']} & {'yes' if r['detected'] else 'no'} & "
+                     f"{r['localize_acc']:.2f} & {r['majority_rmse']:.3f} & "
+                     f"{r['average_rmse']:.3f} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "sheaf.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_bounds(e54):
+    """E54: abstract interpretation. Affine bounds stay tight where intervals
+    explode and Monte Carlo under-covers, across the rollout horizon."""
+    rows = e54["rows"]
+    H = [r["T"] for r in rows]
+    fig, (a, b) = plt.subplots(1, 2, figsize=(8.4, 3.5))
+
+    # A: bound width vs horizon (lower is tighter; affine wins)
+    a.plot(H, [r["interval_width"] for r in rows], "--s", color=RED, lw=2,
+           markersize=4, label="interval (loses correlation)")
+    a.plot(H, [r["affine_width"] for r in rows], "-o", color=BLUE, lw=2,
+           markersize=4, label="affine (tracks correlation)")
+    a.plot(H, [r["mc_width"] for r in rows], ":^", color=SLATE, lw=2,
+           markersize=4, label="Monte Carlo (unsound)")
+    a.plot(H, [r["true_width"] for r in rows], "-", color="k", lw=1.3,
+           label="true reachable width")
+    a.set_xlabel("rollout horizon (steps)"); a.set_ylabel("bound width")
+    a.set_title("A. Affine stays tight; intervals explode", fontsize=9.3, loc="left")
+    a.legend(fontsize=7)
+
+    # B: soundness — sound methods enclose the truth; MC misses the high end
+    a_sound = all(r["affine_sound"] for r in rows)
+    i_sound = all(r["interval_sound"] for r in rows)
+    b.plot(H, [r["mc_misses_hi"] for r in rows], "-^", color=SLATE, lw=2,
+           markersize=4, label="Monte Carlo over-shoot missed")
+    b.axhline(0, color=BLUE, lw=2, label="affine / interval (always enclose)")
+    b.set_xlabel("rollout horizon (steps)")
+    b.set_ylabel("truth outside the bound")
+    b.set_title(f"B. Soundness: affine={'sound' if a_sound else 'UNSOUND'}, "
+                f"MC under-covers", fontsize=9.3, loc="left")
+    b.legend(fontsize=7.5)
+
+    fig.suptitle("Abstract interpretation: sound, tight bounds on world rollouts (E54)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "bounds.png", dpi=200)
+    plt.close(fig)
+
+
+def table_bounds(e54):
+    lines = ["\\begin{tabular}{rrrrr}", "\\toprule",
+             "Horizon & True width & Affine & Interval & MC miss \\\\",
+             "\\midrule"]
+    for r in e54["rows"]:
+        lines.append(f"{r['T']} & {r['true_width']:.1f} & {r['affine_width']:.1f} & "
+                     f"{r['interval_width']:.1f} & {r['mc_misses_hi']:.2f} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "bounds.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_infogeom(e55):
+    """E55: information geometry. Expected-info-gain probing collapses posterior
+    entropy fastest, identifying the world in fewer probes than heuristic/random."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(8.4, 3.5))
+    curves = e55["entropy_curves"]
+    styles = {"eig": (BLUE, "-o", "expected info gain"),
+              "heuristic": (ORANGE, "--s", "version-space heuristic"),
+              "random": (SLATE, ":^", "random probing")}
+
+    # A: posterior entropy collapse
+    for s, (col, ls, lab) in styles.items():
+        y = curves[s]
+        a.plot(range(len(y)), y, ls, color=col, lw=2, markersize=3.5, label=lab)
+    a.set_xlabel("probes"); a.set_ylabel("posterior entropy (bits)")
+    a.set_title("A. Information-guided probes identify faster", fontsize=9.3, loc="left")
+    a.legend(fontsize=7.5)
+
+    # B: mean probes to identify
+    summ = e55["summary"]
+    order = ["eig", "heuristic", "random"]
+    vals = [summ[s]["mean_steps"] for s in order]
+    cols = [styles[s][0] for s in order]
+    bars = b.bar([styles[s][2].replace(" ", "\n") for s in order], vals, color=cols)
+    for bar, v in zip(bars, vals):
+        b.text(bar.get_x() + bar.get_width() / 2, v + 0.1, f"{v:.1f}",
+               ha="center", fontsize=8.5)
+    b.set_ylabel("mean probes to identify")
+    b.set_title(f"B. {e55['n_worlds']} worlds, {e55['n_probes']} probes",
+                fontsize=9.3, loc="left")
+
+    fig.suptitle("Information geometry: identify the world by maximizing information (E55)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "infogeom.png", dpi=200)
+    plt.close(fig)
+
+
+def table_infogeom(e55):
+    lines = ["\\begin{tabular}{lrr}", "\\toprule",
+             "Strategy & Mean probes & Accuracy \\\\", "\\midrule"]
+    names = {"eig": "Expected info gain", "heuristic": "Version-space heuristic",
+             "random": "Random probing"}
+    for s in ["eig", "heuristic", "random"]:
+        r = e55["summary"][s]
+        lines.append(f"{names[s]} & {r['mean_steps']:.2f} & {r['accuracy']:.2f} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "infogeom.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_transport(e56):
+    """E56: optimal transport. Wasserstein localizes regime shifts and gives a
+    usable calibration gradient from a cold start where the KL objective is flat."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(8.4, 3.5))
+
+    # A: drift detection — consecutive-window Wasserstein spikes at each shift
+    centers, wc = e56["centers"], e56["wasserstein_curve"]
+    a.plot(centers, wc, "-", color=BLUE, lw=1.6, label="consecutive-window $W_1$")
+    for i, c in enumerate(e56["true_changes"]):
+        a.axvline(c, color="k", ls=":", lw=1.2,
+                  label="true shift" if i == 0 else None)
+    for i, c in enumerate(e56["detected_changes"]):
+        a.axvline(c, color=RED, ls="--", lw=1.4,
+                  label="detected" if i == 0 else None)
+    a.set_xlabel("time"); a.set_ylabel("Wasserstein distance")
+    a.set_title("A. Drift localized by transport distance", fontsize=9.3, loc="left")
+    a.legend(fontsize=7.5)
+
+    # B: calibration objective — Wasserstein V vs flat/saturated KL
+    cal = e56["calibration"]
+    grid = cal["grid"]
+    a2 = b
+    a2.plot(grid, cal["w_objective"], "-", color=BLUE, lw=2, label="Wasserstein (gradient)")
+    a2.set_xlabel(r"world mean $\mu$"); a2.set_ylabel("Wasserstein to target", color=BLUE)
+    a2.tick_params(axis="y", labelcolor=BLUE)
+    a2.axvline(cal["target_mean"], color="k", ls=":", lw=1.2, label="target $\\mu^*$")
+    a2.axvline(cal["cold_start"], color=SLATE, ls="--", lw=1.2, label="cold start")
+    kax = a2.twinx()
+    kax.plot(grid, cal["kl_objective"], "--", color=RED, lw=2)
+    kax.set_ylabel("KL to target (saturates)", color=RED)
+    kax.tick_params(axis="y", labelcolor=RED)
+    a2.set_title("B. Calibration: KL flat where transport descends", fontsize=9.0, loc="left")
+    a2.legend(fontsize=7, loc="upper center")
+
+    fig.suptitle("Optimal transport: drift detection and calibration where KL fails (E56)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "transport.png", dpi=200)
+    plt.close(fig)
+
+
+def table_transport(e56):
+    cal = e56["calibration"]
+    lines = ["\\begin{tabular}{lr}", "\\toprule", "Quantity & Value \\\\", "\\midrule",
+             f"True regime shifts & {', '.join(map(str, e56['true_changes']))} \\\\",
+             f"Wasserstein localized & {', '.join(map(str, e56['detected_changes']))} \\\\",
+             f"Target mean $\\mu^*$ & {cal['target_mean']:.1f} \\\\",
+             f"Recovered $\\hat\\mu$ (transport) & {cal['wasserstein_mu_hat']:.1f} \\\\",
+             f"Far-region slope (transport) & {cal['w_far_rel_slope']:.3f} \\\\",
+             f"Far-region slope (KL) & {cal['kl_far_rel_slope']:.3f} \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "transport.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_path_integral(e49):
@@ -2019,7 +2229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "51"),
+        macro("NumExperiments", "55"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2509,6 +2719,50 @@ def numbers_tex(d):
         macro("DenoiseTunedMean", f"{e52['tuned_mean']:+.1f}"),
         macro("DenoiseSpeech", f"{e52['speech_gain']:+.1f}"),
     ]
+    # E53 (sheaf consistency)
+    e53 = d["e53_sheaf"]
+    r3 = e53["rows"]
+    one_fault = next(r for r in r3 if r["n_faults"] == 1)
+    three = next(r for r in r3 if r["n_faults"] == 3)
+    lines += [
+        macro("SheafSensors", str(e53["sensors"])),
+        macro("SheafLocations", str(e53["locations"])),
+        macro("SheafBetti", str(e53["nerve_betti1"])),
+        macro("SheafGlueErr", f"{e53['glue_exact_error']:.0e}"),
+        macro("SheafOneLocalize", f"{one_fault['localize_acc'] * 100:.0f}"),
+        macro("SheafMajRmse", f"{three['majority_rmse']:.3f}"),
+        macro("SheafAvgRmse", f"{three['average_rmse']:.3f}"),
+    ]
+    # E54 (abstract interpretation / bounds)
+    e54 = d["e54_bounds"]
+    longest = max(e54["rows"], key=lambda r: r["T"])
+    lines += [
+        macro("BoundsHorizon", str(longest["T"])),
+        macro("BoundsAffineWidth", f"{longest['affine_width']:.1f}"),
+        macro("BoundsIntervalWidth", f"{longest['interval_width']:.1f}"),
+        macro("BoundsTrueWidth", f"{longest['true_width']:.1f}"),
+        macro("BoundsMcMiss", f"{max(r['mc_misses_hi'] for r in e54['rows']):.2f}"),
+    ]
+    # E55 (information geometry)
+    e55 = d["e55_infogeom"]
+    s55 = e55["summary"]
+    lines += [
+        macro("InfoGeomWorlds", str(e55["n_worlds"])),
+        macro("InfoGeomProbes", str(e55["n_probes"])),
+        macro("InfoGeomEig", f"{s55['eig']['mean_steps']:.1f}"),
+        macro("InfoGeomHeuristic", f"{s55['heuristic']['mean_steps']:.1f}"),
+        macro("InfoGeomRandom", f"{s55['random']['mean_steps']:.1f}"),
+    ]
+    # E56 (optimal transport)
+    e56 = d["e56_transport"]
+    c56 = e56["calibration"]
+    lines += [
+        macro("TransportTrueShifts", ", ".join(map(str, e56["true_changes"]))),
+        macro("TransportDetected", ", ".join(map(str, e56["detected_changes"]))),
+        macro("TransportMuHat", f"{c56['wasserstein_mu_hat']:.1f}"),
+        macro("TransportWSlope", f"{c56['w_far_rel_slope']:.3f}"),
+        macro("TransportKlSlope", f"{c56['kl_far_rel_slope']:.3f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2557,6 +2811,14 @@ def main():
     table_startups(data["e51_startups"])
     fig_denoise(data["e52_denoise"])
     table_denoise(data["e52_denoise"])
+    fig_sheaf(data["e53_sheaf"])
+    table_sheaf(data["e53_sheaf"])
+    fig_bounds(data["e54_bounds"])
+    table_bounds(data["e54_bounds"])
+    fig_infogeom(data["e55_infogeom"])
+    table_infogeom(data["e55_infogeom"])
+    fig_transport(data["e56_transport"])
+    table_transport(data["e56_transport"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

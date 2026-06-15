@@ -40,6 +40,9 @@ from .sheaf import (glue, is_consistent, localize_fault, majority_glue,
 from .intervals import Affine, Interval
 from .infogeom import bayes_update, expected_info_gain, fisher_information
 from .transport import kl_hist, wasserstein1
+from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
+                   spec_to_json, to_spec, validate_spec)
+from .card import render_card, render_gallery
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
@@ -122,6 +125,15 @@ __all__ = [
     "fisher_information",
     "kl_hist",
     "wasserstein1",
+    "SPEC_VERSION",
+    "SpecError",
+    "to_spec",
+    "from_spec",
+    "validate_spec",
+    "spec_to_json",
+    "spec_from_json",
+    "render_card",
+    "render_gallery",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

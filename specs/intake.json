@@ -1,0 +1,111 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "intake",
+  "description": "A support-ticket intake: perceive a ticket, work it down, emit a resolution report.",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "perception",
+      "demo",
+      "leaf"
+    ],
+    "lineage": "examples/intake_world.py",
+    "metrics": {},
+    "description": "A support-ticket intake: perceive a ticket, work it down, emit a resolution report."
+  },
+  "state_schema": {
+    "priority": "int",
+    "load": "int",
+    "done": "int"
+  },
+  "initial_state": {
+    "priority": 0,
+    "load": 0,
+    "done": 0
+  },
+  "actions": [
+    "work"
+  ],
+  "rules": [
+    "'work' clears one unit of load and increments done (until load is 0)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] == \"work\" and s[\"load\"] > 0:\n        s[\"load\"] = s[\"load\"] - 1\n        s[\"done\"] = s[\"done\"] + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "priority",
+        "load"
+      ],
+      "schema": {
+        "priority": {
+          "type": "int",
+          "range": [
+            0,
+            9
+          ]
+        },
+        "load": {
+          "type": "int",
+          "range": [
+            0,
+            99
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip(); v = v.strip()\n            if k in ('priority', 'load'):\n                out[k] = int(v) if v.lstrip('-').isdigit() else 0\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "priority",
+        "load",
+        "done"
+      ],
+      "report": "priority {priority}: cleared {done}, {load} remaining"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "clear the queue",
+      "goal": "max done"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "work",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "done 0",
+            "load 0",
+            "priority 0"
+          ],
+          "initial": true
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "work"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

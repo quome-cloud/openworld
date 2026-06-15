@@ -125,6 +125,34 @@ class MockPerceptor(Perceptor):
         return dict(delta)
 
 
+class CodePerceptor(Perceptor):
+    """A perceptor whose extraction is verified Python code, not an LLM.
+
+    The code defines `def perceive(data) -> dict`, run in the same restricted
+    sandbox as transition code (stdlib only, no imports/IO). Because it is plain
+    serializable code, a CodePerceptor round-trips through a spec and runs on a
+    server with no LLM at inference time -- the deterministic, deployable way to
+    turn structured input (e.g. `key: value` text) into a symbolic state delta.
+    Its output is still contract-checked by the PerceptionGate.
+    """
+
+    def __init__(self, code: str, produces: List[str],
+                 schema: Optional[Dict[str, Any]] = None, modality: str = "text",
+                 func_name: str = "perceive"):
+        self.code = code
+        self.produces = list(produces)
+        self.schema = dict(schema or {})
+        self.modality = modality
+        self.func_name = func_name
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        from .sandbox import load_transition_code
+        data = observation.data if isinstance(observation, Observation) else observation
+        func = load_transition_code(self.code, self.func_name)
+        result = func(data)
+        return dict(result) if isinstance(result, dict) else {}
+
+
 _EXTRACT_SYSTEM = (
     "You extract structured fields from input. Reply with ONLY a JSON object "
     "containing exactly the requested fields and nothing else.")

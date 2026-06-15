@@ -11,6 +11,20 @@ requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Jim" }]
 keywords = ["world-models", "ollama", "simulation", "agents", "neuro-symbolic"]
+# Targets Python 3.14 (faster-CPython, security/stdlib hardening; the .python-version
+# pin, CI, and the Docker image all use it). The floor stays at 3.9 because the code is
+# 3.9-compatible and the cached experiment results were generated there -- nothing is
+# lost by keeping installs broad while running on 3.14.
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+]
 # The core library (`import openworld`) is zero-dependency and never imports these.
 # They power the optional serve/CLI layer (openworld.serve / openworld.cli), which
 # deliver the build/optimize/deploy experience out of the box.

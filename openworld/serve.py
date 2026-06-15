@@ -17,6 +17,7 @@ against adversarial code.
 
 from __future__ import annotations
 
+import html
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -419,17 +420,40 @@ def serve_app(specs, allow_code: bool = False,
 
     @app.get("/", response_class=HTMLResponse)
     def index():
-        rows = "".join(
-            f'<li><a href="/worlds/{n}/view">{n}</a> '
-            f'<a href="/worlds/{n}/card.svg">card</a> '
-            f'<a href="/worlds/{n}/spec">spec</a></li>'
-            for n in registry.names())
-        return (f"<!doctype html><meta charset=utf-8><title>{title}</title>"
-                f"<style>body{{font-family:-apple-system,sans-serif;max-width:680px;"
-                f"margin:40px auto}}a{{margin-right:10px}}</style>"
-                f"<h1>{title}</h1><p>{len(registry.names())} worlds · "
-                f"<a href='/docs'>API docs</a> · runnable={allow_code}</p>"
-                f"<ul>{rows}</ul>")
+        badge = ('<span class="badge on">runnable</span>' if allow_code
+                 else '<span class="badge off">read-only</span>')
+        tiles = []
+        for n in registry.names():
+            s = registry.spec(n)
+            kind = "composite" if s.get("composite") else "leaf"
+            tags = "".join(f'<span class="tag">{html.escape(str(t))}</span>'
+                           for t in (s.get("card", {}) or {}).get("tags", [])[:3])
+            tiles.append(
+                f'<div class="tile" onclick="location.href=\'/worlds/{n}/view\'">'
+                f'<div class="thumb"><img src="/worlds/{n}/card.svg" loading="lazy" '
+                f'alt="{html.escape(n)} card"></div>'
+                f'<div class="body"><div><span class="nm">{html.escape(n)}</span>'
+                f'<span class="kind">{kind}</span></div>'
+                f'<div class="tags">{tags}</div>'
+                f'<div class="links">'
+                f'<a class="cta" href="/worlds/{n}/view" onclick="event.stopPropagation()">▸ Open in React Flow</a>'
+                f'<a href="/worlds/{n}/card.svg" onclick="event.stopPropagation()">card</a>'
+                f'<a href="/worlds/{n}/spec" onclick="event.stopPropagation()">spec</a>'
+                f'<a href="/worlds/{n}/metrics" onclick="event.stopPropagation()">metrics</a>'
+                f'</div></div></div>')
+        return (
+            f'<!doctype html><html><head><meta charset="utf-8">'
+            f'<meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<title>{html.escape(title)}</title><style>{_INDEX_CSS}</style></head><body>'
+            f'<div class="wrap"><header class="top"><div class="brand">{_MARK_SVG}'
+            f'<div><div class="kick">OPENWORLD · INFERENCE SERVER</div>'
+            f'<div class="wm">OpenWorld</div></div></div>'
+            f'<div class="meta">{len(registry.names())} worlds {badge}'
+            f'<a href="/docs">API docs</a></div></header>'
+            f'<div class="rule"></div>'
+            f'<div class="grid">{"".join(tiles)}</div>'
+            f'<footer>build · optimize · deploy — verified symbolic world models</footer>'
+            f'</div></body></html>')
 
     @app.get("/worlds/{name}/view", response_class=HTMLResponse)
     def view(name: str):
@@ -437,6 +461,54 @@ def serve_app(specs, allow_code: bool = False,
         return _VIEW_HTML.replace("__NAME__", name).replace("__TITLE__", title)
 
     return app
+
+
+# Brand mark + index stylesheet (the "atlas" look, matching the SVG cards).
+_MARK_SVG = (
+    '<svg width="34" height="34" viewBox="-40 -40 80 80" aria-hidden="true">'
+    '<rect x="-34" y="-34" width="68" height="68" rx="13" fill="#fff" '
+    'stroke="#1d4ed8" stroke-width="4.5"/>'
+    '<rect x="-20" y="-20" width="40" height="40" rx="8" fill="none" '
+    'stroke="#b45309" stroke-width="3.6"/>'
+    '<rect x="-8" y="-8" width="16" height="16" rx="4" fill="#0f766e"/></svg>')
+
+_INDEX_CSS = """
+:root{--bg:#fcfbf8;--bg2:#eef0ec;--ink:#16202e;--muted:#5b6675;--accent:#1d4ed8;
+--accent2:#b45309;--teal:#0f766e;--line:#dde2ea;--card:#fff;--mono:ui-monospace,
+SFMono-Regular,Menlo,Consolas,monospace;--serif:'Iowan Old Style',Palatino,Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);
+background:linear-gradient(180deg,var(--bg),var(--bg2));
+font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1160px;margin:0 auto;padding:34px 22px 60px}
+header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .wm{font-family:var(--serif);font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.kick{font-family:var(--mono);font-size:10.5px;letter-spacing:2.2px;color:var(--accent);font-weight:700}
+.meta{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:13px;
+color:var(--muted);font-family:var(--mono)}
+.meta a{color:var(--accent);text-decoration:none}.meta a:hover{text-decoration:underline}
+.badge{padding:3px 10px;border-radius:999px;font-weight:700;font-size:12px;font-family:var(--mono)}
+.badge.on{background:#e7f6f1;color:var(--teal)}.badge.off{background:#fdeee0;color:var(--accent2)}
+.rule{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent),#0891b2);margin:14px 0 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+cursor:pointer;display:flex;flex-direction:column;transition:transform .1s ease,box-shadow .1s ease}
+.tile:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(22,32,46,.13)}
+.thumb{height:228px;overflow:hidden;background:var(--bg);border-bottom:1px solid var(--line)}
+.thumb img{width:100%;display:block}
+.body{padding:14px 16px 16px}
+.nm{font-family:var(--serif);font-size:19px;font-weight:800}
+.kind{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:8px}
+.tags{margin:9px 0 13px;display:flex;gap:6px;flex-wrap:wrap;min-height:8px}
+.tag{font-size:11px;font-weight:600;background:#eef2fb;color:#1e3a8a;padding:3px 9px;
+border-radius:999px;font-family:var(--mono)}
+.links{display:flex;align-items:center;gap:13px;font-size:12px;font-family:var(--mono)}
+.cta{background:linear-gradient(90deg,var(--accent),#0891b2);color:#fff !important;font-weight:700;
+padding:7px 12px;border-radius:9px;margin-right:auto;text-decoration:none}
+.links a{color:var(--muted);text-decoration:none}.links a:hover{color:var(--accent)}
+footer{margin-top:42px;color:var(--muted);font-size:12px;font-family:var(--mono);text-align:center}
+"""
 
 
 # The interactive React Flow view (input -> traverse -> output, looping).

@@ -1,0 +1,215 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "sprint",
+  "description": "An engineering team working a sprint backlog.",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "engineering",
+      "verified",
+      "leaf"
+    ],
+    "lineage": "E34 sprint world",
+    "metrics": {},
+    "description": "An engineering team working a sprint backlog."
+  },
+  "state_schema": {
+    "backlog": "int",
+    "shipped": "int",
+    "bugs": "int",
+    "debt": "int"
+  },
+  "initial_state": {
+    "backlog": 12,
+    "shipped": 0,
+    "bugs": 0,
+    "debt": 0
+  },
+  "actions": [
+    "ship",
+    "fix",
+    "refactor"
+  ],
+  "rules": [
+    "'ship' (when backlog > 0): backlog -1, shipped +1, debt +1, then bugs increase by debt // 4 (integer division, using the debt value after the +1).",
+    "'fix': bugs decrease by 2, never below 0.",
+    "'refactor': debt decreases by 2, never below 0.",
+    "'noop' and unknown actions change nothing."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "sprint_ground_truth",
+    "code": "def sprint_ground_truth(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if name == \"ship\" and s[\"backlog\"] > 0:\n        s[\"backlog\"] -= 1\n        s[\"shipped\"] += 1\n        s[\"debt\"] += 1\n        s[\"bugs\"] += s[\"debt\"] // 4\n    elif name == \"fix\":\n        s[\"bugs\"] = max(0, s[\"bugs\"] - 2)\n    elif name == \"refactor\":\n        s[\"debt\"] = max(0, s[\"debt\"] - 2)\n    return s\n",
+    "from_function": true
+  },
+  "preview": {
+    "steps": 12,
+    "action": "ship",
+    "series": {
+      "backlog": [
+        12.0,
+        11.0,
+        10.0,
+        9.0,
+        8.0,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0
+      ],
+      "shipped": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "bugs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0,
+        12.0,
+        15.0
+      ],
+      "debt": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "backlog 12",
+            "debt 0",
+            "shipped 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "backlog 11",
+            "debt 1",
+            "shipped 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "backlog 10",
+            "debt 2",
+            "shipped 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "backlog 11",
+            "debt 0",
+            "shipped 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "backlog 9",
+            "debt 3",
+            "shipped 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "backlog 10",
+            "debt 0",
+            "shipped 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "ship"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "fix, refactor"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "ship"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "refactor"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "fix"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "ship"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "refactor"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "fix"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

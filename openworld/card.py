@@ -143,26 +143,30 @@ def _pill(x, y, label, c, fg=None, bg=None, font=12) -> Tuple[str, float]:
 # --------------------------------------------------------------------------- #
 # graph: leaf state-transition automaton / composite dataflow, laid out + drawn
 # --------------------------------------------------------------------------- #
-def _gnode(x, y, w, h, lines, c, kind, initial) -> str:
+def _gnode(x, y, w, h, lines, c, kind, initial, href=None) -> str:
     if kind == "agg":
         fill, stroke, sw = c["node1"], c["agg"], 1.4
     elif kind == "param":
         fill, stroke, sw = c["node1"], c["muted"], 1.2
     else:
         fill = "url(#gnode)"
-        stroke, sw = (c["accent"], 2.0) if initial else (c["line"], 1.2)
+        stroke, sw = (c["accent"], 2.2) if initial else (c["line"], 1.2)
     out = [f'<g filter="url(#sh)"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
-           f'height="{h:.1f}" rx="12" fill="{fill}" stroke="{stroke}" '
+           f'height="{h:.1f}" rx="13" fill="{fill}" stroke="{stroke}" '
            f'stroke-width="{sw}"/></g>']
+    if kind == "world":                               # accent header strip on world nodes
+        out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="5" '
+                   f'rx="2.5" fill="url(#gacc)"/>')
     if initial:
-        out.append(_t(x + 2, y - 6, "▶ start", 9.5, "700", c["accent"]))
-    ty = y + (h - len(lines) * 14) / 2 + 11
+        out.append(_t(x + 2, y - 7, "▶ start", 10, "700", c["accent"]))
+    ty = y + (h - len(lines) * 15) / 2 + 12
     for i, ln in enumerate(lines):
-        size = 12.5 if i == 0 else 10.5
+        size = 13 if i == 0 else 11
         col = c["text"] if i == 0 else c["muted"]
-        out.append(_t(x + w / 2, ty + i * 14, ln, size, "700" if i == 0 else "500",
+        out.append(_t(x + w / 2, ty + i * 15, ln, size, "700" if i == 0 else "500",
                       col, anchor="middle"))
-    return "".join(out)
+    inner = "".join(out)
+    return f'<a href="{_esc(href)}">{inner}</a>' if href else inner
 
 
 def _edge_label(x, y, text, c) -> str:
@@ -174,7 +178,7 @@ def _edge_label(x, y, text, c) -> str:
             + _t(x, y + 3, text, 9.5, "600", c["edge"], anchor="middle"))
 
 
-def _graph_layout(nodes, edges, x, y, w, c) -> Tuple[str, float]:
+def _graph_layout(nodes, edges, x, y, w, c, min_h: float = 210) -> Tuple[str, float]:
     if not nodes:
         return _t(x, y + 30, "no graph", 12, "500", c["muted"]), 70
     ids = [n["id"] for n in nodes]
@@ -202,18 +206,21 @@ def _graph_layout(nodes, edges, x, y, w, c) -> Tuple[str, float]:
 
     maxchars = max((max((len(s) for s in nd[i]["label"]), default=3) for i in ids))
     maxlines = max(len(nd[i]["label"]) for i in ids)
-    nw = max(104.0, min(176.0, maxchars * 6.8 + 26))
-    nh = 20 + maxlines * 15
-    vgap, top_pad, bot_pad = 18, 28, 12
+    nw = max(122.0, min(196.0, maxchars * 7.2 + 30))
+    if L > 1:                                   # guarantee columns never overlap
+        nw = min(nw, (w - (L - 1) * 34) / L)
+    nh = 26 + maxlines * 15
+    vgap, top_pad, bot_pad = 26, 32, 16
     max_count = max(len(v) for v in layers.values())
     Hg = max_count * nh + (max_count - 1) * vgap
+    area_h = max(Hg, min_h)
     colstep = (w - nw) / (L - 1) if L > 1 else 0.0
-    y0 = y + top_pad
+    y0 = y + top_pad + (area_h - Hg) / 2
     pos: Dict[str, Tuple[float, float]] = {}
     for lyr, members in layers.items():
         m = len(members)
         start = y0 + (Hg - (m * nh + (m - 1) * vgap)) / 2
-        cx = x + lyr * colstep
+        cx = x + lyr * colstep if L > 1 else x + (w - nw) / 2
         for j, i in enumerate(members):
             pos[i] = (cx, start + j * (nh + vgap))
 
@@ -263,8 +270,8 @@ def _graph_layout(nodes, edges, x, y, w, c) -> Tuple[str, float]:
     for i in ids:
         nx, ny = pos[i]
         el.append(_gnode(nx, ny, nw, nh, nd[i]["label"], c, nd[i].get("kind", "state"),
-                         nd[i].get("initial", False)))
-    return "".join(el), top_pad + Hg + bot_pad
+                         nd[i].get("initial", False), nd[i].get("href")))
+    return "".join(el), top_pad + area_h + bot_pad
 
 
 def _leaf_graph(spec: Dict[str, Any]):
@@ -281,8 +288,10 @@ def _composite_graph(spec: Dict[str, Any]):
     children = comp.get("children", {})
     nodes, edges = [], []
     for ns, child in children.items():
-        sub = "composite" if child.get("composite") else f'{len(child.get("actions", []))} actions'
-        nodes.append({"id": f"c:{ns}", "label": [ns, sub], "kind": "world", "rank": 1})
+        sub = ("composite world" if child.get("composite")
+               else f'{len(child.get("actions", []))} actions')
+        nodes.append({"id": f"c:{ns}", "label": [ns, sub], "kind": "world", "rank": 1,
+                      "href": f'{child.get("name", ns)}.svg'})
     agg_ids = set()
     for a in comp.get("aggregators", []):
         nm = a.get("name", "agg")
@@ -438,6 +447,26 @@ def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
     return "".join(out), (ly + 8) - y
 
 
+def _details_block(spec, x, y, w, c) -> Tuple[str, float]:
+    out = [_t(x, y + 2, "DETAILS", 11, "700", c["muted"], spacing="1.6")]
+    facts = []
+    nr = len(spec.get("rules", []))
+    facts.append(f"{nr} rule" + ("" if nr == 1 else "s"))
+    comp = spec.get("composite")
+    if comp:
+        facts.append(f'{len(comp.get("children", {}))} child worlds')
+        nb = len(comp.get("bridges", []))
+        facts.append(f"{nb} bridge" + ("" if nb == 1 else "s"))
+        ag = comp.get("agents", {})
+        if ag:
+            facts.append(f'{len(ag)} agents: ' + ", ".join(list(ag)[:3]))
+    gy = y + 20
+    for i, fact in enumerate(facts):
+        out.append(f'<circle cx="{x+4:.1f}" cy="{gy+i*19-4:.1f}" r="2.6" fill="{c["accent"]}"/>')
+        out.append(_t(x + 14, gy + i * 19, fact, 12, "600", c["text"]))
+    return "".join(out), 20 + len(facts) * 19 + 6
+
+
 # --------------------------------------------------------------------------- #
 # public API
 # --------------------------------------------------------------------------- #
@@ -458,25 +487,34 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
     tag_y = dy0 + len(dlines) * 19 + 6
     header_bottom = (tag_y + 26 if tags else dy0 + len(dlines) * 19 + 4)
     div_y = header_bottom + 8
-    body_y = div_y + 26
+    body_y = div_y + 24
 
-    # columns
-    comp_svg, lh = _composition(spec, LX, body_y, COLW, c)
-    ry = body_y
-    parts_r = []
-    for builder in (
-        lambda yy: _schema_block(spec, RX, yy, COLW, c),
-        lambda yy: _chips_block(spec, RX, yy, COLW, c, "ACTIONS",
-                                [a for a in spec.get("actions", [])], 12),
-        lambda yy: _dynamics_badge(spec, RX, yy, c),
-        lambda yy: _rollout_block(spec, RX, yy, COLW, c),
-    ):
-        seg, hh = builder(ry)
-        parts_r.append(seg)
-        ry += hh + 16
-    rh = ry - body_y
-    body_bottom = body_y + max(lh, rh)
-    foot_y = body_bottom + 16
+    # hero graph (full content width) + a faint framing panel behind it
+    comp_svg, lh = _composition(spec, CX, body_y, CW, c)
+    graph_panel = (f'<rect x="{CX}" y="{body_y+14:.1f}" width="{CW}" height="{lh-14:.1f}" '
+                   f'rx="16" fill="{c["node1"]}" fill-opacity="0.5" '
+                   f'stroke="{c["line"]}" stroke-width="1"/>')
+
+    # metadata row beneath: schema | actions+dynamics+details | rollout
+    meta_y = body_y + lh + 16
+    g = 20
+    w1 = 250
+    w2 = 222
+    w3 = CW - w1 - w2 - 2 * g
+    x1, x2, x3 = CX, CX + w1 + g, CX + w1 + w2 + 2 * g
+    s_svg, sh = _schema_block(spec, x1, meta_y, w1, c)
+    mid, my = [], meta_y
+    a_svg, ah = _chips_block(spec, x2, my, w2, c, "ACTIONS",
+                             list(spec.get("actions", [])), 10)
+    mid.append(a_svg); my += ah + 14
+    d_svg, dh = _dynamics_badge(spec, x2, my, c)
+    mid.append(d_svg); my += dh + 10
+    f_svg, fh = _details_block(spec, x2, my, w2, c)
+    mid.append(f_svg); my += fh
+    midh = my - meta_y
+    r_svg, rh = _rollout_block(spec, x3, meta_y, w3, c)
+    meta_bottom = meta_y + max(sh, midh, rh)
+    foot_y = meta_bottom + 16
     H = foot_y + 30
 
     # header content
@@ -520,7 +558,7 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
         + "".join(head) + "".join(badges)
         + f'<line x1="{CX}" y1="{div_y:.1f}" x2="{W-CX}" y2="{div_y:.1f}" '
           f'stroke="{c["line"]}" stroke-width="1"/>'
-        + comp_svg + "".join(parts_r)
+        + graph_panel + comp_svg + s_svg + "".join(mid) + r_svg
         + f'<line x1="{CX}" y1="{foot_y-8:.1f}" x2="{W-CX}" y2="{foot_y-8:.1f}" '
           f'stroke="{c["line"]}" stroke-width="1"/>'
         + _t(CX, foot_y + 12, foot, 11, "500", c["muted"])

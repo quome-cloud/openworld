@@ -1,0 +1,583 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "hospital-network",
+  "description": "Two triage clinics that transfer critical patients to balance load; treated counts roll up to the network.",
+  "card": {
+    "version": "0.9",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "healthcare",
+      "composite",
+      "multi-world"
+    ],
+    "lineage": "composed from triage",
+    "metrics": {},
+    "description": "Two triage clinics that transfer critical patients to balance load; treated counts roll up to the network."
+  },
+  "state_schema": {
+    "north": "dict",
+    "south": "dict",
+    "_agg": "dict"
+  },
+  "initial_state": {
+    "north": {
+      "tick": 0,
+      "critical_waiting": 4,
+      "moderate_waiting": 8,
+      "treated": 0,
+      "deteriorated": 0,
+      "outcomes": 0,
+      "spend": 0
+    },
+    "south": {
+      "tick": 0,
+      "critical_waiting": 4,
+      "moderate_waiting": 8,
+      "treated": 0,
+      "deteriorated": 0,
+      "outcomes": 0,
+      "spend": 0
+    },
+    "_agg": {
+      "total_treated": 0
+    }
+  },
+  "actions": [
+    "north:treat_critical",
+    "north:treat_moderate",
+    "north:wait",
+    "south:treat_critical",
+    "south:treat_moderate",
+    "south:wait",
+    "tick"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "composite"
+  },
+  "composite": {
+    "children": {
+      "north": {
+        "openworld_spec_version": "1.0",
+        "name": "triage",
+        "description": "An ICU triage queue. Critical and moderate patients wait for treatment; untreated critical patients deteriorate over time.",
+        "card": {
+          "version": "0.1",
+          "license": null,
+          "authors": [],
+          "tags": [],
+          "lineage": null,
+          "metrics": {},
+          "description": "An ICU triage queue. Critical and moderate patients wait for treatment; untreated critical patients deteriorate over time."
+        },
+        "state_schema": {
+          "tick": "int",
+          "critical_waiting": "int",
+          "moderate_waiting": "int",
+          "treated": "int",
+          "deteriorated": "int",
+          "outcomes": "int",
+          "spend": "int"
+        },
+        "initial_state": {
+          "tick": 0,
+          "critical_waiting": 4,
+          "moderate_waiting": 8,
+          "treated": 0,
+          "deteriorated": 0,
+          "outcomes": 0,
+          "spend": 0
+        },
+        "actions": [
+          "treat_critical",
+          "treat_moderate",
+          "wait"
+        ],
+        "rules": [
+          "'treat_critical' treats one waiting critical patient: critical_waiting -1, treated +1, outcomes +3, spend +3.",
+          "'treat_moderate' treats one waiting moderate patient: moderate_waiting -1, treated +1, outcomes +1, spend +1.",
+          "Treating when the matching queue is empty does nothing (besides the clock).",
+          "After EVERY action (including 'wait' and 'noop'), tick increases by 1.",
+          "Whenever the new tick is even and critical patients still wait, one of them deteriorates: critical_waiting -1, deteriorated +1, outcomes -2."
+        ],
+        "transition": {
+          "kind": "code",
+          "func_name": "triage_ground_truth",
+          "code": "def triage_ground_truth(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if name == \"treat_critical\" and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 3\n        s[\"spend\"] += 3\n    elif name == \"treat_moderate\" and s[\"moderate_waiting\"] > 0:\n        s[\"moderate_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 1\n        s[\"spend\"] += 1\n    s[\"tick\"] += 1\n    if s[\"tick\"] % 2 == 0 and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"deteriorated\"] += 1\n        s[\"outcomes\"] -= 2\n    return s\n",
+          "from_function": true
+        },
+        "preview": {
+          "steps": 12,
+          "action": "treat_critical",
+          "series": {
+            "tick": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0,
+              12.0
+            ],
+            "critical_waiting": [
+              4.0,
+              3.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "treated": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0
+            ],
+            "deteriorated": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "outcomes": [
+              0.0,
+              3.0,
+              4.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0
+            ],
+            "spend": [
+              0.0,
+              3.0,
+              6.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0
+            ]
+          },
+          "graph": {
+            "kind": "state",
+            "nodes": [
+              {
+                "id": 0,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": true
+              },
+              {
+                "id": 1,
+                "label": [
+                  "critical_waiting 3",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 2,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 7"
+                ],
+                "initial": false
+              },
+              {
+                "id": 3,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 4,
+                "label": [
+                  "critical_waiting 1",
+                  "deteriorated 1",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 5,
+                "label": [
+                  "critical_waiting 2",
+                  "deteriorated 1",
+                  "moderate_waiting 7"
+                ],
+                "initial": false
+              }
+            ],
+            "edges": [
+              {
+                "src": 0,
+                "dst": 1,
+                "action": "treat_critical"
+              },
+              {
+                "src": 0,
+                "dst": 2,
+                "action": "treat_moderate"
+              },
+              {
+                "src": 0,
+                "dst": 3,
+                "action": "wait"
+              },
+              {
+                "src": 1,
+                "dst": 4,
+                "action": "treat_critical"
+              },
+              {
+                "src": 1,
+                "dst": 5,
+                "action": "treat_moderate"
+              }
+            ],
+            "truncated": true
+          }
+        }
+      },
+      "south": {
+        "openworld_spec_version": "1.0",
+        "name": "triage",
+        "description": "An ICU triage queue. Critical and moderate patients wait for treatment; untreated critical patients deteriorate over time.",
+        "card": {
+          "version": "0.1",
+          "license": null,
+          "authors": [],
+          "tags": [],
+          "lineage": null,
+          "metrics": {},
+          "description": "An ICU triage queue. Critical and moderate patients wait for treatment; untreated critical patients deteriorate over time."
+        },
+        "state_schema": {
+          "tick": "int",
+          "critical_waiting": "int",
+          "moderate_waiting": "int",
+          "treated": "int",
+          "deteriorated": "int",
+          "outcomes": "int",
+          "spend": "int"
+        },
+        "initial_state": {
+          "tick": 0,
+          "critical_waiting": 4,
+          "moderate_waiting": 8,
+          "treated": 0,
+          "deteriorated": 0,
+          "outcomes": 0,
+          "spend": 0
+        },
+        "actions": [
+          "treat_critical",
+          "treat_moderate",
+          "wait"
+        ],
+        "rules": [
+          "'treat_critical' treats one waiting critical patient: critical_waiting -1, treated +1, outcomes +3, spend +3.",
+          "'treat_moderate' treats one waiting moderate patient: moderate_waiting -1, treated +1, outcomes +1, spend +1.",
+          "Treating when the matching queue is empty does nothing (besides the clock).",
+          "After EVERY action (including 'wait' and 'noop'), tick increases by 1.",
+          "Whenever the new tick is even and critical patients still wait, one of them deteriorates: critical_waiting -1, deteriorated +1, outcomes -2."
+        ],
+        "transition": {
+          "kind": "code",
+          "func_name": "triage_ground_truth",
+          "code": "def triage_ground_truth(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if name == \"treat_critical\" and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 3\n        s[\"spend\"] += 3\n    elif name == \"treat_moderate\" and s[\"moderate_waiting\"] > 0:\n        s[\"moderate_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 1\n        s[\"spend\"] += 1\n    s[\"tick\"] += 1\n    if s[\"tick\"] % 2 == 0 and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"deteriorated\"] += 1\n        s[\"outcomes\"] -= 2\n    return s\n",
+          "from_function": true
+        },
+        "preview": {
+          "steps": 12,
+          "action": "treat_critical",
+          "series": {
+            "tick": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              4.0,
+              5.0,
+              6.0,
+              7.0,
+              8.0,
+              9.0,
+              10.0,
+              11.0,
+              12.0
+            ],
+            "critical_waiting": [
+              4.0,
+              3.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "treated": [
+              0.0,
+              1.0,
+              2.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0,
+              3.0
+            ],
+            "deteriorated": [
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "outcomes": [
+              0.0,
+              3.0,
+              4.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0,
+              7.0
+            ],
+            "spend": [
+              0.0,
+              3.0,
+              6.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0,
+              9.0
+            ]
+          },
+          "graph": {
+            "kind": "state",
+            "nodes": [
+              {
+                "id": 0,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": true
+              },
+              {
+                "id": 1,
+                "label": [
+                  "critical_waiting 3",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 2,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 7"
+                ],
+                "initial": false
+              },
+              {
+                "id": 3,
+                "label": [
+                  "critical_waiting 4",
+                  "deteriorated 0",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 4,
+                "label": [
+                  "critical_waiting 1",
+                  "deteriorated 1",
+                  "moderate_waiting 8"
+                ],
+                "initial": false
+              },
+              {
+                "id": 5,
+                "label": [
+                  "critical_waiting 2",
+                  "deteriorated 1",
+                  "moderate_waiting 7"
+                ],
+                "initial": false
+              }
+            ],
+            "edges": [
+              {
+                "src": 0,
+                "dst": 1,
+                "action": "treat_critical"
+              },
+              {
+                "src": 0,
+                "dst": 2,
+                "action": "treat_moderate"
+              },
+              {
+                "src": 0,
+                "dst": 3,
+                "action": "wait"
+              },
+              {
+                "src": 1,
+                "dst": 4,
+                "action": "treat_critical"
+              },
+              {
+                "src": 1,
+                "dst": 5,
+                "action": "treat_moderate"
+              }
+            ],
+            "truncated": true
+          }
+        }
+      }
+    },
+    "bridges": [
+      {
+        "name": "transfer",
+        "a": "north",
+        "b": "south",
+        "description": "balance critical load north->south",
+        "rules": [],
+        "transition": {
+          "kind": "code",
+          "func_name": "transition",
+          "code": "\ndef transition(state, action):\n    a = dict(state[\"a\"]); b = dict(state[\"b\"])\n    if a[\"critical_waiting\"] > b[\"critical_waiting\"] + 1:\n        a[\"critical_waiting\"] -= 1\n        b[\"critical_waiting\"] += 1\n    return {\"a\": a, \"b\": b}\n"
+        },
+        "kind": "bridge"
+      }
+    ],
+    "aggregators": [
+      {
+        "name": "total_treated",
+        "func_name": "total_treated",
+        "source": "def total_treated(children):\n    return sum(int(c.get(\"treated\", 0)) for c in children.values())\n"
+      }
+    ],
+    "bindings": [],
+    "timescales": {
+      "north": 1,
+      "south": 1
+    },
+    "default_actions": {
+      "north": "treat_critical",
+      "south": "treat_moderate"
+    },
+    "agents": {}
+  },
+  "preview": {
+    "steps": 12,
+    "action": "tick",
+    "series": {
+      "total_treated": [
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        11.0,
+        11.0,
+        11.0,
+        11.0
+      ]
+    },
+    "graph": {}
+  }
+}

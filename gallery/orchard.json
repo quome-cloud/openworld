@@ -1,0 +1,68 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "orchard",
+  "description": "Agents share an orchard with a limited pool of apples.",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "resource",
+      "multi-agent",
+      "leaf"
+    ],
+    "lineage": "E01 orchard world",
+    "metrics": {},
+    "description": "Agents share an orchard with a limited pool of apples."
+  },
+  "state_schema": {
+    "apples": "int",
+    "harvested": "dict"
+  },
+  "initial_state": {
+    "apples": 10,
+    "harvested": {
+      "alice": 0
+    }
+  },
+  "actions": [
+    "pick",
+    "wait"
+  ],
+  "rules": [
+    "'pick' moves one apple from the orchard to the acting agent's count in 'harvested' (use action['agent'] as the key; create it at 0 if missing).",
+    "Picking when no apples remain does nothing.",
+    "'wait' and 'noop' leave the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "orchard_ground_truth",
+    "code": "def orchard_ground_truth(state, action):\n    s = dict(state)\n    s[\"harvested\"] = dict(s[\"harvested\"])\n    agent = action.get(\"agent\")\n    if action[\"name\"] == \"pick\" and s[\"apples\"] > 0 and agent:\n        s[\"apples\"] -= 1\n        s[\"harvested\"][agent] = s[\"harvested\"].get(agent, 0) + 1\n    return s\n",
+    "from_function": true
+  },
+  "preview": {
+    "steps": 12,
+    "action": "pick",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "apples 10"
+          ],
+          "initial": true
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "pick, wait"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Unattended daily forward-test for the E50 trading model (macOS launchd).
+     No machine-specific paths: it runs run_daily.sh via a login shell so $HOME
+     expands at runtime, and run_daily.sh resolves the repo + logs itself.
+     Assumes the repo lives at $HOME/Desktop/openworld — edit the path below if not.
      Install once:
        cp datasets/openworld-market/com.openworld.dailysignal.plist ~/Library/LaunchAgents/
        launchctl load ~/Library/LaunchAgents/com.openworld.dailysignal.plist
@@ -7,7 +10,11 @@
 <plist version="1.0"><dict>
   <key>Label</key><string>com.openworld.dailysignal</string>
   <key>ProgramArguments</key>
-  <array><string>/Users/jim/Desktop/openworld/datasets/openworld-market/run_daily.sh</string></array>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>exec "$HOME/Desktop/openworld/datasets/openworld-market/run_daily.sh"</string>
+  </array>
   <key>StartCalendarInterval</key>
   <array>
     <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
@@ -16,6 +23,4 @@
     <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
     <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
   </array>
-  <key>StandardOutPath</key><string>/Users/jim/Desktop/openworld/datasets/openworld-market/daily.log</string>
-  <key>StandardErrorPath</key><string>/Users/jim/Desktop/openworld/datasets/openworld-market/daily.log</string>
 </dict></plist>

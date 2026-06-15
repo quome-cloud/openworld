@@ -7,7 +7,7 @@
 **Build, optimize, and deploy *verified symbolic world models* — simulated environments whose dynamics are explicit, auditable Python code instead of opaque neural weights.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-1d4ed8.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-1d4ed8.svg)](https://www.python.org/)
+[![Python 3.14](https://img.shields.io/badge/python-3.14-1d4ed8.svg)](https://www.python.org/)
 [![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
 [![Tests: 263 passing](https://img.shields.io/badge/tests-263%20passing-brightgreen.svg)](#-reproducibility--testing)
 [![Experiments: 56](https://img.shields.io/badge/experiments-56-b45309.svg)](#-empirical-baselines)
@@ -99,13 +99,16 @@ data; the strongest of 9 learned families reaches ~0.20.</sub>
 
 ## 🚀 Install
 
-> **Note:** Source install for now (not yet on PyPI). The **core** (`import openworld`)
-> is zero-dependency; the `openworld` CLI + server add `fastapi` / `uvicorn` / `click`
+> **Note:** Source install for now (not yet on PyPI). **Python 3.14 is recommended**
+> (faster-CPython + security/stdlib hardening; a `.python-version` pin selects it under
+> pyenv), though the code runs on 3.9+. The **core** (`import openworld`) is
+> zero-dependency; the `openworld` CLI + server add `fastapi` / `uvicorn` / `click`
 > / `rich`.
 
 ```bash
 git clone https://github.com/quome-cloud/openworld.git
 cd openworld
+pyenv install 3.14.6 && pyenv local 3.14.6   # optional: pin the recommended Python
 pip install -e .                 # core + CLI/server
 pip install -e ".[dev]"          # + test tooling
 ```
@@ -162,6 +165,34 @@ openworld serve specs/ --allow-code            # → http://127.0.0.1:8080
 
 Open `http://127.0.0.1:8080/worlds/thermostat/view`, step the world, and watch the
 graph update.
+
+---
+
+## 🐳 Deploy with Docker
+
+The repo ships a `Dockerfile` (Python 3.14, non-root, healthchecked) that runs the
+inference server with the bundled specs out of the box:
+
+```bash
+docker build -t openworld .
+docker run --rm -p 8080:8080 openworld                       # serves the bundled specs/
+```
+
+Then open `http://localhost:8080/` (interactive `/view` per world, `/docs` for the API).
+Serve your own specs by mounting a directory over `/app/specs`:
+
+```bash
+docker run --rm -p 8080:8080 -v "$PWD/specs:/app/specs" openworld
+```
+
+The image installs only the core + serve/CLI layer (FastAPI / Uvicorn / Click / Rich);
+override the default command to run any CLI subcommand, e.g.:
+
+```bash
+docker run --rm openworld ls /app/specs
+docker run --rm -p 9000:9000 -v "$PWD/specs:/app/specs" \
+  openworld serve /app/specs --host 0.0.0.0 --port 9000 --allow-code --no-open
+```
 
 ---
 

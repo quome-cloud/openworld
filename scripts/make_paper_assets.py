@@ -49,6 +49,23 @@ def pct(x):
     return f"{100 * x:.0f}\\%"
 
 
+def repo_metrics():
+    """Count the live codebase so the Implementation paragraph can't drift.
+    Core = openworld/*.py minus the serve/CLI layer (serve, cli, _tmux), which is
+    the only place third-party deps (fastapi/uvicorn/click/rich) are allowed."""
+    pkg = ROOT / "openworld"
+    serve_layer = {"serve.py", "cli.py", "_tmux.py"}
+    core = [p for p in sorted(pkg.glob("*.py")) if p.name not in serve_layer]
+    core_loc = sum(len(p.read_text().splitlines()) for p in core)
+    tests = sorted((ROOT / "tests").glob("test_*.py"))
+    test_fns = sum(t.read_text().count("def test_") for t in tests)
+    return {
+        "core_modules": len(core),
+        "core_loc": core_loc,
+        "test_functions": test_fns,
+    }
+
+
 def ci_str(ci):
     return f"[{ci[0]:.2f}, {ci[1]:.2f}]"
 
@@ -2196,6 +2213,7 @@ def numbers_tex(d):
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
 
+    _rm = repo_metrics()
     speed_ratio = (speed["code_transition"]["steps_per_second"]
                    / speed["llm_transition"]["steps_per_second"])
     lines = [
@@ -2230,9 +2248,14 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "59"),
+        macro("NumExperiments", str(len(EXPERIMENTS))),
+        # Codebase metrics, counted from the live repo (see repo_metrics()).
+        macro("LibModules", str(_rm["core_modules"])),
+        macro("LibLOC", f"{_rm['core_loc']:,}".replace(",", "{,}")),
+        macro("LibTests", str(_rm["test_functions"])),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
+        macro("MultiWorldRollouts", str(code_total["n"])),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
         macro("MultiLLMExact", f"{llm_total['exact_rollouts']}/{llm_total['n']}"),
         macro("MultiLLMCI", ci_str(llm_total["ci"])),
@@ -2281,7 +2304,13 @@ def numbers_tex(d):
     pooled = e17["pooled"]
     pm = pooled["mcnemar_judge_vs_random"]
     pb = pooled["position_bias"]
+    nr = e17["new_rounds_stats"]            # the independent replication seeds alone
+    nrm = nr["mcnemar_judge_vs_random"]
     lines += [
+        macro("NewRounds", str(nr["n_rounds"])),
+        macro("NewJudge", pct(nr["strategies"]["judge"]["rate"])),
+        macro("NewRandom", pct(nr["strategies"]["random"]["rate"])),
+        macro("NewMcNemarP", f"{nrm['p']:.3f}"),
         macro("PooledRounds", str(pooled["n_rounds"])),
         macro("PooledFirst", pct(pooled["strategies"]["first"]["rate"])),
         macro("PooledRandom", pct(pooled["strategies"]["random"]["rate"])),
@@ -2794,7 +2823,8 @@ def numbers_tex(d):
     # E60 (the perceive -> world -> emit -> act boundary)
     e60 = d["e60_io_boundary"]
     lines += [
-        macro("IOSem", f"{e60['routing']['semantic'] * 100:.0f}"),
+        macro("IOReca", f"{e60['routing']['trigram'] * 100:.0f}"),
+        macro("IOJac", f"{e60['routing']['jaccard'] * 100:.0f}"),
         macro("IOExact", f"{e60['routing']['exact_key'] * 100:.0f}"),
         macro("IORes", f"{e60['resolution_rate'] * 100:.0f}"),
         macro("IOTickets", str(e60["n_tickets"])),
@@ -2950,17 +2980,20 @@ def table_brain_arch(e59):
 
 
 def fig_io_boundary(e60):
-    """E60: the perceive -> world -> emit -> act boundary. Semantic recall routes
-    paraphrased tickets where exact-key fails; the assembled world acts via real
-    tool calls; contract gates reject every malformed input/output."""
+    """E60: the perceive -> world -> emit -> act boundary. Content-addressable recall
+    routes realistic paraphrased tickets, beating a fair lexical baseline and naive
+    exact-key lookup; the assembled world acts via real tool calls; contract gates
+    reject every malformed input/output."""
     fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.5))
 
-    labels = ["exact-key\nrecall", "semantic\nrecall", "end-to-end\nresolution"]
-    vals = [e60["routing"]["exact_key"], e60["routing"]["semantic"], e60["resolution_rate"]]
-    cols = [SLATE, TEAL, BLUE]
-    a.bar(range(3), vals, color=cols)
-    a.set_xticks(range(3)); a.set_xticklabels(labels, fontsize=8)
-    a.set_ylabel("accuracy"); a.set_ylim(0, 1.12)
+    labels = ["exact-key\nlookup", "token-overlap\n(Jaccard)", "content-addr.\n(MemoryStore)",
+              "end-to-end\nresolution"]
+    vals = [e60["routing"]["exact_key"], e60["routing"]["jaccard"],
+            e60["routing"]["trigram"], e60["resolution_rate"]]
+    cols = [SLATE, ORANGE, TEAL, BLUE]
+    a.bar(range(len(vals)), vals, color=cols)
+    a.set_xticks(range(len(vals))); a.set_xticklabels(labels, fontsize=7.6)
+    a.set_ylabel("routing accuracy"); a.set_ylim(0, 1.12)
     for i, v in enumerate(vals):
         a.text(i, v + 0.02, f"{v:.2f}", ha="center", fontsize=8.5)
     a.set_title(f"A. Routing & acting ({e60['n_tickets']} paraphrased tickets)",

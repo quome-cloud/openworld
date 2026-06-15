@@ -34,13 +34,10 @@ from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
 from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
-from .wavelets import denoise as wavelet_denoise
-from .wavelets import dwt, idwt, sparsity
-from .sheaf import (glue, is_consistent, localize_fault, majority_glue,
-                    obstruction_norm)
 from .intervals import Affine, Interval
-from .infogeom import bayes_update, expected_info_gain, fisher_information
-from .transport import kl_hist, wasserstein1
+# numpy-backed extras (wavelets/sheaf/infogeom/transport) are imported lazily via
+# the module __getattr__ below, so `import openworld` stays stdlib-only. They pull
+# numpy only when one of their names is first accessed (see _LAZY_NUMPY).
 from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
                    spec_to_json, to_mermaid, to_spec, validate_spec)
 from .card import render_card, render_gallery, to_reactflow
@@ -188,4 +185,55 @@ __all__ = [
     "WorldState",
     "sweep",
     "synthesize_transition",
+    # numpy-backed extras (lazy; see _LAZY_NUMPY)
+    "wavelet_denoise",
+    "dwt",
+    "idwt",
+    "sparsity",
+    "glue",
+    "is_consistent",
+    "localize_fault",
+    "majority_glue",
+    "obstruction_norm",
+    "bayes_update",
+    "expected_info_gain",
+    "fisher_information",
+    "kl_hist",
+    "wasserstein1",
 ]
+
+# Names backed by numpy. Kept out of the eager import path so that
+# `import openworld` pulls only the stdlib (the zero-dependency core contract).
+# Each maps a public name to (submodule, attribute); numpy is imported the first
+# time one is accessed, and a clear ImportError surfaces if numpy is absent.
+_LAZY_NUMPY = {
+    "wavelet_denoise": ("wavelets", "denoise"),
+    "dwt": ("wavelets", "dwt"),
+    "idwt": ("wavelets", "idwt"),
+    "sparsity": ("wavelets", "sparsity"),
+    "glue": ("sheaf", "glue"),
+    "is_consistent": ("sheaf", "is_consistent"),
+    "localize_fault": ("sheaf", "localize_fault"),
+    "majority_glue": ("sheaf", "majority_glue"),
+    "obstruction_norm": ("sheaf", "obstruction_norm"),
+    "bayes_update": ("infogeom", "bayes_update"),
+    "expected_info_gain": ("infogeom", "expected_info_gain"),
+    "fisher_information": ("infogeom", "fisher_information"),
+    "kl_hist": ("transport", "kl_hist"),
+    "wasserstein1": ("transport", "wasserstein1"),
+}
+
+
+def __getattr__(name):  # PEP 562 module-level lazy attribute access
+    spec = _LAZY_NUMPY.get(name)
+    if spec is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    import importlib
+    mod = importlib.import_module(f".{spec[0]}", __name__)
+    value = getattr(mod, spec[1])
+    globals()[name] = value  # cache so subsequent access skips __getattr__
+    return value
+
+
+def __dir__():
+    return sorted(list(globals()) + list(_LAZY_NUMPY))

@@ -12,7 +12,11 @@
       "leaf"
     ],
     "lineage": "E01 orchard world",
-    "metrics": {},
+    "metrics": {
+      "round-trip": "exact",
+      "reachable states": 1,
+      "spec size": "1.7 KB"
+    },
     "description": "Agents share an orchard with a limited pool of apples."
   },
   "state_schema": {

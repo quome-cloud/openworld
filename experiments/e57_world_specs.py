@@ -17,9 +17,9 @@ Deterministic/offline; standard library only.
 
 from pathlib import Path
 
-from openworld import (Aggregator, Bridge, CodeTransition, CompositeWorld, World,
-                       from_spec, render_card, render_gallery, spec_to_json,
-                       to_spec, validate_spec)
+from openworld import (Aggregator, Bridge, CodeTransition, CompositeWorld,
+                       MockPerceptor, World, from_spec, render_card,
+                       render_gallery, spec_to_json, to_spec, validate_spec)
 from openworld.state import Action
 
 from common import make_oracle_world, save_results
@@ -119,6 +119,23 @@ def hospital_network():
     )
 
 
+def triage_with_perception():
+    """The triage world with a perception boundary: a text perceptor reads queue
+    sizes off a status feed into the symbolic state (perceive -> world)."""
+    w = make_oracle_world("triage")
+    w.perceptors = [MockPerceptor(
+        modality="text",
+        produces=["critical_waiting", "moderate_waiting"],
+        deltas=[{}],
+        schema={"critical_waiting": (int, (0, 20)),
+                "moderate_waiting": (int, (0, 40))})]
+    # the emit (world -> output) side of the loop, and the world's goals
+    w.emit = [{"modality": "alert", "fields": ["critical_waiting", "deteriorated"]}]
+    w.objectives = [{"name": "minimize deterioration", "goal": "min deteriorated"},
+                    {"name": "maximize outcomes", "goal": "max outcomes"}]
+    return w
+
+
 def rollout(world, actions, agent=None):
     states, s = [], world.initial_state.copy()
     for a in actions:
@@ -132,10 +149,10 @@ WORLDS = [
     (lambda: make_oracle_world("sprint"), ["ship", "ship", "fix", "refactor", "ship"],
      None, {"version": "1.0", "license": "MIT", "lineage": "E34 sprint world",
             "tags": ["engineering", "verified", "leaf"]}),
-    (lambda: make_oracle_world("triage"),
+    (triage_with_perception,
      ["treat_critical", "wait", "treat_moderate", "wait", "treat_critical"], None,
      {"version": "1.0", "license": "MIT", "lineage": "E08/E26 triage world",
-      "tags": ["healthcare", "queue", "leaf"]}),
+      "tags": ["healthcare", "queue", "perception"]}),
     (lambda: make_oracle_world("orchard"), ["pick", "pick", "wait", "pick"], "alice",
      {"version": "1.0", "license": "MIT", "lineage": "E01 orchard world",
       "tags": ["resource", "multi-agent", "leaf"]}),
@@ -160,6 +177,13 @@ def main():
             exact = rollout(world, actions, agent) == rollout(reloaded, actions, agent)
         except Exception:
             exact = False
+        # marketplace-style eval metrics, derived from the spec itself
+        graph = spec.get("preview", {}).get("graph", {})
+        spec["card"]["metrics"] = {
+            "round-trip": "exact" if exact else "lossy",
+            "reachable states": len(graph.get("nodes", [])) or "—",
+            "spec size": f"{len(spec_to_json(spec)) / 1024:.1f} KB",
+        }
         spec_json = spec_to_json(spec)
         (GALLERY / f"{spec['name']}.json").write_text(spec_json, encoding="utf-8")
         render_card(spec, path=GALLERY / f"{spec['name']}.svg")

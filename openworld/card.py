@@ -168,19 +168,30 @@ def _pill(x, y, label, c, fg=None, bg=None, font=12) -> Tuple[str, float]:
 # graph: leaf state-transition automaton / composite dataflow, laid out + drawn
 # --------------------------------------------------------------------------- #
 def _gnode(x, y, w, h, lines, c, kind, initial, href=None) -> str:
+    dash = ""
     if kind == "agg":
         fill, stroke, sw = c["node1"], c["agg"], 1.4
     elif kind == "param":
         fill, stroke, sw = c["node1"], c["muted"], 1.2
+    elif kind == "perceptor":
+        fill, stroke, sw = c["node1"], c["accent2"], 1.5
+        dash = ' stroke-dasharray="5 3"'
+    elif kind == "emitter":
+        fill, stroke, sw = c["node1"], c["good"], 1.5
+        dash = ' stroke-dasharray="5 3"'
     else:
         fill = "url(#gnode)"
         stroke, sw = (c["accent"], 2.2) if initial else (c["line"], 1.2)
     out = [f'<g filter="url(#sh)"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
            f'height="{h:.1f}" rx="13" fill="{fill}" stroke="{stroke}" '
-           f'stroke-width="{sw}"/></g>']
+           f'stroke-width="{sw}"{dash}/></g>']
     if kind == "world":                               # accent header strip on world nodes
         out.append(f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="5" '
                    f'rx="2.5" fill="url(#gacc)"/>')
+    if kind == "perceptor":
+        out.append(_t(x + 11, y - 7, "⌖ sensor", 9, "700", c["accent2"], family=MONO))
+    if kind == "emitter":
+        out.append(_t(x + 11, y - 7, "▸ output", 9, "700", c["good"], family=MONO))
     if initial:
         out.append(_t(x + 2, y - 7, "▶ start", 10, "700", c["accent"]))
     ty = y + (h - len(lines) * 15) / 2 + 12
@@ -304,6 +315,29 @@ def _leaf_graph(spec: Dict[str, Any]):
               "initial": n.get("initial", False)} for n in g.get("nodes", [])]
     edges = [{"src": e["src"], "dst": e["dst"], "action": e.get("action", "")}
              for e in g.get("edges", [])]
+    # perception boundary: perceptor inputs feed the initial state ("perceive")
+    perc = spec.get("perception", [])
+    if perc and nodes:
+        init = next((n["id"] for n in g.get("nodes", []) if n.get("initial")),
+                    nodes[0]["id"])
+        for i, p in enumerate(perc):
+            produces = ", ".join(p.get("produces", [])[:3]) or "perceive"
+            nodes.append({"id": f"perc{i}", "kind": "perceptor", "initial": False,
+                          "label": [p.get("modality", "text"), produces]})
+            edges.append({"src": f"perc{i}", "dst": init, "action": "perceive",
+                          "style": "dash"})
+    # emit boundary: a terminal state emits outputs ("emit")
+    em = spec.get("emit", [])
+    state_ids = [n["id"] for n in nodes if n.get("kind") == "state"]
+    if em and state_ids:
+        srcs = {e["src"] for e in edges}
+        sink = next((i for i in state_ids if i not in srcs), state_ids[-1])
+        for j, e2 in enumerate(em):
+            fields = ", ".join(e2.get("fields", [])[:3]) or "emit"
+            nodes.append({"id": f"emit{j}", "kind": "emitter", "initial": False,
+                          "label": [e2.get("modality", "data"), fields]})
+            edges.append({"src": sink, "dst": f"emit{j}", "action": "emit",
+                          "style": "dash"})
     return nodes, edges
 
 
@@ -498,26 +532,173 @@ def _fmt_num(v) -> str:
     return f"{v:g}"
 
 
+def _trunc(s, n) -> str:
+    s = str(s)
+    return s if len(s) <= n else s[:n - 1] + "…"
+
+
+def _fmt_val(v) -> str:
+    if v is None:
+        return ""
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return f"{v:g}"
+    if isinstance(v, str):
+        return '"' + _trunc(v, 8) + '"'
+    if isinstance(v, list):
+        return f"[{len(v)}]"
+    if isinstance(v, dict):
+        return "{…}"
+    return ""
+
+
+def _actions_items(spec) -> List[str]:
+    """Action chips for the card. For composites, group namespaced actions by
+    their child prefix (north ▸ 5) so the list stays scannable."""
+    actions = spec.get("actions", [])
+    if not spec.get("composite"):
+        return actions
+    groups: Dict[str, int] = {}
+    singles: List[str] = []
+    for a in actions:
+        if ":" in a:
+            g = a.split(":", 1)[0]
+            groups[g] = groups.get(g, 0) + 1
+        else:
+            singles.append(a)
+    return [f"{g} ▸ {n}" for g, n in groups.items()] + singles
+
+
+def _schema_row(out, x, ry, w, idx, name, mid, tag, c, tagcol):
+    if idx % 2 == 0:                                       # zebra row tint
+        out.append(f'<rect x="{x-4:.1f}" y="{ry-3:.1f}" width="{w+8:.1f}" '
+                   f'height="24" rx="6" fill="{c["accent"]}" fill-opacity="0.035"/>')
+    out.append(_t(x + 4, ry + 13, name, 12, "600", c["text"], family=MONO))
+    tw = len(str(tag)) * 6.7 + 14
+    out.append(f'<rect x="{x+w-tw:.1f}" y="{ry+1:.1f}" width="{tw:.1f}" height="17" '
+               f'rx="5" fill="{c["chipbg"]}"/>')
+    out.append(_t(x + w - tw + 7, ry + 13, tag, 10.5, "700", tagcol, family=MONO))
+    if mid:
+        out.append(_t(x + w - tw - 8, ry + 13, mid, 10.5, "600", c["muted"],
+                      anchor="end", family=MONO))
+
+
 def _schema_block(spec, x, y, w, c) -> Tuple[str, float]:
-    out = [_section(x, y + 9, "STATE SCHEMA", c)]
-    schema = {k: v for k, v in spec.get("state_schema", {}).items()
-              if not k.startswith("_")}
-    items = list(schema.items())[:6]
+    comp = spec.get("composite")
+    title = "SUB-WORLDS" if comp else "STATE SCHEMA"
+    out = [_section(x, y + 9, title, c)]
     ry = y + 26
-    for idx, (k, ty) in enumerate(items):
-        if idx % 2 == 0:                                  # zebra row tint
-            out.append(f'<rect x="{x-4:.1f}" y="{ry-3:.1f}" width="{w+8:.1f}" '
-                       f'height="24" rx="6" fill="{c["accent"]}" fill-opacity="0.035"/>')
-        out.append(_t(x + 4, ry + 13, k, 12, "600", c["text"], family=MONO))
-        tw = len(str(ty)) * 6.7 + 14
-        out.append(f'<rect x="{x+w-tw:.1f}" y="{ry+1:.1f}" width="{tw:.1f}" height="17" '
-                   f'rx="5" fill="{c["chipbg"]}"/>')
-        out.append(_t(x + w - tw + 7, ry + 13, ty, 10.5, "700", c["accent"], family=MONO))
-        ry += 26
-    if len(schema) > 6:
-        out.append(_t(x + 4, ry + 11, f"+ {len(schema) - 6} more fields", 11, "500",
-                      c["muted"], family=MONO))
+    if comp:
+        items = list(comp.get("children", {}).items())[:6]
+        for idx, (ns, child) in enumerate(items):
+            kind = "composite" if child.get("composite") else "leaf"
+            name = _trunc(child.get("name", ns), 16)
+            _schema_row(out, x, ry, w, idx, ns, name, kind, c, c["accent2"])
+            ry += 26
+        extra = len(comp.get("children", {})) - len(items)
+    else:
+        schema = {k: v for k, v in spec.get("state_schema", {}).items()
+                  if not k.startswith("_")}
+        init = spec.get("initial_state", {})
+        items = list(schema.items())[:6]
+        for idx, (k, ty) in enumerate(items):
+            _schema_row(out, x, ry, w, idx, k, _fmt_val(init.get(k)), ty, c, c["accent"])
+            ry += 26
+        extra = len(schema) - len(items)
+    if extra > 0:
+        out.append(_t(x + 4, ry + 11, f"+ {extra} more", 11, "500", c["muted"],
+                      family=MONO))
         ry += 20
+    return "".join(out), ry - y + 6
+
+
+def _perception_block(spec, x, y, w, c) -> Tuple[str, float]:
+    out = [_section(x, y + 9, "PERCEPTION", c)]
+    perc = spec.get("perception", [])
+    ry = y + 24
+    for p in perc[:4]:
+        mod = p.get("modality", "text")
+        produces = ", ".join(p.get("produces", [])[:4]) or "—"
+        mw = len(mod) * 6.4 + 16
+        out.append(f'<rect x="{x:.1f}" y="{ry:.1f}" width="{mw:.1f}" height="18" rx="5" '
+                   f'fill="{c["chipbg"]}" stroke="{c["accent2"]}" stroke-width="1" '
+                   f'stroke-opacity="0.45" stroke-dasharray="3 2"/>')
+        out.append(_t(x + 8, ry + 13, mod, 10, "700", c["accent2"], family=MONO))
+        out.append(_t(x + mw + 8, ry + 13, "→ " + _trunc(produces, 26), 11, "600",
+                      c["text"], family=MONO))
+        ry += 24
+    return "".join(out), ry - y + 6
+
+
+def _emit_block(spec, x, y, w, c) -> Tuple[str, float]:
+    em = spec.get("emit", [])
+    if not em:
+        return "", 0
+    out = [_section(x, y + 9, "EMIT", c)]
+    ry = y + 24
+    for e in em[:3]:
+        mod = e.get("modality", "data")
+        fields = ", ".join(e.get("fields", [])[:4]) or "—"
+        mw = len(mod) * 6.4 + 16
+        out.append(f'<rect x="{x:.1f}" y="{ry:.1f}" width="{mw:.1f}" height="18" rx="5" '
+                   f'fill="{c["chipbg"]}" stroke="{c["good"]}" stroke-width="1" '
+                   f'stroke-opacity="0.45" stroke-dasharray="3 2"/>')
+        out.append(_t(x + 8, ry + 13, mod, 10, "700", c["good"], family=MONO))
+        out.append(_t(x + mw + 8, ry + 13, "← " + _trunc(fields, 26), 11, "600",
+                      c["text"], family=MONO))
+        ry += 24
+    return "".join(out), ry - y + 6
+
+
+def _objectives_block(spec, x, y, w, c) -> Tuple[str, float]:
+    objs = spec.get("objectives", [])
+    if not objs:
+        return "", 0
+    out = [_section(x, y + 9, "OBJECTIVES", c)]
+    ry = y + 24
+    for o in objs[:4]:
+        nm = o.get("name", "goal")
+        goal = o.get("goal", "")
+        txt = nm + (f" · {goal}" if goal else "")
+        out.append(f'<circle cx="{x+4:.1f}" cy="{ry+8-4:.1f}" r="2.4" fill="{c["accent"]}"/>')
+        out.append(_t(x + 13, ry + 8, _trunc(txt, 30), 11.5, "600", c["text"], family=MONO))
+        ry += 19
+    return "".join(out), ry - y + 6
+
+
+def _metrics_block(spec, x, y, w, c) -> Tuple[str, float]:
+    metrics = (spec.get("card", {}) or {}).get("metrics") or {}
+    if not metrics:
+        return "", 0
+    out = [_section(x, y + 9, "METRICS", c)]
+    ry = y + 24
+    for k, v in list(metrics.items())[:5]:
+        out.append(_t(x + 4, ry + 12, _trunc(k, 20), 11, "600", c["muted"], family=MONO))
+        out.append(_t(x + w, ry + 12, _trunc(str(v), 14), 11.5, "700", c["good"],
+                      anchor="end", family=MONO))
+        out.append(f'<line x1="{x+4:.1f}" y1="{ry+19:.1f}" x2="{x+w:.1f}" y2="{ry+19:.1f}" '
+                   f'stroke="{c["line"]}" stroke-width="1" stroke-dasharray="1 4" opacity="0.7"/>')
+        ry += 22
+    return "".join(out), ry - y + 6
+
+
+def _rules_block(spec, x, y, w, c) -> Tuple[str, float]:
+    rules = spec.get("rules", [])
+    if not rules:
+        return "", 0
+    out = [_section(x, y + 9, "RULES — declared contract", c)]
+    ry = y + 26
+    for i, r in enumerate(rules[:4]):
+        lines = _wrap(r, 118, 2)
+        out.append(_t(x + 4, ry + 11, str(i + 1), 11, "800", c["accent"], family=MONO))
+        for j, ln in enumerate(lines):
+            out.append(_t(x + 22, ry + 11 + j * 15, ln, 11, "500", c["text"]))
+        ry += len(lines) * 15 + 9
+    if len(rules) > 4:
+        out.append(_t(x + 22, ry + 8, f"+ {len(rules) - 4} more rules", 10.5, "500",
+                      c["muted"], family=MONO))
+        ry += 16
     return "".join(out), ry - y + 6
 
 
@@ -568,10 +749,16 @@ def _dynamics_badge(spec, x, y, c) -> Tuple[str, float]:
 
 
 def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
+    preview = spec.get("preview", {}) or {}
     out = [_section(x, y + 9, "SAMPLE ROLLOUT", c)]
-    series = {k: v for k, v in (spec.get("preview", {}) or {}).get("series", {}).items()
+    act = preview.get("action")
+    steps = preview.get("steps")
+    if act:
+        out.append(_t(x + w, y + 9, f"{steps} steps · {act}", 9.5, "600",
+                      c["muted"], anchor="end", family=MONO))
+    series = {k: v for k, v in preview.get("series", {}).items()
               if isinstance(v, list) and len(v) > 1}
-    cy, ch = y + 22, 124
+    cy, ch = y + 22, 130
     out.append(f'<rect x="{x:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{ch}" rx="12" '
                f'fill="{c["node1"]}" stroke="{c["line"]}" stroke-width="1"/>')
     if not series:
@@ -579,6 +766,10 @@ def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
                       c["muted"], anchor="middle", family=MONO))
         return "".join(out), (cy + ch) - y + 6
     pad = 16
+    allv = [v for vals in series.values() for v in vals]
+    out.append(_t(x + 8, cy + 14, _fmt_num(max(allv)), 9, "600", c["muted"], family=MONO))
+    out.append(_t(x + 8, cy + ch - 8, _fmt_num(min(allv)), 9, "600", c["muted"],
+                  family=MONO))
     names = sorted(series, key=lambda k: -(max(series[k]) - min(series[k])))[:4]
     # faint horizontal gridlines
     for f in (0.25, 0.5, 0.75):
@@ -628,22 +819,28 @@ def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
 
 
 def _details_block(spec, x, y, w, c) -> Tuple[str, float]:
-    out = [_section(x, y + 9, "DETAILS", c)]
-    facts = []
-    nr = len(spec.get("rules", []))
-    facts.append(f"{nr} rule" + ("" if nr == 1 else "s"))
     comp = spec.get("composite")
-    if comp:
-        facts.append(f'{len(comp.get("children", {}))} child worlds')
-        nb = len(comp.get("bridges", []))
-        if nb:
-            facts.append(f"{nb} bridge" + ("" if nb == 1 else "s"))
-        na = len(comp.get("aggregators", []))
-        if na:
-            facts.append(f"{na} aggregator" + ("" if na == 1 else "s"))
-        ag = comp.get("agents", {})
-        if ag:
-            facts.append(f'{len(ag)} agents: ' + ", ".join(list(ag)[:3]))
+    if not comp:
+        return "", 0
+    facts = [f'{len(comp.get("children", {}))} child worlds']
+    nb = len(comp.get("bridges", []))
+    if nb:
+        facts.append(f"{nb} bridge" + ("" if nb == 1 else "s"))
+    na = len(comp.get("aggregators", []))
+    if na:
+        facts.append(f"{na} aggregator" + ("" if na == 1 else "s"))
+    nbd = len(comp.get("bindings", []))
+    if nbd:
+        facts.append(f"{nbd} binding" + ("" if nbd == 1 else "s"))
+    ts = comp.get("timescales", {})
+    nonunit = {k: v for k, v in ts.items() if v != 1}
+    if nonunit:
+        facts.append("timescales: " + ", ".join(f"{k}×{v}" for k, v in
+                                                 list(nonunit.items())[:2]))
+    ag = comp.get("agents", {})
+    if ag:
+        facts.append(f'{len(ag)} agents: ' + ", ".join(list(ag)[:3]))
+    out = [_section(x, y + 9, "STRUCTURE", c)]
     gy = y + 24
     for i, fact in enumerate(facts):
         out.append(f'<circle cx="{x+4:.1f}" cy="{gy+i*19-4:.1f}" r="2.4" fill="{c["accent"]}"/>')
@@ -686,19 +883,40 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
     w2 = 222
     w3 = CW - w1 - w2 - 2 * g
     x1, x2, x3 = CX, CX + w1 + g, CX + w1 + w2 + 2 * g
-    s_svg, sh = _schema_block(spec, x1, meta_y, w1, c)
-    mid, my = [], meta_y
-    a_svg, ah = _chips_block(spec, x2, my, w2, c, "ACTIONS",
-                             list(spec.get("actions", [])), 10)
-    mid.append(a_svg); my += ah + 14
-    d_svg, dh = _dynamics_badge(spec, x2, my, c)
-    mid.append(d_svg); my += dh + 10
-    f_svg, fh = _details_block(spec, x2, my, w2, c)
-    mid.append(f_svg); my += fh
-    midh = my - meta_y
-    r_svg, rh = _rollout_block(spec, x3, meta_y, w3, c)
-    meta_bottom = meta_y + max(sh, midh, rh)
-    foot_y = meta_bottom + 16
+    def _stack(blocks):
+        parts, yy = [], meta_y
+        for fn in blocks:
+            seg, hh = fn(yy)
+            if hh > 0:
+                parts.append(seg)
+                yy += hh + 16
+        return "".join(parts), (yy - 16 - meta_y if parts else 0)
+
+    has_perc = bool(spec.get("perception"))
+    left_svg, lh = _stack([
+        lambda yy: _schema_block(spec, x1, yy, w1, c),
+        lambda yy: _perception_block(spec, x1, yy, w1, c) if has_perc else ("", 0),
+        lambda yy: _emit_block(spec, x1, yy, w1, c),
+    ])
+    mid_svg, mh = _stack([
+        lambda yy: _chips_block(spec, x2, yy, w2, c, "ACTIONS", _actions_items(spec), 10),
+        lambda yy: _dynamics_badge(spec, x2, yy, c),
+        lambda yy: _objectives_block(spec, x2, yy, w2, c),
+        lambda yy: _details_block(spec, x2, yy, w2, c),
+    ])
+    right_svg, rhh = _stack([
+        lambda yy: _rollout_block(spec, x3, yy, w3, c),
+        lambda yy: _metrics_block(spec, x3, yy, w3, c),
+    ])
+    meta_bottom = meta_y + max(lh, mh, rhh)
+    rules_svg, rules_h = _rules_block(spec, CX, meta_bottom + 20, CW, c)
+    rules_div = ""
+    after = meta_bottom
+    if rules_h:
+        rules_div = (f'<line x1="{CX}" y1="{meta_bottom+10:.1f}" x2="{W-CX}" '
+                     f'y2="{meta_bottom+10:.1f}" stroke="{c["line"]}" stroke-width="1"/>')
+        after = meta_bottom + 20 + rules_h
+    foot_y = after + 16
     H = foot_y + 30
 
     # header content
@@ -734,6 +952,9 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
     foot = f"openworld_spec_version {spec.get('openworld_spec_version', SPEC_VERSION)}"
     if lineage:
         foot += f"  ·  lineage: {lineage}"
+    authors = card.get("authors") or []
+    if authors:
+        foot += "  ·  by " + ", ".join(authors[:2])
 
     pw, ph = W - 2 * PAD, H - 2 * PAD
     o = PAD + 13
@@ -754,7 +975,8 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
         + ticks + "".join(head) + "".join(badges)
         + f'<line x1="{CX}" y1="{div_y:.1f}" x2="{W-CX}" y2="{div_y:.1f}" '
           f'stroke="{c["line"]}" stroke-width="1"/>'
-        + graph_panel + comp_svg + s_svg + "".join(mid) + r_svg
+        + graph_panel + comp_svg + left_svg + mid_svg + right_svg
+        + rules_div + rules_svg
         + f'<line x1="{CX}" y1="{foot_y-8:.1f}" x2="{W-CX}" y2="{foot_y-8:.1f}" '
           f'stroke="{c["line"]}" stroke-width="1"/>'
         + _t(CX, foot_y + 12, foot, 11, "500", c["muted"])
@@ -839,8 +1061,7 @@ def to_reactflow(world_or_spec: Union[World, Dict[str, Any]]) -> Dict[str, Any]:
     if spec.get("composite"):
         _rf_world(spec, spec["name"], None, 0.0, 0.0, nodes, edges)
         return {"nodes": nodes, "edges": edges, "playground": REACTFLOW_PLAYGROUND}
-    g = (spec.get("preview", {}) or {}).get("graph", {}) or {}
-    gn, ge = g.get("nodes", []), g.get("edges", [])
+    gn, ge = _leaf_graph(spec)        # includes perception/emit boundary nodes
     if not gn:
         return {"nodes": [{"id": "n0", "position": {"x": 0, "y": 0},
                            "type": "input", "data": {"label": spec["name"]}}],

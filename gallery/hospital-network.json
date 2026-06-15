@@ -12,7 +12,11 @@
       "multi-world"
     ],
     "lineage": "composed from triage",
-    "metrics": {},
+    "metrics": {
+      "round-trip": "exact",
+      "reachable states": "\u2014",
+      "spec size": "15.8 KB"
+    },
     "description": "Two triage clinics that transfer critical patients to balance load; treated counts roll up to the network."
   },
   "state_schema": {

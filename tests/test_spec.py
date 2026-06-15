@@ -203,3 +203,43 @@ def test_mermaid_composite_is_dataflow():
     assert "c_shop" in mm and "c_market" in mm
     assert "|restock|" in mm                     # bridge edge
     assert "Σ total_value" in mm                 # aggregator node
+
+
+# --------------------------------------------------------------------------- #
+# perception / emit / objectives / metrics (full-component coverage)
+# --------------------------------------------------------------------------- #
+from openworld import MockPerceptor                                  # noqa: E402
+
+
+def perceiving_world():
+    w = counter_world()
+    w.perceptors = [MockPerceptor(modality="text", produces=["n"], deltas=[{}],
+                                  schema={"n": (int, (0, 99))})]
+    w.emit = [{"modality": "display", "fields": ["n"]}]
+    w.objectives = [{"name": "grow n", "goal": "max n"}]
+    return w
+
+
+def test_perception_emit_objectives_serialized_and_valid():
+    spec = to_spec(perceiving_world(), card={"metrics": {"acc": 1.0}})
+    assert spec["perception"][0] == {"kind": "MockPerceptor", "modality": "text",
+                                     "produces": ["n"],
+                                     "schema": {"n": {"type": "int", "range": [0, 99]}}}
+    assert spec["emit"][0] == {"modality": "display", "fields": ["n"]}
+    assert spec["objectives"][0] == {"name": "grow n", "goal": "max n"}
+    assert spec["card"]["metrics"] == {"acc": 1.0}
+    assert validate_spec(spec) == []
+
+
+def test_validate_rejects_bad_component_types():
+    spec = to_spec(counter_world())
+    spec["perception"] = "not-a-list"
+    spec["card"]["metrics"] = ["bad"]
+    problems = validate_spec(spec)
+    assert any("perception" in p for p in problems)
+    assert any("metrics" in p for p in problems)
+
+
+def test_mermaid_includes_perception_and_emit():
+    mm = to_mermaid(to_spec(perceiving_world()))
+    assert "perceive" in mm and "emit" in mm

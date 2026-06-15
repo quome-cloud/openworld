@@ -9,10 +9,14 @@
     "tags": [
       "healthcare",
       "queue",
-      "leaf"
+      "perception"
     ],
     "lineage": "E08/E26 triage world",
-    "metrics": {},
+    "metrics": {
+      "round-trip": "exact",
+      "reachable states": 6,
+      "spec size": "6.1 KB"
+    },
     "description": "An ICU triage queue. Critical and moderate patients wait for treatment; untreated critical patients deteriorate over time."
   },
   "state_schema": {
@@ -51,6 +55,51 @@
     "code": "def triage_ground_truth(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if name == \"treat_critical\" and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 3\n        s[\"spend\"] += 3\n    elif name == \"treat_moderate\" and s[\"moderate_waiting\"] > 0:\n        s[\"moderate_waiting\"] -= 1\n        s[\"treated\"] += 1\n        s[\"outcomes\"] += 1\n        s[\"spend\"] += 1\n    s[\"tick\"] += 1\n    if s[\"tick\"] % 2 == 0 and s[\"critical_waiting\"] > 0:\n        s[\"critical_waiting\"] -= 1\n        s[\"deteriorated\"] += 1\n        s[\"outcomes\"] -= 2\n    return s\n",
     "from_function": true
   },
+  "perception": [
+    {
+      "kind": "MockPerceptor",
+      "modality": "text",
+      "produces": [
+        "critical_waiting",
+        "moderate_waiting"
+      ],
+      "schema": {
+        "critical_waiting": {
+          "type": "int",
+          "range": [
+            0,
+            20
+          ]
+        },
+        "moderate_waiting": {
+          "type": "int",
+          "range": [
+            0,
+            40
+          ]
+        }
+      }
+    }
+  ],
+  "emit": [
+    {
+      "modality": "alert",
+      "fields": [
+        "critical_waiting",
+        "deteriorated"
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize deterioration",
+      "goal": "min deteriorated"
+    },
+    {
+      "name": "maximize outcomes",
+      "goal": "max outcomes"
+    }
+  ],
   "preview": {
     "steps": 12,
     "action": "treat_critical",

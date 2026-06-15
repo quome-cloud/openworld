@@ -24,6 +24,16 @@ def test_card_has_reactflow_playground_link():
     assert "open in React Flow" in svg
 
 
+def test_card_shows_all_components():
+    from tests.test_spec import perceiving_world
+    spec = to_spec(perceiving_world(), card={"metrics": {"acc": "1.00"}})
+    svg = render_card(spec)
+    assert "PERCEPTION" in svg and "EMIT" in svg            # perceive/emit boundary
+    assert "OBJECTIVES" in svg and "METRICS" in svg
+    assert "RULES" in svg                                   # declared contract text
+    assert "⌖ sensor" in svg and "▸ output" in svg          # boundary nodes in graph
+
+
 def test_reactflow_export_leaf_and_composite():
     rf = to_reactflow(counter_world())
     assert rf["playground"] == "https://play.reactflow.dev"

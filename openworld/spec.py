@@ -372,6 +372,50 @@ def _composite_from_spec(spec: Dict[str, Any], allow_code: bool, llm: Any) -> Co
 # --------------------------------------------------------------------------- #
 # card metadata
 # --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# perception (the perceive -> world boundary)
+# --------------------------------------------------------------------------- #
+def _schema_field_to_spec(v: Any) -> Any:
+    """A perceptor schema value is a type, or a (type, (lo, hi)) range pair."""
+    if isinstance(v, tuple) and v:
+        typ = v[0]
+        out: Dict[str, Any] = {"type": getattr(typ, "__name__", str(typ))}
+        if len(v) > 1 and v[1] is not None:
+            out["range"] = list(v[1])
+        return out
+    return getattr(v, "__name__", str(v))
+
+
+def _perceptor_to_spec(p: Any) -> Dict[str, Any]:
+    return {"kind": type(p).__name__,
+            "modality": getattr(p, "modality", "text"),
+            "produces": list(getattr(p, "produces", [])),
+            "schema": {k: _schema_field_to_spec(v)
+                       for k, v in getattr(p, "schema", {}).items()}}
+
+
+def _emit_to_spec(e: Any) -> Dict[str, Any]:
+    """An emitter (the world -> output boundary): a modality + the state fields it
+    reads out. Accepts a dict or an object with .modality/.fields(/.reads)."""
+    if isinstance(e, dict):
+        return {"modality": e.get("modality", "data"),
+                "fields": list(e.get("fields", []))}
+    return {"modality": getattr(e, "modality", "data"),
+            "fields": list(getattr(e, "fields", None) or getattr(e, "reads", []))}
+
+
+def _objective_to_spec(o: Any) -> Dict[str, Any]:
+    """A goal the world is evaluated against (name + direction + optional weight)."""
+    if isinstance(o, dict):
+        d = {"name": o.get("name"), "goal": o.get("goal") or o.get("direction"),
+             "weight": o.get("weight")}
+    else:
+        d = {"name": getattr(o, "name", None),
+             "goal": getattr(o, "direction", None) or getattr(o, "goal", None),
+             "weight": getattr(o, "weight", None)}
+    return {k: v for k, v in d.items() if v is not None}
+
+
 def _default_card(world: World, card: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     base = {"version": "0.1", "license": None, "authors": [], "tags": [],
             "lineage": None, "metrics": {}, "description": world.description}
@@ -384,8 +428,15 @@ def _default_card(world: World, card: Optional[Dict[str, Any]]) -> Dict[str, Any
 # public API
 # --------------------------------------------------------------------------- #
 def to_spec(world: World, *, card: Optional[Dict[str, Any]] = None,
-            preview_steps: int = 12) -> Dict[str, Any]:
-    """Serialize a world model to a portable JSON-friendly spec dict."""
+            preview_steps: int = 12, perceptors: Optional[list] = None,
+            emit: Optional[list] = None,
+            objectives: Optional[list] = None) -> Dict[str, Any]:
+    """Serialize a world model to a portable JSON-friendly spec dict.
+
+    Perception (the perceive->world boundary) is captured when the world carries
+    perceptors -- either passed as ``perceptors=`` or set on ``world.perceptors``.
+    Each is described by its modality, the state fields it ``produces``, and its
+    typed schema."""
     spec: Dict[str, Any] = {
         "openworld_spec_version": SPEC_VERSION,
         "name": world.name,
@@ -398,6 +449,15 @@ def to_spec(world: World, *, card: Optional[Dict[str, Any]] = None,
         "rules": list(world.rules),
         "transition": _transition_to_spec(world.transition),
     }
+    percs = perceptors if perceptors is not None else getattr(world, "perceptors", None)
+    if percs:
+        spec["perception"] = [_perceptor_to_spec(p) for p in percs]
+    ems = emit if emit is not None else getattr(world, "emit", None)
+    if ems:
+        spec["emit"] = [_emit_to_spec(e) for e in ems]
+    objs = objectives if objectives is not None else getattr(world, "objectives", None)
+    if objs:
+        spec["objectives"] = [_objective_to_spec(o) for o in objs]
     if isinstance(world, CompositeWorld):
         spec["composite"] = _composite_to_spec(world, preview_steps)
     spec["preview"] = _rollout_preview(world, preview_steps)
@@ -452,6 +512,12 @@ def validate_spec(spec: Any) -> List[str]:
             problems.append(f"transition.kind {t.get('kind')!r} not in {sorted(_TRANSITION_KINDS)}")
     elif "transition" in spec:
         problems.append("'transition' must be an object with a 'kind'")
+    for fld in ("perception", "emit", "objectives"):
+        if fld in spec and not isinstance(spec[fld], list):
+            problems.append(f"{fld!r} must be a list")
+    card = spec.get("card")
+    if isinstance(card, dict) and "metrics" in card and not isinstance(card["metrics"], dict):
+        problems.append("card.metrics must be an object")
     comp = spec.get("composite")
     if comp is not None:
         if not isinstance(comp, dict) or "children" not in comp:
@@ -503,10 +569,18 @@ def to_mermaid(spec: Dict[str, Any]) -> str:
 
     g = (spec.get("preview", {}) or {}).get("graph", {}) or {}
     lines = ["flowchart LR"]
-    for n in g.get("nodes", []):
+    gnodes = g.get("nodes", [])
+    init_id = next((n["id"] for n in gnodes if n.get("initial")),
+                   gnodes[0]["id"] if gnodes else None)
+    # perception boundary: sensors -> initial state
+    for i, p in enumerate(spec.get("perception", [])):
+        lab = p.get("modality", "text") + ": " + ", ".join(p.get("produces", []))
+        lines.append(f'  perc{i}[/"{lab}"/]')
+        if init_id is not None:
+            lines.append(f'  perc{i} -. perceive .-> n{init_id}')
+    for n in gnodes:
         label = "<br/>".join(n.get("label", [])) or f's{n["id"]}'
-        tag = "((start))" if n.get("initial") else None
-        if tag:
+        if n.get("initial"):
             lines.append(f'  n{n["id"]}["{label}"]:::start')
         else:
             lines.append(f'  n{n["id"]}["{label}"]')
@@ -514,7 +588,13 @@ def to_mermaid(spec: Dict[str, Any]) -> str:
         act = e.get("action", "")
         mid = f"|{act}|" if act else ""
         lines.append(f'  n{e["src"]} -->{mid} n{e["dst"]}')
-    if any(n.get("initial") for n in g.get("nodes", [])):
+    # emit boundary: initial state -> outputs
+    for i, em in enumerate(spec.get("emit", [])):
+        lab = em.get("modality", "data") + ": " + ", ".join(em.get("fields", []))
+        lines.append(f'  emit{i}[\\"{lab}"/]')
+        if init_id is not None:
+            lines.append(f'  n{init_id} -. emit .-> emit{i}')
+    if any(n.get("initial") for n in gnodes):
         lines.append("  classDef start stroke-width:2px;")
     return "\n".join(lines)
 

@@ -12,7 +12,11 @@
       "world-of-worlds"
     ],
     "lineage": "nation > region > city",
-    "metrics": {},
+    "metrics": {
+      "round-trip": "exact",
+      "reachable states": "\u2014",
+      "spec size": "26.3 KB"
+    },
     "description": "A nation of two regions, each of two cities: GDP rolls up the hierarchy (city -> region -> nation)."
   },
   "state_schema": {

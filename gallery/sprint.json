@@ -12,7 +12,11 @@
       "leaf"
     ],
     "lineage": "E34 sprint world",
-    "metrics": {},
+    "metrics": {
+      "round-trip": "exact",
+      "reachable states": 6,
+      "spec size": "4.2 KB"
+    },
     "description": "An engineering team working a sprint backlog."
   },
   "state_schema": {

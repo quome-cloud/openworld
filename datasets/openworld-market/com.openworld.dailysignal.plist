@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Unattended daily forward-test for the E50 trading model (macOS launchd).
+     Install once:
+       cp datasets/openworld-market/com.openworld.dailysignal.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.openworld.dailysignal.plist
+     Runs weekdays at 8:53am local; output appends to daily.log. -->
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.openworld.dailysignal</string>
+  <key>ProgramArguments</key>
+  <array><string>/Users/jim/Desktop/openworld/datasets/openworld-market/run_daily.sh</string></array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>53</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/Users/jim/Desktop/openworld/datasets/openworld-market/daily.log</string>
+  <key>StandardErrorPath</key><string>/Users/jim/Desktop/openworld/datasets/openworld-market/daily.log</string>
+</dict></plist>

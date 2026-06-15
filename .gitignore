@@ -25,3 +25,4 @@ _template/main.blg
 _template/main.log
 _template/main.out
 datasets/openworld-market/predictions.jsonl
+datasets/openworld-market/daily.log

@@ -528,10 +528,44 @@ _VIEW_HTML = r"""<!doctype html><html><head><meta charset="utf-8">
  button.alt{background:#fff;color:var(--accent);border:1px solid var(--accent)}
  pre{background:#eef1f6;border-radius:8px;padding:10px;font-size:11px;overflow:auto;max-height:220px}
  .out{border:1px solid var(--teal);border-radius:8px;padding:10px;background:#f0faf8;font-size:12px}
+ .back{color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:8px}
+ .back:hover{background:#eef2fb}
+ header a{color:var(--accent);text-decoration:none}
+ .apibtn{margin:0;background:linear-gradient(90deg,var(--accent),#0891b2);font-size:13px;padding:7px 12px}
+ .overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+ .overlay[hidden]{display:none}
+ .modal{background:#fff;border-radius:16px;max-width:680px;width:92%;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+ .mhead{display:flex;align-items:center;justify-content:space-between}
+ .mhead b{font-size:17px}
+ .x{background:none;color:#5b6675;border:0;font-size:18px;cursor:pointer;margin:0;padding:2px 8px}
+ .mdesc{color:#5b6675;font-size:13px;margin:6px 0 14px}
+ .clabel{font-size:11px;letter-spacing:1.2px;color:#5b6675;font-family:ui-monospace,Menlo,monospace;margin:14px 0 6px;font-weight:700}
+ .codewrap{position:relative}
+ .codewrap pre{background:#0f1626;color:#e6edff;max-height:none;white-space:pre-wrap;word-break:break-all;padding:14px;font-size:12px}
+ .copy{position:absolute;top:8px;right:8px;margin:0;background:#1f2a44;font-size:11px;padding:5px 10px}
+ .other{font-size:12px;color:#5b6675;font-family:ui-monospace,Menlo,monospace;line-height:1.9;margin-top:6px}
+ .other code{background:#eef1f6;padding:1px 5px;border-radius:4px}
 </style></head><body>
-<header><b>🌐 __NAME__</b><span id="meta">loading…</span><span style="margin-left:auto"><a href="/worlds/__NAME__/card.svg">card.svg</a> · <a href="/docs">api</a></span></header>
+<header>
+  <a class="back" href="/">← worlds</a>
+  <b>🌐 __NAME__</b><span id="meta">loading…</span>
+  <span style="margin-left:auto;display:flex;gap:12px;align-items:center">
+    <button id="apiBtn" class="apibtn">⚡ Run from API</button>
+    <a href="/worlds/__NAME__/card.svg">card.svg</a><a href="/docs">api</a>
+  </span>
+</header>
 <div class="wrap"><div class="graph" id="graph"></div>
 <div class="side" id="side"></div></div>
+<div id="apimodal" class="overlay" hidden>
+  <div class="modal">
+    <div class="mhead"><b>Run “__NAME__” from the API</b><button class="x" id="apiClose">✕</button></div>
+    <p class="mdesc">The same call the browser makes — copy, paste, run. Edit the input as you like.</p>
+    <div class="clabel">PRIMARY CALL</div>
+    <div class="codewrap"><button class="copy" data-target="curl1">copy</button><pre id="curl1">…</pre></div>
+    <div class="clabel">OTHER ENDPOINTS</div>
+    <div class="other" id="apiOther"></div>
+  </div>
+</div>
 <script type="module">
 import React,{useState,useEffect,useCallback} from 'https://esm.sh/react@18';
 import {createRoot} from 'https://esm.sh/react-dom@18/client';
@@ -580,5 +614,49 @@ function Side(){
 }
 createRoot(document.getElementById('graph')).render(html`<${App}/>`);
 createRoot(document.getElementById('side')).render(html`<${Side}/>`);
+</script>
+<script>
+(function(){
+  var NAME="__NAME__", base=location.origin;
+  var modal=document.getElementById('apimodal');
+  function sample(info){
+    var p=(info.perception||[])[0];
+    if(p){
+      var lines=(p.produces||[]).map(function(f){
+        var sc=(p.schema||{})[f]||{}, v=1;
+        if(sc.range){ v=Math.max(1, Math.round((sc.range[0]+sc.range[1])/4)); }
+        return f+": "+v;
+      }).join("\n");
+      return {path:"/run", body:{input:{modality:p.modality||"text", data:lines}, steps:8}};
+    }
+    var act=(info.actions||["noop"])[0];
+    return {path:"/step", body:{state:info.initial_state||{}, action:{name:act}}};
+  }
+  function curl(s){
+    return "curl -s "+base+"/worlds/"+NAME+s.path+
+      " -H 'content-type: application/json' -d '"+JSON.stringify(s.body)+"'";
+  }
+  fetch(base+"/worlds/"+NAME).then(function(r){return r.json();}).then(function(info){
+    document.getElementById("curl1").textContent=curl(sample(info));
+    document.getElementById("apiOther").innerHTML=
+      "GET  <code>/worlds/"+NAME+"/spec</code> · "+
+      "<code>/metrics</code> · <code>/actions</code> · <code>/reactflow</code><br>"+
+      "POST <code>/predict</code> (batch) · <code>/rollout</code> · <code>/observe</code> · "+
+      "WS <code>/live</code>";
+  }).catch(function(){ document.getElementById("curl1").textContent="(could not load spec)"; });
+  document.getElementById("apiBtn").onclick=function(){ modal.hidden=false; };
+  if(location.hash==="#api"){ modal.hidden=false; }     // deep-link / shareable
+  document.getElementById("apiClose").onclick=function(){ modal.hidden=true; };
+  modal.onclick=function(e){ if(e.target===modal) modal.hidden=true; };
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") modal.hidden=true; });
+  document.addEventListener("click",function(e){
+    if(e.target.classList && e.target.classList.contains("copy")){
+      var t=document.getElementById(e.target.getAttribute("data-target"));
+      navigator.clipboard.writeText(t.textContent);
+      var b=e.target, old=b.textContent; b.textContent="copied!";
+      setTimeout(function(){ b.textContent=old; },1200);
+    }
+  });
+})();
 </script></body></html>
 """

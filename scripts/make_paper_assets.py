@@ -36,7 +36,7 @@ EXPERIMENTS = [
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
     "e51_startups", "e52_denoise", "e53_sheaf",
-    "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain",
+    "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
 ]
 
 
@@ -2229,7 +2229,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "57"),
+        macro("NumExperiments", "58"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2781,6 +2781,15 @@ def numbers_tex(d):
         macro("BrainRandom", f"{e58['panelA_means']['random']:.0f}"),
         macro("BrainPlateau", str(e58["plateau_depth"])),
     ]
+    # E59 (brain architecture search)
+    e59 = d["e59_brain_arch"]
+    lines += [
+        macro("ArchBare", f"{e59['arm_accuracy']['bare LLM']:.2f}"),
+        macro("ArchMem", f"{e59['arm_accuracy']['+ memory (retrieval)']:.2f}"),
+        macro("ArchOpt", f"{e59['arm_accuracy']['optimized brain']:.2f}"),
+        macro("ArchLift", f"{e59['lift_over_bare']:.2f}"),
+        macro("ArchConfigs", str(e59["n_configs"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2885,6 +2894,49 @@ def table_brain(e58):
     (TABLES / "brain.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_brain_arch(e59):
+    """E59: optimizing the brain architecture with the LLM held constant. Accuracy
+    by architecture, and a search that recovers the best of all configs."""
+    fig, (a, b) = plt.subplots(1, 2, figsize=(9.2, 3.5))
+    names = list(e59["arm_accuracy"])
+    accs = [e59["arm_accuracy"][n] for n in names]
+    cols = [SLATE, ORANGE, TEAL, BLUE][:len(names)]
+    a.bar(range(len(names)), accs, color=cols)
+    a.set_xticks(range(len(names)))
+    a.set_xticklabels([n.replace(" ", "\n") for n in names], fontsize=7.3)
+    a.set_ylabel("task accuracy"); a.set_ylim(0, 1.1)
+    for i, v in enumerate(accs):
+        a.text(i, v + 0.02, f"{v:.2f}", ha="center", fontsize=8.5)
+    a.set_title("A. Architecture matters (one fixed LLM)", fontsize=9.3, loc="left")
+
+    c = e59["search_curve"]
+    b.plot(range(1, len(c) + 1), c, "-o", color=BLUE, lw=2, markersize=3.5)
+    b.axhline(e59["best_acc"], color=TEAL, ls="--", lw=1.4,
+              label=f"best ({e59['best_acc']:.2f})")
+    b.set_xlabel("architectures tried"); b.set_ylabel("best accuracy so far")
+    b.set_ylim(0, 1.1)
+    b.set_title(f"B. Search over {e59['n_configs']} architectures", fontsize=9.3, loc="left")
+    b.legend(fontsize=8, loc="lower right")
+
+    fig.suptitle("Optimizing the brain architecture for the task, LLM held constant (E59)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(FIGS / "brain_arch.png", dpi=200)
+    plt.close(fig)
+
+
+def table_brain_arch(e59):
+    arms, acc = e59["arms"], e59["arm_accuracy"]
+    lines = ["\\begin{tabular}{lll r}", "\\toprule",
+             "Architecture & Memory & Tree+verify & Accuracy \\\\", "\\midrule"]
+    for name, cfg in arms.items():
+        mem = "yes" if cfg[0] == "longterm" else "--"
+        tv = f"w{cfg[1]}+verify" if cfg[2] else (f"w{cfg[1]}" if cfg[1] > 1 else "--")
+        lines.append(f"{name} & {mem} & {tv} & {acc[name]:.2f} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "brain_arch.tex").write_text("\n".join(lines) + "\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -2942,6 +2994,8 @@ def main():
     table_world_specs(data["e57_world_specs"])
     fig_brain(data["e58_brain"])
     table_brain(data["e58_brain"])
+    fig_brain_arch(data["e59_brain_arch"])
+    table_brain_arch(data["e59_brain_arch"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

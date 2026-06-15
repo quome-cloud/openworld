@@ -465,11 +465,16 @@ def _emit_to_spec(e: Any) -> Dict[str, Any]:
     if isinstance(e, dict):
         out = {"modality": e.get("modality", "data"),
                "fields": list(e.get("fields", []))}
-        if e.get("report"):
-            out["report"] = e["report"]
+        for k in ("report", "kind", "template"):          # incl. LLM-emit channel
+            if e.get(k):
+                out[k] = e[k]
         return out
+    # an object emitter (e.g. LLMEmitter): a template-driven LLM text-out channel
     out = {"modality": getattr(e, "modality", "data"),
            "fields": list(getattr(e, "fields", None) or getattr(e, "reads", []))}
+    if getattr(e, "template", None):
+        out["kind"] = "llm"
+        out["template"] = e.template
     if getattr(e, "report", None):
         out["report"] = e.report
     return out

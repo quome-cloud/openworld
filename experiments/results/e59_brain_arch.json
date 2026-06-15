@@ -1,0 +1,111 @@
+{
+  "n_tasks": 40,
+  "p_hard": 0.4,
+  "arms": {
+    "bare LLM": [
+      "none",
+      1,
+      false
+    ],
+    "+ memory (retrieval)": [
+      "longterm",
+      1,
+      false
+    ],
+    "+ best-of-5 + verify": [
+      "none",
+      5,
+      true
+    ],
+    "optimized brain": [
+      "longterm",
+      5,
+      true
+    ]
+  },
+  "arm_accuracy": {
+    "bare LLM": 0.325,
+    "+ memory (retrieval)": 0.725,
+    "+ best-of-5 + verify": 0.5,
+    "optimized brain": 1.0
+  },
+  "best_cfg": [
+    "longterm",
+    5,
+    true
+  ],
+  "best_acc": 1.0,
+  "search_curve": [
+    0.325,
+    0.95,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "n_configs": 12,
+  "leaderboard": [
+    [
+      1.0,
+      [
+        "longterm",
+        5,
+        true
+      ]
+    ],
+    [
+      0.95,
+      [
+        "longterm",
+        3,
+        true
+      ]
+    ],
+    [
+      0.725,
+      [
+        "longterm",
+        5,
+        false
+      ]
+    ],
+    [
+      0.725,
+      [
+        "longterm",
+        3,
+        false
+      ]
+    ],
+    [
+      0.725,
+      [
+        "longterm",
+        1,
+        true
+      ]
+    ]
+  ],
+  "lift_over_bare": 0.675,
+  "brain_validated": true,
+  "brain_round_trip": true,
+  "live_demo": {
+    "ran": true,
+    "runs": [
+      {
+        "question": "Q: what is the capital of France?",
+        "answer": "Paris"
+      }
+    ]
+  },
+  "problems": [],
+  "experiment": "e59_brain_arch",
+  "timestamp": "2026-06-15T10:23:17",
+  "platform": "macOS-26.5-arm64-arm-64bit"
+}

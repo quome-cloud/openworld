@@ -1,0 +1,10 @@
+\begin{tabular}{lll r}
+\toprule
+Architecture & Memory & Tree+verify & Accuracy \\
+\midrule
+bare LLM & -- & -- & 0.33 \\
++ memory (retrieval) & yes & -- & 0.72 \\
++ best-of-5 + verify & -- & w5+verify & 0.50 \\
+optimized brain & yes & w5+verify & 1.00 \\
+\bottomrule
+\end{tabular}

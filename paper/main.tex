@@ -1476,6 +1476,50 @@ $L=\BrainOptimal$). Persistent memory reaches optimal; memoryless/random do not.
 \input{tables/brain}
 \end{table}
 
+\subsubsection{Optimizing the brain architecture for the task, LLM held constant (E59)}\label{sec:brainarch}
+If the backbone is a powerful LLM, what should the \emph{brain around it} look like?
+We treat the LLM's raw capability as fixed and search over brain \emph{architectures}
+--- composable worlds that differ in whether the brain has long-term memory it can
+retrieve, how many tree-of-thoughts drafts it generates, and whether it verifies
+them --- a neuromorphic architecture search over composite world models. The task
+suite is recalled-fact + verify: each question needs a specific fact (common
+knowledge, or rare and requiring retrieval) and is simple or hard (a hard task needs
+a verifier to filter best-of-$N$ drafts). The backbone answers iff the fact is in its
+context, correctly for simple tasks and with a fixed per-draft probability for hard
+ones --- the \emph{same} capability for every architecture.
+
+Holding that backbone constant (Figure~\ref{fig:brain-arch}, Table~\ref{tab:brainarch}),
+the architecture is decisive: the bare LLM scores $\ArchBare$; adding retrieval
+lifts it to $\ArchMem$ (the rare-fact questions become answerable); adding
+best-of-$N$ with a verifier lifts the hard questions; and the \emph{optimized} brain
+reaches $\ArchOpt$ --- a $+\ArchLift$ absolute gain over the bare backbone with no
+change to the LLM. A search over all $\ArchConfigs$ architectures recovers the richest
+configuration. The brain serializes to a spec (with a real LLM emit channel) and
+round-trips losslessly; a live Ollama run exercises the genuine
+text-in~$\to$~reason~$\to$~text-out loop (\texttt{TextPerceptor}~+~\texttt{LLMEmitter}).
+This is a controlled demonstration with a modeled fixed-capability backbone --- not a
+benchmark of a particular model --- but it makes the point precisely: \emph{with the
+model frozen, the world model around it is what you optimize}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/brain_arch.png}
+\caption{\textbf{Architecture, not the model (E59).} \textbf{A:} with one fixed LLM,
+task accuracy rises from the bare backbone through retrieval and best-of-$N$+verify to
+the optimized brain. \textbf{B:} searching the $\ArchConfigs$-architecture space
+recovers the best configuration.}
+\label{fig:brain-arch}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E59 brain architectures} on the recalled-fact+verify suite, with the
+LLM backbone held constant. Memory and verified best-of-$N$ each add accuracy; the
+optimized brain reaches $\ArchOpt$ ($+\ArchLift$ over the bare LLM).}
+\label{tab:brainarch}
+\input{tables/brain_arch}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

@@ -528,6 +528,19 @@ _VIEW_HTML = r"""<!doctype html><html><head><meta charset="utf-8">
  button.alt{background:#fff;color:var(--accent);border:1px solid var(--accent)}
  pre{background:#eef1f6;border-radius:8px;padding:10px;font-size:11px;overflow:auto;max-height:220px}
  .out{border:1px solid var(--teal);border-radius:8px;padding:10px;background:#f0faf8;font-size:12px}
+ .react-flow__node-ow{background:none;border:0;padding:0;width:auto;font-size:inherit}
+ .ow{position:relative;border-radius:13px;padding:11px 15px;min-width:118px;text-align:center;background:#fff;border:1.4px solid var(--line);box-shadow:0 2px 9px rgba(22,32,46,.09);transition:box-shadow .25s,transform .25s,border-color .25s}
+ .ow-init{border-color:var(--accent);border-width:2.4px}
+ .ow-perceptor{border-style:dashed;border-color:var(--ochre);background:#fffaf3}
+ .ow-emitter{border-style:dashed;border-color:var(--teal);background:#f0faf8}
+ .ow-world{border-color:var(--accent)}
+ .ow-title{font-weight:800;font-size:13px;color:var(--ink)}
+ .ow-sub{font-size:10.5px;color:#5b6675;font-family:ui-monospace,Menlo,monospace;margin-top:2px;white-space:nowrap}
+ .ow-tag{position:absolute;top:-9px;left:9px;font-size:9px;font-weight:800;letter-spacing:.4px;font-family:ui-monospace,Menlo,monospace;padding:0 4px;background:#fcfbf8}
+ .ow-tag.start{color:var(--accent)} .ow-tag.sensor{color:var(--ochre)} .ow-tag.out{color:var(--teal)}
+ .ow-active{box-shadow:0 0 0 4px rgba(29,78,216,.5),0 8px 22px rgba(29,78,216,.32);transform:scale(1.07);border-color:var(--accent);z-index:5}
+ .ow-perceptor.ow-active{box-shadow:0 0 0 4px rgba(180,83,9,.5)}
+ .ow-emitter.ow-active{box-shadow:0 0 0 4px rgba(15,118,110,.5)}
  .back{color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:8px}
  .back:hover{background:#eef2fb}
  header a{color:var(--accent);text-decoration:none}
@@ -554,8 +567,7 @@ _VIEW_HTML = r"""<!doctype html><html><head><meta charset="utf-8">
     <a href="/worlds/__NAME__/card.svg">card.svg</a><a href="/docs">api</a>
   </span>
 </header>
-<div class="wrap"><div class="graph" id="graph"></div>
-<div class="side" id="side"></div></div>
+<div id="root"></div>
 <div id="apimodal" class="overlay" hidden>
   <div class="modal">
     <div class="mhead"><b>Run “__NAME__” from the API</b><button class="x" id="apiClose">✕</button></div>
@@ -567,53 +579,91 @@ _VIEW_HTML = r"""<!doctype html><html><head><meta charset="utf-8">
   </div>
 </div>
 <script type="module">
-import React,{useState,useEffect,useCallback} from 'https://esm.sh/react@18';
+import React,{useState,useEffect,useCallback,useRef} from 'https://esm.sh/react@18';
 import {createRoot} from 'https://esm.sh/react-dom@18/client';
-import ReactFlow,{Background,Controls} from 'https://esm.sh/reactflow@11?deps=react@18,react-dom@18';
+import ReactFlow,{Background,Controls,Handle,Position} from 'https://esm.sh/reactflow@11?deps=react@18,react-dom@18';
 import htm from 'https://esm.sh/htm';
 const html=htm.bind(React.createElement);
 const NAME="__NAME__";
 const api=(p,b)=>fetch(p,b?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}:undefined).then(r=>r.json());
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+const H0={opacity:0,border:0,minWidth:0,minHeight:0};
+
+// custom node styled like the SVG model card (sensor / state / emitter)
+function OwNode({data}){
+  const k=data.kind||'state';
+  const cls=`ow ow-${k}${data.initial?' ow-init':''}${data.active?' ow-active':''}`;
+  const lines=(data.lines&&data.lines.length)?data.lines:[data.label||''];
+  return html`<div class=${cls}>
+    <${Handle} type="target" position=${Position.Left} style=${H0}/>
+    ${data.initial?html`<div class="ow-tag start">▶ start</div>`:''}
+    ${k==='perceptor'?html`<div class="ow-tag sensor">⌖ sensor</div>`:''}
+    ${k==='emitter'?html`<div class="ow-tag out">▸ output</div>`:''}
+    ${lines.map((l,i)=>html`<div class=${i===0?'ow-title':'ow-sub'} key=${i}>${l}</div>`)}
+    <${Handle} type="source" position=${Position.Right} style=${H0}/>
+  </div>`;
+}
+const nodeTypes={ow:OwNode};
 
 function App(){
   const [nodes,setNodes]=useState([]); const [edges,setEdges]=useState([]);
+  const [info,setInfo]=useState(null); const [text,setText]=useState("");
+  const [act,setAct]=useState(""); const [state,setState]=useState(null);
+  const [out,setOut]=useState(null); const [busy,setBusy]=useState(false);
+  const kinds=useRef({});               // id -> kind, for boundary pulses
   useEffect(()=>{(async()=>{
     const rf=await api(`/worlds/${NAME}/reactflow`);
-    setNodes((rf.nodes||[]).map(n=>({...n,data:{label:(n.data&&n.data.label||'').replace(/\n/g,' · ')}})));
-    setEdges(rf.edges||[]);
-  })()},[]);
-  return html`<${ReactFlow} nodes=${nodes} edges=${edges} fitView=${true}
-      onInit=${(i)=>setTimeout(()=>i.fitView(),80)}>
-      <${Background}/><${Controls}/></${ReactFlow}>`;
-}
-function Side(){
-  const [info,setInfo]=useState(null);const [text,setText]=useState("");const [act,setAct]=useState("");
-  const [state,setState]=useState(null);const [out,setOut]=useState(null);const [busy,setBusy]=useState(false);
-  useEffect(()=>{(async()=>{const i=await api(`/worlds/${NAME}`);setInfo(i);setState(i.initial_state);
+    (rf.nodes||[]).forEach(n=>{kinds.current[n.id]=(n.data&&n.data.kind)||'state';});
+    setNodes((rf.nodes||[]).map(n=>({...n,type:'ow',data:{...n.data,active:false}})));
+    setEdges((rf.edges||[]).map(e=>({...e,labelBgStyle:{fill:'#fff'},
+      labelStyle:{fontFamily:'ui-monospace,Menlo,monospace',fontSize:10,fill:'#5b6675'}})));
+    const i=await api(`/worlds/${NAME}`); setInfo(i); setState(i.initial_state);
     document.getElementById('meta').textContent=`${i.kind} · ${i.actions.length} actions · ${i.bridges.length} bridges${i.perception&&i.perception.length?' · perceives '+i.perception[0].modality:''}`;
-    const a=await api(`/worlds/${NAME}/actions`);setAct(a.default);})()},[]);
-  const hi=(cur)=>{document.querySelectorAll('.react-flow__node').forEach(el=>{el.style.boxShadow=(el.getAttribute('data-id')===cur)?'0 0 0 3px #1d4ed8':'';});};
-  const animate=async(frames,output)=>{for(const f of frames){setState(f.state);hi(f.current_node);await new Promise(r=>setTimeout(r,420));}setOut(output||null);};
-  const run=async()=>{setBusy(true);setOut(null);try{const r=await api(`/worlds/${NAME}/run`,{input:{modality:'text',data:text},steps:8});await animate(r.trajectory,r.output);}finally{setBusy(false);}};
-  const step=async()=>{const r=await api(`/worlds/${NAME}/step`,{state,action:{name:act}});setState(r.next_state);hi(r.current_node);};
-  if(!info)return html`<p>loading…</p>`;
-  const hasPerc=info.perception&&info.perception.length>0;
-  return html`<div>
-    ${hasPerc?html`<${React.Fragment}>
-      <h3>INPUT (${info.perception[0].modality})</h3>
-      <textarea rows=5 placeholder="paste input, e.g.\npriority: 7\nload: 40" value=${text} onChange=${e=>setText(e.target.value)}></textarea>
-      <button disabled=${busy} onClick=${run}>${busy?'running…':'▸ Run'}</button>
-    </>`:html`<${React.Fragment}>
-      <h3>ACTION</h3>
-      <select value=${act} onChange=${e=>setAct(e.target.value)}>${info.actions.map(a=>html`<option key=${a}>${a}</option>`)}</select>
-      <button onClick=${step}>Step ▸</button>
+    const a=await api(`/worlds/${NAME}/actions`); setAct(a.default);
+  })()},[]);
+  const light=useCallback((id)=>setNodes(ns=>ns.map(n=>(
+    {...n,data:{...n.data,active:(id!=null&&n.id===id)}}))),[]);
+  const idOfKind=(k)=>Object.keys(kinds.current).find(i=>kinds.current[i]===k);
+  async function animate(frames){
+    const sensor=idOfKind('perceptor');
+    if(sensor){ light(sensor); await sleep(520); }            // data enters
+    for(const f of frames){ setState(f.state); if(f.current_node) light(f.current_node); await sleep(460); }
+    const emit=idOfKind('emitter');
+    if(emit){ light(emit); await sleep(620); }                // result leaves
+    light(null);
+  }
+  const run=async()=>{ setBusy(true); setOut(null);
+    try{ const r=await api(`/worlds/${NAME}/run`,{input:{modality:'text',data:text},steps:8});
+         await animate(r.trajectory); setOut(r.output); } finally{ setBusy(false); } };
+  const step=async()=>{ const r=await api(`/worlds/${NAME}/step`,{state,action:{name:act}});
+    setState(r.next_state); light(r.current_node); setTimeout(()=>light(null),750); };
+  const hasPerc=info&&info.perception&&info.perception.length>0;
+  return html`<div class="wrap">
+    <div class="graph">
+      <${ReactFlow} nodes=${nodes} edges=${edges} nodeTypes=${nodeTypes} fitView=${true}
+        minZoom=${0.2} proOptions=${{hideAttribution:true}}
+        onInit=${(i)=>setTimeout(()=>i.fitView({padding:0.18}),90)}>
+        <${Background} color="#c9d4e6" gap=${22}/><${Controls} showInteractive=${false}/>
+      </${ReactFlow}>
+    </div>
+    <div class="side">
+    ${!info?html`<p>loading…</p>`:html`<${React.Fragment}>
+      ${hasPerc?html`<${React.Fragment}>
+        <h3>INPUT (${info.perception[0].modality})</h3>
+        <textarea rows=5 placeholder="paste input, e.g.\npriority: 7\nload: 40" value=${text} onChange=${e=>setText(e.target.value)}></textarea>
+        <button disabled=${busy} onClick=${run}>${busy?'running…':'▸ Run'}</button>
+      </>`:html`<${React.Fragment}>
+        <h3>ACTION</h3>
+        <select value=${act} onChange=${e=>setAct(e.target.value)}>${info.actions.map(a=>html`<option key=${a}>${a}</option>`)}</select>
+        <button disabled=${busy} onClick=${step}>Step ▸</button>
+      </>`}
+      <h3>STATE</h3><pre>${JSON.stringify(state,null,1)}</pre>
+      ${out?html`<h3>OUTPUT</h3>${out.emitted.map((e,i)=>html`<div class=out key=${i}><b>${e.modality}</b>${e.report?html`<div>${e.report}</div>`:''}<pre>${JSON.stringify(e.fields,null,1)}</pre></div>`)}`:''}
     </>`}
-    <h3>STATE</h3><pre>${JSON.stringify(state,null,1)}</pre>
-    ${out?html`<h3>OUTPUT</h3>${out.emitted.map((e,i)=>html`<div class=out key=${i}><b>${e.modality}</b>${e.report?html`<div>${e.report}</div>`:''}<pre>${JSON.stringify(e.fields,null,1)}</pre></div>`)}`:''}
+    </div>
   </div>`;
 }
-createRoot(document.getElementById('graph')).render(html`<${App}/>`);
-createRoot(document.getElementById('side')).render(html`<${Side}/>`);
+createRoot(document.getElementById('root')).render(html`<${App}/>`);
 </script>
 <script>
 (function(){

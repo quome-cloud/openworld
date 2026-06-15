@@ -1082,12 +1082,21 @@ def to_reactflow(world_or_spec: Union[World, Dict[str, Any]]) -> Dict[str, Any]:
         lyr = layer[n["id"]]
         r = rows.get(lyr, 0)
         rows[lyr] = r + 1
-        nodes.append({"id": f"n{n['id']}", "position": {"x": lyr * 240, "y": r * 110},
+        nodes.append({"id": f"n{n['id']}", "position": {"x": lyr * 260, "y": r * 120},
                       "type": "input" if n.get("initial") else "default",
-                      "data": {"label": "\n".join(n.get("label", []))}})
+                      # generic label for the React Flow playground, plus rich
+                      # fields (kind/initial/lines) the server's own view styles on.
+                      "data": {"label": "\n".join(n.get("label", [])),
+                               "lines": n.get("label", []),
+                               "kind": n.get("kind", "state"),
+                               "initial": bool(n.get("initial"))}})
     for k, e in enumerate(ge):
-        edges.append({"id": f"e{k}", "source": f"n{e['src']}",
-                      "target": f"n{e['dst']}", "label": e.get("action", "")})
+        ed = {"id": f"e{k}", "source": f"n{e['src']}", "target": f"n{e['dst']}",
+              "label": e.get("action", "")}
+        if e.get("style") == "dash" or e.get("action") in ("perceive", "emit"):
+            ed["animated"] = True
+            ed["style"] = {"strokeDasharray": "5 4"}
+        edges.append(ed)
     return {"nodes": nodes, "edges": edges, "playground": REACTFLOW_PLAYGROUND}
 
 

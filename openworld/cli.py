@@ -104,7 +104,9 @@ def main(ctx):
 @click.option("--allow-code/--no-allow-code", default=True, show_default=True,
               help="Run the worlds' dynamics (required to step/predict). "
                    "Only enable for specs you trust.")
-def serve(paths, host, port, allow_code):
+@click.option("--open/--no-open", "open_", default=True, show_default=True,
+              help="Open the interactive React Flow view in a browser on startup.")
+def serve(paths, host, port, allow_code, open_):
     import uvicorn
 
     from .serve import serve_app
@@ -122,6 +124,14 @@ def serve(paths, host, port, allow_code):
         + f"\n\nindex   http://{host}:{port}/\n"
         f"api     http://{host}:{port}/docs",
         title=f"OpenWorld serving {len(specs)} worlds", border_style="blue"))
+    if open_:
+        # land directly on the interactive React Flow view (or the gallery if many)
+        tail = (f"/worlds/{specs[0]['name']}/view" if len(specs) == 1 else "/")
+        url = f"http://{host}:{port}{tail}"
+        import threading
+        import webbrowser
+        threading.Timer(1.3, lambda: webbrowser.open(url)).start()
+        console.print(f"[dim]opening {url} …[/dim]")
     app = serve_app(specs, allow_code=allow_code)
     uvicorn.run(app, host=host, port=port)
 

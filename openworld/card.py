@@ -476,42 +476,63 @@ def _composition(spec: Dict[str, Any], x: float, y: float, w: float,
 
 
 # --------------------------------------------------------------------------- #
-# right column: schema, actions, dynamics, rollout
+# right column: schema, actions, dynamics, rollout (consistent section style)
 # --------------------------------------------------------------------------- #
+def _section(x, y, label, c) -> str:
+    """A consistent metadata-section header: accent tick + mono kicker."""
+    return (f'<rect x="{x:.1f}" y="{y-9:.1f}" width="3" height="11" rx="1.5" '
+            f'fill="{c["accent"]}"/>'
+            + _t(x + 9, y, label, 10.5, "700", c["muted"], spacing="1.8", family=MONO))
+
+
+def _fmt_num(v) -> str:
+    return f"{v:g}"
+
+
 def _schema_block(spec, x, y, w, c) -> Tuple[str, float]:
-    out = [_t(x, y + 2, "STATE SCHEMA", 11, "700", c["muted"], spacing="1.6")]
+    out = [_section(x, y + 9, "STATE SCHEMA", c)]
     schema = {k: v for k, v in spec.get("state_schema", {}).items()
               if not k.startswith("_")}
     items = list(schema.items())[:6]
-    ry = y + 22
-    for k, ty in items:
-        out.append(_t(x, ry + 11, k, 13, "600", c["text"]))
-        pill, pw = _pill(x + w - (16 + len(str(ty)) * 12 * 0.62), ry - 1, ty, c, font=11)
-        out.append(pill)
-        out.append(f'<line x1="{x:.1f}" y1="{ry+20:.1f}" x2="{x+w:.1f}" y2="{ry+20:.1f}" '
-                   f'stroke="{c["line"]}" stroke-width="1" stroke-dasharray="2 4"/>')
-        ry += 27
+    ry = y + 26
+    for idx, (k, ty) in enumerate(items):
+        if idx % 2 == 0:                                  # zebra row tint
+            out.append(f'<rect x="{x-4:.1f}" y="{ry-3:.1f}" width="{w+8:.1f}" '
+                       f'height="24" rx="6" fill="{c["accent"]}" fill-opacity="0.035"/>')
+        out.append(_t(x + 4, ry + 13, k, 12, "600", c["text"], family=MONO))
+        tw = len(str(ty)) * 6.7 + 14
+        out.append(f'<rect x="{x+w-tw:.1f}" y="{ry+1:.1f}" width="{tw:.1f}" height="17" '
+                   f'rx="5" fill="{c["chipbg"]}"/>')
+        out.append(_t(x + w - tw + 7, ry + 13, ty, 10.5, "700", c["accent"], family=MONO))
+        ry += 26
     if len(schema) > 6:
-        out.append(_t(x, ry + 10, f"+{len(schema) - 6} more", 11.5, "500", c["muted"]))
-        ry += 22
+        out.append(_t(x + 4, ry + 11, f"+ {len(schema) - 6} more fields", 11, "500",
+                      c["muted"], family=MONO))
+        ry += 20
     return "".join(out), ry - y + 6
 
 
 def _chips_block(spec, x, y, w, c, title, items, limit) -> Tuple[str, float]:
-    out = [_t(x, y + 2, title, 11, "700", c["muted"], spacing="1.6")]
-    cx, cy = x, y + 16
-    shown = items[:limit]
-    for it in shown:
-        pill, pw = _pill(cx, cy, it, c)
-        if cx + pw > x + w:
-            cx, cy = x, cy + 30
-            pill, pw = _pill(cx, cy, it, c)
-        out.append(pill)
-        cx += pw + 8
+    out = [_section(x, y + 9, title, c)]
+    cx, cy, rowh = x, y + 24, 26
+    for it in items[:limit]:
+        cw = len(str(it)) * 6.5 + 18
+        if cx + cw > x + w:
+            cx, cy = x, cy + rowh
+        out.append(f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{cw:.1f}" height="20" rx="6" '
+                   f'fill="{c["chipbg"]}" stroke="{c["accent"]}" stroke-width="1" '
+                   f'stroke-opacity="0.16"/>')
+        out.append(_t(cx + 9, cy + 14, it, 10.5, "600", c["chiptx"], family=MONO))
+        cx += cw + 7
     if len(items) > limit:
-        pill, pw = _pill(cx, cy, f"+{len(items) - limit}", c)
-        out.append(pill)
-    return "".join(out), (cy + 30) - y + 6
+        cw = 46
+        if cx + cw > x + w:
+            cx, cy = x, cy + rowh
+        out.append(f'<rect x="{cx:.1f}" y="{cy:.1f}" width="{cw}" height="20" rx="6" '
+                   f'fill="{c["chipbg"]}"/>')
+        out.append(_t(cx + 9, cy + 14, f"+{len(items) - limit}", 10.5, "700",
+                      c["muted"], family=MONO))
+    return "".join(out), (cy + 20) - y + 8
 
 
 def _dynamics_badge(spec, x, y, c) -> Tuple[str, float]:
@@ -523,32 +544,39 @@ def _dynamics_badge(spec, x, y, c) -> Tuple[str, float]:
              "llm": "LLM dynamics", "composite": "composite dynamics",
              "none": "no dynamics"}.get(kind, kind)
     fg = c["good"] if kind == "code" else c["muted"]
-    out = [_t(x, y + 2, "DYNAMICS", 11, "700", c["muted"], spacing="1.6")]
-    check = f'<circle cx="{x+9:.1f}" cy="{y+27:.1f}" r="8" fill="{fg}"/>' \
-            f'<path d="M{x+5.4:.1f},{y+27:.1f} l2.4,2.4 l4-4.4" fill="none" ' \
-            f'stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>' if kind == "code" \
-            else f'<circle cx="{x+9:.1f}" cy="{y+27:.1f}" r="8" fill="none" stroke="{fg}" stroke-width="1.6"/>'
-    out.append(check)
-    out.append(_t(x + 24, y + 31, label, 13, "700", c["text"]))
-    return "".join(out), 48
+    out = [_section(x, y + 9, "DYNAMICS", c)]
+    yc = y + 30
+    if kind == "code":
+        out.append(f'<circle cx="{x+9:.1f}" cy="{yc:.1f}" r="8" fill="{fg}"/>'
+                   f'<path d="M{x+5.4:.1f},{yc:.1f} l2.4,2.4 l4-4.4" fill="none" '
+                   f'stroke="#fff" stroke-width="1.8" stroke-linecap="round" '
+                   f'stroke-linejoin="round"/>')
+    else:
+        out.append(f'<circle cx="{x+9:.1f}" cy="{yc:.1f}" r="8" fill="none" '
+                   f'stroke="{fg}" stroke-width="1.6"/>')
+    out.append(_t(x + 24, yc + 4, label, 12.5, "700", c["text"]))
+    return "".join(out), 44
 
 
 def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
-    out = [_t(x, y + 2, "SAMPLE ROLLOUT", 11, "700", c["muted"], spacing="1.6")]
-    preview = spec.get("preview", {}) or {}
-    series = {k: v for k, v in preview.get("series", {}).items()
+    out = [_section(x, y + 9, "SAMPLE ROLLOUT", c)]
+    series = {k: v for k, v in (spec.get("preview", {}) or {}).get("series", {}).items()
               if isinstance(v, list) and len(v) > 1}
-    cy = y + 16
-    ch = 132
-    out.append(f'<rect x="{x:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{ch}" rx="14" '
+    cy, ch = y + 22, 124
+    out.append(f'<rect x="{x:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{ch}" rx="12" '
                f'fill="{c["node1"]}" stroke="{c["line"]}" stroke-width="1"/>')
     if not series:
         out.append(_t(x + w / 2, cy + ch / 2 + 4, "no numeric preview", 12, "500",
-                      c["muted"], anchor="middle"))
+                      c["muted"], anchor="middle", family=MONO))
         return "".join(out), (cy + ch) - y + 6
-    pad = 14
+    pad = 16
     names = sorted(series, key=lambda k: -(max(series[k]) - min(series[k])))[:4]
-    base = cy + ch - pad
+    # faint horizontal gridlines
+    for f in (0.25, 0.5, 0.75):
+        gyl = cy + pad + f * (ch - 2 * pad)
+        out.append(f'<line x1="{x+pad:.1f}" y1="{gyl:.1f}" x2="{x+w-pad:.1f}" '
+                   f'y2="{gyl:.1f}" stroke="{c["line"]}" stroke-width="0.8" '
+                   f'stroke-dasharray="1 5" opacity="0.7"/>')
 
     def pts(vals):
         lo, hi = min(vals), max(vals)
@@ -558,7 +586,7 @@ def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
                  cy + pad + (hi - v) / span * (ch - 2 * pad))
                 for j, v in enumerate(vals)]
 
-    # main series: gradient area + line
+    base = cy + ch - pad
     main = names[0]
     p = pts(series[main])
     line = " ".join(f"{px:.1f},{py:.1f}" for px, py in p)
@@ -568,28 +596,30 @@ def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
     out.append(f'<path class="series" d="{area}" fill="url(#garea)"/>')
     out.append(f'<polyline class="series" points="{line}" fill="none" '
                f'stroke="{_SERIES[0]}" stroke-width="2.4" stroke-linejoin="round"/>')
-    out.append(f'<circle cx="{p[-1][0]:.1f}" cy="{p[-1][1]:.1f}" r="3.2" fill="{_SERIES[0]}"/>')
+    out.append(f'<circle cx="{p[-1][0]:.1f}" cy="{p[-1][1]:.1f}" r="3.4" '
+               f'fill="{_SERIES[0]}"/>')
+    out.append(_t(p[-1][0] - 4, p[-1][1] - 8, _fmt_num(series[main][-1]), 9.5, "700",
+                  _SERIES[0], anchor="end", family=MONO))
     for i, nm in enumerate(names[1:], start=1):
         pl = " ".join(f"{px:.1f},{py:.1f}" for px, py in pts(series[nm]))
         out.append(f'<polyline class="series" points="{pl}" fill="none" '
                    f'stroke="{_SERIES[i % len(_SERIES)]}" stroke-width="1.8" '
                    f'stroke-opacity="0.9" stroke-linejoin="round"/>')
-    # legend
-    ly = cy + ch + 16
-    lx = x
+    # legend with end values
+    ly, lx = cy + ch + 16, x + 2
     for i, nm in enumerate(names):
         vals = series[nm]
         arrow = "↑" if vals[-1] > vals[0] else ("↓" if vals[-1] < vals[0] else "→")
         col = _SERIES[i % len(_SERIES)]
-        out.append(f'<rect x="{lx:.1f}" y="{ly-9:.1f}" width="10" height="10" rx="2.5" fill="{col}"/>')
+        out.append(f'<rect x="{lx:.1f}" y="{ly-9:.1f}" width="9" height="9" rx="2" fill="{col}"/>')
         label = f"{nm} {arrow}"
-        out.append(_t(lx + 15, ly, label, 11, "600", c["muted"]))
-        lx += 15 + len(label) * 6.6 + 14
+        out.append(_t(lx + 14, ly, label, 10.5, "600", c["muted"], family=MONO))
+        lx += 14 + len(label) * 6.3 + 14
     return "".join(out), (ly + 8) - y
 
 
 def _details_block(spec, x, y, w, c) -> Tuple[str, float]:
-    out = [_t(x, y + 2, "DETAILS", 11, "700", c["muted"], spacing="1.6")]
+    out = [_section(x, y + 9, "DETAILS", c)]
     facts = []
     nr = len(spec.get("rules", []))
     facts.append(f"{nr} rule" + ("" if nr == 1 else "s"))
@@ -597,15 +627,19 @@ def _details_block(spec, x, y, w, c) -> Tuple[str, float]:
     if comp:
         facts.append(f'{len(comp.get("children", {}))} child worlds')
         nb = len(comp.get("bridges", []))
-        facts.append(f"{nb} bridge" + ("" if nb == 1 else "s"))
+        if nb:
+            facts.append(f"{nb} bridge" + ("" if nb == 1 else "s"))
+        na = len(comp.get("aggregators", []))
+        if na:
+            facts.append(f"{na} aggregator" + ("" if na == 1 else "s"))
         ag = comp.get("agents", {})
         if ag:
             facts.append(f'{len(ag)} agents: ' + ", ".join(list(ag)[:3]))
-    gy = y + 20
+    gy = y + 24
     for i, fact in enumerate(facts):
-        out.append(f'<circle cx="{x+4:.1f}" cy="{gy+i*19-4:.1f}" r="2.6" fill="{c["accent"]}"/>')
-        out.append(_t(x + 14, gy + i * 19, fact, 12, "600", c["text"]))
-    return "".join(out), 20 + len(facts) * 19 + 6
+        out.append(f'<circle cx="{x+4:.1f}" cy="{gy+i*19-4:.1f}" r="2.4" fill="{c["accent"]}"/>')
+        out.append(_t(x + 13, gy + i * 19, fact, 11.5, "600", c["text"], family=MONO))
+    return "".join(out), 24 + len(facts) * 19 + 6
 
 
 # --------------------------------------------------------------------------- #

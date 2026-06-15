@@ -1,0 +1,40 @@
+Google Meet — Investor call with Lumen Labs (Series Seed) — transcript
+
+Investor (Dana): Thanks for making time. Give me the 90-second version.
+Founder (Priya, CEO): We're Lumen Labs. We sell an AI copilot for clinical-trial
+coordinators — it auto-drafts the regulatory paperwork that today eats 40% of a
+coordinator's week. We launched the paid product 7 months ago.
+
+Dana: What does traction look like?
+Priya: We're at $48k MRR, growing about 22% month over month for the last five
+months. 14 paying sites, net revenue retention is 130% — sites that start with one
+trial expand to more. We have a waitlist of 60 sites.
+
+Dana: That retention is strong. Why do they stick?
+Founder (Wei, CTO): The drafts are good enough that coordinators stopped editing
+them after a few weeks — we measure acceptance rate, it's 88% now. They'd have to
+rip us out of their workflow. Honestly the pull has been the surprise; we can't
+onboard sites fast enough.
+
+Dana: Tell me about the team.
+Priya: I ran clinical operations at a CRO for six years — I lived this pain. Wei
+was a staff engineer on healthcare ML at a big EHR vendor. We've shipped together
+for two years. Two more engineers, both senior.
+
+Dana: Market size?
+Priya: There are ~30,000 active trial sites in the US alone, coordinator software
+is a multi-billion dollar category and basically unautomated. We think bottom-up
+it's a $2B+ wedge before we expand to the sponsor side.
+
+Dana: Capital and burn?
+Wei: We raised a $1.5M pre-seed 14 months ago, ~$520k left, burning about $70k a
+month. This round is to hire ahead of the demand and harden compliance (SOC 2,
+HIPAA). We've been heads-down — turned down two pilots that weren't ICP because we
+didn't want to dilute focus.
+
+Dana: What keeps you up at night?
+Priya: Hiring fast enough without breaking the onboarding quality. And a big EHR
+vendor deciding to build this. But we're 18 months ahead and the data flywheel
+compounds. We're not going anywhere — we've both put our savings in.
+
+Dana: Appreciate the candor. Let me take this to the partnership.

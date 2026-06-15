@@ -256,6 +256,27 @@ video, or scenes. Where the spatial-intelligence systems \emph{learn what cannot
 told}, OpenWorld \emph{writes down what can be told, and verifies it}; the two are
 better read as adjacent tools than as competitors.
 
+\paragraph{World, action, agent, simulation---and why a \emph{verified} model is
+special.} The world model is only one of four distinct objects, and keeping them
+separate dissolves much of the remaining confusion. A \emph{world} is the
+environment-as-simulator: a symbolic state, a discrete set of \emph{actions}, and
+the verified transition that maps a $(\textrm{state}, \textrm{action})$ pair to the
+next state (plus optional perception/emit boundaries). An \emph{agent} is a
+\emph{separate} policy---an LLM planner or a fixed rule---that chooses actions
+toward a goal; it is a \emph{user} of a world, not a part of it, so one world serves
+any agent and a planner can be swapped without re-synthesizing dynamics. A
+\emph{simulation} closes the loop: it places agents in a world and repeatedly
+observes, chooses an action, and steps the world, producing a trajectory scored by
+objectives. The textbook definition puts the world model \emph{inside} the agent
+(the simulator it plans with) and distinguishes it from the true environment; the
+gap between the two---model bias, sim-to-real error---is exactly what bounds learned
+world models. A verified code world model \emph{collapses} that gap: because the
+accepted program reproduces the declared dynamics exactly, the agent's internal
+model and the environment are the \emph{same} artifact, so planning ``in
+imagination'' is identical to acting in the world. This is why the same
+\texttt{World} serves, without modification, both as the ground-truth environment
+and as the model an agent plans through in our planning experiments.
+
 This Code World Model bargain---programs instead of weights---buys verifiability,
 compute-cheap rollouts, and out-of-distribution generalization by
 construction~\cite{worldcoder2024, gifmcts2024, poeworld2025, cwmgames2025}. Yet

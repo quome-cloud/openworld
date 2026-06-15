@@ -42,7 +42,7 @@ from .infogeom import bayes_update, expected_info_gain, fisher_information
 from .transport import kl_hist, wasserstein1
 from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
                    spec_to_json, to_mermaid, to_spec, validate_spec)
-from .card import render_card, render_gallery
+from .card import render_card, render_gallery, to_reactflow
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
     MockPerceptor, Observation, PerceptionError, PerceptionGate, Perceptor,
@@ -135,6 +135,7 @@ __all__ = [
     "to_mermaid",
     "render_card",
     "render_gallery",
+    "to_reactflow",
     "Objective",
     "ObjectiveSuite",
     "OllamaConnectionError",

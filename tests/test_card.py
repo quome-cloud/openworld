@@ -1,6 +1,6 @@
 """Tests for HTML+SVG model cards and the gallery index."""
 
-from openworld import render_card, render_gallery, to_spec
+from openworld import render_card, render_gallery, to_reactflow, to_spec
 from tests.test_spec import counter_world, economy_world
 
 
@@ -12,10 +12,27 @@ def test_card_is_self_contained_svg():
     assert "ACTIONS" in svg
     for action in ("inc", "dec", "noop"):
         assert action in svg
-    # self-contained: no fetched external resources (xmlns namespace URIs are
-    # declarations, not network fetches, so they are allowed).
-    for external in ("src=", "<script", "<image", 'href="http', "url(http", "@import"):
+    # self-contained: no fetched external resources. (xmlns namespace URIs and
+    # <a href> hyperlinks are not fetches, so they are allowed.)
+    for external in ("src=", "<script", "<image", "url(http", "@import"):
         assert external not in svg
+
+
+def test_card_has_reactflow_playground_link():
+    svg = render_card(counter_world())
+    assert 'href="https://play.reactflow.dev"' in svg
+    assert "open in React Flow" in svg
+
+
+def test_reactflow_export_leaf_and_composite():
+    rf = to_reactflow(counter_world())
+    assert rf["playground"] == "https://play.reactflow.dev"
+    assert rf["nodes"] and rf["edges"]
+    assert all("position" in n and "id" in n for n in rf["nodes"])
+    rfc = to_reactflow(economy_world())
+    assert any(n.get("type") == "group" for n in rfc["nodes"])    # nested group
+    assert any(n.get("parentNode") for n in rfc["nodes"])         # children parented
+    assert any(e.get("label") == "restock" for e in rfc["edges"])  # bridge edge
 
 
 def test_card_renders_composition_graph_and_writes_file(tmp_path):

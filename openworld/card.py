@@ -41,6 +41,7 @@ _THEMES = {
     },
 }
 _SERIES = ["#2563eb", "#0f9d8f", "#d97706", "#db2777", "#7c3aed"]
+REACTFLOW_PLAYGROUND = "https://play.reactflow.dev"
 MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
 SERIF = "'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif"
 LEAFW, LEAFH = 176, 104
@@ -749,6 +750,9 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
         + f'<line x1="{CX}" y1="{foot_y-8:.1f}" x2="{W-CX}" y2="{foot_y-8:.1f}" '
           f'stroke="{c["line"]}" stroke-width="1"/>'
         + _t(CX, foot_y + 12, foot, 11, "500", c["muted"])
+        + f'<a href="{REACTFLOW_PLAYGROUND}" target="_blank">'
+        + _t(W / 2, foot_y + 12, "▸ open in React Flow", 10.5, "700", c["accent"],
+             anchor="middle", family=MONO) + "</a>"
         + _t(W - CX, foot_y + 12, "OpenWorld", 12, "800", c["accent"], anchor="end"))
 
     svg_doc = (
@@ -760,6 +764,102 @@ def render_card(world_or_spec: Union[World, Dict[str, Any]],
     if path is not None:
         Path(path).write_text(svg_doc, encoding="utf-8")
     return svg_doc
+
+
+def _rf_world(spec, nid, parent, x, y, nodes, edges):
+    comp = spec.get("composite")
+    w, h = _measure_world(spec)
+    node = {"id": nid, "position": {"x": round(x, 1), "y": round(y, 1)},
+            "data": {"label": spec["name"]},
+            "style": {"width": int(w), "height": int(h)}}
+    if parent:
+        node["parentNode"] = parent
+        node["extent"] = "parent"
+    if not comp:
+        node["type"] = "default"
+        lines = _compact_state_lines(spec, 2)
+        node["data"]["label"] = spec["name"] + (("\n" + ", ".join(lines)) if lines else "")
+        nodes.append(node)
+        return
+    node["type"] = "group"
+    nodes.append(node)
+    ch = comp.get("children", {})
+    pad, head, gap = 20, 52, 30
+    sizes = {ns: _measure_world(c) for ns, c in ch.items()}
+    rowh = max(s[1] for s in sizes.values())
+    cx, cids = pad, {}
+    for ns, child in ch.items():
+        w_i, h_i = sizes[ns]
+        cid = f"{nid}/{ns}"
+        cids[ns] = cid
+        _rf_world(child, cid, nid, cx, head + (rowh - h_i) / 2, nodes, edges)
+        cx += w_i + gap
+    for a in comp.get("aggregators", []):
+        aid = f"{nid}/agg/{a.get('name', 'agg')}"
+        nodes.append({"id": aid, "parentNode": nid, "extent": "parent",
+                      "type": "output", "position": {"x": int(w - 150), "y": 12},
+                      "data": {"label": "Σ " + a.get("name", "agg")},
+                      "style": {"width": 130, "height": 30}})
+        for cid in cids.values():
+            edges.append({"id": f"e:{cid}->{aid}", "source": cid, "target": aid,
+                          "animated": True})
+    for b in comp.get("bridges", []):
+        sa, sb = cids.get(b.get("a")), cids.get(b.get("b"))
+        if sa and sb:
+            e = {"id": f"e:{sa}~{sb}", "source": sa, "target": sb,
+                 "label": b.get("name", ""), "type": "smoothstep"}
+            if b.get("kind") == "route":
+                e["animated"] = True
+            edges.append(e)
+    for bd in comp.get("bindings", []):
+        cid = cids.get(bd.get("child"))
+        if cid:
+            edges.append({"id": f"e:bind:{cid}:{bd.get('key', '')}", "source": nid,
+                          "target": cid, "label": bd.get("key", ""), "animated": True,
+                          "style": {"strokeDasharray": "4 3"}})
+
+
+def to_reactflow(world_or_spec: Union[World, Dict[str, Any]]) -> Dict[str, Any]:
+    """Export the world's graph as React Flow ``{nodes, edges, playground}`` with
+    positions (nested composites use ``parentNode`` group nodes; leaves use the
+    state-transition automaton). ``playground`` is the React Flow playground URL
+    (https://play.reactflow.dev) where the exported nodes/edges can be pasted to
+    explore interactively. Pure JSON data, no React dependency."""
+    spec = _as_spec(world_or_spec)
+    nodes: List[Dict[str, Any]] = []
+    edges: List[Dict[str, Any]] = []
+    if spec.get("composite"):
+        _rf_world(spec, spec["name"], None, 0.0, 0.0, nodes, edges)
+        return {"nodes": nodes, "edges": edges, "playground": REACTFLOW_PLAYGROUND}
+    g = (spec.get("preview", {}) or {}).get("graph", {}) or {}
+    gn, ge = g.get("nodes", []), g.get("edges", [])
+    if not gn:
+        return {"nodes": [{"id": "n0", "position": {"x": 0, "y": 0},
+                           "type": "input", "data": {"label": spec["name"]}}],
+                "edges": [], "playground": REACTFLOW_PLAYGROUND}
+    ids = [n["id"] for n in gn]
+    layer = {i: 0 for i in ids}
+    fwd = [e for e in ge if e["src"] != e["dst"]]
+    for _ in range(len(ids)):
+        changed = False
+        for e in fwd:
+            if layer[e["dst"]] < layer[e["src"]] + 1 <= len(ids):
+                layer[e["dst"]] = layer[e["src"]] + 1
+                changed = True
+        if not changed:
+            break
+    rows: Dict[int, int] = {}
+    for n in gn:
+        lyr = layer[n["id"]]
+        r = rows.get(lyr, 0)
+        rows[lyr] = r + 1
+        nodes.append({"id": f"n{n['id']}", "position": {"x": lyr * 240, "y": r * 110},
+                      "type": "input" if n.get("initial") else "default",
+                      "data": {"label": "\n".join(n.get("label", []))}})
+    for k, e in enumerate(ge):
+        edges.append({"id": f"e{k}", "source": f"n{e['src']}",
+                      "target": f"n{e['dst']}", "label": e.get("action", "")})
+    return {"nodes": nodes, "edges": edges, "playground": REACTFLOW_PLAYGROUND}
 
 
 def render_gallery(specs: List[Dict[str, Any]], path: Optional[Union[str, Path]] = None,

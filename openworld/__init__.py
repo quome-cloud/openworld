@@ -41,7 +41,7 @@ from .intervals import Affine, Interval
 from .infogeom import bayes_update, expected_info_gain, fisher_information
 from .transport import kl_hist, wasserstein1
 from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
-                   spec_to_json, to_spec, validate_spec)
+                   spec_to_json, to_mermaid, to_spec, validate_spec)
 from .card import render_card, render_gallery
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
@@ -132,6 +132,7 @@ __all__ = [
     "validate_spec",
     "spec_to_json",
     "spec_from_json",
+    "to_mermaid",
     "render_card",
     "render_gallery",
     "Objective",

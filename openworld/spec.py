@@ -125,6 +125,66 @@ def _pick_preview_action(world: World) -> str:
     return best
 
 
+def _state_key(state: Dict[str, Any]) -> str:
+    return json.dumps(dict(state), sort_keys=True, default=str)
+
+
+def _transition_graph(world: World, max_nodes: int = 6) -> Dict[str, Any]:
+    """The world's actual state-transition graph, by BFS from the initial state:
+    nodes are distinct reachable states, edges are actions. Computed once at
+    serialize time (the card renderer cannot execute downloaded code). Bounded to
+    a handful of nodes so the picture stays legible. Leaf worlds only."""
+    try:
+        if world.transition is None or isinstance(world, CompositeWorld):
+            return {}
+        agent = _first_agent(world)
+        start = dict(WorldState(world.initial_state).copy())
+        k0 = _state_key(start)
+        states: Dict[str, Dict[str, Any]] = {k0: start}
+        order: List[str] = [k0]
+        edges: List[Dict[str, Any]] = []
+        queue = [k0]
+        while queue and len(order) < max_nodes:
+            k = queue.pop(0)
+            idem: List[str] = []
+            for a in world.actions:
+                try:
+                    nxt = dict(world.transition.step(
+                        WorldState(states[k]).copy(), Action(a, agent=agent)))
+                except Exception:
+                    continue
+                nk = _state_key(nxt)
+                if nk == k:
+                    idem.append(a)
+                    continue
+                if nk not in states:
+                    if len(order) >= max_nodes:
+                        continue
+                    states[nk] = nxt
+                    order.append(nk)
+                    queue.append(nk)
+                edges.append({"src": k, "dst": nk, "action": a})
+            if idem:
+                edges.append({"src": k, "dst": k, "action": ", ".join(idem[:3])})
+        # choose up to 3 scalar vars that vary across nodes for compact labels
+        scal = {k: _numeric_scalars(s) for k, s in states.items()}
+        keys = sorted({kk for sc in scal.values() for kk in sc})
+        varying = [kk for kk in keys
+                   if len({scal[k].get(kk) for k in order}) > 1][:3] or keys[:3]
+        idx = {k: i for i, k in enumerate(order)}
+        nodes = []
+        for k in order:
+            label = [f"{kk} {scal[k][kk]:g}" for kk in varying if kk in scal[k]]
+            nodes.append({"id": idx[k], "label": label or [f"s{idx[k]}"],
+                          "initial": k == k0})
+        graph_edges = [{"src": idx[e["src"]], "dst": idx[e["dst"]],
+                        "action": e["action"]} for e in edges]
+        return {"kind": "state", "nodes": nodes, "edges": graph_edges,
+                "truncated": len(order) >= max_nodes}
+    except Exception:
+        return {}
+
+
 def _rollout_preview(world: World, steps: int) -> Dict[str, Any]:
     """Roll the live world forward and record numeric series for the card.
     Best-effort: any failure yields an empty preview (never blocks to_spec)."""
@@ -145,7 +205,8 @@ def _rollout_preview(world: World, steps: int) -> Dict[str, Any]:
             s = world.transition.step(s, Action(act, agent=agent))
             record(dict(s))
         series = {k: v for k, v in series.items() if len(set(v)) > 1}
-        return {"steps": steps, "action": act, "series": series}
+        return {"steps": steps, "action": act, "series": series,
+                "graph": _transition_graph(world)}
     except Exception:
         return {}
 
@@ -403,6 +464,59 @@ def validate_spec(spec: Any) -> List[str]:
                     if need not in b:
                         problems.append(f"bridge missing {need!r}")
     return problems
+
+
+def _mm_id(prefix: str, key: Any) -> str:
+    safe = "".join(ch if ch.isalnum() else "_" for ch in str(key))
+    return f"{prefix}_{safe}"
+
+
+def to_mermaid(spec: Dict[str, Any]) -> str:
+    """Render the world's graph as Mermaid flowchart text (GitHub/markdown render
+    it natively): a composition dataflow for composites, the state-transition
+    automaton for leaves."""
+    comp = spec.get("composite")
+    lines: List[str]
+    if comp:
+        lines = ["flowchart TD"]
+        for ns in comp.get("children", {}):
+            lines.append(f'  {_mm_id("c", ns)}["{ns}"]')
+        agg_ids = set()
+        for a in comp.get("aggregators", []):
+            nm = a.get("name", "agg")
+            aid = _mm_id("a", nm)
+            agg_ids.add(nm)
+            lines.append(f'  {aid}(["Σ {nm}"])')
+            for ns in comp.get("children", {}):
+                lines.append(f'  {_mm_id("c", ns)} --> {aid}')
+        for b in comp.get("bridges", []):
+            arrow = "-.->" if b.get("kind") == "route" else "-->"
+            label = b.get("name", "")
+            mid = f"|{label}|" if label else ""
+            lines.append(f'  {_mm_id("c", b.get("a"))} {arrow}{mid} {_mm_id("c", b.get("b"))}')
+        for bd in comp.get("bindings", []):
+            sp = bd.get("source_path", [])
+            src = (_mm_id("a", sp[1]) if len(sp) >= 2 and sp[0] == "_agg"
+                   and sp[1] in agg_ids else _mm_id("c", bd.get("child")))
+            lines.append(f'  {src} -.{bd.get("key", "")}.-> {_mm_id("c", bd.get("child"))}')
+        return "\n".join(lines)
+
+    g = (spec.get("preview", {}) or {}).get("graph", {}) or {}
+    lines = ["flowchart LR"]
+    for n in g.get("nodes", []):
+        label = "<br/>".join(n.get("label", [])) or f's{n["id"]}'
+        tag = "((start))" if n.get("initial") else None
+        if tag:
+            lines.append(f'  n{n["id"]}["{label}"]:::start')
+        else:
+            lines.append(f'  n{n["id"]}["{label}"]')
+    for e in g.get("edges", []):
+        act = e.get("action", "")
+        mid = f"|{act}|" if act else ""
+        lines.append(f'  n{e["src"]} -->{mid} n{e["dst"]}')
+    if any(n.get("initial") for n in g.get("nodes", [])):
+        lines.append("  classDef start stroke-width:2px;")
+    return "\n".join(lines)
 
 
 def spec_to_json(spec: Dict[str, Any], indent: Optional[int] = 2) -> str:

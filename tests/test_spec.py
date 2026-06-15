@@ -3,8 +3,8 @@
 import pytest
 
 from openworld import (CodeTransition, CompositeWorld, FunctionTransition, World,
-                       from_spec, spec_from_json, spec_to_json, to_spec,
-                       validate_spec)
+                       from_spec, spec_from_json, spec_to_json, to_mermaid,
+                       to_spec, validate_spec)
 from openworld.compose import Aggregator, Binding, Bridge
 from openworld.spec import SPEC_VERSION, SpecError
 from openworld.state import Action
@@ -185,3 +185,21 @@ def test_composite_round_trips_behaviorally():
     w2 = from_spec(to_spec(w), allow_code=True)
     acts = ["tick", "tick", "shop:inc", "tick"]
     assert _rollout(w, acts) == _rollout(w2, acts)
+
+
+# --------------------------------------------------------------------------- #
+# mermaid export
+# --------------------------------------------------------------------------- #
+def test_mermaid_leaf_is_state_machine():
+    mm = to_mermaid(to_spec(counter_world()))
+    assert mm.startswith("flowchart LR")
+    assert "-->|inc|" in mm                      # action-labeled transition
+    assert ":::start" in mm                      # initial state marked
+
+
+def test_mermaid_composite_is_dataflow():
+    mm = to_mermaid(to_spec(economy_world()))
+    assert mm.startswith("flowchart TD")
+    assert "c_shop" in mm and "c_market" in mm
+    assert "|restock|" in mm                     # bridge edge
+    assert "Σ total_value" in mm                 # aggregator node

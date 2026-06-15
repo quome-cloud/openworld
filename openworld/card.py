@@ -1,14 +1,14 @@
-"""Beautiful, self-contained HTML model cards for world-model specs.
+"""Stunning, self-contained SVG model cards for world-model specs.
 
-``render_card`` turns a world (or its spec) into a single ``.html`` file with
-inline CSS and inline SVG --- no external references, so a card is a drop-in,
-embeddable artifact for a "marketplace for world models". ``render_gallery``
-writes a responsive grid of tiles linking to each card.
+``render_card`` turns a world (or its spec) into a single standalone ``.svg`` ---
+gradients, soft shadows, a designed composition graph (gradient-filled child
+nodes, curved bridge edges with arrowheads, aggregator roll-ups), a typeset state
+schema + action chips, and an area-fill rollout sparkline. One self-contained
+file, no external references, so a card renders identically in a browser, a
+GitHub README (``<img src="card.svg">``), or a slide.
 
-Layout (the approved model-card design): a metadata header band; a left column
-with an SVG composition diagram (nested child boxes, bridge arrows, aggregator
-roll-ups, counts); a right column with the state schema, action chips, and an SVG
-rollout sparkline drawn from the spec's preview series.
+``render_gallery`` builds an SVG contact sheet of clickable tiles (each links to
+its ``<name>.svg``) --- the marketplace browse view.
 
 Zero-dependency: standard library only.
 """
@@ -17,21 +17,39 @@ from __future__ import annotations
 
 import html
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from .spec import SPEC_VERSION, to_spec
 from .world import World
 
-# palette per theme: (background tokens live in CSS; these drive the SVG)
 _THEMES = {
-    "light": {"text": "#1f2933", "muted": "#64748b", "accent": "#2563eb",
-              "parent": "#c7d2fe", "child": "#eef2ff", "edge": "#2563eb",
-              "agg": "#7c3aed"},
-    "dark": {"text": "#e6e9ef", "muted": "#94a3b8", "accent": "#60a5fa",
-             "parent": "#27314a", "child": "#1b2233", "edge": "#60a5fa",
-             "agg": "#a78bfa"},
+    "light": {
+        "bg0": "#ffffff", "bg1": "#eef2f8", "text": "#0f172a", "muted": "#64748b",
+        "accent": "#2563eb", "accent2": "#7c3aed", "node0": "#ffffff",
+        "node1": "#eef2ff", "edge": "#2563eb", "chipbg": "#eef2ff",
+        "chiptx": "#3730a3", "line": "#e2e8f0", "good": "#059669",
+        "agg": "#7c3aed", "shadow": "#0f172a", "shadowO": "0.16",
+        "panelStroke": "#e2e8f0",
+    },
+    "dark": {
+        "bg0": "#0c111c", "bg1": "#141d2e", "text": "#e7ecf5", "muted": "#93a4bd",
+        "accent": "#5b9dff", "accent2": "#b18bff", "node0": "#1b2435",
+        "node1": "#141c2b", "edge": "#5b9dff", "chipbg": "#1d2740",
+        "chiptx": "#c7d6ff", "line": "#26324a", "good": "#34d399",
+        "agg": "#b18bff", "shadow": "#000000", "shadowO": "0.5",
+        "panelStroke": "#26324a",
+    },
 }
-_SERIES_COLORS = ["#2563eb", "#0f766e", "#d97706", "#b91c1c", "#7c3aed"]
+_SERIES = ["#2563eb", "#0f9d8f", "#d97706", "#db2777", "#7c3aed"]
+
+W = 900
+PAD = 26
+CX = 58
+CW = W - 2 * CX
+COLGAP = 38
+COLW = (CW - COLGAP) // 2
+LX = CX
+RX = CX + COLW + COLGAP
 
 
 def _esc(value: Any) -> str:
@@ -42,275 +60,536 @@ def _as_spec(world_or_spec: Union[World, Dict[str, Any]]) -> Dict[str, Any]:
     return world_or_spec if isinstance(world_or_spec, dict) else to_spec(world_or_spec)
 
 
+def _t(x, y, s, size, weight, fill, anchor="start", spacing=None, opacity=None):
+    extra = f' text-anchor="{anchor}"' if anchor != "start" else ""
+    if spacing is not None:
+        extra += f' letter-spacing="{spacing}"'
+    if opacity is not None:
+        extra += f' opacity="{opacity}"'
+    return (f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size}" '
+            f'font-weight="{weight}" fill="{fill}"{extra}>{_esc(s)}</text>')
+
+
+def _wrap(text: str, width: int, max_lines: int) -> List[str]:
+    words, lines, cur = str(text).split(), [], ""
+    for w in words:
+        trial = (cur + " " + w).strip()
+        if len(trial) <= width:
+            cur = trial
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+        if len(lines) == max_lines:
+            break
+    if cur and len(lines) < max_lines:
+        lines.append(cur)
+    if len(lines) == max_lines and (len(" ".join(lines)) < len(text)):
+        lines[-1] = lines[-1][:width - 1].rstrip() + "…"
+    return lines or [""]
+
+
 # --------------------------------------------------------------------------- #
-# SVG pieces
+# defs: gradients, shadow filter, arrowhead
 # --------------------------------------------------------------------------- #
-def _box(x, y, w, h, fill, stroke, title, lines, colors, rx=10):
-    parts = [
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" '
-        f'fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>',
-        f'<text x="{x + 12}" y="{y + 22}" font-size="13" font-weight="700" '
-        f'fill="{colors["text"]}">{_esc(title)}</text>',
-    ]
-    for i, line in enumerate(lines):
-        parts.append(
-            f'<text x="{x + 12}" y="{y + 40 + i * 15}" font-size="10.5" '
-            f'fill="{colors["muted"]}">{_esc(line)}</text>')
-    return "".join(parts)
+def _defs(c: Dict[str, str]) -> str:
+    return (
+        "<defs>"
+        f'<linearGradient id="gbg" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0" stop-color="{c["bg0"]}"/>'
+        f'<stop offset="1" stop-color="{c["bg1"]}"/></linearGradient>'
+        f'<linearGradient id="gnode" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0" stop-color="{c["node0"]}"/>'
+        f'<stop offset="1" stop-color="{c["node1"]}"/></linearGradient>'
+        f'<linearGradient id="gacc" x1="0" y1="0" x2="1" y2="0">'
+        f'<stop offset="0" stop-color="{c["accent"]}"/>'
+        f'<stop offset="1" stop-color="{c["accent2"]}"/></linearGradient>'
+        f'<linearGradient id="garea" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0" stop-color="{c["accent"]}" stop-opacity="0.34"/>'
+        f'<stop offset="1" stop-color="{c["accent"]}" stop-opacity="0"/>'
+        f'</linearGradient>'
+        f'<filter id="sh" x="-30%" y="-30%" width="160%" height="160%">'
+        f'<feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="{c["shadow"]}" '
+        f'flood-opacity="{c["shadowO"]}"/></filter>'
+        f'<filter id="shsoft" x="-40%" y="-40%" width="180%" height="180%">'
+        f'<feDropShadow dx="0" dy="10" stdDeviation="22" flood-color="{c["shadow"]}" '
+        f'flood-opacity="{c["shadowO"]}"/></filter>'
+        f'<marker id="arr" markerWidth="9" markerHeight="9" refX="6.5" refY="3" '
+        f'orient="auto"><path d="M0,0 L6.5,3 L0,6 Z" fill="{c["edge"]}"/></marker>'
+        "</defs>")
 
 
-def _state_preview_lines(spec: Dict[str, Any], limit: int = 3) -> List[str]:
-    schema = spec.get("state_schema", {})
-    keys = [k for k in schema if not k.startswith("_")][:limit]
-    extra = max(0, len([k for k in schema if not k.startswith("_")]) - limit)
-    lines = [f"{k}: {schema[k]}" for k in keys]
-    if extra:
-        lines.append(f"+{extra} more")
-    return lines
+def _globe(x: float, y: float, r: float, c: Dict[str, str]) -> str:
+    return (f'<g transform="translate({x:.1f},{y:.1f})">'
+            f'<circle r="{r}" fill="url(#gacc)"/>'
+            f'<circle r="{r}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.1"/>'
+            f'<ellipse rx="{r*0.45:.1f}" ry="{r}" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1"/>'
+            f'<line x1="{-r}" y1="0" x2="{r}" y2="0" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1"/>'
+            f'<line x1="{-r*0.86:.1f}" y1="{-r*0.5:.1f}" x2="{r*0.86:.1f}" y2="{-r*0.5:.1f}" stroke="#ffffff" stroke-opacity="0.4" stroke-width="0.9"/>'
+            f'<line x1="{-r*0.86:.1f}" y1="{r*0.5:.1f}" x2="{r*0.86:.1f}" y2="{r*0.5:.1f}" stroke="#ffffff" stroke-opacity="0.4" stroke-width="0.9"/>'
+            f'</g>')
 
 
-def _composition_svg(spec: Dict[str, Any], colors: Dict[str, str]) -> str:
-    comp = spec.get("composite")
-    width = 340
-    if not comp:                                  # leaf world: one box
-        h = 86
-        body = _box(12, 12, width - 24, h, colors["child"], colors["accent"],
-                    spec["name"], _state_preview_lines(spec), colors)
-        return _svg_wrap(width, h + 24, body)
-
-    children = comp.get("children", {})
-    names = list(children)
-    cw, ch, gap, top, pad = 188, 70, 18, 56, 16
-    inner_left = pad + 12
-    height = top + len(names) * (ch + gap) + 64
-    parent = (f'<rect x="{pad}" y="{pad}" width="{width - 2 * pad}" '
-              f'height="{height - 2 * pad}" rx="14" fill="{colors["parent"]}" '
-              f'fill-opacity="0.35" stroke="{colors["accent"]}" stroke-width="2"/>'
-              f'<text x="{pad + 14}" y="{pad + 26}" font-size="13.5" '
-              f'font-weight="800" fill="{colors["text"]}">{_esc(spec["name"])}</text>')
-
-    boxes, centers = [], {}
-    for i, ns in enumerate(names):
-        y = top + i * (ch + gap)
-        boxes.append(_box(inner_left, y, cw, ch, colors["child"], colors["accent"],
-                          ns, _state_preview_lines(children[ns], 2), colors))
-        centers[ns] = (inner_left + cw, y + ch / 2, inner_left, y + ch / 2)
-
-    # bridge arrows down the right gutter
-    gutter = inner_left + cw + 16
-    edges = []
-    for b in comp.get("bridges", []):
-        a, bb = b.get("a"), b.get("b")
-        if a in centers and bb in centers:
-            _, ya, _, _ = centers[a]
-            xr, yb, _, _ = centers[bb]
-            edges.append(
-                f'<path d="M {inner_left + cw} {ya} C {gutter + 18} {ya}, '
-                f'{gutter + 18} {yb}, {inner_left + cw} {yb}" fill="none" '
-                f'stroke="{colors["edge"]}" stroke-width="1.6" '
-                f'marker-end="url(#arrow)"/>'
-                f'<text x="{gutter + 22}" y="{(ya + yb) / 2}" font-size="9.5" '
-                f'fill="{colors["edge"]}">{_esc(b.get("name", "bridge"))}</text>')
-
-    # aggregator roll-up pills along the bottom
-    aggs = comp.get("aggregators", [])
-    pills, px = [], inner_left
-    py = top + len(names) * (ch + gap) + 4
-    for a in aggs:
-        label = f'Σ {a.get("name", "agg")}'
-        w = 12 + len(label) * 6.4
-        pills.append(
-            f'<rect x="{px}" y="{py}" width="{w:.0f}" height="22" rx="11" '
-            f'fill="none" stroke="{colors["agg"]}" stroke-width="1.3"/>'
-            f'<text x="{px + 8}" y="{py + 15}" font-size="10" '
-            f'fill="{colors["agg"]}">{_esc(label)}</text>')
-        px += w + 10
-
-    defs = (f'<defs><marker id="arrow" markerWidth="8" markerHeight="8" '
-            f'refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" '
-            f'fill="{colors["edge"]}"/></marker></defs>')
-    body = defs + parent + "".join(boxes) + "".join(edges) + "".join(pills)
-    return _svg_wrap(width, height, body)
+def _pill(x, y, label, c, fg=None, bg=None, font=12) -> Tuple[str, float]:
+    fg = fg or c["chiptx"]
+    bg = bg or c["chipbg"]
+    w = 16 + len(str(label)) * font * 0.62
+    svg = (f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{font+10}" '
+           f'rx="{(font+10)/2:.1f}" fill="{bg}"/>'
+           + _t(x + 8, y + font + 2, label, font, "600", fg))
+    return svg, w
 
 
-def _svg_wrap(w: int, h: float, body: str) -> str:
-    return (f'<svg viewBox="0 0 {w} {h:.0f}" width="100%" '
-            f'preserveAspectRatio="xMinYMin meet" '
-            f'xmlns="http://www.w3.org/2000/svg" role="img">{body}</svg>')
+# --------------------------------------------------------------------------- #
+# graph: leaf state-transition automaton / composite dataflow, laid out + drawn
+# --------------------------------------------------------------------------- #
+def _gnode(x, y, w, h, lines, c, kind, initial) -> str:
+    if kind == "agg":
+        fill, stroke, sw = c["node1"], c["agg"], 1.4
+    elif kind == "param":
+        fill, stroke, sw = c["node1"], c["muted"], 1.2
+    else:
+        fill = "url(#gnode)"
+        stroke, sw = (c["accent"], 2.0) if initial else (c["line"], 1.2)
+    out = [f'<g filter="url(#sh)"><rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" '
+           f'height="{h:.1f}" rx="12" fill="{fill}" stroke="{stroke}" '
+           f'stroke-width="{sw}"/></g>']
+    if initial:
+        out.append(_t(x + 2, y - 6, "▶ start", 9.5, "700", c["accent"]))
+    ty = y + (h - len(lines) * 14) / 2 + 11
+    for i, ln in enumerate(lines):
+        size = 12.5 if i == 0 else 10.5
+        col = c["text"] if i == 0 else c["muted"]
+        out.append(_t(x + w / 2, ty + i * 14, ln, size, "700" if i == 0 else "500",
+                      col, anchor="middle"))
+    return "".join(out)
 
 
-def _sparkline_svg(preview: Dict[str, Any], colors: Dict[str, str],
-                   max_series: int = 4) -> str:
-    series = preview.get("series", {}) if preview else {}
-    series = {k: v for k, v in series.items() if isinstance(v, list) and len(v) > 1}
-    if not series:
+def _edge_label(x, y, text, c) -> str:
+    if not text:
         return ""
-    names = sorted(series, key=lambda k: -(max(series[k]) - min(series[k])))[:max_series]
-    w, h, pad = 320, 96, 10
-    rows = []
-    legend = []
-    for i, name in enumerate(names):
-        vals = series[name]
+    w = len(text) * 6.0 + 10
+    return (f'<rect x="{x-w/2:.1f}" y="{y-8:.1f}" width="{w:.1f}" height="15" rx="7.5" '
+            f'fill="{c["bg0"]}" stroke="{c["line"]}" stroke-width="0.8"/>'
+            + _t(x, y + 3, text, 9.5, "600", c["edge"], anchor="middle"))
+
+
+def _graph_layout(nodes, edges, x, y, w, c) -> Tuple[str, float]:
+    if not nodes:
+        return _t(x, y + 30, "no graph", 12, "500", c["muted"]), 70
+    ids = [n["id"] for n in nodes]
+    nd = {n["id"]: n for n in nodes}
+    if all(n.get("rank") is not None for n in nodes):
+        layer = {n["id"]: n["rank"] for n in nodes}
+    else:
+        layer = {i: 0 for i in ids}
+        fwd = [e for e in edges if e["src"] != e["dst"]]
+        for _ in range(len(ids)):
+            changed = False
+            for e in fwd:
+                if e["src"] in layer and e["dst"] in layer and \
+                        layer[e["dst"]] < layer[e["src"]] + 1 <= len(ids):
+                    layer[e["dst"]] = layer[e["src"]] + 1
+                    changed = True
+            if not changed:
+                break
+    base = min(layer.values())
+    layer = {k: v - base for k, v in layer.items()}
+    L = max(layer.values()) + 1
+    layers: Dict[int, List[str]] = {}
+    for i in ids:
+        layers.setdefault(layer[i], []).append(i)
+
+    maxchars = max((max((len(s) for s in nd[i]["label"]), default=3) for i in ids))
+    maxlines = max(len(nd[i]["label"]) for i in ids)
+    nw = max(104.0, min(176.0, maxchars * 6.8 + 26))
+    nh = 20 + maxlines * 15
+    vgap, top_pad, bot_pad = 18, 28, 12
+    max_count = max(len(v) for v in layers.values())
+    Hg = max_count * nh + (max_count - 1) * vgap
+    colstep = (w - nw) / (L - 1) if L > 1 else 0.0
+    y0 = y + top_pad
+    pos: Dict[str, Tuple[float, float]] = {}
+    for lyr, members in layers.items():
+        m = len(members)
+        start = y0 + (Hg - (m * nh + (m - 1) * vgap)) / 2
+        cx = x + lyr * colstep
+        for j, i in enumerate(members):
+            pos[i] = (cx, start + j * (nh + vgap))
+
+    el: List[str] = []
+    for e in edges:
+        s, d = e["src"], e["dst"]
+        if s not in pos or d not in pos:
+            continue
+        sx, sy = pos[s]
+        dx, dy = pos[d]
+        dash = ' stroke-dasharray="5 4"' if e.get("style") == "dash" else ""
+        stroke = c["edge"]
+        if s == d:                                            # self-loop (top)
+            lx = sx + nw * 0.5
+            el.append(f'<path d="M {lx-13:.1f} {sy:.1f} C {lx-24:.1f} {sy-26:.1f}, '
+                      f'{lx+24:.1f} {sy-26:.1f}, {lx+13:.1f} {sy:.1f}" fill="none" '
+                      f'stroke="{stroke}" stroke-width="1.5"{dash} '
+                      f'marker-end="url(#arr)"/>')
+            el.append(_edge_label(lx, sy - 24, e.get("action", ""), c))
+            continue
+        if dx > sx:                                           # forward
+            x1, y1, x2, y2 = sx + nw, sy + nh / 2, dx, dy + nh / 2
+            mx = (x1 + x2) / 2
+            el.append(f'<path d="M {x1:.1f} {y1:.1f} C {mx:.1f} {y1:.1f}, '
+                      f'{mx:.1f} {y2:.1f}, {x2-3:.1f} {y2:.1f}" fill="none" '
+                      f'stroke="{stroke}" stroke-width="1.7" stroke-opacity="0.85"'
+                      f'{dash} marker-end="url(#arr)"/>')
+            lxm, lym = mx, (y1 + y2) / 2
+        elif dx < sx:                                         # backward (curve below)
+            x1, y1, x2, y2 = sx, sy + nh / 2, dx + nw, dy + nh / 2
+            my = max(y1, y2) + nh / 2 + 14
+            el.append(f'<path d="M {x1:.1f} {y1:.1f} C {x1-30:.1f} {my:.1f}, '
+                      f'{x2+30:.1f} {my:.1f}, {x2+3:.1f} {y2:.1f}" fill="none" '
+                      f'stroke="{stroke}" stroke-width="1.6" stroke-opacity="0.8"'
+                      f'{dash} marker-end="url(#arr)"/>')
+            lxm, lym = (x1 + x2) / 2, my
+        else:                                                 # same column (right bow)
+            x1, y1, x2, y2 = sx + nw, sy + nh / 2, dx + nw, dy + nh / 2
+            off = 46
+            el.append(f'<path d="M {x1:.1f} {y1:.1f} C {x1+off:.1f} {y1:.1f}, '
+                      f'{x1+off:.1f} {y2:.1f}, {x2:.1f} {y2:.1f}" fill="none" '
+                      f'stroke="{stroke}" stroke-width="1.7" stroke-opacity="0.85"'
+                      f'{dash} marker-end="url(#arr)"/>')
+            lxm, lym = x1 + off, (y1 + y2) / 2
+        el.append(_edge_label(lxm, lym, e.get("action", ""), c))
+
+    for i in ids:
+        nx, ny = pos[i]
+        el.append(_gnode(nx, ny, nw, nh, nd[i]["label"], c, nd[i].get("kind", "state"),
+                         nd[i].get("initial", False)))
+    return "".join(el), top_pad + Hg + bot_pad
+
+
+def _leaf_graph(spec: Dict[str, Any]):
+    g = (spec.get("preview", {}) or {}).get("graph", {}) or {}
+    nodes = [{"id": n["id"], "label": n["label"], "kind": "state",
+              "initial": n.get("initial", False)} for n in g.get("nodes", [])]
+    edges = [{"src": e["src"], "dst": e["dst"], "action": e.get("action", "")}
+             for e in g.get("edges", [])]
+    return nodes, edges
+
+
+def _composite_graph(spec: Dict[str, Any]):
+    comp = spec["composite"]
+    children = comp.get("children", {})
+    nodes, edges = [], []
+    for ns, child in children.items():
+        sub = "composite" if child.get("composite") else f'{len(child.get("actions", []))} actions'
+        nodes.append({"id": f"c:{ns}", "label": [ns, sub], "kind": "world", "rank": 1})
+    agg_ids = set()
+    for a in comp.get("aggregators", []):
+        nm = a.get("name", "agg")
+        aid = f"a:{nm}"
+        agg_ids.add(aid)
+        nodes.append({"id": aid, "label": [f"Σ {nm}"], "kind": "agg", "rank": 2})
+        for ns in children:
+            edges.append({"src": f"c:{ns}", "dst": aid, "action": "", "style": "solid"})
+    for b in comp.get("bridges", []):
+        edges.append({"src": f'c:{b.get("a")}', "dst": f'c:{b.get("b")}',
+                      "action": b.get("name", ""),
+                      "style": "dash" if b.get("kind") == "route" else "solid"})
+    params = False
+    for bd in comp.get("bindings", []):
+        sp, child = bd.get("source_path", []), f'c:{bd.get("child")}'
+        if len(sp) >= 2 and sp[0] == "_agg" and f"a:{sp[1]}" in agg_ids:
+            edges.append({"src": f"a:{sp[1]}", "dst": child,
+                          "action": bd.get("key", ""), "style": "dash"})
+        else:
+            if not params:
+                nodes.append({"id": "p:params", "label": ["params"],
+                              "kind": "param", "rank": 0})
+                params = True
+            edges.append({"src": "p:params", "dst": child,
+                          "action": bd.get("key", ""), "style": "dash"})
+    return nodes, edges
+
+
+def _composition(spec: Dict[str, Any], x: float, y: float, w: float,
+                 c: Dict[str, str]) -> Tuple[str, float]:
+    is_comp = bool(spec.get("composite"))
+    title = "COMPOSITION GRAPH" if is_comp else "STATE-TRANSITION GRAPH"
+    out = [_t(x, y + 2, title, 11, "700", c["muted"], spacing="1.6")]
+    nodes, edges = _composite_graph(spec) if is_comp else _leaf_graph(spec)
+    if not nodes:
+        nodes = [{"id": "only", "label": [spec["name"]], "kind": "world",
+                  "initial": True}]
+        edges = []
+    gsvg, gh = _graph_layout(nodes, edges, x, y + 18, w, c)
+    return "".join(out) + gsvg, 18 + gh + 6
+
+
+# --------------------------------------------------------------------------- #
+# right column: schema, actions, dynamics, rollout
+# --------------------------------------------------------------------------- #
+def _schema_block(spec, x, y, w, c) -> Tuple[str, float]:
+    out = [_t(x, y + 2, "STATE SCHEMA", 11, "700", c["muted"], spacing="1.6")]
+    schema = {k: v for k, v in spec.get("state_schema", {}).items()
+              if not k.startswith("_")}
+    items = list(schema.items())[:6]
+    ry = y + 22
+    for k, ty in items:
+        out.append(_t(x, ry + 11, k, 13, "600", c["text"]))
+        pill, pw = _pill(x + w - (16 + len(str(ty)) * 12 * 0.62), ry - 1, ty, c, font=11)
+        out.append(pill)
+        out.append(f'<line x1="{x:.1f}" y1="{ry+20:.1f}" x2="{x+w:.1f}" y2="{ry+20:.1f}" '
+                   f'stroke="{c["line"]}" stroke-width="1" stroke-dasharray="2 4"/>')
+        ry += 27
+    if len(schema) > 6:
+        out.append(_t(x, ry + 10, f"+{len(schema) - 6} more", 11.5, "500", c["muted"]))
+        ry += 22
+    return "".join(out), ry - y + 6
+
+
+def _chips_block(spec, x, y, w, c, title, items, limit) -> Tuple[str, float]:
+    out = [_t(x, y + 2, title, 11, "700", c["muted"], spacing="1.6")]
+    cx, cy = x, y + 16
+    shown = items[:limit]
+    for it in shown:
+        pill, pw = _pill(cx, cy, it, c)
+        if cx + pw > x + w:
+            cx, cy = x, cy + 30
+            pill, pw = _pill(cx, cy, it, c)
+        out.append(pill)
+        cx += pw + 8
+    if len(items) > limit:
+        pill, pw = _pill(cx, cy, f"+{len(items) - limit}", c)
+        out.append(pill)
+    return "".join(out), (cy + 30) - y + 6
+
+
+def _dynamics_badge(spec, x, y, c) -> Tuple[str, float]:
+    t = spec.get("transition", {}) or {}
+    kind = t.get("kind", "none")
+    verified = kind == "code" and not t.get("from_function")
+    label = {"code": "verified code" if verified else "code (from function)",
+             "function": "function (lossy)", "phased": "phased dynamics",
+             "llm": "LLM dynamics", "composite": "composite dynamics",
+             "none": "no dynamics"}.get(kind, kind)
+    fg = c["good"] if kind == "code" else c["muted"]
+    out = [_t(x, y + 2, "DYNAMICS", 11, "700", c["muted"], spacing="1.6")]
+    check = f'<circle cx="{x+9:.1f}" cy="{y+27:.1f}" r="8" fill="{fg}"/>' \
+            f'<path d="M{x+5.4:.1f},{y+27:.1f} l2.4,2.4 l4-4.4" fill="none" ' \
+            f'stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>' if kind == "code" \
+            else f'<circle cx="{x+9:.1f}" cy="{y+27:.1f}" r="8" fill="none" stroke="{fg}" stroke-width="1.6"/>'
+    out.append(check)
+    out.append(_t(x + 24, y + 31, label, 13, "700", c["text"]))
+    return "".join(out), 48
+
+
+def _rollout_block(spec, x, y, w, c) -> Tuple[str, float]:
+    out = [_t(x, y + 2, "SAMPLE ROLLOUT", 11, "700", c["muted"], spacing="1.6")]
+    preview = spec.get("preview", {}) or {}
+    series = {k: v for k, v in preview.get("series", {}).items()
+              if isinstance(v, list) and len(v) > 1}
+    cy = y + 16
+    ch = 132
+    out.append(f'<rect x="{x:.1f}" y="{cy:.1f}" width="{w:.1f}" height="{ch}" rx="14" '
+               f'fill="{c["node1"]}" stroke="{c["line"]}" stroke-width="1"/>')
+    if not series:
+        out.append(_t(x + w / 2, cy + ch / 2 + 4, "no numeric preview", 12, "500",
+                      c["muted"], anchor="middle"))
+        return "".join(out), (cy + ch) - y + 6
+    pad = 14
+    names = sorted(series, key=lambda k: -(max(series[k]) - min(series[k])))[:4]
+    base = cy + ch - pad
+
+    def pts(vals):
         lo, hi = min(vals), max(vals)
         span = (hi - lo) or 1.0
         n = len(vals)
-        pts = " ".join(
-            f"{pad + j * (w - 2 * pad) / (n - 1):.1f},"
-            f"{h - pad - (v - lo) / span * (h - 2 * pad):.1f}"
-            for j, v in enumerate(vals))
-        col = _SERIES_COLORS[i % len(_SERIES_COLORS)]
-        rows.append(f'<polyline points="{pts}" fill="none" stroke="{col}" '
-                    f'stroke-width="2" stroke-linejoin="round"/>')
+        return [(x + pad + j * (w - 2 * pad) / (n - 1),
+                 cy + pad + (hi - v) / span * (ch - 2 * pad))
+                for j, v in enumerate(vals)]
+
+    # main series: gradient area + line
+    main = names[0]
+    p = pts(series[main])
+    line = " ".join(f"{px:.1f},{py:.1f}" for px, py in p)
+    area = (f'M {p[0][0]:.1f} {base:.1f} L '
+            + " L ".join(f"{px:.1f} {py:.1f}" for px, py in p)
+            + f' L {p[-1][0]:.1f} {base:.1f} Z')
+    out.append(f'<path class="series" d="{area}" fill="url(#garea)"/>')
+    out.append(f'<polyline class="series" points="{line}" fill="none" '
+               f'stroke="{_SERIES[0]}" stroke-width="2.4" stroke-linejoin="round"/>')
+    out.append(f'<circle cx="{p[-1][0]:.1f}" cy="{p[-1][1]:.1f}" r="3.2" fill="{_SERIES[0]}"/>')
+    for i, nm in enumerate(names[1:], start=1):
+        pl = " ".join(f"{px:.1f},{py:.1f}" for px, py in pts(series[nm]))
+        out.append(f'<polyline class="series" points="{pl}" fill="none" '
+                   f'stroke="{_SERIES[i % len(_SERIES)]}" stroke-width="1.8" '
+                   f'stroke-opacity="0.9" stroke-linejoin="round"/>')
+    # legend
+    ly = cy + ch + 16
+    lx = x
+    for i, nm in enumerate(names):
+        vals = series[nm]
         arrow = "↑" if vals[-1] > vals[0] else ("↓" if vals[-1] < vals[0] else "→")
-        legend.append(
-            f'<span class="leg"><i style="background:{col}"></i>'
-            f'{_esc(name)} {arrow}</span>')
-    svg = _svg_wrap(w, h, "".join(rows))
-    return f'<div class="spark">{svg}<div class="legend">{"".join(legend)}</div></div>'
+        col = _SERIES[i % len(_SERIES)]
+        out.append(f'<rect x="{lx:.1f}" y="{ly-9:.1f}" width="10" height="10" rx="2.5" fill="{col}"/>')
+        label = f"{nm} {arrow}"
+        out.append(_t(lx + 15, ly, label, 11, "600", c["muted"]))
+        lx += 15 + len(label) * 6.6 + 14
+    return "".join(out), (ly + 8) - y
 
 
 # --------------------------------------------------------------------------- #
-# HTML
+# public API
 # --------------------------------------------------------------------------- #
-_CSS = """
-:root{--bg:#f6f7f9;--card:#fff;--text:#1f2933;--muted:#64748b;--accent:#2563eb;
---chip:#eef2ff;--chiptx:#3349b5;--line:#e6e9ef}
-body.dark{--bg:#0f1117;--card:#161a22;--text:#e6e9ef;--muted:#94a3b8;
---accent:#60a5fa;--chip:#1e2533;--chiptx:#9db5ff;--line:#222a38}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.card{max-width:760px;margin:32px auto;background:var(--card);border:1px solid var(--line);
-border-radius:16px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.06)}
-.card-head{padding:20px 24px;border-bottom:1px solid var(--line)}
-.title{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.ver{font-size:12px;font-weight:700;color:var(--muted)}
-.badge{font-size:11px;font-weight:700;color:var(--chiptx);background:var(--chip);
-padding:2px 8px;border-radius:999px}
-.desc{margin:8px 0 12px;color:var(--muted);font-size:14px;line-height:1.5}
-.tags{display:flex;gap:6px;flex-wrap:wrap}
-.tag{font-size:11px;font-weight:600;color:var(--chiptx);background:var(--chip);
-padding:3px 9px;border-radius:999px}
-.body{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:18px 24px}
-@media(max-width:620px){.body{grid-template-columns:1fr}}
-.col h3{font-size:11px;letter-spacing:.08em;color:var(--muted);margin:12px 0 8px}
-.col h3:first-child{margin-top:0}
-.counts{font-size:11px;color:var(--muted);margin-top:6px}
-.schema{list-style:none;margin:0;padding:0;font-size:13px}
-.schema li{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line)}
-.schema .ty{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:12px;font-weight:600;background:var(--chip);color:var(--chiptx);
-padding:3px 10px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.spark{margin-top:4px}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--muted)}
-.leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
-.card-foot{padding:12px 24px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
-.grid{max-width:1040px;margin:32px auto;padding:0 16px;display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-.gh{max-width:1040px;margin:32px auto 0;padding:0 16px}
-.tile{display:block;text-decoration:none;color:inherit;background:var(--card);
-border:1px solid var(--line);border-radius:14px;padding:16px;transition:transform .08s,box-shadow .08s}
-.tile:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.08)}
-.tile .tn{font-size:16px;font-weight:800}
-.tile .tm{font-size:12px;color:var(--muted);margin:6px 0}
-"""
-
-
-def _header(spec: Dict[str, Any]) -> str:
-    card = spec.get("card", {})
-    ver = _esc(card.get("version", "0.1"))
-    lic = card.get("license")
-    badge = f'<span class="badge">{_esc(lic)}</span>' if lic else ""
-    desc = _esc(card.get("description") or spec.get("description", ""))
-    tags = "".join(f'<span class="tag">{_esc(t)}</span>' for t in card.get("tags", []))
-    return (f'<header class="card-head"><div class="title">\U0001F30D '
-            f'{_esc(spec["name"])} <span class="ver">v{ver}</span>{badge}</div>'
-            f'<p class="desc">{desc}</p><div class="tags">{tags}</div></header>')
-
-
-def _counts(spec: Dict[str, Any]) -> str:
-    comp = spec.get("composite")
-    if not comp:
-        return '<div class="counts">leaf world</div>'
-    return (f'<div class="counts">worlds: {len(comp.get("children", {}))} · '
-            f'bridges: {len(comp.get("bridges", []))} · '
-            f'agents: {len(comp.get("agents", {}))}</div>')
-
-
-def _schema_html(spec: Dict[str, Any], limit: int = 10) -> str:
-    schema = {k: v for k, v in spec.get("state_schema", {}).items()
-              if not k.startswith("_")}
-    items = list(schema.items())[:limit]
-    rows = "".join(f'<li><span>{_esc(k)}</span><span class="ty">{_esc(t)}</span></li>'
-                   for k, t in items)
-    if len(schema) > limit:
-        rows += f'<li><span>+{len(schema) - limit} more</span><span></span></li>'
-    return f'<ul class="schema">{rows}</ul>'
-
-
-def _actions_html(spec: Dict[str, Any], limit: int = 14) -> str:
-    actions = spec.get("actions", [])
-    chips = "".join(f'<span class="chip">{_esc(a)}</span>' for a in actions[:limit])
-    if len(actions) > limit:
-        chips += f'<span class="chip">+{len(actions) - limit}</span>'
-    return f'<div class="chips">{chips}</div>'
-
-
-def render_card(world_or_spec: Union[World, Dict[str, Any]], path: Optional[Union[str, Path]] = None,
-                theme: str = "light") -> str:
-    """Render a self-contained HTML model card. Returns the HTML; writes it to
+def render_card(world_or_spec: Union[World, Dict[str, Any]],
+                path: Optional[Union[str, Path]] = None, theme: str = "light") -> str:
+    """Render a self-contained SVG model card. Returns the SVG; writes it to
     ``path`` when given."""
     spec = _as_spec(world_or_spec)
-    colors = _THEMES.get(theme, _THEMES["light"])
-    spark = _sparkline_svg(spec.get("preview", {}), colors)
-    spark_html = spark or '<div class="counts">no numeric preview available</div>'
-    lineage = spec.get("card", {}).get("lineage")
-    foot = f'openworld_spec_version {_esc(spec.get("openworld_spec_version", SPEC_VERSION))}'
+    c = _THEMES.get(theme, _THEMES["light"])
+    card = spec.get("card", {})
+
+    # header geometry
+    desc = card.get("description") or spec.get("description", "")
+    dlines = _wrap(desc, 86, 2)
+    title_y = PAD + 52
+    dy0 = title_y + 26
+    tags = card.get("tags", [])
+    tag_y = dy0 + len(dlines) * 19 + 6
+    header_bottom = (tag_y + 26 if tags else dy0 + len(dlines) * 19 + 4)
+    div_y = header_bottom + 8
+    body_y = div_y + 26
+
+    # columns
+    comp_svg, lh = _composition(spec, LX, body_y, COLW, c)
+    ry = body_y
+    parts_r = []
+    for builder in (
+        lambda yy: _schema_block(spec, RX, yy, COLW, c),
+        lambda yy: _chips_block(spec, RX, yy, COLW, c, "ACTIONS",
+                                [a for a in spec.get("actions", [])], 12),
+        lambda yy: _dynamics_badge(spec, RX, yy, c),
+        lambda yy: _rollout_block(spec, RX, yy, COLW, c),
+    ):
+        seg, hh = builder(ry)
+        parts_r.append(seg)
+        ry += hh + 16
+    rh = ry - body_y
+    body_bottom = body_y + max(lh, rh)
+    foot_y = body_bottom + 16
+    H = foot_y + 30
+
+    # header content
+    badges = []
+    bx = W - PAD - 18
+    if card.get("license"):
+        svg, w = _pill(0, 0, card["license"], c)  # measure
+        bx -= w
+        b, _ = _pill(bx, PAD + 22, card["license"], c, fg=c["good"], bg=c["chipbg"])
+        badges.append(b)
+        bx -= 8
+    vlabel = f"v{card.get('version', '0.1')}"
+    svg, w = _pill(0, 0, vlabel, c)
+    bx -= w
+    b, _ = _pill(bx, PAD + 22, vlabel, c)
+    badges.append(b)
+
+    head = [
+        _globe(CX + 14, title_y - 6, 15, c),
+        _t(CX + 38, title_y, spec["name"], 30, "800", c["text"]),
+    ]
+    for i, ln in enumerate(dlines):
+        head.append(_t(CX, dy0 + i * 19, ln, 14, "500", c["muted"]))
+    tx = CX
+    for tg in tags[:6]:
+        pill, pw = _pill(tx, tag_y - 14, tg, c)
+        head.append(pill)
+        tx += pw + 8
+
+    lineage = card.get("lineage")
+    foot = f"openworld_spec_version {spec.get('openworld_spec_version', SPEC_VERSION)}"
     if lineage:
-        foot += f' · lineage: {_esc(lineage)}'
+        foot += f"  ·  lineage: {lineage}"
+
     body = (
-        f'<main class="card">{_header(spec)}<section class="body">'
-        f'<div class="col col-left"><h3>COMPOSITION</h3>'
-        f'{_composition_svg(spec, colors)}{_counts(spec)}</div>'
-        f'<div class="col col-right"><h3>STATE SCHEMA</h3>{_schema_html(spec)}'
-        f'<h3>ACTIONS</h3>{_actions_html(spec)}'
-        f'<h3>SAMPLE ROLLOUT</h3>{spark_html}</div>'
-        f'</section><footer class="card-foot">{foot}</footer></main>')
-    doc = (f'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8">'
-           f'<meta name="viewport" content="width=device-width, initial-scale=1">'
-           f'<title>{_esc(spec["name"])} · OpenWorld model card</title>'
-           f'<style>{_CSS}</style></head><body class="{_esc(theme)}">{body}</body></html>')
+        f'<rect x="0" y="0" width="{W}" height="{H}" fill="url(#gbg)"/>'
+        f'<g filter="url(#shsoft)"><rect x="{PAD}" y="{PAD}" width="{W-2*PAD}" '
+        f'height="{H-2*PAD}" rx="24" fill="url(#gbg)" stroke="{c["panelStroke"]}" '
+        f'stroke-width="1"/></g>'
+        f'<rect x="{PAD}" y="{PAD}" width="{W-2*PAD}" height="6" rx="3" fill="url(#gacc)"/>'
+        + "".join(head) + "".join(badges)
+        + f'<line x1="{CX}" y1="{div_y:.1f}" x2="{W-CX}" y2="{div_y:.1f}" '
+          f'stroke="{c["line"]}" stroke-width="1"/>'
+        + comp_svg + "".join(parts_r)
+        + f'<line x1="{CX}" y1="{foot_y-8:.1f}" x2="{W-CX}" y2="{foot_y-8:.1f}" '
+          f'stroke="{c["line"]}" stroke-width="1"/>'
+        + _t(CX, foot_y + 12, foot, 11, "500", c["muted"])
+        + _t(W - CX, foot_y + 12, "OpenWorld", 12, "800", c["accent"], anchor="end"))
+
+    svg_doc = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H:.0f}" '
+        f'width="{W}" height="{H:.0f}" font-family="-apple-system,BlinkMacSystemFont,'
+        f'Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
+        + _defs(c) + body + "</svg>")
     if path is not None:
-        Path(path).write_text(doc, encoding="utf-8")
-    return doc
+        Path(path).write_text(svg_doc, encoding="utf-8")
+    return svg_doc
 
 
 def render_gallery(specs: List[Dict[str, Any]], path: Optional[Union[str, Path]] = None,
                    theme: str = "light", title: str = "OpenWorld model gallery",
-                   card_dir: str = "") -> str:
-    """Render a responsive grid of tiles linking to each world's ``<name>.html``."""
+                   card_ext: str = ".svg") -> str:
+    """Render an SVG contact sheet: clickable tiles linking to each ``<name>.svg``."""
+    c = _THEMES.get(theme, _THEMES["light"])
+    cols = 3
+    tw, th, gap = 270, 150, 22
+    rows = (len(specs) + cols - 1) // cols
+    gx0, gy0 = PAD + 6, 92
+    Hgal = gy0 + rows * (th + gap) + PAD
+    Wgal = gx0 * 2 + cols * tw + (cols - 1) * gap
+
     tiles = []
-    for spec in specs:
-        card = spec.get("card", {})
+    for i, spec in enumerate(specs):
+        r, col = divmod(i, cols)
+        x = gx0 + col * (tw + gap)
+        y = gy0 + r * (th + gap)
         comp = spec.get("composite")
+        card = spec.get("card", {})
         meta = ("leaf world" if not comp else
                 f'{len(comp.get("children", {}))} worlds · '
                 f'{len(comp.get("bridges", []))} bridges')
-        tags = " · ".join(card.get("tags", [])[:3])
-        tag_html = "".join(f'<span class="tag">{_esc(t)}</span>'
-                           for t in card.get("tags", [])[:4])
-        href = f'{card_dir}{spec["name"]}.html'
-        tiles.append(
-            f'<a class="tile" href="{_esc(href)}"><div class="tn">\U0001F30D '
-            f'{_esc(spec["name"])}</div><div class="tm">{_esc(meta)}</div>'
-            f'<div class="tags">{tag_html}</div>'
-            f'<div class="tm">{_esc(tags)}</div></a>')
-    doc = (f'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8">'
-           f'<meta name="viewport" content="width=device-width, initial-scale=1">'
-           f'<title>{_esc(title)}</title><style>{_CSS}</style></head>'
-           f'<body class="{_esc(theme)}"><div class="gh"><h1>{_esc(title)}</h1></div>'
-           f'<div class="grid">{"".join(tiles)}</div></body></html>')
+        tiles.append(f'<a href="{_esc(spec["name"] + card_ext)}">')
+        tiles.append(f'<g filter="url(#sh)"><rect x="{x}" y="{y}" width="{tw}" '
+                     f'height="{th}" rx="16" fill="url(#gnode)" stroke="{c["line"]}" '
+                     f'stroke-width="1"/></g>')
+        tiles.append(f'<rect x="{x}" y="{y}" width="{tw}" height="5" rx="2.5" fill="url(#gacc)"/>')
+        tiles.append(_globe(x + 24, y + 36, 12, c))
+        tiles.append(_t(x + 44, y + 40, spec["name"], 17, "800", c["text"]))
+        tiles.append(_t(x + 18, y + 66, meta, 12, "600", c["muted"]))
+        txx = x + 18
+        for tg in card.get("tags", [])[:3]:
+            pill, pw = _pill(txx, y + 80, tg, c, font=11)
+            tiles.append(pill)
+            txx += pw + 7
+        tiles.append(_t(x + 18, y + th - 16, f"v{card.get('version', '0.1')}",
+                        11.5, "700", c["muted"]))
+        if card.get("license"):
+            tiles.append(_t(x + tw - 18, y + th - 16, card["license"], 11.5, "700",
+                            c["good"], anchor="end"))
+        tiles.append("</a>")
+
+    doc = (
+        f'<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+        f'viewBox="0 0 {Wgal} {Hgal}" width="{Wgal}" height="{Hgal}" '
+        f'font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif">'
+        + _defs(c)
+        + f'<rect x="0" y="0" width="{Wgal}" height="{Hgal}" fill="url(#gbg)"/>'
+        + _globe(gx0 + 12, 50, 16, c)
+        + _t(gx0 + 38, 56, title, 26, "800", c["text"])
+        + _t(gx0 + 38, 76, f"{len(specs)} world models", 13, "600", c["muted"])
+        + "".join(tiles) + "</svg>")
     if path is not None:
         Path(path).write_text(doc, encoding="utf-8")
     return doc

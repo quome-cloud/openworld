@@ -39,9 +39,10 @@ def test_serve_help_lists_options():
     assert "--allow-code" in res.output and "--port" in res.output
 
 
-def test_build_degrades_to_manual_without_tmux(monkeypatch):
-    # force the no-tmux path; assert it scaffolds and explains manual mode
+def test_build_degrades_to_manual_without_claude(monkeypatch):
+    # neither tmux nor claude -> scaffold + manual mode
     monkeypatch.setattr("openworld._tmux.tmux_available", lambda: False)
+    monkeypatch.setattr("openworld._tmux.claude_available", lambda: False)
     with CliRunner().isolated_filesystem():
         res = CliRunner().invoke(main, ["build", "a tiny counter world", "--name", "demo"])
         assert res.exit_code == 0
@@ -49,3 +50,24 @@ def test_build_degrades_to_manual_without_tmux(monkeypatch):
         assert pathlib.Path("build/BUILD.md").exists()
         assert pathlib.Path("build/demo.py").exists()
         assert "manual mode" in res.output
+
+
+def test_build_uses_headless_claude_without_tmux(monkeypatch):
+    # claude present, tmux absent -> headless path (claude -p), no manual fallback
+    monkeypatch.setattr("openworld._tmux.tmux_available", lambda: False)
+    monkeypatch.setattr("openworld._tmux.claude_available", lambda: True)
+    counter_spec = to_spec(counter_world())
+
+    def fake_headless(prompt, cwd, wait_for, timeout=1800.0):
+        import json as _j
+        wait_for.parent.mkdir(parents=True, exist_ok=True)
+        wait_for.write_text(_j.dumps(counter_spec))      # pretend Claude wrote it
+        return True, "authored the world"
+
+    monkeypatch.setattr("openworld._tmux.claude_headless", fake_headless)
+    with CliRunner().isolated_filesystem():
+        res = CliRunner().invoke(main, ["build", "a counter", "--name", "counter"])
+        assert res.exit_code == 0
+        assert "headlessly" in res.output
+        import pathlib
+        assert pathlib.Path("specs/counter.json").exists()

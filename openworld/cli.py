@@ -7,9 +7,10 @@ Three phases, AutoML-style:
 
 Plus helpers: `openworld ls <dir>` and `openworld card <spec>`.
 
-Build/optimize drive an interactive Claude Code session in tmux; if tmux/claude
-are unavailable they print the scaffold + prompt to run manually. This module is
-optional (click/rich/fastapi) and is never imported by the core `openworld`.
+Build/optimize drive Claude Code to author the spec: an interactive, watchable
+tmux session when tmux is available, otherwise headless (`claude -p`). If the
+`claude` CLI isn't installed, they print the scaffold + prompt to run manually.
+This module is optional (click/rich/fastapi) and is never imported by the core.
 """
 
 from __future__ import annotations
@@ -194,20 +195,31 @@ def _scaffold(name: str, description: str) -> Path:
 
 
 def _claude_phase(session: str, message: str, wait_for: Path, manual_hint: str):
-    if not (_tmux.tmux_available() and _tmux.claude_available()):
-        missing = "tmux" if not _tmux.tmux_available() else "claude"
+    # No Claude Code at all -> manual mode.
+    if not _tmux.claude_available():
         console.print(Panel(
-            f"[yellow]{missing} not found — can't drive Claude Code automatically."
+            f"[yellow]claude not found — can't drive Claude Code automatically."
             f"[/yellow]\n\n{manual_hint}", title="manual mode", border_style="yellow"))
         return False
-    console.print(f"[blue]launching Claude Code in tmux session "
-                  f"[bold]{session}[/bold]…[/blue]  (attach: tmux attach -t {session})")
-    ok = _tmux.drive(session, Path.cwd(), message, wait_for,
-                     on_tail=lambda _t: None)
+    # tmux present -> interactive, watchable session you can attach to.
+    if _tmux.tmux_available():
+        console.print(f"[blue]launching Claude Code in tmux session "
+                      f"[bold]{session}[/bold]…[/blue]  (attach: tmux attach -t {session})")
+        ok = _tmux.drive(session, Path.cwd(), message, wait_for, on_tail=lambda _t: None)
+    else:
+        # No tmux -> drive Claude Code headlessly (no multiplexer needed).
+        console.print("[blue]no tmux — running Claude Code headlessly "
+                      "(claude -p)…[/blue]")
+        with console.status("[blue]Claude Code is authoring the spec…[/blue]"):
+            ok, out = _tmux.claude_headless(message, Path.cwd(), wait_for)
+        if out:
+            console.print(Panel(out, title="claude output", border_style="dim"))
     if ok:
         console.print(f"[green]✓ {wait_for} produced[/green]")
     else:
-        console.print(f"[red]timed out before {wait_for} appeared[/red]")
+        console.print(Panel(
+            f"[yellow]Claude Code did not produce {wait_for}.[/yellow]\n\n{manual_hint}",
+            title="finish manually", border_style="yellow"))
     return ok
 
 

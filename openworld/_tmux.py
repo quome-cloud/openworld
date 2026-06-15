@@ -55,6 +55,30 @@ def session_exists(session: str) -> bool:
     return _tmux("has-session", "-t", session).returncode == 0
 
 
+def claude_headless(prompt: str, cwd: Path, wait_for: Path,
+                    timeout: float = 1800.0) -> "tuple[bool, str]":
+    """Drive Claude Code non-interactively (no tmux): `claude -p <prompt>` with
+    edits/bash auto-approved, in `cwd`. Returns (artifact_produced, output_tail).
+
+    This is the unattended path — it needs no terminal multiplexer, just the
+    `claude` CLI on PATH. Permissions are set to accept edits and allow the tools
+    needed to author + run a build script.
+    """
+    cmd = ["claude", "-p", prompt,
+           "--permission-mode", "acceptEdits",
+           "--allowedTools", "Bash Edit Write Read MultiEdit"]
+    try:
+        proc = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True,
+                              timeout=timeout)
+        out = (proc.stdout or "") + (proc.stderr or "")
+    except subprocess.TimeoutExpired as e:
+        out = (e.stdout or "") if isinstance(e.stdout, str) else ""
+        return wait_for.exists(), out[-1500:]
+    except FileNotFoundError:
+        return False, "claude CLI not found"
+    return wait_for.exists(), out[-1500:]
+
+
 def drive(session: str, cwd: Path, message: str, wait_for: Path,
           timeout: float = 900.0, poll: float = 2.0,
           on_tail: Optional[Callable[[str], None]] = None,

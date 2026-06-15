@@ -4,18 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openworld"
-version = "0.2.0"
-description = "A framework for creating, prototyping, and optimizing world models with an Ollama backbone."
+version = "0.3.0"
+description = "Build, optimize, and deploy verified symbolic world models."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Jim" }]
 keywords = ["world-models", "ollama", "simulation", "agents", "neuro-symbolic"]
-dependencies = []
+# The core library (`import openworld`) is zero-dependency and never imports these.
+# They power the optional serve/CLI layer (openworld.serve / openworld.cli), which
+# deliver the build/optimize/deploy experience out of the box.
+dependencies = [
+    "fastapi>=0.95",
+    "uvicorn>=0.20",
+    "click>=8",
+    "rich>=13",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "httpx>=0.23"]
 optuna = ["optuna>=3"]
+
+[project.scripts]
+openworld = "openworld.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["openworld*"]

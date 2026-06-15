@@ -185,6 +185,38 @@ def _transition_graph(world: World, max_nodes: int = 6) -> Dict[str, Any]:
         return {}
 
 
+def reachable_state_ids(world: World, max_nodes: int = 6) -> Dict[str, int]:
+    """Map each reachable state-key to its node index in the transition graph
+    (same BFS/ordering as the card). Lets the inference server highlight the
+    'current' node as a leaf world is stepped. Empty for composites."""
+    try:
+        if world.transition is None or isinstance(world, CompositeWorld):
+            return {}
+        agent = _first_agent(world)
+        start = dict(WorldState(world.initial_state).copy())
+        k0 = _state_key(start)
+        states, order, queue = {k0: start}, [k0], [k0]
+        while queue and len(order) < max_nodes:
+            k = queue.pop(0)
+            for a in world.actions:
+                try:
+                    nxt = dict(world.transition.step(
+                        WorldState(states[k]).copy(), Action(a, agent=agent)))
+                except Exception:
+                    continue
+                nk = _state_key(nxt)
+                if nk == k or nk in states:
+                    continue
+                if len(order) >= max_nodes:
+                    continue
+                states[nk] = nxt
+                order.append(nk)
+                queue.append(nk)
+        return {k: i for i, k in enumerate(order)}
+    except Exception:
+        return {}
+
+
 def _rollout_preview(world: World, steps: int) -> Dict[str, Any]:
     """Roll the live world forward and record numeric series for the card.
     Best-effort: any failure yields an empty preview (never blocks to_spec)."""
@@ -386,22 +418,61 @@ def _schema_field_to_spec(v: Any) -> Any:
     return getattr(v, "__name__", str(v))
 
 
+_SCHEMA_TYPES = {"int": int, "float": float, "str": str, "bool": bool}
+
+
+def _schema_field_from_spec(v: Any) -> Any:
+    if isinstance(v, dict):
+        typ = _SCHEMA_TYPES.get(v.get("type"))
+        if typ is None:
+            return None
+        rng = v.get("range")
+        return (typ, tuple(rng)) if rng is not None else typ
+    return _SCHEMA_TYPES.get(v, v)
+
+
 def _perceptor_to_spec(p: Any) -> Dict[str, Any]:
-    return {"kind": type(p).__name__,
-            "modality": getattr(p, "modality", "text"),
-            "produces": list(getattr(p, "produces", [])),
-            "schema": {k: _schema_field_to_spec(v)
-                       for k, v in getattr(p, "schema", {}).items()}}
+    d = {"kind": type(p).__name__,
+         "modality": getattr(p, "modality", "text"),
+         "produces": list(getattr(p, "produces", [])),
+         "schema": {k: _schema_field_to_spec(v)
+                    for k, v in getattr(p, "schema", {}).items()}}
+    code = getattr(p, "code", None)
+    if code is not None:                                   # CodePerceptor: runnable
+        d["code"] = code
+        d["func_name"] = getattr(p, "func_name", "perceive")
+    return d
+
+
+def _perceptor_from_spec(d: Dict[str, Any], allow_code: bool) -> Any:
+    """Reconstruct a runnable perceptor when possible (CodePerceptor under
+    allow_code). Descriptor-only perceptors (Mock/Text/Vision) cannot be rebuilt
+    from a spec and return None."""
+    if d.get("kind") == "CodePerceptor" and allow_code and d.get("code"):
+        from .perceive import CodePerceptor
+        schema = {k: _schema_field_from_spec(v) for k, v in d.get("schema", {}).items()}
+        schema = {k: v for k, v in schema.items() if v is not None}
+        return CodePerceptor(code=d["code"], produces=d.get("produces", []),
+                             schema=schema, modality=d.get("modality", "text"),
+                             func_name=d.get("func_name", "perceive"))
+    return None
 
 
 def _emit_to_spec(e: Any) -> Dict[str, Any]:
     """An emitter (the world -> output boundary): a modality + the state fields it
-    reads out. Accepts a dict or an object with .modality/.fields(/.reads)."""
+    reads out, and an optional `report` template/code for a human-readable
+    artifact. Accepts a dict or an object with .modality/.fields(/.reads)."""
     if isinstance(e, dict):
-        return {"modality": e.get("modality", "data"),
-                "fields": list(e.get("fields", []))}
-    return {"modality": getattr(e, "modality", "data"),
-            "fields": list(getattr(e, "fields", None) or getattr(e, "reads", []))}
+        out = {"modality": e.get("modality", "data"),
+               "fields": list(e.get("fields", []))}
+        if e.get("report"):
+            out["report"] = e["report"]
+        return out
+    out = {"modality": getattr(e, "modality", "data"),
+           "fields": list(getattr(e, "fields", None) or getattr(e, "reads", []))}
+    if getattr(e, "report", None):
+        out["report"] = e.report
+    return out
 
 
 def _objective_to_spec(o: Any) -> Dict[str, Any]:
@@ -471,9 +542,9 @@ def from_spec(spec: Dict[str, Any], *, allow_code: bool = False,
     if not isinstance(spec, dict) or "name" not in spec:
         raise SpecError("spec must be a dict with at least a 'name'")
     if spec.get("composite"):
-        return _composite_from_spec(spec, allow_code, llm)
+        return _attach_io(_composite_from_spec(spec, allow_code, llm), spec, allow_code)
     transition = _transition_from_spec(spec.get("transition"), allow_code, llm)
-    return World(
+    world = World(
         name=spec["name"],
         description=spec.get("description", ""),
         initial_state=spec.get("initial_state", {}),
@@ -482,6 +553,22 @@ def from_spec(spec: Dict[str, Any], *, allow_code: bool = False,
         transition=transition,
         llm=llm,
     )
+    return _attach_io(world, spec, allow_code)
+
+
+def _attach_io(world: World, spec: Dict[str, Any], allow_code: bool) -> World:
+    """Attach the reconstructable I/O components to a rebuilt world: runnable
+    perceptors (CodePerceptor under allow_code), and the emit/objectives
+    descriptors (used by the inference server)."""
+    percs = [p for p in (_perceptor_from_spec(d, allow_code)
+                         for d in spec.get("perception", [])) if p is not None]
+    if percs:
+        world.perceptors = percs
+    if spec.get("emit"):
+        world.emit = spec["emit"]
+    if spec.get("objectives"):
+        world.objectives = spec["objectives"]
+    return world
 
 
 def validate_spec(spec: Any) -> List[str]:

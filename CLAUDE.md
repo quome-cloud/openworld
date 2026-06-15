@@ -57,4 +57,11 @@ a local Ollama backbone. These rules override default behavior.
 ## Don'ts
 
 - **Never reference CrewAI** anywhere in this codebase or docs.
-- Don't add third-party runtime dependencies (the framework is zero-dependency).
+- The **core library is zero-dependency**: `import openworld` and everything it
+  pulls in (state, transitions, compose, spec, card, perceive, …) must use only
+  the stdlib. Keep it that way.
+- The **serve/CLI layer is the one exception**: `openworld/serve.py`,
+  `openworld/cli.py`, `openworld/_tmux.py` may use `fastapi`/`uvicorn`/`click`/
+  `rich` (declared in `pyproject.toml`). They are NOT imported by
+  `openworld/__init__.py`, so the core import stays clean. Don't add other
+  third-party runtime deps, and don't let serve/CLI deps leak into the core.

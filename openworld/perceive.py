@@ -153,6 +153,36 @@ class CodePerceptor(Perceptor):
         return dict(result) if isinstance(result, dict) else {}
 
 
+_EMIT_SYSTEM = ("You write the world's output. Use only the provided fields; "
+                "reply with the text and nothing else.")
+
+
+class LLMEmitter:
+    """The world -> text boundary: ask an LLM to write output from state fields.
+
+    Symmetric to TextPerceptor (text -> state). `template` is filled from the named
+    `reads` state fields and used as the prompt; the LLM's reply is the emitted
+    text. Deterministic with MockLLM. The output boundary that lets a world
+    *answer* in natural language (perceive -> world -> emit)."""
+
+    modality = "text"
+
+    def __init__(self, llm: "BaseLLM", template: str, reads: List[str],
+                 system: Optional[str] = None):
+        self.llm = llm
+        self.template = template
+        self.reads = list(reads)
+        self.system = system or _EMIT_SYSTEM
+
+    def emit(self, state: Dict[str, Any]) -> str:
+        fields = {k: state.get(k) for k in self.reads}
+        try:
+            prompt = self.template.format(**fields)
+        except Exception:
+            prompt = self.template + "\n" + ", ".join(f"{k}={v}" for k, v in fields.items())
+        return self.llm.ask(prompt, system=self.system)
+
+
 _EXTRACT_SYSTEM = (
     "You extract structured fields from input. Reply with ONLY a JSON object "
     "containing exactly the requested fields and nothing else.")

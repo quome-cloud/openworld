@@ -45,8 +45,9 @@ from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
 from .card import render_card, render_gallery, to_reactflow
 from .optimize import SweepPoint, SweepResult, sweep
 from .perceive import (
-    CodePerceptor, MockPerceptor, Observation, PerceptionError, PerceptionGate,
-    Perceptor, TextPerceptor, TranscriptPerceptor, VisionPerceptor, image_to_b64,
+    CodePerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
+    PerceptionGate, Perceptor, TextPerceptor, TranscriptPerceptor, VisionPerceptor,
+    image_to_b64,
     sample_frames,
 )
 from .sandbox import SandboxError
@@ -146,6 +147,7 @@ __all__ = [
     "PerceptionError",
     "MockPerceptor",
     "CodePerceptor",
+    "LLMEmitter",
     "TextPerceptor",
     "TranscriptPerceptor",
     "VisionPerceptor",

@@ -1104,6 +1104,53 @@ no lookahead). The honest after-cost strategy does not beat SPY risk-adjusted.}
 \input{tables/trading}
 \end{table}
 
+\subsubsection{A startup growth world model: what drives a YC-style batch (E51)}\label{sec:startups}
+The same composite machinery as the corporate world (E48), turned on a cohort of
+startups: a batch of \StartupN{} startups is a \texttt{CompositeWorld} of startup
+child-worlds, each evolving from its factors (team, market, product-market fit,
+grit, capital). Growth is multiplicative in PMF (no fit, no growth); revenue
+compounds; burn depletes runway; traction-gated fundraising extends it;
+idiosyncratic shocks kill some regardless of merit; the batch's total value
+created, survival rate, and top-decile value share are \texttt{Aggregator}s
+(Figure~\ref{fig:startups}, Table~\ref{tab:startups}).
+
+Four results. \emph{What drives growth (causal value-of-factor)}: lifting each
+factor to its 90th percentile across the batch, PMF moves total value most
+(\StartupPmfDelta\%), while doubling everyone's capital moves it
+\StartupCapitalDelta\%---money is not the constraint, fit is. \emph{Power law of
+returns}: only \StartupSurvival\% survive and the top decile captures
+\StartupTopDecile\% of all value (Gini \StartupGini)---the venture home-run
+dynamic. \emph{Counterfactual attribution}: a no-PMF batch produces
+\StartupNoPmf\% of base value, and doubling capital while holding PMF low yields
+\StartupCapLowPmf\%---spend cannot substitute for fit, separating the true driver
+from the spend. \emph{Honest predictability}: month-6 traction is informative but
+not decisive (Spearman \StartupSpearman{}; only \StartupTopOverlap\% of the
+eventual top decile were already in the month-6 top decile)---startup outcomes are
+more predictable than market moves (E50), because they are driven by persistent
+factors, yet the tail stays luck-laden, so the single biggest winner is hard to
+call early. The composite stays exact: the batch value aggregator never drifts
+from the leaves.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/startups.png}
+\caption{\textbf{Startup growth world model (E51).} \textbf{A:} causal
+value-of-factor---PMF dominates, capital barely moves total value. \textbf{B:}
+the power law---the top decile captures \StartupTopDecile\% of value. \textbf{C:}
+counterfactuals---no PMF, or money without PMF, collapses the batch. \textbf{D:}
+month-6 traction vs.\ final value ($\rho=\StartupSpearman$)---informative but not
+decisive; the tail is luck-laden.}
+\label{fig:startups}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E51 startup batch}: causal value-of-factor (PMF $\gg$ capital)
+and the power law of outcomes.}
+\label{tab:startups}
+\input{tables/startups}
+\end{table}
+
 \subsection{Supporting ablations}
 \subsubsection{What each verification gate buys}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,

@@ -35,6 +35,7 @@ EXPERIMENTS = [
     "e41_nonstationary", "e42_agent_traversal", "e43_active_induction",
     "e44_emergent_economy", "e46_many_worlds", "e45_next_token",
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
+    "e51_startups",
 ]
 
 
@@ -613,6 +614,80 @@ def table_trading(e50):
         lines.append(f"{name} & {m['annualized'] * 100:+.1f}\\% & {m['sharpe']:.2f} & {hit} \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (TABLES / "trading.tex").write_text("\n".join(lines) + "\n")
+
+
+def fig_startups(e51):
+    """E51: startup growth world model. Causal value-of-factor, the power law of
+    returns, the no-PMF counterfactual, and early-vs-final predictability."""
+    fig, ((a, b), (c, dax)) = plt.subplots(2, 2, figsize=(8.4, 6.6))
+
+    # A: value-of-factor (causal)
+    voa = e51["value_of_factor"]
+    facs = sorted(voa, key=lambda k: -voa[k]["delta_value_pct"])
+    vals = [voa[f]["delta_value_pct"] for f in facs]
+    cols = [BLUE if f == "pmf" else (RED if f == "capital" else TEAL) for f in facs]
+    bars = a.bar(facs, vals, color=cols)
+    for bar, v in zip(bars, vals):
+        a.text(bar.get_x() + bar.get_width() / 2, v + 3, f"+{v:.0f}%", ha="center", fontsize=8)
+    a.set_ylabel("Δ batch value when lifted (%)")
+    a.set_title("A. What drives growth (causal): PMF ≫ capital", fontsize=9.3, loc="left")
+    a.tick_params(axis="x", labelsize=8.5)
+
+    # B: power law (Lorenz-style cumulative value)
+    cum = e51["cum_value_share"]
+    n = len(cum)
+    x = [100 * (i + 1) / n for i in range(n)]
+    b.plot(x, [100 * c for c in cum], color=BLUE, lw=2.2)
+    b.plot([0, 100], [0, 100], color=SLATE, lw=1, ls=":")
+    td = e51["power_law"]["top_decile_share"]
+    b.axvline(10, color=RED, lw=1, ls="--")
+    b.text(12, 40, f"top 10% =\n{td:.0%} of value", color=RED, fontsize=8)
+    b.set_xlabel("startups (ranked by value, %)"); b.set_ylabel("cumulative value (%)")
+    b.set_title("B. Power law of returns", fontsize=9.3, loc="left")
+
+    # C: counterfactual attribution
+    cf = e51["counterfactual"]
+    labels = ["base", "no PMF", "2× capital\n(low PMF)"]
+    vc = [100, cf["no_pmf_value_pct_of_base"], cf["double_capital_lowpmf_pct_of_base"]]
+    bars = c.bar(labels, vc, color=[TEAL, RED, ORANGE])
+    for bar, v in zip(bars, vc):
+        c.text(bar.get_x() + bar.get_width() / 2, v + 2, f"{v:.0f}%", ha="center", fontsize=8)
+    c.set_ylabel("batch value (% of base)")
+    c.set_title("C. Money can't buy growth without PMF", fontsize=9.3, loc="left")
+    c.tick_params(axis="x", labelsize=8)
+
+    # D: predictability (month-6 traction vs final value)
+    sc = e51["scatter"]
+    rev6 = [max(x, 0.1) for x in sc["rev6"]]; val = [max(x, 0.1) for x in sc["value"]]
+    dax.scatter(rev6, val, s=10, alpha=0.5, color=PURPLE)
+    dax.set_xscale("log"); dax.set_yscale("log")
+    dax.set_xlabel("month-6 revenue ($k)"); dax.set_ylabel("final value ($k)")
+    pr = e51["predictability"]
+    dax.set_title(f"D. Early signal informative, not decisive (ρ={pr['spearman_m6_vs_final']})",
+                  fontsize=9.0, loc="left")
+
+    fig.suptitle("Startup growth world model: a YC-style batch and what drives it (E51)",
+                 fontsize=10.5, x=0.02, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(FIGS / "startups.png", dpi=200)
+    plt.close(fig)
+
+
+def table_startups(e51):
+    """E51: value-of-factor and the power law."""
+    voa, pw = e51["value_of_factor"], e51["power_law"]
+    facs = sorted(voa, key=lambda k: -voa[k]["delta_value_pct"])
+    lines = ["\\begin{tabular}{lr}", "\\toprule",
+             "Factor (lifted to 90th pct) & $\\Delta$ batch value \\\\", "\\midrule"]
+    for f in facs:
+        suffix = " (2$\\times$)" if f == "capital" else ""
+        lines.append(f"{f}{suffix} & {voa[f]['delta_value_pct']:+.0f}\\% \\\\")
+    lines += ["\\midrule",
+              f"Survival rate & {pw['survival_rate'] * 100:.0f}\\% \\\\",
+              f"Top-decile share of value & {pw['top_decile_share'] * 100:.0f}\\% \\\\",
+              f"Value Gini & {pw['value_gini']:.2f} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "startups.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_path_integral(e49):
@@ -1870,7 +1945,7 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "49"),
+        macro("NumExperiments", "50"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -2329,6 +2404,22 @@ def numbers_tex(d):
         macro("TradeSynSharpe", f"{e50['synthetic']['strategy']['sharpe']:.2f}"),
         macro("TradeSynRandom", f"{e50['synthetic']['random']['sharpe']:.2f}"),
     ]
+    # E51 (startup growth world model)
+    e51 = d["e51_startups"]
+    v51, pw51 = e51["value_of_factor"], e51["power_law"]
+    cf51, pr51 = e51["counterfactual"], e51["predictability"]
+    lines += [
+        macro("StartupN", str(e51["n"])),
+        macro("StartupPmfDelta", f"{v51['pmf']['delta_value_pct']:+.0f}"),
+        macro("StartupCapitalDelta", f"{v51['capital']['delta_value_pct']:+.0f}"),
+        macro("StartupSurvival", f"{pw51['survival_rate'] * 100:.0f}"),
+        macro("StartupTopDecile", f"{pw51['top_decile_share'] * 100:.0f}"),
+        macro("StartupGini", f"{pw51['value_gini']:.2f}"),
+        macro("StartupNoPmf", f"{cf51['no_pmf_value_pct_of_base']:.0f}"),
+        macro("StartupCapLowPmf", f"{cf51['double_capital_lowpmf_pct_of_base']:.0f}"),
+        macro("StartupSpearman", f"{pr51['spearman_m6_vs_final']:.2f}"),
+        macro("StartupTopOverlap", f"{pr51['top_decile_overlap'] * 100:.0f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -2373,6 +2464,8 @@ def main():
     fig_corporate_world(data["e48_corporate_world"])
     fig_trading(data["e50_trading"])
     table_trading(data["e50_trading"])
+    fig_startups(data["e51_startups"])
+    table_startups(data["e51_startups"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

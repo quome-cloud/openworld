@@ -74,6 +74,7 @@
 \usepackage{url}
 \usepackage{multirow}
 \usepackage{array}
+\usepackage{longtable}
 \usepackage{ragged2e}
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 \usepackage[htt]{hyphenat}
@@ -2196,34 +2197,43 @@ aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
 do not appear in the text, and the benchmark-scale repair suites E28--E29 are
 described in the Experimental Setup but their dedicated results section was cut.
 
-\begin{table}[htb]
-\centering\footnotesize
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{minipage}[t]{0.49\linewidth}
-\begin{tabular}{@{}l p{0.60\linewidth} l@{}}
+\begingroup\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}r p{0.62\textwidth} l@{}}
+\caption{Index of experiments E1--E57. E14 and E53 are retired and do not
+appear in the text; E28--E29 are described in the Experimental Setup but their
+results section was cut.}\label{tab:experiment-index}\\
 \toprule
 \textbf{E\#} & \textbf{Description} & \textbf{Where} \\
 \midrule
-E1  & Head-to-head symbolic vs.\ learned dynamics on sprint world & Tab.~\ref{tab:main} \\
-E2  & Synthesis reliability: five compile attempts per world & Tab.~\ref{tab:synthesis-app} \\
-E3  & Verifier-gate ablation across four acceptance regimes & Fig.~\ref{fig:verifier} \\
-E4  & Head-to-head engine comparison, primary sprint result & Tab.~\ref{tab:main} \\
-E5  & Multi-attempt repair baseline, low-temperature 1.5B proposer & \S\ref{sec:judge-results} \\
-E6  & Feedback-driven repair retries recover nothing (local minimum) & \S\ref{sec:judge-results} \\
-E7  & Judge-as-objective: rubric scores track ground truth & \S\ref{sec:judge-results} \\
-E8  & Moral dial sweep traces welfare--fairness Pareto frontier & Fig.~\ref{fig:pareto} \\
-E9  & Configuration-search strategies on triage auto-tuning & Tab.~\ref{tab:tuning-app} \\
+\endfirsthead
+\toprule
+\textbf{E\#} & \textbf{Description} & \textbf{Where} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{\footnotesize\itshape continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+E1 & Head-to-head symbolic vs.\ learned dynamics on the sprint world & Tab.~\ref{tab:main} \\
+E2 & Synthesis reliability: five compile attempts per world & Tab.~\ref{tab:synthesis-app} \\
+E3 & Verifier-gate ablation across four acceptance regimes & Fig.~\ref{fig:verifier} \\
+E4 & Head-to-head engine comparison, primary sprint result & Tab.~\ref{tab:main} \\
+E5 & Multi-attempt repair baseline, low-temperature 1.5B proposer & \S\ref{sec:judge-results} \\
+E6 & Feedback-driven repair retries recover nothing (local minimum) & \S\ref{sec:judge-results} \\
+E7 & Judge-as-objective: rubric scores track ground truth & \S\ref{sec:judge-results} \\
+E8 & Moral dial sweep traces the welfare--fairness Pareto frontier & Fig.~\ref{fig:pareto} \\
+E9 & Configuration-search strategies on triage auto-tuning & Tab.~\ref{tab:tuning-app} \\
 E10 & Head-to-head primary comparison, throughput and accuracy & Tab.~\ref{tab:main} \\
 E11 & Multi-world fidelity replication, eight scripts per world & Tab.~\ref{tab:fidelity} \\
-E12 & Trained MLP/1-NN baselines vs.\ zero-transition program & Fig.~\ref{fig:learned} \\
+E12 & Trained MLP/1-NN baselines vs.\ the zero-transition program & Fig.~\ref{fig:learned} \\
 E13 & Controlled judge-selection comparison, paired McNemar test & Fig.~\ref{fig:judge} \\
 E14 & \emph{Retired (absorbed); not in text} & --- \\
 E15 & Paraphrased-rubric judge correlation, weaker and marginal & \S\ref{sec:judge-results} \\
 E16 & Cross-family synthesis replication (Llama, Gemma) & Tab.~\ref{tab:synthesis-app} \\
 E17 & Tripled-seed judge selection, pooled power analysis & Fig.~\ref{fig:judge} \\
 E18 & Filter-vs-repair decomposition of the verification gate & Tab.~\ref{tab:repair-app} \\
-E19 & Scale-ladder vs.\ stronger learned baseline, OOD collapse & Tab.~\ref{tab:ladder-app} \\
+E19 & Scale-ladder vs.\ a stronger learned baseline, OOD collapse & Tab.~\ref{tab:ladder-app} \\
 E20 & The complexity cliff: synthesis degrades past eight rules & Fig.~\ref{fig:complexity} \\
 E21 & Stochastic dynamics via seed-threaded verified synthesis & \S\ref{sec:boundaries} \\
 E22 & Planning: model-predictive lookahead through the program & Tab.~\ref{tab:planning} \\
@@ -2232,17 +2242,8 @@ E24 & Aggregation as ethical commitment: sum vs.\ maximin/leximin & \S\ref{sec:m
 E25 & Side constraints (vetoes) cannot be simulated by weights & \S\ref{sec:moral-structure} \\
 E26 & Moral uncertainty: a credence-weighted moral parliament & \S\ref{sec:moral-structure} \\
 E27 & Pluralism visible across utilitarian/deontic/care rubrics & \S\ref{sec:moral-structure} \\
-E28 & \emph{Cut (setup only)}: atomic SWE-style repair suite & \S Setup \\
-\bottomrule
-\end{tabular}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.49\linewidth}
-\begin{tabular}{@{}l p{0.60\linewidth} l@{}}
-\toprule
-\textbf{E\#} & \textbf{Description} & \textbf{Where} \\
-\midrule
-E29 & \emph{Cut (setup only)}: staged latent-defect repair suite & \S Setup \\
+E28 & \emph{Cut (setup only)}: atomic SWE-style repair suite & \S~Setup \\
+E29 & \emph{Cut (setup only)}: staged latent-defect repair suite & \S~Setup \\
 E30 & Composition defeats the cliff: monolithic vs.\ four children & Fig.~\ref{fig:compcliff} \\
 E31 & Three-level composite replayed against an independent oracle & Fig.~\ref{fig:composition} \\
 E32 & Changing rules via PhasedTransition across a regime switch & Tab.~\ref{tab:composition} \\
@@ -2251,7 +2252,7 @@ E34 & Sprint: budget allocation over twenty repair worlds & Fig.~\ref{fig:sprint
 E35 & Sprint allocation across a model capability ladder & Fig.~\ref{fig:sprint-ladder} \\
 E36 & Composition yields better representations on factored worlds & Fig.~\ref{fig:representations} \\
 E37 & Equal-information induction: code beats learning OOD & Tab.~\ref{tab:induction} \\
-E38 & Induction ceiling is identifiability, not capability & Fig.~\ref{fig:induction-scale} \\
+E38 & The induction ceiling is identifiability, not capability & Fig.~\ref{fig:induction-scale} \\
 E39 & Forecast accuracy equals perception accuracy (decomposition) & \S\ref{sec:perception} \\
 E40 & Perceive-then-forecast a multimodal SIR epidemic & Fig.~\ref{fig:perception} \\
 E41 & Adapting to sudden, unannounced rule changes & Fig.~\ref{fig:nonstationary} \\
@@ -2268,16 +2269,12 @@ E51 & Startup growth world model: what drives a YC-style batch & Tab.~\ref{tab:s
 E52 & Wavelet denoising as a perceive$\to$world$\to$emit loop & Tab.~\ref{tab:denoise} \\
 E53 & \emph{Retired (sheaf section cut); not in text} & --- \\
 E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:bounds} \\
-E55 & Information geometry: identify world by maximizing info & Tab.~\ref{tab:infogeom} \\
+E55 & Information geometry: identify the world by maximizing info & Tab.~\ref{tab:infogeom} \\
 E56 & Optimal transport: drift detection where KL fails & Tab.~\ref{tab:transport} \\
 E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
-\bottomrule
-\end{tabular}
-\end{minipage}
-\caption{Index of experiments E1--E57. E14 and E53 are retired; E28--E29 are
-described in the Experimental Setup but their results section was cut.}
-\label{tab:experiment-index}
-\end{table}
+\end{longtable}
+\endgroup
+
 
 
 \section{Detailed result tables}\label{app:tables}

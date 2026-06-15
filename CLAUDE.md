@@ -14,6 +14,18 @@ a local Ollama backbone. These rules override default behavior.
   at merge time: the `\NumExperiments` macro, the `EXPERIMENTS` list, and the
   registration calls in `scripts/make_paper_assets.py` `main()`. Fix those by hand
   in the PR; do not stack to avoid them.
+- **One change → one branch → one PR.** Once a PR is merged, that branch is *done*:
+  do **not** push more commits to it — a merged/closed PR ignores later pushes, so
+  they never reach `main` (they "orphan"). Start a **fresh branch off updated
+  `main`** for the next change. If you already pushed post-merge commits to a stale
+  branch, cherry-pick them onto a fresh branch off `main` and open a new PR.
+  (This bit us repeatedly: serve/README/view follow-ups merged at an earlier
+  commit and had to be re-PR'd.)
+- The human merges PRs quickly, so **finish and push a change before it's merged**,
+  and when several changes touch the same file (`openworld/serve.py`,
+  `paper/main.tex`), do them **one at a time**: open, wait for merge, branch off
+  updated `main`. After a merge you can confirm with
+  `git merge-base --is-ancestor <sha> origin/main`.
 - Concurrent cloud agents share this remote: **`git fetch` before pushing**, and
   never touch a branch checked out in another worktree.
 - Commit/push only when asked. End commit messages with the Co-Authored-By line.
@@ -42,6 +54,68 @@ a local Ollama backbone. These rules override default behavior.
 - `experiments/common.py` holds shared worlds/helpers (`save_results`,
   `require_ollama`, the sprint world, stats helpers).
 
+## World-model specs, cards & serving
+
+The portable artifact for a world model is a **spec** (`openworld/spec.py`):
+`to_spec(world)` → JSON dict, `from_spec(spec, allow_code=False)` → a world,
+`validate_spec(spec)` → list of problems (the publish gate). A complete spec
+captures **every component of a world model** — keep all of these in sync when you
+touch the format:
+
+- `name`, `description`, `card` (`version`/`license`/`authors`/`tags`/`lineage`/`metrics`).
+- `state_schema` (inferred type names) + `initial_state` (concrete values).
+- `actions`, and `rules` — the declared natural-language contract.
+- `transition` by `kind`: `code` (verified `CodeTransition`), `function`
+  (`FunctionTransition` via `inspect.getsource`, else `lossy`), `phased`, `llm`,
+  `composite`.
+- **perception** (the perceive→world boundary): perceptors as `{kind, modality,
+  produces, schema}`. `CodePerceptor` carries runnable `code` and round-trips +
+  runs server-side with no LLM; Mock/Text/Vision are descriptor-only (not
+  reconstructable from a spec).
+- **emit** (the world→output boundary): `{modality, fields, report?}`.
+- **objectives**: `{name, goal, weight?}`.
+- `composite`: `children` (recursive specs), `bridges` (Route adds `on_cross`),
+  `aggregators` (fn via `getsource`), `bindings`, `timescales`, `default_actions`,
+  `agents`.
+- `preview`: a numeric rollout `series` + a bounded state-transition `graph` (BFS
+  from the initial state), computed once at serialize time for the card/view.
+
+Rules:
+
+- **Round-trip stays lossless**: `from_spec(to_spec(w), allow_code=True)` must
+  reproduce `w`'s rollout. Un-serializable pieces (function transitions/aggregators
+  without source, lambdas, callable phase triggers) are flagged `lossy` — never
+  silently dropped.
+- **`allow_code` is a trust gate, not a sandbox**: `from_spec` keeps embedded code
+  inert unless `allow_code=True`; the serve registry needs it to run dynamics.
+- Cards/exports live in `openworld/card.py`: `render_card` (one self-contained SVG,
+  the "atlas" aesthetic), `render_gallery`, `to_reactflow` (`{nodes, edges,
+  playground}`), `to_mermaid`. Keep the SVG card **self-contained** (no fetched
+  resources; xmlns/`<a href>` are fine). The SVG card, the gallery, the live React
+  Flow `/view`, the logo (`assets/logo.svg`), and the CLI banner share one design
+  language (nested-worlds mark; blue/ochre/teal depth ramp; sensor/state/emit
+  boundary) — keep them consistent.
+- **Adding a spec component means touching all of:** serialize (`_*_to_spec`),
+  reconstruct (`from_spec`/`_attach_io`), `validate_spec`, the card section + graph,
+  `to_reactflow` + `to_mermaid`, and the serve `/metrics` + `/worlds/{name}` info.
+
+## Build → optimize → deploy (CLI + server)
+
+- `openworld serve <specs> --allow-code [--open]` runs a FastAPI multi-world
+  registry (a stateless forward pass). Endpoints per world: `GET` `/worlds`,
+  `/{name}` (info), `/spec`, `/state`, `/actions`, `/metrics`, `/card.svg`,
+  `/mermaid`, `/reactflow`, `/view`; `POST` `/step`, `/predict` (batch),
+  `/rollout`, `/observe`, `/run`; `WS /live`. Composites/bridges/perception serve
+  transparently. The interactive `/view` is the primary world UI; `--open` lands on
+  it.
+- `openworld build/optimize` drive Claude Code to author/tune a spec: interactive
+  tmux session if `tmux` is present, else **headless `claude -p`** (streamed
+  progress), else scaffold + manual prompt. Never require tmux.
+- Honest UX: stream long-running agent work (don't hide it behind a silent
+  spinner); use **terminal-native ANSI/bright colors** (named colors adapt to the
+  user's theme — hard-coded dark hex like `#1d4ed8` is unreadable on a black
+  terminal).
+
 ## Local Ollama gotchas
 
 - Large models can carry a **huge default context** (qwen3-coder:30b defaults to
@@ -56,7 +130,6 @@ a local Ollama backbone. These rules override default behavior.
 
 ## Don'ts
 
-- **Never reference CrewAI** anywhere in this codebase or docs.
 - The **core library is zero-dependency**: `import openworld` and everything it
   pulls in (state, transitions, compose, spec, card, perceive, …) must use only
   the stdlib. Keep it that way.

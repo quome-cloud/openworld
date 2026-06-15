@@ -28,6 +28,42 @@ from .spec import from_spec, spec_to_json, to_spec, validate_spec
 
 console = Console()
 
+# The OpenWorld mark for the terminal: nested-worlds glyph (blue/ochre/teal) +
+# wordmark + tagline, echoing assets/logo.svg.
+_B, _O, _T, _INK = "#1d4ed8", "#b45309", "#0f766e", "bold #16202e"
+
+# Wide-terminal figlet wordmark (ANSI Shadow), drawn with a blue->teal gradient.
+_FIGLET = r"""
+ ██████╗ ██████╗ ███████╗███╗   ██╗██╗    ██╗ ██████╗ ██████╗ ██╗     ██████╗
+██╔═══██╗██╔══██╗██╔════╝████╗  ██║██║    ██║██╔═══██╗██╔══██╗██║     ██╔══██╗
+██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║ █╗ ██║██║   ██║██████╔╝██║     ██║  ██║
+██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
+╚██████╔╝██║     ███████╗██║ ╚████║╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
+ ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝
+""".strip("\n").splitlines()
+_GRADIENT = ["#1d4ed8", "#2160c4", "#1f73ad", "#168a90", "#12807a", "#0f766e"]
+
+
+def _banner() -> None:
+    console.print()
+    fw = max(len(line) for line in _FIGLET)
+    if console.size.width >= fw + 4:                       # wide terminal: figlet
+        for line, col in zip(_FIGLET, _GRADIENT):
+            console.print(f"[{col}]{line}[/]", highlight=False)
+        console.print(f"      [dim]verified symbolic world models[/]    "
+                      f"[{_B}]build · optimize · deploy[/]", highlight=False)
+    else:                                                  # narrow: compact mark
+        for line in (
+            f"  [{_B}]┌───────┐[/]",
+            f"  [{_B}]│[/] [{_O}]┌───┐[/] [{_B}]│[/]   [{_INK}]OpenWorld[/]",
+            f"  [{_B}]│[/] [{_O}]│[/] [{_T}]▪[/] [{_O}]│[/] [{_B}]│[/]   "
+            f"[dim]verified symbolic world models[/]",
+            f"  [{_B}]│[/] [{_O}]└───┘[/] [{_B}]│[/]   [{_B}]build · optimize · deploy[/]",
+            f"  [{_B}]└───────┘[/]",
+        ):
+            console.print(line, highlight=False)
+    console.print()
+
 
 def _load_spec(path: str) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -47,10 +83,14 @@ def _gather(paths) -> list:
     return out
 
 
-@click.group(help="Build, optimize, and deploy world models.")
+@click.group(help="Build, optimize, and deploy world models.",
+             invoke_without_command=True)
 @click.version_option(package_name="openworld", message="openworld %(version)s")
-def main():
-    pass
+@click.pass_context
+def main(ctx):
+    if ctx.invoked_subcommand is None:
+        _banner()
+        console.print(ctx.get_help())
 
 
 # --------------------------------------------------------------------------- #
@@ -71,6 +111,7 @@ def serve(paths, host, port, allow_code):
     if not pairs:
         raise click.ClickException("no specs found")
     specs = [s for _, s in pairs]
+    _banner()
     if allow_code:
         console.print("[yellow]--allow-code: executing world dynamics from specs "
                       "(trust your inputs).[/yellow]")
@@ -251,3 +292,7 @@ def optimize(spec, goal):
     hint = (f"Paste this to Claude Code (or run your own loop):\n   {msg}\n"
             f"Then: [bold]openworld card {out} --open[/bold]")
     _claude_phase(f"ow-opt-{name}", msg, Path(out), hint)
+
+
+if __name__ == "__main__":
+    main()

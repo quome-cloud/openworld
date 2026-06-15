@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340"
+     font-family="'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fcfbf8"/><stop offset="1" stop-color="#eef0ec"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#0891b2"/>
+    </linearGradient>
+    <pattern id="grid" width="26" height="26" patternUnits="userSpaceOnUse">
+      <path d="M26 0 H0 V26" fill="none" stroke="#8aa0c2" stroke-width="0.6" opacity="0.22"/>
+    </pattern>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#16202e" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="340" fill="url(#bg)"/>
+  <rect width="1200" height="340" fill="url(#grid)"/>
+  <!-- top accent rule -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#acc)"/>
+  <!-- corner registration ticks (atlas) -->
+  <g stroke="#1d4ed8" stroke-width="1.6" opacity="0.5" fill="none">
+    <path d="M30 44 L30 30 L44 30"/><path d="M1170 44 L1170 30 L1156 30"/>
+    <path d="M30 296 L30 310 L44 310"/><path d="M1170 296 L1170 310 L1156 310"/>
+  </g>
+
+  <!-- nested-worlds mark: three concentric rounded squares (blue / ochre / teal) -->
+  <g transform="translate(360,172)" filter="url(#sh)">
+    <rect x="-66" y="-66" width="132" height="132" rx="22" fill="#ffffff" stroke="#1d4ed8" stroke-width="6"/>
+    <rect x="-40" y="-40" width="80" height="80" rx="15" fill="none" stroke="#b45309" stroke-width="5"/>
+    <rect x="-16" y="-16" width="32" height="32" rx="8" fill="#0f766e"/>
+  </g>
+
+  <!-- wordmark + taglines -->
+  <text x="462" y="158" font-size="86" font-weight="800" fill="#16202e" letter-spacing="-1">OpenWorld</text>
+  <rect x="466" y="182" width="300" height="4" rx="2" fill="url(#acc)"/>
+  <text x="466" y="214" font-size="19" font-weight="700" fill="#5b6675" letter-spacing="2.4"
+        font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">VERIFIED SYMBOLIC WORLD MODELS</text>
+  <text x="466" y="244" font-size="16" font-weight="600" fill="#1d4ed8" letter-spacing="1.2"
+        font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">build &#183; optimize &#183; deploy</text>
+</svg>

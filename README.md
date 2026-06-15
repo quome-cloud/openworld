@@ -1,239 +1,362 @@
+<div align="center">
+
+<img src="assets/logo.png" alt="OpenWorld — verified symbolic world models" width="760"/>
+
 # OpenWorld
 
-**Create, prototype, and optimize world models in minutes — with a local Ollama backbone.**
+**Build, optimize, and deploy *verified symbolic world models* — simulated environments whose dynamics are explicit, auditable Python code instead of opaque neural weights.**
 
-OpenWorld is a small, zero-dependency Python framework for building *symbolic world
-models*: simulated environments whose dynamics are explicit, verifiable Python code
-rather than opaque neural weights. It operationalizes the Code World Model paradigm —
-an LLM **plans, writes, and verifies** the executable dynamics of your world, and
-objectives stay **open, editable, and tunable at inference time** via weighted dials.
+[![License: MIT](https://img.shields.io/badge/License-MIT-1d4ed8.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-1d4ed8.svg)](https://www.python.org/)
+[![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
+[![Tests: 263 passing](https://img.shields.io/badge/tests-263%20passing-brightgreen.svg)](#-reproducibility--testing)
+[![Experiments: 56](https://img.shields.io/badge/experiments-56-b45309.svg)](#-empirical-baselines)
+[![GitHub stars](https://img.shields.io/github/stars/quome-cloud/openworld?style=social)](https://github.com/quome-cloud/openworld/stargazers)
+[![Cite](https://img.shields.io/badge/cite-this%20work-purple.svg)](#-citation)
+
+</div>
+
+> **TL;DR** — A world model in OpenWorld is a small spec: symbolic state + declared
+> actions + **verified code dynamics** + an optional **perception** boundary. An LLM can
+> *write and verify* that code for you; the result is deterministic, inspectable, and
+> needs **0 training data**. Then `openworld serve` turns any spec into a FastAPI
+> inference server with a live, animated React Flow view.
+
+---
+
+## ⚡ The 30-second mental model
 
 ```
-  describe a world  ──▶  LLM synthesizes dynamics code  ──▶  verifier checks it
-                                                                  │
-        Pareto sweeps  ◀──  scored trajectories  ◀──  agents act in the world
+        BUILD                       OPTIMIZE                       DEPLOY
+  ┌────────────────┐          ┌─────────────────┐         ┌─────────────────────┐
+  │ describe it;   │          │ tune dials &    │         │ FastAPI server +    │
+  │ Claude Code    │  ─spec─▶ │ dynamics vs a   │ ─spec─▶  │ live React Flow     │
+  │ writes+verifies│          │ goal (Study /   │         │ /step /predict      │
+  │ the dynamics   │          │ sweep / dials)  │         │ /run /observe  + WS │
+  └────────────────┘          └─────────────────┘         └─────────────────────┘
+            │                                                        │
+            ▼    one portable JSON spec  ·  one self-contained SVG card    ▼
+
+   perceive ──▶  W O R L D  (verified symbolic state + code dynamics)  ──▶ emit
+   (text in)        ▲ compose: worlds-within-worlds, bridges, roll-ups       (report out)
 ```
 
-## Why
+Every world serializes to a **lossless JSON spec** and renders to a **stunning,
+self-contained SVG model card** (a HuggingFace-style card — but the artifact is a
+*runnable world*). Composition is closed: worlds nest into worlds, coupled by
+*bridges* and rolled up by *aggregators*.
 
-- **Training-free.** Dynamics are synthesized code, not learned latents — no data
-  collection, no GPUs, bit-exact determinism, zero compounding rollout error.
-- **Verifiable.** Every candidate dynamics program passes syntax, sandboxed
-  smoke-run, invariant, and (optional) LLM-critic checks before it's accepted.
-  The accepted code is a plain `.py` artifact you can read, edit, and unit-test.
-- **Steerable.** Objectives are declared scoring functions weighted by `Dial`s
-  (e.g. a morality dial λ). Turn a dial mid-experiment to move along the Pareto
-  frontier between competing values — no retraining.
-- **Local-first.** Talks to Ollama through the standard library. `MockLLM` lets you
-  prototype and test completely offline.
+---
 
-## Install
+## 🧠 Why OpenWorld
+
+- **Training-free & deterministic.** Dynamics are *synthesized, verified code*, not
+  learned latents — no datasets, no GPUs, bit-exact rollouts, **zero compounding
+  error**.
+- **Verifiable by construction.** Every candidate dynamics program passes syntax,
+  sandboxed smoke-run, invariant, and (optional) LLM-critic gates before it is
+  accepted. The accepted code is a plain `.py` you can read, diff, and unit-test.
+- **Portable & publishable.** `to_spec(world)` → a complete JSON spec capturing state,
+  rules, dynamics, **perception**, **emit**, objectives, metrics, and nested
+  composition. `render_card(...)` → one self-contained SVG. `to_mermaid` /
+  `to_reactflow` exports included.
+- **Composable (worlds-within-worlds).** `CompositeWorld` nests child worlds, couples
+  them sideways via `Bridge`s, and rolls them up via `Aggregator`s — recursively.
+- **Steerable at inference time.** Objectives are declared scoring functions weighted
+  by `Dial`s; move along the Pareto frontier between competing values *without
+  retraining*.
+- **Deployable in one line.** `openworld serve specs/ --allow-code` →
+  `http://127.0.0.1:8080` with `/docs`, batch `/predict`, and a live animated React
+  Flow view per world.
+- **Local-first & zero-dependency core.** The library talks to [Ollama](https://ollama.com)
+  through the standard library; `MockLLM` runs everything fully offline.
+
+---
+
+## 📊 Empirical baselines
+
+Verified-code dynamics vs. learned / LLM dynamics on the framework's own benchmark
+suite (numbers from the bundled, reproducible experiments — see [`experiments/`](experiments/)).
+
+| Approach | Rollout exact-match | Generalization to novel combos | Training data | Determinism |
+|---|:--:|:--:|:--:|:--:|
+| **OpenWorld (verified code)** | **1.00 → 1.00** | **1.00** | **0 samples** | **bit-exact** |
+| LLM next-state predictor | 0.67 → 0.00 ¹ | — | — | non-deterministic |
+| Best learned baseline (boosted trees) | — | 0.20 ² | thousands | seed-dependent |
+| Monolithic MLP | — | < 0.20 ² | thousands | seed-dependent |
+
+<sub>¹ Per-step exact-match over a rollout (experiment E01): the LLM degrades to 0 as
+error compounds; verified code stays exact. ² Exact accuracy on *unseen*
+part-combinations at K=5 (E36): composition-symbolic = 1.00 with **zero** training
+data; the strongest of 9 learned families reaches ~0.20.</sub>
+
+> **Note:** OpenWorld reports negative and boundary results honestly — e.g. trace
+> *induction* hits an identifiability ceiling (E38) and a same-day trading world is
+> sub-S&P on a risk-adjusted basis (E50). The value here is *verified dynamics*, not a
+> universal win.
+
+---
+
+## 🚀 Install
+
+> **Note:** Source install for now (not yet on PyPI). The **core** (`import openworld`)
+> is zero-dependency; the `openworld` CLI + server add `fastapi` / `uvicorn` / `click`
+> / `rich`.
 
 ```bash
-pip install -e .            # from this directory
-# optional: dev tools
-pip install -e ".[dev]"
+git clone https://github.com/quome-cloud/openworld.git
+cd openworld
+pip install -e .                 # core + CLI/server
+pip install -e ".[dev]"          # + test tooling
 ```
 
-You'll want [Ollama](https://ollama.com) running with a model pulled, e.g.:
+Optional — for LLM-synthesized dynamics, run [Ollama](https://ollama.com) locally:
 
 ```bash
-ollama pull llama3.1
+ollama pull qwen3-coder:30b      # or any code-capable model
 ```
 
-## Quickstart
+---
+
+## ✨ Quickstart (runs out of the box — no LLM required)
+
+Define a world, run it deterministically, serialize it, and render its model card:
 
 ```python
-from openworld import World, Agent, Simulation, Objective, OllamaLLM
+from openworld import World, Action, CodeTransition, to_spec, render_card
 
-llm = OllamaLLM(model="llama3.1")
+DYNAMICS = """
+def transition(state, action):
+    s = dict(state)
+    if action["name"] == "heat":   s["temp"] += 1
+    elif action["name"] == "cool": s["temp"] -= 1
+    return s            # 'idle' (and anything else) holds — explicit & verifiable
+"""
 
-# 1. Declare the world: state, actions, rules — in plain language + JSON.
+room = World(
+    name="thermostat",
+    description="A room with a thermostat tracking a target temperature.",
+    initial_state={"temp": 18, "target": 21},
+    actions=["heat", "cool", "idle"],
+    rules=["'heat' raises temp by 1, 'cool' lowers it by 1, 'idle' holds."],
+    transition=CodeTransition(DYNAMICS),       # verified code — not a neural net
+)
+
+print(room.transition.step(room.initial_state, Action("heat")))  # {'temp': 19, 'target': 21}
+print(to_spec(room)["state_schema"])           # {'temp': 'int', 'target': 'int'}
+render_card(room, "thermostat.svg")            # a self-contained SVG model card
+```
+
+Then **deploy it** with a live, animated view:
+
+```python
+import os
+from openworld import spec_to_json, to_spec
+os.makedirs("specs", exist_ok=True)
+open("specs/thermostat.json", "w").write(spec_to_json(to_spec(room)))
+```
+
+```bash
+openworld serve specs/ --allow-code            # → http://127.0.0.1:8080
+```
+
+Open `http://127.0.0.1:8080/worlds/thermostat/view`, step the world, and watch the
+graph update.
+
+---
+
+## 🛠️ Advanced usage
+
+<details>
+<summary><b>Compose worlds-within-worlds (bridges + aggregators)</b></summary>
+
+```python
+from openworld import CompositeWorld, Bridge, Aggregator, Action, render_card
+
+def total_treated(children):
+    return sum(c["treated"] for c in children.values())
+
+network = CompositeWorld(
+    name="hospital-network",
+    children={"north": triage_world(), "south": triage_world()},    # any Worlds
+    bridges=[Bridge(name="transfer", a="north", b="south",
+                    transition=CodeTransition(TRANSFER_CODE))],       # sideways coupling
+    aggregators=[Aggregator(name="total_treated", fn=total_treated)], # upward roll-up
+    default_actions={"north": "treat_critical", "south": "treat_moderate"},
+)
+network.transition.step(network.initial_state, Action("tick"))       # steps both + bridge + roll-up
+render_card(network, "network.svg")                                  # nested "world of worlds" card
+```
+</details>
+
+<details>
+<summary><b>Perception → world → emit (paste text in, get a report out)</b></summary>
+
+```python
+from openworld import World, CodeTransition, CodePerceptor, to_spec
+
+w = World(name="intake", description="ticket intake",
+          initial_state={"priority": 0, "load": 0, "done": 0}, actions=["work"],
+          transition=CodeTransition(WORK_CODE))
+
+# A perceptor whose extraction is *verified code* — runs server-side with no LLM:
+w.perceptors = [CodePerceptor(code=PARSE_CODE, produces=["priority", "load"],
+                              schema={"priority": (int, (0, 9)), "load": (int, (0, 99))})]
+w.emit = [{"modality": "report", "fields": ["priority", "load", "done"],
+           "report": "priority {priority}: cleared {done}, {load} remaining"}]
+
+spec = to_spec(w)   # perception + emit travel inside the spec, losslessly
+```
+
+Served, this powers the live view: paste `priority: 7` / `load: 4`, watch it
+**perceive → traverse the rules → emit a report**, and loop.
+</details>
+
+<details>
+<summary><b>LLM-synthesized, verified dynamics (the Code World Model loop)</b></summary>
+
+```python
+from openworld import World, OllamaLLM
+
 world = World(
-    name="orchard",
-    description="Agents share an orchard with a limited pool of apples.",
+    name="orchard", description="Agents share an orchard with limited apples.",
     initial_state={"apples": 10, "harvested": {"alice": 0}},
     actions=["pick", "wait"],
-    rules=[
-        "'pick' moves one apple to the acting agent's harvested count.",
-        "Picking when no apples remain does nothing.",
-    ],
-    llm=llm,
+    rules=["'pick' moves one apple to the acting agent; none left → no-op."],
+    llm=OllamaLLM(model="qwen3-coder:30b", options={"num_ctx": 8192}),
 )
-
-# 2. Compile: the LLM writes executable dynamics; a verifier checks them
-#    (syntax, sandboxed smoke-runs, your invariants) and feeds failures back
-#    to the generator until the code passes.
-world.compile(
-    invariants=[("apple count never negative", lambda s: s["apples"] >= 0)],
-    save_to="orchard_dynamics.py",   # the dynamics stay an editable artifact
-)
-
-# 3. Drop agents in and run.
-alice = Agent(name="alice", goal="Harvest as many apples as possible.", llm=llm)
-sim = Simulation(world, agents=[alice],
-                 objectives=[Objective("welfare", fn=lambda s, a, ns: s["apples"] - ns["apples"])])
-trajectory = sim.run(steps=10)
-print(trajectory.final_state, trajectory.totals())
+world.compile(invariants=[("apples never negative", lambda s: s["apples"] >= 0)])
+# the LLM writes the dynamics; the verifier gates it (AST + sandbox + invariants
+# + optional critic) before acceptance. The result is an editable .py artifact.
 ```
+</details>
 
-## Tunable objectives and Pareto sweeps
-
-Weight any objective with a `Dial` and sweep it to trace the trade-off frontier
-between competing values:
+<details>
+<summary><b>Steerable objectives & Pareto sweeps (no retraining)</b></summary>
 
 ```python
-from openworld import Dial, Objective, sweep
+from openworld import Dial, Objective, Simulation, sweep
 
 morality = Dial("morality", value=0.0)          # λ ∈ [0, 1]
-sim = Simulation(world, agents,
-    objectives=[
-        Objective("welfare",  fn=welfare,  weight=1.0),
-        Objective("fairness", fn=fairness, weight=morality),
-    ])
+sim = Simulation(world, agents, objectives=[
+    Objective("welfare",  fn=welfare,  weight=1.0),
+    Objective("fairness", fn=fairness, weight=morality)])
 
 result = sweep(sim, dial="morality", values=[0.0, 0.1, 0.5, 1.0], steps=20, episodes=3)
 print(result.table())                            # totals per dial setting
-frontier = result.pareto(["welfare", "fairness"])  # non-dominated points
-best = result.best("aggregate")
+frontier = result.pareto(["welfare", "fairness"])# non-dominated trade-off points
 ```
+</details>
 
-## Automated tuning: find the configuration that solves your task
+<details>
+<summary><b>CLI: build → optimize → deploy</b></summary>
 
-Treat the world design, the agent's policy knobs, and the moral dials as one
-searchable space, and let the tuner find the configuration that maximizes
-success at a declared goal — search broadly first, then fine-tune locally:
-
-```python
-from openworld import Tuner, Uniform, IntRange, Choice
-
-tuner = Tuner(
-    build=build,                       # params -> a fully configured Simulation
-    space={
-        "protocol":    Choice(["critical_first", "round_robin"]),
-        "stewardship": Dial("stewardship"),   # moral configuration is first-class:
-        "compassion":  Dial("compassion"),    # dials are tuned over their bounds
-        "budget":      IntRange(6, 24),       # the world design
-    },
-    score=score,                       # (trajectory, params) -> float to maximize
-    success=solved,                    # (trajectory, params) -> bool: task solved?
-    steps=16, seed=7,
-    workers=8,                         # parallel trials (pays off for LLM-backed worlds)
-    goal="Treat all criticals, zero deteriorations, within the cost target.",
-)
-
-tuner.search(n_trials=1000)            # stage 1: 1000 simulated environments
-tuner.search(n_trials=50, strategy="tpe")  # or: Optuna TPE for expensive worlds
-tuner.refine(n_trials=200, scale=0.15) # stage 2: hill-climb around the best
-tuner.refine(n_trials=100, scale=0.05) # stage 3: finer pass
-
-print(tuner.study.table(k=10))         # auditable leaderboard, not just a winner
-print(tuner.study.best.params, tuner.study.success_rate())
-tuner.study.to_csv("study.csv")        # full trial history for offline analysis
+```bash
+openworld build "a support-ticket queue you can paste into" --name intake  # Claude Code authors a spec
+openworld optimize specs/intake.json --goal "clear high-priority fastest"   # tune toward a goal
+openworld ls specs/                                                        # inspect a catalog
+openworld card specs/intake.json --open                                    # render the SVG card
+openworld serve specs/ --allow-code                                        # FastAPI @ :8080
 ```
+</details>
 
-Every trial is a full, replayable simulation; the study records each trial's
-parameters, score, solve status, and objective totals. The `"tpe"` strategy
-uses [Optuna](https://optuna.org)'s Bayesian sampler (`pip install optuna`) —
-worth it when each trial is expensive (live-LLM dynamics); plain random search
-parallelizes freely and is usually enough for fast symbolic worlds. See
-`examples/autotune_triage.py` for a complete run that discovers the ideal
-triage protocol, two-dial moral configuration, and unit budget for an
-emergency shift — including the *solving manifold*: the distinct moral
-configurations that all solve the task.
+<details>
+<summary><b>Inference-server API (per world)</b></summary>
 
-## Three interchangeable dynamics engines
-
-| Engine | What it is | When to use |
+| Method | Path | Purpose |
 |---|---|---|
-| `CodeTransition` | LLM-synthesized, verified Python (`world.compile()`) | The default: deterministic, auditable, fast rollouts |
-| `LLMTransition` | The LLM predicts the next state directly each step (`world.use_llm_dynamics()`) | Instant prototyping; stochastic, "learned-style" baseline |
-| `FunctionTransition` | Your own Python function | Ground-truth dynamics, oracles, unit tests |
+| `GET` | `/worlds/{name}` · `/spec` · `/state` · `/actions` · `/metrics` | introspection |
+| `GET` | `/card.svg` · `/mermaid` · `/reactflow` · `/view` | visualizations |
+| `POST` | `/step` | one forward pass: `{state, action}` → `{next_state, changed}` |
+| `POST` | `/predict` | **batch** forward pass |
+| `POST` | `/rollout` | multi-step trajectory |
+| `POST` | `/observe` · `/run` | perception (gated) / full input → perceive → roll → emit |
+| `WS` | `/live` | streamed, animated rollout |
 
-All three implement `(state, action) -> next_state`, so you can swap them inside the
-same `Simulation` and compare.
+Composites, bridges, and perception are served transparently. `--allow-code` gates
+dynamics execution (a trust gate for local specs — **not** a sandbox against
+adversarial code).
+</details>
 
-## Concepts
+---
 
-- **`World`** — declarative container: description, JSON-serializable symbolic state,
-  action names, plain-language rules, and a dynamics engine.
-- **`Agent`** — an LLM planner with a `goal` (or a hand-written `policy` function) that
-  proposes one action per step. Unparseable LLM output degrades to a safe `noop`.
-- **`Objective` + `Dial`** — open value specification: named scoring functions over
-  `(state, action, next_state)`, weighted by fixed floats or tunable dials.
-- **`Simulation` / `Trajectory`** — round-robin episode loop that records every state,
-  action, and per-objective score.
-- **`sweep` / `SweepResult`** — run episodes across dial values; get totals tables,
-  Pareto frontiers, and best settings.
-- **`Verifier`** — the gatekeeper for synthesized dynamics: AST checks, sandboxed
-  execution against sample actions, custom invariants, optional LLM critic with a
-  repair feedback loop.
+## 🧭 Design principles
 
-## Examples
+- **The core is zero-dependency.** `import openworld` and everything it pulls in uses
+  only the standard library. The CLI/server are the one batteries-included layer.
+- **Honest science.** Experiments are deterministic, self-checking, and report weak or
+  negative results plainly. Paper numbers come *only* from
+  [`scripts/make_paper_assets.py`](scripts/make_paper_assets.py) reading
+  [`experiments/results/`](experiments/results/).
+- **Code is the contract.** Accepted dynamics are auditable artifacts, not weights.
 
-```bash
-python examples/orchard.py            # synthesis + agent loop (falls back to MockLLM)
-python examples/morality_sweep.py     # Pareto frontier over a morality dial
-```
+---
 
-## Tutorials
-
-Domain walkthroughs in [`tutorials/`](tutorials/README.md), each with a runnable script:
-
-- **[Healthcare](tutorials/healthcare_triage.md)** — ICU triage: synthesized dynamics, safety invariants, outcomes-vs-spend dial
-- **[Legaltech](tutorials/legaltech_settlement.md)** — settlement negotiation: multi-agent simulation, event-triggered objectives
-- **[Finance](tutorials/finance_portfolio.md)** — portfolio rebalancing: scenario replay, growth-vs-risk frontiers
-- **[Software engineering](tutorials/software_engineering_sprint.md)** — sprint planning: generator + critic relay, validating synthesized code against ground truth
-
-## Agents-as-a-judge
-
-`Judge` wraps any backbone model with two operations: pick the best of N
-candidate behaviors, or grade a whole episode against a written rubric:
-
-```python
-from openworld import Judge
-
-judge = Judge(OllamaLLM(model="qwen2.5:7b"), criteria="prefer minimal correct fixes")
-best = judge.choose(candidate_patches, context=task_description)   # index
-score = judge.score_trajectory(trajectory, rubric="reward prompt triage")  # 0-10
-```
-
-## The coding world
-
-`openworld.coding` ships a ten-task program-repair benchmark where the world's
-dynamics *are* test execution: submit a patch, the sandbox runs the hidden
-tests bit-exactly, and failing-test feedback enters the state for the next
-attempt. See `experiments/e05_codefix_agent.py` and `e06_judge_selection.py`.
-
-## Experiments and paper
-
-`experiments/` contains a 14-experiment campaign (dynamics fidelity across
-three worlds, synthesis reliability, verifier ablations, rollout speed,
-program repair, controlled judge selection with McNemar tests and
-position-bias audits, judge-objective alignment with permutation tests,
-morality Pareto sweeps, tuning efficiency, OOD generalization, and trained
-MLP/k-NN baselines), each writing `results/*.json`. A NeurIPS-style internal
-review and the revision protocol it drove live in `docs/review/`. The
-research paper in `paper/` regenerates end-to-end:
+## 🔬 Reproducibility & testing
 
 ```bash
-python3 scripts/make_paper_assets.py   # figures, tables, numbers.tex from results
-cd paper && make                       # builds main.pdf (tectonic or pdflatex)
+pytest -q                                  # 263 tests, deterministic & offline (MockLLM)
+python experiments/e57_world_specs.py      # e.g. world specs: 5/5 round-trip exact
+python scripts/make_paper_assets.py        # regenerate every paper figure/table/number
 ```
 
-## Testing
+The **56 bundled experiments** are designed for reproducibility: fixed seeds, numpy
+baselines, and `assert`ed claims. The accompanying paper compiles end-to-end from the
+same results (`cd paper && tectonic main.tex`).
 
-The test suite runs entirely offline via `MockLLM`:
+---
 
-```bash
-python -m pytest
+## 📚 Citation
+
+If OpenWorld supports your research, please cite it. This **novel framework** for
+verified, composable, training-free world models is built for **reproducibility** and
+**empirical baselines**.
+
+> Schwoebel, J. (2026). *OpenWorld: A zero-dependency framework for verified symbolic
+> world models* (Version 0.3.0) [Computer software]. Quome.
+> https://github.com/quome-cloud/openworld
+
+```bibtex
+@software{schwoebel_openworld_2026,
+  author  = {Schwoebel, Jim},
+  title   = {{OpenWorld}: A Zero-Dependency Framework for Verified Symbolic World Models},
+  year    = {2026},
+  version = {0.3.0},
+  url     = {https://github.com/quome-cloud/openworld},
+  note    = {Quome}
+}
 ```
 
-## Background
+> **Note:** A companion paper is in preparation; a `@article` entry with a DOI / arXiv
+> identifier will be added here on release. Until then, please use the `@software`
+> citation above — no placeholder identifiers are published.
 
-The design follows the symbolic / code-world-model line of research: executable code
-as a verifiable transition engine, modular plan–generate–verify LLM orchestration,
-and value alignment kept *open* — objectives as declared, editable artifacts with
-inference-time dials instead of frozen weights. See
-`World Models_ Learned vs. Symbolic.md` in this repository for the full literature
-review that motivated the architecture.
+---
+
+## 🤝 Contributing
+
+Contributions are welcome — new world models, experiments, perceptors, or serving
+features.
+
+1. Read **[CLAUDE.md](CLAUDE.md)** (working conventions) and **[QUICKSTART.md](QUICKSTART.md)**.
+2. Base every branch on `main`; keep the core zero-dependency; add deterministic,
+   self-checking tests.
+3. Open a PR against `main` with a clear description and a passing `pytest`.
+
+Found a bug or have an idea? Open an [issue](https://github.com/quome-cloud/openworld/issues).
+
+<div align="center">
+<a href="https://github.com/quome-cloud/openworld/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=quome-cloud/openworld" alt="contributors"/>
+</a>
+</div>
+
+---
+
+## 📄 License
+
+Released under the **[MIT License](LICENSE)** — free for commercial and academic use.
+
+<div align="center">
+<sub>Built with verified code, not vibes. ⭐ Star the repo if a readable, deployable world model is useful to you.</sub>
+</div>

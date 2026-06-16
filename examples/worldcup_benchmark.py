@@ -67,6 +67,56 @@ def training_matches(year: int, years: int = 4) -> List[dict]:
     return [r for r in _read_results() if lo <= r["date"] < cutoff]
 
 
+import random as _random
+
+
+def _host_of(year: int) -> str:
+    return wh.load_cup(year).host
+
+
+def predict_uniform(year: int, eng: "wh.EloEngine") -> Dict[tuple, Dict[str, float]]:
+    third = 1 / 3
+    return {(r["date"], r["home"], r["away"]): {"W": third, "D": third, "L": third}
+            for r in cup_matches(year)}
+
+
+def predict_ours_frozen(year: int, eng: "wh.EloEngine", sims: int = 20000,
+                        seed: int = 2026) -> Dict[tuple, Dict[str, float]]:
+    """Elo->Poisson W/D/L from FROZEN pre-tournament Elo (the E61 model)."""
+    elo = eng.ratings_asof(wh._cup_freeze_date(year))
+    host = _host_of(year)
+    rng = _random.Random(seed)
+    out = {}
+    for r in cup_matches(year):
+        out[(r["date"], r["home"], r["away"])] = wh._wdl_probs(
+            r["home"], r["away"], elo, host, 1500.0, sims, rng)
+    return out
+
+
+def predict_ours_walk_forward(year: int, eng: "wh.EloEngine", sims: int = 20000,
+                              seed: int = 2026) -> Dict[tuple, Dict[str, float]]:
+    """Predict each match from Elo as of just before it, then update Elo with the
+    real result (K = World Cup) — absorbs in-tournament info like 538 does."""
+    elo = dict(eng.ratings_asof(wh._cup_freeze_date(year)))
+    host = _host_of(year)
+    base = 1500.0
+    wc_k = wh._k_for("FIFA World Cup")
+    rng = _random.Random(seed)
+    out = {}
+    for r in cup_matches(year):              # date-sorted
+        h, a, hg, ag = r["home"], r["away"], r["hg"], r["ag"]
+        out[(r["date"], h, a)] = wh._wdl_probs(h, a, elo, host, base, sims, rng)
+        # update a local Elo copy (World Football Elo, same formula as the engine)
+        ha = 0.0 if r["neutral"] else wh.HOME_ADVANTAGE
+        rh, ra = elo.get(h, base), elo.get(a, base)
+        we = 1.0 / (1.0 + 10 ** (-((rh + ha) - ra) / 400.0))
+        w = 1.0 if hg > ag else (0.5 if hg == ag else 0.0)
+        delta = wc_k * wh._gd_multiplier(hg - ag) * (w - we)
+        elo[h] = rh + delta
+        elo[a] = ra - delta
+    return out
+
+
 def rps(probs: Dict[str, float], actual: str) -> float:
     """Ranked Probability Score for an ordinal W/D/L forecast (home perspective).
 

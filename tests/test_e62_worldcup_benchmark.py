@@ -64,3 +64,29 @@ def test_training_matches_are_leakage_free():
     assert tr, "expected pre-cup internationals"
     assert all(r["date"] < cutoff for r in tr)
     assert all(r["date"] >= "2010-06-12" for r in tr)  # 4-year window
+
+
+def test_uniform_predictions():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    p = wb.predict_uniform(2014, eng)
+    assert len(p) == 64
+    v = next(iter(p.values()))
+    assert v == {"W": 1 / 3, "D": 1 / 3, "L": 1 / 3}
+
+
+def test_ours_frozen_predictions_normalised():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    p = wb.predict_ours_frozen(2014, eng, sims=2000)
+    assert len(p) == 64
+    for v in p.values():
+        assert abs(sum(v.values()) - 1.0) < 1e-9
+
+
+def test_walk_forward_beats_uniform_on_2014():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    preds = wb.predict_ours_walk_forward(2014, eng, sims=3000)
+    actuals = wb.actual_outcomes(2014)
+    s = wb.score_matches(preds, actuals)
+    u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
+    assert len(preds) == 64
+    assert s["rps"] < u["rps"]   # real skill beats the floor

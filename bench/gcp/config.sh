@@ -16,7 +16,7 @@ BUCKET="${OW_BUCKET:-gs://openworld-bench}"
 REPO_URL="${OW_REPO_URL:-https://github.com/quome-cloud/openworld.git}"
 REPO_REF="${OW_REPO_REF:-main}"
 # Deep Learning VM: CUDA + PyTorch preinstalled, A100/H100 drivers handled.
-IMAGE_FAMILY="${OW_IMAGE_FAMILY:-common-cu124-ubuntu-2204-py310}"
+IMAGE_FAMILY="${OW_IMAGE_FAMILY:-pytorch-2-9-cu129-ubuntu-2204-nvidia-580}"
 IMAGE_PROJECT="deeplearning-platform-release"
 BOOT_DISK_GB="${OW_BOOT_DISK_GB:-200}"
 

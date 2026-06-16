@@ -40,3 +40,13 @@ def test_elo_update_is_zero_sum_per_match():
     db = eng.rating("B") - b0
     assert abs(da + db) < 1e-9
     assert da > 0  # winner gains
+
+
+def test_validation_against_published_elo_is_strong():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    stats = wh.validate_against_published(eng, snapshot_year=2013)
+    # Our reconstructed Elo should track eloratings.net well on shared teams.
+    assert stats["n"] >= 20
+    assert stats["spearman"] >= 0.7
+    assert stats["pearson"] >= 0.7
+    assert stats["rmse"] < 250.0

@@ -121,3 +121,62 @@ class EloEngine:
             snap = s
         # default-fill is handled by callers via .get(team, base); return as-is
         return dict(snap)
+
+
+# results.csv name -> published Elo file (`country`) name, where they differ.
+NAME_TO_PUBLISHED = {
+    "USA": "United States",
+    "South Korea": "South Korea",      # same in both; explicit for clarity
+    "China PR": "China",
+    "Cape Verde": "Cabo Verde",
+    "Ivory Coast": "Ivory Coast",
+    "Czech Republic": "Czechia",
+}
+
+
+def _pearson(xs: List[float], ys: List[float]) -> float:
+    n = len(xs)
+    mx, my = sum(xs) / n, sum(ys) / n
+    cov = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
+    vx = math.sqrt(sum((x - mx) ** 2 for x in xs))
+    vy = math.sqrt(sum((y - my) ** 2 for y in ys))
+    return cov / (vx * vy) if vx and vy else 0.0
+
+
+def _spearman(xs: List[float], ys: List[float]) -> float:
+    def ranks(v):
+        order = sorted(range(len(v)), key=lambda i: v[i])
+        rk = [0.0] * len(v)
+        for pos, i in enumerate(order):
+            rk[i] = pos
+        return rk
+    return _pearson(ranks(xs), ranks(ys))
+
+
+def published_ratings(snapshot_year: int) -> Dict[str, float]:
+    """Year-end published Elo for the given year, keyed by `country` name."""
+    out: Dict[str, float] = {}
+    with open(PUBLISHED_ELO_CSV, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if int(r["year"]) == snapshot_year and r["snapshot_date"].endswith("-12-31"):
+                out[r["country"]] = float(r["rating"])
+    return out
+
+
+def validate_against_published(eng: "EloEngine", snapshot_year: int) -> dict:
+    """Compare our computed end-of-year Elo to the published file on shared teams.
+
+    Returns {n, pearson, spearman, rmse, snapshot_year} for teams present in both.
+    """
+    ours_all = eng.ratings_asof(f"{snapshot_year + 1}-01-01")  # end-of-year state
+    pub = published_ratings(snapshot_year)
+    xs, ys = [], []
+    for team, ours in ours_all.items():
+        key = NAME_TO_PUBLISHED.get(team, team)
+        if key in pub:
+            xs.append(ours)
+            ys.append(pub[key])
+    n = len(xs)
+    rmse = math.sqrt(sum((a - b) ** 2 for a, b in zip(xs, ys)) / n) if n else float("nan")
+    return {"n": n, "pearson": _pearson(xs, ys), "spearman": _spearman(xs, ys),
+            "rmse": rmse, "snapshot_year": snapshot_year}

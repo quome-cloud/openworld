@@ -110,6 +110,28 @@ TOTAL_GOALS = 2.7      # mean combined goals per match
 SUPREMACY = 1.9        # how strongly an Elo edge converts to a goal margin
 HOST_ADVANTAGE = 60.0  # Elo bump for a host nation (applied in every match)
 
+# Real matchday-1 results (official, as of 15 June 2026). Used ONLY by the
+# accuracy backtest (evaluate_predictions); NEVER fed into the clean
+# pre-tournament forecast. Because ELO is the 10 June (pre-tournament) snapshot,
+# scoring the model against these is a genuine out-of-sample test.
+RESULTS_TO_DATE: List[Tuple[str, str, str, int, int]] = [
+    ("A", "Mexico", "South Africa", 2, 0),
+    ("A", "South Korea", "Czechia", 2, 1),
+    ("B", "Canada", "Bosnia", 1, 1),
+    ("B", "Qatar", "Switzerland", 1, 1),
+    ("C", "Brazil", "Morocco", 1, 1),
+    ("C", "Haiti", "Scotland", 0, 1),
+    ("D", "United States", "Paraguay", 4, 1),
+    ("D", "Australia", "Turkey", 2, 0),
+    ("E", "Germany", "Curacao", 7, 1),
+    ("E", "Ivory Coast", "Ecuador", 1, 0),
+    ("F", "Netherlands", "Japan", 2, 2),
+    ("F", "Sweden", "Tunisia", 5, 1),
+    ("G", "Belgium", "Egypt", 1, 1),
+    ("H", "Spain", "Cabo Verde", 0, 0),
+    ("H", "Saudi Arabia", "Uruguay", 1, 1),
+]
+
 
 # --------------------------------------------------------------------------- #
 # Outcome model: Elo -> expected score -> Poisson goals.
@@ -422,6 +444,90 @@ def forecast_table(results: Dict[str, Dict[str, float]], top: int = 20) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# Backtest: how well does the pre-tournament model predict matches that have
+# actually been played? (Out-of-sample: ELO predates these results.)
+# --------------------------------------------------------------------------- #
+
+def match_probabilities(home: str, away: str, sims: int = 30000, seed: int = 1) -> Dict[str, float]:
+    """Model P(home win), P(draw), P(away win) for one matchup, by sampling."""
+    rng = random.Random(seed)
+    w = d = 0
+    for _ in range(sims):
+        hg, ag = sample_match(home, away, rng)
+        if hg > ag:
+            w += 1
+        elif hg == ag:
+            d += 1
+    return {"W": w / sims, "D": d / sims, "L": (sims - w - d) / sims}
+
+
+def evaluate_predictions(results=RESULTS_TO_DATE, sims: int = 30000, seed: int = 2026):
+    """Score the model's W/D/L predictions against real results.
+
+    Returns (rows, summary). For each match we record the predicted W/D/L
+    probabilities, the actual outcome, the probability the model put on it, and
+    a Brier score. Summary aggregates hit-rate (model's most-likely outcome was
+    right), mean probability on the actual outcome, and mean Brier vs the
+    uniform 1/3 baseline (Brier 0.667) as a skill score.
+    """
+    rows = []
+    hits = p_sum = brier_sum = 0.0
+    dec_hits = dec_n = draws = 0
+    for i, (g, home, away, hg, ag) in enumerate(results):
+        probs = match_probabilities(home, away, sims=sims, seed=seed * 7919 + i)
+        actual = "W" if hg > ag else ("D" if hg == ag else "L")
+        fav = max(probs, key=probs.get)
+        hit = fav == actual
+        brier = sum((probs[c] - (1.0 if c == actual else 0.0)) ** 2 for c in "WDL")
+        hits += hit; p_sum += probs[actual]; brier_sum += brier
+        if actual == "D":
+            draws += 1
+        else:                         # decisive game: did we name the winner?
+            dec_n += 1
+            dec_hits += probs["W"] > probs["L"] if actual == "W" else probs["L"] > probs["W"]
+        rows.append({"group": g, "home": home, "away": away, "score": f"{hg}-{ag}",
+                     "actual": actual, "probs": probs, "fav": fav, "hit": hit,
+                     "brier": brier})
+    n = len(results)
+    base = 2 / 3  # uniform (1/3,1/3,1/3) Brier vs a one-hot outcome
+    return rows, {
+        "n": n,
+        "draws": draws,
+        "hit_rate": hits / n,
+        "decisive_n": dec_n,
+        "decisive_hit_rate": dec_hits / dec_n if dec_n else 0.0,
+        "mean_p_actual": p_sum / n,
+        "mean_brier": brier_sum / n,
+        "baseline_brier": base,
+        "skill_vs_uniform": 1 - (brier_sum / n) / base,
+    }
+
+
+def evaluation_table(rows, summary) -> str:
+    out = [f"{'Match':<34}{'Actual':>7}{'P(actual)':>11}{'Model pick':>13}{'hit':>5}"]
+    out.append("-" * 70)
+    name = {"W": "home win", "D": "draw", "L": "away win"}
+    for r in rows:
+        match = f"{r['home']} {r['score']} {r['away']}"
+        out.append(f"{match:<34}{name[r['actual']]:>9}"
+                   f"{r['probs'][r['actual']] * 100:>9.0f}% {name[r['fav']]:>11}"
+                   f"{'  ✓' if r['hit'] else '  ✗':>5}")
+    out.append("-" * 70)
+    out.append(
+        f"All {summary['n']} matches ({summary['draws']} draws): "
+        f"most-likely-outcome hit rate {summary['hit_rate'] * 100:.0f}% "
+        f"(coin-among-3 ≈ 33%)")
+    out.append(
+        f"Decisive games only ({summary['decisive_n']}): named the winner "
+        f"{summary['decisive_hit_rate'] * 100:.0f}% of the time")
+    out.append(
+        f"Mean prob on the actual result: {summary['mean_p_actual'] * 100:.0f}%   "
+        f"Brier {summary['mean_brier']:.3f} vs {summary['baseline_brier']:.3f} uniform   "
+        f"(skill {summary['skill_vs_uniform'] * 100:+.0f}%)")
+    return "\n".join(out)
+
+
+# --------------------------------------------------------------------------- #
 # Bracket rendering: one played-out tournament, as text and as a self-contained
 # SVG in OpenWorld's "atlas" card aesthetic.
 # --------------------------------------------------------------------------- #
@@ -459,26 +565,39 @@ def render_bracket_text(detail: dict) -> str:
 
 
 def render_bracket_svg(detail: dict) -> str:
-    """A self-contained SVG bracket (atlas palette), R32 -> champion left-to-right."""
+    """A self-contained SVG (atlas palette): group-stage band on top, then the
+    knockout bracket R32 -> champion left-to-right."""
     C = {"bg0": "#fcfbf8", "bg1": "#eef0ec", "text": "#16202e", "muted": "#5b6675",
          "accent": "#1d4ed8", "accent2": "#b45309", "teal": "#0f766e",
          "line": "#dde2ea", "node": "#ffffff", "win": "#1e3a8a"}
     rounds = detail["rounds"]                      # [(name, [matches]), ...]
     champ = detail["champion"]
+    standings = detail["standings"]
+    group_matches = detail.get("group_matches", {})
+    qualified = set(detail["qualified_thirds"])
     n0 = len(rounds[0][1])                          # 16 R32 matches
-    # geometry
-    top, colw, gap = 116, 212, 26
-    box_h, row_h = 44, 21
-    band = n0 * (box_h + gap)                      # vertical band for round 0
-    width = 40 + len(rounds) * colw + 230
-    height = top + band + 60
+
+    # group-stage band geometry: 12 cards in a 4 x 3 grid
+    gcols, card_w, card_h, gx, gy = 4, 300, 230, 14, 16
+    gband_top = 122
+    ko_top = gband_top + 3 * (card_h + gy) + 60      # knockout starts below groups
+
+    # knockout geometry
+    colw, gap, box_h, row_h = 212, 26, 44, 21
+    band = n0 * (box_h + gap)
+    width = max(40 + len(rounds) * colw + 230, 40 + gcols * (card_w + gx) + 26)
+    height = ko_top + band + 60
 
     def cy(r, m):                                  # vertical center of match m in round r
         nr = len(rounds[r][1])
-        return top + band * (m + 0.5) / nr
+        return ko_top + band * (m + 0.5) / nr
 
     def esc(s):
         return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    def tr(s, n):                                  # truncate long names
+        s = str(s)
+        return s if len(s) <= n else s[:n - 1] + "…"
 
     out = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -488,17 +607,57 @@ def render_bracket_svg(detail: dict) -> str:
         f'<rect x="0" y="0" width="{width}" height="84" fill="{C["bg1"]}"/>',
         f'<rect x="0" y="84" width="{width}" height="3" fill="{C["accent"]}"/>',
         f'<text x="40" y="44" font-size="27" font-weight="700" fill="{C["text"]}">'
-        f'World Cup 2026 — a modelled bracket</text>',
+        f'World Cup 2026 — a modelled tournament</text>',
         f'<text x="40" y="68" font-size="13" fill="{C["muted"]}">'
         f'One Elo-driven simulation · group stage → knockout · '
         f'champion: <tspan font-weight="700" fill="{C["accent2"]}">{esc(champ)}</tspan></text>',
+        f'<text x="40" y="{gband_top - 6}" font-size="12" font-weight="700" '
+        f'letter-spacing="1.4" fill="{C["muted"]}">GROUP STAGE — '
+        f'<tspan fill="{C["accent"]}">1–2 advance</tspan> · '
+        f'<tspan fill="{C["teal"]}">best-third qualifies</tspan></text>',
     ]
-    # round headers
+
+    # group cards
+    for idx, (g, table) in enumerate(standings.items()):
+        col, row = idx % gcols, idx // gcols
+        gxp = 40 + col * (card_w + gx)
+        gyp = gband_top + row * (card_h + gy)
+        out.append(f'<rect x="{gxp}" y="{gyp}" width="{card_w}" height="{card_h}" rx="10" '
+                   f'fill="{C["node"]}" stroke="{C["line"]}" stroke-width="1"/>')
+        out.append(f'<rect x="{gxp}" y="{gyp}" width="{card_w}" height="4" rx="2" fill="{C["accent2"]}"/>')
+        out.append(f'<text x="{gxp + 14}" y="{gyp + 27}" font-size="14.5" font-weight="700" '
+                   f'fill="{C["text"]}">Group {g}</text>')
+        for pos, (t, pts, gd, _gf) in enumerate(table):
+            ry = gyp + 46 + pos * 18
+            third_ok = pos == 2 and t in qualified
+            if pos < 2:
+                col_t, wt = C["win"], "700"
+            elif third_ok:
+                col_t, wt = C["teal"], "700"
+            else:
+                col_t, wt = C["muted"], "400"
+            marker = "✓" if (pos < 2 or third_ok) else " "
+            out.append(f'<text x="{gxp + 14}" y="{ry}" font-size="11.5" font-weight="{wt}" '
+                       f'fill="{col_t}">{pos + 1}. {esc(tr(t, 16))}</text>')
+            out.append(f'<text x="{gxp + card_w - 12}" y="{ry}" font-size="11.5" '
+                       f'font-weight="{wt}" fill="{col_t}" text-anchor="end">'
+                       f'{pts}pt {gd:+d} {marker}</text>')
+        out.append(f'<line x1="{gxp + 12}" y1="{gyp + 124}" x2="{gxp + card_w - 12}" '
+                   f'y2="{gyp + 124}" stroke="{C["line"]}" stroke-width="0.8"/>')
+        for j, (h, a, hg, ag) in enumerate(group_matches.get(g, [])):
+            my = gyp + 140 + j * 15
+            out.append(f'<text x="{gxp + 14}" y="{my}" font-size="10" fill="{C["muted"]}">'
+                       f'{esc(tr(h, 11))} <tspan font-weight="700" fill="{C["text"]}">'
+                       f'{hg}-{ag}</tspan> {esc(tr(a, 11))}</text>')
+
+    # knockout section heading + round headers
+    out.append(f'<text x="40" y="{ko_top - 24}" font-size="12" font-weight="700" '
+               f'letter-spacing="1.4" fill="{C["muted"]}">KNOCKOUT</text>')
     for r, (name, _m) in enumerate(rounds):
         x = 40 + r * colw
-        out.append(f'<text x="{x + 6}" y="104" font-size="11.5" font-weight="700" '
+        out.append(f'<text x="{x + 6}" y="{ko_top - 8}" font-size="11.5" font-weight="700" '
                    f'letter-spacing="1.2" fill="{C["muted"]}">{_KO_LABELS[name].upper()}</text>')
-    out.append(f'<text x="{40 + len(rounds) * colw + 6}" y="104" font-size="11.5" '
+    out.append(f'<text x="{40 + len(rounds) * colw + 6}" y="{ko_top - 8}" font-size="11.5" '
                f'font-weight="700" letter-spacing="1.2" fill="{C["accent2"]}">CHAMPION</text>')
 
     # connector elbows from round r to r+1
@@ -642,7 +801,15 @@ def main() -> None:
                     help="write worldcup2026.spec.json for `openworld serve`")
     ap.add_argument("--bracket", action="store_true",
                     help="play ONE tournament; print it and write worldcup2026_bracket.svg")
+    ap.add_argument("--evaluate", action="store_true",
+                    help="backtest the pre-tournament model vs real matchday-1 results")
     args = ap.parse_args()
+
+    if args.evaluate:
+        rows, summary = evaluate_predictions()
+        print("Backtest — pre-tournament model vs real results (out-of-sample):\n")
+        print(evaluation_table(rows, summary))
+        return
 
     if args.bracket:
         detail = simulate_detailed(random.Random(args.seed))

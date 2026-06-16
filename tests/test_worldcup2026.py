@@ -165,11 +165,43 @@ def test_svg_is_self_contained():
     svg = wc.render_bracket_svg(d)
     assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
     assert d["champion"] in svg
-    # 31 match boxes (16+8+4+2+1) drawn with rx="7"
+    # 31 knockout boxes (16+8+4+2+1) at rx="7"; 12 group cards at rx="10"
     assert svg.count('rx="7"') == 31
+    assert svg.count('rx="10"') == 12
+    assert "GROUP STAGE" in svg and "Group A" in svg and "KNOCKOUT" in svg
     # no fetched resources (xmlns URL is fine; no http(s) image/script refs)
     assert "http://" not in svg.replace('xmlns="http://www.w3.org/2000/svg"', "")
     assert "https://" not in svg
+
+
+# --------------------------------------------------------------------------- #
+# Backtest / accuracy
+# --------------------------------------------------------------------------- #
+
+def test_match_probabilities_normalize_and_favor_strong():
+    p = wc.match_probabilities("Germany", "Curacao", sims=4000, seed=3)
+    assert abs(p["W"] + p["D"] + p["L"] - 1.0) < 1e-9
+    assert p["W"] > p["L"]            # huge favourite wins far more than loses
+    assert p["W"] > 0.6
+
+
+def test_evaluate_predictions_structure_and_determinism():
+    rows, summary = wc.evaluate_predictions(sims=2000, seed=4)
+    assert len(rows) == len(wc.RESULTS_TO_DATE) == 15
+    assert summary["draws"] + summary["decisive_n"] == 15
+    assert 0.0 <= summary["hit_rate"] <= 1.0
+    assert 0.0 <= summary["decisive_hit_rate"] <= 1.0
+    # deterministic given seed/sims
+    assert wc.evaluate_predictions(sims=2000, seed=4)[1] == summary
+    # the actual results really do contain that many draws (data sanity)
+    draws = sum(1 for _g, _h, _a, hg, ag in wc.RESULTS_TO_DATE if hg == ag)
+    assert draws == summary["draws"] == 7
+
+
+def test_evaluation_table_renders():
+    rows, summary = wc.evaluate_predictions(sims=1000, seed=1)
+    txt = wc.evaluation_table(rows, summary)
+    assert "hit rate" in txt and "Brier" in txt
 
 
 # --------------------------------------------------------------------------- #

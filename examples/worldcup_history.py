@@ -4,8 +4,6 @@ Computes leakage-free World Football Elo from the full results history
 (datasets/openworld-football/results.csv), reuses the 2026 forecaster's
 Elo->Poisson goal model in a 32-team format, and scores forecasts against real
 results. Zero external deps (stdlib only).
-
-    python examples/worldcup_history.py            # summary for all four cups
 """
 
 from __future__ import annotations
@@ -113,8 +111,9 @@ class EloEngine:
         return eng
 
     def ratings_asof(self, date: str) -> Dict[str, float]:
-        """Snapshot of all team ratings using only matches strictly before
-        `date` (no look-ahead). Returns base for teams unseen by then."""
+        """Snapshot of team ratings using only matches strictly before `date`
+        (no look-ahead). Only teams seen before then are present; callers
+        default-fill unseen teams via .get(team, base)."""
         snap: Dict[str, float] = {}
         for d, s in self._history:
             if d >= date:

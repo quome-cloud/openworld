@@ -147,3 +147,16 @@ def test_maher_fit_and_predict_beats_uniform():
     u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
     assert len(preds) == 64
     assert s["rps"] < u["rps"]
+
+
+def test_run_benchmark_structure_and_floor():
+    res = wb.run_benchmark(sims=2000)
+    assert set(res["per_model"]) >= {"uniform", "elo_logistic", "ours_frozen",
+                                     "ours_walk_forward", "maher"}
+    # every probabilistic model beats the uniform floor on pooled RPS
+    u = res["per_model"]["uniform"]["pooled"]["rps"]
+    for name in ("elo_logistic", "ours_frozen", "ours_walk_forward", "maher"):
+        assert res["per_model"][name]["pooled"]["rps"] < u, name
+    # 538 head-to-head present on 128 matches
+    assert res["head_to_head_538"]["n"] == 128
+    assert "five_thirty_eight" in res["head_to_head_538"]["per_model"]

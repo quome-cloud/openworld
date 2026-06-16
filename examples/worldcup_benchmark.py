@@ -311,6 +311,51 @@ def predict_fte(year: int) -> Dict[tuple, Dict[str, float]]:
     return out
 
 
+def _pooled_and_per_cup(predict_fn, cups) -> dict:
+    """predict_fn(year) -> {match_key: probs}. Returns pooled + per-cup scores."""
+    all_preds, all_acts = {}, {}
+    per_cup = {}
+    for y in cups:
+        preds = predict_fn(y)
+        acts = actual_outcomes(y)
+        per_cup[str(y)] = score_matches(preds, acts)
+        all_preds.update(preds)
+        all_acts.update(acts)
+    return {"pooled": score_matches(all_preds, all_acts), "per_cup": per_cup}
+
+
+def run_benchmark(sims: int = 20000, seed: int = 2026) -> dict:
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    maher_models = {y: fit_maher(y) for y in CUPS}
+    model_fns = {
+        "uniform": lambda y: predict_uniform(y, eng),
+        "elo_logistic": lambda y: predict_elo_logistic(y, eng),
+        "ours_frozen": lambda y: predict_ours_frozen(y, eng, sims=sims, seed=seed),
+        "ours_walk_forward": lambda y: predict_ours_walk_forward(y, eng, sims=sims, seed=seed),
+        "maher": lambda y: predict_maher(y, maher_models[y]),
+    }
+    per_model = {name: _pooled_and_per_cup(fn, CUPS) for name, fn in model_fns.items()}
+
+    # 538 head-to-head on 2018+2022 only: re-score every model on the shared matches.
+    h2h_preds = {name: {} for name in list(model_fns) + ["five_thirty_eight"]}
+    h2h_acts = {}
+    for y in FTE_CUPS:
+        acts = actual_outcomes(y)
+        h2h_acts.update(acts)
+        for name, fn in model_fns.items():
+            h2h_preds[name].update(fn(y))
+        h2h_preds["five_thirty_eight"].update(predict_fte(y))
+    h2h = {name: score_matches(h2h_preds[name], h2h_acts) for name in h2h_preds}
+
+    ranking = sorted(((n, m["pooled"]["rps"]) for n, m in per_model.items()),
+                     key=lambda kv: kv[1])
+    return {"cups": CUPS, "fte_cups": FTE_CUPS, "sims": sims, "seed": seed,
+            "per_model": per_model,
+            "head_to_head_538": {"n": sum(len(actual_outcomes(y)) for y in FTE_CUPS),
+                                 "per_model": h2h},
+            "ranking": ranking}
+
+
 def predict_maher(year: int, model: dict) -> Dict[tuple, Dict[str, float]]:
     idx, atk, dee = model["idx"], model["atk"], model["dee"]
     mu, gamma = model["mu"], model["home"]

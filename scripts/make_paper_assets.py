@@ -38,7 +38,7 @@ EXPERIMENTS = [
     "e47_relativity", "e49_path_integral", "e48_corporate_world", "e50_trading",
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
-    "e60_io_boundary",
+    "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
 ]
 
 
@@ -2876,6 +2876,28 @@ def numbers_tex(d):
         macro("IOGateBad", str(e60["gates"]["bad_inputs"])),
         macro("IOComponents", str(len(e60["components_exercised"]))),
     ]
+    # E61 (trained world model vs verified code on downstream control)
+    e61 = d["e61_trained_wm_control"]
+    best_k = max(e61["k_budgets"])
+    lines += [
+        macro("TwmVerified", f"{e61['verified_code_return']:.1f}"),
+        macro("TwmReactive", f"{e61['reactive_return']:.1f}"),
+        macro("TwmRandom", f"{e61['random_return']:.1f}"),
+        macro("TwmBestTrained", f"{e61['best_trained_mean']:.1f}"),
+        macro("TwmRegret", f"{e61['regret_best_trained']:.1f}"),
+        macro("TwmHarm", f"{e61['harm_fraction'] * 100:.0f}"),
+        macro("TwmMaxK", f"{best_k:,}".replace(",", "{,}")),
+        macro("TwmMlpSmall", f"{e61['trained']['mlp'][str(min(e61['k_budgets']))]['mean']:.1f}"),
+        macro("TwmSeeds", str(len(e61["seeds"]))),
+    ]
+    # E62 (branch-covering acceptance gate)
+    e62 = d["e62_branch_gate"]
+    lines += [
+        macro("BranchSingleFA", f"{e62['single_state_false_accept_rate'] * 100:.0f}"),
+        macro("BranchCovFA", f"{e62['branch_covering_false_accept_rate'] * 100:.0f}"),
+        macro("BranchFaults", str(e62["n_branch_faults"])),
+        macro("BranchProbes", str(e62["n_probe_states"])),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -3087,6 +3109,37 @@ def table_io_boundary(e60):
     (TABLES / "io_boundary.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_trained_wm_control(e61):
+    """E61: downstream control return vs training samples K. Verified code (0 samples)
+    is the optimal upper bound; trained world models are sample-inefficient and
+    planning through them can fall below model-free control."""
+    ks = e61["k_budgets"]
+    fig, ax = plt.subplots(figsize=(6.4, 3.9))
+    ax.axhline(e61["verified_code_return"], color=TEAL, lw=2.2,
+               label=f"verified code, 0 samples ({e61['verified_code_return']:.1f})")
+    ax.axhline(e61["reactive_return"], color=SLATE, ls="--", lw=1.4,
+               label=f"reactive (model-free, {e61['reactive_return']:.1f})")
+    ax.axhline(e61["random_return"], color="#9ca3af", ls=":", lw=1.4,
+               label=f"random ({e61['random_return']:.1f})")
+    for kind, col, lab in (("mlp", BLUE, "trained MLP world model"),
+                           ("nn", ORANGE, "trained 1-NN world model")):
+        means = [e61["trained"][kind][str(k)]["mean"] for k in ks]
+        sds = [e61["trained"][kind][str(k)]["sd"] for k in ks]
+        ax.errorbar(ks, means, yerr=sds, marker="o", color=col, lw=1.8,
+                    capsize=3, label=lab)
+    ax.set_xscale("log")
+    ax.set_xlabel("training transitions $K$ (log scale)")
+    ax.set_ylabel("downstream return (12-step episode)")
+    ax.set_title(f"Verified code vs trained world models on control "
+                 f"(E61, {len(e61['seeds'])} seeds)", fontsize=10, loc="left")
+    ax.legend(fontsize=7.6, loc="lower right")
+    ax.axhspan(e61["random_return"] - 6, e61["reactive_return"], color="#fee2e2", alpha=0.35,
+               zorder=0)
+    fig.tight_layout()
+    fig.savefig(FIGS / "trained_wm_control.png", dpi=200)
+    plt.close(fig)
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3148,6 +3201,7 @@ def main():
     table_brain_arch(data["e59_brain_arch"])
     fig_io_boundary(data["e60_io_boundary"])
     table_io_boundary(data["e60_io_boundary"])
+    fig_trained_wm_control(data["e61_trained_wm_control"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

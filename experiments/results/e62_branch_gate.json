@@ -1,0 +1,36 @@
+{
+  "n_branch_faults": 3,
+  "n_probe_states": 3,
+  "correct_program": {
+    "single_state": true,
+    "branch_covering": true
+  },
+  "branch_faults": {
+    "ship_no_guard": {
+      "single_state": true,
+      "branch_covering": false
+    },
+    "fix_off_by_one": {
+      "single_state": true,
+      "branch_covering": false
+    },
+    "refactor_off_by_one": {
+      "single_state": true,
+      "branch_covering": false
+    }
+  },
+  "silent_correctness_error": {
+    "single_state": true,
+    "branch_covering": true
+  },
+  "single_state_false_accept_rate": 1.0,
+  "branch_covering_false_accept_rate": 0.0,
+  "experiment": "e62_branch_gate",
+  "timestamp": "2026-06-15T21:32:13",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.6",
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.0"
+  }
+}

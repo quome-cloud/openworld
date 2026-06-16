@@ -60,6 +60,11 @@ class Verifier:
     invariants: List[Tuple[str, Invariant]] = field(default_factory=list)
     critic: Optional[BaseLLM] = None
     world_context: str = ""
+    # Extra states to smoke-run each action from, beyond the initial state. A
+    # single-initial-state smoke-run cannot see branches reached only later in a
+    # rollout (empty queue, high-debt, etc.); supplying branch-covering states here
+    # turns check_behavior into a branch-covering acceptance gate.
+    probe_states: List[dict] = field(default_factory=list)
 
     def check_syntax(self, code: str) -> Tuple[bool, str]:
         try:
@@ -76,18 +81,20 @@ class Verifier:
 
     def check_behavior(self, code: str) -> Tuple[bool, str]:
         actions = self.sample_actions or [Action.noop()]
-        for action in actions:
-            try:
-                result = run_transition_code(code, dict(self.initial_state), action.to_dict())
-            except SandboxError as exc:
-                return False, f"On action {action.name!r}: {exc}"
-            next_state = WorldState(result)
-            for description, invariant in self.invariants:
-                if not invariant(next_state):
-                    return False, (
-                        f"After action {action.name!r}, invariant violated: {description}. "
-                        f"Resulting state: {next_state.to_json()}"
-                    )
+        states = [dict(self.initial_state)] + [dict(s) for s in self.probe_states]
+        for state in states:
+            for action in actions:
+                try:
+                    result = run_transition_code(code, dict(state), action.to_dict())
+                except SandboxError as exc:
+                    return False, f"On action {action.name!r} from {state}: {exc}"
+                next_state = WorldState(result)
+                for description, invariant in self.invariants:
+                    if not invariant(next_state):
+                        return False, (
+                            f"After action {action.name!r} from {state}, invariant "
+                            f"violated: {description}. Resulting state: {next_state.to_json()}"
+                        )
         return True, ""
 
     def check_semantics(self, code: str) -> Tuple[bool, str]:

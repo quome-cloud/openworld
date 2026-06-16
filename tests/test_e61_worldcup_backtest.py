@@ -85,3 +85,21 @@ def test_forecast_cup_is_deterministic_and_normalised():
     # The pre-2014 favourites should top the title odds.
     top = max(f1, key=lambda t: f1[t]["champion"])
     assert top in {"Brazil", "Germany", "Argentina", "Spain"}
+
+
+def test_group_match_skill_beats_uniform():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    elo = eng.ratings_asof(wh._cup_freeze_date(2014))
+    rows, summary = wh.score_group_matches(wh.load_cup(2014), elo, sims=4000, seed=3)
+    assert summary["n"] == 48
+    assert 0.0 <= summary["hit_rate"] <= 1.0
+    assert summary["skill_vs_uniform"] > 0.0  # better than a 1/3 coin
+
+
+def test_knockout_advancement_metric():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    elo = eng.ratings_asof(wh._cup_freeze_date(2014))
+    summary = wh.score_knockout_advancement(wh.load_cup(2014), elo, sims=4000, seed=3)
+    assert summary["n"] == 16
+    assert 0.0 <= summary["accuracy"] <= 1.0
+    assert summary["brier"] >= 0.0

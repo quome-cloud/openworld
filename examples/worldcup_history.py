@@ -417,3 +417,79 @@ def forecast_cup(year: int, eng: "EloEngine", sims: int = 10000, seed: int = 202
                 "reach_SF": pct(reach[t]["SF"]),
                 "reach_QF": pct(reach[t]["QF"]),
                 "reach_R16": pct(reach[t]["R16"])} for t in teams}
+
+
+def _wdl_probs(home, away, elo, host, base, sims, rng) -> Dict[str, float]:
+    w = d = 0
+    for _ in range(sims):
+        hg, ag = _sample(home, away, elo, host, base, rng)
+        if hg > ag:
+            w += 1
+        elif hg == ag:
+            d += 1
+    return {"W": w / sims, "D": d / sims, "L": (sims - w - d) / sims}
+
+
+def score_group_matches(cup: "Cup", elo: Dict[str, float], sims: int = 30000,
+                        seed: int = 2026, base: float = 1500.0):
+    """W/D/L Brier/hit-rate/skill over a cup's 48 group matches. Returns (rows, summary)."""
+    rng = random.Random(seed)
+    rows = []
+    hits = p_sum = brier_sum = 0.0
+    dec_hits = dec_n = draws = 0
+    matches = []
+    for g, teams in cup.groups.items():
+        for i in range(len(teams)):
+            for j in range(i + 1, len(teams)):
+                rec = cup.group_result(teams[i], teams[j])
+                home, hg, ag = rec
+                away = teams[j] if home == teams[i] else teams[i]
+                matches.append((g, home, away, hg, ag))
+    for (g, home, away, hg, ag) in matches:
+        probs = _wdl_probs(home, away, elo, cup.host, base, sims, rng)
+        actual = "W" if hg > ag else ("D" if hg == ag else "L")
+        fav = max(probs, key=probs.get)
+        brier = sum((probs[c] - (1.0 if c == actual else 0.0)) ** 2 for c in "WDL")
+        hits += fav == actual; p_sum += probs[actual]; brier_sum += brier
+        if actual == "D":
+            draws += 1
+        else:
+            dec_n += 1
+            dec_hits += (probs["W"] > probs["L"]) if actual == "W" else (probs["L"] > probs["W"])
+        rows.append({"group": g, "home": home, "away": away, "score": f"{hg}-{ag}",
+                     "actual": actual, "probs": probs, "hit": fav == actual, "brier": brier})
+    n = len(matches)
+    base_brier = 2 / 3
+    return rows, {"n": n, "draws": draws, "hit_rate": hits / n,
+                  "decisive_n": dec_n,
+                  "decisive_hit_rate": dec_hits / dec_n if dec_n else 0.0,
+                  "mean_p_actual": p_sum / n, "mean_brier": brier_sum / n,
+                  "baseline_brier": base_brier,
+                  "skill_vs_uniform": 1 - (brier_sum / n) / base_brier}
+
+
+def score_knockout_advancement(cup: "Cup", elo: Dict[str, float], sims: int = 30000,
+                               seed: int = 2026, base: float = 1500.0):
+    """For each real KO match, model P(home advances) vs the actual advancer."""
+    rng = random.Random(seed)
+    rows = []
+    correct = brier_sum = logloss_sum = 0.0
+    n = 0
+    for m in cup.knockout_matches():
+        home, away, winner = m["home"], m["away"], m["winner"]
+        if winner is None:
+            continue
+        adv = sum(_ko_match(home, away, elo, cup.host, base, rng)[0] == home
+                  for _ in range(sims))
+        p_home = adv / sims
+        p_home = min(max(p_home, 1e-6), 1 - 1e-6)
+        actual_home = 1.0 if winner == home else 0.0
+        pick_home = p_home >= 0.5
+        correct += (pick_home and actual_home) or ((not pick_home) and not actual_home)
+        brier_sum += (p_home - actual_home) ** 2
+        logloss_sum += -(actual_home * math.log(p_home) + (1 - actual_home) * math.log(1 - p_home))
+        n += 1
+        rows.append({"home": home, "away": away, "winner": winner,
+                     "p_home_adv": p_home, "correct": pick_home == bool(actual_home)})
+    return {"n": n, "accuracy": correct / n, "brier": brier_sum / n,
+            "logloss": logloss_sum / n, "rows": rows}

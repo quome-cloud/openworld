@@ -69,10 +69,17 @@ def score_road(eid: int, persona: Persona, state: GameState) -> float:
 
 
 def available_build_actions(state: GameState, player: str, persona: Persona) -> List[BuildAction]:
-    """Return all affordable build actions, scored."""
+    """Return all affordable build actions, scored.
+
+    City upgrades are suppressed when the player has only one settlement left —
+    converting it would eliminate all future expansion starting points.
+    """
     actions: List[BuildAction] = []
 
-    if can_afford(state, player, CITY_COST):
+    settlement_count = sum(1 for p in state.settlements.values() if p == player)
+    allow_city = settlement_count > 1  # keep at least one settlement for expansion
+
+    if allow_city and can_afford(state, player, CITY_COST):
         for vid in valid_city_vertices(state, player):
             actions.append(BuildAction("city", vid, score_city(vid, persona, state)))
 

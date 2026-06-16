@@ -110,3 +110,21 @@ def test_fit_davidson_nu_positive_and_predicts():
     u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
     assert len(preds) == 64
     assert s["rps"] < u["rps"]
+
+
+def test_poisson_grid_probs_normalise():
+    p = wb._poisson_wdl(1.6, 0.9, max_goals=10)
+    assert abs(sum(p.values()) - 1.0) < 1e-6
+    assert p["W"] > p["L"]            # home expects more goals
+
+
+def test_maher_fit_and_predict_beats_uniform():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    model = wb.fit_maher(2014)
+    assert "atk" in model and "dee" in model and "home" in model and "mu" in model
+    preds = wb.predict_maher(2014, model)
+    actuals = wb.actual_outcomes(2014)
+    s = wb.score_matches(preds, actuals)
+    u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
+    assert len(preds) == 64
+    assert s["rps"] < u["rps"]

@@ -210,3 +210,78 @@ def predict_elo_logistic(year: int, eng: "wh.EloEngine") -> Dict[tuple, Dict[str
         d = wh._eff(r["home"], elo, host, 1500.0) - wh._eff(r["away"], elo, host, 1500.0)
         out[(r["date"], r["home"], r["away"])] = _davidson_probs(d, nu)
     return out
+
+
+def _poisson_wdl(lam_home: float, lam_away: float, max_goals: int = 10) -> Dict[str, float]:
+    """W/D/L from two independent Poissons over a 0..max_goals score grid."""
+    def pmf(lam, k):
+        return math.exp(-lam) * lam ** k / math.factorial(k)
+    ph = [pmf(lam_home, k) for k in range(max_goals + 1)]
+    pa = [pmf(lam_away, k) for k in range(max_goals + 1)]
+    w = d = l = 0.0
+    for i in range(max_goals + 1):
+        for j in range(max_goals + 1):
+            p = ph[i] * pa[j]
+            if i > j:
+                w += p
+            elif i == j:
+                d += p
+            else:
+                l += p
+    z = w + d + l
+    return {"W": w / z, "D": d / z, "L": l / z}
+
+
+def fit_maher(year: int, years: int = 4) -> dict:
+    """MLE of a Maher independent-Poisson attack/defense model on the pre-cup window.
+
+    Returns {teams, idx, atk, dee (defense), home (gamma), mu}. Leakage-free:
+    training_matches only includes internationals before the cup's freeze date.
+    """
+    tr = training_matches(year, years=years)
+    teams = sorted({r["home"] for r in tr} | {r["away"] for r in tr})
+    idx = {t: i for i, t in enumerate(teams)}
+    nt = len(teams)
+    hi = np.array([idx[r["home"]] for r in tr])
+    ai = np.array([idx[r["away"]] for r in tr])
+    hg = np.array([r["hg"] for r in tr], dtype=float)
+    ag = np.array([r["ag"] for r in tr], dtype=float)
+
+    def unpack(x):
+        return x[0], x[1], x[2:2 + nt], x[2 + nt:2 + 2 * nt]
+
+    def neg_ll(x):
+        mu, gamma, atk, dee = unpack(x)
+        lh = np.exp(mu + gamma + atk[hi] - dee[ai])
+        la = np.exp(mu + atk[ai] - dee[hi])
+        ll = np.sum(hg * np.log(lh) - lh) + np.sum(ag * np.log(la) - la)
+        pen = 1e3 * (atk.mean() ** 2 + dee.mean() ** 2)   # soft sum-to-zero
+        return -ll + pen
+
+    from scipy.optimize import minimize
+    x0 = np.concatenate([[0.0, 0.2], np.zeros(nt), np.zeros(nt)])
+    res = minimize(neg_ll, x0, method="L-BFGS-B")
+    mu, gamma, atk, dee = unpack(res.x)
+    return {"teams": teams, "idx": idx, "mu": float(mu), "home": float(gamma),
+            "atk": atk, "dee": dee}
+
+
+def predict_maher(year: int, model: dict) -> Dict[tuple, Dict[str, float]]:
+    idx, atk, dee = model["idx"], model["atk"], model["dee"]
+    mu, gamma = model["mu"], model["home"]
+    mean_atk = float(atk.mean()) if len(atk) else 0.0
+    mean_dee = float(dee.mean()) if len(dee) else 0.0
+
+    def a_of(t):
+        return atk[idx[t]] if t in idx else mean_atk
+
+    def d_of(t):
+        return dee[idx[t]] if t in idx else mean_dee
+
+    out = {}
+    for r in cup_matches(year):
+        h, a = r["home"], r["away"]
+        lam_h = math.exp(mu + gamma + a_of(h) - d_of(a))
+        lam_a = math.exp(mu + a_of(a) - d_of(h))
+        out[(r["date"], h, a)] = _poisson_wdl(lam_h, lam_a)
+    return out

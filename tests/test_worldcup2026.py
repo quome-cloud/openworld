@@ -204,6 +204,18 @@ def test_evaluation_table_renders():
     assert "hit rate" in txt and "Brier" in txt
 
 
+def test_svg_overlays_actuals_and_right_wrong():
+    d = wc.simulate_detailed(random.Random(2026))
+    rows, summary = wc.evaluate_predictions(sims=1000, seed=2026)
+    svg = wc.render_bracket_svg(d, eval_rows=rows, summary=summary)
+    assert "MODEL vs ACTUAL" in svg
+    assert "7-1" in svg          # Germany 7-1 Curacao, an actual result
+    assert "✗" in svg            # at least one wrong pick is marked (matchday 1 had upsets)
+    assert "https://" not in svg  # still self-contained
+    # without eval data, no actual-results overlay
+    assert "MODEL vs ACTUAL" not in wc.render_bracket_svg(d)
+
+
 # --------------------------------------------------------------------------- #
 # Forecast aggregation
 # --------------------------------------------------------------------------- #

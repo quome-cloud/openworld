@@ -564,12 +564,19 @@ def render_bracket_text(detail: dict) -> str:
     return "\n".join(lines)
 
 
-def render_bracket_svg(detail: dict) -> str:
+def render_bracket_svg(detail: dict, eval_rows=None, summary=None) -> str:
     """A self-contained SVG (atlas palette): group-stage band on top, then the
-    knockout bracket R32 -> champion left-to-right."""
+    knockout bracket R32 -> champion left-to-right.
+
+    If `eval_rows`/`summary` from evaluate_predictions() are passed, played
+    fixtures show the ACTUAL score with a right/wrong (✓/✗) mark, and the header
+    carries a model-vs-actual accuracy strip.
+    """
     C = {"bg0": "#fcfbf8", "bg1": "#eef0ec", "text": "#16202e", "muted": "#5b6675",
          "accent": "#1d4ed8", "accent2": "#b45309", "teal": "#0f766e",
-         "line": "#dde2ea", "node": "#ffffff", "win": "#1e3a8a"}
+         "line": "#dde2ea", "node": "#ffffff", "win": "#1e3a8a",
+         "right": "#0f766e", "wrong": "#b91c1c"}
+    actual = {frozenset((r["home"], r["away"])): r for r in (eval_rows or [])}
     rounds = detail["rounds"]                      # [(name, [matches]), ...]
     champ = detail["champion"]
     standings = detail["standings"]
@@ -614,8 +621,27 @@ def render_bracket_svg(detail: dict) -> str:
         f'<text x="40" y="{gband_top - 6}" font-size="12" font-weight="700" '
         f'letter-spacing="1.4" fill="{C["muted"]}">GROUP STAGE — '
         f'<tspan fill="{C["accent"]}">1–2 advance</tspan> · '
-        f'<tspan fill="{C["teal"]}">best-third qualifies</tspan></text>',
+        f'<tspan fill="{C["teal"]}">best-third qualifies</tspan> · '
+        f'<tspan fill="{C["right"]}">✓</tspan>/<tspan fill="{C["wrong"]}">✗</tspan> '
+        f'= pre-match pick vs actual · grey = not yet played</text>',
     ]
+
+    # header accuracy strip (model vs actual, matchday 1) — the "side graph"
+    if summary and eval_rows:
+        px = width - 478
+        out.append(f'<text x="{px}" y="30" font-size="12" font-weight="700" '
+                   f'letter-spacing="1.2" fill="{C["text"]}">MODEL vs ACTUAL · matchday 1</text>')
+        out.append(f'<text x="{px}" y="49" font-size="11.5" fill="{C["muted"]}">'
+                   f'overall <tspan font-weight="700" fill="{C["text"]}">'
+                   f'{summary["hit_rate"]*100:.0f}%</tspan> · decisive '
+                   f'<tspan font-weight="700" fill="{C["text"]}">'
+                   f'{summary["decisive_hit_rate"]*100:.0f}%</tspan> · Brier '
+                   f'{summary["mean_brier"]:.2f}</text>')
+        for i, r in enumerate(eval_rows):
+            tx = px + i * 29
+            col = C["right"] if r["hit"] else C["wrong"]
+            out.append(f'<text x="{tx}" y="71" font-size="13" font-weight="700" '
+                       f'fill="{col}">{"✓" if r["hit"] else "✗"}</text>')
 
     # group cards
     for idx, (g, table) in enumerate(standings.items()):
@@ -644,11 +670,19 @@ def render_bracket_svg(detail: dict) -> str:
                        f'{pts}pt {gd:+d} {marker}</text>')
         out.append(f'<line x1="{gxp + 12}" y1="{gyp + 124}" x2="{gxp + card_w - 12}" '
                    f'y2="{gyp + 124}" stroke="{C["line"]}" stroke-width="0.8"/>')
-        for j, (h, a, hg, ag) in enumerate(group_matches.get(g, [])):
+        for j, (h, a, shg, sag) in enumerate(group_matches.get(g, [])):
             my = gyp + 140 + j * 15
-            out.append(f'<text x="{gxp + 14}" y="{my}" font-size="10" fill="{C["muted"]}">'
-                       f'{esc(tr(h, 11))} <tspan font-weight="700" fill="{C["text"]}">'
-                       f'{hg}-{ag}</tspan> {esc(tr(a, 11))}</text>')
+            r = actual.get(frozenset((h, a)))
+            if r:                                    # played: show ACTUAL score + right/wrong
+                mark, mcol = ("✓", C["right"]) if r["hit"] else ("✗", C["wrong"])
+                out.append(f'<text x="{gxp + 14}" y="{my}" font-size="10" fill="{C["text"]}">'
+                           f'{esc(tr(r["home"], 10))} <tspan font-weight="700">{r["score"]}</tspan> '
+                           f'{esc(tr(r["away"], 10))}</text>')
+                out.append(f'<text x="{gxp + card_w - 12}" y="{my}" font-size="11" '
+                           f'font-weight="700" fill="{mcol}" text-anchor="end">{mark}</text>')
+            else:                                    # not yet played
+                out.append(f'<text x="{gxp + 14}" y="{my}" font-size="10" fill="{C["muted"]}" '
+                           f'opacity="0.7">{esc(tr(h, 11))} v {esc(tr(a, 11))}</text>')
 
     # knockout section heading + round headers
     out.append(f'<text x="40" y="{ko_top - 24}" font-size="12" font-weight="700" '
@@ -814,7 +848,8 @@ def main() -> None:
     if args.bracket:
         detail = simulate_detailed(random.Random(args.seed))
         print(render_bracket_text(detail))
-        svg = render_bracket_svg(detail)
+        rows, summary = evaluate_predictions()  # overlay actual results + right/wrong
+        svg = render_bracket_svg(detail, eval_rows=rows, summary=summary)
         path = "worldcup2026_bracket.svg"
         with open(path, "w", encoding="utf-8") as f:
             f.write(svg)

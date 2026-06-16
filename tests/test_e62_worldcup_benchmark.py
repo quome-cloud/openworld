@@ -118,6 +118,25 @@ def test_poisson_grid_probs_normalise():
     assert p["W"] > p["L"]            # home expects more goals
 
 
+@pytest.mark.parametrize("year", [2018, 2022])
+def test_fte_aligns_to_real_fixtures(year):
+    preds = wb.predict_fte(year)
+    actuals = wb.actual_outcomes(year)
+    assert len(preds) == 64
+    # every 538 match_key must be a real fixture (1:1 alignment after name mapping)
+    assert all(k in actuals for k in preds), set(preds) - set(actuals)
+    for v in preds.values():
+        assert abs(sum(v.values()) - 1.0) < 1e-6
+
+
+def test_fte_probs_oriented_home_perspective():
+    # 2022 opener Qatar(home) vs Ecuador: 538 favoured Ecuador, so L > W from
+    # Qatar's home perspective.
+    preds = wb.predict_fte(2022)
+    key = next(k for k in preds if k[1] == "Qatar" and k[2] == "Ecuador")
+    assert preds[key]["L"] > preds[key]["W"]
+
+
 def test_maher_fit_and_predict_beats_uniform():
     eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
     model = wb.fit_maher(2014)

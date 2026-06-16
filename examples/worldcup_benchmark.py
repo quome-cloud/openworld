@@ -266,6 +266,51 @@ def fit_maher(year: int, years: int = 4) -> dict:
             "atk": atk, "dee": dee}
 
 
+# 538 team name -> results.csv spelling, where they differ. Extended during impl
+# until every cup's 64 538 rows align 1:1 to the real fixtures (the test is the gate).
+FTE_NAME = {
+    "IR Iran": "Iran",
+    "Korea Republic": "South Korea",
+    "USA": "United States",
+    "China PR": "China",
+}
+
+
+def _fte_name(n: str) -> str:
+    return FTE_NAME.get(n, n)
+
+
+def predict_fte(year: int) -> Dict[tuple, Dict[str, float]]:
+    """Load 538's per-match W/D/L probs, oriented to our (home=results.csv) keys.
+
+    538 rows give team1/team2 + prob1/probtie/prob2. We match each to the real
+    fixture by date + unordered team pair, and orient to the real home team.
+    """
+    # Key on date + unordered pair: a few cups repeat a pairing (group +
+    # 3rd-place playoff, e.g. Belgium/England 2018, Croatia/Morocco 2022), so the
+    # pair alone is not unique — the date disambiguates the two meetings.
+    real = {(r["date"], frozenset((r["home"], r["away"]))):
+            (r["date"], r["home"], r["away"]) for r in cup_matches(year)}
+    out = {}
+    path = FTE_DIR / f"wc_{year}.csv"
+    with open(path, encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            t1, t2 = _fte_name(row["team1"]), _fte_name(row["team2"])
+            p1, ptie, p2 = float(row["prob1"]), float(row["probtie"]), float(row["prob2"])
+            key = real.get((row["date"], frozenset((t1, t2))))
+            if key is None:
+                raise ValueError(f"538 {year}: no real fixture for {t1} vs {t2} "
+                                 f"(extend FTE_NAME)")
+            _date, home, _away = key
+            if home == t1:                       # 538 team1 == real home
+                probs = {"W": p1, "D": ptie, "L": p2}
+            else:                                # flip orientation
+                probs = {"W": p2, "D": ptie, "L": p1}
+            z = sum(probs.values())
+            out[key] = {k: v / z for k, v in probs.items()}
+    return out
+
+
 def predict_maher(year: int, model: dict) -> Dict[tuple, Dict[str, float]]:
     idx, atk, dee = model["idx"], model["atk"], model["dee"]
     mu, gamma = model["mu"], model["home"]

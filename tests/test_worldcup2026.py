@@ -59,6 +59,19 @@ def test_even_match_is_roughly_balanced():
     assert 0.4 < a / 3000 < 0.6
 
 
+def test_sample_goals_from_elo_matches_sample_match():
+    # sample_match must be exactly sample_goals_from_elo on the effective Elos,
+    # so the rating-parameterised core is the identical model.
+    import random as _r
+    for home, away in [("Spain", "Qatar"), ("Algeria", "Iran"), ("Mexico", "Czechia")]:
+        rng_a = _r.Random(42)
+        rng_b = _r.Random(42)
+        got = [wc.sample_match(home, away, rng_a) for _ in range(50)]
+        want = [wc.sample_goals_from_elo(wc._eff_elo(home), wc._eff_elo(away), rng_b)
+                for _ in range(50)]
+        assert got == want
+
+
 def test_poisson_nonnegative_and_mean():
     rng = random.Random(2)
     draws = [wc._poisson(1.5, rng) for _ in range(5000)]

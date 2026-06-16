@@ -153,14 +153,33 @@ def _poisson(lam: float, rng: random.Random) -> int:
             return k - 1
 
 
+def sample_goals_from_elo(
+    elo_home: float,
+    elo_away: float,
+    rng: random.Random,
+    *,
+    total_goals: float = None,
+    supremacy: float = None,
+) -> Tuple[int, int]:
+    """Elo ratings -> (home_goals, away_goals) via the Poisson goal model.
+
+    The rating-parameterised core shared by the 2026 forecaster (which passes
+    host-adjusted Elos) and the E61 historical backtest (its own per-cup Elos).
+    `total_goals`/`supremacy` default to the module dials.
+    """
+    tg = TOTAL_GOALS if total_goals is None else total_goals
+    sup = SUPREMACY if supremacy is None else supremacy
+    diff = elo_home - elo_away
+    expected = 1.0 / (1.0 + 10 ** (-diff / 400.0))   # home expected score in [0,1]
+    margin = sup * (2 * expected - 1)                 # >0 favours home
+    lam_home = max(tg / 2 + margin / 2, 0.05)
+    lam_away = max(tg / 2 - margin / 2, 0.05)
+    return _poisson(lam_home, rng), _poisson(lam_away, rng)
+
+
 def sample_match(home: str, away: str, rng: random.Random) -> Tuple[int, int]:
     """Sample (home_goals, away_goals) from the Elo->Poisson model."""
-    diff = _eff_elo(home) - _eff_elo(away)
-    expected = 1.0 / (1.0 + 10 ** (-diff / 400.0))   # home expected score in [0,1]
-    supremacy = SUPREMACY * (2 * expected - 1)        # >0 favours home
-    lam_home = max(TOTAL_GOALS / 2 + supremacy / 2, 0.05)
-    lam_away = max(TOTAL_GOALS / 2 - supremacy / 2, 0.05)
-    return _poisson(lam_home, rng), _poisson(lam_away, rng)
+    return sample_goals_from_elo(_eff_elo(home), _eff_elo(away), rng)
 
 
 def _knockout_match(home: str, away: str, rng: random.Random):

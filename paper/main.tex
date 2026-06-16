@@ -247,12 +247,16 @@ observes, chooses an action, and steps the world, producing a trajectory scored 
 objectives. The textbook definition puts the world model \emph{inside} the agent
 (the simulator it plans with) and distinguishes it from the true environment; the
 gap between the two---model bias, sim-to-real error---is exactly what bounds learned
-world models. A verified code world model \emph{collapses} that gap: because the
-accepted program reproduces the declared dynamics exactly, the agent's internal
-model and the environment are the \emph{same} artifact, so planning ``in
-imagination'' is identical to acting in the world. This is why the same
-\texttt{World} serves, without modification, both as the ground-truth environment
-and as the model an agent plans through in our planning experiments.
+world models. A verified code world model does not so much eliminate that gap as
+\emph{relocate} it: once the dynamics are declared symbolically and the accepted
+program reproduces them exactly, the agent's internal model and the (symbolic)
+environment are the same artifact, so the dynamics contribute \emph{no} rollout
+error---what error remains lives entirely in the \emph{specification} and in
+\emph{perception} (the symbol-grounding boundary, \S\ref{sec:perception}),
+not in the transition. This is why the same \texttt{World} serves, without
+modification, both as the ground-truth environment and as the model an agent plans
+through in our planning experiments; it is also why this paper is scoped to
+\emph{specifiable} domains, where that relocation is a genuine win.
 
 This Code World Model bargain---programs instead of weights---buys verifiability,
 compute-cheap rollouts,
@@ -323,9 +327,10 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   absolute probe accuracy over blind acceptance) and decompose the mechanism
   (the filter holds quality, the repair loop converts \FilterAccept{}
   acceptance into \LoopAccept); against paired controls on shared candidates
-  pooled over \PooledRounds{} rounds, judge selection exceeds random
-  selection (\PooledJudge{} vs \PooledRandom, exact McNemar
-  $p=\PooledMcNemarP$, marginal) and approaches the \PooledOracle{} oracle
+  pooled over \PooledRounds{} rounds, judge selection is \emph{estimated, not
+  established}, to beat random selection (\PooledJudge{} vs \PooledRandom, exact
+  McNemar $p=\PooledMcNemarP$---not significant, with an independent replication
+  alone at $p=\NewMcNemarP$) while approaching the \PooledOracle{} oracle
   ceiling, with a position-bias audit showing order-sensitive choices but
   order-stable accuracy; judge rubric scores track a ground-truth objective
   at Spearman $\rho=\JudgeSpearman$ ($p=\RubricOrigP$, permutation test),
@@ -418,9 +423,9 @@ world.compile(                       # generator writes transition(state, action
 \end{lstlisting}
 \end{tcolorbox}
 \caption{The interface: a world is \emph{declared}; its dynamics are
-synthesized and must survive syntax checks, sandboxed smoke-runs on every
-action, declared invariants, and an optional LLM critic, with verifier
-feedback looped back to the generator until acceptance.}
+synthesized and must survive syntax checks, a sandboxed smoke-run per action
+on the initial state, declared invariants, and an optional LLM critic, with
+verifier feedback looped back to the generator until acceptance.}
 \label{fig:spec}
 \end{figure}
 
@@ -973,65 +978,6 @@ exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
 \input{tables/next_token}
 \end{table}
 
-\subsubsection{Relativity as a verified world model: reference frames and atomic clocks (E47)}\label{sec:relativity}
-Reference frames and changing references are the framework's composition and
-non-stationarity story in the language of physics, so E47 encodes special and
-general relativity as a verified world model and validates it against real
-atomic-clock data. The world's state carries each agent's velocity and proper
-time (its atomic clock); the verified transition advances a clock by the
-time-dilated amount $\Delta\tau=\Delta t/\gamma$ with
-$\gamma=1/\sqrt{1-v^2/c^2}$; a \emph{changing reference} is a velocity-change
-action and \emph{agent observation} is one frame reading another's clock through
-the Lorentz transform (Figure~\ref{fig:relativity}).
-
-Four results. (i) \emph{Time dilation} is exact for the symbolic model at every
-speed, whereas a learned fit on low-speed data diverges as $v\to c$ (error
-\RelLearnErr{} of a clock tick at $0.999c$) and the Newtonian ``no dilation''
-model is off by \RelNewtErr---the classical physics that real clocks disprove.
-(ii) Relativistic velocity addition stays below $c$ while the Galilean sum runs
-superluminal. (iii) The \emph{twin paradox}, simulated as an agent worldline with
-a turnaround, has the traveler return \RelTwinDiff{} years younger
-(\RelTwinTravel{} vs.\ \RelTwinStay{}) while the frame-naive model ages both
-identically---the asymmetry is entirely the change of reference. (iv) Most
-tellingly, the same verified model reproduces \emph{real measurements}: from
-first principles the GPS clock correction is $\RelGpsSR$ (SR) $+\,\RelGpsGR$ (GR)
-$=\RelGpsNet$~$\mu$s/day, matching the documented $\sim$+38; and at
-flight-averaged parameters the Hafele--Keating shifts come out eastward
-\RelHKModelEast~ns and westward \RelHKModelWest~ns, inside the 1971 measured
-$\RelHKObsEast$~ns and $\RelHKObsWest$~ns (the east/west asymmetry exists only
-because of relativity in the rotating frame; the Newtonian model predicts zero).
-A verified-code world model, declared from textbook physics, is exact in the
-relativistic regime and lands inside the error bars of a real atomic-clock
-experiment---the same exact-vs-approximate story as the rest of the paper, now in
-a domain where the ``approximate'' (classical) model is known to fail and is
-corrected for daily in orbit.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/relativity.png}
-\caption{\textbf{Relativity as a verified world model (E47).} \textbf{Top:} the
-composite world---a lab (observer) frame containing two reference-frame
-sub-worlds, each carrying an agent and its atomic clock, coupled by the Lorentz
-transform (the bridge) while the traveler is an agent that crosses/changes
-reference (the route). \textbf{A:} the
-moving-clock rate $1/\gamma$---symbolic exact, a low-speed learned fit diverges
-OOD near $c$, Newtonian shows none. \textbf{B:} velocity addition stays below
-$c$; the Galilean sum does not. \textbf{C:} the twin paradox as an agent
-worldline---the traveler returns \RelTwinDiff{} years younger. \textbf{D:}
-real atomic clocks---the model's Hafele--Keating eastward/westward shifts vs.\ the
-1971 measurements (GPS net $\RelGpsNet\,\mu$s/day in the title).}
-\label{fig:relativity}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E47 atomic-clock validation.} The verified relativistic model
-vs.\ real/documented measurements. GPS is computed from first principles;
-Hafele--Keating uses flight-averaged parameters.}
-\label{tab:relativity}
-\input{tables/relativity}
-\end{table}
-
 \subsubsection{A composite corporate world: individual, division, and company goals (E48)}\label{sec:corporate}
 The framework's structural primitives---nested composition, aggregation,
 hierarchical observation, multi-level objectives---map almost one-to-one onto an
@@ -1089,56 +1035,6 @@ the openworld-corp transcript dataset as perception.}
 \input{tables/corporate_world}
 \end{table}
 
-\subsubsection{A same-day trading world model: out-of-sample on real markets (E50)}\label{sec:trading}
-E50 applies the framework to a deliberately hard, near-efficient real-world
-problem: from \TradeUniverse{} large-cap tickers' history (real OHLC via
-yfinance, \TradeYears{} years), rank the ticker most likely to rise and recommend
-the same-day entry---buy at the open (capture the intraday segment, close→open
-$\to$ open→close) or at the close (capture the overnight segment). Each ticker is
-a world with verified, auditable estimators of P(up) per segment; selection is a
-many-worlds pick of the highest expected move; timing is the open/close choice.
-The value here is not alpha---it is \emph{rigor}: an exact, auditable model and an
-walk-forward, no-lookahead, after-cost backtest that makes overfitting
-visible, where a black-box predictor would hide it.
-
-The result is reported as-is (Figure~\ref{fig:trading}, Table~\ref{tab:trading}).
-On a synthetic market with a \emph{known} $+40$\,bps overnight edge the detector
-recovers it cleanly (Sharpe \TradeSynSharpe{} vs.\ \TradeSynRandom{} random), so a
-weak real result reads as ``market efficient'', not ``detector broken.'' On real
-data the out-of-sample strategy returns \TradeHonestAnn\% annualized after
-cost---nominally above buy-and-hold SPY (\TradeSpyAnn\%)---but its hit rate is
-only \TradeHonestHit\%, its risk-adjusted return is \emph{below} SPY (Sharpe
-\TradeHonestSharpe{} vs.\ \TradeSpySharpe{}), and the edge is cost-fragile: the
-no-cost Sharpe is \TradeNoCostSharpe{} (close to the lookahead-cheating
-\TradeLookaheadSharpe{}) and the annualized return crosses zero around
-\TradeCostBreakeven\,bps round-trip. In other words, most of the apparent edge is
-transaction cost and overfitting; what survives does not beat simply holding the
-index on a risk-adjusted basis. That verdict---and the auditable,
-cost-swept, no-lookahead protocol that produces it---is the contribution; the
-model also emits a concrete daily recommendation (ticker + open/close entry) for
-live forward-testing, with the obvious caveat that this is not investment advice.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/trading.png}
-\caption{\textbf{Same-day trading world model (E50).} \textbf{A:} walk-forward
-equity (log) of the after-cost strategy vs.\ lookahead, buy-and-hold SPY,
-and random. \textbf{B:} cost fragility---annualized return vs.\ round-trip cost,
-crossing zero near \TradeCostBreakeven\,bps. \textbf{C:} on a synthetic market
-with a known edge the detector recovers it. \textbf{D:} risk-adjusted, the after-cost
-strategy ($\,$\TradeHonestSharpe{}$\,$) trails SPY ($\,$\TradeSpySharpe{}$\,$);
-the no-cost/lookahead Sharpes show how much is overfitting and cost.}
-\label{fig:trading}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E50 out-of-sample backtest} (real OHLC, walk-forward,
-no lookahead). The after-cost strategy does not beat SPY risk-adjusted.}
-\label{tab:trading}
-\input{tables/trading}
-\end{table}
-
 \subsubsection{A startup growth world model: what drives a YC-style batch (E51)}\label{sec:startups}
 The same composite machinery as the corporate world (E48), turned on a cohort of
 startups: a batch of \StartupN{} startups is a \texttt{CompositeWorld} of startup
@@ -1186,173 +1082,7 @@ and the power law of outcomes.}
 \input{tables/startups}
 \end{table}
 
-\subsubsection{Wavelet denoising as a perception$\to$world$\to$emit loop (E52)}\label{sec:denoise}
-A wavelet denoiser is a clean instance of the perception boundary: a noisy
-continuous signal is mapped to a \emph{sparse symbolic state} (the few
-significant wavelet coefficients --- real structure separated from dense noise),
-a declared, auditable rule shrinks the noise coefficients (soft-threshold at the
-universal $\lambda=\sigma\sqrt{2\ln N}$, $\sigma$ the robust MAD estimate), and
-the inverse transform emits the cleaned signal. We implement the transform in
-numpy (orthonormal Haar, bit-exact perfect reconstruction --- max round-trip
-error \DenoisePR{}, a built-in invariant), with the multi-resolution
-decomposition as a composite of scale sub-bands. On noisy input the symbolic
-state is \DenoiseSparsity\% zero (the compactness the threshold buys).
-
-The result is a basis-match story (Figure~\ref{fig:denoise},
-Table~\ref{tab:denoise}). On \emph{discontinuous} signals (Donoho's blocks and
-heavisine), where the wavelet basis matches the structure, the parameter-free
-wavelet denoiser gains \DenoiseEdgeWavelet\,dB SNR --- beating even an
-\emph{optimally tuned} low-pass (\DenoiseEdgeTuned\,dB) and a naive one
-(\DenoiseEdgeNaive\,dB), because Fourier filtering blurs and rings the jumps the
-wavelet preserves. It is also parameter-free: the low-pass must be hand-tuned to
-rise from \DenoiseNaiveMean{} to \DenoiseTunedMean\,dB, while the wavelet's
-threshold is automatic. We report the mismatches rather than hide them: on
-\emph{smooth/oscillatory} signals (bumps, doppler) a Fourier low-pass matches the
-structure better (\DenoiseSmoothTuned{} vs.\ \DenoiseSmoothWavelet\,dB), and on
-\emph{harmonic speech} the Haar basis is simply wrong (\DenoiseSpeech\,dB ---
-harmonics are sparse in Fourier, not Haar; a smoother db/sym or learned basis is
-needed). The lesson is the framework's, in signal form: a verified, auditable,
-training-free world model wins precisely where its declared structure matches the
-signal's, and the experiment makes that boundary visible. The model emits
-before/after \texttt{.wav} files (blocks, doppler, speech) to listen to.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/denoise.png}
-\caption{\textbf{Wavelet denoising as perceive$\to$world$\to$emit (E52).}
-\textbf{A:} SNR gain by signal --- wavelet wins on discontinuous signals, a
-low-pass on smooth ones (basis match). \textbf{B:} on blocks, the wavelet keeps
-the edges; the tuned low-pass blurs and rings them. \textbf{C:} the sparse
-symbolic state --- a few coefficients above the universal threshold,
-\DenoiseSparsity\% zeroed. \textbf{D:} edges (wavelet wins, parameter-free) vs.\
-smooth (Fourier wins).}
-\label{fig:denoise}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E52 denoising SNR gain (dB)} by signal and method. The
-parameter-free wavelet wins on edge/discontinuity signals even vs.\ a tuned
-low-pass; basis mismatches (smooth, speech) reported.}
-\label{tab:denoise}
-\input{tables/denoise}
-\end{table}
-
-\subsubsection{Abstract interpretation: sound, tight bounds on rollouts (E54)}\label{sec:bounds}
-A verified world model can be run not just on concrete states but on
-\emph{abstract} ones, propagating a whole set of possible states forward at once
-and returning guaranteed bounds on where the world can go. That is abstract
-interpretation. The naive abstraction---intervals---is sound but loses all
-correlation between variables, so bounds blow up under feedback. We add an affine domain that carries shared noise symbols, so cancellations like
-$a + (1-a)$ are tracked exactly, and test both on a recurring contractive update
-$x_{t+1}=a\,x_t+(1-a)c+\text{shock}$ with $a$ ranging in $[0.70,0.95]$ each step.
-
-Over a \BoundsHorizon-step horizon (Figure~\ref{fig:bounds},
-Table~\ref{tab:bounds}) the affine bound stays tight---width \BoundsAffineWidth{}
-against the true reachable width \BoundsTrueWidth---while the interval bound
-explodes to \BoundsIntervalWidth{} by losing the $a/(1-a)$ correlation. Both
-abstract methods are \emph{sound} (they always enclose the truth); a Monte-Carlo
-envelope of the same system is tighter but \emph{unsound}, missing the true
-maximum by up to \BoundsMcMiss{} units---the failure mode that matters when the
-bound is a safety guarantee. Abstract interpretation gives the world model a
-``worst-case rollout'' it can actually certify.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/bounds.png}
-\caption{\textbf{Abstract interpretation (E54).} \textbf{A:} bound width vs.\
-horizon---affine tracks the true reachable set; intervals explode; Monte Carlo is
-tight but unsound. \textbf{B:} the sound domains always enclose the truth, while
-Monte Carlo under-covers the high end.}
-\label{fig:bounds}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E54 reachable-set bounds} by horizon: true width vs.\ affine and
-interval bound widths, and the amount by which an unsound Monte-Carlo envelope
-misses the truth.}
-\label{tab:bounds}
-\input{tables/bounds}
-\end{table}
-
-\subsubsection{Information geometry: identify the world by maximizing information (E55)}\label{sec:infogeom}
-When the true world is one of $K$ candidates and each probe yields a noisy,
-world-dependent outcome, the right next experiment is the one whose outcome
-carries the most information about which world is true---the expected information
-gain (mutual information between outcome and world identity under the current
-posterior), the information-geometric / optimal-experiment criterion. This
-sharpens the active-induction story (\S\ref{sec:active-induction}) and the
-many-worlds posterior (\S\ref{sec:many-worlds}): choose probes by information,
-update by Bayes. We compare it to random probing and to the count-based
-version-space heuristic on \InfoGeomWorlds{} candidate worlds and \InfoGeomProbes{}
-probes.
-
-Expected information gain identifies the true world in \InfoGeomEig{} probes on
-average, against \InfoGeomHeuristic{} for the version-space heuristic and
-\InfoGeomRandom{} for random probing (Figure~\ref{fig:infogeom},
-Table~\ref{tab:infogeom}), at essentially perfect accuracy. The reason is
-adaptivity: as the posterior concentrates, the criterion stops re-confirming what
-is already known and picks probes that separate the worlds still in
-contention---something the probability-blind count heuristic cannot do.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/infogeom.png}
-\caption{\textbf{Information geometry (E55).} \textbf{A:} posterior entropy
-collapses fastest under expected-information-gain probing. \textbf{B:} mean probes
-to identify the world---information-guided $<$ heuristic $<$ random.}
-\label{fig:infogeom}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E55 world identification}: mean probes to identify and final
-accuracy for expected-information-gain, version-space, and random probing.}
-\label{tab:infogeom}
-\input{tables/infogeom}
-\end{table}
-
-\subsubsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
-Comparing a world's output distribution to data is usually done with KL
-divergence, but KL is uninformative in exactly the regime drift detection cares about: under a regime shift the new
-distribution moves off the old one, supports stop overlapping, and KL saturates to
-an uninformative plateau (or diverges)---it cannot say \emph{how far} the world
-drifted, only that it did. The Wasserstein (earth-mover) distance instead measures
-how far probability mass must move, so it stays finite, scales with the size of
-the shift, and gives a usable gradient even across disjoint supports. We use the
-closed-form 1-D Wasserstein (the $L_1$ distance between quantile functions) for
-scalar world outputs.
-
-On a four-regime stream the consecutive-window Wasserstein distance spikes at
-each shift and localizes both true change-points (\TransportTrueShifts{}) exactly
-(Figure~\ref{fig:transport}, Table~\ref{tab:transport}). The sharper result is
-calibration: fitting a world's mean to data from a cold start whose support does
-not overlap the target ($\mu^*=8$), minimizing Wasserstein recovers
-$\hat\mu=\TransportMuHat$ because the objective slopes toward the target
-everywhere (far-region relative slope \TransportWSlope), whereas the KL objective
-is flat there (slope \TransportKlSlope)---no descent direction at all. Optimal
-transport is the distance that lets a world model be \emph{calibrated and
-monitored} across the very shifts where KL goes blind.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/transport.png}
-\caption{\textbf{Optimal transport (E56).} \textbf{A:} consecutive-window
-Wasserstein distance spikes at and localizes each regime shift. \textbf{B:} as a
-calibration objective Wasserstein descends toward the target from a cold start
-while the KL objective is flat (saturated) on non-overlapping supports.}
-\label{fig:transport}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E56 transport vs.\ KL}: localized regime shifts, the recovered
-target mean, and the far-region objective slope (gradient) for Wasserstein vs.\
-KL.}
-\label{tab:transport}
-\input{tables/transport}
-\end{table}
+\paragraph{Further domain demonstrations.} Six additional worlds exercise the framework \emph{outside} its core symbolic-world-model thesis---special relativity (E47), same-day trading (E50), wavelet denoising (E52), abstract-interpretation rollout bounds (E54), information-geometric world identification (E55), and optimal-transport drift detection (E56). They demonstrate expressiveness rather than carry the central argument, so they are collected in Appendix~\ref{app:domains}.
 
 \subsubsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
 For world models to be shared the way trained models are, a world needs a
@@ -2593,6 +2323,287 @@ when outcomes look fine. In E7/E15, the rubric judge compressed mid-range
 episodes toward similar scores (rank correlation \JudgeSpearman{} rather than
 1.0, dropping to \RubricParaRho{} under paraphrase), consistent with known
 LLM-judge coarseness~\cite{llmjudge2023}.
+
+\section{Additional domain demonstrations}\label{app:domains}
+These experiments express the framework across domains beyond the symbolic-world-model thesis benchmarked in the main text. They are demonstrations of expressiveness, not load-bearing evidence for the central claims, and are collected here to keep the main results focused; each is self-contained and regenerates from the same pipeline.
+
+\subsection{Relativity as a verified world model: reference frames and atomic clocks (E47)}\label{sec:relativity}
+Reference frames and changing references are the framework's composition and
+non-stationarity story in the language of physics, so E47 encodes special and
+general relativity as a verified world model and validates it against real
+atomic-clock data. The world's state carries each agent's velocity and proper
+time (its atomic clock); the verified transition advances a clock by the
+time-dilated amount $\Delta\tau=\Delta t/\gamma$ with
+$\gamma=1/\sqrt{1-v^2/c^2}$; a \emph{changing reference} is a velocity-change
+action and \emph{agent observation} is one frame reading another's clock through
+the Lorentz transform (Figure~\ref{fig:relativity}).
+
+Four results. (i) \emph{Time dilation} is exact for the symbolic model at every
+speed, whereas a learned fit on low-speed data diverges as $v\to c$ (error
+\RelLearnErr{} of a clock tick at $0.999c$) and the Newtonian ``no dilation''
+model is off by \RelNewtErr---the classical physics that real clocks disprove.
+(ii) Relativistic velocity addition stays below $c$ while the Galilean sum runs
+superluminal. (iii) The \emph{twin paradox}, simulated as an agent worldline with
+a turnaround, has the traveler return \RelTwinDiff{} years younger
+(\RelTwinTravel{} vs.\ \RelTwinStay{}) while the frame-naive model ages both
+identically---the asymmetry is entirely the change of reference. (iv) Most
+tellingly, the same verified model reproduces \emph{real measurements}: from
+first principles the GPS clock correction is $\RelGpsSR$ (SR) $+\,\RelGpsGR$ (GR)
+$=\RelGpsNet$~$\mu$s/day, matching the documented $\sim$+38; and at
+flight-averaged parameters the Hafele--Keating shifts come out eastward
+\RelHKModelEast~ns and westward \RelHKModelWest~ns, inside the 1971 measured
+$\RelHKObsEast$~ns and $\RelHKObsWest$~ns (the east/west asymmetry exists only
+because of relativity in the rotating frame; the Newtonian model predicts zero).
+A verified-code world model, declared from textbook physics, is exact in the
+relativistic regime and lands inside the error bars of a real atomic-clock
+experiment---the same exact-vs-approximate story as the rest of the paper, now in
+a domain where the ``approximate'' (classical) model is known to fail and is
+corrected for daily in orbit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/relativity.png}
+\caption{\textbf{Relativity as a verified world model (E47).} \textbf{Top:} the
+composite world---a lab (observer) frame containing two reference-frame
+sub-worlds, each carrying an agent and its atomic clock, coupled by the Lorentz
+transform (the bridge) while the traveler is an agent that crosses/changes
+reference (the route). \textbf{A:} the
+moving-clock rate $1/\gamma$---symbolic exact, a low-speed learned fit diverges
+OOD near $c$, Newtonian shows none. \textbf{B:} velocity addition stays below
+$c$; the Galilean sum does not. \textbf{C:} the twin paradox as an agent
+worldline---the traveler returns \RelTwinDiff{} years younger. \textbf{D:}
+real atomic clocks---the model's Hafele--Keating eastward/westward shifts vs.\ the
+1971 measurements (GPS net $\RelGpsNet\,\mu$s/day in the title).}
+\label{fig:relativity}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E47 atomic-clock validation.} The verified relativistic model
+vs.\ real/documented measurements. GPS is computed from first principles;
+Hafele--Keating uses flight-averaged parameters.}
+\label{tab:relativity}
+\input{tables/relativity}
+\end{table}
+
+\subsection{A same-day trading world model: out-of-sample on real markets (E50)}\label{sec:trading}
+E50 applies the framework to a deliberately hard, near-efficient real-world
+problem: from \TradeUniverse{} large-cap tickers' history (real OHLC via
+yfinance, \TradeYears{} years), rank the ticker most likely to rise and recommend
+the same-day entry---buy at the open (capture the intraday segment, close→open
+$\to$ open→close) or at the close (capture the overnight segment). Each ticker is
+a world with verified, auditable estimators of P(up) per segment; selection is a
+many-worlds pick of the highest expected move; timing is the open/close choice.
+The value here is not alpha---it is \emph{rigor}: an exact, auditable model and an
+walk-forward, no-lookahead, after-cost backtest that makes overfitting
+visible, where a black-box predictor would hide it.
+
+The result is reported as-is (Figure~\ref{fig:trading}, Table~\ref{tab:trading}).
+On a synthetic market with a \emph{known} $+40$\,bps overnight edge the detector
+recovers it cleanly (Sharpe \TradeSynSharpe{} vs.\ \TradeSynRandom{} random), so a
+weak real result reads as ``market efficient'', not ``detector broken.'' On real
+data the out-of-sample strategy returns \TradeHonestAnn\% annualized after
+cost---nominally above buy-and-hold SPY (\TradeSpyAnn\%)---but its hit rate is
+only \TradeHonestHit\%, its risk-adjusted return is \emph{below} SPY (Sharpe
+\TradeHonestSharpe{} vs.\ \TradeSpySharpe{}), and the edge is cost-fragile: the
+no-cost Sharpe is \TradeNoCostSharpe{} (close to the lookahead-cheating
+\TradeLookaheadSharpe{}) and the annualized return crosses zero around
+\TradeCostBreakeven\,bps round-trip. In other words, most of the apparent edge is
+transaction cost and overfitting; what survives does not beat simply holding the
+index on a risk-adjusted basis. That verdict---and the auditable,
+cost-swept, no-lookahead protocol that produces it---is the contribution; the
+model also emits a concrete daily recommendation (ticker + open/close entry) for
+live forward-testing, with the obvious caveat that this is not investment advice.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/trading.png}
+\caption{\textbf{Same-day trading world model (E50).} \textbf{A:} walk-forward
+equity (log) of the after-cost strategy vs.\ lookahead, buy-and-hold SPY,
+and random. \textbf{B:} cost fragility---annualized return vs.\ round-trip cost,
+crossing zero near \TradeCostBreakeven\,bps. \textbf{C:} on a synthetic market
+with a known edge the detector recovers it. \textbf{D:} risk-adjusted, the after-cost
+strategy ($\,$\TradeHonestSharpe{}$\,$) trails SPY ($\,$\TradeSpySharpe{}$\,$);
+the no-cost/lookahead Sharpes show how much is overfitting and cost.}
+\label{fig:trading}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E50 out-of-sample backtest} (real OHLC, walk-forward,
+no lookahead). The after-cost strategy does not beat SPY risk-adjusted.}
+\label{tab:trading}
+\input{tables/trading}
+\end{table}
+
+\subsection{Wavelet denoising as a perception$\to$world$\to$emit loop (E52)}\label{sec:denoise}
+A wavelet denoiser is a clean instance of the perception boundary: a noisy
+continuous signal is mapped to a \emph{sparse symbolic state} (the few
+significant wavelet coefficients --- real structure separated from dense noise),
+a declared, auditable rule shrinks the noise coefficients (soft-threshold at the
+universal $\lambda=\sigma\sqrt{2\ln N}$, $\sigma$ the robust MAD estimate), and
+the inverse transform emits the cleaned signal. We implement the transform in
+numpy (orthonormal Haar, bit-exact perfect reconstruction --- max round-trip
+error \DenoisePR{}, a built-in invariant), with the multi-resolution
+decomposition as a composite of scale sub-bands. On noisy input the symbolic
+state is \DenoiseSparsity\% zero (the compactness the threshold buys).
+
+The result is a basis-match story (Figure~\ref{fig:denoise},
+Table~\ref{tab:denoise}). On \emph{discontinuous} signals (Donoho's blocks and
+heavisine), where the wavelet basis matches the structure, the parameter-free
+wavelet denoiser gains \DenoiseEdgeWavelet\,dB SNR --- beating even an
+\emph{optimally tuned} low-pass (\DenoiseEdgeTuned\,dB) and a naive one
+(\DenoiseEdgeNaive\,dB), because Fourier filtering blurs and rings the jumps the
+wavelet preserves. It is also parameter-free: the low-pass must be hand-tuned to
+rise from \DenoiseNaiveMean{} to \DenoiseTunedMean\,dB, while the wavelet's
+threshold is automatic. We report the mismatches rather than hide them: on
+\emph{smooth/oscillatory} signals (bumps, doppler) a Fourier low-pass matches the
+structure better (\DenoiseSmoothTuned{} vs.\ \DenoiseSmoothWavelet\,dB), and on
+\emph{harmonic speech} the Haar basis is simply wrong (\DenoiseSpeech\,dB ---
+harmonics are sparse in Fourier, not Haar; a smoother db/sym or learned basis is
+needed). The lesson is the framework's, in signal form: a verified, auditable,
+training-free world model wins precisely where its declared structure matches the
+signal's, and the experiment makes that boundary visible. The model emits
+before/after \texttt{.wav} files (blocks, doppler, speech) to listen to.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/denoise.png}
+\caption{\textbf{Wavelet denoising as perceive$\to$world$\to$emit (E52).}
+\textbf{A:} SNR gain by signal --- wavelet wins on discontinuous signals, a
+low-pass on smooth ones (basis match). \textbf{B:} on blocks, the wavelet keeps
+the edges; the tuned low-pass blurs and rings them. \textbf{C:} the sparse
+symbolic state --- a few coefficients above the universal threshold,
+\DenoiseSparsity\% zeroed. \textbf{D:} edges (wavelet wins, parameter-free) vs.\
+smooth (Fourier wins).}
+\label{fig:denoise}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E52 denoising SNR gain (dB)} by signal and method. The
+parameter-free wavelet wins on edge/discontinuity signals even vs.\ a tuned
+low-pass; basis mismatches (smooth, speech) reported.}
+\label{tab:denoise}
+\input{tables/denoise}
+\end{table}
+
+\subsection{Abstract interpretation: sound, tight bounds on rollouts (E54)}\label{sec:bounds}
+A verified world model can be run not just on concrete states but on
+\emph{abstract} ones, propagating a whole set of possible states forward at once
+and returning guaranteed bounds on where the world can go. That is abstract
+interpretation. The naive abstraction---intervals---is sound but loses all
+correlation between variables, so bounds blow up under feedback. We add an affine domain that carries shared noise symbols, so cancellations like
+$a + (1-a)$ are tracked exactly, and test both on a recurring contractive update
+$x_{t+1}=a\,x_t+(1-a)c+\text{shock}$ with $a$ ranging in $[0.70,0.95]$ each step.
+
+Over a \BoundsHorizon-step horizon (Figure~\ref{fig:bounds},
+Table~\ref{tab:bounds}) the affine bound stays tight---width \BoundsAffineWidth{}
+against the true reachable width \BoundsTrueWidth---while the interval bound
+explodes to \BoundsIntervalWidth{} by losing the $a/(1-a)$ correlation. Both
+abstract methods are \emph{sound} (they always enclose the truth); a Monte-Carlo
+envelope of the same system is tighter but \emph{unsound}, missing the true
+maximum by up to \BoundsMcMiss{} units---the failure mode that matters when the
+bound is a safety guarantee. Abstract interpretation gives the world model a
+``worst-case rollout'' it can actually certify.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/bounds.png}
+\caption{\textbf{Abstract interpretation (E54).} \textbf{A:} bound width vs.\
+horizon---affine tracks the true reachable set; intervals explode; Monte Carlo is
+tight but unsound. \textbf{B:} the sound domains always enclose the truth, while
+Monte Carlo under-covers the high end.}
+\label{fig:bounds}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E54 reachable-set bounds} by horizon: true width vs.\ affine and
+interval bound widths, and the amount by which an unsound Monte-Carlo envelope
+misses the truth.}
+\label{tab:bounds}
+\input{tables/bounds}
+\end{table}
+
+\subsection{Information geometry: identify the world by maximizing information (E55)}\label{sec:infogeom}
+When the true world is one of $K$ candidates and each probe yields a noisy,
+world-dependent outcome, the right next experiment is the one whose outcome
+carries the most information about which world is true---the expected information
+gain (mutual information between outcome and world identity under the current
+posterior), the information-geometric / optimal-experiment criterion. This
+sharpens the active-induction story (\S\ref{sec:active-induction}) and the
+many-worlds posterior (\S\ref{sec:many-worlds}): choose probes by information,
+update by Bayes. We compare it to random probing and to the count-based
+version-space heuristic on \InfoGeomWorlds{} candidate worlds and \InfoGeomProbes{}
+probes.
+
+Expected information gain identifies the true world in \InfoGeomEig{} probes on
+average, against \InfoGeomHeuristic{} for the version-space heuristic and
+\InfoGeomRandom{} for random probing (Figure~\ref{fig:infogeom},
+Table~\ref{tab:infogeom}), at essentially perfect accuracy. The reason is
+adaptivity: as the posterior concentrates, the criterion stops re-confirming what
+is already known and picks probes that separate the worlds still in
+contention---something the probability-blind count heuristic cannot do.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/infogeom.png}
+\caption{\textbf{Information geometry (E55).} \textbf{A:} posterior entropy
+collapses fastest under expected-information-gain probing. \textbf{B:} mean probes
+to identify the world---information-guided $<$ heuristic $<$ random.}
+\label{fig:infogeom}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E55 world identification}: mean probes to identify and final
+accuracy for expected-information-gain, version-space, and random probing.}
+\label{tab:infogeom}
+\input{tables/infogeom}
+\end{table}
+
+\subsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
+Comparing a world's output distribution to data is usually done with KL
+divergence, but KL is uninformative in exactly the regime drift detection cares about: under a regime shift the new
+distribution moves off the old one, supports stop overlapping, and KL saturates to
+an uninformative plateau (or diverges)---it cannot say \emph{how far} the world
+drifted, only that it did. The Wasserstein (earth-mover) distance instead measures
+how far probability mass must move, so it stays finite, scales with the size of
+the shift, and gives a usable gradient even across disjoint supports. We use the
+closed-form 1-D Wasserstein (the $L_1$ distance between quantile functions) for
+scalar world outputs.
+
+On a four-regime stream the consecutive-window Wasserstein distance spikes at
+each shift and localizes both true change-points (\TransportTrueShifts{}) exactly
+(Figure~\ref{fig:transport}, Table~\ref{tab:transport}). The sharper result is
+calibration: fitting a world's mean to data from a cold start whose support does
+not overlap the target ($\mu^*=8$), minimizing Wasserstein recovers
+$\hat\mu=\TransportMuHat$ because the objective slopes toward the target
+everywhere (far-region relative slope \TransportWSlope), whereas the KL objective
+is flat there (slope \TransportKlSlope)---no descent direction at all. Optimal
+transport is the distance that lets a world model be \emph{calibrated and
+monitored} across the very shifts where KL goes blind.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/transport.png}
+\caption{\textbf{Optimal transport (E56).} \textbf{A:} consecutive-window
+Wasserstein distance spikes at and localizes each regime shift. \textbf{B:} as a
+calibration objective Wasserstein descends toward the target from a cold start
+while the KL objective is flat (saturated) on non-overlapping supports.}
+\label{fig:transport}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E56 transport vs.\ KL}: localized regime shifts, the recovered
+target mean, and the far-region objective slope (gradient) for Wasserstein vs.\
+KL.}
+\label{tab:transport}
+\input{tables/transport}
+\end{table}
+
 
 \section{Reproducibility}
 One pipeline rebuilds every artifact: experiment scripts in

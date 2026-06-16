@@ -180,3 +180,139 @@ def validate_against_published(eng: "EloEngine", snapshot_year: int) -> dict:
     rmse = math.sqrt(sum((a - b) ** 2 for a, b in zip(xs, ys)) / n) if n else float("nan")
     return {"n": n, "pearson": _pearson(xs, ys), "spearman": _spearman(xs, ys),
             "rmse": rmse, "snapshot_year": snapshot_year}
+
+
+# Official group draws (results.csv spellings). Verified against real fixtures.
+CUP_GROUPS: Dict[int, Dict[str, List[str]]] = {
+    2010: {
+        "A": ["South Africa", "Mexico", "Uruguay", "France"],
+        "B": ["Argentina", "Nigeria", "South Korea", "Greece"],
+        "C": ["England", "United States", "Algeria", "Slovenia"],
+        "D": ["Germany", "Australia", "Serbia", "Ghana"],
+        "E": ["Netherlands", "Denmark", "Japan", "Cameroon"],
+        "F": ["Italy", "Paraguay", "New Zealand", "Slovakia"],
+        "G": ["Brazil", "North Korea", "Ivory Coast", "Portugal"],
+        "H": ["Spain", "Switzerland", "Honduras", "Chile"],
+    },
+    2014: {
+        "A": ["Brazil", "Croatia", "Mexico", "Cameroon"],
+        "B": ["Spain", "Netherlands", "Chile", "Australia"],
+        "C": ["Colombia", "Greece", "Ivory Coast", "Japan"],
+        "D": ["Uruguay", "Costa Rica", "England", "Italy"],
+        "E": ["Switzerland", "Ecuador", "France", "Honduras"],
+        "F": ["Argentina", "Bosnia and Herzegovina", "Iran", "Nigeria"],
+        "G": ["Germany", "Portugal", "Ghana", "United States"],
+        "H": ["Belgium", "Algeria", "Russia", "South Korea"],
+    },
+    2018: {
+        "A": ["Russia", "Saudi Arabia", "Egypt", "Uruguay"],
+        "B": ["Portugal", "Spain", "Morocco", "Iran"],
+        "C": ["France", "Australia", "Peru", "Denmark"],
+        "D": ["Argentina", "Iceland", "Croatia", "Nigeria"],
+        "E": ["Brazil", "Switzerland", "Costa Rica", "Serbia"],
+        "F": ["Germany", "Mexico", "Sweden", "South Korea"],
+        "G": ["Belgium", "Panama", "Tunisia", "England"],
+        "H": ["Poland", "Senegal", "Colombia", "Japan"],
+    },
+    2022: {
+        "A": ["Qatar", "Ecuador", "Senegal", "Netherlands"],
+        "B": ["England", "Iran", "United States", "Wales"],
+        "C": ["Argentina", "Saudi Arabia", "Mexico", "Poland"],
+        "D": ["France", "Australia", "Denmark", "Tunisia"],
+        "E": ["Spain", "Costa Rica", "Germany", "Japan"],
+        "F": ["Belgium", "Canada", "Morocco", "Croatia"],
+        "G": ["Brazil", "Serbia", "Switzerland", "Cameroon"],
+        "H": ["Portugal", "Ghana", "Uruguay", "South Korea"],
+    },
+}
+
+# Host nation per cup (gets the forecaster's host Elo bump in simulation).
+CUP_HOST = {2010: "South Africa", 2014: "Brazil", 2018: "Russia", 2022: "Qatar"}
+
+# Fixed Round-of-16 pairing: (group-winner letter, group-runnerup letter).
+R16_PAIRS = [("A", "B"), ("C", "D"), ("E", "F"), ("G", "H"),
+             ("B", "A"), ("D", "C"), ("F", "E"), ("H", "G")]
+
+
+class Cup:
+    """One World Cup's draw + real results, loaded from the vendored data."""
+
+    def __init__(self, year: int):
+        self.year = year
+        self.groups = CUP_GROUPS[year]
+        self.host = CUP_HOST[year]
+        self._team_to_group = {t: g for g, ts in self.groups.items() for t in ts}
+        self._group_res: Dict[frozenset, Tuple[str, int, int]] = {}
+        self._ko: List[dict] = []
+        self._shootouts: Dict[frozenset, str] = {}
+        self._load()
+
+    def _load(self):
+        with open(SHOOTOUTS_CSV, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if r["date"][:4] == str(self.year):
+                    self._shootouts[frozenset((r["home_team"], r["away_team"]))] = r["winner"]
+        with open(RESULTS_CSV, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if r["tournament"] != "FIFA World Cup" or r["date"][:4] != str(self.year):
+                    continue
+                h, a = r["home_team"], r["away_team"]
+                hg, ag = int(r["home_score"]), int(r["away_score"])
+                same_group = (self._team_to_group.get(h) is not None
+                              and self._team_to_group.get(h) == self._team_to_group.get(a))
+                if same_group:
+                    self._group_res[frozenset((h, a))] = (h, hg, ag)
+                else:
+                    key = frozenset((h, a))
+                    winner = h if hg > ag else (a if ag > hg else self._shootouts.get(key))
+                    self._ko.append({"date": r["date"], "home": h, "away": a,
+                                     "hg": hg, "ag": ag, "winner": winner})
+        self._ko.sort(key=lambda m: m["date"])
+
+    def group_result(self, a: str, b: str):
+        """(home, home_goals, away_goals) for the real group match, or None."""
+        return self._group_res.get(frozenset((a, b)))
+
+    def group_of(self, team: str) -> str:
+        return self._team_to_group[team]
+
+    def real_standings(self) -> Dict[str, List[str]]:
+        """Real finishing order per group (reuses the forecaster's tiebreak)."""
+        out = {}
+        for g, teams in self.groups.items():
+            res = {}
+            for i in range(len(teams)):
+                for j in range(i + 1, len(teams)):
+                    rec = self.group_result(teams[i], teams[j])
+                    home, hg, ag = rec
+                    away = teams[j] if home == teams[i] else teams[i]
+                    res[(home, away)] = (hg, ag)
+            out[g] = group_standings(teams, res)
+        return out
+
+    def actual_advancers(self) -> Dict[str, str]:
+        """Round-name -> advancing teams, derived from real KO games.
+
+        16 KO matches in date order: first 8 = R16, next 4 = QF, next 2 = SF,
+        then 3rd-place playoff + final. The final is the last-two match whose two
+        teams both won their SF; the 3rd-place game is the other.
+        """
+        ko = self._ko
+        r16 = ko[:8]; qf = ko[8:12]; sf = ko[12:14]; last_two = ko[14:16]
+        sf_winners = {m["winner"] for m in sf}
+        final = next(m for m in last_two
+                     if m["home"] in sf_winners and m["away"] in sf_winners)
+        return {
+            "R16": [m["winner"] for m in r16],
+            "QF": [m["winner"] for m in qf],
+            "SF": [m["winner"] for m in sf],
+            "final_match": final,
+            "champion": final["winner"],
+        }
+
+    def actual_champion(self) -> str:
+        return self.actual_advancers()["champion"]
+
+
+def load_cup(year: int) -> Cup:
+    return Cup(year)

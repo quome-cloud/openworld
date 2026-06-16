@@ -50,3 +50,26 @@ def test_validation_against_published_elo_is_strong():
     assert stats["spearman"] >= 0.7
     assert stats["pearson"] >= 0.7
     assert stats["rmse"] < 250.0
+
+
+@pytest.mark.parametrize("year", [2010, 2014, 2018, 2022])
+def test_encoded_groups_match_real_data(year):
+    cup = wh.load_cup(year)
+    # 8 groups of 4 distinct teams.
+    assert len(cup.groups) == 8
+    assert sorted(cup.groups) == list("ABCDEFGH")
+    teams = [t for g in cup.groups.values() for t in g]
+    assert len(teams) == 32 and len(set(teams)) == 32
+    # Every encoded group's 6 round-robin pairings appear as real group matches.
+    for letter, four in cup.groups.items():
+        for i in range(4):
+            for j in range(i + 1, 4):
+                a, b = four[i], four[j]
+                assert cup.group_result(a, b) is not None, (year, letter, a, b)
+
+
+@pytest.mark.parametrize("year,champion", [
+    (2010, "Spain"), (2014, "Germany"), (2018, "France"), (2022, "Argentina")])
+def test_actual_champion_recovered(year, champion):
+    cup = wh.load_cup(year)
+    assert cup.actual_champion() == champion

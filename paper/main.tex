@@ -366,6 +366,40 @@ framework must produce a faithful, fast, auditable simulator plus the
 machinery to steer and optimize behavior within it. The adversary here is not
 a security attacker but \emph{model error itself}: hallucinated transitions,
 silently wrong code, reward misspecification, and value drift.
+
+\paragraph{A world model, formally.} An \openworld{} world model is a tuple
+\[
+  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
+\]
+where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
+JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
+discrete action set, and the dynamics $\tau : \mathcal{S} \times \mathcal{A} \to
+\mathcal{S}$ is a \emph{deterministic program}; a stochastic world reserves an
+explicit seed field so $\tau$ stays a pure function and every rollout is
+replayable. Objectives $o_i : \mathcal{S} \times \mathcal{A} \times \mathcal{S}
+\to \mathbb{R}$ score a transition $(s, a, s')$ and are weighted by \emph{dials}
+$w_i$ (fixed or tunable); invariants $\mathcal{I}$ are predicates $\iota :
+\mathcal{S} \to \{\top, \bot\}$ required of every reachable state. The
+practitioner supplies only $(s_0, \mathcal{A}, R, \mathcal{I})$---an initial
+state, the actions, natural-language rules $R$, and invariants---and the
+framework must \emph{produce} $\tau$.
+
+It produces $\tau$ by \emph{synthesis under verification}, not by learning. An
+LLM proposes a program $\hat\tau$ from $R$; $\hat\tau$ is accepted only if it
+(i)~parses with the required signature, (ii)~executes in a sandbox over a probe
+set $P \subseteq \mathcal{S} \times \mathcal{A}$ and satisfies every $\iota \in
+\mathcal{I}$ on the results, and optionally (iii)~survives a second-model
+critique against $R$. The accepted $\hat\tau$ is then \emph{fixed}: a depth-$t$
+rollout $s_t = \hat\tau(\cdot, a_t) \circ \cdots \circ \hat\tau(\cdot, a_1)(s_0)$
+is computed by executing code, so if $\hat\tau = \tau^\star$ on the reachable set
+it is exact at \emph{every} depth, bit-exactly. Contrast a learned or
+per-step-predicted transition $\tilde\tau$ resampled each step with single-step
+error $\epsilon = \Pr[\tilde\tau(s, a) \neq \tau^\star(s, a)]$: the chance a full
+$t$-step rollout is exact decays as $(1 - \epsilon)^t$. A symbolic world pays its
+error budget \emph{once}, at synthesis time, where it is auditable; a learned
+world pays it every step, where it compounds. This tuple, and that property, are
+what the rest of the paper measures.
+
 Table~\ref{tab:related} situates the approach against the principal
 world-model strategy families surveyed in the accompanying literature review.
 

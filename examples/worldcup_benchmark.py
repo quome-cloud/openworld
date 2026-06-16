@@ -20,6 +20,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+import numpy as np
+from scipy.optimize import minimize_scalar
+
 sys.path.insert(0, os.path.dirname(__file__))
 import worldcup_history as wh  # noqa: E402
 
@@ -162,3 +165,48 @@ def score_matches(predictions: Dict[tuple, Dict[str, float]],
     return {"n": n, "rps": rps_s / n, "brier": brier_s / n, "logloss": ll_s / n,
             "hit_rate": hits / n,
             "decisive_hit_rate": dec_hits / dec_n if dec_n else None}
+
+
+def _davidson_probs(elo_diff: float, nu: float) -> Dict[str, float]:
+    f = 10 ** (elo_diff / 400.0)
+    g = 10 ** (-elo_diff / 400.0)
+    draw = max(nu, 0.0) * math.sqrt(f * g)
+    z = f + g + draw
+    return {"W": f / z, "D": draw / z, "L": g / z}
+
+
+def fit_davidson_nu(year: int, eng: "wh.EloEngine") -> float:
+    """MLE of the Davidson draw parameter on pre-cup internationals (leakage-free).
+
+    Uses each training match's pre-match Elo gap from a fresh engine frozen at the
+    cup's freeze date (ratings_asof), so no post-cup info leaks.
+    """
+    elo = eng.ratings_asof(wh._cup_freeze_date(year))
+    tr = training_matches(year, years=4)
+    gaps, outs = [], []
+    for r in tr:
+        ha = 0.0 if r["neutral"] else wh.HOME_ADVANTAGE
+        d = (elo.get(r["home"], 1500.0) + ha) - elo.get(r["away"], 1500.0)
+        gaps.append(d)
+        outs.append("W" if r["hg"] > r["ag"] else ("D" if r["hg"] == r["ag"] else "L"))
+
+    def neg_ll(log_nu: float) -> float:
+        nu = math.exp(log_nu)
+        s = 0.0
+        for d, o in zip(gaps, outs):
+            s += -math.log(max(_davidson_probs(d, nu)[o], 1e-12))
+        return s
+
+    res = minimize_scalar(neg_ll, bounds=(-6.0, 3.0), method="bounded")
+    return math.exp(res.x)
+
+
+def predict_elo_logistic(year: int, eng: "wh.EloEngine") -> Dict[tuple, Dict[str, float]]:
+    elo = eng.ratings_asof(wh._cup_freeze_date(year))
+    host = _host_of(year)
+    nu = fit_davidson_nu(year, eng)
+    out = {}
+    for r in cup_matches(year):
+        d = wh._eff(r["home"], elo, host, 1500.0) - wh._eff(r["away"], elo, host, 1500.0)
+        out[(r["date"], r["home"], r["away"])] = _davidson_probs(d, nu)
+    return out

@@ -90,3 +90,23 @@ def test_walk_forward_beats_uniform_on_2014():
     u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
     assert len(preds) == 64
     assert s["rps"] < u["rps"]   # real skill beats the floor
+
+
+def test_davidson_probs_normalise_and_favour_stronger():
+    p = wb._davidson_probs(elo_diff=200.0, nu=1.0)
+    assert abs(sum(p.values()) - 1.0) < 1e-9
+    assert p["W"] > p["L"]                      # home stronger by 200 Elo
+    eq = wb._davidson_probs(elo_diff=0.0, nu=1.0)
+    assert abs(eq["W"] - eq["L"]) < 1e-9        # symmetric when even
+
+
+def test_fit_davidson_nu_positive_and_predicts():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    nu = wb.fit_davidson_nu(2014, eng)
+    assert nu > 0.0
+    preds = wb.predict_elo_logistic(2014, eng)
+    actuals = wb.actual_outcomes(2014)
+    s = wb.score_matches(preds, actuals)
+    u = wb.score_matches(wb.predict_uniform(2014, eng), actuals)
+    assert len(preds) == 64
+    assert s["rps"] < u["rps"]

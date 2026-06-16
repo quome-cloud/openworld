@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="460" viewBox="0 0 720 460" font-family="ui-sans-serif,system-ui,sans-serif">
+<rect width="720" height="460" fill="#fcfbf8"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#1f2937">World Cup 2022 — forecast vs reality</text>
+<text x="24" y="64" font-size="13" fill="#0f766e">host Qatar · model: Elo→Poisson, pre-tournament ratings</text>
+<text x="24" y="104" font-size="15" font-weight="700" fill="#1d4ed8">Our title odds (top 8)</text>
+<text x="24" y="132" font-size="14" fill="#1f2937">Brazil — 29.9%</text>
+<text x="24" y="158" font-size="14" fill="#b45309">Argentina — 23.4%  ← actual winner</text>
+<text x="24" y="184" font-size="14" fill="#1f2937">Netherlands — 8.1%</text>
+<text x="24" y="210" font-size="14" fill="#1f2937">Spain — 7.7%</text>
+<text x="24" y="236" font-size="14" fill="#1f2937">France — 5.2%</text>
+<text x="24" y="262" font-size="14" fill="#1f2937">Belgium — 5.1%</text>
+<text x="24" y="288" font-size="14" fill="#1f2937">Portugal — 4.4%</text>
+<text x="24" y="314" font-size="14" fill="#1f2937">Denmark — 3.1%</text>
+<text x="400" y="104" font-size="15" font-weight="700" fill="#1d4ed8">What actually happened</text>
+<text x="400" y="132" font-size="14" fill="#1f2937">Champion: Argentina (we gave 23.4% to win)</text>
+<text x="400" y="158" font-size="14" fill="#1f2937">Runner-up: France (we gave 5.2% to win)</text>
+<text x="400" y="184" font-size="14" fill="#1f2937">Semi-finalist: Croatia (we gave 1.1% to win)</text>
+<text x="400" y="210" font-size="14" fill="#1f2937">Semi-finalist: Morocco (we gave 0.1% to win)</text>
+</svg>

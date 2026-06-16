@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="460" viewBox="0 0 720 460" font-family="ui-sans-serif,system-ui,sans-serif">
+<rect width="720" height="460" fill="#fcfbf8"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#1f2937">World Cup 2018 — forecast vs reality</text>
+<text x="24" y="64" font-size="13" fill="#0f766e">host Russia · model: Elo→Poisson, pre-tournament ratings</text>
+<text x="24" y="104" font-size="15" font-weight="700" fill="#1d4ed8">Our title odds (top 8)</text>
+<text x="24" y="132" font-size="14" fill="#1f2937">Brazil — 30.9%</text>
+<text x="24" y="158" font-size="14" fill="#1f2937">Germany — 17.5%</text>
+<text x="24" y="184" font-size="14" fill="#1f2937">Spain — 12.8%</text>
+<text x="24" y="210" font-size="14" fill="#1f2937">Argentina — 7.2%</text>
+<text x="24" y="236" font-size="14" fill="#1f2937">Portugal — 5.8%</text>
+<text x="24" y="262" font-size="14" fill="#b45309">France — 5.3%  ← actual winner</text>
+<text x="24" y="288" font-size="14" fill="#1f2937">Peru — 3.8%</text>
+<text x="24" y="314" font-size="14" fill="#1f2937">England — 3.5%</text>
+<text x="400" y="104" font-size="15" font-weight="700" fill="#1d4ed8">What actually happened</text>
+<text x="400" y="132" font-size="14" fill="#1f2937">Champion: France (we gave 5.3% to win)</text>
+<text x="400" y="158" font-size="14" fill="#1f2937">Runner-up: Croatia (we gave 0.7% to win)</text>
+<text x="400" y="184" font-size="14" fill="#1f2937">Semi-finalist: Belgium (we gave 3.2% to win)</text>
+<text x="400" y="210" font-size="14" fill="#1f2937">Semi-finalist: England (we gave 3.5% to win)</text>
+</svg>

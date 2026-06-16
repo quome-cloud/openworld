@@ -132,3 +132,13 @@ def test_reach_qf_calibration_buckets():
     # exactly 8 teams reach the QF per cup -> 32 positives total across 4 cups
     total_pos = sum(b["observed"] * b["n"] for b in buckets if b["n"])
     assert abs(total_pos - 32) < 1e-6
+
+
+def test_bracket_svg_is_self_contained():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    f = wh.forecast_cup(2014, eng, sims=400, seed=2)
+    svg = wh.render_cup_svg(wh.load_cup(2014), f)
+    assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
+    assert "http://www.w3.org/2000/svg" in svg
+    assert "Germany" in svg          # actual champion appears
+    assert "<image" not in svg and "xlink:href=\"http" not in svg  # no fetched resources

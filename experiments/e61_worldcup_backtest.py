@@ -86,6 +86,13 @@ def main():
                "reach_qf_calibration": calib_qf}
     save_results("e61_worldcup_backtest", payload)   # BEFORE asserts
 
+    from pathlib import Path
+    figdir = Path(__file__).resolve().parents[1] / "paper" / "figs"
+    figdir.mkdir(parents=True, exist_ok=True)
+    for (cup, forecast) in cups_forecasts:
+        svg = wh.render_cup_svg(cup, forecast)
+        (figdir / f"e61_bracket_{cup.year}.svg").write_text(svg, encoding="utf-8")
+
     # --- self-checks (after save) ---
     for y in (2013, 2017):  # representative snapshots
         assert validation[y]["spearman"] >= 0.7, (y, validation[y])

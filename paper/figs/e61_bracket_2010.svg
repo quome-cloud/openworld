@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="460" viewBox="0 0 720 460" font-family="ui-sans-serif,system-ui,sans-serif">
+<rect width="720" height="460" fill="#fcfbf8"/>
+<text x="24" y="40" font-size="22" font-weight="700" fill="#1f2937">World Cup 2010 — forecast vs reality</text>
+<text x="24" y="64" font-size="13" fill="#0f766e">host South Africa · model: Elo→Poisson, pre-tournament ratings</text>
+<text x="24" y="104" font-size="15" font-weight="700" fill="#1d4ed8">Our title odds (top 8)</text>
+<text x="24" y="132" font-size="14" fill="#1f2937">Brazil — 26.3%</text>
+<text x="24" y="158" font-size="14" fill="#b45309">Spain — 25.9%  ← actual winner</text>
+<text x="24" y="184" font-size="14" fill="#1f2937">Netherlands — 13.4%</text>
+<text x="24" y="210" font-size="14" fill="#1f2937">England — 9.3%</text>
+<text x="24" y="236" font-size="14" fill="#1f2937">Germany — 4.8%</text>
+<text x="24" y="262" font-size="14" fill="#1f2937">Italy — 4.3%</text>
+<text x="24" y="288" font-size="14" fill="#1f2937">Mexico — 3.9%</text>
+<text x="24" y="314" font-size="14" fill="#1f2937">Argentina — 2.6%</text>
+<text x="400" y="104" font-size="15" font-weight="700" fill="#1d4ed8">What actually happened</text>
+<text x="400" y="132" font-size="14" fill="#1f2937">Champion: Spain (we gave 25.9% to win)</text>
+<text x="400" y="158" font-size="14" fill="#1f2937">Runner-up: Netherlands (we gave 13.4% to win)</text>
+<text x="400" y="184" font-size="14" fill="#1f2937">Semi-finalist: Uruguay (we gave 0.8% to win)</text>
+<text x="400" y="210" font-size="14" fill="#1f2937">Semi-finalist: Germany (we gave 4.8% to win)</text>
+</svg>

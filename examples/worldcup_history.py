@@ -330,6 +330,54 @@ def load_cup(year: int) -> Cup:
     return Cup(year)
 
 
+_BG, _ACCENT, _OCHRE, _TEAL, _INK = "#fcfbf8", "#1d4ed8", "#b45309", "#0f766e", "#1f2937"
+
+
+def _esc(s: str) -> str:
+    return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+
+
+def render_cup_svg(cup: "Cup", forecast: Dict[str, Dict[str, float]]) -> str:
+    """Self-contained SVG: our title-odds top-8 beside the cup's actual final four."""
+    adv = cup.actual_advancers()
+    ranked = sorted(forecast, key=lambda t: forecast[t]["champion"], reverse=True)[:8]
+    champ = adv["champion"]
+    finalists = [adv["final_match"]["home"], adv["final_match"]["away"]]
+    runner_up = [t for t in finalists if t != champ][0]
+    W, H = 720, 460
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
+           f'viewBox="0 0 {W} {H}" font-family="ui-sans-serif,system-ui,sans-serif">']
+    out.append(f'<rect width="{W}" height="{H}" fill="{_BG}"/>')
+    out.append(f'<text x="24" y="40" font-size="22" font-weight="700" fill="{_INK}">'
+               f'World Cup {cup.year} — forecast vs reality</text>')
+    out.append(f'<text x="24" y="64" font-size="13" fill="{_TEAL}">'
+               f'host {_esc(cup.host)} · model: Elo→Poisson, pre-tournament ratings</text>')
+    # Left: our title odds
+    out.append(f'<text x="24" y="104" font-size="15" font-weight="700" '
+               f'fill="{_ACCENT}">Our title odds (top 8)</text>')
+    y = 132
+    for t in ranked:
+        p = forecast[t]["champion"]
+        mark = "  ← actual winner" if t == champ else ""
+        col = _OCHRE if t == champ else _INK
+        out.append(f'<text x="24" y="{y}" font-size="14" fill="{col}">'
+                   f'{_esc(t)} — {p:.1f}%{mark}</text>')
+        y += 26
+    # Right: actual final four
+    out.append(f'<text x="400" y="104" font-size="15" font-weight="700" '
+               f'fill="{_ACCENT}">What actually happened</text>')
+    rows = [("Champion", champ), ("Runner-up", runner_up)]
+    rows += [("Semi-finalist", t) for t in adv["QF"] if t not in finalists]
+    y = 132
+    for label, t in rows:
+        odds = forecast.get(t, {}).get("champion", 0.0)
+        out.append(f'<text x="400" y="{y}" font-size="14" fill="{_INK}">'
+                   f'{label}: {_esc(t)} (we gave {odds:.1f}% to win)</text>')
+        y += 26
+    out.append('</svg>')
+    return "\n".join(out)
+
+
 KO_ROUNDS = ["R16", "QF", "SF", "final"]
 
 

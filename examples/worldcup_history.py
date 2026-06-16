@@ -18,14 +18,14 @@ from typing import Dict, List, Optional, Tuple
 
 # Reuse the IDENTICAL goal model + rating-agnostic standings from the forecaster.
 sys.path.insert(0, os.path.dirname(__file__))
-from worldcup2026 import sample_goals_from_elo, group_standings, _table  # noqa: E402,F401
+from worldcup2026 import sample_goals_from_elo, group_standings, _table, HOST_ADVANTAGE  # noqa: E402,F401
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "datasets" / "openworld-football"
 RESULTS_CSV = DATA_DIR / "results.csv"
 SHOOTOUTS_CSV = DATA_DIR / "shootouts.csv"
 PUBLISHED_ELO_CSV = DATA_DIR / "elo_ratings_wc2026.csv"
 
-HOME_ADVANTAGE = 100.0   # World Football Elo home bump (0 on neutral ground)
+HOME_ADVANTAGE = 100.0   # Elo-engine home bump for computing ratings from results.csv.
 
 # K-factor by match importance (World Football Elo conventions), keyed off the
 # results.csv `tournament` column; default for anything unlisted.
@@ -333,8 +333,9 @@ def load_cup(year: int) -> Cup:
 KO_ROUNDS = ["R16", "QF", "SF", "final"]
 
 
+# Simulation host bump uses the forecaster's HOST_ADVANTAGE (distinct from the
+# Elo-engine's HOME_ADVANTAGE above, which is for rating computation).
 def _eff(team: str, elo: Dict[str, float], host: str, base: float) -> float:
-    from worldcup2026 import HOST_ADVANTAGE
     return elo.get(team, base) + (HOST_ADVANTAGE if team == host else 0.0)
 
 
@@ -387,6 +388,12 @@ def simulate_cup_once(cup: "Cup", elo: Dict[str, float], rng: random.Random,
 _REACH_ORDER = ["group", "R16", "QF", "SF", "final", "champion"]
 
 
+def _cup_freeze_date(year: int) -> str:
+    """Day-before-opener freeze date per cup (no look-ahead)."""
+    return {2010: "2010-06-11", 2014: "2014-06-12",
+            2018: "2018-06-14", 2022: "2022-11-20"}[year]
+
+
 def forecast_cup(year: int, eng: "EloEngine", sims: int = 10000, seed: int = 2026,
                  base: float = 1500.0) -> Dict[str, Dict[str, float]]:
     """Monte-Carlo a cup from FROZEN pre-tournament Elo. Per-team probabilities (%)."""
@@ -410,9 +417,3 @@ def forecast_cup(year: int, eng: "EloEngine", sims: int = 10000, seed: int = 202
                 "reach_SF": pct(reach[t]["SF"]),
                 "reach_QF": pct(reach[t]["QF"]),
                 "reach_R16": pct(reach[t]["R16"])} for t in teams}
-
-
-def _cup_freeze_date(year: int) -> str:
-    """Day-before-opener freeze date per cup (no look-ahead)."""
-    return {2010: "2010-06-11", 2014: "2014-06-12",
-            2018: "2018-06-14", 2022: "2022-11-20"}[year]

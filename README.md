@@ -326,7 +326,7 @@ adversarial code).
 ## 🔬 Reproducibility & testing
 
 ```bash
-pytest -q                                  # 263 tests, deterministic & offline (MockLLM)
+pytest -q                                  # 281 tests, deterministic & offline (MockLLM)
 python experiments/e57_world_specs.py      # e.g. world specs: 5/5 round-trip exact
 python scripts/make_paper_assets.py        # regenerate every paper figure/table/number
 ```

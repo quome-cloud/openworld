@@ -38,6 +38,7 @@ EXPERIMENTS = [
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary",
+    "e61_worldcup_backtest",
 ]
 
 
@@ -2238,7 +2239,13 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "59"),
+        macro("NumExperiments", "60"),
+        macro("WCGroupHitRate", pct(d["e61_worldcup_backtest"]["pooled"]["group_hit_rate"])),
+        macro("WCKnockoutAcc", pct(d["e61_worldcup_backtest"]["pooled"]["knockout_accuracy"])),
+        macro("WCGroupSkill", pct(d["e61_worldcup_backtest"]["pooled"]["group_skill_vs_uniform"])),
+        macro("WCChampLogLoss", f"{d['e61_worldcup_backtest']['pooled']['mean_champion_logloss']:.2f}"),
+        macro("WCChalkHitRate", pct(d["e61_worldcup_backtest"]["pooled"]["mean_chalk_group_hit_rate"])),
+        macro("WCEloSpearman", f"{d['e61_worldcup_backtest']['validation']['2013']['spearman']:.2f}"),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiCodeCI", ci_str(code_total["ci"])),
@@ -3018,6 +3025,41 @@ def table_io_boundary(e60):
     (TABLES / "io_boundary.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_worldcup_backtest(e61):
+    cups = e61["cups"]
+    hit = [e61["per_cup"][str(y)]["group"]["hit_rate"] * 100 for y in cups]
+    ko = [e61["per_cup"][str(y)]["knockout"]["accuracy"] * 100 for y in cups]
+    chalk = [e61["per_cup"][str(y)]["chalk"]["group_hit_rate"] * 100 for y in cups]
+    fig, ax = plt.subplots(figsize=(6, 3.4))
+    x = range(len(cups))
+    ax.plot(x, hit, "-o", color=BLUE, label="model group hit-rate")
+    ax.plot(x, ko, "-s", color=TEAL, label="model KO advancement")
+    ax.plot(x, chalk, "--", color=SLATE, label="chalk group hit-rate")
+    ax.axhline(100 / 3, color="#999", lw=0.8, ls=":")
+    ax.set_xticks(list(x)); ax.set_xticklabels([str(c) for c in cups])
+    ax.set_ylabel("accuracy (%)"); ax.set_ylim(0, 100)
+    ax.legend(fontsize=8); ax.set_title("E61: forecast accuracy by cup")
+    fig.tight_layout(); fig.savefig(FIGS / "e61_worldcup_backtest.pdf"); plt.close(fig)
+
+
+def table_worldcup_backtest(e61):
+    lines = [r"\begin{tabular}{lrrrr}", r"\toprule",
+             r"Cup & Group hit & KO adv. & Champ rank & Champ \% \\", r"\midrule"]
+    for y in e61["cups"]:
+        pc = e61["per_cup"][str(y)]
+        cal = pc["calibration"]
+        lines.append(
+            f"{y} & {pc['group']['hit_rate']*100:.0f}\\% & "
+            f"{pc['knockout']['accuracy']*100:.0f}\\% & "
+            f"\\#{cal['champion_rank']} & {cal['champion_prob']*100:.1f}\\% \\\\")
+    p = e61["pooled"]
+    lines += [r"\midrule",
+              f"Pooled & {p['group_hit_rate']*100:.0f}\\% & "
+              f"{p['knockout_accuracy']*100:.0f}\\% & -- & -- \\\\",
+              r"\bottomrule", r"\end{tabular}"]
+    (TABLES / "worldcup_backtest.tex").write_text("\n".join(lines))
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3079,6 +3121,8 @@ def main():
     table_brain_arch(data["e59_brain_arch"])
     fig_io_boundary(data["e60_io_boundary"])
     table_io_boundary(data["e60_io_boundary"])
+    fig_worldcup_backtest(data["e61_worldcup_backtest"])
+    table_worldcup_backtest(data["e61_worldcup_backtest"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

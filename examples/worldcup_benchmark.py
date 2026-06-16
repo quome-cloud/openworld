@@ -18,7 +18,7 @@ import math
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 from scipy.optimize import minimize_scalar
@@ -178,8 +178,10 @@ def _davidson_probs(elo_diff: float, nu: float) -> Dict[str, float]:
 def fit_davidson_nu(year: int, eng: "wh.EloEngine") -> float:
     """MLE of the Davidson draw parameter on pre-cup internationals (leakage-free).
 
-    Uses each training match's pre-match Elo gap from a fresh engine frozen at the
-    cup's freeze date (ratings_asof), so no post-cup info leaks.
+    Uses each training match's Elo gap from the single freeze-date snapshot
+    (ratings_asof). Leakage-free (those ratings see only pre-freeze matches);
+    mildly anachronistic for old training matches, but this only sets the scalar
+    draw parameter nu, not any match-time prediction.
     """
     elo = eng.ratings_asof(wh._cup_freeze_date(year))
     tr = training_matches(year, years=4)

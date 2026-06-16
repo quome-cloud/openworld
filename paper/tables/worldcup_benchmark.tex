@@ -1,0 +1,15 @@
+\begin{tabular}{lrrr}
+\toprule
+Model (all 4 cups) & RPS & Brier & Hit \\
+\midrule
+Uniform & 0.241 & 0.667 & 41\% \\
+Elo-logistic & 0.209 & 0.593 & 54\% \\
+Maher Poisson & 0.219 & 0.613 & 49\% \\
+Ours (frozen) & 0.203 & 0.578 & 54\% \\
+Ours (walk-fwd) & 0.201 & 0.575 & 56\% \\
+\midrule
+\multicolumn{4}{l}{\emph{538 head-to-head (2018+2022, 128 matches)}} \\
+538 & 0.209 & 0.608 & 56\% \\
+Ours (walk-fwd) & 0.214 & 0.598 & 55\% \\
+\bottomrule
+\end{tabular}

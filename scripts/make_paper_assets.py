@@ -39,6 +39,7 @@ EXPERIMENTS = [
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary",
     "e61_worldcup_backtest",
+    "e62_worldcup_benchmark",
 ]
 
 
@@ -2239,7 +2240,12 @@ def numbers_tex(d):
         macro("NashLambda", str(e08["nash_optimum_lambda"])),
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
-        macro("NumExperiments", "60"),
+        macro("NumExperiments", "61"),
+        macro("BenchOursWFRPS", f"{d['e62_worldcup_benchmark']['head_to_head_538']['per_model']['ours_walk_forward']['rps']:.3f}"),
+        macro("BenchFTERPS", f"{d['e62_worldcup_benchmark']['head_to_head_538']['per_model']['five_thirty_eight']['rps']:.3f}"),
+        macro("BenchMaherRPS", f"{d['e62_worldcup_benchmark']['per_model']['maher']['pooled']['rps']:.3f}"),
+        macro("BenchOursFrozenRPS", f"{d['e62_worldcup_benchmark']['per_model']['ours_frozen']['pooled']['rps']:.3f}"),
+        macro("BenchUniformRPS", f"{d['e62_worldcup_benchmark']['per_model']['uniform']['pooled']['rps']:.3f}"),
         macro("WCGroupHitRate", pct(d["e61_worldcup_backtest"]["pooled"]["group_hit_rate"])),
         macro("WCKnockoutAcc", pct(d["e61_worldcup_backtest"]["pooled"]["knockout_accuracy"])),
         macro("WCGroupSkill", pct(d["e61_worldcup_backtest"]["pooled"]["group_skill_vs_uniform"])),
@@ -3060,6 +3066,50 @@ def table_worldcup_backtest(e61):
     (TABLES / "worldcup_backtest.tex").write_text("\n".join(lines))
 
 
+def fig_worldcup_benchmark(e62):
+    h2h = e62["head_to_head_538"]["per_model"]
+    order = ["five_thirty_eight", "ours_walk_forward", "maher", "elo_logistic",
+             "ours_frozen", "uniform"]
+    labels = {"five_thirty_eight": "538", "ours_walk_forward": "ours (WF)",
+              "maher": "Maher", "elo_logistic": "Elo-logistic",
+              "ours_frozen": "ours (frozen)", "uniform": "uniform"}
+    names = [n for n in order if n in h2h]
+    rps = [h2h[n]["rps"] for n in names]
+    fig, ax = plt.subplots(figsize=(6, 3.4))
+    colors = [TEAL if n.startswith("ours") else (BLUE if n == "five_thirty_eight" else SLATE)
+              for n in names]
+    ax.bar([labels[n] for n in names], rps, color=colors)
+    ax.set_ylabel("RPS (lower = better)")
+    ax.set_title("E62: match-level RPS, 538 head-to-head (2018+2022)")
+    for i, v in enumerate(rps):
+        ax.text(i, v, f"{v:.3f}", ha="center", va="bottom", fontsize=8)
+    fig.tight_layout(); fig.savefig(FIGS / "e62_worldcup_benchmark.pdf"); plt.close(fig)
+
+
+def table_worldcup_benchmark(e62):
+    pm = e62["per_model"]
+    order = ["uniform", "elo_logistic", "maher", "ours_frozen", "ours_walk_forward"]
+    label = {"uniform": "Uniform", "elo_logistic": "Elo-logistic", "maher": "Maher Poisson",
+             "ours_frozen": "Ours (frozen)", "ours_walk_forward": "Ours (walk-fwd)"}
+    lines = [r"\begin{tabular}{lrrr}", r"\toprule",
+             r"Model (all 4 cups) & RPS & Brier & Hit \\", r"\midrule"]
+    for n in order:
+        s = pm[n]["pooled"]
+        lines.append(f"{label[n]} & {s['rps']:.3f} & {s['brier']:.3f} & "
+                     f"{s['hit_rate']*100:.0f}\\% \\\\")
+    h = e62["head_to_head_538"]["per_model"]
+    lines += [r"\midrule",
+              r"\multicolumn{4}{l}{\emph{538 head-to-head (2018+2022, 128 matches)}} \\",
+              f"538 & {h['five_thirty_eight']['rps']:.3f} & "
+              f"{h['five_thirty_eight']['brier']:.3f} & "
+              f"{h['five_thirty_eight']['hit_rate']*100:.0f}\\% \\\\",
+              f"Ours (walk-fwd) & {h['ours_walk_forward']['rps']:.3f} & "
+              f"{h['ours_walk_forward']['brier']:.3f} & "
+              f"{h['ours_walk_forward']['hit_rate']*100:.0f}\\% \\\\",
+              r"\bottomrule", r"\end{tabular}"]
+    (TABLES / "worldcup_benchmark.tex").write_text("\n".join(lines))
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3123,6 +3173,8 @@ def main():
     table_io_boundary(data["e60_io_boundary"])
     fig_worldcup_backtest(data["e61_worldcup_backtest"])
     table_worldcup_backtest(data["e61_worldcup_backtest"])
+    fig_worldcup_benchmark(data["e62_worldcup_benchmark"])
+    table_worldcup_benchmark(data["e62_worldcup_benchmark"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

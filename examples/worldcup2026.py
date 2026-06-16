@@ -141,16 +141,25 @@ def sample_match(home: str, away: str, rng: random.Random) -> Tuple[int, int]:
     return _poisson(lam_home, rng), _poisson(lam_away, rng)
 
 
-def _knockout_winner(home: str, away: str, rng: random.Random) -> str:
-    """Single-elimination result; ties go to an Elo-leaning penalty flip."""
+def _knockout_match(home: str, away: str, rng: random.Random):
+    """Single-elimination result; ties go to an Elo-leaning penalty flip.
+
+    Returns (winner, home_goals, away_goals, went_to_penalties).
+    """
     hg, ag = sample_match(home, away, rng)
     if hg > ag:
-        return home
+        return home, hg, ag, False
     if ag > hg:
-        return away
+        return away, hg, ag, False
     diff = _eff_elo(home) - _eff_elo(away)
     p_home = 1.0 / (1.0 + 10 ** (-diff / 400.0))      # shootout, slight Elo lean
-    return home if rng.random() < p_home else away
+    winner = home if rng.random() < p_home else away
+    return winner, hg, ag, True
+
+
+def _knockout_winner(home: str, away: str, rng: random.Random) -> str:
+    """Just the winner (thin wrapper over _knockout_match)."""
+    return _knockout_match(home, away, rng)[0]
 
 
 # --------------------------------------------------------------------------- #
@@ -158,12 +167,8 @@ def _knockout_winner(home: str, away: str, rng: random.Random) -> str:
 # served World.
 # --------------------------------------------------------------------------- #
 
-def group_standings(teams: List[str], results: Dict[Tuple[str, str], Tuple[int, int]]) -> List[str]:
-    """Order a group's teams by points -> GD -> GF -> goals-against (desc).
-
-    `results` maps (home, away) -> (home_goals, away_goals) for that group.
-    A stable, deterministic ordering (ties broken by name as a final fallback).
-    """
+def _table(teams: List[str], results: Dict[Tuple[str, str], Tuple[int, int]]) -> Dict[str, tuple]:
+    """Per-team (points, goal-difference, goals-for, goals-against) for a group."""
     pts = {t: 0 for t in teams}
     gf = {t: 0 for t in teams}
     ga = {t: 0 for t in teams}
@@ -175,9 +180,19 @@ def group_standings(teams: List[str], results: Dict[Tuple[str, str], Tuple[int, 
             pts[a] += 3
         else:
             pts[h] += 1; pts[a] += 1
+    return {t: (pts[t], gf[t] - ga[t], gf[t], ga[t]) for t in teams}
+
+
+def group_standings(teams: List[str], results: Dict[Tuple[str, str], Tuple[int, int]]) -> List[str]:
+    """Order a group's teams by points -> GD -> GF -> goals-against (desc).
+
+    `results` maps (home, away) -> (home_goals, away_goals) for that group.
+    A stable, deterministic ordering (ties broken by name as a final fallback).
+    """
+    tbl = _table(teams, results)
     return sorted(
         teams,
-        key=lambda t: (pts[t], gf[t] - ga[t], gf[t], -ga[t], t),
+        key=lambda t: (tbl[t][0], tbl[t][1], tbl[t][2], -tbl[t][3], t),
         reverse=True,
     )
 
@@ -237,11 +252,13 @@ def assign_thirds(qualified_groups: List[str], third_by_group: Dict[str, str]) -
     return out
 
 
-def _knockout_tree(seeds: List[str], rng: random.Random) -> Tuple[str, Dict[str, int]]:
+def _knockout_tree(seeds: List[str], rng: random.Random, record: list = None) -> Tuple[str, Dict[str, int]]:
     """Play a single-elimination bracket over `seeds` (len a power of two).
 
     Returns (champion, {team: furthest_round_index}) where round indices follow
-    ROUND_NAMES (R32=1 ... champion=6). Pairs adjacent entries each round.
+    ROUND_NAMES (R32=1 ... champion=6). Pairs adjacent entries each round. If
+    `record` is a list, each round is appended as (round_name, [matches]) where
+    a match is (home, away, home_goals, away_goals, winner, went_to_pens).
     """
     reached: Dict[str, int] = {}
     rnd = 1
@@ -249,47 +266,43 @@ def _knockout_tree(seeds: List[str], rng: random.Random) -> Tuple[str, Dict[str,
     for t in teams:
         reached[t] = rnd  # everyone reaches the entry round (R32)
     while len(teams) > 1:
-        nxt = []
+        nxt, matches = [], []
         for i in range(0, len(teams), 2):
-            w = _knockout_winner(teams[i], teams[i + 1], rng)
+            w, hg, ag, pens = _knockout_match(teams[i], teams[i + 1], rng)
             reached[w] = rnd + 1
             nxt.append(w)
+            matches.append((teams[i], teams[i + 1], hg, ag, w, pens))
+        if record is not None:
+            record.append((ROUND_NAMES[rnd], matches))
         teams = nxt
         rnd += 1
     return teams[0], reached
 
 
-def simulate_tournament(
-    rng: random.Random,
-    fixed: Dict[Tuple[str, str, str], Tuple[int, int]] = None,
-) -> Tuple[str, Dict[str, int]]:
-    """Play one full tournament. Returns (champion, {team: furthest round}).
-
-    `fixed` supplies already-played group results (keyed (group, home, away));
-    every other match is sampled. Knockout matches are always sampled.
-    """
-    reached: Dict[str, int] = {t: 0 for g in GROUPS.values() for t in g}
+def _play_groups(rng: random.Random, fixed=None):
+    """Play all 12 groups. Returns (winners, runners, thirds, standings) where
+    standings[g] is a list of (team, points, gd, gf) in finishing order."""
     winners: Dict[str, str] = {}
     runners: Dict[str, str] = {}
     thirds: Dict[str, Tuple[str, dict]] = {}
-
+    standings: Dict[str, list] = {}
     for g, teams in GROUPS.items():
         res = _round_robin(teams, rng, group=g, fixed=fixed)
         order = group_standings(teams, res)
+        tbl = _table(teams, res)
+        standings[g] = [(t, tbl[t][0], tbl[t][1], tbl[t][2]) for t in order]
         winners[g], runners[g], third = order[0], order[1], order[2]
-        # third-place stats for cross-group ranking
-        pts = gf = ga = 0
-        for (h, a), (hg, ag) in res.items():
-            if third in (h, a):
-                mine, theirs = (hg, ag) if h == third else (ag, hg)
-                gf += mine; ga += theirs
-                pts += 3 if mine > theirs else (1 if mine == theirs else 0)
-        thirds[g] = (third, {"points": pts, "gd": gf - ga, "gf": gf})
+        st = tbl[third]
+        thirds[g] = (third, {"points": st[0], "gd": st[1], "gf": st[2]})
+    return winners, runners, thirds, standings
 
+
+def _seed_r32(winners, runners, thirds) -> Tuple[List[str], List[str]]:
+    """Determine the 32 R32 entrants in bracket order, plus the 8 qualifying
+    third-placed teams (best-first)."""
     best_thirds = rank_thirds(thirds)
     qualified_groups = [g for g in GROUPS if thirds[g][0] in best_thirds]
-    # rank the qualifying groups best->worst so assign_thirds fills in order
-    qualified_groups.sort(
+    qualified_groups.sort(  # best->worst so assign_thirds fills in rank order
         key=lambda g: (thirds[g][1]["points"], thirds[g][1]["gd"], thirds[g][1]["gf"], g),
         reverse=True,
     )
@@ -305,12 +318,47 @@ def simulate_tournament(
         return next(slot_thirds)  # "3" slots consumed in bracket order
 
     seeds = [resolve(s) for match in R32 for s in match]
+    return seeds, [third_by_group[g] for g in qualified_groups]
+
+
+def simulate_tournament(
+    rng: random.Random,
+    fixed: Dict[Tuple[str, str, str], Tuple[int, int]] = None,
+) -> Tuple[str, Dict[str, int]]:
+    """Play one full tournament. Returns (champion, {team: furthest round}).
+
+    `fixed` supplies already-played group results (keyed (group, home, away));
+    every other match is sampled. Knockout matches are always sampled.
+    """
+    reached: Dict[str, int] = {t: 0 for g in GROUPS.values() for t in g}
+    winners, runners, thirds, _ = _play_groups(rng, fixed)
+    seeds, _q = _seed_r32(winners, runners, thirds)
     for t in seeds:
         reached[t] = max(reached[t], 1)  # reached R32
     champion, ko_reached = _knockout_tree(seeds, rng)
     for t, r in ko_reached.items():
         reached[t] = max(reached[t], r)
     return champion, reached
+
+
+def simulate_detailed(rng: random.Random, fixed=None) -> dict:
+    """Play one full tournament and return the whole bracket for display:
+
+        {standings, qualified_thirds, seeds, rounds, champion}
+
+    `rounds` is a list of (round_name, [(home, away, hg, ag, winner, pens), ...]).
+    """
+    winners, runners, thirds, standings = _play_groups(rng, fixed)
+    seeds, qualified = _seed_r32(winners, runners, thirds)
+    rounds: list = []
+    champion, _reached = _knockout_tree(seeds, rng, record=rounds)
+    return {
+        "standings": standings,
+        "qualified_thirds": qualified,
+        "seeds": seeds,
+        "rounds": rounds,
+        "champion": champion,
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -367,6 +415,135 @@ def forecast_table(results: Dict[str, Dict[str, float]], top: int = 20) -> str:
             f"{p['reach_SF']:>7.1f}%{p['reach_QF']:>7.1f}%{p['reach_R16']:>7.1f}%"
         )
     return "\n".join(lines)
+
+
+# --------------------------------------------------------------------------- #
+# Bracket rendering: one played-out tournament, as text and as a self-contained
+# SVG in OpenWorld's "atlas" card aesthetic.
+# --------------------------------------------------------------------------- #
+
+_KO_LABELS = {"R32": "Round of 32", "R16": "Round of 16", "QF": "Quarter-finals",
+              "SF": "Semi-finals", "final": "Final"}
+
+
+def render_bracket_text(detail: dict) -> str:
+    """A terminal-friendly rendering of one tournament's bracket."""
+    lines = []
+    lines.append("GROUP STAGE — winners (1) & runners-up (2) advance")
+    for g, table in detail["standings"].items():
+        top2 = "  ".join(f"{i+1}.{t}" for i, (t, *_s) in enumerate(table[:2]))
+        lines.append(f"  Group {g}: {top2}")
+    lines.append("  Best thirds: " + ", ".join(detail["qualified_thirds"]))
+    for name, matches in detail["rounds"]:
+        lines.append("")
+        lines.append(_KO_LABELS[name].upper())
+        for home, away, hg, ag, winner, pens in matches:
+            tag = " (pens)" if pens else ""
+            star_h = "*" if winner == home else " "
+            star_a = "*" if winner == away else " "
+            lines.append(f"  {star_h}{home:<16} {hg}-{ag} {away:<16}{star_a}{tag}")
+    lines.append("")
+    lines.append(f"CHAMPION: {detail['champion']}")
+    return "\n".join(lines)
+
+
+def render_bracket_svg(detail: dict) -> str:
+    """A self-contained SVG bracket (atlas palette), R32 -> champion left-to-right."""
+    C = {"bg0": "#fcfbf8", "bg1": "#eef0ec", "text": "#16202e", "muted": "#5b6675",
+         "accent": "#1d4ed8", "accent2": "#b45309", "teal": "#0f766e",
+         "line": "#dde2ea", "node": "#ffffff", "win": "#1e3a8a"}
+    rounds = detail["rounds"]                      # [(name, [matches]), ...]
+    champ = detail["champion"]
+    n0 = len(rounds[0][1])                          # 16 R32 matches
+    # geometry
+    top, colw, gap = 116, 212, 26
+    box_h, row_h = 44, 21
+    band = n0 * (box_h + gap)                      # vertical band for round 0
+    width = 40 + len(rounds) * colw + 230
+    height = top + band + 60
+
+    def cy(r, m):                                  # vertical center of match m in round r
+        nr = len(rounds[r][1])
+        return top + band * (m + 0.5) / nr
+
+    def esc(s):
+        return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+    out = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+        f'viewBox="0 0 {width} {height}" font-family="\'Iowan Old Style\',Georgia,serif">',
+        f'<rect width="{width}" height="{height}" fill="{C["bg0"]}"/>',
+        # header
+        f'<rect x="0" y="0" width="{width}" height="84" fill="{C["bg1"]}"/>',
+        f'<rect x="0" y="84" width="{width}" height="3" fill="{C["accent"]}"/>',
+        f'<text x="40" y="44" font-size="27" font-weight="700" fill="{C["text"]}">'
+        f'World Cup 2026 — a modelled bracket</text>',
+        f'<text x="40" y="68" font-size="13" fill="{C["muted"]}">'
+        f'One Elo-driven simulation · group stage → knockout · '
+        f'champion: <tspan font-weight="700" fill="{C["accent2"]}">{esc(champ)}</tspan></text>',
+    ]
+    # round headers
+    for r, (name, _m) in enumerate(rounds):
+        x = 40 + r * colw
+        out.append(f'<text x="{x + 6}" y="104" font-size="11.5" font-weight="700" '
+                   f'letter-spacing="1.2" fill="{C["muted"]}">{_KO_LABELS[name].upper()}</text>')
+    out.append(f'<text x="{40 + len(rounds) * colw + 6}" y="104" font-size="11.5" '
+               f'font-weight="700" letter-spacing="1.2" fill="{C["accent2"]}">CHAMPION</text>')
+
+    # connector elbows from round r to r+1
+    for r in range(len(rounds) - 1):
+        x_out = 40 + r * colw + (colw - gap)       # right edge of this round's boxes
+        x_in = 40 + (r + 1) * colw                 # left edge of next round's boxes
+        xm = (x_out + x_in) / 2
+        for m in range(0, len(rounds[r][1]), 2):
+            y1, y2 = cy(r, m), cy(r, m + 1)
+            yt = cy(r + 1, m // 2)
+            out.append(
+                f'<path d="M{x_out:.0f} {y1:.0f} H{xm:.0f} V{yt:.0f} H{x_in:.0f} '
+                f'M{x_out:.0f} {y2:.0f} H{xm:.0f} V{yt:.0f}" fill="none" '
+                f'stroke="{C["line"]}" stroke-width="1.4"/>')
+
+    # match boxes
+    def match_box(x, ycenter, home, away, hg, ag, winner, pens):
+        y = ycenter - box_h / 2
+        w = colw - gap
+        s = [f'<rect x="{x:.0f}" y="{y:.0f}" width="{w}" height="{box_h}" rx="7" '
+             f'fill="{C["node"]}" stroke="{C["line"]}" stroke-width="1"/>',
+             f'<line x1="{x:.0f}" y1="{y + row_h:.0f}" x2="{x + w:.0f}" '
+             f'y2="{y + row_h:.0f}" stroke="{C["line"]}" stroke-width="0.7"/>']
+        for k, (team, goals) in enumerate([(home, hg), (away, ag)]):
+            ty = y + row_h * k + 15
+            won = team == winner
+            col = C["win"] if won else C["muted"]
+            wt = "700" if won else "400"
+            if won:  # winner accent bar
+                s.append(f'<rect x="{x:.0f}" y="{y + row_h * k + 2:.0f}" width="3.5" '
+                         f'height="{row_h - 4}" rx="1.5" fill="{C["accent"]}"/>')
+            label = esc(team) + (" (p)" if pens and won else "")
+            s.append(f'<text x="{x + 11:.0f}" y="{ty:.0f}" font-size="12.5" '
+                     f'font-weight="{wt}" fill="{col}">{label}</text>')
+            s.append(f'<text x="{x + w - 12:.0f}" y="{ty:.0f}" font-size="12.5" '
+                     f'font-weight="{wt}" fill="{col}" text-anchor="end">{goals}</text>')
+        return "".join(s)
+
+    for r, (_name, matches) in enumerate(rounds):
+        x = 40 + r * colw
+        for m, mm in enumerate(matches):
+            out.append(match_box(x, cy(r, m), *mm))
+
+    # champion node
+    cx = 40 + len(rounds) * colw
+    cyc = cy(len(rounds) - 1, 0)
+    w = colw - gap
+    out.append(f'<rect x="{cx:.0f}" y="{cyc - 26:.0f}" width="{w + 30}" height="52" rx="9" '
+               f'fill="{C["accent2"]}"/>')
+    out.append(f'<text x="{cx + (w + 30) / 2:.0f}" y="{cyc - 4:.0f}" font-size="11" '
+               f'font-weight="700" letter-spacing="1.5" fill="#fff" '
+               f'text-anchor="middle" opacity="0.85">★ WINNERS ★</text>')
+    out.append(f'<text x="{cx + (w + 30) / 2:.0f}" y="{cyc + 16:.0f}" font-size="16" '
+               f'font-weight="700" fill="#fff" text-anchor="middle">{esc(champ)}</text>')
+    out.append('</svg>')
+    return "\n".join(out)
 
 
 # --------------------------------------------------------------------------- #
@@ -452,7 +629,19 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=2026)
     ap.add_argument("--serve", action="store_true",
                     help="write worldcup2026.spec.json for `openworld serve`")
+    ap.add_argument("--bracket", action="store_true",
+                    help="play ONE tournament; print it and write worldcup2026_bracket.svg")
     args = ap.parse_args()
+
+    if args.bracket:
+        detail = simulate_detailed(random.Random(args.seed))
+        print(render_bracket_text(detail))
+        svg = render_bracket_svg(detail)
+        path = "worldcup2026_bracket.svg"
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(svg)
+        print(f"\nWrote {path} (open in a browser to view the visual bracket).")
+        return
 
     if args.serve:
         world = build_world()  # also puts the repo root on sys.path

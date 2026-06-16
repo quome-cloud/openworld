@@ -129,6 +129,41 @@ def test_determinism_same_seed():
 
 
 # --------------------------------------------------------------------------- #
+# Detailed bracket + rendering
+# --------------------------------------------------------------------------- #
+
+def test_simulate_detailed_structure():
+    d = wc.simulate_detailed(random.Random(2026))
+    # round sizes 16 -> 8 -> 4 -> 2 -> 1
+    assert [len(matches) for _name, matches in d["rounds"]] == [16, 8, 4, 2, 1]
+    assert [name for name, _m in d["rounds"]] == ["R32", "R16", "QF", "SF", "final"]
+    assert len(d["standings"]) == 12 and all(len(v) == 4 for v in d["standings"].values())
+    assert len(d["qualified_thirds"]) == 8
+    # the final's winner is the champion
+    _h, _a, _hg, _ag, winner, _p = d["rounds"][-1][1][0]
+    assert winner == d["champion"]
+
+
+def test_detailed_matches_simulate_tournament():
+    # same seed -> same RNG draws -> same champion as the aggregate simulator
+    seed = 77
+    assert wc.simulate_detailed(random.Random(seed))["champion"] == \
+        wc.simulate_tournament(random.Random(seed))[0]
+
+
+def test_svg_is_self_contained():
+    d = wc.simulate_detailed(random.Random(1))
+    svg = wc.render_bracket_svg(d)
+    assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
+    assert d["champion"] in svg
+    # 31 match boxes (16+8+4+2+1) drawn with rx="7"
+    assert svg.count('rx="7"') == 31
+    # no fetched resources (xmlns URL is fine; no http(s) image/script refs)
+    assert "http://" not in svg.replace('xmlns="http://www.w3.org/2000/svg"', "")
+    assert "https://" not in svg
+
+
+# --------------------------------------------------------------------------- #
 # Forecast aggregation
 # --------------------------------------------------------------------------- #
 

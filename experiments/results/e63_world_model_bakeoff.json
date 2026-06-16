@@ -1,0 +1,124 @@
+{
+  "domains": [
+    "sprint",
+    "triage"
+  ],
+  "k_trained": 10000,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "excluded": {
+    "orchard": "nested per-agent dict state; not a flat vector"
+  },
+  "fidelity": {
+    "sprint": {
+      "verified code (CWM)": {
+        "probe_in": 1.0,
+        "probe_ood": 1.0,
+        "rollout": 1.0
+      },
+      "1-NN": {
+        "probe_in": 1.0,
+        "probe_ood": 0.0,
+        "rollout": 0.95
+      },
+      "tabular": {
+        "probe_in": 1.0,
+        "probe_ood": 0.0,
+        "rollout": 0.95
+      },
+      "linear": {
+        "probe_in": 0.875,
+        "probe_ood": 0.0,
+        "rollout": 0.375
+      },
+      "koopman": {
+        "probe_in": 0.958,
+        "probe_ood": 0.0,
+        "rollout": 0.875
+      },
+      "MLP": {
+        "probe_in": 0.833,
+        "probe_ood": 0.0,
+        "rollout": 0.375
+      }
+    },
+    "triage": {
+      "verified code (CWM)": {
+        "probe_in": 1.0,
+        "probe_ood": 1.0,
+        "rollout": 1.0
+      },
+      "1-NN": {
+        "probe_in": 1.0,
+        "probe_ood": 0.0,
+        "rollout": 0.6
+      },
+      "tabular": {
+        "probe_in": 1.0,
+        "probe_ood": 0.0,
+        "rollout": 0.6
+      },
+      "linear": {
+        "probe_in": 0.042,
+        "probe_ood": 0.0,
+        "rollout": 0.0
+      },
+      "koopman": {
+        "probe_in": 0.542,
+        "probe_ood": 0.0,
+        "rollout": 0.0
+      },
+      "MLP": {
+        "probe_in": 0.567,
+        "probe_ood": 0.0,
+        "rollout": 0.0
+      }
+    }
+  },
+  "sprint_control": {
+    "verified code (CWM)": 7.5,
+    "1-NN": 5.7,
+    "tabular": 5.7,
+    "linear": -7.4,
+    "koopman": 5.6,
+    "MLP": -2.6
+  },
+  "sprint_steps_per_sec": {
+    "verified code (CWM)": 2250984,
+    "1-NN": 6547,
+    "tabular": 1891232,
+    "linear": 145448,
+    "koopman": 81985,
+    "MLP": 68670
+  },
+  "llm_proxy": {
+    "source": "E10/E11/E22",
+    "sprint_rollout": 0.0,
+    "sprint_control": 0.0
+  },
+  "n_methods_runnable": 6,
+  "perceptual_world_models_compared_on_properties": [
+    "DreamerV3",
+    "MuZero",
+    "IRIS",
+    "DIAMOND",
+    "Genie",
+    "Sora",
+    "World Labs",
+    "V-JEPA",
+    "NE-Dreamer"
+  ],
+  "experiment": "e63_world_model_bakeoff",
+  "timestamp": "2026-06-15T22:23:10",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.6",
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.0"
+  }
+}

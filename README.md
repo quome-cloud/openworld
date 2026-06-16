@@ -10,7 +10,7 @@
 [![Python 3.14](https://img.shields.io/badge/python-3.14-1d4ed8.svg)](https://www.python.org/)
 [![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
 [![Tests: 284 passing](https://img.shields.io/badge/tests-284%20passing-brightgreen.svg)](#-reproducibility--testing)
-[![Experiments: 61](https://img.shields.io/badge/experiments-61-b45309.svg)](#-empirical-baselines)
+[![Experiments: 62](https://img.shields.io/badge/experiments-62-b45309.svg)](#-empirical-baselines)
 [![GitHub stars](https://img.shields.io/github/stars/quome-cloud/openworld?style=social)](https://github.com/quome-cloud/openworld/stargazers)
 [![Cite](https://img.shields.io/badge/cite-this%20work-purple.svg)](#-citation)
 
@@ -331,7 +331,7 @@ python experiments/e57_world_specs.py      # e.g. world specs: 5/5 round-trip ex
 python scripts/make_paper_assets.py        # regenerate every paper figure/table/number
 ```
 
-The **61 bundled experiments** are designed for reproducibility: fixed seeds, numpy
+The **62 bundled experiments** are designed for reproducibility: fixed seeds, numpy
 baselines, and `assert`ed claims. The accompanying paper compiles end-to-end from the
 same results (`cd paper && tectonic main.tex`).
 

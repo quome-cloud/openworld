@@ -124,6 +124,10 @@ and the fixed R16 bracket, and calls the shared core. Hosts get the existing
   errors).
 - **R16 bracket:** the fixed FIFA pairing rule, applied to *our simulated*
   standings during Monte-Carlo, and to the *real* standings for the actual bracket.
+  The seeding is *idealized* (winners/runners-up pair so neighbours advance, no
+  same-group R16 clashes) rather than FIFA-exact in later-round geometry; it is
+  applied identically to the model forecast and the chalk baseline, so it never
+  biases the comparison.
 - **Group-stage vs knockout split** in `results.csv`: the 48 matches whose
   (home, away) pair lies within one encoded group are group-stage; the remaining 16
   are knockout.

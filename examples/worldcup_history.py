@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Tuple
 
 # Reuse the IDENTICAL goal model + rating-agnostic standings from the forecaster.
 sys.path.insert(0, os.path.dirname(__file__))
-from worldcup2026 import sample_goals_from_elo, group_standings, _table, HOST_ADVANTAGE  # noqa: E402,F401
+from worldcup2026 import sample_goals_from_elo, group_standings, HOST_ADVANTAGE  # noqa: E402
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "datasets" / "openworld-football"
 RESULTS_CSV = DATA_DIR / "results.csv"

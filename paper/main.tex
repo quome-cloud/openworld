@@ -120,8 +120,7 @@
 \vspace{1.1em}
 \begin{center}
   {\LARGE\bfseries \openworld: Training-Free Symbolic World Models with\\[2pt]
-   Verified Code Dynamics, Tunable Moral Configurations,\\[2pt]
-   and Agents-as-a-Judge\par}
+   Verified Code Dynamics and Tunable Moral Configurations\par}
 
   \vspace{0.9em}
   {\large
@@ -322,21 +321,24 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   worlds, a \NumTasks-task program-repair benchmark (the coding world), and
   \NumExperiments{} seed-fixed experiments with paired statistical tests,
   all regenerable from one repository.
-  \item \textbf{Measured guardrails.} Verification and judging are evaluated,
-  not assumed: ablations isolate what each verification gate buys ($+0.24$
-  absolute probe accuracy over blind acceptance) and decompose the mechanism
-  (the filter holds quality, the repair loop converts \FilterAccept{}
-  acceptance into \LoopAccept); against paired controls on shared candidates
-  pooled over \PooledRounds{} rounds, judge selection is \emph{estimated, not
-  established}, to beat random selection (\PooledJudge{} vs \PooledRandom, exact
-  McNemar $p=\PooledMcNemarP$---not significant, with an independent replication
-  alone at $p=\NewMcNemarP$) while approaching the \PooledOracle{} oracle
-  ceiling, with a position-bias audit showing order-sensitive choices but
-  order-stable accuracy; judge rubric scores track a ground-truth objective
-  at Spearman $\rho=\JudgeSpearman$ ($p=\RubricOrigP$, permutation test),
-  directionally stable under rubric paraphrase ($\rho=\RubricParaRho$,
-  $p=\RubricParaP$).
+  \item \textbf{Measured guardrails (verification).} Verification is evaluated,
+  not assumed: ablations isolate what each gate buys ($+0.24$ absolute probe
+  accuracy over blind acceptance) and decompose the mechanism (the filter holds
+  quality, the repair loop converts \FilterAccept{} acceptance into \LoopAccept).
+  Crucially, verification certifies executable, invariant-respecting code, not
+  rule-correctness: on the weak 3B generator the full gate accepts every program
+  yet \emph{none} is branch-exact (a 100\% branch-level false-accept rate),
+  so exactness reflects generator capability gated by cheap checks, not the gate.
 \end{enumerate}
+
+We deliberately do \emph{not} list the LLM judge as a contribution. Pooled over
+\PooledRounds{} rounds its selection edge over random is \emph{estimated, not
+established} (\PooledJudge{} vs \PooledRandom, exact McNemar
+$p=\PooledMcNemarP$---not significant; an independent replication alone gives
+$p=\NewMcNemarP$); we report it (\S\ref{sec:judge-results}) as an exploratory
+finding whose sharper signal is a position-bias audit (order-sensitive choices,
+order-stable accuracy), and whose rubric scores track a ground-truth objective at
+Spearman $\rho=\JudgeSpearman$ ($p=\RubricOrigP$).
 
 \paragraph{Positioning in the field.} \openworld{} operationalizes the
 symbolic side of the learned-vs-symbolic divide: it is the CWM
@@ -472,8 +474,9 @@ standard library; numpy-backed analysis extras (wavelets, sheaf gluing, informat
 geometry, optimal transport) load lazily and the optional serving/CLI layer
 (FastAPI, Uvicorn, Click, Rich) is never imported by the core. The codebase is
 $\sim$\LibLOC{} lines across \LibModules{} core modules with \LibTests{} unit-test
-functions that run fully offline via a scripted mock backbone (a regression test
-asserts the core import stays stdlib-only). Released with worked examples, four
+functions (281 cases under parametrization, all passing) that run fully offline via
+a scripted mock backbone (a regression test asserts the core import stays
+stdlib-only). Released with worked examples, four
 domain tutorials, the three instrumented worlds, the \NumTasks-task coding
 benchmark, and every experiment script used here.
 
@@ -1308,9 +1311,15 @@ invariants + repair loop) lifts accuracy to \VerifierFullAcc, and adding the
 blind acceptance. Notably, no 3B generation achieved bit-exact dynamics under
 any regime (the 7B generator routinely does, \S\ref{sec:abl2}): verification
 buys a large, measurable correctness margin, but cannot substitute for
-generator capability. The residual gap is semantic---code that runs and
-respects invariants can still misread a rule---which is the gap the
-probe-and-tighten workflow (\S\ref{sec:discussion}) targets.
+generator capability. Stated as the gate's \emph{false-accept rate} on branch
+behavior---the quantity the single-initial-state smoke-run cannot see---every
+one of the 3B generator's gate-accepted programs is wrong on at least one
+branch-covering probe (a 100\% branch-level false-accept rate on this weak
+generator), versus the 7B generator's routinely rule-perfect output. The
+residual gap is semantic---code that runs and respects invariants can still
+misread a rule---which is the gap the probe-and-tighten workflow
+(\S\ref{sec:discussion}) targets, and which a branch-covering acceptance gate
+(rather than a single-state smoke-run) is the natural next step to close.
 
 \begin{figure}[htb]
 \centering
@@ -1508,8 +1517,14 @@ whole 12-step episode planned in \PlanCodeSeconds\,s. Planning through the
 LLM next-state engine is confined to depth 2 by cost (\PlanLLMSeconds\,s per
 episode) and scores \PlanLLM---\emph{worse than no model at all}: lookahead
 through hallucinated transitions steered the agent away from productive
-actions entirely. Fidelity and throughput are not abstract virtues; they are
-the difference between planning that helps and planning that harms.
+actions entirely. We note one honest caveat: the LLM engine falls back to a
+no-op when a reply does not parse as a next state, so this score conflates
+genuinely hallucinated transitions with unparseable outputs; the script now
+logs the parse-failure rate so the two can be separated on re-run, but the
+qualitative conclusion---planning through an unverified model is worse than not
+planning---does not depend on the split. Fidelity and throughput are not
+abstract virtues; they are the difference between planning that helps and
+planning that harms.
 
 \begin{table}[htb]\centering\small
 \input{tables/planning.tex}
@@ -2610,9 +2625,18 @@ One pipeline rebuilds every artifact: experiment scripts in
 \texttt{experiments/} write \texttt{results/*.json} (seeds fixed in-source);
 \texttt{python3 scripts/make\_paper\_assets.py} regenerates every figure,
 table, and the \texttt{numbers.tex} macros from those JSON files; and
-\texttt{make} in \texttt{paper/} builds this PDF. Model snapshots:
-\texttt{qwen2.5:7b} (Q4\_K\_M) and \texttt{qwen2.5:3b} via Ollama; platform
-recorded in each result file.
+\texttt{make} in \texttt{paper/} builds this PDF. A continuous-integration
+workflow runs the offline test suite, re-runs the asset pipeline, and fails if
+\texttt{numbers.tex} would change, so the paper's numbers cannot silently drift
+from the committed results. \texttt{experiments/MANIFEST.md} classifies every
+experiment as deterministic-offline or Ollama-dependent and records its model and
+provenance; \texttt{experiments/requirements.lock} pins the analysis stack
+(Python, numpy, matplotlib). The \NumModels{} Ollama model snapshots that appear
+across the runs are \ModelList{} (quantization \texttt{Q4\_K\_M}); platform,
+versions, and timestamp are recorded in each result file. Deterministic-offline
+experiments reproduce bit-for-bit; the Ollama-dependent runs reproduce
+\emph{in distribution} (Metal is not bit-deterministic even at fixed seed), with
+dataset/model-pinned frozen artifacts where exact numbers are cited.
 
 \clearpage
 

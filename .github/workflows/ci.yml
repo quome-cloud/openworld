@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install (core + dev + pinned analysis stack)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]" -r experiments/requirements.lock
+
+      - name: Core import is stdlib-only
+        run: |
+          python -c "import sys, openworld; leaked=[m for m in ('numpy','fastapi','uvicorn','click','rich') if m in sys.modules]; assert not leaked, leaked; print('core import clean')"
+
+      - name: Test suite (offline, MockLLM)
+        run: python -m pytest tests/ -q
+
+      - name: Paper numbers do not drift from committed results
+        run: |
+          python scripts/make_paper_assets.py
+          python scripts/make_manifest.py
+          git diff --exit-code paper/numbers.tex paper/tables experiments/MANIFEST.md \
+            || (echo "::error::regenerated assets differ from committed; run make_paper_assets.py + make_manifest.py and commit"; exit 1)
+
+  paper-builds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PDF with tectonic
+        uses: WtfJoke/setup-tectonic@v3
+      - run: tectonic paper/main.tex

@@ -84,6 +84,10 @@ class LLMTransition(Transition):
         self.llm = llm
         self.description = description
         self.rules = list(rules or [])
+        # Instrumentation: distinguish unparseable-reply no-ops from genuine
+        # (parseable-but-wrong) hallucinations when this baseline scores poorly.
+        self.steps = 0
+        self.parse_failures = 0
 
     def step(self, state: WorldState, action: Action) -> WorldState:
         rules = "\n".join(f"- {rule}" for rule in self.rules)
@@ -94,13 +98,19 @@ class LLMTransition(Transition):
             f"Action: {action.to_dict()}\n"
             "Next state JSON:"
         )
+        self.steps += 1
         reply = self.llm.ask(prompt, system=self.SYSTEM)
         parsed = extract_json(reply)
         if parsed is None:
             # An unparseable prediction leaves the world unchanged rather than
             # crashing a long rollout.
+            self.parse_failures += 1
             return state.copy()
         return WorldState(parsed)
+
+    @property
+    def parse_failure_rate(self) -> float:
+        return self.parse_failures / self.steps if self.steps else 0.0
 
 
 class PhasedTransition(Transition):

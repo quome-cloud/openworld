@@ -4,6 +4,7 @@ Single command reproducibility:  python3 scripts/make_paper_assets.py
 """
 
 import json
+import re
 from pathlib import Path
 
 import matplotlib
@@ -63,7 +64,39 @@ def repo_metrics():
         "core_modules": len(core),
         "core_loc": core_loc,
         "test_functions": test_fns,
+        "models": scan_models(),
     }
+
+
+_MODEL_RE = re.compile(r"^[a-z][a-z0-9._-]*:[0-9][0-9.]*b$")
+
+
+def scan_models():
+    """Every Ollama model id that appears anywhere in the cached result JSONs, so
+    the Reproducibility section's model list is derived from the runs, not hand-kept."""
+    found = set()
+
+    def walk(o):
+        if isinstance(o, str):
+            if _MODEL_RE.match(o):
+                found.add(o)
+        elif isinstance(o, dict):
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    for f in sorted(RESULTS.glob("*.json")):
+        try:
+            walk(json.loads(f.read_text()))
+        except Exception:
+            pass
+    # family-then-size ordering for a stable, readable list
+    def key(m):
+        name, size = m.split(":")
+        return (name, float(size[:-1]))
+    return sorted(found, key=key)
 
 
 def ci_str(ci):
@@ -2261,6 +2294,9 @@ def numbers_tex(d):
         macro("LibModules", str(_rm["core_modules"])),
         macro("LibLOC", f"{_rm['core_loc']:,}".replace(",", "{,}")),
         macro("LibTests", str(_rm["test_functions"])),
+        macro("NumModels", str(len(_rm["models"]))),
+        macro("ModelList", ", ".join("\\texttt{%s}" % m.replace("_", "\\_")
+                                     for m in _rm["models"])),
         # E11 multi-world fidelity
         macro("MultiCodeExact", f"{code_total['exact_rollouts']}/{code_total['n']}"),
         macro("MultiWorldRollouts", str(code_total["n"])),

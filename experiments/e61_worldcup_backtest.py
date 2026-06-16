@@ -6,10 +6,13 @@ reality. Computes leakage-free World Football Elo from the full results history
 Elo->Poisson goal model in a 32-team format, and reports: match-level skill
 (group W/D/L), knockout advancement, tournament calibration, and a chalk baseline.
 
-Where the model shines: strong-favourite group results, tournament-level
-calibration. Where it misses: single chaotic outcomes (Brazil 1-7 Germany 2014,
-Italy's group exits, 2022 Argentina from a non-top Elo). We emphasise pooled skill
-and calibration over any one bracket.
+Where the model shines: it placed all four eventual champions in its pre-tournament
+top six, two of them at #2 (Spain 2010 at 25.9%, Argentina 2022 at 23.4%), and its
+reach-round probabilities are well calibrated in aggregate. Where it misses: France
+2018 sat only #6 in our odds (5.3%) — the clearest under-call; and the model's 2014
+favourite was host Brazil (38.6%), which reality answered with a 1-7 semi-final
+collapse to the eventual champion Germany (our #3). Single brackets are noisy, so we
+emphasise pooled match-level skill and calibration over any one tournament.
 
 Deterministic & offline. save_results() is called BEFORE the asserts.
 

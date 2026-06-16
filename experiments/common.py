@@ -249,12 +249,25 @@ def permutation_p_spearman(xs, ys, n_permutations=10000, seed=0):
     return (hits + 1) / (n_permutations + 1)
 
 
+def _env_metadata():
+    """Provenance stamped into every result: interpreter + analysis-stack versions,
+    so a cached artifact records exactly what produced it (auditability)."""
+    meta = {"python": platform.python_version()}
+    for mod in ("numpy", "matplotlib"):
+        try:
+            meta[mod] = __import__(mod).__version__
+        except Exception:
+            pass
+    return meta
+
+
 def save_results(name, payload):
     RESULTS_DIR.mkdir(exist_ok=True)
     payload = dict(payload)
     payload.setdefault("experiment", name)
     payload.setdefault("timestamp", datetime.now().isoformat(timespec="seconds"))
     payload.setdefault("platform", platform.platform())
+    payload.setdefault("env", _env_metadata())
     path = RESULTS_DIR / f"{name}.json"
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     print(f"[saved] {path}")

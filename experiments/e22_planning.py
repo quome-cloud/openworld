@@ -126,6 +126,11 @@ def main():
         "model": GENERATOR_MODEL, "episode_steps": EPISODE_STEPS,
         "value_function": "shipped - bugs - 0.5*debt",
         "depths": {"code": CODE_DEPTH, "llm": LLM_DEPTH},
+        # Separate unparseable-reply no-ops from parseable-but-wrong hallucinations
+        # in the LLM planner's score (see paper E22 caveat).
+        "llm_parse_failure_rate": round(llm_model.parse_failure_rate, 3),
+        "llm_parse_failures": llm_model.parse_failures,
+        "llm_lookahead_steps": llm_model.steps,
         "rows": rows,
     })
 

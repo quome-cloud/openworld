@@ -139,6 +139,15 @@ def test_simulate_detailed_structure():
     assert [name for name, _m in d["rounds"]] == ["R32", "R16", "QF", "SF", "final"]
     assert len(d["standings"]) == 12 and all(len(v) == 4 for v in d["standings"].values())
     assert len(d["qualified_thirds"]) == 8
+    # every group plays its full round-robin: 6 matches each, 72 total
+    assert len(d["group_matches"]) == 12
+    assert all(len(m) == 6 for m in d["group_matches"].values())
+    assert sum(len(m) for m in d["group_matches"].values()) == 72
+    # the pairings are exactly the 6 unordered pairs of each group's 4 teams
+    for g, teams in wc.GROUPS.items():
+        pairs = {frozenset((h, a)) for h, a, _hg, _ag in d["group_matches"][g]}
+        assert pairs == {frozenset((teams[i], teams[j]))
+                         for i in range(4) for j in range(i + 1, 4)}
     # the final's winner is the champion
     _h, _a, _hg, _ag, winner, _p = d["rounds"][-1][1][0]
     assert winner == d["champion"]

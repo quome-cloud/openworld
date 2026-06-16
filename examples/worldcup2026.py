@@ -280,21 +280,24 @@ def _knockout_tree(seeds: List[str], rng: random.Random, record: list = None) ->
 
 
 def _play_groups(rng: random.Random, fixed=None):
-    """Play all 12 groups. Returns (winners, runners, thirds, standings) where
-    standings[g] is a list of (team, points, gd, gf) in finishing order."""
+    """Play all 12 groups. Returns (winners, runners, thirds, standings, matches)
+    where standings[g] is a list of (team, points, gd, gf) in finishing order and
+    matches[g] is the list of (home, away, home_goals, away_goals) played."""
     winners: Dict[str, str] = {}
     runners: Dict[str, str] = {}
     thirds: Dict[str, Tuple[str, dict]] = {}
     standings: Dict[str, list] = {}
+    matches: Dict[str, list] = {}
     for g, teams in GROUPS.items():
         res = _round_robin(teams, rng, group=g, fixed=fixed)
+        matches[g] = [(h, a, hg, ag) for (h, a), (hg, ag) in res.items()]
         order = group_standings(teams, res)
         tbl = _table(teams, res)
         standings[g] = [(t, tbl[t][0], tbl[t][1], tbl[t][2]) for t in order]
         winners[g], runners[g], third = order[0], order[1], order[2]
         st = tbl[third]
         thirds[g] = (third, {"points": st[0], "gd": st[1], "gf": st[2]})
-    return winners, runners, thirds, standings
+    return winners, runners, thirds, standings, matches
 
 
 def _seed_r32(winners, runners, thirds) -> Tuple[List[str], List[str]]:
@@ -331,7 +334,7 @@ def simulate_tournament(
     every other match is sampled. Knockout matches are always sampled.
     """
     reached: Dict[str, int] = {t: 0 for g in GROUPS.values() for t in g}
-    winners, runners, thirds, _ = _play_groups(rng, fixed)
+    winners, runners, thirds, _, _ = _play_groups(rng, fixed)
     seeds, _q = _seed_r32(winners, runners, thirds)
     for t in seeds:
         reached[t] = max(reached[t], 1)  # reached R32
@@ -348,12 +351,13 @@ def simulate_detailed(rng: random.Random, fixed=None) -> dict:
 
     `rounds` is a list of (round_name, [(home, away, hg, ag, winner, pens), ...]).
     """
-    winners, runners, thirds, standings = _play_groups(rng, fixed)
+    winners, runners, thirds, standings, group_matches = _play_groups(rng, fixed)
     seeds, qualified = _seed_r32(winners, runners, thirds)
     rounds: list = []
     champion, _reached = _knockout_tree(seeds, rng, record=rounds)
     return {
         "standings": standings,
+        "group_matches": group_matches,
         "qualified_thirds": qualified,
         "seeds": seeds,
         "rounds": rounds,
@@ -429,11 +433,18 @@ _KO_LABELS = {"R32": "Round of 32", "R16": "Round of 16", "QF": "Quarter-finals"
 def render_bracket_text(detail: dict) -> str:
     """A terminal-friendly rendering of one tournament's bracket."""
     lines = []
-    lines.append("GROUP STAGE — winners (1) & runners-up (2) advance")
+    lines.append("GROUP STAGE — every fixture (round-robin); winners (1) & "
+                 "runners-up (2) advance, plus the 8 best thirds")
     for g, table in detail["standings"].items():
-        top2 = "  ".join(f"{i+1}.{t}" for i, (t, *_s) in enumerate(table[:2]))
-        lines.append(f"  Group {g}: {top2}")
-    lines.append("  Best thirds: " + ", ".join(detail["qualified_thirds"]))
+        lines.append("")
+        lines.append(f"Group {g}")
+        for home, away, hg, ag in detail.get("group_matches", {}).get(g, []):
+            lines.append(f"    {home:<16} {hg}-{ag} {away}")
+        order = "  ".join(f"{i+1}.{t}({pts}pts,{gd:+d})"
+                          for i, (t, pts, gd, _gf) in enumerate(table))
+        lines.append(f"  -> {order}")
+    lines.append("")
+    lines.append("Best thirds (8 qualify): " + ", ".join(detail["qualified_thirds"]))
     for name, matches in detail["rounds"]:
         lines.append("")
         lines.append(_KO_LABELS[name].upper())

@@ -162,7 +162,11 @@ a trained MLP given 10{,}000 transitions compound error and collapse out of
 distribution. The payoff is decision-making: depth-3 planning through the
 verified model matches planning through the ground truth exactly and beats
 planning through a hallucinating model, which scores worse than no model at
-all---so the world model is a simulator an agent can profitably call.
+all---so the world model is a simulator an agent can profitably call. Against a
+world model \emph{trained} on environment transitions (not just the LLM proxy),
+the verified model attains optimal control return from \emph{zero} data, while a
+trained model needs thousands of transitions to approach it and planning through
+it underperforms model-free control in nearly half of runs.
 Compositional synthesis carries the paradigm past the monolithic complexity
 cliff; it extends to stochastic worlds, to induction on equal information
 (observed traces, no rule text), and to next-token sequence models that
@@ -474,7 +478,7 @@ standard library; numpy-backed analysis extras (wavelets, sheaf gluing, informat
 geometry, optimal transport) load lazily and the optional serving/CLI layer
 (FastAPI, Uvicorn, Click, Rich) is never imported by the core. The codebase is
 $\sim$\LibLOC{} lines across \LibModules{} core modules with \LibTests{} unit-test
-functions (281 cases under parametrization, all passing) that run fully offline via
+functions (284 cases under parametrization, all passing) that run fully offline via
 a scripted mock backbone (a regression test asserts the core import stays
 stdlib-only). Released with worked examples, four
 domain tutorials, the three instrumented worlds, the \NumTasks-task coding
@@ -1331,7 +1335,22 @@ a branch-covering probe suite.}
 \label{fig:verifier}
 \end{figure}
 
-\subsubsection{Synthesis reliability across model scale and family}\label{sec:abl2}
+\subsubsection{Closing the false-accept gap: a branch-covering gate (E62)}\label{sec:branch-gate}
+The behavioral gate's blind spot is that it smoke-runs each action once, from the
+initial state; a transition can be invariant-clean there yet violate an invariant
+on a state reached only later in a rollout. E62 measures and closes this
+deterministically (no LLM). On a panel of \BranchFaults{} faults that are clean from
+the initial state but go negative on a reachable state (an unguarded \texttt{ship},
+two off-by-one guards), the single-state gate's branch-level false-accept rate is
+\BranchSingleFA\%---it accepts every one. Re-running each action over just
+\BranchProbes{} branch-covering states (empty backlog, one outstanding bug, one unit
+of debt) drops the false-accept rate to \BranchCovFA\%, while the correct program
+still passes. The honest limit remains: a \emph{silent} correctness error
+(invariant-clean everywhere but numerically wrong) passes \emph{both} gates---no
+oracle-free gate can catch it, which is why we report exactness against ground-truth
+probes, not acceptance, as the measure of correctness. The branch-covering gate is
+now an option on the verifier (\texttt{probe\_states}); making branch coverage the
+default acceptance criterion is the natural strengthening these numbers motivate.
 E2 attempts compilation five times per world per model; E16 replicates the
 protocol with generators from two other vendors
 (Table~\ref{tab:synthesis-app}, Appendix~\ref{app:tables}). Every backbone
@@ -1533,6 +1552,39 @@ in the ground-truth environment. Value function: shipped $-$ bugs $-$
 0.5$\cdot$debt after 12 steps.}
 \label{tab:planning}
 \end{table}
+
+\subsection{Verified code vs a \emph{trained} world model, on downstream control (E61)}\label{sec:trained-wm}
+The comparisons so far pit verified code against an LLM next-state proxy; the
+fairer question a model-based-RL reader asks is how it fares against a world model
+\emph{trained} on environment transitions, judged on the only thing an agent cares
+about---task return. E61 answers it on the shared sprint task: the same depth-3
+planner plans inside each candidate world model but acts in the true environment,
+and we vary the number of transitions $K$ the model is trained on, over
+\TwmSeeds{} seeds (Figure~\ref{fig:trained-wm}). The result is decisive and,
+unlike E59/E60, fully deterministic and offline (numpy, no LLM). The verified code
+world model attains the optimal return \TwmVerified{} from \emph{zero} training
+transitions. A trained MLP world model needs $K{=}\TwmMaxK{}$ random-policy
+transitions just to reach \TwmBestTrained{} (a 1-NN model is comparable), still
+short of optimal (regret \TwmRegret), and is wildly sample-inefficient below that:
+at the smallest budget its mean return is \emph{negative} (\TwmMlpSmall), worse
+than random. Most tellingly, planning through a trained world model is \emph{worse
+than not planning}---it falls below the model-free reactive policy
+(\TwmReactive)---in \TwmHarm\% of runs, because lookahead drives the agent into
+states the model never saw and mispredicts. A verified program is not merely more
+accurate; it is the difference between planning that helps and planning that harms,
+at zero data cost.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.74\linewidth]{figs/trained_wm_control.png}
+\caption{\textbf{Verified code vs trained world models for control (E61).} Downstream
+return of a depth-3 planner planning inside each world model and acting in the true
+sprint environment, vs training transitions $K$ ($\TwmSeeds$ seeds, $\pm$SD).
+Verified code (\TwmVerified, teal) is optimal from zero data; trained MLP/1-NN
+models are sample-inefficient and, in the shaded band, planning through them
+underperforms the model-free reactive policy.}
+\label{fig:trained-wm}
+\end{figure}
 
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
 Three round-3 experiments chart where the paradigm holds and what to do at
@@ -2179,7 +2231,7 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E57 are introduced across the Results section in thematic
+The experiments E1--E62 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
@@ -2261,6 +2313,11 @@ E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:b
 E55 & Information geometry: identify the world by maximizing info & Tab.~\ref{tab:infogeom} \\
 E56 & Optimal transport: drift detection where KL fails & Tab.~\ref{tab:transport} \\
 E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
+E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
+E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
+E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} \\
+E61 & Verified code vs a trained world model, on control & Fig.~\ref{fig:trained-wm} \\
+E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
 \end{longtable}
 \endgroup
 

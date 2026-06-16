@@ -37,6 +37,29 @@ override via `OW_*` env vars. The instance name defaults to `openworld-mgbench`
   removes it. Always tear down.
 - `provision.sh` is the only script that spends money; it requires GPU quota.
 
+## Results so far
+- **Shared-environment fidelity (validated on an A100 spot instance, real `minigrid`):**
+  the OpenWorld verified world reproduces `MiniGrid-DoorKey-6x6-v0` **bit-for-bit** --
+  `exact_step_match_rate = 1.0` over 600 steps (20 episodes), 0 mismatches
+  (`experiments/results/minigrid_bench/minigrid_fidelity.json`; also in
+  `gs://openworld-bench/run-manual-fidelity/`). This is the fairness precondition,
+  and a result on its own: a standard RL benchmark's dynamics expressed as
+  zero-data verified code, exact against the real environment.
+- The provision -> ssh -> run -> GCS -> fetch -> teardown pipeline is proven on a
+  spot `a2-highgpu-1g` (A100-40GB) in `us-central1-a`.
+
+## Competitor head-to-head: status (a dedicated sprint)
+Running the *published* systems on the shared env is real integration work, not a
+one-shot run:
+- **DreamerV3**: the maintained PyTorch port (NM512) ships Crafter/Atari/DMC
+  configs but **no MiniGrid** and pins old torch/gym/numpy. Cleanest path is
+  `sheeprl` (`exp=dreamer_v3 env=minigrid`) or adding a MiniGrid wrapper + config.
+- **V-JEPA 2**: load `facebook/vjepa2` weights and run action-conditioned latent
+  rollout/planning on rendered MiniGrid frames (GPU inference).
+- **PoE-World**: host an open coder LLM (vLLM) and run its synthesis on a shared
+  task -- the same-species comparison.
+Each is a clean follow-up on a re-provisioned spot A100 (the scripts here drive it).
+
 ## Reproducibility contract
 Every run writes `gpu.txt`, `env.json`, per-method JSON, and logs under one
 `run-<id>/`. `fetch_results.sh` lands them in the repo; commit them. The exact

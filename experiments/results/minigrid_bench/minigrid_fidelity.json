@@ -1,0 +1,8 @@
+{
+  "env": "MiniGrid-DoorKey-6x6-v0",
+  "episodes": 20,
+  "steps_compared": 600,
+  "exact_step_match_rate": 1.0,
+  "mismatches": 0,
+  "claim": "OpenWorld verified world reproduces MiniGrid transitions exactly"
+}

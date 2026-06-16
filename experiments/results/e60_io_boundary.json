@@ -2,7 +2,8 @@
   "n_tickets": 40,
   "n_issues": 8,
   "routing": {
-    "semantic": 1.0,
+    "trigram": 0.775,
+    "jaccard": 0.7,
     "exact_key": 0.0
   },
   "gates": {
@@ -11,7 +12,7 @@
     "caught_output": 1,
     "good_output_passes": true
   },
-  "resolution_rate": 1.0,
+  "resolution_rate": 0.775,
   "components_exercised": {
     "JSONPerceptor": true,
     "RegexPerceptor": true,
@@ -38,6 +39,6 @@
   },
   "problems": [],
   "experiment": "e60_io_boundary",
-  "timestamp": "2026-06-15T11:04:22",
+  "timestamp": "2026-06-15T12:18:17",
   "platform": "macOS-26.5-arm64-arm-64bit"
 }

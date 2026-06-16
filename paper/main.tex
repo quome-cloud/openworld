@@ -142,9 +142,13 @@
 {\centering\large\bfseries Abstract\par}
 \smallskip
 \fontsize{9.5}{11.3}\selectfont
-World models built on learned neural latent dynamics are data-hungry,
-stochastic, and opaque, with their values frozen into weights. Code World Models
-promise an alternative---environment dynamics as executable, verifiable
+World models built on learned neural latent dynamics---including the pixel, video,
+and 3D ``spatial-intelligence'' generators that now dominate the term---are
+data-hungry, stochastic, and opaque, with their values frozen into weights. We
+study a different, complementary species: \emph{symbolic} world models whose
+dynamics are executable, verifiable \emph{code} over a typed symbolic state (not
+pixels or latents). Code World Models promise this alternative---environment
+dynamics as executable, verifiable
 programs---but no lightweight framework has brought the paradigm to local
 hardware. We present \textbf{\openworld}, a zero-dependency Python framework in
 which a local LLM plans, writes, and \emph{verifies} the executable dynamics of a
@@ -164,7 +168,9 @@ Compositional synthesis carries the paradigm past the monolithic complexity
 cliff; it extends to stochastic worlds, to induction on equal information
 (observed traces, no rule text), and to next-token sequence models that
 length-generalize where direct prediction does not. Verification and judging are
-measured, not assumed. Within the symbolic-state regime these worlds inhabit, a
+measured, not assumed---verification certifies executable, invariant-respecting
+code, not rule-correctness, so exactness reflects a capable-enough generator gated
+by cheap checks, not the gate alone. Within the symbolic-state regime these worlds inhabit, a
 training-free, verified, symbolic world model on consumer hardware eliminates
 compounding rollout error at zero training cost. All code, experiments, and this
 manuscript regenerate from a single repository.
@@ -185,23 +191,71 @@ value alignment; agents-as-a-judge; local LLMs.
 
 % ============================================================================
 \section{Introduction}
-A world model is an agent's internal simulator: a mechanism that predicts how
-the environment evolves under action, enabling planning ``in imagination''
-rather than by trial in the world~\cite{ha2018world}. The dominant research
-line learns this simulator as a neural network over latent states---from the
-V--M--C triad of Ha and Schmidhuber~\cite{ha2018world} through the RSSM-based
-Dreamer family~\cite{dreamerv3}, value-equivalent planning in
-MuZero~\cite{muzero}, autoregressive token models such as IRIS~\cite{iris2023}
-and $\Delta$-IRIS~\cite{deltairis2024}, diffusion dynamics in
-DIAMOND~\cite{diamond2024}, and internet-scale generative environments in
-Genie~\cite{genie2024}. These systems share three structural costs: they are
-\emph{data-hungry} (millions of environment steps, or internet-scale video),
-\emph{compounding} (every learned transition adds error that accumulates over
-a rollout), and \emph{opaque} (dynamics and values alike live in continuous
-weights that cannot be inspected, edited, or audited).
+A world model is an agent's internal simulator: given a state and an action, it
+predicts the next state (and/or observation), letting the agent plan ``in
+imagination'' rather than by trial in the world~\cite{ha2018world}. That
+\emph{genus} is shared across the field; research programs diverge on \emph{how the
+model represents state and how it is obtained}, and the term today names two largely
+disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
+generative}: a neural network learned from large amounts of data whose state is a
+continuous latent---or pixels, video, or a 3D scene---and whose output is a
+\emph{generated observation}. It runs from the V--M--C triad of Ha and
+Schmidhuber~\cite{ha2018world} through the RSSM-based Dreamer
+family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
+autoregressive token models such as IRIS~\cite{iris2023} and
+$\Delta$-IRIS~\cite{deltairis2024}, and diffusion dynamics in
+DIAMOND~\cite{diamond2024}; and, most prominently in recent generative AI, to
+interactive generative environments and ``spatial intelligence''---internet-scale
+video and 3D world generators such as Genie~\cite{genie2024}, video-generation-as-%
+simulator (Sora)~\cite{sora2024}, and Fei-Fei Li's World
+Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
+costs: they are \emph{data-hungry} (millions of environment steps, or
+internet-scale video), \emph{compounding} (every learned transition adds error
+that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
+live in continuous weights that cannot be inspected, edited, or audited).
 
-Code World Models (CWMs) invert the bargain: represent dynamics as executable
-programs synthesized by an LLM, gaining verifiability, compute-cheap rollouts,
+\paragraph{What ``world model'' means in this paper.} Because the term has come to
+connote those generative, pixel- and 3D-native systems, we state our usage plainly.
+We use \emph{world model} in its original, narrower sense---a forward predictor of
+the next \emph{state} for planning---and we restrict the state to a \emph{symbolic}
+object: a typed record of named variables (counts, prices, positions, flags), not
+pixels, latents, or 3D geometry. Our world models are therefore the second species,
+\emph{Code World Models} (CWMs): the transition is an explicit, human-readable
+\emph{program} over that symbolic state, synthesized by an LLM from a declared rule
+set and verified before use, and a rollout returns the next symbolic state
+\emph{exactly} rather than a generated image, with \emph{zero} training data. This
+is the same genus as the perceptual models above (a simulator the agent rolls
+forward) but a different species---and an intentionally complementary one.
+OpenWorld targets domains that can be \emph{specified} symbolically (inventories,
+markets, schedules, negotiations, physics with known equations); it is \emph{not} a
+pixel-native, perceptual, or open-world-3D model and does not generate images,
+video, or scenes. Where the spatial-intelligence systems \emph{learn what cannot be
+told}, OpenWorld \emph{writes down what can be told, and verifies it}; the two are
+better read as adjacent tools than as competitors.
+
+\paragraph{World, action, agent, simulation---and why a \emph{verified} model is
+special.} The world model is only one of four distinct objects, and keeping them
+separate dissolves much of the remaining confusion. A \emph{world} is the
+environment-as-simulator: a symbolic state, a discrete set of \emph{actions}, and
+the verified transition that maps a $(\textrm{state}, \textrm{action})$ pair to the
+next state (plus optional perception/emit boundaries). An \emph{agent} is a
+\emph{separate} policy---an LLM planner or a fixed rule---that chooses actions
+toward a goal; it is a \emph{user} of a world, not a part of it, so one world serves
+any agent and a planner can be swapped without re-synthesizing dynamics. A
+\emph{simulation} closes the loop: it places agents in a world and repeatedly
+observes, chooses an action, and steps the world, producing a trajectory scored by
+objectives. The textbook definition puts the world model \emph{inside} the agent
+(the simulator it plans with) and distinguishes it from the true environment; the
+gap between the two---model bias, sim-to-real error---is exactly what bounds learned
+world models. A verified code world model \emph{collapses} that gap: because the
+accepted program reproduces the declared dynamics exactly, the agent's internal
+model and the environment are the \emph{same} artifact, so planning ``in
+imagination'' is identical to acting in the world. This is why the same
+\texttt{World} serves, without modification, both as the ground-truth environment
+and as the model an agent plans through in our planning experiments.
+
+This Code World Model bargain---programs instead of weights---buys verifiability,
+compute-cheap rollouts,
 and out-of-distribution generalization by construction~\cite{worldcoder2024,
 gifmcts2024, poeworld2025, cwmgames2025}. Yet CWM research has remained a set
 of bespoke systems aimed at particular benchmarks. There has been no general,
@@ -314,6 +368,7 @@ MuZero~\cite{muzero} & value-equivalent latent planning & ungrounded states; inc
 IRIS / $\Delta$-IRIS~\cite{iris2023,deltairis2024} & VQ tokens + autoregressive transformer & token budgets; drift over horizon \\
 DIAMOND~\cite{diamond2024} & diffusion dynamics in pixel space & GPU-heavy; no symbolic audit \\
 Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale compute; closed \\
+Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
@@ -405,10 +460,16 @@ verdicts degrade to safe defaults. Judges plug into action selection
 score exists.
 
 \subsection{Implementation}
-Python ($\geq$3.9), zero runtime dependencies (Optuna optional),
-$\sim$1{,}800 lines across 14 modules, 44 unit tests that run fully offline
-via a scripted mock backbone. Released with worked examples, four domain
-tutorials, the three instrumented worlds, the \NumTasks-task coding
+Python ($\geq$3.9; the recommended/default runtime is 3.14). The core is
+\emph{zero-dependency} --- \texttt{import openworld} and everything it pulls in
+(state, transitions, composition, specs, cards, perception, memory) use only the
+standard library; numpy-backed analysis extras (wavelets, sheaf gluing, information
+geometry, optimal transport) load lazily and the optional serving/CLI layer
+(FastAPI, Uvicorn, Click, Rich) is never imported by the core. The codebase is
+$\sim$\LibLOC{} lines across \LibModules{} core modules with \LibTests{} unit-test
+functions that run fully offline via a scripted mock backbone (a regression test
+asserts the core import stays stdlib-only). Released with worked examples, four
+domain tutorials, the three instrumented worlds, the \NumTasks-task coding
 benchmark, and every experiment script used here.
 
 % ============================================================================
@@ -580,6 +641,17 @@ at synthesis time, where it is auditable: if the accepted program is right,
 every rollout of any depth is right, bit-exactly. This is the CWM
 hypothesis~\cite{worldcoder2024,cwmgames2025} made measurable on consumer
 hardware.
+
+The single-number divergence \LLMFirstDivergence{} is from one world (sprint,
+$n{=}3$ rollouts, one seed) and is \emph{not} representative: across the three
+worlds (E11, \MultiWorldRollouts{} rollouts) the LLM proxy's first divergence
+ranges from step ${\approx}1.4$ (sprint) and $2.0$ (triage) to ${\approx}11$ (orchard),
+because compounding depends on the per-step error rate, which varies by world.
+The robust, world-independent claim is the exact-match contrast, not the mean
+divergence step: code engines complete \MultiCodeExact{} of \MultiWorldRollouts{}
+twenty-step rollouts bit-exactly (95\% CI \MultiCodeCI) versus \MultiLLMExact{}
+for the LLM proxy. We treat the divergence figure as illustrative of the
+mechanism and the exact-match rate as the result.
 
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
@@ -1399,38 +1471,42 @@ $L=\BrainOptimal$). Persistent memory reaches optimal; memoryless/random do not.
 \input{tables/brain}
 \end{table}
 
-\subsubsection{Optimizing the brain architecture for the task, LLM held constant (E59)}\label{sec:brainarch}
+\subsubsection{The brain around a frozen model, as a composable world (E59)}\label{sec:brainarch}
 If the backbone is a powerful LLM, what should the \emph{brain around it} look like?
-We treat the LLM's raw capability as fixed and search over brain \emph{architectures}
---- composable worlds that differ in whether the brain has long-term memory it can
-retrieve, how many tree-of-thoughts drafts it generates, and whether it verifies
-them --- a neuromorphic architecture search over composite world models. The task
-suite is recalled-fact + verify: each question needs a specific fact (common
-knowledge, or rare and requiring retrieval) and is simple or hard (a hard task needs
-a verifier to filter best-of-$N$ drafts). The backbone answers iff the fact is in its
-context, correctly for simple tasks and with a fixed per-draft probability for hard
-ones --- the \emph{same} capability for every architecture.
+We illustrate the design space with a controlled study whose backbone is
+\emph{modeled}, not measured: a fixed-capability oracle that answers iff the needed
+fact is in its context --- correctly for simple tasks, and with a fixed per-draft
+probability for hard ones --- the \emph{same} capability for every architecture. We
+then assemble brains as composite worlds that differ in whether they retrieve from
+long-term memory, how many tree-of-thoughts drafts they generate, and whether they
+verify them, on a recalled-fact~+~verify suite. \textbf{We stress that the accuracy
+ordering below is a consequence of these modeling assumptions, not an empirical
+finding}: retrieval makes the rare-fact questions answerable by definition, and
+best-of-$N$~+~verify wins the hard questions because several independent draws beat one.
+The experiment's purpose is to show that the framework expresses and serializes these
+architectures, and to fix the value proposition precisely; the headline numbers are
+arithmetic illustrations of it.
 
-Holding that backbone constant (Figure~\ref{fig:brain-arch}, Table~\ref{tab:brainarch}),
-the architecture is decisive: the bare LLM scores $\ArchBare$; adding retrieval
-lifts it to $\ArchMem$ (the rare-fact questions become answerable); adding
-best-of-$N$ with a verifier lifts the hard questions; and the \emph{optimized} brain
-reaches $\ArchOpt$ --- a $+\ArchLift$ absolute gain over the bare backbone with no
-change to the LLM. A search over all $\ArchConfigs$ architectures recovers the richest
-configuration. The brain serializes to a spec (with a real LLM emit channel) and
-round-trips losslessly; a live Ollama run exercises the genuine
+Under that modeled backbone (Figure~\ref{fig:brain-arch}, Table~\ref{tab:brainarch}),
+the bare LLM scores $\ArchBare$; adding retrieval lifts it to $\ArchMem$; adding
+best-of-$N$ with a verifier lifts the hard questions; and the richest brain reaches
+$\ArchOpt$ ($+\ArchLift$ absolute over the bare backbone with no change to the LLM),
+which a sweep over all $\ArchConfigs$ architectures recovers. The \emph{empirical}
+content is engineering, not the lift: the brain serializes to a spec (with a real LLM
+emit channel) and round-trips losslessly, and a live Ollama run exercises the genuine
 text-in~$\to$~reason~$\to$~text-out loop (\texttt{TextPerceptor}~+~\texttt{LLMEmitter}).
-This is a controlled demonstration with a modeled fixed-capability backbone --- not a
-benchmark of a particular model --- but it makes the point precisely: \emph{with the
-model frozen, the world model around it is what you optimize}.
+The point the study makes precisely is \emph{with the model frozen, the world model
+around it is what you optimize} --- a hypothesis this controlled setup illustrates and
+that a real held-constant backbone would be needed to establish.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.95\linewidth]{figs/brain_arch.png}
-\caption{\textbf{Architecture, not the model (E59).} \textbf{A:} with one fixed LLM,
-task accuracy rises from the bare backbone through retrieval and best-of-$N$+verify to
-the optimized brain. \textbf{B:} searching the $\ArchConfigs$-architecture space
-recovers the best configuration.}
+\caption{\textbf{Architecture around a frozen model (E59), modeled backbone.} \textbf{A:}
+under a fixed-capability modeled backbone, task accuracy rises from the bare backbone
+through retrieval and best-of-$N$+verify to the richest brain --- an arithmetic
+illustration of the modeling assumptions, not a measured effect. \textbf{B:} a sweep
+over the $\ArchConfigs$-architecture space recovers the richest configuration.}
 \label{fig:brain-arch}
 \end{figure}
 
@@ -1452,25 +1528,31 @@ serializable component. A \texttt{JSONPerceptor} ingests a structured ticket and
 \texttt{PerceptionGate}; a content-addressable \texttt{MemoryStore} recalls the closest
 past resolution; a \texttt{ToolEmitter} backed by a typed \texttt{ToolRegistry} executes
 the chosen fix; and a verified-code \texttt{CodeEmitter} writes the report, contract-checked
-by an \texttt{EmissionGate}. On $\IOTickets$ paraphrased tickets, semantic recall routes
-$\IOSem\%$ to the correct tool where exact-key matching scores $\IOExact\%$
-(Figure~\ref{fig:io-boundary}A), and the assembled world resolves $\IORes\%$ end to end
-through real tool calls. The contract gates catch every injected fault --- all
+by an \texttt{EmissionGate}. On $\IOTickets$ realistic paraphrased tickets (synonyms,
+dropped and reordered words, typos --- not the canonical wording shuffled), the
+content-addressable \texttt{MemoryStore} routes $\IOReca\%$ to the correct tool, ahead of
+a fair lexical token-overlap (Jaccard) baseline at $\IOJac\%$ and far ahead of naive
+exact-key dict lookup at $\IOExact\%$ (Figure~\ref{fig:io-boundary}A); the gap over the
+Jaccard baseline is modest and we report the numbers as measured rather than tuning the
+paraphrases. The assembled world resolves $\IORes\%$ end to end through real tool calls
+(routing follows recall). The contract gates catch every injected fault --- all
 $\IOGateIn$ malformed inputs and the out-of-contract output
 (Figure~\ref{fig:io-boundary}B) --- while passing valid traffic. The entire world,
 spanning all $\IOComponents$ components, serializes to a spec and round-trips losslessly
 with no LLM in the loop (an optional Ollama run uses an \texttt{LLMEmitter} to draft the
 customer-facing reply), making the perceive/emit/act boundary a portable, deterministically
-verifiable artifact (Table~\ref{tab:ioboundary}).
+verifiable artifact (Table~\ref{tab:ioboundary}). The contribution here is the
+engineering boundary itself; the recall numbers characterize a stdlib sub-word matcher,
+not a learned embedding model.
 
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.95\linewidth]{figs/io_boundary.png}
-\caption{\textbf{A working I/O boundary (E60).} \textbf{A:} semantic recall routes
-paraphrased tickets ($\IOSem\%$) where exact-key matching fails ($\IOExact\%$), and the
-assembled world resolves $\IORes\%$ end to end via real tool calls. \textbf{B:} the
-perception and emission gates reject every injected malformed input and out-of-contract
-output.}
+\caption{\textbf{A working I/O boundary (E60).} \textbf{A:} on realistic paraphrased
+tickets, content-addressable recall ($\IOReca\%$) beats a fair lexical token-overlap
+baseline ($\IOJac\%$) and naive exact-key lookup ($\IOExact\%$); the assembled world
+resolves $\IORes\%$ end to end via real tool calls. \textbf{B:} the perception and
+emission gates reject every injected malformed input and out-of-contract output.}
 \label{fig:io-boundary}
 \end{figure}
 
@@ -1546,7 +1628,13 @@ review asked for power, so E17 tripled the proposer seeds. Pooled over
 sharpened---\PooledMcNemarB{} versus \PooledMcNemarC{} discordant rounds,
 exact McNemar $p=\PooledMcNemarP$---but remains short of the conventional
 threshold; the judge recovers roughly half of the random-to-oracle gap, and
-we report the effect as estimated, not established. The position-bias audit
+we report the effect as estimated, not established. In full honesty, the
+\NewRounds{} \emph{newly collected} rounds taken alone (judge \NewJudge{} vs
+random \NewRandom) are not significant on their own (exact McNemar
+$p=\NewMcNemarP$); the pooled $p=\PooledMcNemarP$ is reached only by combining
+them with E13's original rounds, so it should be read as a pooled estimate
+following an underpowered first result, not a pre-registered confirmatory test.
+The position-bias audit
 is the sharper finding: asked again with candidates in reversed order, the
 judge's raw choices match on only \PooledConsistency{} of pooled rounds---yet
 its \emph{accuracy} is order-stable, picking a passing candidate
@@ -2279,6 +2367,23 @@ parliament's credences are themselves operator-set dials. (ix) Several
 experiments were redesigned after pilots and four internal review rounds
 (E3, E5/E6, E11--E27); pilot saturation results are reported alongside the
 final protocols, and all reviews ship in the repository.
+(x) Multiple comparisons: across \NumExperiments{} experiments we report many
+$p$-values and rank correlations and apply \emph{no} family-wise or
+false-discovery correction; with this many tests the borderline results
+($p$ between $0.05$ and $0.10$---notably the judge margin and the
+rubric-paraphrase correlation) should be read as exploratory, and only the
+large deterministic effects (exact-match rates, OOD collapse, the complexity
+cliff) are robust to the multiplicity. (xi) Variance: the deterministic claims
+are exact-match against oracles and need no error bars, but several
+\emph{stochastic} (LLM) headline quantities are point estimates from small,
+single-seed samples (e.g.\ the E1 divergence step, $n{=}3$, one world) without
+across-seed variance; we add the pooled multi-world view (E11) where it
+matters, but per-model probe accuracies should be read as estimates, not tight
+measurements. (xii) Two illustrative studies are true \emph{by construction}:
+E59's architecture lift follows arithmetically from a modeled fixed-capability
+backbone, and E60's routing gap over exact-key lookup is guaranteed by the
+comparison design (we add a fair lexical baseline and report the modest gap over
+it); both are flagged in situ as engineering demonstrations, not measured effects.
 
 % ============================================================================
 \section{Conclusion}

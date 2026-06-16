@@ -103,3 +103,32 @@ def test_knockout_advancement_metric():
     assert summary["n"] == 16
     assert 0.0 <= summary["accuracy"] <= 1.0
     assert summary["brier"] >= 0.0
+
+
+def test_tournament_calibration_fields():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    f = wh.forecast_cup(2014, eng, sims=800, seed=5)
+    cal = wh.tournament_calibration(wh.load_cup(2014), f)
+    assert cal["champion"] == "Germany"
+    assert 1 <= cal["champion_rank"] <= 32
+    assert cal["champion_prob"] >= 0.0
+    assert cal["champion_logloss"] >= 0.0
+
+
+def test_chalk_baseline_picks_higher_elo():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    elo = eng.ratings_asof(wh._cup_freeze_date(2014))
+    base = wh.chalk_baseline(wh.load_cup(2014), elo)
+    assert 0.0 <= base["group_hit_rate"] <= 1.0
+    assert base["champion"] in [t for g in wh.load_cup(2014).groups.values() for t in g]
+
+
+def test_reach_qf_calibration_buckets():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    cfs = [(wh.load_cup(y), wh.forecast_cup(y, eng, sims=200, seed=1))
+           for y in (2010, 2014, 2018, 2022)]
+    buckets = wh.reach_round_calibration(cfs, key="reach_QF")
+    assert len(buckets) == 5
+    # exactly 8 teams reach the QF per cup -> 32 positives total across 4 cups
+    total_pos = sum(b["observed"] * b["n"] for b in buckets if b["n"])
+    assert abs(total_pos - 32) < 1e-6

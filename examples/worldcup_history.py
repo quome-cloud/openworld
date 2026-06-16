@@ -493,3 +493,98 @@ def score_knockout_advancement(cup: "Cup", elo: Dict[str, float], sims: int = 30
                      "p_home_adv": p_home, "correct": pick_home == bool(actual_home)})
     return {"n": n, "accuracy": correct / n, "brier": brier_sum / n,
             "logloss": logloss_sum / n, "rows": rows}
+
+
+def tournament_calibration(cup: "Cup", forecast: Dict[str, Dict[str, float]]) -> dict:
+    """Where did the actual champion / finalists / semifinalists rank in our odds?"""
+    adv = cup.actual_advancers()
+    champ = adv["champion"]
+    ranked = sorted(forecast, key=lambda t: forecast[t]["champion"], reverse=True)
+    champ_rank = ranked.index(champ) + 1
+    p_champ = forecast[champ]["champion"] / 100.0
+    finalists = {adv["final_match"]["home"], adv["final_match"]["away"]}
+    semifinalists = set(adv["QF"])  # QF winners reached the semi-final
+    return {
+        "champion": champ,
+        "champion_rank": champ_rank,
+        "champion_prob": p_champ,
+        "champion_logloss": -math.log(max(p_champ, 1e-6)),
+        "finalists": sorted(finalists),
+        "mean_finalist_reach_final_prob":
+            sum(forecast[t]["reach_final"] for t in finalists) / (100.0 * len(finalists)),
+        "semifinalists": sorted(semifinalists),
+        "mean_semifinalist_reach_SF_prob":
+            sum(forecast[t]["reach_SF"] for t in semifinalists) / (100.0 * len(semifinalists)),
+    }
+
+
+def _actual_reached(cup: "Cup", key: str) -> set:
+    """The set of teams that actually reached the round named by a forecast key."""
+    adv = cup.actual_advancers()
+    if key == "reach_QF":
+        return set(adv["R16"])       # won R16 -> reached the quarter-final (8 teams)
+    if key == "reach_SF":
+        return set(adv["QF"])        # won QF  -> reached the semi-final (4 teams)
+    if key == "reach_final":
+        return set(adv["SF"])        # won SF  -> reached the final (2 teams)
+    if key == "reach_R16":
+        st = cup.real_standings()
+        return {t for g in st for t in st[g][:2]}  # top-2 advanced to the R16 (16 teams)
+    raise ValueError(f"unknown reach key: {key}")
+
+
+def reach_round_calibration(cups_forecasts, key: str = "reach_QF",
+                            n_buckets: int = 5) -> List[dict]:
+    """Pool teams across cups; bucket by predicted prob; compare to observed freq.
+
+    `cups_forecasts` is a list of (Cup, forecast). Returns per-bucket
+    {lo, hi, n, predicted, observed} where predicted is the mean forecast prob in
+    the bucket and observed is the actual fraction that reached the round.
+    """
+    pts = []  # (predicted_prob_in_[0,1], reached 0/1)
+    for cup, fc in cups_forecasts:
+        target = _actual_reached(cup, key)
+        for t in fc:
+            pts.append((fc[t][key] / 100.0, 1.0 if t in target else 0.0))
+    out = []
+    for b in range(n_buckets):
+        lo, hi = b / n_buckets, (b + 1) / n_buckets
+        sel = [(p, h) for (p, h) in pts
+               if (lo <= p < hi or (b == n_buckets - 1 and p == 1.0))]
+        if not sel:
+            out.append({"lo": lo, "hi": hi, "n": 0, "predicted": None, "observed": None})
+            continue
+        out.append({"lo": lo, "hi": hi, "n": len(sel),
+                    "predicted": sum(p for p, _ in sel) / len(sel),
+                    "observed": sum(h for _, h in sel) / len(sel)})
+    return out
+
+
+def chalk_baseline(cup: "Cup", elo: Dict[str, float], base: float = 1500.0) -> dict:
+    """Deterministic 'higher pre-tournament Elo always wins' bracket."""
+    def stronger(a, b):
+        ea, eb = _eff(a, elo, cup.host, base), _eff(b, elo, cup.host, base)
+        return a if (ea, a) >= (eb, b) else b  # name breaks exact ties
+
+    # Group hit-rate: predict the higher-Elo team as the W/D/L call (never a draw).
+    hits = n = 0
+    for g, teams in cup.groups.items():
+        for i in range(len(teams)):
+            for j in range(i + 1, len(teams)):
+                rec = cup.group_result(teams[i], teams[j])
+                home, hg, ag = rec
+                away = teams[j] if home == teams[i] else teams[i]
+                pick = stronger(home, away)
+                actual = home if hg > ag else (away if ag > hg else None)
+                hits += (pick == actual)
+                n += 1
+    # Chalk bracket from the REAL group standings (sees the same qualifiers we did).
+    standings = cup.real_standings()
+    winners = {g: standings[g][0] for g in cup.groups}
+    runners = {g: standings[g][1] for g in cup.groups}
+    teams = []
+    for wl, rl in R16_PAIRS:
+        teams.append(winners[wl]); teams.append(runners[rl])
+    for _rnd in KO_ROUNDS:
+        teams = [stronger(teams[i], teams[i + 1]) for i in range(0, len(teams), 2)]
+    return {"group_hit_rate": hits / n, "champion": teams[0]}

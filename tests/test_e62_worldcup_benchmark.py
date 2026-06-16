@@ -8,6 +8,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 import worldcup_benchmark as wb  # noqa: E402
+import worldcup_history as wh  # noqa: E402
 
 
 def test_rps_perfect_is_zero():
@@ -38,3 +39,28 @@ def test_score_matches_aggregates():
     assert 0.0 <= s["rps"] <= 1.0
     assert 0.0 <= s["brier"] <= 2.0
     assert s["hit_rate"] == 1.0
+
+
+def test_cup_matches_are_64_in_date_order():
+    m = wb.cup_matches(2014)
+    assert len(m) == 64
+    dates = [r["date"] for r in m]
+    assert dates == sorted(dates)
+    r = m[0]
+    assert set(r) >= {"date", "home", "away", "hg", "ag", "neutral"}
+
+
+def test_actual_outcomes_home_perspective():
+    out = wb.actual_outcomes(2014)
+    assert len(out) == 64
+    # Brazil opened 2014 by beating Croatia 3-1 at home -> home win "W".
+    key = next(k for k in out if k[1] == "Brazil" and k[2] == "Croatia")
+    assert out[key] == "W"
+
+
+def test_training_matches_are_leakage_free():
+    cutoff = wh._cup_freeze_date(2014)
+    tr = wb.training_matches(2014, years=4)
+    assert tr, "expected pre-cup internationals"
+    assert all(r["date"] < cutoff for r in tr)
+    assert all(r["date"] >= "2010-06-12" for r in tr)  # 4-year window

@@ -29,6 +29,44 @@ FTE_CUPS = [2018, 2022]
 _ORDER = ["L", "D", "W"]   # ordinal: away-win < draw < home-win (by home margin)
 
 
+def _read_results() -> List[dict]:
+    rows = []
+    with open(wh.RESULTS_CSV, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            try:
+                hg, ag = int(r["home_score"]), int(r["away_score"])
+            except (ValueError, KeyError):
+                continue
+            rows.append({"date": r["date"], "home": r["home_team"],
+                         "away": r["away_team"], "hg": hg, "ag": ag,
+                         "tournament": r["tournament"],
+                         "neutral": str(r["neutral"]).strip().upper() == "TRUE"})
+    rows.sort(key=lambda r: r["date"])
+    return rows
+
+
+def cup_matches(year: int) -> List[dict]:
+    """The cup's 64 real matches (date-sorted), home perspective from results.csv."""
+    return [r for r in _read_results()
+            if r["tournament"] == "FIFA World Cup" and r["date"][:4] == str(year)]
+
+
+def actual_outcomes(year: int) -> Dict[tuple, str]:
+    """match_key (date, home, away) -> actual W/D/L from the home perspective."""
+    out = {}
+    for r in cup_matches(year):
+        out[(r["date"], r["home"], r["away"])] = (
+            "W" if r["hg"] > r["ag"] else ("D" if r["hg"] == r["ag"] else "L"))
+    return out
+
+
+def training_matches(year: int, years: int = 4) -> List[dict]:
+    """All internationals strictly before the cup's freeze date, within `years`."""
+    cutoff = wh._cup_freeze_date(year)
+    lo = f"{year - years:04d}{cutoff[4:]}"
+    return [r for r in _read_results() if lo <= r["date"] < cutoff]
+
+
 def rps(probs: Dict[str, float], actual: str) -> float:
     """Ranked Probability Score for an ordinal W/D/L forecast (home perspective).
 

@@ -1,0 +1,704 @@
+{
+  "model": "elo_poisson_32team",
+  "sims": 10000,
+  "match_sims": 20000,
+  "seed": 2026,
+  "cups": [
+    2010,
+    2014,
+    2018,
+    2022
+  ],
+  "validation": {
+    "2009": {
+      "n": 47,
+      "pearson": 0.9841083933072724,
+      "spearman": 0.9678538390379279,
+      "rmse": 72.6123378974027,
+      "snapshot_year": 2009
+    },
+    "2013": {
+      "n": 47,
+      "pearson": 0.9836751010405942,
+      "spearman": 0.9738667900092507,
+      "rmse": 84.90848498765742,
+      "snapshot_year": 2013
+    },
+    "2017": {
+      "n": 47,
+      "pearson": 0.9848558805498815,
+      "spearman": 0.9790703052728955,
+      "rmse": 87.76789995989029,
+      "snapshot_year": 2017
+    },
+    "2021": {
+      "n": 47,
+      "pearson": 0.9889118788811707,
+      "spearman": 0.9861239592969473,
+      "rmse": 87.82972862854315,
+      "snapshot_year": 2021
+    }
+  },
+  "per_cup": {
+    "2010": {
+      "group": {
+        "n": 48,
+        "draws": 14,
+        "hit_rate": 0.5,
+        "decisive_n": 34,
+        "decisive_hit_rate": 0.7058823529411765,
+        "mean_p_actual": 0.4147489583333334,
+        "mean_brier": 0.59540122625,
+        "baseline_brier": 0.6666666666666666,
+        "skill_vs_uniform": 0.1068981606249999
+      },
+      "knockout": {
+        "n": 16,
+        "accuracy": 0.75,
+        "brier": 0.16412476421875002,
+        "logloss": 0.498760643163645,
+        "rows": [
+          {
+            "home": "Uruguay",
+            "away": "South Korea",
+            "winner": "Uruguay",
+            "p_home_adv": 0.54575,
+            "correct": true
+          },
+          {
+            "home": "United States",
+            "away": "Ghana",
+            "winner": "Ghana",
+            "p_home_adv": 0.61875,
+            "correct": false
+          },
+          {
+            "home": "Argentina",
+            "away": "Mexico",
+            "winner": "Argentina",
+            "p_home_adv": 0.447,
+            "correct": false
+          },
+          {
+            "home": "Germany",
+            "away": "England",
+            "winner": "Germany",
+            "p_home_adv": 0.4216,
+            "correct": false
+          },
+          {
+            "home": "Brazil",
+            "away": "Chile",
+            "winner": "Brazil",
+            "p_home_adv": 0.8028,
+            "correct": true
+          },
+          {
+            "home": "Netherlands",
+            "away": "Slovakia",
+            "winner": "Netherlands",
+            "p_home_adv": 0.89045,
+            "correct": true
+          },
+          {
+            "home": "Paraguay",
+            "away": "Japan",
+            "winner": "Paraguay",
+            "p_home_adv": 0.55325,
+            "correct": true
+          },
+          {
+            "home": "Spain",
+            "away": "Portugal",
+            "winner": "Spain",
+            "p_home_adv": 0.8079,
+            "correct": true
+          },
+          {
+            "home": "Netherlands",
+            "away": "Brazil",
+            "winner": "Netherlands",
+            "p_home_adv": 0.37095,
+            "correct": false
+          },
+          {
+            "home": "Uruguay",
+            "away": "Ghana",
+            "winner": "Uruguay",
+            "p_home_adv": 0.6467,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "Germany",
+            "winner": "Germany",
+            "p_home_adv": 0.43045,
+            "correct": true
+          },
+          {
+            "home": "Paraguay",
+            "away": "Spain",
+            "winner": "Spain",
+            "p_home_adv": 0.12855,
+            "correct": true
+          },
+          {
+            "home": "Uruguay",
+            "away": "Netherlands",
+            "winner": "Netherlands",
+            "p_home_adv": 0.23485,
+            "correct": true
+          },
+          {
+            "home": "Germany",
+            "away": "Spain",
+            "winner": "Spain",
+            "p_home_adv": 0.26725,
+            "correct": true
+          },
+          {
+            "home": "Uruguay",
+            "away": "Germany",
+            "winner": "Germany",
+            "p_home_adv": 0.33815,
+            "correct": true
+          },
+          {
+            "home": "Netherlands",
+            "away": "Spain",
+            "winner": "Spain",
+            "p_home_adv": 0.38185,
+            "correct": true
+          }
+        ]
+      },
+      "calibration": {
+        "champion": "Spain",
+        "champion_rank": 2,
+        "champion_prob": 0.259,
+        "champion_logloss": 1.3509272172825992,
+        "finalists": [
+          "Netherlands",
+          "Spain"
+        ],
+        "mean_finalist_reach_final_prob": 0.3208,
+        "semifinalists": [
+          "Germany",
+          "Netherlands",
+          "Spain",
+          "Uruguay"
+        ],
+        "mean_semifinalist_reach_SF_prob": 0.32185
+      },
+      "chalk": {
+        "group_hit_rate": 0.5,
+        "champion": "Brazil"
+      },
+      "host": "South Africa"
+    },
+    "2014": {
+      "group": {
+        "n": 48,
+        "draws": 9,
+        "hit_rate": 0.625,
+        "decisive_n": 39,
+        "decisive_hit_rate": 0.7692307692307693,
+        "mean_p_actual": 0.43430208333333337,
+        "mean_brier": 0.5380334869791666,
+        "baseline_brier": 0.6666666666666666,
+        "skill_vs_uniform": 0.19294976953124998
+      },
+      "knockout": {
+        "n": 16,
+        "accuracy": 0.6875,
+        "brier": 0.18513386796875,
+        "logloss": 0.5485418187863496,
+        "rows": [
+          {
+            "home": "Brazil",
+            "away": "Chile",
+            "winner": "Brazil",
+            "p_home_adv": 0.84205,
+            "correct": true
+          },
+          {
+            "home": "Colombia",
+            "away": "Uruguay",
+            "winner": "Colombia",
+            "p_home_adv": 0.49485,
+            "correct": false
+          },
+          {
+            "home": "Costa Rica",
+            "away": "Greece",
+            "winner": "Costa Rica",
+            "p_home_adv": 0.3874,
+            "correct": false
+          },
+          {
+            "home": "Netherlands",
+            "away": "Mexico",
+            "winner": "Netherlands",
+            "p_home_adv": 0.68115,
+            "correct": true
+          },
+          {
+            "home": "France",
+            "away": "Nigeria",
+            "winner": "France",
+            "p_home_adv": 0.6783,
+            "correct": true
+          },
+          {
+            "home": "Germany",
+            "away": "Algeria",
+            "winner": "Germany",
+            "p_home_adv": 0.89515,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "Switzerland",
+            "winner": "Argentina",
+            "p_home_adv": 0.75715,
+            "correct": true
+          },
+          {
+            "home": "Belgium",
+            "away": "United States",
+            "winner": "Belgium",
+            "p_home_adv": 0.42385,
+            "correct": false
+          },
+          {
+            "home": "Brazil",
+            "away": "Colombia",
+            "winner": "Brazil",
+            "p_home_adv": 0.83995,
+            "correct": true
+          },
+          {
+            "home": "France",
+            "away": "Germany",
+            "winner": "Germany",
+            "p_home_adv": 0.2517,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "Belgium",
+            "winner": "Argentina",
+            "p_home_adv": 0.75245,
+            "correct": true
+          },
+          {
+            "home": "Netherlands",
+            "away": "Costa Rica",
+            "winner": "Netherlands",
+            "p_home_adv": 0.80805,
+            "correct": true
+          },
+          {
+            "home": "Brazil",
+            "away": "Germany",
+            "winner": "Germany",
+            "p_home_adv": 0.711,
+            "correct": false
+          },
+          {
+            "home": "Netherlands",
+            "away": "Argentina",
+            "winner": "Argentina",
+            "p_home_adv": 0.42865,
+            "correct": true
+          },
+          {
+            "home": "Brazil",
+            "away": "Netherlands",
+            "winner": "Netherlands",
+            "p_home_adv": 0.80125,
+            "correct": false
+          },
+          {
+            "home": "Germany",
+            "away": "Argentina",
+            "winner": "Germany",
+            "p_home_adv": 0.5742,
+            "correct": true
+          }
+        ]
+      },
+      "calibration": {
+        "champion": "Germany",
+        "champion_rank": 3,
+        "champion_prob": 0.1366,
+        "champion_logloss": 1.9906983318454474,
+        "finalists": [
+          "Argentina",
+          "Germany"
+        ],
+        "mean_finalist_reach_final_prob": 0.22604999999999997,
+        "semifinalists": [
+          "Argentina",
+          "Brazil",
+          "Germany",
+          "Netherlands"
+        ],
+        "mean_semifinalist_reach_SF_prob": 0.423975
+      },
+      "chalk": {
+        "group_hit_rate": 0.625,
+        "champion": "Brazil"
+      },
+      "host": "Brazil"
+    },
+    "2018": {
+      "group": {
+        "n": 48,
+        "draws": 9,
+        "hit_rate": 0.5625,
+        "decisive_n": 39,
+        "decisive_hit_rate": 0.6923076923076923,
+        "mean_p_actual": 0.42951979166666665,
+        "mean_brier": 0.5584923859375001,
+        "baseline_brier": 0.6666666666666666,
+        "skill_vs_uniform": 0.16226142109374986
+      },
+      "knockout": {
+        "n": 15,
+        "accuracy": 0.5333333333333333,
+        "brier": 0.2646274988333333,
+        "logloss": 0.7375431448019486,
+        "rows": [
+          {
+            "home": "France",
+            "away": "Argentina",
+            "winner": "France",
+            "p_home_adv": 0.4725,
+            "correct": false
+          },
+          {
+            "home": "Uruguay",
+            "away": "Portugal",
+            "winner": "Uruguay",
+            "p_home_adv": 0.3735,
+            "correct": false
+          },
+          {
+            "home": "Russia",
+            "away": "Spain",
+            "winner": "Russia",
+            "p_home_adv": 0.14965,
+            "correct": false
+          },
+          {
+            "home": "Croatia",
+            "away": "Denmark",
+            "winner": "Croatia",
+            "p_home_adv": 0.53075,
+            "correct": true
+          },
+          {
+            "home": "Brazil",
+            "away": "Mexico",
+            "winner": "Brazil",
+            "p_home_adv": 0.83235,
+            "correct": true
+          },
+          {
+            "home": "Belgium",
+            "away": "Japan",
+            "winner": "Belgium",
+            "p_home_adv": 0.7829,
+            "correct": true
+          },
+          {
+            "home": "Sweden",
+            "away": "Switzerland",
+            "winner": "Sweden",
+            "p_home_adv": 0.34695,
+            "correct": false
+          },
+          {
+            "home": "Colombia",
+            "away": "England",
+            "winner": "England",
+            "p_home_adv": 0.5012,
+            "correct": false
+          },
+          {
+            "home": "Uruguay",
+            "away": "France",
+            "winner": "France",
+            "p_home_adv": 0.35855,
+            "correct": true
+          },
+          {
+            "home": "Brazil",
+            "away": "Belgium",
+            "winner": "Belgium",
+            "p_home_adv": 0.77925,
+            "correct": false
+          },
+          {
+            "home": "Sweden",
+            "away": "England",
+            "winner": "England",
+            "p_home_adv": 0.2729,
+            "correct": true
+          },
+          {
+            "home": "Russia",
+            "away": "Croatia",
+            "winner": "Croatia",
+            "p_home_adv": 0.32835,
+            "correct": true
+          },
+          {
+            "home": "France",
+            "away": "Belgium",
+            "winner": "France",
+            "p_home_adv": 0.5716,
+            "correct": true
+          },
+          {
+            "home": "Croatia",
+            "away": "England",
+            "winner": "Croatia",
+            "p_home_adv": 0.36525,
+            "correct": false
+          },
+          {
+            "home": "France",
+            "away": "Croatia",
+            "winner": "France",
+            "p_home_adv": 0.68705,
+            "correct": true
+          }
+        ]
+      },
+      "calibration": {
+        "champion": "France",
+        "champion_rank": 6,
+        "champion_prob": 0.0526,
+        "champion_logloss": 2.945039159238473,
+        "finalists": [
+          "Croatia",
+          "France"
+        ],
+        "mean_finalist_reach_final_prob": 0.0739,
+        "semifinalists": [
+          "Belgium",
+          "Croatia",
+          "England",
+          "France"
+        ],
+        "mean_semifinalist_reach_SF_prob": 0.181525
+      },
+      "chalk": {
+        "group_hit_rate": 0.5625,
+        "champion": "Brazil"
+      },
+      "host": "Russia"
+    },
+    "2022": {
+      "group": {
+        "n": 48,
+        "draws": 9,
+        "hit_rate": 0.5208333333333334,
+        "decisive_n": 39,
+        "decisive_hit_rate": 0.6410256410256411,
+        "mean_p_actual": 0.4026166666666667,
+        "mean_brier": 0.6196097577083334,
+        "baseline_brier": 0.6666666666666666,
+        "skill_vs_uniform": 0.07058536343749988
+      },
+      "knockout": {
+        "n": 15,
+        "accuracy": 0.8,
+        "brier": 0.1908786043333333,
+        "logloss": 0.5773505734215618,
+        "rows": [
+          {
+            "home": "Netherlands",
+            "away": "United States",
+            "winner": "Netherlands",
+            "p_home_adv": 0.77255,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "Australia",
+            "winner": "Argentina",
+            "p_home_adv": 0.88325,
+            "correct": true
+          },
+          {
+            "home": "France",
+            "away": "Poland",
+            "winner": "France",
+            "p_home_adv": 0.7588,
+            "correct": true
+          },
+          {
+            "home": "England",
+            "away": "Senegal",
+            "winner": "England",
+            "p_home_adv": 0.73045,
+            "correct": true
+          },
+          {
+            "home": "Japan",
+            "away": "Croatia",
+            "winner": "Croatia",
+            "p_home_adv": 0.37885,
+            "correct": true
+          },
+          {
+            "home": "Brazil",
+            "away": "South Korea",
+            "winner": "Brazil",
+            "p_home_adv": 0.87665,
+            "correct": true
+          },
+          {
+            "home": "Morocco",
+            "away": "Spain",
+            "winner": "Morocco",
+            "p_home_adv": 0.182,
+            "correct": false
+          },
+          {
+            "home": "Portugal",
+            "away": "Switzerland",
+            "winner": "Portugal",
+            "p_home_adv": 0.6495,
+            "correct": true
+          },
+          {
+            "home": "Croatia",
+            "away": "Brazil",
+            "winner": "Croatia",
+            "p_home_adv": 0.1792,
+            "correct": false
+          },
+          {
+            "home": "Netherlands",
+            "away": "Argentina",
+            "winner": "Argentina",
+            "p_home_adv": 0.33845,
+            "correct": true
+          },
+          {
+            "home": "Morocco",
+            "away": "Portugal",
+            "winner": "Morocco",
+            "p_home_adv": 0.22615,
+            "correct": false
+          },
+          {
+            "home": "England",
+            "away": "France",
+            "winner": "France",
+            "p_home_adv": 0.38645,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "Croatia",
+            "winner": "Argentina",
+            "p_home_adv": 0.7925,
+            "correct": true
+          },
+          {
+            "home": "France",
+            "away": "Morocco",
+            "winner": "France",
+            "p_home_adv": 0.76035,
+            "correct": true
+          },
+          {
+            "home": "Argentina",
+            "away": "France",
+            "winner": "Argentina",
+            "p_home_adv": 0.71835,
+            "correct": true
+          }
+        ]
+      },
+      "calibration": {
+        "champion": "Argentina",
+        "champion_rank": 2,
+        "champion_prob": 0.2339,
+        "champion_logloss": 1.4528616053920038,
+        "finalists": [
+          "Argentina",
+          "France"
+        ],
+        "mean_finalist_reach_final_prob": 0.234,
+        "semifinalists": [
+          "Argentina",
+          "Croatia",
+          "France",
+          "Morocco"
+        ],
+        "mean_semifinalist_reach_SF_prob": 0.23315000000000002
+      },
+      "chalk": {
+        "group_hit_rate": 0.5208333333333334,
+        "champion": "Brazil"
+      },
+      "host": "Qatar"
+    }
+  },
+  "pooled": {
+    "group_n": 192,
+    "group_hit_rate": 0.5520833333333334,
+    "group_mean_brier": 0.57788421421875,
+    "group_skill_vs_uniform": 0.1331736786718749,
+    "knockout_n": 62,
+    "knockout_accuracy": 0.6935483870967742,
+    "mean_champion_logloss": 1.934881578439631,
+    "mean_chalk_group_hit_rate": 0.5520833333333334
+  },
+  "reach_qf_calibration": [
+    {
+      "lo": 0.0,
+      "hi": 0.2,
+      "n": 65,
+      "predicted": 0.09690461538461538,
+      "observed": 0.07692307692307693
+    },
+    {
+      "lo": 0.2,
+      "hi": 0.4,
+      "n": 34,
+      "predicted": 0.2742558823529412,
+      "observed": 0.3235294117647059
+    },
+    {
+      "lo": 0.4,
+      "hi": 0.6,
+      "n": 16,
+      "predicted": 0.47643125,
+      "observed": 0.375
+    },
+    {
+      "lo": 0.6,
+      "hi": 0.8,
+      "n": 13,
+      "predicted": 0.6733538461538462,
+      "observed": 0.7692307692307693
+    },
+    {
+      "lo": 0.8,
+      "hi": 1.0,
+      "n": 0,
+      "predicted": null,
+      "observed": null
+    }
+  ],
+  "experiment": "e61_worldcup_backtest",
+  "timestamp": "2026-06-16T00:21:31",
+  "platform": "macOS-26.4.1-arm64-arm-64bit-Mach-O"
+}

@@ -39,6 +39,7 @@ EXPERIMENTS = [
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
+    "e63_world_model_bakeoff",
 ]
 
 
@@ -2898,6 +2899,19 @@ def numbers_tex(d):
         macro("BranchFaults", str(e62["n_branch_faults"])),
         macro("BranchProbes", str(e62["n_probe_states"])),
     ]
+    # E63 (world-model bake-off)
+    e63 = d["e63_world_model_bakeoff"]
+    learned = [m for m in e63["sprint_control"] if m != "verified code (CWM)"]
+    ood_max = max(e63["fidelity"][dom][m]["probe_ood"]
+                  for dom in e63["domains"] for m in learned)
+    lines += [
+        macro("BakeMethods", str(e63["n_methods_runnable"])),
+        macro("BakeDomains", str(len(e63["domains"]))),
+        macro("BakeCodeReturn", f"{e63['sprint_control']['verified code (CWM)']:.1f}"),
+        macro("BakeLearnedOodMax", f"{ood_max:.2f}"),
+        macro("BakeCodeSpeed", f"{e63['sprint_steps_per_sec']['verified code (CWM)']:,}".replace(",", "{,}")),
+        macro("BakePerceptual", str(len(e63["perceptual_world_models_compared_on_properties"]))),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -3140,6 +3154,36 @@ def fig_trained_wm_control(e61):
     plt.close(fig)
 
 
+def table_bakeoff(e63):
+    """E63: every world model we can run, side by side, averaged over domains
+    (probe in-dist / 10x OOD / rollout) with sprint control return + auditability."""
+    doms = e63["domains"]
+    order = ["verified code (CWM)"] + [m for m in e63["sprint_control"]
+                                       if m != "verified code (CWM)"]
+    train = {"verified code (CWM)": "0 (rules)"}
+    for m in order[1:]:
+        train[m] = f"{e63['k_trained']:,}"
+
+    def avg(model, metric):
+        vals = [e63["fidelity"][dom][model][metric] for dom in doms]
+        return sum(vals) / len(vals)
+
+    rows = []
+    for m in order:
+        audit = "\\checkmark" if m == "verified code (CWM)" else "--"
+        rows.append(f"{m} & {train[m]} & {avg(m,'probe_in'):.2f} & {avg(m,'probe_ood'):.2f} & "
+                    f"{avg(m,'rollout'):.2f} & {e63['sprint_control'][m]:+.1f} & {audit} \\\\")
+    llm = e63.get("llm_proxy", {})
+    rows.append(f"LLM next-state$^\\dagger$ & rules & -- & -- & "
+                f"{llm.get('sprint_rollout', 0):.2f} & {llm.get('sprint_control', 0):+.1f} & -- \\\\")
+    (TABLES / "bakeoff.tex").write_text(
+        "\\begin{tabular}{llccccc}\n\\toprule\n"
+        "World model & Train data & Probe & Probe & Rollout & Control & Audit. \\\\\n"
+        "& (transitions) & in-dist & 10$\\times$OOD & exact & return & \\\\\n\\midrule\n"
+        + "\n".join(rows)
+        + "\n\\bottomrule\n\\end{tabular}\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3202,6 +3246,7 @@ def main():
     fig_io_boundary(data["e60_io_boundary"])
     table_io_boundary(data["e60_io_boundary"])
     fig_trained_wm_control(data["e61_trained_wm_control"])
+    table_bakeoff(data["e63_world_model_bakeoff"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

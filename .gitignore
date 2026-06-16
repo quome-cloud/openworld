@@ -31,3 +31,8 @@ _template/main.bbl
 _template/main.blg
 _template/main.log
 _template/main.out
+
+# GCP harvest local config + outputs (no secrets in repo)
+tooling/distill/gcp/config.env
+traces/
+tooling/distill/gcp/watch.log

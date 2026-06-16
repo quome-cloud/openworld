@@ -605,7 +605,10 @@ def main(argv=None) -> int:
             temp = recipe["eval"].get("temperature", 0.2)
             for model in models:
                 def _factory(inst, sd, _m=model, _t=temp):
-                    return OllamaLLM(model=_m, temperature=_t, options={"seed": sd})
+                    # Cap context (a 70B's huge default num_ctx swaps the GPU)
+                    # and give the big model a long timeout for the harvest run.
+                    return OllamaLLM(model=_m, temperature=_t, timeout=1800,
+                                     options={"seed": sd, "num_ctx": 8192})
                 try:
                     _factory(None, seeds[0]).ask("Reply with OK.")
                 except OllamaConnectionError as exc:

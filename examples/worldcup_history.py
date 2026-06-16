@@ -269,12 +269,17 @@ class Cup:
                                      "hg": hg, "ag": ag, "winner": winner})
         self._ko.sort(key=lambda m: m["date"])
 
-    def group_result(self, a: str, b: str):
+    def group_result(self, a: str, b: str) -> Optional[Tuple[str, int, int]]:
         """(home, home_goals, away_goals) for the real group match, or None."""
         return self._group_res.get(frozenset((a, b)))
 
     def group_of(self, team: str) -> str:
         return self._team_to_group[team]
+
+    def knockout_matches(self) -> List[dict]:
+        """The cup's real knockout matches, date-sorted. Each is a dict with
+        keys home, away, hg, ag, winner, date."""
+        return list(self._ko)
 
     def real_standings(self) -> Dict[str, List[str]]:
         """Real finishing order per group (reuses the forecaster's tiebreak)."""
@@ -284,24 +289,31 @@ class Cup:
             for i in range(len(teams)):
                 for j in range(i + 1, len(teams)):
                     rec = self.group_result(teams[i], teams[j])
+                    if rec is None:
+                        raise ValueError(
+                            f"{self.year} group {g}: missing match {teams[i]} vs {teams[j]}")
                     home, hg, ag = rec
                     away = teams[j] if home == teams[i] else teams[i]
                     res[(home, away)] = (hg, ag)
             out[g] = group_standings(teams, res)
         return out
 
-    def actual_advancers(self) -> Dict[str, str]:
-        """Round-name -> advancing teams, derived from real KO games.
+    def actual_advancers(self) -> Dict[str, object]:
+        """Round-name -> advancing teams, derived from the real KO games (date-sorted).
 
-        16 KO matches in date order: first 8 = R16, next 4 = QF, next 2 = SF,
-        then 3rd-place playoff + final. The final is the last-two match whose two
-        teams both won their SF; the 3rd-place game is the other.
+        R16 = winners of the first 8 KO matches, QF = next 4, SF = next 2. The 3rd-place
+        playoff is present for some cups (2010, 2014) and absent in the vendored data for
+        others (2018, 2022), so the final is identified by predicate — the last match
+        whose BOTH teams won their semi-final — rather than by a fixed match count.
+        champion = winner of that final.
         """
         ko = self._ko
         r16 = ko[:8]; qf = ko[8:12]; sf = ko[12:14]; last_two = ko[14:16]
         sf_winners = {m["winner"] for m in sf}
-        final = next(m for m in last_two
-                     if m["home"] in sf_winners and m["away"] in sf_winners)
+        final = next((m for m in last_two
+                      if m["home"] in sf_winners and m["away"] in sf_winners), None)
+        if final is None:
+            raise ValueError(f"could not identify the {self.year} final from KO data")
         return {
             "R16": [m["winner"] for m in r16],
             "QF": [m["winner"] for m in qf],

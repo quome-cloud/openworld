@@ -1,0 +1,23 @@
+LLM-Persona Validation: Cycle 1 Results
+Model: claude-haiku-4-5-20251001 | N_personas=20 | N_trials=50 | API calls=1840 | cache hits=12160
+
+Gap fraction: median (IQR) across 50 trials
+
+Condition   centrist                      off_axis                    
+---------------------------------------------------------------------------
+A           med=0.231 IQR=[0.231,0.231]         med=0.373 IQR=[0.373,0.373]       
+C_CN        med=0.231 IQR=[0.103,0.231]         med=0.373 IQR=[0.167,0.373]       
+
+Comparison: LLM-driven vs parametric baseline (cycle5)
+
+             Spillover     Param (med)  LLM (med)    Delta Validation
+----------------------------------------------------------------------
+  A          centrist            0.306      0.231   -0.075  within ±0.15
+  A          off_axis            0.495      0.373   -0.122  within ±0.15
+  C_CN       centrist            0.793      0.231   -0.562  DIVERGED (>0.15)
+  C_CN       off_axis            0.904      0.373   -0.531  DIVERGED (>0.15)
+
+  centrist: C_CN=0.231  A=0.231  delta=+0.000  → DIRECTION FAILED ✗
+  off_axis: C_CN=0.373  A=0.373  delta=+0.000  → DIRECTION FAILED ✗
+
+VERDICT: Partial or diverged — see deltas above

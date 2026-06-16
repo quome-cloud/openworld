@@ -103,6 +103,7 @@ def endorse(
             temperature=TEMPERATURE,
             system=persona.system_prompt,
             messages=[{"role": "user", "content": user_msg}],
+            timeout=30.0,
         )
         raw_text = response.content[0].text.strip()
     except Exception as exc:

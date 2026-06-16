@@ -1,0 +1,14 @@
+\begin{tabular}{llccccc}
+\toprule
+World model & Train data & Probe & Probe & Rollout & Control & Audit. \\
+& (transitions) & in-dist & 10$\times$OOD & exact & return & \\
+\midrule
+verified code (CWM) & 0 (rules) & 1.00 & 1.00 & 1.00 & +7.5 & \checkmark \\
+1-NN & 10,000 & 1.00 & 0.00 & 0.77 & +5.7 & -- \\
+tabular & 10,000 & 1.00 & 0.00 & 0.77 & +5.7 & -- \\
+linear & 10,000 & 0.46 & 0.00 & 0.19 & -7.4 & -- \\
+koopman & 10,000 & 0.75 & 0.00 & 0.44 & +5.6 & -- \\
+MLP & 10,000 & 0.70 & 0.00 & 0.19 & -2.6 & -- \\
+LLM next-state$^\dagger$ & rules & -- & -- & 0.00 & +0.0 & -- \\
+\bottomrule
+\end{tabular}

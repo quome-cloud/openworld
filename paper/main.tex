@@ -207,11 +207,12 @@ Schmidhuber~\cite{ha2018world} through the RSSM-based Dreamer
 family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
 autoregressive token models such as IRIS~\cite{iris2023} and
 $\Delta$-IRIS~\cite{deltairis2024}, and diffusion dynamics in
-DIAMOND~\cite{diamond2024}; and, most prominently in recent generative AI, to
-interactive generative environments and ``spatial intelligence''---internet-scale
-video and 3D world generators such as Genie~\cite{genie2024}, video-generation-as-%
-simulator (Sora)~\cite{sora2024}, and Fei-Fei Li's World
-Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
+DIAMOND~\cite{diamond2024}, joint-embedding predictive video models that
+forecast in representation space such as V-JEPA~\cite{vjepa2025}; and, most
+prominently in recent generative AI, to interactive generative environments and
+``spatial intelligence''---internet-scale video and 3D world generators such as
+Genie~\cite{genie2024}, video-generation-as-simulator (Sora)~\cite{sora2024}, and
+Fei-Fei Li's World Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
 costs: they are \emph{data-hungry} (millions of environment steps, or
 internet-scale video), \emph{compounding} (every learned transition adds error
 that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
@@ -380,6 +381,7 @@ IRIS / $\Delta$-IRIS~\cite{iris2023,deltairis2024} & VQ tokens + autoregressive 
 DIAMOND~\cite{diamond2024} & diffusion dynamics in pixel space & GPU-heavy; no symbolic audit \\
 Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale compute; closed \\
 Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
+V-JEPA~\cite{vjepa2025} & joint-embedding video prediction in latent space & perceptual; latent, unauditable; trained \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
@@ -1586,6 +1588,51 @@ underperforms the model-free reactive policy.}
 \label{fig:trained-wm}
 \end{figure}
 
+\subsection{A world-model bake-off: as many approaches as we can run (E63)}\label{sec:bakeoff}
+E61 compares one trained model class; E63 broadens the head-to-head to
+\BakeMethods{} world models we can execute locally, across \BakeDomains{} domains
+(sprint and triage), under one battery (Table~\ref{tab:bakeoff}). \textbf{What
+makes this a fair comparison---and how to check it}: every entry is a next-state
+predictor over the \emph{same} symbolic state, evaluated on the \emph{same} task
+with the \emph{same} training budget ($K{=}10{,}000$ transitions, 5 seeds), and the
+learned set spans the standard families of dynamics models---memorization (1-NN),
+a tabular model with nearest-neighbour backoff, linear least-squares, a
+Koopman/EDMD operator on a degree-2 lift, and a neural MLP. The result is uniform:
+the verified code world model is exact in- and out-of-distribution and rolls out
+bit-exactly in both domains from \emph{zero} transitions, plans optimally
+(return~\BakeCodeReturn) and runs at \BakeCodeSpeed{} steps/s; \emph{every} learned
+model collapses to \BakeLearnedOodMax{} exact accuracy at $10\times$ OOD in
+\emph{both} domains (memorizers ace in-distribution probes yet generalize no
+better), and planning through them lands at or below model-free control---some
+\emph{negative}. The LLM next-state proxy (numbers from E10/E11/E22) completes
+$0$ rollouts and scores $0$ on control.
+
+\paragraph{Why not Dreamer, V-JEPA, Genie, Sora?} Those are a different
+\emph{species}: \emph{perceptual} world models that learn latent or pixel/video
+dynamics (DreamerV3~\cite{dreamerv3}, MuZero~\cite{muzero}, IRIS~\cite{iris2023},
+DIAMOND~\cite{diamond2024}, Genie~\cite{genie2024}, Sora~\cite{sora2024}, Fei-Fei
+Li's World Labs~\cite{worldlabs2025}, and the joint-embedding
+V-JEPA~\cite{vjepa2025}). They predict observations or embeddings, not a symbolic
+next state, and cannot run on these tasks without a learned perception stack, so a
+head-to-head would not be apples-to-apples; we compare them on \emph{properties}
+in Table~\ref{tab:related} ($\BakePerceptual$ such systems) rather than fabricate a
+shared number. This is the genus/species distinction drawn in the introduction:
+the bake-off is the within-species comparison; the related-work table is the
+cross-species one. The honest scope of E63 is the symbolic regime---orchard is
+excluded because its per-agent nested-dict state is not a flat vector for the
+learned baselines.
+
+\begin{table}[htb]\centering\small
+\input{tables/bakeoff.tex}
+\caption{\textbf{World-model bake-off (E63).} Every world model we can run
+locally, on shared symbolic tasks; probe/rollout averaged over sprint and triage
+(5 seeds, $K{=}10{,}000$). $^\dagger$LLM rows from E10/E11/E22. Verified code is the
+only model exact, OOD-robust, optimal-for-control, auditable, \emph{and} zero-data.
+Perceptual world models (Dreamer/V-JEPA/Genie/Sora/$\ldots$) are a different species,
+compared on properties in Table~\ref{tab:related}.}
+\label{tab:bakeoff}
+\end{table}
+
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
 Three round-3 experiments chart where the paradigm holds and what to do at
 the edge.
@@ -2231,7 +2278,7 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E62 are introduced across the Results section in thematic
+The experiments E1--E63 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
@@ -2318,6 +2365,7 @@ E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch}
 E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} \\
 E61 & Verified code vs a trained world model, on control & Fig.~\ref{fig:trained-wm} \\
 E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
+E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
 \end{longtable}
 \endgroup
 

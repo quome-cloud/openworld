@@ -73,3 +73,15 @@ def test_encoded_groups_match_real_data(year):
 def test_actual_champion_recovered(year, champion):
     cup = wh.load_cup(year)
     assert cup.actual_champion() == champion
+
+
+def test_forecast_cup_is_deterministic_and_normalised():
+    eng = wh.EloEngine.from_results(wh.RESULTS_CSV)
+    f1 = wh.forecast_cup(2014, eng, sims=300, seed=7)
+    f2 = wh.forecast_cup(2014, eng, sims=300, seed=7)
+    assert f1 == f2  # deterministic in seed
+    champ = sum(v["champion"] for v in f1.values())
+    assert abs(champ - 100.0) < 1e-6  # title probs sum to 100%
+    # The pre-2014 favourites should top the title odds.
+    top = max(f1, key=lambda t: f1[t]["champion"])
+    assert top in {"Brazil", "Germany", "Argentina", "Spain"}

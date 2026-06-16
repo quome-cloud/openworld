@@ -328,3 +328,91 @@ class Cup:
 
 def load_cup(year: int) -> Cup:
     return Cup(year)
+
+
+KO_ROUNDS = ["R16", "QF", "SF", "final"]
+
+
+def _eff(team: str, elo: Dict[str, float], host: str, base: float) -> float:
+    from worldcup2026 import HOST_ADVANTAGE
+    return elo.get(team, base) + (HOST_ADVANTAGE if team == host else 0.0)
+
+
+def _sample(home, away, elo, host, base, rng):
+    return sample_goals_from_elo(_eff(home, elo, host, base),
+                                 _eff(away, elo, host, base), rng)
+
+
+def _ko_match(home, away, elo, host, base, rng):
+    hg, ag = _sample(home, away, elo, host, base, rng)
+    if hg != ag:
+        return (home if hg > ag else away), hg, ag, False
+    dh = _eff(home, elo, host, base) - _eff(away, elo, host, base)
+    p_home = 1.0 / (1.0 + 10 ** (-dh / 400.0))
+    return (home if rng.random() < p_home else away), hg, ag, True
+
+
+def simulate_cup_once(cup: "Cup", elo: Dict[str, float], rng: random.Random,
+                      base: float = 1500.0) -> dict:
+    """One full 32-team tournament. Returns reached-round per team + champion."""
+    reached = {t: "group" for g in cup.groups.values() for t in g}
+    winners, runners = {}, {}
+    for g, teams in cup.groups.items():
+        res = {}
+        for i in range(len(teams)):
+            for j in range(i + 1, len(teams)):
+                h, a = teams[i], teams[j]
+                res[(h, a)] = _sample(h, a, elo, cup.host, base, rng)
+        order = group_standings(teams, res)
+        winners[g], runners[g] = order[0], order[1]
+    # Seed R16 in fixed bracket order so the binary tree pairs neighbours.
+    seeds = []
+    for wl, rl in R16_PAIRS:
+        seeds.append(winners[wl]); seeds.append(runners[rl])
+    for t in seeds:
+        reached[t] = "R16"
+    teams = seeds
+    for rnd in KO_ROUNDS:
+        nxt = []
+        for i in range(0, len(teams), 2):
+            w, _hg, _ag, _p = _ko_match(teams[i], teams[i + 1], elo, cup.host, base, rng)
+            nxt.append(w)
+        nxt_round = KO_ROUNDS[KO_ROUNDS.index(rnd) + 1] if rnd != "final" else "champion"
+        for w in nxt:
+            reached[w] = nxt_round
+        teams = nxt
+    return {"champion": teams[0], "reached": reached}
+
+
+_REACH_ORDER = ["group", "R16", "QF", "SF", "final", "champion"]
+
+
+def forecast_cup(year: int, eng: "EloEngine", sims: int = 10000, seed: int = 2026,
+                 base: float = 1500.0) -> Dict[str, Dict[str, float]]:
+    """Monte-Carlo a cup from FROZEN pre-tournament Elo. Per-team probabilities (%)."""
+    cup = load_cup(year)
+    elo = eng.ratings_asof(_cup_freeze_date(year))
+    teams = [t for g in cup.groups.values() for t in g]
+    titles = {t: 0 for t in teams}
+    reach = {t: {r: 0 for r in _REACH_ORDER} for t in teams}
+    for s in range(sims):
+        rng = random.Random(seed * 1_000_003 + s)
+        out = simulate_cup_once(cup, elo, rng, base=base)
+        titles[out["champion"]] += 1
+        for t, r in out["reached"].items():
+            idx = _REACH_ORDER.index(r)
+            for ri in range(1, idx + 1):
+                reach[t][_REACH_ORDER[ri]] += 1
+    # Keep exact floats (no rounding) so champion probabilities sum to exactly 100%.
+    def pct(n): return 100.0 * n / sims
+    return {t: {"champion": pct(titles[t]),
+                "reach_final": pct(reach[t]["final"]),
+                "reach_SF": pct(reach[t]["SF"]),
+                "reach_QF": pct(reach[t]["QF"]),
+                "reach_R16": pct(reach[t]["R16"])} for t in teams}
+
+
+def _cup_freeze_date(year: int) -> str:
+    """Day-before-opener freeze date per cup (no look-ahead)."""
+    return {2010: "2010-06-11", 2014: "2014-06-12",
+            2018: "2018-06-14", 2022: "2022-11-20"}[year]

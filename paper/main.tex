@@ -1683,6 +1683,37 @@ compared on properties in Table~\ref{tab:related}.}
 \label{tab:bakeoff}
 \end{table}
 
+\subsection{Crossing species on a shared benchmark: trained vs.\ verified on MiniGrid (E65)}\label{sec:minigrid}
+The bake-off (E63) is deliberately \emph{within}-species and defers the cross-species
+comparison to properties (Table~\ref{tab:related}), because perceptual models cannot
+run on flat symbolic state. E65 closes that gap by moving to a benchmark where the
+species \emph{can} meet: MiniGrid DoorKey-6x6. We express the task as a verified
+OpenWorld transition and validate it \emph{bit-for-bit} against the real Farama
+\texttt{minigrid} environment ($600/600$ steps; \texttt{bench/validate\_minigrid.py}),
+so the learned and perceptual models consume the \emph{same} environment's rendered
+$48\times48$ pixels while OpenWorld plans over the verified code
+(Table~\ref{tab:minigrid}). OpenWorld solves the task \emph{zero-shot} with an optimal
+\MGOpenWorldPlan-step plan and no training data. DreamerV3~\cite{dreamerv3}, learning a
+latent world model from pixels on a dedicated A100, reaches the same
+\MGDreamerFinalSolve{} solve rate---but only after a first success at
+\MGDreamerFirstSolve{} environment steps and convergence over $\sim$50k.
+V-JEPA-2~\cite{vjepa2025} enters as the perceptual species: with no symbolic policy it
+has no solve rate, so we report its representation drift (mean consecutive-frame cosine
+\MGVjepaCosine) and mark it, honestly, as not directly comparable. The reading holds
+the paper's thesis on the learned models' \emph{own} terrain (pixels): verification
+buys the exact solution for zero data and a guarantee, where the learned model needs
+$\sim$10k pixel-level interactions merely to first succeed.
+
+\begin{table}[htb]\centering\small
+\input{tables/minigrid_bench.tex}
+\caption{\textbf{Trained vs.\ verified on a shared benchmark (E65).} MiniGrid
+DoorKey-6x6, with OpenWorld's transition validated bit-for-bit against Farama
+\texttt{minigrid}; DreamerV3 (1 seed, A100) and V-JEPA-2 consume the same
+environment's rendered pixels. V-JEPA is perceptual (no symbolic policy), hence a
+representation-drift metric rather than a solve rate.}
+\label{tab:minigrid}
+\end{table}
+
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
 Three round-3 experiments chart where the paradigm holds and what to do at
 the edge.

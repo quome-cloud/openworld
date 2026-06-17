@@ -2392,7 +2392,7 @@ E52 & Wavelet denoising as a perceive$\to$world$\to$emit loop & Tab.~\ref{tab:de
 E53 & \emph{Retired (sheaf section cut); not in text} & --- \\
 E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:bounds} \\
 E55 & Information geometry: identify the world by maximizing info & Tab.~\ref{tab:infogeom} \\
-E56 & Optimal transport: drift detection where KL fails & Tab.~\ref{tab:transport} \\
+E56 & Optimal transport: drift detection where KL saturates & Tab.~\ref{tab:transport} \\
 E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
 E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
 E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
@@ -2717,7 +2717,7 @@ accuracy for expected-information-gain, version-space, and random probing.}
 \input{tables/infogeom}
 \end{table}
 
-\subsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
+\subsection{Optimal transport: drift detection and calibration where KL saturates (E56)}\label{sec:transport}
 Comparing a world's output distribution to data is usually done with KL
 divergence, but KL is uninformative in exactly the regime drift detection cares about: under a regime shift the new
 distribution moves off the old one, supports stop overlapping, and KL saturates to

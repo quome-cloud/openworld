@@ -1,0 +1,109 @@
+{
+  "experiment": "e66_reachable_ood",
+  "k_trained": 10000,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "traj": 4000,
+  "traj_len": 30,
+  "domains": {
+    "sprint": {
+      "coord": "shipped",
+      "median": 10,
+      "n_distinct": 500,
+      "n_train_region_tr": 95689,
+      "n_interp_ood_tr": 18193,
+      "n_extrap_ood_tr": 7377,
+      "models": {
+        "1-NN": {
+          "in_region": 0.992,
+          "interp_ood": 0.169,
+          "extrap_ood": 0.0,
+          "x10_old": 0.0
+        },
+        "tabular": {
+          "in_region": 0.992,
+          "interp_ood": 0.169,
+          "extrap_ood": 0.0,
+          "x10_old": 0.0
+        },
+        "linear": {
+          "in_region": 0.872,
+          "interp_ood": 0.641,
+          "extrap_ood": 0.349,
+          "x10_old": 0.0
+        },
+        "koopman": {
+          "in_region": 0.975,
+          "interp_ood": 0.838,
+          "extrap_ood": 0.57,
+          "x10_old": 0.0
+        },
+        "MLP": {
+          "in_region": 0.88,
+          "interp_ood": 0.607,
+          "extrap_ood": 0.124,
+          "x10_old": 0.0
+        },
+        "verified code (reference)": {
+          "in_region": 1.0,
+          "interp_ood": 1.0,
+          "extrap_ood": 1.0,
+          "x10_old": 1.0,
+          "note": "exact by construction (oracle); reference, not a contestant"
+        }
+      }
+    },
+    "triage": {
+      "coord": "tick",
+      "median": 16,
+      "n_distinct": 786,
+      "n_train_region_tr": 50094,
+      "n_interp_ood_tr": 33517,
+      "n_extrap_ood_tr": 52000,
+      "models": {
+        "1-NN": {
+          "in_region": 0.995,
+          "interp_ood": 0.0,
+          "extrap_ood": 0.0,
+          "x10_old": 0.0
+        },
+        "tabular": {
+          "in_region": 0.995,
+          "interp_ood": 0.0,
+          "extrap_ood": 0.0,
+          "x10_old": 0.0
+        },
+        "linear": {
+          "in_region": 0.472,
+          "interp_ood": 0.452,
+          "extrap_ood": 0.378,
+          "x10_old": 0.0
+        },
+        "koopman": {
+          "in_region": 0.797,
+          "interp_ood": 0.579,
+          "extrap_ood": 0.417,
+          "x10_old": 0.0
+        },
+        "MLP": {
+          "in_region": 0.481,
+          "interp_ood": 0.338,
+          "extrap_ood": 0.226,
+          "x10_old": 0.0
+        },
+        "verified code (reference)": {
+          "in_region": 1.0,
+          "interp_ood": 1.0,
+          "extrap_ood": 1.0,
+          "x10_old": 1.0,
+          "note": "exact by construction (oracle); reference, not a contestant"
+        }
+      }
+    }
+  }
+}

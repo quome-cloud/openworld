@@ -28,7 +28,7 @@ With-context vs without-context ablation per instance: the same model solves
 the repair task once with no examples (without-context) and once with a short
 history of related, already-solved bugs prepended (with-context). The axis is
 in-context learning — does showing prior solved examples help the model
-transfer the fix pattern to a new module? Scoring is identical to swebench:
+transfer the fix pattern to a new module? Scoring is identical to repairbench:
 solved = zero failures in both hidden suites. Default ladder: qwen2.5:1.5b, qwen2.5:3b, qwen2.5:7b.
 Per-instance paired records are always saved so exact tests (e.g. McNemar)
 remain possible. (`eval.budget` is a schema-parity placeholder; contextbench

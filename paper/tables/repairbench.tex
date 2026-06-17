@@ -1,0 +1,13 @@
+\begin{tabular}{llccccc}
+\toprule
+Suite & Model & SS pass@1 & IW pass@1 & IW pass@4 & $\Delta$ & Mean att. \\
+\midrule
+Atomic ($n=6$) & \texttt{qwen2.5:1.5b} & 0.17 & 0.17 & 0.17 & $+0.00$ & 3.5 \\
+ & \texttt{qwen2.5:3b} & 0.50 & 0.50 & 0.50 & $+0.00$ & 2.5 \\
+ & \texttt{qwen2.5:7b} & 1.00 & 0.67 & 0.83 & $-0.17$ & 1.7 \\
+\midrule
+Staged ($n=15$) & \texttt{qwen2.5:1.5b} & 0.07 & 0.07 & 0.07 & $+0.00$ & 3.8 \\
+ & \texttt{qwen2.5:3b} & 0.13 & 0.13 & 0.27 & $+0.13$ & 3.3 \\
+ & \texttt{qwen2.5:7b} & 0.13 & 0.13 & 0.47 & $+0.33$ & 3.0 \\
+\bottomrule
+\end{tabular}

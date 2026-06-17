@@ -4,11 +4,11 @@ A recipe (recipes/*.json, schema_version 1) pins everything needed to rebuild
 a dataset, validate it, run the paired single-shot vs in-world evaluation,
 and emit a dataset card:
 
-    python -m openworld.bench recipes/owsb-atomic-v1.json build
-    python -m openworld.bench recipes/owsb-atomic-v1.json validate
-    python -m openworld.bench recipes/owsb-atomic-v1.json run --mock
-    python -m openworld.bench recipes/owsb-atomic-v1.json card
-    python -m openworld.bench recipes/owsb-atomic-v1.json all --mock
+    python -m openworld.bench recipes/owrb-atomic-v1.json build
+    python -m openworld.bench recipes/owrb-atomic-v1.json validate
+    python -m openworld.bench recipes/owrb-atomic-v1.json run --mock
+    python -m openworld.bench recipes/owrb-atomic-v1.json card
+    python -m openworld.bench recipes/owrb-atomic-v1.json all --mock
 
 Recipes are JSON (not YAML) because the framework is zero-dependency on
 Python 3.9. Results are written one file per (model, recipe) in a frozen
@@ -78,8 +78,8 @@ def wilson_ci(successes: int, n: int, z: float = 1.96):
 
 
 def harness_kind(recipe: Dict[str, Any]) -> str:
-    """The harness dispatch kind; defaults to the original swebench ablation."""
-    return recipe.get("harness", {}).get("kind", "swebench")
+    """The harness dispatch kind; defaults to the original repairbench ablation."""
+    return recipe.get("harness", {}).get("kind", "repairbench")
 
 
 def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
@@ -92,13 +92,13 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     - tasks.jsonl sha256 matches recipe.artifacts (when frozen)
 
     For harness.kind == "contextbench" the unit of iteration is a
-    ContextBenchInstance whose `.task` IS a swebench instance, so the same
+    ContextBenchInstance whose `.task` IS a repairbench instance, so the same
     per-task gate runs against `inst.task`. The contextbench world only stores
     a `source/attempts/solved` initial state (no per-suite counts), so the
     initial-state drift check is run over exactly the keys present in the
-    stored state — still meaningful, just narrower than swebench's.
+    stored state — still meaningful, just narrower than repairbench's.
     """
-    from .swebench import initial_world_state, run_instance_tests
+    from .repairbench import initial_world_state, run_instance_tests
 
     kind = harness_kind(recipe)
     if kind == "contextbench":
@@ -107,7 +107,7 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
         instances = [c.task for c in cb_instances]
         ids = [c.instance_id for c in cb_instances]
     else:
-        from .swebench import load_dataset
+        from .repairbench import load_dataset
         instances = load_dataset(recipe["dataset"]["path"])
         ids = [i.instance_id for i in instances]
 
@@ -128,7 +128,7 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
               buggy["fail_to_pass"]["passed"] == 0 and buggy["pass_to_pass"]["failed"] == 0)
         recomputed = initial_world_state(inst)
         stored = inst.world.get("initial_state", {})
-        # Gate over the keys the stored state actually carries (swebench stores
+        # Gate over the keys the stored state actually carries (repairbench stores
         # the full per-suite counts; contextbench stores source/attempts/solved).
         drift = [k for k in ("fail_to_pass_passed", "fail_to_pass_failed",
                              "pass_to_pass_passed", "pass_to_pass_failed",
@@ -151,8 +151,8 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _oracle_source(instance) -> str:
-    """The reference patch for either a swebench or contextbench instance."""
-    # ContextBenchInstance wraps a SWEBenchInstance in `.task`.
+    """The reference patch for either a repairbench or contextbench instance."""
+    # ContextBenchInstance wraps a RepairBenchInstance in `.task`.
     task = getattr(instance, "task", instance)
     return task.reference_source
 
@@ -277,7 +277,7 @@ def evaluate_contextbench(recipe, model, llm_factory, mock=False,
                           results_dir=None, seeds=None) -> Dict[str, Any]:
     """Run the with-context vs without-context ablation for one model.
 
-    Result-file shape is kept parallel to the swebench `evaluate` (same
+    Result-file shape is kept parallel to the repairbench `evaluate` (same
     top-level keys) so results stay comparable across harness kinds.
     `budget` is carried (from recipe.eval.budget) but unused — contextbench has
     no iteration budget; the field exists only for schema parity.
@@ -339,7 +339,7 @@ def evaluate(recipe, model, llm_factory, budget=None, mock=False,
     """
     from datetime import datetime
 
-    from .swebench import load_dataset, solve_in_world, solve_single_shot
+    from .repairbench import load_dataset, solve_in_world, solve_single_shot
 
     instances = load_dataset(recipe["dataset"]["path"])
     budget = budget or recipe["eval"]["budget"]
@@ -400,7 +400,7 @@ With-context vs without-context ablation per instance: the same model solves
 the repair task once with no examples (without-context) and once with a short
 history of related, already-solved bugs prepended (with-context). The axis is
 in-context learning — does showing prior solved examples help the model
-transfer the fix pattern to a new module? Scoring is identical to swebench:
+transfer the fix pattern to a new module? Scoring is identical to repairbench:
 solved = zero failures in both hidden suites. Default ladder: {', '.join(recipe['eval']['models'])}.
 Per-instance paired records are always saved so exact tests (e.g. McNemar)
 remain possible. (`eval.budget` is a schema-parity placeholder; contextbench

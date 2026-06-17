@@ -10,7 +10,7 @@
 
 **Spec deviation (recorded):** the spec sketch said `recipes/<dataset>.yaml`; recipes are JSON because the repo is zero-dependency on Python 3.9 (no PyYAML, no tomllib). Same fields, same semantics.
 
-**Scope note:** unifying the *contextbench* runner is deferred (its conditions are with/without-context, not single-shot/in-world; it needs a condition abstraction that is YAGNI here). Only the two swebench datasets are retrofitted.
+**Scope note:** unifying the *contextbench* runner is deferred (its conditions are with/without-context, not single-shot/in-world; it needs a condition abstraction that is YAGNI here). Only the two repairbench datasets are retrofitted.
 
 **Base branch:** branch off `staged-on-main` (PR #7) until it merges; rebase onto main after.
 
@@ -20,8 +20,8 @@
 
 **Files:**
 - Create: `openworld/bench.py`
-- Create: `recipes/owsb-atomic-v1.json`
-- Create: `recipes/owsb-staged-v1.json`
+- Create: `recipes/owrb-atomic-v1.json`
+- Create: `recipes/owrb-staged-v1.json`
 - Create: `tests/test_bench.py`
 
 - [ ] **Step 1: Write the failing tests**
@@ -37,14 +37,14 @@ import pytest
 
 from openworld.bench import RecipeError, load_recipe
 
-ATOMIC_RECIPE = "recipes/owsb-atomic-v1.json"
-STAGED_RECIPE = "recipes/owsb-staged-v1.json"
+ATOMIC_RECIPE = "recipes/owrb-atomic-v1.json"
+STAGED_RECIPE = "recipes/owrb-staged-v1.json"
 
 
 def test_load_recipe_resolves_paths_and_defaults():
     recipe = load_recipe(ATOMIC_RECIPE)
     assert recipe["schema_version"] == 1
-    assert recipe["dataset"]["name"] == "owsb-atomic"
+    assert recipe["dataset"]["name"] == "owrb-atomic"
     # paths are resolved to absolute paths under the repo root
     assert recipe["dataset"]["path"].is_absolute()
     assert recipe["dataset"]["path"].name == "tasks.jsonl"
@@ -55,7 +55,7 @@ def test_load_recipe_resolves_paths_and_defaults():
 
 def test_load_recipe_staged():
     recipe = load_recipe(STAGED_RECIPE)
-    assert recipe["dataset"]["name"] == "owsb-staged"
+    assert recipe["dataset"]["name"] == "owrb-staged"
     assert recipe["dataset"]["path"].exists()
 
 
@@ -82,20 +82,20 @@ Expected: collection error — no module `openworld.bench`.
 
 - [ ] **Step 3: Implement**
 
-Create `recipes/owsb-atomic-v1.json`:
+Create `recipes/owrb-atomic-v1.json`:
 
 ```json
 {
   "schema_version": 1,
   "dataset": {
-    "name": "owsb-atomic",
+    "name": "owrb-atomic",
     "version": "v1",
     "description": "20 atomic single-defect SWE program-repair instances, each with an explicit world-model spec and a pass_to_pass regression suite.",
-    "path": "datasets/openworld-swebench/tasks.jsonl"
+    "path": "datasets/openworld-repairbench/tasks.jsonl"
   },
   "generator": {
     "type": "hand",
-    "builder": "datasets/openworld-swebench/build_tasks.py",
+    "builder": "datasets/openworld-repairbench/build_tasks.py",
     "seed": null
   },
   "harness": {
@@ -113,20 +113,20 @@ Create `recipes/owsb-atomic-v1.json`:
 }
 ```
 
-Create `recipes/owsb-staged-v1.json` (same shape):
+Create `recipes/owrb-staged-v1.json` (same shape):
 
 ```json
 {
   "schema_version": 1,
   "dataset": {
-    "name": "owsb-staged",
+    "name": "owrb-staged",
     "version": "v1",
     "description": "15 two-stage program-repair instances: the issue-visible fix surfaces a latent second failing test, so feedback-driven iteration is required.",
-    "path": "datasets/openworld-swebench-staged/tasks.jsonl"
+    "path": "datasets/openworld-repairbench-staged/tasks.jsonl"
   },
   "generator": {
     "type": "hand",
-    "builder": "datasets/openworld-swebench-staged/build_tasks.py",
+    "builder": "datasets/openworld-repairbench-staged/build_tasks.py",
     "seed": null
   },
   "harness": {
@@ -153,11 +153,11 @@ A recipe (recipes/*.json, schema_version 1) pins everything needed to rebuild
 a dataset, validate it, run the paired single-shot vs in-world evaluation,
 and emit a dataset card:
 
-    python -m openworld.bench recipes/owsb-atomic-v1.json build
-    python -m openworld.bench recipes/owsb-atomic-v1.json validate
-    python -m openworld.bench recipes/owsb-atomic-v1.json run --mock
-    python -m openworld.bench recipes/owsb-atomic-v1.json card
-    python -m openworld.bench recipes/owsb-atomic-v1.json all --mock
+    python -m openworld.bench recipes/owrb-atomic-v1.json build
+    python -m openworld.bench recipes/owrb-atomic-v1.json validate
+    python -m openworld.bench recipes/owrb-atomic-v1.json run --mock
+    python -m openworld.bench recipes/owrb-atomic-v1.json card
+    python -m openworld.bench recipes/owrb-atomic-v1.json all --mock
 
 Recipes are JSON (not YAML) because the framework is zero-dependency on
 Python 3.9. Results are written one file per (model, recipe) in a frozen
@@ -234,7 +234,7 @@ Run: `python -m pytest tests/test_bench.py -v` — all 4 PASS.
 
 ```bash
 git add openworld/bench.py recipes/ tests/test_bench.py
-git commit -m "Add openworld.bench recipe schema v1 with recipes for both swebench datasets"
+git commit -m "Add openworld.bench recipe schema v1 with recipes for both repairbench datasets"
 ```
 
 ---
@@ -287,7 +287,7 @@ def validate_dataset(recipe: Dict[str, Any]) -> Dict[str, Any]:
     - stored world.initial_state matches recomputation
     - tasks.jsonl sha256 matches recipe.artifacts (when frozen)
     """
-    from .swebench import initial_world_state, load_dataset, run_instance_tests
+    from .repairbench import initial_world_state, load_dataset, run_instance_tests
 
     instances = load_dataset(recipe["dataset"]["path"])
     checks: List[Dict[str, Any]] = []
@@ -358,7 +358,7 @@ def test_evaluate_mock_oracle_second_try(tmp_path):
     assert out.exists()
     saved = json.loads(out.read_text(encoding="utf-8"))
     assert saved["result_schema_version"] == 1
-    assert saved["dataset"] == "owsb-atomic"
+    assert saved["dataset"] == "owrb-atomic"
     assert saved["recipe_sha256"] == recipe["_recipe_sha256"]
     assert saved["mock"] is True
     assert saved["n_instances"] == 20
@@ -445,7 +445,7 @@ def evaluate(recipe, model, llm_factory, budget=None, mock=False,
     """Run the paired ablation for one model; write one frozen-schema file."""
     from datetime import datetime
 
-    from .swebench import load_dataset, solve_in_world, solve_single_shot
+    from .repairbench import load_dataset, solve_in_world, solve_single_shot
 
     instances = load_dataset(recipe["dataset"]["path"])
     budget = budget or recipe["eval"]["budget"]
@@ -528,7 +528,7 @@ def test_card_contains_provenance_and_gate(tmp_path):
     report = validate_dataset(recipe)
     card_path = write_card(recipe, report, out=tmp_path / "CARD.md")
     card = card_path.read_text(encoding="utf-8")
-    assert "# owsb-atomic v1" in card
+    assert "# owrb-atomic v1" in card
     assert "hand" in card                      # generator type
     assert "20 instances" in card
     assert "all checks passed" in card
@@ -712,13 +712,13 @@ if __name__ == "__main__":
 - [ ] **Step 2: Smoke the CLI end-to-end (mock)**
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json validate
-python -m openworld.bench recipes/owsb-staged-v1.json all --mock
+python -m openworld.bench recipes/owrb-atomic-v1.json validate
+python -m openworld.bench recipes/owrb-staged-v1.json all --mock
 ```
 
 Expected: gate OK for both; staged `all` rebuilds tasks.jsonl (no drift since
 hash not yet frozen), runs the mock (table row: 0% / 0% / 100% / +100% / 2.0),
-and writes `datasets/openworld-swebench-staged/CARD.md`.
+and writes `datasets/openworld-repairbench-staged/CARD.md`.
 
 CAUTION: `run` overwrites `results/<model>.json`. The staged dataset has a
 committed legacy `results/comparison.json` — the new writer uses per-model
@@ -728,10 +728,10 @@ filenames so it is NOT touched; verify with `git status` that only `CARD.md`
 - [ ] **Step 3: Freeze both artifacts**
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json build --freeze
-python -m openworld.bench recipes/owsb-staged-v1.json build --freeze
-python -m openworld.bench recipes/owsb-atomic-v1.json validate
-python -m openworld.bench recipes/owsb-staged-v1.json validate
+python -m openworld.bench recipes/owrb-atomic-v1.json build --freeze
+python -m openworld.bench recipes/owrb-staged-v1.json build --freeze
+python -m openworld.bench recipes/owrb-atomic-v1.json validate
+python -m openworld.bench recipes/owrb-staged-v1.json validate
 ```
 
 Expected: both recipes now pin sha256; both validates print OK (artifact-sha256 check now active).
@@ -741,7 +741,7 @@ Expected: both recipes now pin sha256; both validates print OK (artifact-sha256 
 The staged dataset dir has no `.gitignore`, and its legacy
 `results/comparison.json` (the original E29 run cited by the paper) must stay
 tracked while new per-model result files stay out of git. Create
-`datasets/openworld-swebench-staged/.gitignore` with exactly:
+`datasets/openworld-repairbench-staged/.gitignore` with exactly:
 
 ```
 results/*
@@ -752,11 +752,11 @@ results/*
 stays; the negation documents intent.)
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json card
-python -m openworld.bench recipes/owsb-staged-v1.json card
-git add openworld/bench.py recipes/ datasets/openworld-swebench/CARD.md \
-        datasets/openworld-swebench-staged/CARD.md \
-        datasets/openworld-swebench-staged/.gitignore
+python -m openworld.bench recipes/owrb-atomic-v1.json card
+python -m openworld.bench recipes/owrb-staged-v1.json card
+git add openworld/bench.py recipes/ datasets/openworld-repairbench/CARD.md \
+        datasets/openworld-repairbench-staged/CARD.md \
+        datasets/openworld-repairbench-staged/.gitignore
 git commit -m "bench: CLI with build/validate/run/card; freeze both dataset artifacts; emit cards"
 ```
 
@@ -765,16 +765,16 @@ git commit -m "bench: CLI with build/validate/run/card; freeze both dataset arti
 ### Task 6: Retire the per-dataset runners + docs + full verification
 
 **Files:**
-- Delete: `datasets/openworld-swebench/run_comparison.py`
-- Delete: `datasets/openworld-swebench-staged/run_comparison.py`
-- Modify: `datasets/openworld-swebench/README.md` (Running section)
-- Modify: `datasets/openworld-swebench-staged/README.md` (Files/Running sections)
+- Delete: `datasets/openworld-repairbench/run_comparison.py`
+- Delete: `datasets/openworld-repairbench-staged/run_comparison.py`
+- Modify: `datasets/openworld-repairbench/README.md` (Running section)
+- Modify: `datasets/openworld-repairbench-staged/README.md` (Files/Running sections)
 
 - [ ] **Step 1: Delete the runners and update the READMEs**
 
 ```bash
-git rm datasets/openworld-swebench/run_comparison.py \
-       datasets/openworld-swebench-staged/run_comparison.py
+git rm datasets/openworld-repairbench/run_comparison.py \
+       datasets/openworld-repairbench-staged/run_comparison.py
 ```
 
 In each README, replace the `run_comparison.py` commands with the bench
@@ -783,19 +783,19 @@ equivalents and mention the recipe file, e.g. for atomic:
 ```markdown
 ## Running
 
-All operations go through the recipe (`recipes/owsb-atomic-v1.json`):
+All operations go through the recipe (`recipes/owrb-atomic-v1.json`):
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json run --mock   # offline smoke
-python -m openworld.bench recipes/owsb-atomic-v1.json run          # Ollama ladder
-python -m openworld.bench recipes/owsb-atomic-v1.json all --mock   # build+validate+run+card
+python -m openworld.bench recipes/owrb-atomic-v1.json run --mock   # offline smoke
+python -m openworld.bench recipes/owrb-atomic-v1.json run          # Ollama ladder
+python -m openworld.bench recipes/owrb-atomic-v1.json all --mock   # build+validate+run+card
 ```
 
 Results land in `results/<model>.json` (frozen result schema v1, one file
 per model); the dataset card is `CARD.md`.
 ```
 
-(Equivalent edit in the staged README, citing `recipes/owsb-staged-v1.json`;
+(Equivalent edit in the staged README, citing `recipes/owrb-staged-v1.json`;
 keep its legacy-results note: `results/comparison.json` is the original E29
 run cited by the paper.)
 
@@ -810,9 +810,9 @@ leave it). Fix any live reference (e.g. the root README) to use bench.
 
 ```bash
 python -m pytest tests/ -q                                  # everything passes
-python -m openworld.bench recipes/owsb-atomic-v1.json build # no drift vs frozen hash
-python -m openworld.bench recipes/owsb-staged-v1.json build
-python -m openworld.bench recipes/owsb-atomic-v1.json run --mock
+python -m openworld.bench recipes/owrb-atomic-v1.json build # no drift vs frozen hash
+python -m openworld.bench recipes/owrb-staged-v1.json build
+python -m openworld.bench recipes/owrb-atomic-v1.json run --mock
 git status --short                                          # only intended changes
 ```
 

@@ -6,7 +6,7 @@
 
 **Architecture:** Two files in `tutorials/` matching the existing guide+script house pattern, plus one README row. The script is its own test (asserts throughout, offline by default, live model via argv).
 
-**Tech Stack:** stdlib + `openworld.swebench` / `openworld.bench` public APIs. Spec: `docs/superpowers/specs/2026-06-11-benchmark-tutorial-design.md`.
+**Tech Stack:** stdlib + `openworld.repairbench` / `openworld.bench` public APIs. Spec: `docs/superpowers/specs/2026-06-11-benchmark-tutorial-design.md`.
 
 ---
 
@@ -34,9 +34,9 @@ import sys
 from openworld import Action, MockLLM, OllamaLLM
 from openworld.bench import load_recipe, markdown_table, summarize
 from openworld.llm import OllamaConnectionError
-from openworld.swebench import (
-    SWEBenchInstance,
-    build_swebench_world,
+from openworld.repairbench import (
+    RepairBenchInstance,
+    build_repairbench_world,
     initial_world_state,
     run_instance_tests,
     solve_in_world,
@@ -80,7 +80,7 @@ NAIVE_PATCH = REFERENCE.replace(
     "if amount_cents >= self.balance_cents:",
 )
 
-INSTANCE = SWEBenchInstance(
+INSTANCE = RepairBenchInstance(
     instance_id="tutorial-000-wallet-overdraft",
     module_name="wallet",
     issue=(
@@ -109,7 +109,7 @@ INSTANCE = SWEBenchInstance(
 )
 
 INSTANCE.world = {
-    "name": f"swebench:{INSTANCE.instance_id}",
+    "name": f"repairbench:{INSTANCE.instance_id}",
     "description": (
         "Program repair as a world model for module 'wallet'. Submit a "
         "corrected module via submit_patch(params={'source': ...})."
@@ -140,7 +140,7 @@ print("[gate] reference solves both suites; bug is real; regressions intact")
 # 3. The world: exact dynamics, and why the naive fix fails.
 # ---------------------------------------------------------------------------
 
-world = build_swebench_world(INSTANCE)
+world = build_repairbench_world(INSTANCE)
 state = world.step(Action("submit_patch", params={"source": NAIVE_PATCH}))
 assert state["fail_to_pass_failed"] == 0      # the naive patch fixes the symptom...
 assert state["pass_to_pass_failed"] == 1      # ...and trips the regression trap
@@ -188,12 +188,12 @@ if live is None:
 # 5. Recipes: how a dataset of these becomes reproducible.
 # ---------------------------------------------------------------------------
 
-recipe = load_recipe("recipes/owsb-atomic-v1.json")
+recipe = load_recipe("recipes/owrb-atomic-v1.json")
 frozen = recipe["artifacts"]["tasks_jsonl_sha256"]
 print(f"\n[recipe] {recipe['dataset']['name']} {recipe['dataset']['version']}: "
       f"{recipe['dataset']['path'].name} pinned at sha256 {frozen[:12]}…, "
       f"ladder {', '.join(recipe['eval']['models'])}, budget {recipe['eval']['budget']}")
-print("[recipe] full flow: python -m openworld.bench recipes/owsb-atomic-v1.json all --mock")
+print("[recipe] full flow: python -m openworld.bench recipes/owrb-atomic-v1.json all --mock")
 ```
 
 - [ ] **Step 2: Run it offline**
@@ -223,11 +223,11 @@ git commit -m "Add benchmark-dataset tutorial script"
 
 Title: `# Benchmarking: Build Your Own World-Model Dataset`. Callout: script link + "runs offline; pass an Ollama model name to go live." Sections (each excerpts the corresponding script code):
 
-1. **An instance is a tiny world** — the `SWEBenchInstance` fields table (issue / buggy_source / reference_source / test_preamble / fail_to_pass / pass_to_pass / world); only `module_name`+`issue`+`buggy_source` are shown to a model under test; `solved` requires zero failures in BOTH suites, so a fix that breaks a passing test does not count.
+1. **An instance is a tiny world** — the `RepairBenchInstance` fields table (issue / buggy_source / reference_source / test_preamble / fail_to_pass / pass_to_pass / world); only `module_name`+`issue`+`buggy_source` are shown to a model under test; `solved` requires zero failures in BOTH suites, so a fix that breaks a passing test does not count.
 2. **Author one instance** — the Wallet bug verbatim (issue text, both sources); call out the design move: `pass_to_pass` includes spending the *exact* balance, so the obvious `>=` guard is wrong. Issues describe symptoms and a repro, never the fix.
 3. **The gate is the trust layer** — the three assertions from script §2 with one sentence each; the punchline from the factory spec: once the gate is the quality bar, instance provenance (human, LLM, template, mined corpus) stops mattering — `python -m openworld.bench <recipe> validate` runs this same gate over a whole dataset.
-4. **The paired ablation** — script §3–4: the world rejecting the naive patch with the exact regression error, then `solve_single_shot` vs `solve_in_world`; state the isolation property (same prompts; only the feedback loop differs) and one paragraph on E28/E29: atomic suite Δ≈0 at every model size, staged suite Δ=+0.13 (3B) and +0.33 (7B) — feedback pays only on multi-stage bugs and only for models strong enough to use it; pointer to `paper/` §"When does the feedback loop pay off?" and `datasets/openworld-swebench-staged/`.
-5. **Recipes make it reproducible** — anatomy of `recipes/owsb-atomic-v1.json` (generator+seed, frozen tasks.jsonl sha256, eval ladder/budget/temperature/seed); the five CLI verbs; the three reproducibility tiers (Tier 0 mock-in-pytest, Tier 1 byte-identical rebuild, Tier 2 statistically-compatible reruns at pinned digests); cards (`CARD.md`) as committed provenance.
+4. **The paired ablation** — script §3–4: the world rejecting the naive patch with the exact regression error, then `solve_single_shot` vs `solve_in_world`; state the isolation property (same prompts; only the feedback loop differs) and one paragraph on E28/E29: atomic suite Δ≈0 at every model size, staged suite Δ=+0.13 (3B) and +0.33 (7B) — feedback pays only on multi-stage bugs and only for models strong enough to use it; pointer to `paper/` §"When does the feedback loop pay off?" and `datasets/openworld-repairbench-staged/`.
+5. **Recipes make it reproducible** — anatomy of `recipes/owrb-atomic-v1.json` (generator+seed, frozen tasks.jsonl sha256, eval ladder/budget/temperature/seed); the five CLI verbs; the three reproducibility tiers (Tier 0 mock-in-pytest, Tier 1 byte-identical rebuild, Tier 2 statistically-compatible reruns at pinned digests); cards (`CARD.md`) as committed provenance.
 
 Closing: "Where next" — author 5 instances and a builder + recipe of your own; the dataset-factory spec (`docs/superpowers/specs/2026-06-11-dataset-factory-design.md`) for what's coming (generators, gate v2).
 

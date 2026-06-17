@@ -55,8 +55,8 @@ from .contextbench import (
     ContextBenchInstance, ContextExample, solve_with_context, solve_without_context,
 )
 from .state import Action, WorldState
-from .swebench import (
-    SWEBenchInstance, SWEBenchTransition, build_swebench_world, load_dataset,
+from .repairbench import (
+    RepairBenchInstance, RepairBenchTransition, build_repairbench_world, load_dataset,
     run_instance_tests, solve_in_world, solve_single_shot,
 )
 from .transition import CodeTransition, FunctionTransition, LLMTransition, PhasedTransition, Transition
@@ -174,9 +174,9 @@ __all__ = [
     "ContextExample",
     "solve_with_context",
     "solve_without_context",
-    "SWEBenchInstance",
-    "SWEBenchTransition",
-    "build_swebench_world",
+    "RepairBenchInstance",
+    "RepairBenchTransition",
+    "build_repairbench_world",
     "load_dataset",
     "run_instance_tests",
     "solve_in_world",

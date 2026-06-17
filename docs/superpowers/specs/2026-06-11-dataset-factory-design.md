@@ -12,7 +12,7 @@ dataset cards, and a frozen result schema.
 
 ## The core insight
 
-The validation gate built for openworld-swebench — *reference must solve both
+The validation gate built for openworld-repairbench — *reference must solve both
 suites; buggy must fail every `fail_to_pass` and pass every `pass_to_pass`;
 output must rebuild byte-identically* — converts **untrusted instance
 sources into trusted benchmark data**. Once the gate is the quality bar, the
@@ -39,26 +39,26 @@ A dataset is a point in five axes:
 | feedback richness | counts-only, +error strings (default), +traces |
 | domain | data structures, parsers, state machines, numeric, schedulers, ... |
 
-Naming: `owsb-<source-or-theme>-<distinguisher>-v<N>` (e.g.
-`owsb-llm-3stage-module-v1`). Versions are immutable: a changed instance set
+Naming: `owrb-<source-or-theme>-<distinguisher>-v<N>` (e.g.
+`owrb-llm-3stage-module-v1`). Versions are immutable: a changed instance set
 is a new version, never an in-place edit.
 
 Initial roadmap (one recipe each):
 
 | dataset | source | exercises |
 |---|---|---|
-| `owsb-atomic` (exists: v0 n=6, v1 n=20) | hand | baseline; capability ladder |
-| `owsb-staged` (exists: n=15) | hand | 2-stage; in-world lift (E29) |
-| `owsb-deep` | llm | 3–5 stage latent chains — does Δ grow with depth? |
-| `owsb-param-*` | parametric | difficulty dials; scaling curves; volume |
-| `owsb-quixbugs` | mined | external validity / decontamination anchor |
-| `owsb-package` | llm | multi-module code scale |
-| `owsb-feedback` | reuse staged | feedback-richness ablation (harness knob) |
-| `owsb-flaky` | parametric | seeded stochastic tests (extends E21) |
+| `owrb-atomic` (exists: v0 n=6, v1 n=20) | hand | baseline; capability ladder |
+| `owrb-staged` (exists: n=15) | hand | 2-stage; in-world lift (E29) |
+| `owrb-deep` | llm | 3–5 stage latent chains — does Δ grow with depth? |
+| `owrb-param-*` | parametric | difficulty dials; scaling curves; volume |
+| `owrb-quixbugs` | mined | external validity / decontamination anchor |
+| `owrb-package` | llm | multi-module code scale |
+| `owrb-feedback` | reuse staged | feedback-richness ablation (harness knob) |
+| `owrb-flaky` | parametric | seeded stochastic tests (extends E21) |
 
 ## 2. Generator plugins
 
-All generators emit the existing `SWEBenchInstance` schema and feed the same
+All generators emit the existing `RepairBenchInstance` schema and feed the same
 gate.
 
 - **`hand`** — today's `build_tasks.py` instance dicts, unchanged, as a
@@ -108,7 +108,7 @@ dataset card.
 One YAML per dataset under `recipes/`, one runner:
 
 ```
-python -m openworld.bench recipes/owsb-deep-v1.yaml {build|validate|run|card|all}
+python -m openworld.bench recipes/owrb-deep-v1.yaml {build|validate|run|card|all}
 ```
 
 Recipe fields (frozen `schema_version: 1`):
@@ -154,19 +154,19 @@ the contextbench runner fold into `openworld.bench`).
 
 Each is its own spec → plan → implementation cycle:
 
-1. **`openworld.bench` runner + recipe schema**, retrofit `owsb-atomic` and
-   `owsb-staged` (foundation; unifies runners and freezes the result
+1. **`openworld.bench` runner + recipe schema**, retrofit `owrb-atomic` and
+   `owrb-staged` (foundation; unifies runners and freezes the result
    schema).
 2. **Gate v2** (N-stage verification, calibration, leak check, dedup).
-3. **Parametric generator** + first `owsb-param-*` family (fastest volume;
+3. **Parametric generator** + first `owrb-param-*` family (fastest volume;
    enables scaling curves).
-4. **LLM generator** + `owsb-deep` (the scientifically interesting axis:
+4. **LLM generator** + `owrb-deep` (the scientifically interesting axis:
    Δ vs staging depth).
-5. **QuixBugs adapter** + `owsb-quixbugs` (external validity).
-6. **Feedback-richness knob** in the harness + `owsb-feedback` ablation.
+5. **QuixBugs adapter** + `owrb-quixbugs` (external validity).
+6. **Feedback-richness knob** in the harness + `owrb-feedback` ablation.
 
 **Prerequisite:** reconcile PR #4 (20-instance atomic) and the unmerged
-staged branch into one canonical `openworld/swebench.py` before sub-project
+staged branch into one canonical `openworld/repairbench.py` before sub-project
 1, so the factory builds on a single harness.
 
 ## Out of scope (this design)
@@ -175,5 +175,5 @@ staged branch into one canonical `openworld/swebench.py` before sub-project
   images) — deliberately deferred; the recipe standard is designed so this
   can be added later without rework.
 - Multi-file/multi-repo instances with real package installs (breaks the
-  zero-dependency sandbox; revisit only after `owsb-package`).
+  zero-dependency sandbox; revisit only after `owrb-package`).
 - Non-Python languages.

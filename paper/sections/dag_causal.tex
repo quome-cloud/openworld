@@ -1,0 +1,115 @@
+% Causal DAGs as world specifications. Numbers come from E64 macros
+% (scripts/make_paper_assets.py -> numbers.tex); the table is tables/causal_assumptions.tex.
+% Input from main.tex with \input{sections/dag_causal}.
+
+\section{Causal DAGs as World Specifications}\label{sec:dag}
+A world model and a causal diagram are the same object viewed from two sides: a
+directed acyclic graph (DAG) names variables and asserts which directly cause
+which; an \openworld{} \texttt{World} carries a symbolic state ontology and a
+transition that recomputes that state. \openworld{} closes the gap by accepting
+a DAG as a first-class input and compiling it into a verified world, so that the
+causal assumptions a domain expert is willing to commit to in a diagram become
+executable, inspectable, and---crucially---falsifiable dynamics.
+
+\subsection{A DAG as a perception modality}
+DAGs enter through the same perception boundary (\S\ref{sec:language}) that
+admits text, audio, and images: a \texttt{graph} modality whose
+\texttt{DAGPerceptor} ingests the \texttt{dagitty}/Graphviz \texttt{.dot} text
+those tools already export. A single option selects what the graph resolves
+into---the three ways a world model consumes a causal structure. In
+\emph{graph} mode it commits a normalized object (nodes with their
+exposure/outcome/latent tags, plus edges) to state. In \emph{schema} mode it
+emits the observed (non-latent) variables to extract from a record downstream:
+the DAG \emph{declares what to perceive}. In \emph{world} mode it compiles the
+DAG to a runnable structural causal model (SCM). The perceptor is deterministic
+and code-free, so it round-trips losslessly through a portable spec like the
+other declarative perceptors.
+
+\subsection{Compiling a DAG to a verified SCM}
+Compilation emits a single pure \texttt{transition(state, action)} that
+recomputes each node from its parents in topological order, with an exogenous
+term $u_v$ per node $v$; the default per-node form is a transparent
+linear threshold over the parents, and edge weights/signs are overridable. The
+emitted code passes the same gates as any synthesized dynamics
+(\S\ref{sec:language})---it parses, smoke-runs sandboxed on every action, and
+respects declared invariants---so the causal model is an auditable artifact, not
+a black box. Interventions are simply the world's actions: a \texttt{do\_$v$}
+action overrides node $v$'s structural equation and the override propagates to
+its descendants within the same topological pass, realizing Pearl's do-operator
+\cite{pearl2009causality}. Because the dynamics are deterministic given the
+exogenous terms, a unit-level counterfactual is recovered exactly: hold a unit's
+$u_v$ fixed, swap the action, and re-roll (abduction--action--prediction). The
+result is a training-free interventional and counterfactual sandbox over an
+\emph{assumed} causal structure.
+
+\subsection{Testing the assumptions, not just running them}
+A diagram is a set of hypotheses, and \openworld{} lets a corpus of observed
+transitions adjudicate among them on the factored many-worlds store of
+\S\ref{sec:active-induction}. Each uncertain edge becomes a parameter whose
+candidate values are the rival assumptions---an edge's presence, or the sign of
+an effect---and each node a \texttt{Mechanism} predicting a discretized
+(cut-point) outcome from its parents under those parameters. Observing
+transitions reweights only the small factors the firing mechanisms touch, so the
+version space over causal models is pruned without ever enumerating the joint.
+
+On a synthetic cohort of \DagCleanCohort{} units drawn from a known structure
+(E64; shaped after the perinatal DAG of \S\ref{sec:dag-app}), exact pruning
+collapses \DagCandidateModels{} candidate causal models to \DagSurvivorsClean{},
+recovering all \DagIdentifiedEdges{} identified edges
+(income~$\to$~stress, stress~$\to$~preterm, preterm~$\to$~outcome) at posterior
+$1.0$ (Table~\ref{tab:causal-assumptions}). The \DagSurvivorsClean{} survivors
+differ only in whether a \emph{direct} stress~$\to$~outcome edge is present:
+with stress fully determining preterm in this cohort, that edge is
+\emph{non-identifiable}, and the store reports it as an even posterior rather
+than committing---the mediator-versus-direct ambiguity surfaced and measured,
+not hidden, in the same spirit as the framework's other boundary results. Hard
+version-space pruning is brittle to measurement noise: under \DagNoiseFlipPct\%{}
+outcome noise the true model is contradicted and \DagHardSurvivorsNoisy{}
+candidates survive. An additive soft-Bayesian scorer over the \emph{same}
+mechanisms, weighting each observation by a flip-noise likelihood, instead holds
+the identified edges at posterior $\geq\DagSoftMinIdentified{}$ while still
+leaving the unidentifiable edge near-even---motivating a likelihood-weighted
+semiring as the natural generalization of the store's update.
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E64: testing causal assumptions on the many-worlds store.} Each
+questioned edge of the perinatal DAG is a parameter; exact version-space pruning
+on clean data pins the identified edges to their true value and leaves the
+non-identifiable direct edge even, while a soft-Bayesian scorer over the same
+mechanisms recovers the identified edges under \DagNoiseFlipPct\%{} outcome noise.}
+\label{tab:causal-assumptions}
+\input{tables/causal_assumptions}
+\end{table}
+
+\subsection{Application: social determinants of health}\label{sec:dag-app}
+The motivating use case is individual health-risk counterfactuals over social
+determinants of health (SDOH). A person's record is perceived into a symbolic
+SDOH state; structural factors (income, housing, food security, social support,
+neighborhood) and a place-based population prior drive a mediating psychosocial
+layer (perceived stress, pregnancy-related anxiety), which in turn drives a
+physiological load (a neuroendocrine/cortisol and an inflammatory term) and
+finally an individualized outcome risk. The chain encodes a documented
+mechanism---psychosocial stress in pregnancy raising preterm-birth risk through
+neuroendocrine and inflammatory pathways, with social support protective and
+effects strongest in early gestation \cite{shapiro2013psp}---over a social
+gradient in which structural disadvantage, not individual behavior alone, sets
+the baseline \cite{marmot2018}. Interventions are the world's actions, so
+counterfactual care plans are rollouts under different action sequences: the
+framework compares a structural plan, a proximal stress/anxiety-reduction plan,
+and their combination by resulting risk and by risk reduction per unit of effort,
+and emits a recommendation. Two worked worlds ship as examples (a generic SDOH
+world and a perinatal preterm-birth world); both reproduce the qualitative
+literature---structural action dominates behavior-only plans, while proximal
+stress care matters most early in gestation.
+
+The scope is deliberately bounded. \openworld{} supplies the verified, auditable
+counterfactual layer; it consumes a population prior (e.g.\ a geospatial
+foundation-model embedding for a locale) as an exogenous input rather than
+learning one. And it tests the \emph{implications and internal consistency} of a
+causal assumption set---interventional and counterfactual predictions, edge-sign
+and functional-form sensitivity, and the identifiability of a target effect---not
+the truth of the diagram, which still requires real data and an identification
+argument. What it removes is the opacity: every edge is a line of code, every
+recommendation a rollout one can replay, and every assumption a hypothesis the
+data is allowed to refute.

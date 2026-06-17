@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "owrb-staged",
+    "version": "v1",
+    "description": "15 two-stage program-repair instances: the issue-visible fix surfaces a latent second failing test, so feedback-driven iteration is required.",
+    "path": "datasets/openworld-repairbench-staged/tasks.jsonl"
+  },
+  "generator": {
+    "type": "hand",
+    "builder": "datasets/openworld-repairbench-staged/build_tasks.py",
+    "seed": null
+  },
+  "harness": {
+    "result_schema_version": 1
+  },
+  "eval": {
+    "models": [
+      "qwen2.5:1.5b",
+      "qwen2.5:3b",
+      "qwen2.5:7b"
+    ],
+    "budget": 4,
+    "temperature": 0.2,
+    "seed": 41,
+    "seeds": [
+      41,
+      42,
+      43,
+      44,
+      45
+    ]
+  },
+  "artifacts": {
+    "tasks_jsonl_sha256": "f9ab3342c630a50a7dcc0e4f277c1521edcf5aae615212f06f8894ea12e327d1"
+  }
+}

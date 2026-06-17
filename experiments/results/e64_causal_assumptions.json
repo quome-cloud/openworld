@@ -1,0 +1,93 @@
+{
+  "dag": "Income->Stress->Preterm->Bayley (+Smoking->Preterm, +direct Stress->Bayley?)",
+  "params": {
+    "A_income_stress": {
+      "candidates": [
+        "causal",
+        "null"
+      ],
+      "truth": "causal",
+      "exact_posterior": {
+        "causal": 1.0,
+        "null": 0.0
+      },
+      "soft_posterior": {
+        "causal": 1.0,
+        "null": 3.3985464896407795e-126
+      },
+      "identified": true
+    },
+    "A_stress_preterm": {
+      "candidates": [
+        "causal",
+        "null"
+      ],
+      "truth": "causal",
+      "exact_posterior": {
+        "causal": 1.0,
+        "null": 0.0
+      },
+      "soft_posterior": {
+        "causal": 1.0,
+        "null": 2.353911822264187e-67
+      },
+      "identified": true
+    },
+    "A_preterm_bayley": {
+      "candidates": [
+        "causal",
+        "null"
+      ],
+      "truth": "causal",
+      "exact_posterior": {
+        "causal": 1.0,
+        "null": 0.0
+      },
+      "soft_posterior": {
+        "causal": 1.0,
+        "null": 9.843999959873787e-61
+      },
+      "identified": true
+    },
+    "A_stress_direct": {
+      "candidates": [
+        "yes",
+        "no"
+      ],
+      "truth": "no",
+      "exact_posterior": {
+        "yes": 0.5,
+        "no": 0.5
+      },
+      "soft_posterior": {
+        "yes": 0.5,
+        "no": 0.5
+      },
+      "identified": false
+    }
+  },
+  "n_candidate_models": 16,
+  "clean_cohort_n": 200,
+  "survivors_clean": 2,
+  "n_identified_edges": 3,
+  "noise_flip": 0.12,
+  "noisy_cohort_n": 400,
+  "hard_survivors_noisy": 0,
+  "soft_min_identified_truth": 1.0,
+  "direct_edge_exact_even": {
+    "yes": 0.5,
+    "no": 0.5
+  },
+  "direct_edge_soft_even": {
+    "yes": 0.5,
+    "no": 0.5
+  },
+  "experiment": "e64_causal_assumptions",
+  "timestamp": "2026-06-16T23:17:29",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.5",
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.0"
+  }
+}

@@ -27,7 +27,7 @@ from typing import Any, Callable, Dict, List, Optional
 from .llm import BaseLLM
 from .parsing import extract_json
 
-MODALITIES = ("text", "audio", "image", "video_frame", "video_segment")
+MODALITIES = ("text", "audio", "image", "video_frame", "video_segment", "graph")
 
 
 class EmissionError(ValueError):
@@ -219,6 +219,89 @@ class RegexPerceptor(Perceptor):
                 except Exception:
                     pass
         return out
+
+
+class DAGPerceptor(Perceptor):
+    """Perceive a causal DAG (dagitty / Graphviz ``.dot`` text) into the world.
+
+    A DAG of causal assumptions is a first-class input modality (``"graph"``).
+    One option, ``mode``, selects what the DAG is resolved into -- the three ways
+    a world model consumes a causal graph:
+
+    * ``"graph"`` (default): a normalized graph delta -- ``dag_nodes``,
+      ``dag_edges``, ``dag_exposures``, ``dag_outcomes`` -- committed to state.
+    * ``"schema"``: ``{"dag_schema": {slug: (type, (lo, hi))}}`` -- the observed
+      variables to extract downstream, i.e. the DAG declares what to perceive.
+    * ``"world"``: ``{"dag_world": <spec dict>}`` -- the DAG compiled to a
+      verified structural-causal-model world spec (load it with ``from_spec``).
+
+    Deterministic and code-free, so it round-trips through a spec. The
+    convenience methods :meth:`to_dag`, :meth:`to_schema`, :meth:`to_world`
+    return the live objects directly without going through ``observe``.
+    """
+
+    modality = "graph"
+    _PRODUCES = {
+        "graph": ["dag_nodes", "dag_edges", "dag_exposures", "dag_outcomes"],
+        "schema": ["dag_schema"],
+        "world": ["dag_world"],
+    }
+
+    def __init__(self, mode: str = "graph", node_type: type = int,
+                 bounds: Optional[tuple] = (0, 1), world_name: str = "dag_world",
+                 schema: Optional[Dict[str, Any]] = None):
+        if mode not in self._PRODUCES:
+            raise PerceptionError(
+                f"unknown DAGPerceptor mode {mode!r}; expected one of "
+                f"{tuple(self._PRODUCES)}")
+        self.mode = mode
+        self.node_type = node_type
+        self.bounds = tuple(bounds) if bounds is not None else None
+        self.world_name = world_name
+        self.produces = list(self._PRODUCES[mode])
+        self.schema = dict(schema or {})
+
+    def _text(self, observation: Observation) -> str:
+        return observation.data if isinstance(observation, Observation) else observation
+
+    def to_dag(self, observation: Observation):
+        """Parse the observation into a :class:`~openworld.dag.CausalDAG`."""
+        from .dag import parse_dag
+        return parse_dag(self._text(observation))
+
+    def to_schema(self, observation: Observation) -> Dict[str, Any]:
+        from .dag import dag_to_schema
+        return dag_to_schema(self.to_dag(observation), node_type=self.node_type,
+                             bounds=self.bounds)
+
+    def to_world(self, observation: Observation, **kwargs):
+        """Compile the perceived DAG into a runnable verified-SCM world."""
+        from .dag import dag_to_world
+        return dag_to_world(self.to_dag(observation),
+                            name=kwargs.pop("name", self.world_name), **kwargs)
+
+    def perceive(self, observation: Observation) -> Dict[str, Any]:
+        dag = self.to_dag(observation)
+        if self.mode == "schema":
+            # JSON-friendly form (lands in world state): {slug: {type, bounds}}
+            out = {}
+            for k, v in self.to_schema(observation).items():
+                if isinstance(v, tuple):
+                    typ, bnds = v
+                    out[k] = {"type": getattr(typ, "__name__", str(typ)),
+                              "bounds": list(bnds)}
+                else:
+                    out[k] = {"type": getattr(v, "__name__", str(v)), "bounds": None}
+            return {"dag_schema": out}
+        if self.mode == "world":
+            from .spec import to_spec
+            return {"dag_world": to_spec(self.to_world(observation))}
+        return {
+            "dag_nodes": list(dag.nodes),
+            "dag_edges": [[a, b] for a, b in dag.edges],
+            "dag_exposures": dag.exposures(),
+            "dag_outcomes": dag.outcomes(),
+        }
 
 
 _EMIT_SYSTEM = ("You write the world's output. Use only the provided fields; "

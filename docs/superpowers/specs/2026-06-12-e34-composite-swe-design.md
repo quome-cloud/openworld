@@ -1,4 +1,4 @@
-# E34 — The sprint world: composite allocation on openworld-swebench
+# E34 — The sprint world: composite allocation on openworld-repairbench
 
 **Date:** 2026-06-12
 **Status:** approved
@@ -6,23 +6,23 @@
 ## Goal
 
 Benchmark the composite-world structure on real software-engineering tasks:
-a CompositeWorld whose 20 children are the owsb-atomic repair worlds, where
+a CompositeWorld whose 20 children are the owrb-atomic repair worlds, where
 a global allocation policy decides which task receives each repair attempt.
 Same model, same total budget as the standard protocol — the measured
 quantity is what the composite's global view is worth.
 
 ## Design
 
-- **World:** children = `build_swebench_world(inst)` for all 20 owsb-atomic
+- **World:** children = `build_repairbench_world(inst)` for all 20 owrb-atomic
   v1 instances (children unmodified — the composition contract). Aggregators:
   `open_tasks` (unsolved count), `total_failing` (sum of failing tests).
   Actions route as `<instance_id>:submit_patch`.
 - **Repair model:** qwen2.5:7b, temperature/seed from
-  `recipes/owsb-atomic-v1.json`; prompts identical to the standard in-world
-  condition (`openworld.swebench._feedback_prompt` / `_safe_ask`).
+  `recipes/owrb-atomic-v1.json`; prompts identical to the standard in-world
+  condition (`openworld.repairbench._feedback_prompt` / `_safe_ask`).
 - **Conditions** (total budget B = 80 attempts each):
   1. `fixed` — the standard protocol: 4 attempts per task in isolation
-     (control; also the first real-model numbers for owsb-atomic v1);
+     (control; also the first real-model numbers for owrb-atomic v1);
   2. `round_robin` — composite: cycle unsolved tasks, skipping solved ones
      (recycles stranded attempts);
   3. `greedy` — composite: next attempt to the unsolved task with the

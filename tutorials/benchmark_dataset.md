@@ -15,7 +15,7 @@ behind a recipe.
 
 ## 1. An instance is a tiny world
 
-A `SWEBenchInstance` packages one repair task:
+A `RepairBenchInstance` packages one repair task:
 
 | field | the model under test sees it? | what it is |
 |---|---|---|
@@ -115,21 +115,21 @@ single-edit bugs the loop adds nothing at any model size (Δ ≈ 0), while on
 *staged* bugs — a latent second defect that surfaces only as a failing test —
 the loop pays and the payoff grows with capability: Δ = +0.13 at 3B,
 +0.33 at 7B, flat at 1.5B. See the "When does the feedback loop pay off?"
-section of the paper and `datasets/openworld-swebench-staged/`.
+section of the paper and `datasets/openworld-repairbench-staged/`.
 
 ## 5. Recipes make it reproducible
 
 A dataset of these instances ships behind a recipe
-(`recipes/owsb-atomic-v1.json`) that pins everything a rerun needs: the
+(`recipes/owrb-atomic-v1.json`) that pins everything a rerun needs: the
 builder and its seed, the frozen `tasks.jsonl` sha256, the eval ladder,
 budget, temperature, and sampling seed. One command drives the whole flow:
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json build      # regenerate, verify hash
-python -m openworld.bench recipes/owsb-atomic-v1.json validate   # the gate, dataset-wide
-python -m openworld.bench recipes/owsb-atomic-v1.json run --mock # paired ablation
-python -m openworld.bench recipes/owsb-atomic-v1.json card       # dataset card
-python -m openworld.bench recipes/owsb-atomic-v1.json all --mock # everything
+python -m openworld.bench recipes/owrb-atomic-v1.json build      # regenerate, verify hash
+python -m openworld.bench recipes/owrb-atomic-v1.json validate   # the gate, dataset-wide
+python -m openworld.bench recipes/owrb-atomic-v1.json run --mock # paired ablation
+python -m openworld.bench recipes/owrb-atomic-v1.json card       # dataset card
+python -m openworld.bench recipes/owrb-atomic-v1.json all --mock # everything
 ```
 
 Results land one file per model in a frozen schema (per-instance paired

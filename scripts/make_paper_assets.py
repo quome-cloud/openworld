@@ -29,7 +29,7 @@ EXPERIMENTS = [
     "e19_scale_ladder", "e20_complexity", "e21_stochastic",
     "e22_planning", "e23_self_check", "e24_aggregators",
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
-    "e28_swebench_ablation", "e29_swebench_staged",
+    "e28_repairbench_ablation", "e29_repairbench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
@@ -39,7 +39,7 @@ EXPERIMENTS = [
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
-    "e63_world_model_bakeoff", "e65_minigrid_bench",
+    "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
 ]
 
 
@@ -1428,7 +1428,7 @@ def table_ladder(e19):
     )
 
 
-def table_swebench(e28, e29):
+def table_repairbench(e28, e29):
     def block(label, summary):
         rows = []
         for s in summary:
@@ -1443,7 +1443,7 @@ def table_swebench(e28, e29):
 
     atomic = block(f"Atomic ($n={e28['n_instances']}$)", e28["summary"])
     staged = block(f"Staged ($n={e29['n_instances']}$)", e29["summary"])
-    (TABLES / "swebench.tex").write_text(
+    (TABLES / "repairbench.tex").write_text(
         "\\begin{tabular}{llccccc}\n\\toprule\n"
         "Suite & Model & SS pass@1 & IW pass@1 & IW pass@4 & "
         "$\\Delta$ & Mean att. \\\\\n\\midrule\n"
@@ -2143,7 +2143,7 @@ def fig_sprint_ladder(e35, e34):
 
 
 def fig_sprint(e34):
-    """E34: solved-vs-budget curves per allocation condition on owsb-atomic."""
+    """E34: solved-vs-budget curves per allocation condition on owrb-atomic."""
     styles = {
         "fixed": (SLATE, "-", "o", "fixed 4/task (standard protocol)"),
         "round_robin": (BLUE, "--", "s", "round-robin (pinned seed)"),
@@ -2434,7 +2434,7 @@ def numbers_tex(d):
         macro("RubricCareVsUtil", f"{e27['pairwise']['utilitarian_vs_care_ethics']['spearman']:.2f}"),
     ]
     # E28-E29 (benchmark-scale repair ablation: single-shot vs in-world)
-    e28, e29 = d["e28_swebench_ablation"], d["e29_swebench_staged"]
+    e28, e29 = d["e28_repairbench_ablation"], d["e29_repairbench_staged"]
     a = {s["model"]: s for s in e28["summary"]}
     g = {s["model"]: s for s in e29["summary"]}
     lines += [
@@ -2488,7 +2488,7 @@ def numbers_tex(d):
         macro("DynGdpStranded", str(s33["final_world_gdp_stranded"])),
         macro("DynMobilityGain", str(s33["mobility_gain"])),
     ]
-    # E34 (sprint composite: attempt allocation on owsb-atomic)
+    # E34 (sprint composite: attempt allocation on owrb-atomic)
     s34 = {c["condition"]: c for c in d["e34_composite_swe"]["summary"]}
 
     def sprint_solved(cond):
@@ -2918,6 +2918,18 @@ def numbers_tex(d):
         macro("BakeCodeSpeed", f"{e63['sprint_steps_per_sec']['verified code (CWM)']:,}".replace(",", "{,}")),
         macro("BakePerceptual", str(len(e63["perceptual_world_models_compared_on_properties"]))),
     ]
+    # E64 (Bayesian causal-assumption testing on the many-worlds store)
+    e64 = d["e64_causal_assumptions"]
+    lines += [
+        macro("DagCandidateModels", str(e64["n_candidate_models"])),
+        macro("DagSurvivorsClean", str(e64["survivors_clean"])),
+        macro("DagCleanCohort", str(e64["clean_cohort_n"])),
+        macro("DagIdentifiedEdges", str(e64["n_identified_edges"])),
+        macro("DagNoiseFlipPct", f"{e64['noise_flip'] * 100:.0f}"),
+        macro("DagNoisyCohort", str(e64["noisy_cohort_n"])),
+        macro("DagHardSurvivorsNoisy", str(e64["hard_survivors_noisy"])),
+        macro("DagSoftMinIdentified", f"{e64['soft_min_identified_truth']:.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -3190,6 +3202,32 @@ def table_bakeoff(e63):
         + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def table_causal_assumptions(e64):
+    """E64: one row per questioned edge -- its candidate assumptions, the exact
+    version-space posterior on the true value (clean data), the soft posterior
+    under measurement noise, and whether the data identifies it."""
+    label = {
+        "A_income_stress": "Income $\\to$ Stress",
+        "A_stress_preterm": "Stress $\\to$ Preterm",
+        "A_preterm_bayley": "Preterm $\\to$ Bayley",
+        "A_stress_direct": "Stress $\\to$ Bayley (direct)",
+    }
+    order = ["A_income_stress", "A_stress_preterm", "A_preterm_bayley", "A_stress_direct"]
+    lines = ["\\begin{tabular}{l l c c c}", "\\toprule",
+             "Edge & Candidates & Exact post.\\ & Soft post.\\ & Identified \\\\",
+             "& & (clean) & (noisy) & \\\\", "\\midrule"]
+    for p in order:
+        info = e64["params"][p]
+        truth = info["truth"]
+        cand = "/".join(info["candidates"])
+        ex = info["exact_posterior"][truth]
+        sf = info["soft_posterior"][truth]
+        ident = "\\checkmark" if info["identified"] else "--"
+        lines.append(f"{label[p]} & {cand} & {ex:.2f} & {sf:.2f} & {ident} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "causal_assumptions.tex").write_text("\n".join(lines) + "\n")
+
+
 def table_minigrid_bench(e65):
     """Trained-vs-verified head-to-head on a shared benchmark, MiniGrid DoorKey-6x6
     (E65): one row per world-model species, with what it costs to reach the solution.
@@ -3278,8 +3316,9 @@ def main():
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
-    table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
+    table_repairbench(data["e28_repairbench_ablation"], data["e29_repairbench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])
+    table_causal_assumptions(data["e64_causal_assumptions"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

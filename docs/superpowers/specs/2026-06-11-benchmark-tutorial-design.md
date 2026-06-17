@@ -14,7 +14,7 @@ recipe. Existing tutorials are untouched except for the README index.
 
 1. **`tutorials/benchmark_dataset.md`** (~120 lines, house voice — matches
    the other four guides) titled "Build Your Own Benchmark Dataset", sections:
-   1. *An instance is a tiny world* — the `SWEBenchInstance` schema (issue,
+   1. *An instance is a tiny world* — the `RepairBenchInstance` schema (issue,
       buggy/reference source, hidden `fail_to_pass` / `pass_to_pass` suites,
       world spec); solving requires zero failures in BOTH suites, so
       regressions count.
@@ -28,20 +28,20 @@ recipe. Existing tutorials are untouched except for the README index.
       finding (atomic Δ≈0, staged Δ grows with model scale) with a pointer
       to the paper and the staged dataset.
    5. *Recipes make it reproducible* — anatomy of
-      `recipes/owsb-atomic-v1.json`, the
+      `recipes/owrb-atomic-v1.json`, the
       `python -m openworld.bench <recipe> all --mock` flow, frozen artifact
       hashes, auto-generated cards, the three reproducibility tiers.
 2. **`tutorials/benchmark_dataset.py`** (~140 lines, runnable offline):
-   - defines the §2 instance inline (`SWEBenchInstance(...)`);
+   - defines the §2 instance inline (`RepairBenchInstance(...)`);
    - asserts the gate checks (reference solves both suites; buggy fails every
      `fail_to_pass`, passes every `pass_to_pass`) and prints what passed;
-   - builds the world via `build_swebench_world`, steps it once with a wrong
+   - builds the world via `build_repairbench_world`, steps it once with a wrong
      patch and once with the reference to show exact dynamics;
    - runs both conditions — `MockLLM` scripted garbage-then-oracle by
      default, or a live `OllamaLLM` when a model name is passed as argv[1] —
      and prints a one-row markdown comparison table via
      `openworld.bench.markdown_table`-compatible formatting;
-   - loads `recipes/owsb-atomic-v1.json` with `openworld.bench.load_recipe`
+   - loads `recipes/owrb-atomic-v1.json` with `openworld.bench.load_recipe`
      and prints the pinned fields (dataset path, frozen sha256 prefix,
      ladder, budget), then points at the CLI for the full flow.
    - Exits non-zero on any assertion failure (the script is its own test).
@@ -54,8 +54,8 @@ recipe. Existing tutorials are untouched except for the README index.
 
 - Offline by default; no new dependencies; no pytest additions (tutorials
   are not in the test suite, matching the existing four).
-- Uses only public/canonical APIs: `openworld.swebench`
-  (`SWEBenchInstance`, `run_instance_tests`, `build_swebench_world`,
+- Uses only public/canonical APIs: `openworld.repairbench`
+  (`RepairBenchInstance`, `run_instance_tests`, `build_repairbench_world`,
   `solve_single_shot`, `solve_in_world`) and `openworld.bench`
   (`load_recipe`).
 - The inline instance must satisfy the same invariants the gate enforces on

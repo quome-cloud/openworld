@@ -42,11 +42,13 @@ from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
                    spec_to_json, to_mermaid, to_spec, validate_spec)
 from .card import render_card, render_gallery, to_reactflow
 from .optimize import SweepPoint, SweepResult, sweep
+from .dag import (CausalDAG, dag_to_schema, dag_to_transition_code, dag_to_world,
+                  parse_dag)
 from .perceive import (
-    CodeEmitter, CodePerceptor, EmissionError, EmissionGate, JSONPerceptor,
-    LLMEmitter, MockPerceptor, Observation, PerceptionError, PerceptionGate,
-    Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter, ToolRegistry,
-    TranscriptPerceptor, VisionPerceptor, image_to_b64,
+    CodeEmitter, CodePerceptor, DAGPerceptor, EmissionError, EmissionGate,
+    JSONPerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
+    PerceptionGate, Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter,
+    ToolRegistry, TranscriptPerceptor, VisionPerceptor, image_to_b64,
     sample_frames,
 )
 from .sandbox import SandboxError
@@ -55,8 +57,8 @@ from .contextbench import (
     ContextBenchInstance, ContextExample, solve_with_context, solve_without_context,
 )
 from .state import Action, WorldState
-from .swebench import (
-    SWEBenchInstance, SWEBenchTransition, build_swebench_world, load_dataset,
+from .repairbench import (
+    RepairBenchInstance, RepairBenchTransition, build_repairbench_world, load_dataset,
     run_instance_tests, solve_in_world, solve_single_shot,
 )
 from .transition import CodeTransition, FunctionTransition, LLMTransition, PhasedTransition, Transition
@@ -155,6 +157,12 @@ __all__ = [
     "EmissionGate",
     "EmissionError",
     "MemoryStore",
+    "CausalDAG",
+    "DAGPerceptor",
+    "parse_dag",
+    "dag_to_schema",
+    "dag_to_transition_code",
+    "dag_to_world",
     "TextPerceptor",
     "TranscriptPerceptor",
     "VisionPerceptor",
@@ -174,9 +182,9 @@ __all__ = [
     "ContextExample",
     "solve_with_context",
     "solve_without_context",
-    "SWEBenchInstance",
-    "SWEBenchTransition",
-    "build_swebench_world",
+    "RepairBenchInstance",
+    "RepairBenchTransition",
+    "build_repairbench_world",
     "load_dataset",
     "run_instance_tests",
     "solve_in_world",

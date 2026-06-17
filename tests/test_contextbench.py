@@ -7,7 +7,7 @@ from openworld.contextbench import (
     _context_block,
 )
 from openworld.llm import MockLLM
-from openworld.swebench import run_instance_tests
+from openworld.repairbench import run_instance_tests
 
 INSTANCES = load_dataset()
 

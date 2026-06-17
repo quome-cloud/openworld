@@ -1,6 +1,6 @@
-"""E34 - The sprint world: composite attempt allocation on openworld-swebench.
+"""E34 - The sprint world: composite attempt allocation on openworld-repairbench.
 
-A CompositeWorld whose 20 children are the owsb-atomic repair worlds
+A CompositeWorld whose 20 children are the owrb-atomic repair worlds
 (children unmodified), with aggregators exposing the sprint dashboard
 (open tasks, total failing tests). The repair model is identical to the
 standard in-world protocol (same prompts, same temperature/seed from the
@@ -8,7 +8,7 @@ dataset recipe); the only variable is WHO decides where the next attempt
 goes:
 
   fixed       - the standard protocol: 4 attempts per task in isolation
-                (also the first real-model numbers for owsb-atomic v1)
+                (also the first real-model numbers for owrb-atomic v1)
   round_robin - composite: cycle unsolved tasks, recycling attempts
                 stranded on solved ones
   greedy      - composite: next attempt to the unsolved task with the
@@ -27,18 +27,18 @@ from openworld.bench import load_recipe, wilson_ci
 from openworld.compose import AGG_KEY, Aggregator, CompositeWorld
 from openworld.llm import OllamaLLM
 from openworld.parsing import extract_code
-from openworld.swebench import (
+from openworld.repairbench import (
     SYSTEM_PROMPT,
     _feedback_prompt,
     _safe_ask,
-    build_swebench_world,
+    build_repairbench_world,
     load_dataset,
 )
 
 from common import Timer, require_ollama, save_results
 
 RECIPE = load_recipe(Path(__file__).resolve().parent.parent
-                     / "recipes" / "owsb-atomic-v1.json")
+                     / "recipes" / "owrb-atomic-v1.json")
 MODEL = "qwen2.5:7b"
 PER_TASK_BUDGET = 4
 TOTAL_BUDGET = None  # set in main: PER_TASK_BUDGET * n_tasks
@@ -49,7 +49,7 @@ def failing(slice_state):
 
 
 def build_sprint(instances):
-    children = {inst.instance_id: build_swebench_world(inst) for inst in instances}
+    children = {inst.instance_id: build_repairbench_world(inst) for inst in instances}
     return CompositeWorld(
         name="sprint",
         children=children,

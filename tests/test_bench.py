@@ -6,14 +6,14 @@ import pytest
 
 from openworld.bench import RecipeError, evaluate, load_recipe, mock_factory, summarize, validate_dataset, write_card
 
-ATOMIC_RECIPE = "recipes/owsb-atomic-v1.json"
-STAGED_RECIPE = "recipes/owsb-staged-v1.json"
+ATOMIC_RECIPE = "recipes/owrb-atomic-v1.json"
+STAGED_RECIPE = "recipes/owrb-staged-v1.json"
 
 
 def test_load_recipe_resolves_paths_and_defaults():
     recipe = load_recipe(ATOMIC_RECIPE)
     assert recipe["schema_version"] == 1
-    assert recipe["dataset"]["name"] == "owsb-atomic"
+    assert recipe["dataset"]["name"] == "owrb-atomic"
     # paths are resolved to absolute paths under the repo root
     assert recipe["dataset"]["path"].is_absolute()
     assert recipe["dataset"]["path"].name == "tasks.jsonl"
@@ -24,7 +24,7 @@ def test_load_recipe_resolves_paths_and_defaults():
 
 def test_load_recipe_staged():
     recipe = load_recipe(STAGED_RECIPE)
-    assert recipe["dataset"]["name"] == "owsb-staged"
+    assert recipe["dataset"]["name"] == "owrb-staged"
     assert recipe["dataset"]["path"].exists()
 
 
@@ -74,7 +74,7 @@ def test_evaluate_mock_oracle_second_try(tmp_path):
     assert out.exists()
     saved = json.loads(out.read_text(encoding="utf-8"))
     assert saved["result_schema_version"] == 1
-    assert saved["dataset"] == "owsb-atomic"
+    assert saved["dataset"] == "owrb-atomic"
     assert saved["recipe_sha256"] == recipe["_recipe_sha256"]
     assert saved["mock"] is True
     assert saved["n_instances"] == 20
@@ -103,7 +103,7 @@ def test_card_contains_provenance_and_gate(tmp_path):
     report = validate_dataset(recipe)
     card_path = write_card(recipe, report, out=tmp_path / "CARD.md")
     card = card_path.read_text(encoding="utf-8")
-    assert "# owsb-atomic v1" in card
+    assert "# owrb-atomic v1" in card
     assert "hand" in card                      # generator type
     assert "20 instances" in card
     assert "all checks passed" in card

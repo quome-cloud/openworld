@@ -29,7 +29,7 @@ EXPERIMENTS = [
     "e19_scale_ladder", "e20_complexity", "e21_stochastic",
     "e22_planning", "e23_self_check", "e24_aggregators",
     "e25_constraints", "e26_parliament", "e27_rubric_pluralism",
-    "e28_swebench_ablation", "e29_swebench_staged",
+    "e28_repairbench_ablation", "e29_repairbench_staged",
     "e30_composition", "e31_nested_fidelity", "e32_regime_switch",
     "e33_dynamic_traversal", "e34_composite_swe", "e35_sprint_ladder", "e36_representations",
     "e37_induction", "e38_induction_scale", "e39_perception_fidelity", "e40_perceive_forecast",
@@ -1428,7 +1428,7 @@ def table_ladder(e19):
     )
 
 
-def table_swebench(e28, e29):
+def table_repairbench(e28, e29):
     def block(label, summary):
         rows = []
         for s in summary:
@@ -1443,7 +1443,7 @@ def table_swebench(e28, e29):
 
     atomic = block(f"Atomic ($n={e28['n_instances']}$)", e28["summary"])
     staged = block(f"Staged ($n={e29['n_instances']}$)", e29["summary"])
-    (TABLES / "swebench.tex").write_text(
+    (TABLES / "repairbench.tex").write_text(
         "\\begin{tabular}{llccccc}\n\\toprule\n"
         "Suite & Model & SS pass@1 & IW pass@1 & IW pass@4 & "
         "$\\Delta$ & Mean att. \\\\\n\\midrule\n"
@@ -2143,7 +2143,7 @@ def fig_sprint_ladder(e35, e34):
 
 
 def fig_sprint(e34):
-    """E34: solved-vs-budget curves per allocation condition on owsb-atomic."""
+    """E34: solved-vs-budget curves per allocation condition on owrb-atomic."""
     styles = {
         "fixed": (SLATE, "-", "o", "fixed 4/task (standard protocol)"),
         "round_robin": (BLUE, "--", "s", "round-robin (pinned seed)"),
@@ -2434,7 +2434,7 @@ def numbers_tex(d):
         macro("RubricCareVsUtil", f"{e27['pairwise']['utilitarian_vs_care_ethics']['spearman']:.2f}"),
     ]
     # E28-E29 (benchmark-scale repair ablation: single-shot vs in-world)
-    e28, e29 = d["e28_swebench_ablation"], d["e29_swebench_staged"]
+    e28, e29 = d["e28_repairbench_ablation"], d["e29_repairbench_staged"]
     a = {s["model"]: s for s in e28["summary"]}
     g = {s["model"]: s for s in e29["summary"]}
     lines += [
@@ -2488,7 +2488,7 @@ def numbers_tex(d):
         macro("DynGdpStranded", str(s33["final_world_gdp_stranded"])),
         macro("DynMobilityGain", str(s33["mobility_gain"])),
     ]
-    # E34 (sprint composite: attempt allocation on owsb-atomic)
+    # E34 (sprint composite: attempt allocation on owrb-atomic)
     s34 = {c["condition"]: c for c in d["e34_composite_swe"]["summary"]}
 
     def sprint_solved(cond):
@@ -3316,7 +3316,7 @@ def main():
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])
     table_planning(data["e22_planning"])
-    table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
+    table_repairbench(data["e28_repairbench_ablation"], data["e29_repairbench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])
     table_causal_assumptions(data["e64_causal_assumptions"])
     numbers_tex(data)

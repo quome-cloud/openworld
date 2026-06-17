@@ -14,9 +14,9 @@ import sys
 from openworld import Action, MockLLM, OllamaLLM
 from openworld.bench import load_recipe, markdown_table, summarize
 from openworld.llm import OllamaConnectionError
-from openworld.swebench import (
-    SWEBenchInstance,
-    build_swebench_world,
+from openworld.repairbench import (
+    RepairBenchInstance,
+    build_repairbench_world,
     initial_world_state,
     run_instance_tests,
     solve_in_world,
@@ -60,7 +60,7 @@ NAIVE_PATCH = REFERENCE.replace(
     "if amount_cents >= self.balance_cents:",
 )
 
-INSTANCE = SWEBenchInstance(
+INSTANCE = RepairBenchInstance(
     instance_id="tutorial-000-wallet-overdraft",
     module_name="wallet",
     issue=(
@@ -89,7 +89,7 @@ INSTANCE = SWEBenchInstance(
 )
 
 INSTANCE.world = {
-    "name": f"swebench:{INSTANCE.instance_id}",
+    "name": f"repairbench:{INSTANCE.instance_id}",
     "description": (
         "Program repair as a world model for module 'wallet'. Submit a "
         "corrected module via submit_patch(params={'source': ...})."
@@ -120,7 +120,7 @@ print("[gate] reference solves both suites; bug is real; regressions intact")
 # 3. The world: exact dynamics, and why the naive fix fails.
 # ---------------------------------------------------------------------------
 
-world = build_swebench_world(INSTANCE)
+world = build_repairbench_world(INSTANCE)
 state = world.step(Action("submit_patch", params={"source": NAIVE_PATCH}))
 assert state["fail_to_pass_failed"] == 0      # the naive patch fixes the symptom...
 assert state["pass_to_pass_failed"] == 1      # ...and trips the regression trap
@@ -170,9 +170,9 @@ if live is None:
 # 5. Recipes: how a dataset of these becomes reproducible.
 # ---------------------------------------------------------------------------
 
-recipe = load_recipe("recipes/owsb-atomic-v1.json")
+recipe = load_recipe("recipes/owrb-atomic-v1.json")
 frozen = recipe["artifacts"]["tasks_jsonl_sha256"]
 print(f"\n[recipe] {recipe['dataset']['name']} {recipe['dataset']['version']}: "
       f"{recipe['dataset']['path'].name} pinned at sha256 {frozen[:12]}…, "
       f"ladder {', '.join(recipe['eval']['models'])}, budget {recipe['eval']['budget']}")
-print("[recipe] full flow: python -m openworld.bench recipes/owsb-atomic-v1.json all --mock")
+print("[recipe] full flow: python -m openworld.bench recipes/owrb-atomic-v1.json all --mock")

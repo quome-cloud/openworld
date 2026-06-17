@@ -369,36 +369,50 @@ silently wrong code, reward misspecification, and value drift.
 
 \paragraph{A world model, formally.} An \openworld{} world model is a tuple
 \[
-  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
+  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
 \]
 where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
 JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
-discrete action set, and the dynamics $\tau : \mathcal{S} \times \mathcal{A} \to
-\mathcal{S}$ is a \emph{deterministic program}; a stochastic world reserves an
-explicit seed field so $\tau$ stays a pure function and every rollout is
-replayable. Objectives $o_i : \mathcal{S} \times \mathcal{A} \times \mathcal{S}
-\to \mathbb{R}$ score a transition $(s, a, s')$ and are weighted by \emph{dials}
-$w_i$ (fixed or tunable); invariants $\mathcal{I}$ are predicates $\iota :
-\mathcal{S} \to \{\top, \bot\}$ required of every reachable state. The
-practitioner supplies only $(s_0, \mathcal{A}, R, \mathcal{I})$---an initial
-state, the actions, natural-language rules $R$, and invariants---and the
-framework must \emph{produce} $\tau$.
+discrete action set, $s_0 \in \mathcal{S}$ is a distinguished initial state, and
+the dynamics $\tau : \mathcal{S} \times \mathcal{A} \to \mathcal{S}$ is a
+\emph{deterministic program} returning the successor state (an action illegal in
+a state acts as a no-op, so $\tau$ is total). A stochastic world threads an
+explicit pseudo-random seed through the state, so $\tau$ stays a pure function
+and every rollout is replayable; \openworld{} thus models stochasticity as
+replayable seeded determinism rather than a transition kernel $\mathcal{S} \times
+\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $o_i : \mathcal{S} \times
+\mathcal{A} \times \mathcal{S} \to \mathbb{R}$ score a transition $(s, a, s')$,
+are combined as $\sum_i w_i o_i$, and are weighted by \emph{dials} $w_i$ (fixed
+or tunable); invariants $\mathcal{I}$ are predicates $\iota : \mathcal{S} \to
+\{\top, \bot\}$ required to hold on every state reachable from $s_0$ under $\tau$.
+The practitioner declares $(s_0, \mathcal{A}, R, \{(o_i, w_i)\}_i,
+\mathcal{I})$---an initial state, the actions, natural-language rules $R$,
+objectives with their dials, and invariants; the schema of $s_0$ induces
+$\mathcal{S}$, and the framework must \emph{produce} $\tau$ from $R$.
 
 It produces $\tau$ by \emph{synthesis under verification}, not by learning. An
 LLM proposes a program $\hat\tau$ from $R$; $\hat\tau$ is accepted only if it
 (i)~parses with the required signature, (ii)~executes in a sandbox over a probe
-set $P \subseteq \mathcal{S} \times \mathcal{A}$ and satisfies every $\iota \in
-\mathcal{I}$ on the results, and optionally (iii)~survives a second-model
-critique against $R$. The accepted $\hat\tau$ is then \emph{fixed}: a depth-$t$
-rollout $s_t = \hat\tau(\cdot, a_t) \circ \cdots \circ \hat\tau(\cdot, a_1)(s_0)$
-is computed by executing code, so if $\hat\tau = \tau^\star$ on the reachable set
-it is exact at \emph{every} depth, bit-exactly. Contrast a learned or
-per-step-predicted transition $\tilde\tau$ resampled each step with single-step
-error $\epsilon = \Pr[\tilde\tau(s, a) \neq \tau^\star(s, a)]$: the chance a full
-$t$-step rollout is exact decays as $(1 - \epsilon)^t$. A symbolic world pays its
-error budget \emph{once}, at synthesis time, where it is auditable; a learned
-world pays it every step, where it compounds. This tuple, and that property, are
-what the rest of the paper measures.
+set $P \subseteq \mathcal{S} \times \mathcal{A}$ (in our implementation, each
+action applied at $s_0$) and satisfies every $\iota \in \mathcal{I}$ on the
+resulting states, and optionally (iii)~survives a second-model critique against
+$R$. Verification therefore certifies signature-conformance and
+invariant-consistency on $P$; it does \emph{not} certify $\hat\tau = \tau^\star$
+against a ground truth---it bounds and surfaces error rather than eliminating it.
+The accepted $\hat\tau$ is then \emph{fixed}: a depth-$t$ rollout $s_t =
+\hat\tau(\cdot, a_t) \circ \cdots \circ \hat\tau(\cdot, a_1)(s_0)$ is computed by
+executing code, so \emph{if} $\hat\tau = \tau^\star$ on the reachable set, it is
+exact at \emph{every} depth, bit-exactly. Contrast a learned or
+per-step-predicted transition $\tilde\tau$ resampled each step: writing
+$\epsilon = \Pr_{(s,a)\sim\pi}[\tilde\tau(s, a) \neq \tau^\star(s, a)]$ for its
+single-step error rate over states visited under a policy $\pi$, the probability
+that a full $t$-step rollout is exact is $\prod_{k<t}(1 - \epsilon_k) \approx
+(1 - \epsilon)^t$ under independent, constant-$\epsilon$ steps---and strictly
+lower once an early error pushes the rollout off-distribution, where $\epsilon$
+grows. A symbolic world fixes its error \emph{once}, at synthesis time, where it
+is systematic and auditable; a learned world risks a fresh error every step,
+where it compounds. This tuple, and that property, are what the rest of the paper
+measures.
 
 Table~\ref{tab:related} situates the approach against the principal
 world-model strategy families surveyed in the accompanying literature review.
@@ -604,7 +618,7 @@ the baselines' seconds-scale fitting.
 (i) \texttt{LLMTransition}: the same backbone predicting each next state
 directly from the same description and rules---sharing the symbolic engine's
 knowledge while exhibiting the per-step stochastic prediction structure of
-learned models. (ii) \emph{Genuinely trained} models (E12): a two-hidden-layer
+learned models. (ii) \emph{Gradient-trained} models (E12): a two-hidden-layer
 MLP and a 1-nearest-neighbor memorizer, each trained on $K \in \{100, 1000,
 10000\}$ environment transitions collected by a random policy---real learned
 dynamics with a measured sample-efficiency curve. We are explicit that
@@ -917,12 +931,14 @@ E46 searches the space of worlds for a problem; E49 asks how an agent should
 \emph{traverse} that space---in what order to master worlds---to solve a new,
 out-of-distribution problem as directly as possible. We cast it as a path
 integral over learning trajectories: a trajectory is an ordering of skills to
-learn, weighted by $e^{-\beta S}$ with action $S$ the total learning cost; the
+learn, weighted by $e^{-\beta S}$ with the action $S$ the trajectory's total
+learning cost---the sum of per-skill costs (in abstract effort units), each skill
+cheap to acquire once its prerequisites are mastered and dear from scratch; the
 sum is dominated by the least-action path, the most direct curriculum. Crucially
 this needs \emph{no new machinery}: a path integral is a sum over paths, which is
 a semiring computation, so we reuse the E46 \texttt{Semiring} and swap the value
 ring---tropical $(\min,+)$ for the least-action path, log (log-sum-exp,~$+$) for
-the full partition function---and run a forward/backward dynamic program over
+the full partition function---and run a forward/backward dynamic program (DP) over
 capability-states. The combinatorially many trajectories are summed
 \emph{without enumeration}: \PathTraj{} distinct trajectories are accounted for by
 a DP over just \PathStates{} states.
@@ -1097,7 +1113,7 @@ returns}: only \StartupSurvival\% survive and the top decile captures
 dynamic. \emph{Counterfactual attribution}: a no-PMF batch produces
 \StartupNoPmf\% of base value, and doubling capital while holding PMF low yields
 \StartupCapLowPmf\%---spend cannot substitute for fit, separating the true driver
-from the spend. \emph{Honest predictability}: month-6 traction is informative but
+from the spend. \emph{Bounded predictability}: month-6 traction is informative but
 not decisive (Spearman \StartupSpearman{}; only \StartupTopOverlap\% of the
 eventual top decile were already in the month-6 top decile)---startup outcomes are
 more predictable than market moves (E50), because they are driven by persistent
@@ -1665,6 +1681,37 @@ only model exact, OOD-robust, optimal-for-control, auditable, \emph{and} zero-da
 Perceptual world models (Dreamer/V-JEPA/Genie/Sora/$\ldots$) are a different species,
 compared on properties in Table~\ref{tab:related}.}
 \label{tab:bakeoff}
+\end{table}
+
+\subsection{Crossing species on a shared benchmark: trained vs.\ verified on MiniGrid (E65)}\label{sec:minigrid}
+The bake-off (E63) is deliberately \emph{within}-species and defers the cross-species
+comparison to properties (Table~\ref{tab:related}), because perceptual models cannot
+run on flat symbolic state. E65 closes that gap by moving to a benchmark where the
+species \emph{can} meet: MiniGrid DoorKey-6x6. We express the task as a verified
+OpenWorld transition and validate it \emph{bit-for-bit} against the real Farama
+\texttt{minigrid} environment ($600/600$ steps; \texttt{bench/validate\_minigrid.py}),
+so the learned and perceptual models consume the \emph{same} environment's rendered
+$48\times48$ pixels while OpenWorld plans over the verified code
+(Table~\ref{tab:minigrid}). OpenWorld solves the task \emph{zero-shot} with an optimal
+\MGOpenWorldPlan-step plan and no training data. DreamerV3~\cite{dreamerv3}, learning a
+latent world model from pixels on a dedicated A100, reaches the same
+\MGDreamerFinalSolve{} solve rate---but only after a first success at
+\MGDreamerFirstSolve{} environment steps and convergence over $\sim$50k.
+V-JEPA-2~\cite{vjepa2025} enters as the perceptual species: with no symbolic policy it
+has no solve rate, so we report its representation drift (mean consecutive-frame cosine
+\MGVjepaCosine) and mark it, honestly, as not directly comparable. The reading holds
+the paper's thesis on the learned models' \emph{own} terrain (pixels): verification
+buys the exact solution for zero data and a guarantee, where the learned model needs
+$\sim$10k pixel-level interactions merely to first succeed.
+
+\begin{table}[htb]\centering\small
+\input{tables/minigrid_bench.tex}
+\caption{\textbf{Trained vs.\ verified on a shared benchmark (E65).} MiniGrid
+DoorKey-6x6, with OpenWorld's transition validated bit-for-bit against Farama
+\texttt{minigrid}; DreamerV3 (1 seed, A100) and V-JEPA-2 consume the same
+environment's rendered pixels. V-JEPA is perceptual (no symbolic policy), hence a
+representation-drift metric rather than a solve rate.}
+\label{tab:minigrid}
 \end{table}
 
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
@@ -2392,7 +2439,7 @@ E52 & Wavelet denoising as a perceive$\to$world$\to$emit loop & Tab.~\ref{tab:de
 E53 & \emph{Retired (sheaf section cut); not in text} & --- \\
 E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:bounds} \\
 E55 & Information geometry: identify the world by maximizing info & Tab.~\ref{tab:infogeom} \\
-E56 & Optimal transport: drift detection where KL fails & Tab.~\ref{tab:transport} \\
+E56 & Optimal transport: drift detection where KL saturates & Tab.~\ref{tab:transport} \\
 E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
 E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
 E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
@@ -2717,7 +2764,7 @@ accuracy for expected-information-gain, version-space, and random probing.}
 \input{tables/infogeom}
 \end{table}
 
-\subsection{Optimal transport: drift detection and calibration where KL fails (E56)}\label{sec:transport}
+\subsection{Optimal transport: drift detection and calibration where KL saturates (E56)}\label{sec:transport}
 Comparing a world's output distribution to data is usually done with KL
 divergence, but KL is uninformative in exactly the regime drift detection cares about: under a regime shift the new
 distribution moves off the old one, supports stop overlapping, and KL saturates to

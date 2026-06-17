@@ -1,0 +1,96 @@
+{
+  "task": "MiniGrid-DoorKey-6x6",
+  "shared_benchmark": "OpenWorld transition validated bit-for-bit vs Farama minigrid; learned/perceptual models consume its rendered pixels",
+  "openworld": {
+    "success": 1.0,
+    "plan_length": 11,
+    "plan": [
+      "right",
+      "forward",
+      "pickup",
+      "left",
+      "forward",
+      "toggle",
+      "forward",
+      "forward",
+      "right",
+      "forward",
+      "forward"
+    ],
+    "training_transitions": 0,
+    "verified": true,
+    "validated_vs_real_minigrid": "bit-exact, 600/600 steps (bench/validate_minigrid.py)"
+  },
+  "dreamerv3": {
+    "status": "ran",
+    "obs": "48x48x3 RGB",
+    "max_step": 174104,
+    "steps_to_first_solve": 9640,
+    "final_solve_rate": 1.0,
+    "final_mean_reward": 0.967,
+    "episodes_logged": 11159,
+    "curve": [
+      {
+        "step": 25000,
+        "solve_rate": 0.65,
+        "mean_reward": 0.598,
+        "n": 217
+      },
+      {
+        "step": 50000,
+        "solve_rate": 0.993,
+        "mean_reward": 0.956,
+        "n": 1578
+      },
+      {
+        "step": 75000,
+        "solve_rate": 0.999,
+        "mean_reward": 0.966,
+        "n": 1833
+      },
+      {
+        "step": 100000,
+        "solve_rate": 1.0,
+        "mean_reward": 0.967,
+        "n": 1885
+      },
+      {
+        "step": 125000,
+        "solve_rate": 1.0,
+        "mean_reward": 0.967,
+        "n": 1896
+      },
+      {
+        "step": 150000,
+        "solve_rate": 1.0,
+        "mean_reward": 0.967,
+        "n": 1902
+      },
+      {
+        "step": 175000,
+        "solve_rate": 1.0,
+        "mean_reward": 0.967,
+        "n": 1848
+      }
+    ],
+    "seeds": 1,
+    "hardware": "A100 (us-central1-f)"
+  },
+  "vjepa2": {
+    "model": "facebook/vjepa2-vitl-fpc64-256",
+    "status": "ran",
+    "metric": "mean_consecutive_cosine",
+    "value": 0.4843,
+    "embedding_dim": 1024,
+    "frames": 32,
+    "note": "perceptual representation drift over a rollout; NOT a task success rate -- V-JEPA is a different (latent/perceptual) species"
+  },
+  "experiment": "e65_minigrid_bench",
+  "timestamp": "2026-06-17T13:19:44",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

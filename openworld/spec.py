@@ -446,6 +446,11 @@ def _perceptor_to_spec(p: Any) -> Dict[str, Any]:
         d["pattern"] = p.pattern
         if getattr(p, "casts", None):
             d["casts"] = {k: getattr(c, "__name__", str(c)) for k, c in p.casts.items()}
+    if type(p).__name__ == "DAGPerceptor":                 # DAGPerceptor: declarative
+        d["mode"] = getattr(p, "mode", "graph")
+        d["node_type"] = getattr(getattr(p, "node_type", int), "__name__", "int")
+        d["bounds"] = list(p.bounds) if getattr(p, "bounds", None) is not None else None
+        d["world_name"] = getattr(p, "world_name", "dag_world")
     return d
 
 
@@ -466,6 +471,12 @@ def _perceptor_from_spec(d: Dict[str, Any], allow_code: bool) -> Any:
                  if _SCHEMA_TYPES.get(c)}
         return RegexPerceptor(pattern=d["pattern"], schema=schema,
                               modality=d.get("modality", "text"), casts=casts)
+    if kind == "DAGPerceptor":
+        from .perceive import DAGPerceptor
+        bounds = tuple(d["bounds"]) if d.get("bounds") else None
+        return DAGPerceptor(mode=d.get("mode", "graph"),
+                            node_type=_SCHEMA_TYPES.get(d.get("node_type", "int"), int),
+                            bounds=bounds, world_name=d.get("world_name", "dag_world"))
     if kind == "CodePerceptor" and allow_code and d.get("code"):
         from .perceive import CodePerceptor
         return CodePerceptor(code=d["code"], produces=d.get("produces", []),

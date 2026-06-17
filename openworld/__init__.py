@@ -42,11 +42,13 @@ from .spec import (SPEC_VERSION, SpecError, from_spec, spec_from_json,
                    spec_to_json, to_mermaid, to_spec, validate_spec)
 from .card import render_card, render_gallery, to_reactflow
 from .optimize import SweepPoint, SweepResult, sweep
+from .dag import (CausalDAG, dag_to_schema, dag_to_transition_code, dag_to_world,
+                  parse_dag)
 from .perceive import (
-    CodeEmitter, CodePerceptor, EmissionError, EmissionGate, JSONPerceptor,
-    LLMEmitter, MockPerceptor, Observation, PerceptionError, PerceptionGate,
-    Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter, ToolRegistry,
-    TranscriptPerceptor, VisionPerceptor, image_to_b64,
+    CodeEmitter, CodePerceptor, DAGPerceptor, EmissionError, EmissionGate,
+    JSONPerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
+    PerceptionGate, Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter,
+    ToolRegistry, TranscriptPerceptor, VisionPerceptor, image_to_b64,
     sample_frames,
 )
 from .sandbox import SandboxError
@@ -155,6 +157,12 @@ __all__ = [
     "EmissionGate",
     "EmissionError",
     "MemoryStore",
+    "CausalDAG",
+    "DAGPerceptor",
+    "parse_dag",
+    "dag_to_schema",
+    "dag_to_transition_code",
+    "dag_to_world",
     "TextPerceptor",
     "TranscriptPerceptor",
     "VisionPerceptor",

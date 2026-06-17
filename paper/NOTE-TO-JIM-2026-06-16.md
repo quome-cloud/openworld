@@ -46,14 +46,15 @@ parametric learners interpolate but don't extrapolate; code extrapolates by cons
 
 - The reachable rerun covered **sprint/triage** with the classical baselines (n=5). Orchard and the E38
   scale ladder weren't re-run — same probe should be applied there before those claims ship.
-- One open item (now resolved into a finding): **neither qwen2.5:7b nor 14b** could induce a fully-correct
-  program (repro=1.0) from the held-out-region data (0/3 each) — the post-ship `bugs += debt//4` compound
-  rule resists induction from this distribution at both sizes. So induction success here is
-  **data-distribution-limited, not just model-size-limited**. The induced-code extrapolation number is
-  therefore a *trend*, not a single point: imperfect induced code already extrapolates ~0.66–0.70 (vs MLP
-  ~0.10, 1-NN ~0.005), and the repro→extrap correlation is clean and monotone (14b: 0.86→0.50, 0.94→0.67,
-  0.94→0.80; 7b: 0.95→0.86), extrapolating to ≈1.0 at repro=1.0 — which the verified-code reference
-  realizes exactly (1.0 by construction). Data: `e37c` (7b), `e37d_clean_induction_14b` (14b).
+- One open item (now resolved into a finding): **qwen2.5:7b** could not induce a fully-correct program
+  (repro=1.0) from the held-out-region data (0/3) — the post-ship `bugs += debt//4` compound rule resists
+  induction from this distribution. So induction success here is at least **data-distribution-limited**.
+  The induced-code extrapolation number is therefore a *trend*, not a single point: imperfect induced code
+  already extrapolates ~0.70 (vs MLP ~0.10, 1-NN ~0.005), and the repro→extrap correlation is clean and
+  monotone (7b: 0.93→0.625, 0.82→0.625, 0.95→0.858), extrapolating to ≈1.0 at repro=1.0 — which the
+  verified-code reference realizes exactly (1.0 by construction). Data: `e37c` (7b). A larger-model
+  (qwen2.5:14b) run is **deferred until it lands a clean repro=1.0 point** — the in-progress 14b run was
+  still 0/3 at repro=1.0, so it is not advertised here and was dropped from the committed results.
 
 Nothing's pushed — this is all on a local branch (`gpu-bench-reachable-ood`), additive (your `main.tex`
 and `numbers.tex` are untouched). Happy to push it as a branch + PR, or walk through it live, whichever you

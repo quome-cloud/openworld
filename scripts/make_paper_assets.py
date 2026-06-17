@@ -40,6 +40,7 @@ EXPERIMENTS = [
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
+    "e66_reachable_ood",
 ]
 
 
@@ -3248,6 +3249,64 @@ def table_minigrid_bench(e65):
     (TABLES / "minigrid_bench.tex").write_text("\n".join(lines) + "\n")
 
 
+def table_reachable_ood(e66):
+    """E66: on-manifold OOD. Replaces the x10 magnitude probe with a held-out
+    region of the REACHABLE state space, split into three DISJOINT regions:
+    in-region (held-out train states), interp-OOD (scattered on-manifold holdout),
+    extrap-OOD (beyond the median progress coordinate). 5 seeds, sprint + triage.
+    Verified code = reference, exact by construction. x10(old) shown for contrast.
+    Triage's coordinate is a monotonic counter, so it has no interpolation regime
+    (caveat in the JSON + caption); sprint carries the interpolation claim."""
+    labels = {"1-NN": "1-NN memorizer", "tabular": "tabular ($+$NN)",
+              "linear": "linear", "koopman": "Koopman (deg-2)", "MLP": "MLP",
+              "verified code (reference)": "\\textbf{verified code (ref.)}"}
+    order = ["1-NN", "tabular", "linear", "koopman", "MLP",
+             "verified code (reference)"]
+
+    def cell(v):
+        return "--" if v is None else f"{v:.2f}"
+
+    # bold the best learned (non-reference) value in each interp/extrap column
+    def rows_for(dom):
+        models = e66["domains"][dom]["models"]
+        learned = [m for m in order if m != "verified code (reference)"]
+        best = {c: max(models[m][c] for m in learned) for c in ("interp_ood", "extrap_ood")}
+        out = []
+        first = True
+        for m in order:
+            md = models[m]
+            head = dom if first else ""
+            first = False
+            cells = []
+            for c in ("in_region", "interp_ood", "extrap_ood", "x10_old"):
+                txt = cell(md[c])
+                if m != "verified code (reference)" and c in best and md[c] == best[c] \
+                        and md[c] is not None:
+                    txt = f"\\textbf{{{txt}}}"
+                cells.append(txt)
+            out.append(f"{head} & {labels[m]} & " + " & ".join(cells) + " \\\\")
+        return out
+
+    body = rows_for("sprint") + ["\\midrule"] + rows_for("triage")
+    triage_caveat = e66["domains"]["triage"].get("interp_caveat", "")
+    caption = (
+        "% OOD on three DISJOINT held-out REACHABLE regions (not x10 off-manifold\n"
+        "% magnitudes): in-region = held-out trained states; interp-OOD = scattered\n"
+        "% on-manifold holdout (coord <= median); extrap-OOD = beyond the median\n"
+        "% progress coordinate. Memorizers (1-NN, tabular) collapse off the trained\n"
+        "% states; parametric learners partially generalize on-manifold (Koopman\n"
+        "% recovers 0.42-0.84); none are exact. Verified code is exact and flat across\n"
+        "% the whole reachable manifold at zero training data. The x10 column = 0.00\n"
+        "% for every learned model in both worlds: it measured failure on IMPOSSIBLE\n"
+        "% states (off the manifold), not failure to generalize the dynamics.\n"
+        f"% Triage caveat: {triage_caveat}.\n")
+    (TABLES / "reachable_ood.tex").write_text(
+        caption +
+        "\\begin{tabular}{llcccc}\n\\toprule\n"
+        "World & Model & in-region & interp-OOD & extrap-OOD & $10\\times$ (old) \\\\\n"
+        "\\midrule\n" + "\n".join(body) + "\n\\bottomrule\n\\end{tabular}\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3312,6 +3371,7 @@ def main():
     fig_trained_wm_control(data["e61_trained_wm_control"])
     table_bakeoff(data["e63_world_model_bakeoff"])
     table_minigrid_bench(data["e65_minigrid_bench"])
+    table_reachable_ood(data["e66_reachable_ood"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

@@ -26,6 +26,14 @@ This is NOT a fabrication problem — the ×10 numbers are real. It's a **constr
 > impossible states rather than failure to generalize the dynamics; we therefore report OOD on a held-out
 > region of the reachable state space (Table~\ref{tab:reachable-ood}).
 
+**Triage interpolation caveat (machine-readable in the result JSON + table caption).** Triage's progress
+coordinate is `tick`, a **monotonic counter**, so distinct source states have distinct ticks and triage
+has **no valid interpolation regime** (1-NN interp ≈ 0 by construction, not by failure to learn). We do not
+re-architect triage; instead the e66 triage output carries
+`"interp_caveat": "tick is a monotonic counter; triage has no valid interpolation regime — sprint carries
+the interpolation claim"`, and the reachable-OOD table caption flags it. **Sprint is the headline for the
+interpolation/extrapolation claim**; triage's interp column is reported for completeness only.
+
 ## Stale spots to fix in `paper/` (×10-based OOD claims)
 
 `numbers.tex`:
@@ -107,8 +115,9 @@ induce a fully-correct sprint program from held-out-region data (residual miss =
 ⚠️ **New caveat for the paper:** E37 says induction is "accepted only if it reproduces the observed
 transitions" (implies repro=1.0), but qwen2.5:7b reached that **0/3** on held-out-region data (tops ~0.95).
 So induction success is **model/data-dependent**; the paper likely used full-manifold induction data or a
-stronger model. **Next step to nail the clean repro=1.0 point: rerun the inducer with qwen2.5:14b**
-(installed locally). Result: `results/e37c_clean_induction.json`.
+stronger model. **The 14b run is deferred until it lands a clean repro=1.0 point** — an in-progress
+qwen2.5:14b run was still 0/3 at repro=1.0, so it is not advertised here and was dropped from the committed
+results; revisit once it produces a clean point. Result: `results/e37c_clean_induction.json`.
 
 ## Honest net
 

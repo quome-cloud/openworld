@@ -1,30 +1,29 @@
-% Reachable-state OOD (E65). Replaces the x10 magnitude probe with a held-out
-% region of the REACHABLE state space (on-manifold). 5 seeds, sprint + triage.
-% Verified code = reference, exact by construction. x10(old) shown for contrast.
+% OOD on three DISJOINT held-out REACHABLE regions (not x10 off-manifold
+% magnitudes): in-region = held-out trained states; interp-OOD = scattered
+% on-manifold holdout (coord <= median); extrap-OOD = beyond the median
+% progress coordinate. Memorizers (1-NN, tabular) collapse off the trained
+% states; parametric learners partially generalize on-manifold (Koopman
+% recovers 0.42-0.84); none are exact. Verified code is exact and flat across
+% the whole reachable manifold at zero training data. The x10 column = 0.00
+% for every learned model in both worlds: it measured failure on IMPOSSIBLE
+% states (off the manifold), not failure to generalize the dynamics.
+% Triage caveat: tick is a monotonic counter; triage has no valid interpolation regime -- sprint carries the interpolation claim.
 \begin{tabular}{llcccc}
 \toprule
 World & Model & in-region & interp-OOD & extrap-OOD & $10\times$ (old) \\
 \midrule
-sprint & 1-NN memorizer & 0.99 & 0.17 & 0.00 & 0.00 \\
- & tabular ($+$NN) & 0.99 & 0.17 & 0.00 & 0.00 \\
- & linear & 0.87 & 0.64 & 0.35 & 0.00 \\
- & Koopman (deg-2) & 0.98 & \textbf{0.84} & \textbf{0.57} & 0.00 \\
- & MLP & 0.88 & 0.61 & 0.12 & 0.00 \\
+sprint & 1-NN memorizer & 0.99 & 0.21 & 0.00 & 0.00 \\
+ & tabular ($+$NN) & 0.99 & 0.21 & 0.00 & 0.00 \\
+ & linear & 0.86 & 0.69 & 0.37 & 0.00 \\
+ & Koopman (deg-2) & 0.96 & \textbf{0.87} & \textbf{0.65} & 0.00 \\
+ & MLP & 0.88 & 0.71 & 0.17 & 0.00 \\
  & \textbf{verified code (ref.)} & 1.00 & 1.00 & 1.00 & 1.00 \\
 \midrule
 triage & 1-NN memorizer & 0.99 & 0.00 & 0.00 & 0.00 \\
  & tabular ($+$NN) & 0.99 & 0.00 & 0.00 & 0.00 \\
- & linear & 0.47 & 0.45 & 0.38 & 0.00 \\
- & Koopman (deg-2) & 0.80 & 0.58 & 0.42 & 0.00 \\
- & MLP & 0.48 & 0.34 & 0.23 & 0.00 \\
+ & linear & 0.46 & 0.45 & 0.35 & 0.00 \\
+ & Koopman (deg-2) & 0.79 & \textbf{0.62} & \textbf{0.46} & 0.00 \\
+ & MLP & 0.48 & 0.39 & 0.26 & 0.00 \\
  & \textbf{verified code (ref.)} & 1.00 & 1.00 & 1.00 & 1.00 \\
 \bottomrule
 \end{tabular}
-
-% OOD on a held-out REACHABLE region (not x10 off-manifold magnitudes). Memorizers
-% (1-NN, tabular) collapse off the trained states; parametric learners partially
-% generalize on-manifold (Koopman recovers 0.42-0.84); none are exact. Verified code
-% is exact and flat across the whole reachable manifold at zero training data. The
-% x10 column = 0.00 for every learned model in both worlds: it measured failure on
-% IMPOSSIBLE states (off the manifold, e.g. sprint's shipped+backlog=12 invariant),
-% not failure to generalize the dynamics.

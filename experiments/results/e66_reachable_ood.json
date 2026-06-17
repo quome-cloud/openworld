@@ -16,37 +16,37 @@
       "median": 10,
       "n_distinct": 500,
       "n_train_region_tr": 95689,
-      "n_interp_ood_tr": 18193,
+      "n_interp_ood_tr": 16934,
       "n_extrap_ood_tr": 7377,
       "models": {
         "1-NN": {
-          "in_region": 0.992,
-          "interp_ood": 0.169,
+          "in_region": 0.994,
+          "interp_ood": 0.206,
           "extrap_ood": 0.0,
           "x10_old": 0.0
         },
         "tabular": {
-          "in_region": 0.992,
-          "interp_ood": 0.169,
+          "in_region": 0.994,
+          "interp_ood": 0.206,
           "extrap_ood": 0.0,
           "x10_old": 0.0
         },
         "linear": {
-          "in_region": 0.872,
-          "interp_ood": 0.641,
-          "extrap_ood": 0.349,
+          "in_region": 0.863,
+          "interp_ood": 0.691,
+          "extrap_ood": 0.368,
           "x10_old": 0.0
         },
         "koopman": {
-          "in_region": 0.975,
-          "interp_ood": 0.838,
-          "extrap_ood": 0.57,
+          "in_region": 0.96,
+          "interp_ood": 0.872,
+          "extrap_ood": 0.646,
           "x10_old": 0.0
         },
         "MLP": {
-          "in_region": 0.88,
-          "interp_ood": 0.607,
-          "extrap_ood": 0.124,
+          "in_region": 0.882,
+          "interp_ood": 0.707,
+          "extrap_ood": 0.168,
           "x10_old": 0.0
         },
         "verified code (reference)": {
@@ -63,7 +63,7 @@
       "median": 16,
       "n_distinct": 786,
       "n_train_region_tr": 50094,
-      "n_interp_ood_tr": 33517,
+      "n_interp_ood_tr": 17906,
       "n_extrap_ood_tr": 52000,
       "models": {
         "1-NN": {
@@ -79,21 +79,21 @@
           "x10_old": 0.0
         },
         "linear": {
-          "in_region": 0.472,
-          "interp_ood": 0.452,
-          "extrap_ood": 0.378,
+          "in_region": 0.464,
+          "interp_ood": 0.45,
+          "extrap_ood": 0.352,
           "x10_old": 0.0
         },
         "koopman": {
-          "in_region": 0.797,
-          "interp_ood": 0.579,
-          "extrap_ood": 0.417,
+          "in_region": 0.785,
+          "interp_ood": 0.625,
+          "extrap_ood": 0.464,
           "x10_old": 0.0
         },
         "MLP": {
-          "in_region": 0.481,
-          "interp_ood": 0.338,
-          "extrap_ood": 0.226,
+          "in_region": 0.483,
+          "interp_ood": 0.392,
+          "extrap_ood": 0.255,
           "x10_old": 0.0
         },
         "verified code (reference)": {
@@ -103,7 +103,8 @@
           "x10_old": 1.0,
           "note": "exact by construction (oracle); reference, not a contestant"
         }
-      }
+      },
+      "interp_caveat": "tick is a monotonic counter; triage has no valid interpolation regime -- sprint carries the interpolation claim"
     }
   }
 }

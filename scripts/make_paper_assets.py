@@ -39,7 +39,7 @@ EXPERIMENTS = [
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
-    "e63_world_model_bakeoff", "e64_causal_assumptions",
+    "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
 ]
 
 
@@ -2291,6 +2291,12 @@ def numbers_tex(d):
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
         macro("NumExperiments", str(len(EXPERIMENTS))),
+        # E65 MiniGrid head-to-head (trained vs verified on a shared benchmark)
+        macro("MGOpenWorldPlan", str(d["e65_minigrid_bench"]["openworld"]["plan_length"])),
+        macro("MGDreamerFirstSolve",
+              f"{d['e65_minigrid_bench']['dreamerv3']['steps_to_first_solve']:,}".replace(",", "{,}")),
+        macro("MGDreamerFinalSolve", pct(d["e65_minigrid_bench"]["dreamerv3"]["final_solve_rate"])),
+        macro("MGVjepaCosine", f"{d['e65_minigrid_bench']['vjepa2']['value']:.2f}"),
         # Codebase metrics, counted from the live repo (see repo_metrics()).
         macro("LibModules", str(_rm["core_modules"])),
         macro("LibLOC", f"{_rm['core_loc']:,}".replace(",", "{,}")),
@@ -3222,6 +3228,26 @@ def table_causal_assumptions(e64):
     (TABLES / "causal_assumptions.tex").write_text("\n".join(lines) + "\n")
 
 
+def table_minigrid_bench(e65):
+    """Trained-vs-verified head-to-head on a shared benchmark, MiniGrid DoorKey-6x6
+    (E65): one row per world-model species, with what it costs to reach the solution.
+    V-JEPA is perceptual (no symbolic policy), so it has no solve rate -- it reports a
+    representation-drift metric, clearly marked as a different species."""
+    ow, dv, vj = e65["openworld"], e65["dreamerv3"], e65["vjepa2"]
+    fs = f"{dv['steps_to_first_solve']:,}".replace(",", "{,}")
+    lines = ["\\begin{tabular}{llccl}", "\\toprule",
+             "World model & Species & Train data & Solve & Cost to solution \\\\",
+             "\\midrule",
+             f"OpenWorld & verified code & 0 & {pct(ow['success'])} & "
+             f"0-shot plan, length {ow['plan_length']} \\\\",
+             f"DreamerV3 & learned (pixels) & {fs} steps & {pct(dv['final_solve_rate'])} & "
+             f"first solve @ {fs} steps \\\\",
+             f"V-JEPA-2 & perceptual & pretrained & -- & "
+             f"cos-drift {vj['value']:.2f} (not a solve rate) \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "minigrid_bench.tex").write_text("\n".join(lines) + "\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3285,6 +3311,7 @@ def main():
     table_io_boundary(data["e60_io_boundary"])
     fig_trained_wm_control(data["e61_trained_wm_control"])
     table_bakeoff(data["e63_world_model_bakeoff"])
+    table_minigrid_bench(data["e65_minigrid_bench"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

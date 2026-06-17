@@ -1,0 +1,10 @@
+{
+  "method": "v-jepa2",
+  "model": "facebook/vjepa2-vitl-fpc64-256",
+  "status": "ran",
+  "embedding_dim": 1024,
+  "frames": 32,
+  "mean_consecutive_cosine": 0.4843,
+  "metric_note": "perceptual representation drift over a rollout; NOT a task success rate -- V-JEPA is a different (latent/perceptual) species",
+  "training": "pretrained on internet video (not on this task)"
+}

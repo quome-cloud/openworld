@@ -1,0 +1,140 @@
+{
+  "experiment": "e37b_reachable_induction",
+  "model": "qwen2.5:7b",
+  "ks": [
+    100,
+    1000
+  ],
+  "replicates": 2,
+  "coord": "shipped",
+  "median": 10,
+  "rows": [
+    {
+      "k": 100,
+      "rep": 0,
+      "induce_repro": 0.81,
+      "code": {
+        "in_region": 0.817,
+        "interp_ood": 0.783,
+        "extrap_ood": 0.625,
+        "in_dist_orig": 0.6,
+        "x10_old": 0.6
+      },
+      "mlp": {
+        "in_region": 0.717,
+        "interp_ood": 0.85,
+        "extrap_ood": 0.008,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.692,
+        "interp_ood": 0.275,
+        "extrap_ood": 0.0,
+        "in_dist_orig": 0.1,
+        "x10_old": 0.0
+      }
+    },
+    {
+      "k": 100,
+      "rep": 1,
+      "induce_repro": 0.55,
+      "code": {
+        "in_region": 0.617,
+        "interp_ood": 0.683,
+        "extrap_ood": 0.392,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.3
+      },
+      "mlp": {
+        "in_region": 0.825,
+        "interp_ood": 0.75,
+        "extrap_ood": 0.092,
+        "in_dist_orig": 0.4,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.667,
+        "interp_ood": 0.258,
+        "extrap_ood": 0.0,
+        "in_dist_orig": 0.1,
+        "x10_old": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "rep": 0,
+      "induce_repro": 0.808,
+      "code": {
+        "in_region": 0.817,
+        "interp_ood": 0.783,
+        "extrap_ood": 0.625,
+        "in_dist_orig": 0.6,
+        "x10_old": 0.6
+      },
+      "mlp": {
+        "in_region": 0.833,
+        "interp_ood": 0.742,
+        "extrap_ood": 0.025,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.917,
+        "interp_ood": 0.308,
+        "extrap_ood": 0.0,
+        "in_dist_orig": 0.2,
+        "x10_old": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "rep": 1,
+      "induce_repro": 0.603,
+      "code": {
+        "in_region": 0.617,
+        "interp_ood": 0.683,
+        "extrap_ood": 0.392,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.3
+      },
+      "mlp": {
+        "in_region": 0.842,
+        "interp_ood": 0.85,
+        "extrap_ood": 0.142,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.883,
+        "interp_ood": 0.308,
+        "extrap_ood": 0.0,
+        "in_dist_orig": 0.2,
+        "x10_old": 0.0
+      }
+    }
+  ],
+  "aggregate": {
+    "code": {
+      "in_region": 0.717,
+      "interp_ood": 0.733,
+      "extrap_ood": 0.508,
+      "in_dist_orig": 0.45,
+      "x10_old": 0.45
+    },
+    "mlp": {
+      "in_region": 0.804,
+      "interp_ood": 0.798,
+      "extrap_ood": 0.067,
+      "in_dist_orig": 0.325,
+      "x10_old": 0.0
+    },
+    "knn1": {
+      "in_region": 0.79,
+      "interp_ood": 0.287,
+      "extrap_ood": 0.0,
+      "in_dist_orig": 0.15,
+      "x10_old": 0.0
+    }
+  }
+}

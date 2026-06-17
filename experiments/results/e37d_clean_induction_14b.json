@@ -1,0 +1,122 @@
+{
+  "experiment": "e37d_clean_induction_14b",
+  "model": "qwen2.5:14b",
+  "ks": [
+    1000
+  ],
+  "replicates": 3,
+  "coord": "shipped",
+  "median": 10,
+  "show": 60,
+  "rows": [
+    {
+      "k": 1000,
+      "rep": 0,
+      "induce_repro": 0.859,
+      "induce_attempts": 40,
+      "gated_ok": false,
+      "code": {
+        "in_region": 0.917,
+        "interp_ood": 0.867,
+        "extrap_ood": 0.5,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.3
+      },
+      "mlp": {
+        "in_region": 0.892,
+        "interp_ood": 0.792,
+        "extrap_ood": 0.05,
+        "in_dist_orig": 0.4,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.975,
+        "interp_ood": 0.25,
+        "extrap_ood": 0.008,
+        "in_dist_orig": 0.2,
+        "x10_old": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "rep": 1,
+      "induce_repro": 0.939,
+      "induce_attempts": 40,
+      "gated_ok": false,
+      "code": {
+        "in_region": 0.967,
+        "interp_ood": 0.917,
+        "extrap_ood": 0.667,
+        "in_dist_orig": 0.4,
+        "x10_old": 0.4
+      },
+      "mlp": {
+        "in_region": 0.858,
+        "interp_ood": 0.725,
+        "extrap_ood": 0.2,
+        "in_dist_orig": 0.5,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.958,
+        "interp_ood": 0.242,
+        "extrap_ood": 0.0,
+        "in_dist_orig": 0.2,
+        "x10_old": 0.0
+      }
+    },
+    {
+      "k": 1000,
+      "rep": 2,
+      "induce_repro": 0.938,
+      "induce_attempts": 40,
+      "gated_ok": false,
+      "code": {
+        "in_region": 0.967,
+        "interp_ood": 0.933,
+        "extrap_ood": 0.8,
+        "in_dist_orig": 0.5,
+        "x10_old": 0.5
+      },
+      "mlp": {
+        "in_region": 0.742,
+        "interp_ood": 0.7,
+        "extrap_ood": 0.042,
+        "in_dist_orig": 0.5,
+        "x10_old": 0.0
+      },
+      "knn1": {
+        "in_region": 0.967,
+        "interp_ood": 0.242,
+        "extrap_ood": 0.008,
+        "in_dist_orig": 0.3,
+        "x10_old": 0.0
+      }
+    }
+  ],
+  "n_gated_repro1": 0,
+  "aggregate_all": {
+    "code": {
+      "in_region": 0.95,
+      "interp_ood": 0.906,
+      "extrap_ood": 0.656,
+      "in_dist_orig": 0.4,
+      "x10_old": 0.4
+    },
+    "mlp": {
+      "in_region": 0.831,
+      "interp_ood": 0.739,
+      "extrap_ood": 0.097,
+      "in_dist_orig": 0.467,
+      "x10_old": 0.0
+    },
+    "knn1": {
+      "in_region": 0.967,
+      "interp_ood": 0.245,
+      "extrap_ood": 0.005,
+      "in_dist_orig": 0.233,
+      "x10_old": 0.0
+    }
+  },
+  "code_aggregate_gated_only": null
+}

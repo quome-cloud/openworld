@@ -5,10 +5,10 @@ import json
 import pytest
 
 from openworld import Action, MockLLM
-from openworld.swebench import (
+from openworld.repairbench import (
     DEFAULT_DATASET_PATH,
-    SWEBenchInstance,
-    build_swebench_world,
+    RepairBenchInstance,
+    build_repairbench_world,
     initial_world_state,
     load_dataset,
     merged_errors,
@@ -18,8 +18,8 @@ from openworld.swebench import (
 )
 
 # A minimal class-based instance used by unit tests (not part of the dataset).
-FIXTURE = SWEBenchInstance(
-    instance_id="openworld-swebench-000-fixture",
+FIXTURE = RepairBenchInstance(
+    instance_id="openworld-repairbench-000-fixture",
     module_name="counter",
     issue=(
         "Counter seems to double-count. After calling increment() once, "
@@ -51,10 +51,10 @@ FIXTURE = SWEBenchInstance(
     fail_to_pass=[("bump(1)", "1"), ("bump(3)", "3")],
     pass_to_pass=[("Counter().value", "0")],
     world={
-        "name": "swebench:openworld-swebench-000-fixture",
+        "name": "repairbench:openworld-repairbench-000-fixture",
         "description": "Program repair world for the counter module.",
         "initial_state": {
-            "instance": "openworld-swebench-000-fixture",
+            "instance": "openworld-repairbench-000-fixture",
             "source": "",  # filled below
             "fail_to_pass_passed": 0,
             "fail_to_pass_failed": 2,
@@ -138,7 +138,7 @@ def test_merged_errors_keeps_regression_visibility():
 
 
 def test_world_episode_garbage_then_reference():
-    world = build_swebench_world(FIXTURE)
+    world = build_repairbench_world(FIXTURE)
     assert world.state["solved"] is False
     assert world.state["fail_to_pass_failed"] == 2
 
@@ -155,7 +155,7 @@ def test_world_episode_garbage_then_reference():
 
 
 def test_solved_world_ignores_further_steps():
-    world = build_swebench_world(FIXTURE)
+    world = build_repairbench_world(FIXTURE)
     world.step(Action("submit_patch", params={"source": FIXTURE.reference_source}))
     assert world.state["solved"] is True
     world.step(Action("submit_patch", params={"source": "x = 1\n"}))
@@ -205,7 +205,7 @@ def test_solve_in_world_exhausts_budget():
 
 @pytest.fixture(scope="module")
 def dataset():
-    assert DEFAULT_DATASET_PATH.exists(), "run datasets/openworld-swebench/build_tasks.py"
+    assert DEFAULT_DATASET_PATH.exists(), "run datasets/openworld-repairbench/build_tasks.py"
     return load_dataset()
 
 
@@ -217,7 +217,7 @@ def test_dataset_has_20_unique_instances(dataset):
 
 def test_dataset_schema(dataset):
     for inst in dataset:
-        assert inst.instance_id.startswith("openworld-swebench-")
+        assert inst.instance_id.startswith("openworld-repairbench-")
         for fld in ("module_name", "issue", "buggy_source", "reference_source"):
             assert getattr(inst, fld).strip(), f"{inst.instance_id}: empty {fld}"
         assert len(inst.fail_to_pass) >= 2, inst.instance_id

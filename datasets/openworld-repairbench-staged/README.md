@@ -1,8 +1,8 @@
 # OpenWorld-SWE-bench-STAGED
 
 A **two-stage** program-repair dataset, companion to
-[`openworld-swebench`](../openworld-swebench/) (the atomic set). Same schema,
-same `openworld.swebench` harness, same single-shot-vs-in-world ablation — built
+[`openworld-repairbench`](../openworld-repairbench/) (the atomic set). Same schema,
+same `openworld.repairbench` harness, same single-shot-vs-in-world ablation — built
 to answer the one question the atomic set couldn't.
 
 ## Why this exists
@@ -28,7 +28,7 @@ Every instance encodes two defects:
 
 The "obvious" patch a model writes from the issue alone fixes **stage 1 and
 passes the first test, but fails the second**, while keeping the regression
-(`pass_to_pass`) suite green. (`tests/test_swebench_staged.py::test_staging_is_real`
+(`pass_to_pass`) suite green. (`tests/test_repairbench_staged.py::test_staging_is_real`
 asserts exactly this for all six instances, using the stage-1 patches in
 `build_tasks.py::STAGE1_PATCHES`.)
 
@@ -58,21 +58,21 @@ the atomic set, so cross-dataset comparison isn't confounded by task type.
 
 ## Run it
 
-All operations go through the recipe (`recipes/owsb-staged-v1.json`):
+All operations go through the recipe (`recipes/owrb-staged-v1.json`):
 
 ```bash
-python -m openworld.bench recipes/owsb-staged-v1.json run --mock   # offline smoke
-python -m openworld.bench recipes/owsb-staged-v1.json run          # Ollama ladder
-python -m openworld.bench recipes/owsb-staged-v1.json all --mock   # build+validate+run+card
+python -m openworld.bench recipes/owrb-staged-v1.json run --mock   # offline smoke
+python -m openworld.bench recipes/owrb-staged-v1.json run          # Ollama ladder
+python -m openworld.bench recipes/owrb-staged-v1.json all --mock   # build+validate+run+card
 ```
 
 Results land in `results/<model>.json` (frozen result schema v1, one file
 per model); the dataset card is `CARD.md`.
 
-To rebuild `tasks.jsonl` directly: `python datasets/openworld-swebench-staged/build_tasks.py`
-(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owsb-staged-v1.json build`).
+To rebuild `tasks.jsonl` directly: `python datasets/openworld-repairbench-staged/build_tasks.py`
+(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owrb-staged-v1.json build`).
 
-To validate the dataset: `pytest tests/test_swebench_staged.py`
+To validate the dataset: `pytest tests/test_repairbench_staged.py`
 
 Results (with per-task paired records for significance testing) land alongside
 a printed markdown table — same format as the atomic set, so the two are read
@@ -84,5 +84,5 @@ side by side: **flat Δ on atomic, positive Δ here** is the story.
 |---|---|
 | `build_tasks.py` | source of truth (`RAW` instances + `STAGE1_PATCHES`); writes `tasks.jsonl` |
 | `tasks.jsonl` | generated artifact the harness loads |
-| `recipes/owsb-staged-v1.json` | recipe — use `python -m openworld.bench recipes/owsb-staged-v1.json <cmd>` to build/run/card |
+| `recipes/owrb-staged-v1.json` | recipe — use `python -m openworld.bench recipes/owrb-staged-v1.json <cmd>` to build/run/card |
 | `results/comparison.json` | original E29 ladder run cited by the paper — do not modify |

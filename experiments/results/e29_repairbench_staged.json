@@ -1,7 +1,7 @@
 {
-  "experiment": "e29_swebench_staged",
+  "experiment": "e29_repairbench_staged",
   "description": "OpenWorld-SWE-bench-STAGED: staged-failure suite, single-shot vs in-world",
-  "provenance": "copied from branch openworld-swebench commit 7422581 (datasets/*/results/comparison.json)",
+  "provenance": "copied from branch openworld-repairbench commit 7422581 (datasets/*/results/comparison.json)",
   "n_instances": 15,
   "budget": 4,
   "mock": false,
@@ -81,9 +81,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -91,7 +91,7 @@
             "regression_failures_seen": 3
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -100,9 +100,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -110,7 +110,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -119,9 +119,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "instance_id": "openworld-repairbench-staged-002-histogram-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -129,7 +129,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -138,9 +138,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "instance_id": "openworld-repairbench-staged-003-median-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -148,7 +148,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -157,9 +157,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+          "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -167,7 +167,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -176,9 +176,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+          "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -186,7 +186,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -195,9 +195,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+          "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -205,7 +205,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -214,9 +214,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -224,7 +224,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -233,9 +233,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+          "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -243,7 +243,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -252,9 +252,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-009-slugify-staged",
+          "instance_id": "openworld-repairbench-staged-009-slugify-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -262,7 +262,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -271,9 +271,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+          "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -281,7 +281,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -290,9 +290,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+          "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -300,7 +300,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -309,9 +309,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+          "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -319,7 +319,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -328,9 +328,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+          "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -338,7 +338,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -347,9 +347,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-014-truncate-staged",
+          "instance_id": "openworld-repairbench-staged-014-truncate-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -357,7 +357,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -386,9 +386,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -396,7 +396,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -405,9 +405,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -415,7 +415,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -424,9 +424,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "instance_id": "openworld-repairbench-staged-002-histogram-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -434,7 +434,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -443,9 +443,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "instance_id": "openworld-repairbench-staged-003-median-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -453,45 +453,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
-            "condition": "in_world",
-            "solved": false,
-            "solved_first_attempt": false,
-            "attempts": 4,
-            "regression_failures_seen": 0
-          }
-        },
-        {
-          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
-          "single_shot": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
-            "condition": "single_shot",
-            "solved": true,
-            "solved_first_attempt": true,
-            "attempts": 1,
-            "regression_failures_seen": 0
-          },
-          "in_world": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
-            "condition": "in_world",
-            "solved": true,
-            "solved_first_attempt": true,
-            "attempts": 1,
-            "regression_failures_seen": 0
-          }
-        },
-        {
-          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
-          "single_shot": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
-            "condition": "single_shot",
-            "solved": false,
-            "solved_first_attempt": false,
-            "attempts": 1,
-            "regression_failures_seen": 0
-          },
-          "in_world": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -500,9 +462,28 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+          "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
+            "condition": "single_shot",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
+            "condition": "in_world",
+            "solved": true,
+            "solved_first_attempt": true,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
+          "single_shot": {
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -510,7 +491,26 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
+            "condition": "in_world",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 4,
+            "regression_failures_seen": 0
+          }
+        },
+        {
+          "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
+          "single_shot": {
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
+            "condition": "single_shot",
+            "solved": false,
+            "solved_first_attempt": false,
+            "attempts": 1,
+            "regression_failures_seen": 0
+          },
+          "in_world": {
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -519,9 +519,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -529,7 +529,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -538,9 +538,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+          "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -548,7 +548,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -557,9 +557,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-009-slugify-staged",
+          "instance_id": "openworld-repairbench-staged-009-slugify-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -567,7 +567,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -576,9 +576,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+          "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -586,7 +586,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -595,9 +595,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+          "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -605,7 +605,7 @@
             "regression_failures_seen": 1
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -614,9 +614,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+          "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -624,7 +624,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -633,9 +633,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+          "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -643,7 +643,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -652,9 +652,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-014-truncate-staged",
+          "instance_id": "openworld-repairbench-staged-014-truncate-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -662,7 +662,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -691,9 +691,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+          "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -701,7 +701,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-000-config-parser-staged",
+            "instance_id": "openworld-repairbench-staged-000-config-parser-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -710,9 +710,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -720,7 +720,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-001-discount-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-001-discount-clamp-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -729,9 +729,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-002-histogram-staged",
+          "instance_id": "openworld-repairbench-staged-002-histogram-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -739,7 +739,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-002-histogram-staged",
+            "instance_id": "openworld-repairbench-staged-002-histogram-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -748,9 +748,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-003-median-staged",
+          "instance_id": "openworld-repairbench-staged-003-median-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -758,7 +758,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-003-median-staged",
+            "instance_id": "openworld-repairbench-staged-003-median-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -767,9 +767,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+          "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -777,7 +777,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-004-deep-get-staged",
+            "instance_id": "openworld-repairbench-staged-004-deep-get-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -786,9 +786,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+          "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -796,7 +796,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-005-format-duration-staged",
+            "instance_id": "openworld-repairbench-staged-005-format-duration-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -805,9 +805,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+          "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -815,7 +815,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-006-csv-row-staged",
+            "instance_id": "openworld-repairbench-staged-006-csv-row-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -824,9 +824,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+          "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -834,7 +834,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-007-charge-clamp-staged",
+            "instance_id": "openworld-repairbench-staged-007-charge-clamp-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -843,9 +843,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+          "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -853,7 +853,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-008-bounded-stack-staged",
+            "instance_id": "openworld-repairbench-staged-008-bounded-stack-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -862,9 +862,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-009-slugify-staged",
+          "instance_id": "openworld-repairbench-staged-009-slugify-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -872,7 +872,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-009-slugify-staged",
+            "instance_id": "openworld-repairbench-staged-009-slugify-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -881,9 +881,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+          "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -891,7 +891,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-010-phone-format-staged",
+            "instance_id": "openworld-repairbench-staged-010-phone-format-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -900,9 +900,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+          "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -910,7 +910,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-011-running-stats-staged",
+            "instance_id": "openworld-repairbench-staged-011-running-stats-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -919,9 +919,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+          "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -929,7 +929,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-012-parse-ints-staged",
+            "instance_id": "openworld-repairbench-staged-012-parse-ints-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -938,9 +938,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+          "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -948,7 +948,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-013-palindrome-staged",
+            "instance_id": "openworld-repairbench-staged-013-palindrome-staged",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -957,9 +957,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-staged-014-truncate-staged",
+          "instance_id": "openworld-repairbench-staged-014-truncate-staged",
           "single_shot": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -967,7 +967,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-staged-014-truncate-staged",
+            "instance_id": "openworld-repairbench-staged-014-truncate-staged",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,

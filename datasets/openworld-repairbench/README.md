@@ -12,7 +12,7 @@ error messages, and pass/fail counts — returned after each patch submission.
 
 | field | type | notes |
 |---|---|---|
-| `instance_id` | str | unique identifier, e.g. `openworld-swebench-002-pagination-last-page` |
+| `instance_id` | str | unique identifier, e.g. `openworld-repairbench-002-pagination-last-page` |
 | `module_name` | str | Python module name the patch must replace |
 | `issue` | str | the only problem statement models see — symptoms and repro, no fix named |
 | `buggy_source` | str | the broken module given to the model |
@@ -31,7 +31,7 @@ error messages, and pass/fail counts — returned after each patch submission.
 
 ```json
 {
-  "instance_id": "openworld-swebench-002-pagination-last-page",
+  "instance_id": "openworld-repairbench-002-pagination-last-page",
   "module_name": "pagination",
   "issue": "Items vanish from the last page of results.\nWith 7 items and per_page=3, page_count says 2 (should be 3) and\nthe 7th item is never returned by get_page. Asking for the page\nafter the last one raises IndexError instead of returning [].\n",
   "buggy_source": "def page_count(total, per_page):\n    return total // per_page\n...",
@@ -49,10 +49,10 @@ error messages, and pass/fail counts — returned after each patch submission.
     ["page_summary([1, 2, 3, 4], 2)", "[2, 2]"]
   ],
   "world": {
-    "name": "swebench:openworld-swebench-002-pagination-last-page",
+    "name": "repairbench:openworld-repairbench-002-pagination-last-page",
     "description": "Program repair as a world model for module 'pagination'. Submit a corrected module via submit_patch(params={'source': ...}).",
     "initial_state": {
-      "instance": "openworld-swebench-002-pagination-last-page",
+      "instance": "openworld-repairbench-002-pagination-last-page",
       "fail_to_pass_passed": 0, "fail_to_pass_failed": 4,
       "pass_to_pass_passed": 3, "pass_to_pass_failed": 0,
       "last_errors": [
@@ -128,21 +128,21 @@ prompt text constant.
 
 ## How to run
 
-All operations go through the recipe (`recipes/owsb-atomic-v1.json`):
+All operations go through the recipe (`recipes/owrb-atomic-v1.json`):
 
 ```bash
-python -m openworld.bench recipes/owsb-atomic-v1.json run --mock   # offline smoke
-python -m openworld.bench recipes/owsb-atomic-v1.json run          # Ollama ladder
-python -m openworld.bench recipes/owsb-atomic-v1.json all --mock   # build+validate+run+card
+python -m openworld.bench recipes/owrb-atomic-v1.json run --mock   # offline smoke
+python -m openworld.bench recipes/owrb-atomic-v1.json run          # Ollama ladder
+python -m openworld.bench recipes/owrb-atomic-v1.json all --mock   # build+validate+run+card
 ```
 
 Results land in `results/<model>.json` (frozen result schema v1, one file
 per model); the dataset card is `CARD.md`.
 
-To rebuild `tasks.jsonl` directly: `python datasets/openworld-swebench/build_tasks.py`
-(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owsb-atomic-v1.json build`).
+To rebuild `tasks.jsonl` directly: `python datasets/openworld-repairbench/build_tasks.py`
+(the recipe's `build` step calls this for you: `python -m openworld.bench recipes/owrb-atomic-v1.json build`).
 
-To validate the dataset: `python -m pytest tests/test_swebench.py`
+To validate the dataset: `python -m pytest tests/test_repairbench.py`
 
 ## Results
 

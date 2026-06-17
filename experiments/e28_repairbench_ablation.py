@@ -1,39 +1,42 @@
-"""E29 - OpenWorld-SWE-bench *staged* suite: single-shot vs in-world repair.
+"""E28 - OpenWorld-SWE-bench atomic suite: single-shot vs in-world repair.
 
-Identical protocol to E28, on the staged dataset: each of the 15 two-stage
-instances plants a latent second failing test that surfaces only after the
-issue-visible fix, so feedback-driven iteration is required and the in-world
-loop is expected to pay off where single-shot cannot. Reports single-shot
+Protocol (one paired comparison per instance, per model):
+  - single-shot:  one completion from the issue + buggy module, no feedback
+                  (openworld.repairbench.solve_single_shot)
+  - in-world:     iterative repair inside the world with exact test feedback,
+                  budget B attempts (openworld.repairbench.solve_in_world)
+across the qwen2.5 capability ladder (1.5b / 3b / 7b). We report single-shot
 pass@1, in-world pass@1 and pass@B (Wilson CIs), the budget-minus-single-shot
-delta, and mean attempts, across the qwen2.5 ladder (1.5b / 3b / 7b).
+delta, and mean attempts.
 
 PROVENANCE / REPRODUCIBILITY. The committed results JSON
-(`results/e29_swebench_staged.json`) is a frozen artifact copied from the
-`openworld-swebench` dataset branch (commit 6982b8b). The bundled staged
-dataset (`datasets/openworld-swebench-staged/tasks.jsonl`, owsb-staged-v1) has
-15 instances, matching the cached run's n; re-running this script reproduces the
-protocol on that dataset, though Ollama-on-Metal nondeterminism means exact
-numbers may differ. Treat the cached JSON as the canonical paper numbers; this
-script documents and re-enables the experiment. Requires a local Ollama with the
-three models.
+(`results/e28_repairbench_ablation.json`) is a frozen artifact copied from the
+`openworld-repairbench` dataset branch (commit 6982b8b), generated on an early
+6-instance snapshot of the atomic dataset. The current bundled dataset
+(`datasets/openworld-repairbench/tasks.jsonl`, owrb-atomic-v1) has since grown to
+20 instances, so re-running this script reproduces the *protocol* but not the
+exact frozen numbers (different n, plus Ollama-on-Metal nondeterminism). Treat
+the cached JSON as the canonical paper numbers; this script documents and
+re-enables the experiment. Requires a local Ollama with the three models.
 """
 
+import sys
 from pathlib import Path
 from statistics import mean
 
 from openworld.bench import load_recipe, wilson_ci
 from openworld.llm import OllamaLLM
-from openworld.swebench import load_dataset, solve_in_world, solve_single_shot
+from openworld.repairbench import load_dataset, solve_in_world, solve_single_shot
 
 from common import Timer, require_ollama, save_results
 
 RECIPE = load_recipe(Path(__file__).resolve().parent.parent
-                     / "recipes" / "owsb-staged-v1.json")
-EXPERIMENT = "e29_swebench_staged"
-DESCRIPTION = ("OpenWorld-SWE-bench staged suite: single-shot vs in-world, "
-              "qwen2.5 ladder; latent second defect rewards iteration")
-PROVENANCE = ("frozen artifact from branch openworld-swebench commit 6982b8b; "
-             "re-running uses the current 15-instance staged dataset")
+                     / "recipes" / "owrb-atomic-v1.json")
+EXPERIMENT = "e28_repairbench_ablation"
+DESCRIPTION = ("OpenWorld-SWE-bench atomic suite: single-shot vs in-world, "
+              "qwen2.5 ladder")
+PROVENANCE = ("frozen artifact from branch openworld-repairbench commit 6982b8b "
+             "(early 6-instance snapshot); re-running uses the current dataset")
 
 
 def run_model(model, instances, budget, temperature, seed):
@@ -70,10 +73,11 @@ def main():
     results = []
     for model in RECIPE["eval"]["models"]:
         require_ollama(model)
-        print(f"[{model}] single-shot vs in-world over {len(instances)} staged instances")
+        print(f"[{model}] single-shot vs in-world over {len(instances)} instances")
         with Timer() as t:
             results.append(run_model(model, instances, budget, temperature, seed))
         results[-1]["seconds"] = round(t.elapsed, 1)
+        # incremental save: a crash in a later model loses nothing
         save_results(EXPERIMENT, {
             "experiment": EXPERIMENT, "description": DESCRIPTION,
             "provenance": PROVENANCE,

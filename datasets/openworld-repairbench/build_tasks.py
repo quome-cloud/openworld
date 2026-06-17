@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Build tasks.jsonl for openworld-swebench.
+"""Build tasks.jsonl for openworld-repairbench.
 
 Instances are defined here as plain dicts; this script computes each world's
 initial state by actually running the hidden suites on the buggy source,
 validates every instance (reference solves; buggy fails all fail_to_pass and
 passes all pass_to_pass), and writes the JSONL artifact. Re-run after editing:
 
-    python datasets/openworld-swebench/build_tasks.py
+    python datasets/openworld-repairbench/build_tasks.py
 """
 
 import json
@@ -14,7 +14,7 @@ import sys
 import textwrap
 from pathlib import Path
 
-from openworld.swebench import SWEBenchInstance, initial_world_state, run_instance_tests
+from openworld.repairbench import RepairBenchInstance, initial_world_state, run_instance_tests
 
 OUT = Path(__file__).resolve().parent / "tasks.jsonl"
 
@@ -39,7 +39,7 @@ def D(s):
 
 INSTANCES = [
     dict(
-        instance_id="openworld-swebench-001-rate-limiter-window",
+        instance_id="openworld-repairbench-001-rate-limiter-window",
         module_name="rate_limiter",
         issue=(
             "Our RateLimiter(max_calls=3, window=10) lets a 4th call through.\n"
@@ -95,7 +95,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-002-pagination-last-page",
+        instance_id="openworld-repairbench-002-pagination-last-page",
         module_name="pagination",
         issue=(
             "Items vanish from the last page of results.\n"
@@ -145,7 +145,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-003-lru-cache-eviction",
+        instance_id="openworld-repairbench-003-lru-cache-eviction",
         module_name="lru_cache",
         issue=D('''
             Our LRUCache evicts the wrong entry under read traffic.
@@ -265,7 +265,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-004-text-wrap-long-word",
+        instance_id="openworld-repairbench-004-text-wrap-long-word",
         module_name="textwrapper",
         issue=D('''
             wrap() silently loses text. wrap('a extraordinarily b', 6) comes
@@ -343,7 +343,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-005-interval-merge-touching",
+        instance_id="openworld-repairbench-005-interval-merge-touching",
         module_name="intervals",
         issue=D('''
             merge() leaves back-to-back intervals split. merge([[1, 2], [2, 3]])
@@ -404,7 +404,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-006-bank-ledger-overdraft",
+        instance_id="openworld-repairbench-006-bank-ledger-overdraft",
         module_name="ledger",
         issue=D('''
             Accounts are going negative. With the standard fee of 2 and a
@@ -501,7 +501,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-007-tokenizer-quoted-strings",
+        instance_id="openworld-repairbench-007-tokenizer-quoted-strings",
         module_name="tokenizer",
         issue=D('''
             Quoted phrases are not kept together. tokenize('say "hello
@@ -577,7 +577,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-008-graph-bfs-distance",
+        instance_id="openworld-repairbench-008-graph-bfs-distance",
         module_name="graph",
         issue=D('''
             shortest_len returns paths that are too long. On a graph where
@@ -683,7 +683,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-009-priority-queue-stability",
+        instance_id="openworld-repairbench-009-priority-queue-stability",
         module_name="pqueue",
         issue=D('''
             PQueue is not FIFO for equal priorities. Push 'a', 'b', 'c' all
@@ -760,7 +760,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-010-roman-numerals-subtractive",
+        instance_id="openworld-repairbench-010-roman-numerals-subtractive",
         module_name="roman",
         issue=D('''
             from_roman misreads subtractive numerals. from_roman('IV')
@@ -852,7 +852,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-011-date-add-days-leap",
+        instance_id="openworld-repairbench-011-date-add-days-leap",
         module_name="datemath",
         issue=D('''
             add_days lands on February 29, 1900 -- a date that does not
@@ -933,7 +933,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-012-stats-variance-bias",
+        instance_id="openworld-repairbench-012-stats-variance-bias",
         module_name="stats",
         issue=D('''
             variance() is biased low compared with every stats package we
@@ -991,7 +991,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-013-rpn-operand-order",
+        instance_id="openworld-repairbench-013-rpn-operand-order",
         module_name="rpn",
         issue=D('''
             Subtraction and division come out backwards in eval_rpn.
@@ -1077,7 +1077,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-014-cart-coupon-stacking",
+        instance_id="openworld-repairbench-014-cart-coupon-stacking",
         module_name="cart",
         issue=D('''
             Discounts stack when a coupon is applied twice. Customers who
@@ -1168,7 +1168,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-015-matrix-multiply-index",
+        instance_id="openworld-repairbench-015-matrix-multiply-index",
         module_name="matrix",
         issue=D('''
             matmul gives wrong numbers -- or crashes -- on non-square
@@ -1236,7 +1236,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-016-histogram-bin-edge",
+        instance_id="openworld-repairbench-016-histogram-bin-edge",
         module_name="histogram",
         issue=D('''
             histogram crashes whenever a sample equals the upper bound.
@@ -1295,7 +1295,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-017-query-string-repeats",
+        instance_id="openworld-repairbench-017-query-string-repeats",
         module_name="querystring",
         issue=D('''
             parse_qs drops data in two ways. Repeated keys lose all but one
@@ -1362,7 +1362,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-018-scheduler-containment",
+        instance_id="openworld-repairbench-018-scheduler-containment",
         module_name="scheduler",
         issue=D('''
             We are double-booking rooms. book(0, 10) followed by book(3, 4)
@@ -1437,7 +1437,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-019-runlength-segments",
+        instance_id="openworld-repairbench-019-runlength-segments",
         module_name="segments",
         issue=D('''
             compress loses the tail of every sequence. compress([1, 1, 2, 2, 2])
@@ -1514,7 +1514,7 @@ INSTANCES = [
         ],
     ),
     dict(
-        instance_id="openworld-swebench-020-thermostat-hysteresis",
+        instance_id="openworld-repairbench-020-thermostat-hysteresis",
         module_name="thermostat",
         issue=D('''
             The furnace is short-cycling. With Thermostat(target=20, band=2)
@@ -1598,7 +1598,7 @@ INSTANCES = [
 def build():
     records = []
     for spec in INSTANCES:
-        instance = SWEBenchInstance(
+        instance = RepairBenchInstance(
             instance_id=spec["instance_id"],
             module_name=spec["module_name"],
             issue=spec["issue"],
@@ -1624,7 +1624,7 @@ def build():
                 f"{buggy['pass_to_pass']['errors']}"
             )
         instance.world = {
-            "name": f"swebench:{instance.instance_id}",
+            "name": f"repairbench:{instance.instance_id}",
             "description": (
                 f"Program repair as a world model for module '{instance.module_name}'. "
                 "Submit a corrected module via submit_patch(params={'source': ...})."

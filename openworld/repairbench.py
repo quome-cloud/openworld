@@ -29,7 +29,7 @@ from .world import World
 
 DEFAULT_DATASET_PATH = (
     Path(__file__).resolve().parent.parent
-    / "datasets" / "openworld-swebench" / "tasks.jsonl"
+    / "datasets" / "openworld-repairbench" / "tasks.jsonl"
 )
 
 # coding's restricted builtins cannot define classes; these instances can.
@@ -48,7 +48,7 @@ CLASS_BUILTINS = {
 
 
 @dataclass
-class SWEBenchInstance:
+class RepairBenchInstance:
     """One SWE-bench-style instance plus its world-model spec."""
 
     instance_id: str
@@ -62,7 +62,7 @@ class SWEBenchInstance:
     world: Dict[str, Any]
 
     @classmethod
-    def from_dict(cls, record: Dict[str, Any]) -> "SWEBenchInstance":
+    def from_dict(cls, record: Dict[str, Any]) -> "RepairBenchInstance":
         """Build from a JSONL record, ignoring unknown keys."""
         record = {k: v for k, v in record.items() if k in _INSTANCE_FIELDS}
         record["fail_to_pass"] = [tuple(t) for t in record.get("fail_to_pass", [])]
@@ -86,22 +86,22 @@ class SWEBenchInstance:
         }
 
 
-_INSTANCE_FIELDS = {f.name for f in fields(SWEBenchInstance)}
+_INSTANCE_FIELDS = {f.name for f in fields(RepairBenchInstance)}
 
 
-def load_dataset(path: Optional[Path] = None) -> List[SWEBenchInstance]:
+def load_dataset(path: Optional[Path] = None) -> List[RepairBenchInstance]:
     """Read instances from the JSONL dataset artifact."""
     text = Path(path or DEFAULT_DATASET_PATH).read_text(encoding="utf-8")
-    instances: List[SWEBenchInstance] = []
+    instances: List[RepairBenchInstance] = []
     for line in text.splitlines():
         if not line.strip():
             continue
-        instances.append(SWEBenchInstance.from_dict(json.loads(line)))
+        instances.append(RepairBenchInstance.from_dict(json.loads(line)))
     return instances
 
 
 def run_instance_tests(
-    source: str, instance: SWEBenchInstance, timeout_seconds: float = 5.0
+    source: str, instance: RepairBenchInstance, timeout_seconds: float = 5.0
 ) -> Dict[str, Any]:
     """Run both hidden suites against `source`. Solved = zero failures in both."""
     program = source
@@ -130,7 +130,7 @@ def merged_errors(result: Dict[str, Any], limit: int = 3) -> List[str]:
     return f2p[:limit]
 
 
-def initial_world_state(instance: SWEBenchInstance) -> Dict[str, Any]:
+def initial_world_state(instance: RepairBenchInstance) -> Dict[str, Any]:
     """The world's initial symbolic state: the buggy module's exact test results."""
     result = run_instance_tests(instance.buggy_source, instance)
     return {
@@ -146,10 +146,10 @@ def initial_world_state(instance: SWEBenchInstance) -> Dict[str, Any]:
     }
 
 
-class SWEBenchTransition(Transition):
+class RepairBenchTransition(Transition):
     """Exact dynamics: submitting a patch runs both hidden suites."""
 
-    def __init__(self, instance: SWEBenchInstance):
+    def __init__(self, instance: RepairBenchInstance):
         self.instance = instance
 
     def step(self, state: WorldState, action: Action) -> WorldState:
@@ -170,7 +170,7 @@ class SWEBenchTransition(Transition):
         return s
 
 
-def build_swebench_world(instance: SWEBenchInstance) -> World:
+def build_repairbench_world(instance: RepairBenchInstance) -> World:
     """Instantiate the instance's world spec with exact test-running dynamics."""
     spec = instance.world
     return World(
@@ -179,7 +179,7 @@ def build_swebench_world(instance: SWEBenchInstance) -> World:
         initial_state=spec["initial_state"],
         actions=spec["actions"],
         rules=spec.get("rules", []),
-        transition=SWEBenchTransition(instance),
+        transition=RepairBenchTransition(instance),
     )
 
 
@@ -204,14 +204,14 @@ def _safe_ask(llm: BaseLLM, prompt: str, system: str) -> str:
         return ""
 
 
-def _base_prompt(instance: SWEBenchInstance, source: str) -> str:
+def _base_prompt(instance: RepairBenchInstance, source: str) -> str:
     return (
         f"Bug report for module `{instance.module_name}`:\n{instance.issue}\n\n"
         f"Current module source:\n```python\n{source}\n```\n"
     )
 
 
-def _feedback_prompt(instance: SWEBenchInstance, state: WorldState) -> str:
+def _feedback_prompt(instance: RepairBenchInstance, state: WorldState) -> str:
     errors = "\n".join(f"- {e}" for e in state["last_errors"]) or "- (none reported)"
     return (
         _base_prompt(instance, state["source"])
@@ -224,7 +224,7 @@ def _feedback_prompt(instance: SWEBenchInstance, state: WorldState) -> str:
     )
 
 
-def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
+def solve_single_shot(instance: RepairBenchInstance, llm: BaseLLM) -> Dict[str, Any]:
     """Condition A: one completion from issue + buggy module, no feedback."""
     prompt = _base_prompt(instance, instance.buggy_source) + "\nProvide the corrected module."
     patch = extract_code(_safe_ask(llm, prompt, SYSTEM_PROMPT))
@@ -240,10 +240,10 @@ def solve_single_shot(instance: SWEBenchInstance, llm: BaseLLM) -> Dict[str, Any
 
 
 def solve_in_world(
-    instance: SWEBenchInstance, llm: BaseLLM, budget: int = 4
+    instance: RepairBenchInstance, llm: BaseLLM, budget: int = 4
 ) -> Dict[str, Any]:
     """Condition B: iterative repair inside the world, exact feedback each step."""
-    world = build_swebench_world(instance)
+    world = build_repairbench_world(instance)
     attempts_used = 0
     first_attempt_solved = False
     saw_regression = False

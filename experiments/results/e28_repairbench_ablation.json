@@ -1,7 +1,7 @@
 {
-  "experiment": "e28_swebench_ablation",
+  "experiment": "e28_repairbench_ablation",
   "description": "OpenWorld-SWE-bench atomic suite: single-shot vs in-world, qwen2.5 ladder",
-  "provenance": "copied from branch openworld-swebench commit 6982b8b (datasets/*/results/comparison.json)",
+  "provenance": "copied from branch openworld-repairbench commit 6982b8b (datasets/*/results/comparison.json)",
   "n_instances": 6,
   "budget": 4,
   "mock": false,
@@ -81,9 +81,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-000-lru-cache-recency",
+          "instance_id": "openworld-repairbench-000-lru-cache-recency",
           "single_shot": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -91,7 +91,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -100,9 +100,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-001-bank-overdraft",
+          "instance_id": "openworld-repairbench-001-bank-overdraft",
           "single_shot": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -110,7 +110,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -119,9 +119,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+          "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
           "single_shot": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -129,7 +129,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -138,9 +138,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+          "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
           "single_shot": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -148,7 +148,7 @@
             "regression_failures_seen": 1
           },
           "in_world": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -157,9 +157,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+          "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
           "single_shot": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -167,7 +167,7 @@
             "regression_failures_seen": 3
           },
           "in_world": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -176,9 +176,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-005-inventory-oversell",
+          "instance_id": "openworld-repairbench-005-inventory-oversell",
           "single_shot": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -186,7 +186,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -215,9 +215,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-000-lru-cache-recency",
+          "instance_id": "openworld-repairbench-000-lru-cache-recency",
           "single_shot": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -225,7 +225,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -234,9 +234,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-001-bank-overdraft",
+          "instance_id": "openworld-repairbench-001-bank-overdraft",
           "single_shot": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -244,7 +244,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -253,9 +253,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+          "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
           "single_shot": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -263,7 +263,7 @@
             "regression_failures_seen": 3
           },
           "in_world": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -272,9 +272,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+          "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
           "single_shot": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -282,7 +282,7 @@
             "regression_failures_seen": 2
           },
           "in_world": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -291,9 +291,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+          "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
           "single_shot": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -301,7 +301,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -310,9 +310,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-005-inventory-oversell",
+          "instance_id": "openworld-repairbench-005-inventory-oversell",
           "single_shot": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "single_shot",
             "solved": false,
             "solved_first_attempt": false,
@@ -320,7 +320,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,
@@ -349,9 +349,9 @@
       "budget": 4,
       "pairs": [
         {
-          "instance_id": "openworld-swebench-000-lru-cache-recency",
+          "instance_id": "openworld-repairbench-000-lru-cache-recency",
           "single_shot": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -359,7 +359,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-000-lru-cache-recency",
+            "instance_id": "openworld-repairbench-000-lru-cache-recency",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -368,9 +368,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-001-bank-overdraft",
+          "instance_id": "openworld-repairbench-001-bank-overdraft",
           "single_shot": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -378,7 +378,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-001-bank-overdraft",
+            "instance_id": "openworld-repairbench-001-bank-overdraft",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": false,
@@ -387,9 +387,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+          "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
           "single_shot": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -397,7 +397,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-002-interval-merge-unsorted",
+            "instance_id": "openworld-repairbench-002-interval-merge-unsorted",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -406,9 +406,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+          "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
           "single_shot": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -416,7 +416,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-003-rate-limiter-overfill",
+            "instance_id": "openworld-repairbench-003-rate-limiter-overfill",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -425,9 +425,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+          "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
           "single_shot": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -435,7 +435,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-004-tokenizer-drops-last",
+            "instance_id": "openworld-repairbench-004-tokenizer-drops-last",
             "condition": "in_world",
             "solved": true,
             "solved_first_attempt": true,
@@ -444,9 +444,9 @@
           }
         },
         {
-          "instance_id": "openworld-swebench-005-inventory-oversell",
+          "instance_id": "openworld-repairbench-005-inventory-oversell",
           "single_shot": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "single_shot",
             "solved": true,
             "solved_first_attempt": true,
@@ -454,7 +454,7 @@
             "regression_failures_seen": 0
           },
           "in_world": {
-            "instance_id": "openworld-swebench-005-inventory-oversell",
+            "instance_id": "openworld-repairbench-005-inventory-oversell",
             "condition": "in_world",
             "solved": false,
             "solved_first_attempt": false,

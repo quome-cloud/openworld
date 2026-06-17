@@ -1,6 +1,6 @@
 """Builder for OpenWorld-SWE-bench-STAGED (writes tasks.jsonl).
 
-Companion to ``datasets/openworld-swebench`` (the atomic set). The v0 7b-ladder
+Companion to ``datasets/openworld-repairbench`` (the atomic set). The v0 7b-ladder
 run showed **no in-world lift** on the atomic instances: each bug is repaired by a
 single edit fully described by the issue text, so single-shot and in-world
 converge on attempt 1 and the failing-test feedback loop never does any work.
@@ -18,13 +18,13 @@ This dataset is the design response. Every instance is a **two-stage** repair:
 So the predicted result is **single-shot solves stage 1 but fails stage 2;
 in-world reads the stage-2 error and finishes the repair** -> measurable lift.
 
-Schema is byte-identical to the atomic set (same ``openworld.swebench`` loader).
+Schema is byte-identical to the atomic set (same ``openworld.repairbench`` loader).
 ``buggy_source`` still fails EVERY ``fail_to_pass`` and passes EVERY
 ``pass_to_pass`` (the dataset contract); the staging lives in the *model's*
 intermediate patches, which the harness exercises at run time.
 
-    python datasets/openworld-swebench-staged/build_tasks.py
-    pytest tests/test_swebench_staged.py
+    python datasets/openworld-repairbench-staged/build_tasks.py
+    pytest tests/test_repairbench_staged.py
 
 The RAW list is the source of truth; tasks.jsonl is the generated artifact.
 """
@@ -589,7 +589,7 @@ RAW = [
 
 
 # Stage-1-only "obvious" patches: the fix a model writes from the issue text
-# alone. NOT shipped in the dataset — used by tests/test_swebench_staged.py to
+# alone. NOT shipped in the dataset — used by tests/test_repairbench_staged.py to
 # assert the staging is real (each passes f2p[0], fails f2p[1]).
 STAGE1_PATCHES = {
     "config-parser-staged": '''\
@@ -712,7 +712,7 @@ def truncate(text, n):
 
 def _world(slug: str, module_name: str, initial_state: dict) -> dict:
     return {
-        "name": f"swebench-staged:{slug}",
+        "name": f"repairbench-staged:{slug}",
         "description": (
             f"Program repair for the {module_name!r} module. Read the issue, then "
             "submit the complete corrected source via "
@@ -737,14 +737,14 @@ def _world(slug: str, module_name: str, initial_state: dict) -> dict:
 def build() -> list:
     import sys
 
-    from openworld.swebench import (
-        SWEBenchInstance, initial_world_state, run_instance_tests,
+    from openworld.repairbench import (
+        RepairBenchInstance, initial_world_state, run_instance_tests,
     )
 
     instances = []
     for i, r in enumerate(RAW):
-        instance_id = f"openworld-swebench-staged-{i:03d}-{r['slug']}"
-        instance = SWEBenchInstance(
+        instance_id = f"openworld-repairbench-staged-{i:03d}-{r['slug']}"
+        instance = RepairBenchInstance(
             instance_id=instance_id,
             module_name=r["module_name"],
             issue=r["issue"],

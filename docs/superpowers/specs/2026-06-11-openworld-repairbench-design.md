@@ -23,7 +23,7 @@ model itself.
 
 ## Dataset
 
-**Location:** `datasets/openworld-swebench/`
+**Location:** `datasets/openworld-repairbench/`
 
 - `tasks.jsonl` — 20 instances, one JSON object per line.
 - `README.md` — dataset card: schema, design rationale, how to run the comparison,
@@ -33,7 +33,7 @@ model itself.
 
 | field | type | meaning |
 |---|---|---|
-| `instance_id` | str | `openworld-swebench-NNN-<slug>` |
+| `instance_id` | str | `openworld-repairbench-NNN-<slug>` |
 | `module_name` | str | name of the buggy module (for prompts) |
 | `issue` | str | GitHub-style natural-language bug report (the only problem statement the model sees) |
 | `buggy_source` | str | full Python module, 30–80 lines, 2–5 functions or a stateful class |
@@ -54,24 +54,24 @@ model itself.
 - `issue` is written as a user would write it (symptoms, repro), not as a spec
   of the fix.
 
-## Package: `openworld/swebench.py`
+## Package: `openworld/repairbench.py`
 
 Follows the `openworld/coding.py` pattern.
 
-- `SWEBenchInstance` dataclass mirroring the schema.
-- `load_dataset(path=DEFAULT_PATH) -> List[SWEBenchInstance]` — reads the JSONL;
-  default path resolves `datasets/openworld-swebench/tasks.jsonl` relative to the
+- `RepairBenchInstance` dataclass mirroring the schema.
+- `load_dataset(path=DEFAULT_PATH) -> List[RepairBenchInstance]` — reads the JSONL;
+  default path resolves `datasets/openworld-repairbench/tasks.jsonl` relative to the
   repo root.
 - `run_instance_tests(source, instance, timeout_seconds=5.0)` — execs the
   submission, then the `test_preamble`, then evaluates both suites. Returns
   `{"fail_to_pass": {"passed", "failed", "errors"}, "pass_to_pass": {...},
   "solved": bool}` where `solved` means zero failures in **both** suites.
   Reuses the fork+SIGKILL pattern from `coding.run_tests`.
-- `SWEBenchTransition(Transition)` — exact dynamics: `submit_patch` runs
+- `RepairBenchTransition(Transition)` — exact dynamics: `submit_patch` runs
   `run_instance_tests`, updates state (`source`, per-suite pass/fail counts,
   `last_errors` capped at 3, `attempts`, `solved`). No-op once solved.
-- `build_swebench_world(instance) -> World` — instantiates the instance's
-  `world` spec with a `SWEBenchTransition`.
+- `build_repairbench_world(instance) -> World` — instantiates the instance's
+  `world` spec with a `RepairBenchTransition`.
 - Episode runners:
   - `solve_single_shot(instance, llm) -> record` — one prompt (issue +
     buggy module), one completion, `extract_code`, one hidden-suite run.
@@ -83,14 +83,14 @@ Follows the `openworld/coding.py` pattern.
   - Records: `{"instance_id", "solved", "solved_first_attempt", "attempts",
     "regression_failures_seen"}`.
 
-## Runner: `datasets/openworld-swebench/run_comparison.py`
+## Runner: `datasets/openworld-repairbench/run_comparison.py`
 
 CLI: `python run_comparison.py [model ...]`, default models
 `qwen2.5:1.5b qwen2.5:3b qwen2.5:7b llama3.2` (the e05/e16/e19 ladder).
 `--budget N` (default 4), `--mock` for an offline smoke run with `MockLLM`.
 
 For each model × instance it runs both conditions (paired), then writes
-`datasets/openworld-swebench/results/comparison.json` and prints a markdown
+`datasets/openworld-repairbench/results/comparison.json` and prints a markdown
 table:
 
 | model | single-shot pass@1 | in-world pass@1 | in-world pass@4 | Δ (pass@4 − SS) | mean attempts |
@@ -101,7 +101,7 @@ self-contained for execution while logic stays importable for tests).
 Per-task paired records are saved so paired significance tests can be run later.
 Requires Ollama only for real models; checks model availability up front.
 
-## Tests: `tests/test_swebench.py`
+## Tests: `tests/test_repairbench.py`
 
 All offline, no Ollama:
 
@@ -109,7 +109,7 @@ All offline, no Ollama:
 2. **Oracle:** `reference_source` passes both suites for every instance.
 3. **Bug reality:** `buggy_source` fails **all** `fail_to_pass` and passes
    **all** `pass_to_pass` tests for every instance.
-4. **World spec:** `build_swebench_world` instantiates; submitting
+4. **World spec:** `build_repairbench_world` instantiates; submitting
    `reference_source` flips `solved`; submitting garbage increments `attempts`
    without solving; solved worlds ignore further steps.
 5. **Harness:** `solve_single_shot` and `solve_in_world` end-to-end with

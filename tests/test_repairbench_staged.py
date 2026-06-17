@@ -16,9 +16,9 @@ import pytest
 
 from openworld.llm import MockLLM
 from openworld.state import Action
-from openworld.swebench import (
-    SWEBenchInstance,
-    build_swebench_world,
+from openworld.repairbench import (
+    RepairBenchInstance,
+    build_repairbench_world,
     load_dataset,
     run_instance_tests,
     solve_in_world,
@@ -26,14 +26,14 @@ from openworld.swebench import (
 )
 
 _HERE = Path(__file__).resolve().parent
-_DATA = _HERE.parent / "datasets" / "openworld-swebench-staged" / "tasks.jsonl"
+_DATA = _HERE.parent / "datasets" / "openworld-repairbench-staged" / "tasks.jsonl"
 
 INSTANCES = load_dataset(_DATA)
 
 # Load the builder module to reach STAGE1_PATCHES (the stage-1-only fixes).
 _spec = importlib.util.spec_from_file_location(
     "_staged_build",
-    _HERE.parent / "datasets" / "openworld-swebench-staged" / "build_tasks.py",
+    _HERE.parent / "datasets" / "openworld-repairbench-staged" / "build_tasks.py",
 )
 _bt = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_bt)
@@ -41,7 +41,7 @@ STAGE1_PATCHES = _bt.STAGE1_PATCHES
 
 
 def _slug(instance_id: str) -> str:
-    # openworld-swebench-staged-000-config-parser-staged -> config-parser-staged
+    # openworld-repairbench-staged-000-config-parser-staged -> config-parser-staged
     return instance_id.split("-", 4)[-1]
 
 
@@ -60,7 +60,7 @@ def test_dataset_loads_and_ids_unique():
 
 
 @pytest.mark.parametrize("inst", INSTANCES, ids=[i.instance_id for i in INSTANCES])
-def test_oracle_passes_both_suites(inst: SWEBenchInstance):
+def test_oracle_passes_both_suites(inst: RepairBenchInstance):
     result = run_instance_tests(inst.reference_source, inst)
     assert result["fail_to_pass"]["failed"] == 0, result["fail_to_pass"]["errors"]
     assert result["pass_to_pass"]["failed"] == 0, result["pass_to_pass"]["errors"]
@@ -68,7 +68,7 @@ def test_oracle_passes_both_suites(inst: SWEBenchInstance):
 
 
 @pytest.mark.parametrize("inst", INSTANCES, ids=[i.instance_id for i in INSTANCES])
-def test_bug_is_real(inst: SWEBenchInstance):
+def test_bug_is_real(inst: RepairBenchInstance):
     # buggy source must FAIL every fail_to_pass and PASS every pass_to_pass.
     result = run_instance_tests(inst.buggy_source, inst)
     assert result["fail_to_pass"]["passed"] == 0, (
@@ -82,7 +82,7 @@ def test_bug_is_real(inst: SWEBenchInstance):
 
 
 @pytest.mark.parametrize("inst", INSTANCES, ids=[i.instance_id for i in INSTANCES])
-def test_staging_is_real(inst: SWEBenchInstance):
+def test_staging_is_real(inst: RepairBenchInstance):
     """The stage-1 patch fixes test 1 but not test 2 — the loop has work to do.
 
     This is the property that distinguishes this dataset from the atomic set:
@@ -113,7 +113,7 @@ def test_staging_is_real(inst: SWEBenchInstance):
 
 def test_world_flips_solved_on_reference():
     inst = INSTANCES[0]
-    world = build_swebench_world(inst)
+    world = build_repairbench_world(inst)
     assert world.state["solved"] is False
     world.step(Action("submit_patch", params={"source": "def nope():\n    return 1\n"}, agent="t"))
     assert world.state["attempts"] == 1

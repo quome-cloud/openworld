@@ -39,7 +39,7 @@ EXPERIMENTS = [
     "e51_startups", "e52_denoise", "e53_sheaf",
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
-    "e63_world_model_bakeoff",
+    "e63_world_model_bakeoff", "e64_causal_assumptions",
 ]
 
 
@@ -2912,6 +2912,18 @@ def numbers_tex(d):
         macro("BakeCodeSpeed", f"{e63['sprint_steps_per_sec']['verified code (CWM)']:,}".replace(",", "{,}")),
         macro("BakePerceptual", str(len(e63["perceptual_world_models_compared_on_properties"]))),
     ]
+    # E64 (Bayesian causal-assumption testing on the many-worlds store)
+    e64 = d["e64_causal_assumptions"]
+    lines += [
+        macro("DagCandidateModels", str(e64["n_candidate_models"])),
+        macro("DagSurvivorsClean", str(e64["survivors_clean"])),
+        macro("DagCleanCohort", str(e64["clean_cohort_n"])),
+        macro("DagIdentifiedEdges", str(e64["n_identified_edges"])),
+        macro("DagNoiseFlipPct", f"{e64['noise_flip'] * 100:.0f}"),
+        macro("DagNoisyCohort", str(e64["noisy_cohort_n"])),
+        macro("DagHardSurvivorsNoisy", str(e64["hard_survivors_noisy"])),
+        macro("DagSoftMinIdentified", f"{e64['soft_min_identified_truth']:.2f}"),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -3184,6 +3196,32 @@ def table_bakeoff(e63):
         + "\n\\bottomrule\n\\end{tabular}\n")
 
 
+def table_causal_assumptions(e64):
+    """E64: one row per questioned edge -- its candidate assumptions, the exact
+    version-space posterior on the true value (clean data), the soft posterior
+    under measurement noise, and whether the data identifies it."""
+    label = {
+        "A_income_stress": "Income $\\to$ Stress",
+        "A_stress_preterm": "Stress $\\to$ Preterm",
+        "A_preterm_bayley": "Preterm $\\to$ Bayley",
+        "A_stress_direct": "Stress $\\to$ Bayley (direct)",
+    }
+    order = ["A_income_stress", "A_stress_preterm", "A_preterm_bayley", "A_stress_direct"]
+    lines = ["\\begin{tabular}{l l c c c}", "\\toprule",
+             "Edge & Candidates & Exact post.\\ & Soft post.\\ & Identified \\\\",
+             "& & (clean) & (noisy) & \\\\", "\\midrule"]
+    for p in order:
+        info = e64["params"][p]
+        truth = info["truth"]
+        cand = "/".join(info["candidates"])
+        ex = info["exact_posterior"][truth]
+        sf = info["soft_posterior"][truth]
+        ident = "\\checkmark" if info["identified"] else "--"
+        lines.append(f"{label[p]} & {cand} & {ex:.2f} & {sf:.2f} & {ident} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "causal_assumptions.tex").write_text("\n".join(lines) + "\n")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
@@ -3253,6 +3291,7 @@ def main():
     table_planning(data["e22_planning"])
     table_swebench(data["e28_swebench_ablation"], data["e29_swebench_staged"])
     table_composition(data["e30_composition"], data["e32_regime_switch"])
+    table_causal_assumptions(data["e64_causal_assumptions"])
     numbers_tex(data)
     print("assets written to paper/figs, paper/tables, paper/numbers.tex")
 

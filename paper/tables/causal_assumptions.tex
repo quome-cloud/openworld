@@ -1,0 +1,11 @@
+\begin{tabular}{l l c c c}
+\toprule
+Edge & Candidates & Exact post.\ & Soft post.\ & Identified \\
+& & (clean) & (noisy) & \\
+\midrule
+Income $\to$ Stress & causal/null & 1.00 & 1.00 & \checkmark \\
+Stress $\to$ Preterm & causal/null & 1.00 & 1.00 & \checkmark \\
+Preterm $\to$ Bayley & causal/null & 1.00 & 1.00 & \checkmark \\
+Stress $\to$ Bayley (direct) & yes/no & 0.50 & 0.50 & -- \\
+\bottomrule
+\end{tabular}

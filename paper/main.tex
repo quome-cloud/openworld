@@ -931,12 +931,14 @@ E46 searches the space of worlds for a problem; E49 asks how an agent should
 \emph{traverse} that space---in what order to master worlds---to solve a new,
 out-of-distribution problem as directly as possible. We cast it as a path
 integral over learning trajectories: a trajectory is an ordering of skills to
-learn, weighted by $e^{-\beta S}$ with action $S$ the total learning cost; the
+learn, weighted by $e^{-\beta S}$ with the action $S$ the trajectory's total
+learning cost---the sum of per-skill costs (in abstract effort units), each skill
+cheap to acquire once its prerequisites are mastered and dear from scratch; the
 sum is dominated by the least-action path, the most direct curriculum. Crucially
 this needs \emph{no new machinery}: a path integral is a sum over paths, which is
 a semiring computation, so we reuse the E46 \texttt{Semiring} and swap the value
 ring---tropical $(\min,+)$ for the least-action path, log (log-sum-exp,~$+$) for
-the full partition function---and run a forward/backward dynamic program over
+the full partition function---and run a forward/backward dynamic program (DP) over
 capability-states. The combinatorially many trajectories are summed
 \emph{without enumeration}: \PathTraj{} distinct trajectories are accounted for by
 a DP over just \PathStates{} states.

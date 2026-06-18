@@ -44,6 +44,7 @@ EXPERIMENTS = [
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
     "e67_cartpole_bench",
     "e68_prototyping_latency", "e68b_recipe_audit",
+    "e74_scaling",
 ]
 
 
@@ -2255,6 +2256,10 @@ def numbers_tex(d):
     e12_rows = {(r["model"], r["k_transitions"]): r for r in e12["rows"]}
     bias = e13["position_bias"]
     mcn = e13["mcnemar_judge_vs_random"]
+    e74s = d["e74_scaling"]
+    e74d = load("e74_diagnosis")
+    wt_small, wt_large = e74s["sizes"][0], e74s["sizes"][-1]
+    wt_lc = e74d["learning_curve"]
 
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
@@ -2295,6 +2300,23 @@ def numbers_tex(d):
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
         macro("NumExperiments", str(len(EXPERIMENTS))),
+        # E74 world-time compute (diagnosis world family)
+        macro("WTNumTrainWorlds", str(e74s["n_train_specialties"])),
+        macro("WTNumTestWorlds", str(e74s["n_test_specialties"])),
+        macro("WTNumCases", str(e74s["n_test_cases"])),
+        macro("WTNumSizes", str(len(e74s["sizes"]))),
+        macro("WTSmallName", wt_small["name"]),
+        macro("WTSmallBase", pct(wt_small["base"])),
+        macro("WTSmallFT", pct(wt_small["ft"])),
+        macro("WTSmallGain", f"{100 * wt_small['gain']:.0f}"),
+        macro("WTLargeName", wt_large["name"]),
+        macro("WTLargeBase", pct(wt_large["base"])),
+        macro("WTLargeFT", pct(wt_large["ft"])),
+        macro("WTLargeGain", f"{100 * wt_large['gain']:.0f}"),
+        macro("WTOracle", pct(e74s["offline_oracle"])),
+        macro("WTFloor", pct(e74s["offline_floor"])),
+        macro("WTMetaFewShot", pct(wt_lc["meta_acc"][0])),
+        macro("WTScratchFewShot", pct(wt_lc["scratch_acc"][0])),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
@@ -3337,6 +3359,47 @@ def table_prototyping(e68, e68b):
     (TABLES / "prototyping.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_world_time_compute(scaling, diag):
+    """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
+    world models ('world-time compute'), against an offline prior-only floor and a
+    rules-given oracle. The shaded band + labels are the per-size generalization gain."""
+    sizes = scaling["sizes"]
+    x = [s["params_b"] for s in sizes]
+    base = [s["base"] for s in sizes]
+    ft = [s["ft"] for s in sizes]
+    names = [s["name"] for s in sizes]
+    oracle, floor = scaling["offline_oracle"], scaling["offline_floor"]
+
+    fig, ax = plt.subplots(figsize=(7.4, 4.4))
+    ax.set_xscale("log")
+    ax.fill_between(x, base, ft, color=ORANGE, alpha=0.15, zorder=1)
+    ax.plot(x, base, "o-", color=SLATE, lw=2.0, zorder=3, label="base model (zero-shot)")
+    ax.plot(x, ft, "s-", color=ORANGE, lw=2.4, zorder=3,
+            label="+ world-time compute (fine-tuned on traversed worlds)")
+    ax.axhline(oracle, ls="--", color=TEAL, lw=1.3)
+    ax.text(x[-1], oracle + 0.006, "oracle (handed the rules)", ha="right", va="bottom",
+            fontsize=8, color=TEAL)
+    ax.axhline(floor, ls=":", color="#999999", lw=1.2)
+    ax.text(x[0], floor + 0.006, "prior-only floor", ha="left", va="bottom",
+            fontsize=8, color="#777777")
+    for xi, b, f in zip(x, base, ft):
+        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2), fontsize=8.5, ha="center",
+                    va="center", color="#9a4d00", weight="bold")
+    ax.set_xticks(x)
+    ax.set_xticklabels(names)
+    ax.minorticks_off()
+    ax.set_xlabel("model size (Qwen2.5-Instruct, params)")
+    ax.set_ylabel("held-out diagnostic accuracy")
+    ax.set_ylim(min(floor, min(base)) - 0.04, 0.9)
+    ax.legend(loc="lower right", fontsize=8.5, frameon=False)
+    ax.set_title("World-time compute lifts generalization to held-out worlds\n"
+                 "(largest for small models)", fontsize=10.5)
+    ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "world_time_compute.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_prototyping():
     """The framework legend figure: the showcase world's spec rendered as the
     perceive -> world -> emit -> act pipeline (generated from the real spec, so the
@@ -3453,6 +3516,7 @@ def main():
     TABLES.mkdir(exist_ok=True)
     fig_prototyping()
     data = {name: load(name) for name in EXPERIMENTS}
+    fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
     fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])

@@ -1,0 +1,44 @@
+{
+  "task": "world-test compute: fine-tuning an LLM on traversed diagnosis-specialty world models, then testing on held-out specialties, across model sizes",
+  "model_family": "Qwen2.5-Instruct",
+  "n_train_specialties": 60,
+  "n_test_cases": 800,
+  "n_test_specialties": 20,
+  "offline_floor": 0.3404,
+  "offline_oracle": 0.8553,
+  "precision_note": "0.5B-7B bf16 LoRA; 14B/32B 4-bit QLoRA (a quantization step at the top end)",
+  "sizes": [
+    {
+      "name": "0.5B",
+      "params_b": 0.5,
+      "base": 0.3688,
+      "ft": 0.6587,
+      "gain": 0.2899,
+      "precision": "bf16 LoRA"
+    },
+    {
+      "name": "1.5B",
+      "params_b": 1.5,
+      "base": 0.6562,
+      "ft": 0.7462,
+      "gain": 0.09,
+      "precision": "bf16 LoRA"
+    },
+    {
+      "name": "3B",
+      "params_b": 3.0,
+      "base": 0.665,
+      "ft": 0.7262,
+      "gain": 0.0612,
+      "precision": "bf16 LoRA"
+    },
+    {
+      "name": "7B",
+      "params_b": 7.0,
+      "base": 0.7212,
+      "ft": 0.775,
+      "gain": 0.0538,
+      "precision": "bf16 LoRA"
+    }
+  ]
+}

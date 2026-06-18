@@ -1,0 +1,24 @@
+{
+  "base": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": null,
+  "n_test_worlds": 3,
+  "mean_competence": -1.2287,
+  "mean_adherence": 0.381,
+  "per_world": [
+    {
+      "world": "pharmacy_inventory",
+      "competence": 1.0,
+      "adherence": 0.0
+    },
+    {
+      "world": "ambulance_dispatch",
+      "competence": -4.5386,
+      "adherence": 0.1429
+    },
+    {
+      "world": "telehealth_queue",
+      "competence": -0.1474,
+      "adherence": 1.0
+    }
+  ]
+}

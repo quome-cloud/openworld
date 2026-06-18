@@ -42,6 +42,7 @@ EXPERIMENTS = [
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
+    "e67_cartpole_bench",
 ]
 
 
@@ -2293,6 +2294,17 @@ def numbers_tex(d):
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
         macro("NumExperiments", str(len(EXPERIMENTS))),
+        # E67 cartpole-swingup head-to-head (continuous control)
+        macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
+        macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
+        macro("CartDreamerReward", f"{d['e67_cartpole_bench']['dreamerv3']['final_mean_reward']:.0f}"),
+        macro("CartDreamerSteps", f"{d['e67_cartpole_bench']['dreamerv3']['steps_to_reward_100']/1000:.0f}k"),
+        macro("CartDreamerTwoSteps", f"{d['e67_cartpole_bench']['dreamerv2']['steps_to_reward_100']/1000:.0f}k"),
+        macro("CartVjepaSolve", pct(d["e67_cartpole_bench"]["vjepa2"]["planning_solve_rate"])),
+        macro("CartDinoSinTheta",
+              f"{d['e67_cartpole_bench']['frozen_encoder_control']['state_decodability_r2']['dinov2']['sin_theta']:.2f}"),
+        macro("CartDinoCosTheta",
+              f"{d['e67_cartpole_bench']['frozen_encoder_control']['state_decodability_r2']['dinov2']['cos_theta']:.2f}"),
         # E65 MiniGrid head-to-head (trained vs verified on a shared benchmark)
         macro("MGOpenWorldPlan", str(d["e65_minigrid_bench"]["openworld"]["plan_length"])),
         macro("MGDreamerFirstSolve",
@@ -3250,6 +3262,42 @@ def table_minigrid_bench(e65):
     (TABLES / "minigrid_bench.tex").write_text("\n".join(lines) + "\n")
 
 
+def table_cartpole(e67):
+    """E67 cartpole-swingup head-to-head: verified vs learned vs frozen-perceptual, on
+    continuous control. Learned models report a converged reward + sample efficiency;
+    OpenWorld/V-JEPA report a solve rate (different measurement, noted)."""
+    ow, dv3, dv2, vj = e67["openworld"], e67["dreamerv3"], e67["dreamerv2"], e67["vjepa2"]
+    rc = e67["random_control"]
+    lines = ["\\begin{tabular}{llcl}", "\\toprule",
+             "World model & Species & Train data & Result \\\\", "\\midrule",
+             f"OpenWorld & verified code & 0 & {pct(ow['solve_rate'])} solve (CEM-MPC, 0-shot) \\\\",
+             f"DreamerV3 & learned (pixels) & {dv3['steps_to_reward_100']//1000}k steps & "
+             f"reward {dv3['final_mean_reward']:.0f}; first solve $\\sim${dv3['steps_to_reward_100']//1000}k steps \\\\",
+             f"DreamerV2 & learned (pixels) & {dv2['steps_to_reward_100']//1000}k steps & "
+             f"reward {dv2['final_mean_reward']:.0f} ($\\sim$5$\\times$ less sample-efficient) \\\\",
+             f"V-JEPA-2 \\& frozen enc. & perceptual (frozen) & pretrained & "
+             f"{pct(vj['planning_solve_rate'])} solve (every controller) \\\\",
+             f"random control & -- & -- & {pct(rc['solve_rate'])} solve \\\\",
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "cartpole.tex").write_text("\n".join(lines) + "\n")
+
+
+def table_cartpole_ablation(e67):
+    """E67 frozen-encoder probe: do frozen visual features encode the controllable
+    state, and can a bolt-on controller use them? (the V-JEPA 'make it work' study.)"""
+    r2 = e67["frozen_encoder_control"]["state_decodability_r2"]
+    bc = e67["frozen_encoder_control"]["behavioral_cloning_solve"]
+    nice = {"dinov2": "DINOv2", "vit_in21k": "ImageNet ViT"}
+    lines = ["\\begin{tabular}{lccccc}", "\\toprule",
+             "Frozen encoder & $R^2(\\sin\\theta)$ & $R^2(\\cos\\theta)$ & $R^2(x)$ & "
+             "$R^2(\\dot\\theta)$ & BC solve \\\\", "\\midrule"]
+    for k, v in r2.items():
+        lines.append(f"{nice.get(k, k)} & {v['sin_theta']:.2f} & {v['cos_theta']:.2f} & "
+                     f"{v['x']:.2f} & {v['theta_dot']:.2f} & {pct(bc.get(k, 0) or 0)} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "cartpole_ablation.tex").write_text("\n".join(lines) + "\n")
+
+
 def fig_prototyping():
     """The framework legend figure: the showcase world's spec rendered as the
     perceive -> world -> emit -> act pipeline (generated from the real spec, so the
@@ -3325,6 +3373,8 @@ def main():
     fig_trained_wm_control(data["e61_trained_wm_control"])
     table_bakeoff(data["e63_world_model_bakeoff"])
     table_minigrid_bench(data["e65_minigrid_bench"])
+    table_cartpole(data["e67_cartpole_bench"])
+    table_cartpole_ablation(data["e67_cartpole_bench"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

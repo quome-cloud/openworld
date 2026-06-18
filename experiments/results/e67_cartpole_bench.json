@@ -1,0 +1,75 @@
+{
+  "task": "cartpole-swingup (continuous control, verified ODE; learned models from 64x64 pixels)",
+  "world_validation_max_diff": 0.0,
+  "openworld": {
+    "method": "CEM-MPC over verified model",
+    "training_transitions": 0,
+    "solve_rate": 1,
+    "n_starts": 5
+  },
+  "random_control": {
+    "solve_rate": 0
+  },
+  "dreamerv3": {
+    "status": "ran",
+    "obs": "64x64 RGB",
+    "max_step": 29600,
+    "final_mean_reward": 122.1,
+    "steps_to_reward_100": 11200,
+    "episodes": 148,
+    "hardware": "A100 (us-central1-f)"
+  },
+  "dreamerv2": {
+    "status": "ran",
+    "obs": "64x64 RGB",
+    "max_step": 122400,
+    "final_mean_reward": 99.2,
+    "steps_to_reward_100": 56800,
+    "episodes": 612,
+    "hardware": "A100 (us-central1-f)"
+  },
+  "vjepa2": {
+    "planning_solve_rate": 0.0,
+    "dynamics_final_loss": 0.023892048746347427,
+    "note": "frozen V-JEPA encoder + learned latent dynamics(+reward) + MPC"
+  },
+  "frozen_encoder_control": {
+    "behavioral_cloning_solve": {
+      "dinov2": 0.0,
+      "vit_in21k": 0.0
+    },
+    "dagger_dinov2_solve": 0.0,
+    "dagger_stacked_dinov2_solve": 0.0,
+    "state_decodability_r2": {
+      "dinov2": {
+        "x": 0.946,
+        "x_dot": 0.895,
+        "sin_theta": 0.954,
+        "cos_theta": 0.998,
+        "theta_dot": 0.955
+      },
+      "vit_in21k": {
+        "x": 0.868,
+        "x_dot": 0.809,
+        "sin_theta": 0.761,
+        "cos_theta": 0.997,
+        "theta_dot": 0.891
+      }
+    },
+    "raw_angle_probe_artifact": {
+      "x": 0.988,
+      "x_dot": 0.966,
+      "theta": -0.04,
+      "theta_dot": 0.987
+    },
+    "finding": "frozen features (V-JEPA/DINOv2/ViT) decode the full state (sin/cos theta ~0.95-0.998) yet every bolt-on controller (planning, BC, DAgger, frame-stacked DAgger) scores 0; the bottleneck is end-to-end task training, not perception. (An earlier raw-angle probe wrongly suggested the pole angle was unencoded -- an artifact of regressing a periodic quantity; sin/cos decoding corrects it.)"
+  },
+  "experiment": "e67_cartpole_bench",
+  "timestamp": "2026-06-17T22:58:47",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

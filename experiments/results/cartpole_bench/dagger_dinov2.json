@@ -1,0 +1,42 @@
+{
+  "method": "DAgger on frozen dinov2 features (OpenWorld CEM oracle)",
+  "encoder_model": "facebook/dinov2-large",
+  "status": "ran",
+  "embedding_dim": 1024,
+  "init_demos": 8,
+  "dagger_iters": 6,
+  "final_solve_rate": 0.0,
+  "history": [
+    {
+      "iter": 1,
+      "dataset": 2200,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 2,
+      "dataset": 2800,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 3,
+      "dataset": 3400,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 4,
+      "dataset": 4000,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 5,
+      "dataset": 4600,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 6,
+      "dataset": 5200,
+      "solve_rate": 0.0
+    }
+  ],
+  "note": "encoder FROZEN; only the policy head trains. Tests whether good frozen features + a proper imitation controller (covariate-shift-corrected) can solve, vs vanilla BC which scored 0."
+}

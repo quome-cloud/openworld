@@ -1,0 +1,35 @@
+{
+  "task": "cartpole-swingup",
+  "expert": "OpenWorld CEM-MPC",
+  "expert_demos": 2400,
+  "encoders": {
+    "dinov2": {
+      "model": "facebook/dinov2-large",
+      "status": "ran",
+      "embedding_dim": 1024,
+      "state_decode_r2": {
+        "x": 0.946,
+        "x_dot": 0.895,
+        "sin_theta": 0.954,
+        "cos_theta": 0.998,
+        "theta_dot": 0.955
+      },
+      "bc_action_mse": 0.0677,
+      "bc_solve_rate": 0.0
+    },
+    "vit_in21k": {
+      "model": "google/vit-large-patch16-224-in21k",
+      "status": "ran",
+      "embedding_dim": 1024,
+      "state_decode_r2": {
+        "x": 0.868,
+        "x_dot": 0.809,
+        "sin_theta": 0.761,
+        "cos_theta": 0.997,
+        "theta_dot": 0.891
+      },
+      "bc_action_mse": 0.076,
+      "bc_solve_rate": 0.0
+    }
+  }
+}

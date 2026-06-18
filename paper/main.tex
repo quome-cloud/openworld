@@ -1282,6 +1282,32 @@ representation-drift metric rather than a solve rate.}
 \label{tab:minigrid}
 \end{table}
 
+\subsection{Continuous control: cartpole-swingup, on the learned models' home turf (E67)}\label{sec:cartpole}
+MiniGrid (E65) is a gridworld, which arguably favors symbolic models. E67 moves the same
+three-species contest to \emph{continuous control}---cartpole-swingup from $64\times64$
+pixels---where learned and perceptual world models are strongest, yet OpenWorld can still
+write the dynamics (the standard cartpole equations of motion) as verified code, validated
+bit-identical against an independent reference. The picture holds, and sharpens
+(Table~\ref{tab:cartpole}). OpenWorld plans the swing-up with CEM-MPC and solves
+\CartOpenWorldSolve{} of episodes with \emph{zero} data (random control \CartRandomSolve).
+DreamerV3, learning a latent world model from pixels end to end, reaches reward
+\CartDreamerReward{} and first swings up around \CartDreamerSteps{} environment steps---about
+$5\times$ more sample-efficient than DreamerV2. The perceptual species (V-JEPA-2 and other
+frozen encoders) scores \CartVjepaSolve{} through \emph{every} controller we tried. That
+last result is the interesting one, and it is not what it first looks like: the frozen
+features encode the full state perfectly well; the failure is \emph{control}, not
+perception. We trace it in Appendix~\ref{sec:vjepa-control}.
+
+\begin{table}[htb]\centering\small
+\input{tables/cartpole.tex}
+\caption{\textbf{Cartpole-swingup head-to-head (E67).} Verified-code vs.\ end-to-end
+learned vs.\ frozen-perceptual world models on continuous control from pixels. OpenWorld's
+ODE is validated bit-identical to an independent reference; DreamerV3/V2 trained on a
+dedicated A100. Learned models report converged reward + sample efficiency; OpenWorld and
+the frozen-perceptual models report a swing-up solve rate.}
+\label{tab:cartpole}
+\end{table}
+
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
 Three round-3 experiments chart where the paradigm holds and what to do at
 the edge.
@@ -1915,6 +1941,39 @@ LLM-judge coarseness~\cite{llmjudge2023}.
 
 \section{Additional experiments moved from the main text}\label{app:more}
 The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
+
+\subsection{Why frozen perceptual world models don't control cartpole (E67)}\label{sec:vjepa-control}
+The cartpole head-to-head (Section~\ref{sec:cartpole}) gives the perceptual species its
+best shot and it still scores \CartVjepaSolve{}. Because that is a strong claim, we
+chased it down rather than assert it. Every way we tried to turn a frozen visual encoder
+into a swing-up controller failed: (i)~planning over a learned latent-dynamics model on
+frozen V-JEPA-2 features; (ii)~the same with a learned latent \emph{reward} head (so the
+planning objective is no longer the weak link); (iii)~behavioral cloning of the OpenWorld
+CEM expert; (iv)~DAgger, querying that expert on the policy's \emph{own} visited states
+(curing covariate shift); and (v)~frame-stacked DAgger, giving the policy velocity. All
+five score $0$.
+
+A natural explanation is that the frozen features simply don't see the pole. They do. A
+small probe recovers the \emph{full} state from frozen DINOv2 features---$R^2(\sin\theta)
+{=}\CartDinoSinTheta$, $R^2(\cos\theta){=}\CartDinoCosTheta$, and comparably the cart
+position and angular velocity---with ImageNet ViT close behind (Table~\ref{tab:cartpole_ablation}).
+(An earlier probe that regressed the raw, \emph{periodic} angle reported $R^2{\approx}0$
+and briefly fooled us; that is a metric artifact---$\theta$ and $\theta{+}2\pi$ render
+identically---which $\sin/\cos$ decoding corrects.) So the representation is sufficient;
+what fails is converting good \emph{frozen} features into stable control through any
+bolt-on controller. DreamerV3 succeeds precisely because it trains its encoder end to end
+\emph{for} prediction and control. The lesson is clean and, we think, transferable: strong
+frozen perceptual features are necessary but not sufficient for control---end-to-end task
+training, not perception, is what closes the gap.
+
+\begin{table}[htb]\centering\small
+\input{tables/cartpole_ablation.tex}
+\caption{\textbf{Frozen-encoder probe (E67).} Frozen visual encoders decode the full
+cartpole state (high $R^2$ on $\sin\theta,\cos\theta,x,\dot\theta$), yet behavioral
+cloning of the verified expert on those features solves $0\%$---the bottleneck is control,
+not perception.}
+\label{tab:cartpole_ablation}
+\end{table}
 
 \subsection{A database for many worlds: holding a non-enumerable version space (E46)}\label{sec:many-worlds}
 E43 maintains its version space as an explicit list of candidate worlds, which

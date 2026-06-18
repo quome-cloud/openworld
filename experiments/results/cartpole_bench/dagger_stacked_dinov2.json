@@ -1,0 +1,41 @@
+{
+  "method": "DAgger on 3-frame-stacked frozen dinov2 features",
+  "encoder_model": "facebook/dinov2-large",
+  "status": "ran",
+  "stack": 3,
+  "embedding_dim": 1024,
+  "final_solve_rate": 0.0,
+  "history": [
+    {
+      "iter": 1,
+      "dataset": 2200,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 2,
+      "dataset": 2800,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 3,
+      "dataset": 3400,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 4,
+      "dataset": 4000,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 5,
+      "dataset": 4600,
+      "solve_rate": 0.0
+    },
+    {
+      "iter": 6,
+      "dataset": 5200,
+      "solve_rate": 0.0
+    }
+  ],
+  "note": "stacked features give the policy velocity (theta_dot, x_dot); tests if the single-frame velocity gap was why BC/DAgger scored 0."
+}

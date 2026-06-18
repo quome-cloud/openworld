@@ -1,0 +1,873 @@
+CONFIG
+├── algo
+│   └── name: dreamer_v2                                                        
+│       total_steps: 150000                                                     
+│       per_rank_batch_size: 16                                                 
+│       run_test: true                                                          
+│       cnn_keys:                                                               
+│         encoder:                                                              
+│         - image                                                               
+│         decoder:                                                              
+│         - image                                                               
+│       mlp_keys:                                                               
+│         encoder: []                                                           
+│         decoder: []                                                           
+│       world_model:                                                            
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 0.0003                                                          
+│           eps: 1.0e-05                                                        
+│           weight_decay: 1.0e-06                                               
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         discrete_size: 32                                                     
+│         stochastic_size: 32                                                   
+│         kl_balancing_alpha: 0.8                                               
+│         kl_free_nats: 1.0                                                     
+│         kl_free_avg: true                                                     
+│         kl_regularizer: 1.0                                                   
+│         discount_scale_factor: 1.0                                            
+│         use_continues: false                                                  
+│         clip_gradients: 100.0                                                 
+│         encoder:                                                              
+│           cnn_channels_multiplier: 48                                         
+│           cnn_act: torch.nn.ELU                                               
+│           dense_act: torch.nn.ELU                                             
+│           mlp_layers: 4                                                       
+│           layer_norm: false                                                   
+│           dense_units: 400                                                    
+│         recurrent_model:                                                      
+│           recurrent_state_size: 600                                           
+│           layer_norm: true                                                    
+│           dense_units: 400                                                    
+│         transition_model:                                                     
+│           hidden_size: 600                                                    
+│           dense_act: torch.nn.ELU                                             
+│           layer_norm: false                                                   
+│         representation_model:                                                 
+│           hidden_size: 600                                                    
+│           dense_act: torch.nn.ELU                                             
+│           layer_norm: false                                                   
+│         observation_model:                                                    
+│           cnn_channels_multiplier: 48                                         
+│           cnn_act: torch.nn.ELU                                               
+│           dense_act: torch.nn.ELU                                             
+│           mlp_layers: 4                                                       
+│           layer_norm: false                                                   
+│           dense_units: 400                                                    
+│         reward_model:                                                         
+│           dense_act: torch.nn.ELU                                             
+│           mlp_layers: 4                                                       
+│           layer_norm: false                                                   
+│           dense_units: 400                                                    
+│         discount_model:                                                       
+│           learnable: true                                                     
+│           dense_act: torch.nn.ELU                                             
+│           mlp_layers: 4                                                       
+│           layer_norm: false                                                   
+│           dense_units: 400                                                    
+│       actor:                                                                  
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 8.0e-05                                                         
+│           eps: 1.0e-05                                                        
+│           weight_decay: 1.0e-06                                               
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         cls: sheeprl.algos.dreamer_v2.agent.Actor                             
+│         ent_coef: 0.0001                                                      
+│         min_std: 0.1                                                          
+│         init_std: 0.0                                                         
+│         objective_mix: 1.0                                                    
+│         dense_act: torch.nn.ELU                                               
+│         mlp_layers: 4                                                         
+│         layer_norm: false                                                     
+│         dense_units: 400                                                      
+│         clip_gradients: 100.0                                                 
+│       critic:                                                                 
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 8.0e-05                                                         
+│           eps: 1.0e-05                                                        
+│           weight_decay: 1.0e-06                                               
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         dense_act: torch.nn.ELU                                               
+│         mlp_layers: 4                                                         
+│         layer_norm: false                                                     
+│         dense_units: 400                                                      
+│         per_rank_target_network_update_freq: 100                              
+│         clip_gradients: 100.0                                                 
+│       gamma: 0.99                                                             
+│       lmbda: 0.95                                                             
+│       horizon: 15                                                             
+│       replay_ratio: 0.2                                                       
+│       learning_starts: 1000                                                   
+│       per_rank_pretrain_steps: 100                                            
+│       per_rank_sequence_length: 50                                            
+│       layer_norm: false                                                       
+│       dense_units: 400                                                        
+│       mlp_layers: 4                                                           
+│       dense_act: torch.nn.ELU                                                 
+│       cnn_act: torch.nn.ELU                                                   
+│       player:                                                                 
+│         discrete_size: 32                                                     
+│                                                                               
+├── buffer
+│   └── size: 5000000                                                           
+│       memmap: true                                                            
+│       validate_args: false                                                    
+│       from_numpy: false                                                       
+│       checkpoint: true                                                        
+│       type: sequential                                                        
+│       prioritize_ends: false                                                  
+│                                                                               
+├── checkpoint
+│   └── every: 50000                                                            
+│       resume_from: null                                                       
+│       save_last: true                                                         
+│       keep_last: 5                                                            
+│                                                                               
+├── env
+│   └── id: CartpoleSwingupVerified-v0                                          
+│       num_envs: 4                                                             
+│       frame_stack: 1                                                          
+│       sync_env: false                                                         
+│       screen_size: 64                                                         
+│       action_repeat: 1                                                        
+│       grayscale: false                                                        
+│       clip_rewards: false                                                     
+│       capture_video: true                                                     
+│       frame_stack_dilation: 1                                                 
+│       actions_as_observation:                                                 
+│         num_stack: -1                                                         
+│         noop: You MUST define the NOOP                                        
+│         dilation: 1                                                           
+│       max_episode_steps: null                                                 
+│       reward_as_observation: false                                            
+│       wrapper:                                                                
+│         _target_: gymnasium.make                                              
+│         id: CartpoleSwingupVerified-v0                                        
+│         render_mode: rgb_array                                                
+│       mask_velocities: false                                                  
+│                                                                               
+├── fabric
+│   └── _target_: lightning.fabric.Fabric                                       
+│       devices: 1                                                              
+│       num_nodes: 1                                                            
+│       strategy: auto                                                          
+│       accelerator: gpu                                                        
+│       precision: 32-true                                                      
+│       callbacks:                                                              
+│       - _target_: sheeprl.utils.callback.CheckpointCallback                   
+│         keep_last: 5                                                          
+│                                                                               
+└── metric
+    └── log_every: 1000                                                         
+        disable_timer: false                                                    
+        log_level: 1                                                            
+        sync_on_compute: false                                                  
+        aggregator:                                                             
+          _target_: sheeprl.utils.metric.MetricAggregator                       
+          raise_on_missing: false                                               
+          metrics:                                                              
+            Rewards/rew_avg:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Game/ep_len_avg:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/world_model_loss:                                              
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/value_loss:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/policy_loss:                                                   
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/observation_loss:                                              
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/reward_loss:                                                   
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/state_loss:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/continue_loss:                                                 
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/post_entropy:                                                 
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/prior_entropy:                                                
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/kl:                                                           
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/world_model:                                                  
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/actor:                                                        
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/critic:                                                       
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+        logger:                                                                 
+          _target_: lightning.fabric.loggers.TensorBoardLogger                  
+          name: dreamerv2_seed0                                                 
+          root_dir: logs/runs//home/jim/out                                     
+          version: null                                                         
+          default_hp_metric: true                                               
+          prefix: ''                                                            
+          sub_dir: null                                                         
+                                                                                
+Seed set to 0
+/home/jim/sv/lib/python3.10/site-packages/sheeprl/utils/logger.py:22: UserWarning: The specified root directory for the TensorBoardLogger is different from the experiment one, so the logger one will be ignored and replaced with the experiment root directory
+  warnings.warn(
+Missing logger folder: /home/jim/out/dreamerv2_seed0
+Log dir: /home/jim/out/dreamerv2_seed0/version_0
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/experimental/wrappers/rendering.py:166: UserWarning: [33mWARN: Overwriting existing videos at /home/jim/out/dreamerv2_seed0/version_0/train_videos folder (try specifying a different `video_folder` for the `RecordVideo` wrapper if this is not desired)[0m
+  logger.warn(
+Encoder CNN keys: ['image']
+Encoder MLP keys: []
+Decoder CNN keys: ['image']
+Decoder MLP keys: []
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+Rank-0: policy_step=800, reward_env_0=4.2277302742004395
+Rank-0: policy_step=800, reward_env_1=1.0201988220214844
+Rank-0: policy_step=800, reward_env_2=1.4853708744049072
+Rank-0: policy_step=800, reward_env_3=3.739377021789551
+/home/jim/sv/lib/python3.10/site-packages/sheeprl/utils/utils.py:283: UserWarning: The number of pretrain steps is greater than the number of current steps. This could lead to a higher ratio than the one specified (0.2). Setting the 'pretrain_steps' equal to the number of current steps.
+  warnings.warn(
+/home/jim/sv/lib/python3.10/site-packages/torchmetrics/utilities/prints.py:43: UserWarning: The ``compute`` method of metric MeanMetric was called before the ``update`` method which may lead to errors, as metric states have not yet been updated.
+  warnings.warn(*args, **kwargs)
+Rank-0: policy_step=1600, reward_env_0=1.393293023109436
+Rank-0: policy_step=1600, reward_env_1=1.2439719438552856
+Rank-0: policy_step=1600, reward_env_2=9.751311302185059
+Rank-0: policy_step=1600, reward_env_3=3.105027198791504
+Rank-0: policy_step=2400, reward_env_0=1.5628113746643066
+Rank-0: policy_step=2400, reward_env_1=0.5132790207862854
+Rank-0: policy_step=2400, reward_env_2=1.4368157386779785
+Rank-0: policy_step=2400, reward_env_3=1.2965458631515503
+Rank-0: policy_step=3200, reward_env_0=1.4169254302978516
+Rank-0: policy_step=3200, reward_env_1=1.1654975414276123
+Rank-0: policy_step=3200, reward_env_2=0.8055449724197388
+Rank-0: policy_step=3200, reward_env_3=0.2315567284822464
+Rank-0: policy_step=4000, reward_env_0=1.9538849592208862
+Rank-0: policy_step=4000, reward_env_1=1.0455714464187622
+Rank-0: policy_step=4000, reward_env_2=13.760788917541504
+Rank-0: policy_step=4000, reward_env_3=8.594318389892578
+Rank-0: policy_step=4800, reward_env_0=3.8879449367523193
+Rank-0: policy_step=4800, reward_env_1=3.941624164581299
+Rank-0: policy_step=4800, reward_env_2=3.852895975112915
+Rank-0: policy_step=4800, reward_env_3=3.960397958755493
+Rank-0: policy_step=5600, reward_env_0=3.9480795860290527
+Rank-0: policy_step=5600, reward_env_1=4.1328887939453125
+Rank-0: policy_step=5600, reward_env_2=4.111547470092773
+Rank-0: policy_step=5600, reward_env_3=4.081483840942383
+Rank-0: policy_step=6400, reward_env_0=3.956794500350952
+Rank-0: policy_step=6400, reward_env_1=3.9915804862976074
+Rank-0: policy_step=6400, reward_env_2=4.098148345947266
+Rank-0: policy_step=6400, reward_env_3=4.268421649932861
+Rank-0: policy_step=7200, reward_env_0=4.179625988006592
+Rank-0: policy_step=7200, reward_env_1=3.9401156902313232
+Rank-0: policy_step=7200, reward_env_2=4.213702201843262
+Rank-0: policy_step=7200, reward_env_3=4.044699192047119
+Rank-0: policy_step=8000, reward_env_0=3.973630905151367
+Rank-0: policy_step=8000, reward_env_1=3.882392168045044
+Rank-0: policy_step=8000, reward_env_2=3.9200000762939453
+Rank-0: policy_step=8000, reward_env_3=4.006758213043213
+Rank-0: policy_step=8800, reward_env_0=3.8724615573883057
+Rank-0: policy_step=8800, reward_env_1=4.02366828918457
+Rank-0: policy_step=8800, reward_env_2=4.0294880867004395
+Rank-0: policy_step=8800, reward_env_3=4.150102138519287
+Rank-0: policy_step=9600, reward_env_0=4.149519920349121
+Rank-0: policy_step=9600, reward_env_1=4.216955184936523
+Rank-0: policy_step=9600, reward_env_2=4.258244037628174
+Rank-0: policy_step=9600, reward_env_3=3.961582899093628
+Rank-0: policy_step=10400, reward_env_0=4.003700256347656
+Rank-0: policy_step=10400, reward_env_1=4.241899490356445
+Rank-0: policy_step=10400, reward_env_2=4.192474365234375
+Rank-0: policy_step=10400, reward_env_3=4.164513111114502
+Rank-0: policy_step=11200, reward_env_0=4.353039741516113
+Rank-0: policy_step=11200, reward_env_1=3.9961469173431396
+Rank-0: policy_step=11200, reward_env_2=4.094832420349121
+Rank-0: policy_step=11200, reward_env_3=4.140985488891602
+Rank-0: policy_step=12000, reward_env_0=4.139901161193848
+Rank-0: policy_step=12000, reward_env_1=4.163366317749023
+Rank-0: policy_step=12000, reward_env_2=3.821761131286621
+Rank-0: policy_step=12000, reward_env_3=4.010335445404053
+Rank-0: policy_step=12800, reward_env_0=4.018340587615967
+Rank-0: policy_step=12800, reward_env_1=3.919362783432007
+Rank-0: policy_step=12800, reward_env_2=4.124150276184082
+Rank-0: policy_step=12800, reward_env_3=3.872899293899536
+Rank-0: policy_step=13600, reward_env_0=4.0798211097717285
+Rank-0: policy_step=13600, reward_env_1=4.159840106964111
+Rank-0: policy_step=13600, reward_env_2=4.225651264190674
+Rank-0: policy_step=13600, reward_env_3=4.23922872543335
+Rank-0: policy_step=14400, reward_env_0=4.005601406097412
+Rank-0: policy_step=14400, reward_env_1=4.271178722381592
+Rank-0: policy_step=14400, reward_env_2=4.058125019073486
+Rank-0: policy_step=14400, reward_env_3=4.041125297546387
+Rank-0: policy_step=15200, reward_env_0=4.224257946014404
+Rank-0: policy_step=15200, reward_env_1=3.970982551574707
+Rank-0: policy_step=15200, reward_env_2=4.091190814971924
+Rank-0: policy_step=15200, reward_env_3=4.0595574378967285
+Rank-0: policy_step=16000, reward_env_0=4.0838398933410645
+Rank-0: policy_step=16000, reward_env_1=3.9036386013031006
+Rank-0: policy_step=16000, reward_env_2=4.060539245605469
+Rank-0: policy_step=16000, reward_env_3=3.9948952198028564
+Rank-0: policy_step=16800, reward_env_0=4.02946138381958
+Rank-0: policy_step=16800, reward_env_1=4.263051986694336
+Rank-0: policy_step=16800, reward_env_2=4.195356369018555
+Rank-0: policy_step=16800, reward_env_3=4.1638383865356445
+Rank-0: policy_step=17600, reward_env_0=3.993630886077881
+Rank-0: policy_step=17600, reward_env_1=3.9621450901031494
+Rank-0: policy_step=17600, reward_env_2=4.130577564239502
+Rank-0: policy_step=17600, reward_env_3=4.173070907592773
+Rank-0: policy_step=18400, reward_env_0=4.189976692199707
+Rank-0: policy_step=18400, reward_env_1=4.118682384490967
+Rank-0: policy_step=18400, reward_env_2=3.996504306793213
+Rank-0: policy_step=18400, reward_env_3=4.118896007537842
+Rank-0: policy_step=19200, reward_env_0=4.050992488861084
+Rank-0: policy_step=19200, reward_env_1=4.151265621185303
+Rank-0: policy_step=19200, reward_env_2=3.927018404006958
+Rank-0: policy_step=19200, reward_env_3=3.9802610874176025
+Rank-0: policy_step=20000, reward_env_0=4.115551948547363
+Rank-0: policy_step=20000, reward_env_1=4.117546558380127
+Rank-0: policy_step=20000, reward_env_2=3.800870656967163
+Rank-0: policy_step=20000, reward_env_3=4.092195987701416
+Rank-0: policy_step=20800, reward_env_0=4.0247273445129395
+Rank-0: policy_step=20800, reward_env_1=4.1904296875
+Rank-0: policy_step=20800, reward_env_2=4.042252540588379
+Rank-0: policy_step=20800, reward_env_3=3.917127847671509
+Rank-0: policy_step=21600, reward_env_0=3.9667983055114746
+Rank-0: policy_step=21600, reward_env_1=4.131753444671631
+Rank-0: policy_step=21600, reward_env_2=4.233299255371094
+Rank-0: policy_step=21600, reward_env_3=4.01804780960083
+Rank-0: policy_step=22400, reward_env_0=3.901893377304077
+Rank-0: policy_step=22400, reward_env_1=3.839311122894287
+Rank-0: policy_step=22400, reward_env_2=4.209719657897949
+Rank-0: policy_step=22400, reward_env_3=4.0372467041015625
+Rank-0: policy_step=23200, reward_env_0=4.197558403015137
+Rank-0: policy_step=23200, reward_env_1=4.247374534606934
+Rank-0: policy_step=23200, reward_env_2=4.177314758300781
+Rank-0: policy_step=23200, reward_env_3=4.030325889587402
+Rank-0: policy_step=24000, reward_env_0=3.8439295291900635
+Rank-0: policy_step=24000, reward_env_1=4.10319709777832
+Rank-0: policy_step=24000, reward_env_2=3.938657522201538
+Rank-0: policy_step=24000, reward_env_3=3.9340529441833496
+Rank-0: policy_step=24800, reward_env_0=3.932852029800415
+Rank-0: policy_step=24800, reward_env_1=3.8500940799713135
+Rank-0: policy_step=24800, reward_env_2=3.893535852432251
+Rank-0: policy_step=24800, reward_env_3=4.07562255859375
+Rank-0: policy_step=25600, reward_env_0=4.010406017303467
+Rank-0: policy_step=25600, reward_env_1=4.15479850769043
+Rank-0: policy_step=25600, reward_env_2=3.88687801361084
+Rank-0: policy_step=25600, reward_env_3=4.120678901672363
+Rank-0: policy_step=26400, reward_env_0=4.106430530548096
+Rank-0: policy_step=26400, reward_env_1=4.05166482925415
+Rank-0: policy_step=26400, reward_env_2=4.107206344604492
+Rank-0: policy_step=26400, reward_env_3=4.038382530212402
+Rank-0: policy_step=27200, reward_env_0=4.176064968109131
+Rank-0: policy_step=27200, reward_env_1=4.035303592681885
+Rank-0: policy_step=27200, reward_env_2=3.9594979286193848
+Rank-0: policy_step=27200, reward_env_3=3.9880788326263428
+Rank-0: policy_step=28000, reward_env_0=3.8733866214752197
+Rank-0: policy_step=28000, reward_env_1=4.305445671081543
+Rank-0: policy_step=28000, reward_env_2=4.100030422210693
+Rank-0: policy_step=28000, reward_env_3=4.193014144897461
+Rank-0: policy_step=28800, reward_env_0=4.210748672485352
+Rank-0: policy_step=28800, reward_env_1=4.001689434051514
+Rank-0: policy_step=28800, reward_env_2=4.256034851074219
+Rank-0: policy_step=28800, reward_env_3=4.239886283874512
+Rank-0: policy_step=29600, reward_env_0=4.2208967208862305
+Rank-0: policy_step=29600, reward_env_1=4.077708721160889
+Rank-0: policy_step=29600, reward_env_2=4.11431360244751
+Rank-0: policy_step=29600, reward_env_3=4.227688312530518
+Rank-0: policy_step=30400, reward_env_0=4.049181938171387
+Rank-0: policy_step=30400, reward_env_1=3.8498034477233887
+Rank-0: policy_step=30400, reward_env_2=4.086175441741943
+Rank-0: policy_step=30400, reward_env_3=3.9582836627960205
+Rank-0: policy_step=31200, reward_env_0=4.2408552169799805
+Rank-0: policy_step=31200, reward_env_1=4.23509407043457
+Rank-0: policy_step=31200, reward_env_2=4.025472164154053
+Rank-0: policy_step=31200, reward_env_3=3.8745622634887695
+Rank-0: policy_step=32000, reward_env_0=4.110150337219238
+Rank-0: policy_step=32000, reward_env_1=4.314064025878906
+Rank-0: policy_step=32000, reward_env_2=4.125236511230469
+Rank-0: policy_step=32000, reward_env_3=4.177423477172852
+Rank-0: policy_step=32800, reward_env_0=4.109623908996582
+Rank-0: policy_step=32800, reward_env_1=3.9916274547576904
+Rank-0: policy_step=32800, reward_env_2=3.8958544731140137
+Rank-0: policy_step=32800, reward_env_3=3.8897247314453125
+Rank-0: policy_step=33600, reward_env_0=4.188816547393799
+Rank-0: policy_step=33600, reward_env_1=3.9852094650268555
+Rank-0: policy_step=33600, reward_env_2=4.248469829559326
+Rank-0: policy_step=33600, reward_env_3=4.22983455657959
+Rank-0: policy_step=34400, reward_env_0=4.163431167602539
+Rank-0: policy_step=34400, reward_env_1=3.9620168209075928
+Rank-0: policy_step=34400, reward_env_2=3.920703649520874
+Rank-0: policy_step=34400, reward_env_3=4.218307018280029
+Rank-0: policy_step=35200, reward_env_0=4.2778544425964355
+Rank-0: policy_step=35200, reward_env_1=3.997427463531494
+Rank-0: policy_step=35200, reward_env_2=4.121480464935303
+Rank-0: policy_step=35200, reward_env_3=4.008701801300049
+Rank-0: policy_step=36000, reward_env_0=4.148764133453369
+Rank-0: policy_step=36000, reward_env_1=4.066856861114502
+Rank-0: policy_step=36000, reward_env_2=3.8883605003356934
+Rank-0: policy_step=36000, reward_env_3=4.031220436096191
+Rank-0: policy_step=36800, reward_env_0=29.74881935119629
+Rank-0: policy_step=36800, reward_env_1=28.299793243408203
+Rank-0: policy_step=36800, reward_env_2=28.908863067626953
+Rank-0: policy_step=36800, reward_env_3=27.96101188659668
+Rank-0: policy_step=37600, reward_env_0=33.44395065307617
+Rank-0: policy_step=37600, reward_env_1=32.82902526855469
+Rank-0: policy_step=37600, reward_env_2=33.01830291748047
+Rank-0: policy_step=37600, reward_env_3=32.25011444091797
+Rank-0: policy_step=38400, reward_env_0=3.7830774784088135
+Rank-0: policy_step=38400, reward_env_1=4.106195449829102
+Rank-0: policy_step=38400, reward_env_2=4.162854194641113
+Rank-0: policy_step=38400, reward_env_3=4.041759967803955
+Rank-0: policy_step=39200, reward_env_0=3.9699997901916504
+Rank-0: policy_step=39200, reward_env_1=4.04336404800415
+Rank-0: policy_step=39200, reward_env_2=4.233375072479248
+Rank-0: policy_step=39200, reward_env_3=4.168356895446777
+Rank-0: policy_step=40000, reward_env_0=3.8633697032928467
+Rank-0: policy_step=40000, reward_env_1=4.000230312347412
+Rank-0: policy_step=40000, reward_env_2=4.280365467071533
+Rank-0: policy_step=40000, reward_env_3=4.181201934814453
+Rank-0: policy_step=40800, reward_env_0=4.162118434906006
+Rank-0: policy_step=40800, reward_env_1=4.073154449462891
+Rank-0: policy_step=40800, reward_env_2=4.122021198272705
+Rank-0: policy_step=40800, reward_env_3=4.0491838455200195
+Rank-0: policy_step=41600, reward_env_0=21.493438720703125
+Rank-0: policy_step=41600, reward_env_1=22.375511169433594
+Rank-0: policy_step=41600, reward_env_2=22.2573184967041
+Rank-0: policy_step=41600, reward_env_3=21.89652442932129
+Rank-0: policy_step=42400, reward_env_0=22.236539840698242
+Rank-0: policy_step=42400, reward_env_1=21.771574020385742
+Rank-0: policy_step=42400, reward_env_2=23.47823143005371
+Rank-0: policy_step=42400, reward_env_3=21.82876205444336
+Rank-0: policy_step=43200, reward_env_0=4.87954568862915
+Rank-0: policy_step=43200, reward_env_1=22.734601974487305
+Rank-0: policy_step=43200, reward_env_2=22.39061737060547
+Rank-0: policy_step=43200, reward_env_3=22.70743751525879
+Rank-0: policy_step=44000, reward_env_0=23.749887466430664
+Rank-0: policy_step=44000, reward_env_1=23.7943172454834
+Rank-0: policy_step=44000, reward_env_2=23.673828125
+Rank-0: policy_step=44000, reward_env_3=21.737667083740234
+Rank-0: policy_step=44800, reward_env_0=72.83639526367188
+Rank-0: policy_step=44800, reward_env_1=64.15240478515625
+Rank-0: policy_step=44800, reward_env_2=76.8510513305664
+Rank-0: policy_step=44800, reward_env_3=53.86384582519531
+Rank-0: policy_step=45600, reward_env_0=62.64982986450195
+Rank-0: policy_step=45600, reward_env_1=68.32213592529297
+Rank-0: policy_step=45600, reward_env_2=69.9225082397461
+Rank-0: policy_step=45600, reward_env_3=64.01801300048828
+Rank-0: policy_step=46400, reward_env_0=25.245012283325195
+Rank-0: policy_step=46400, reward_env_1=54.18626022338867
+Rank-0: policy_step=46400, reward_env_2=56.89236068725586
+Rank-0: policy_step=46400, reward_env_3=60.070674896240234
+Rank-0: policy_step=47200, reward_env_0=31.397628784179688
+Rank-0: policy_step=47200, reward_env_1=24.946121215820312
+Rank-0: policy_step=47200, reward_env_2=23.768016815185547
+Rank-0: policy_step=47200, reward_env_3=26.253341674804688
+Rank-0: policy_step=48000, reward_env_0=34.06552505493164
+Rank-0: policy_step=48000, reward_env_1=34.48997116088867
+Rank-0: policy_step=48000, reward_env_2=34.150875091552734
+Rank-0: policy_step=48000, reward_env_3=34.20132064819336
+Rank-0: policy_step=48800, reward_env_0=64.08308410644531
+Rank-0: policy_step=48800, reward_env_1=62.83442687988281
+Rank-0: policy_step=48800, reward_env_2=62.03086853027344
+Rank-0: policy_step=48800, reward_env_3=51.782997131347656
+Rank-0: policy_step=49600, reward_env_0=44.122493743896484
+Rank-0: policy_step=49600, reward_env_1=56.957000732421875
+Rank-0: policy_step=49600, reward_env_2=63.3079719543457
+Rank-0: policy_step=49600, reward_env_3=66.03394317626953
+Rank-0: policy_step=50400, reward_env_0=97.11253356933594
+Rank-0: policy_step=50400, reward_env_1=67.9326400756836
+Rank-0: policy_step=50400, reward_env_2=79.88346862792969
+Rank-0: policy_step=50400, reward_env_3=71.48345184326172
+Rank-0: policy_step=51200, reward_env_0=70.24144744873047
+Rank-0: policy_step=51200, reward_env_1=71.18067169189453
+Rank-0: policy_step=51200, reward_env_2=64.98606872558594
+Rank-0: policy_step=51200, reward_env_3=70.92273712158203
+Rank-0: policy_step=52000, reward_env_0=76.53227996826172
+Rank-0: policy_step=52000, reward_env_1=81.67806243896484
+Rank-0: policy_step=52000, reward_env_2=68.68852996826172
+Rank-0: policy_step=52000, reward_env_3=67.4840316772461
+Rank-0: policy_step=52800, reward_env_0=71.8582992553711
+Rank-0: policy_step=52800, reward_env_1=89.8303451538086
+Rank-0: policy_step=52800, reward_env_2=77.93612670898438
+Rank-0: policy_step=52800, reward_env_3=70.94564056396484
+Rank-0: policy_step=53600, reward_env_0=74.22272491455078
+Rank-0: policy_step=53600, reward_env_1=73.66956329345703
+Rank-0: policy_step=53600, reward_env_2=72.66104888916016
+Rank-0: policy_step=53600, reward_env_3=70.75502014160156
+Rank-0: policy_step=54400, reward_env_0=62.260231018066406
+Rank-0: policy_step=54400, reward_env_1=64.38932800292969
+Rank-0: policy_step=54400, reward_env_2=67.76602172851562
+Rank-0: policy_step=54400, reward_env_3=69.31098937988281
+Rank-0: policy_step=55200, reward_env_0=71.0066146850586
+Rank-0: policy_step=55200, reward_env_1=68.1109390258789
+Rank-0: policy_step=55200, reward_env_2=73.7330551147461
+Rank-0: policy_step=55200, reward_env_3=71.90020751953125
+Rank-0: policy_step=56000, reward_env_0=71.22105407714844
+Rank-0: policy_step=56000, reward_env_1=99.7821273803711
+Rank-0: policy_step=56000, reward_env_2=71.38160705566406
+Rank-0: policy_step=56000, reward_env_3=95.31778717041016
+Rank-0: policy_step=56800, reward_env_0=62.549530029296875
+Rank-0: policy_step=56800, reward_env_1=101.8844985961914
+Rank-0: policy_step=56800, reward_env_2=88.94251251220703
+Rank-0: policy_step=56800, reward_env_3=94.55590057373047
+Rank-0: policy_step=57600, reward_env_0=95.16885375976562
+Rank-0: policy_step=57600, reward_env_1=88.64319610595703
+Rank-0: policy_step=57600, reward_env_2=84.98872375488281
+Rank-0: policy_step=57600, reward_env_3=104.05339050292969
+Rank-0: policy_step=58400, reward_env_0=71.48137664794922
+Rank-0: policy_step=58400, reward_env_1=100.45829772949219
+Rank-0: policy_step=58400, reward_env_2=88.47782135009766
+Rank-0: policy_step=58400, reward_env_3=87.01853942871094
+Rank-0: policy_step=59200, reward_env_0=87.8894271850586
+Rank-0: policy_step=59200, reward_env_1=64.74626159667969
+Rank-0: policy_step=59200, reward_env_2=86.09603881835938
+Rank-0: policy_step=59200, reward_env_3=105.33816528320312
+Rank-0: policy_step=60000, reward_env_0=86.02908325195312
+Rank-0: policy_step=60000, reward_env_1=103.09257507324219
+Rank-0: policy_step=60000, reward_env_2=85.29045104980469
+Rank-0: policy_step=60000, reward_env_3=88.94461822509766
+Rank-0: policy_step=60800, reward_env_0=90.0402603149414
+Rank-0: policy_step=60800, reward_env_1=68.84859466552734
+Rank-0: policy_step=60800, reward_env_2=96.11830139160156
+Rank-0: policy_step=60800, reward_env_3=87.1198501586914
+Rank-0: policy_step=61600, reward_env_0=77.92737579345703
+Rank-0: policy_step=61600, reward_env_1=92.40752410888672
+Rank-0: policy_step=61600, reward_env_2=68.86326599121094
+Rank-0: policy_step=61600, reward_env_3=70.93303680419922
+Rank-0: policy_step=62400, reward_env_0=89.5849838256836
+Rank-0: policy_step=62400, reward_env_1=87.9337387084961
+Rank-0: policy_step=62400, reward_env_2=69.40039825439453
+Rank-0: policy_step=62400, reward_env_3=81.92566680908203
+Rank-0: policy_step=63200, reward_env_0=89.3525390625
+Rank-0: policy_step=63200, reward_env_1=93.15050506591797
+Rank-0: policy_step=63200, reward_env_2=87.6805648803711
+Rank-0: policy_step=63200, reward_env_3=96.43608856201172
+Rank-0: policy_step=64000, reward_env_0=94.85199737548828
+Rank-0: policy_step=64000, reward_env_1=88.94791412353516
+Rank-0: policy_step=64000, reward_env_2=91.89961242675781
+Rank-0: policy_step=64000, reward_env_3=91.43932342529297
+Rank-0: policy_step=64800, reward_env_0=96.01136779785156
+Rank-0: policy_step=64800, reward_env_1=90.0627670288086
+Rank-0: policy_step=64800, reward_env_2=94.47703552246094
+Rank-0: policy_step=64800, reward_env_3=95.42585754394531
+Rank-0: policy_step=65600, reward_env_0=61.96952819824219
+Rank-0: policy_step=65600, reward_env_1=91.43504333496094
+Rank-0: policy_step=65600, reward_env_2=113.1262435913086
+Rank-0: policy_step=65600, reward_env_3=96.97964477539062
+Rank-0: policy_step=66400, reward_env_0=89.6376953125
+Rank-0: policy_step=66400, reward_env_1=87.49273681640625
+Rank-0: policy_step=66400, reward_env_2=87.36919403076172
+Rank-0: policy_step=66400, reward_env_3=86.2856674194336
+Rank-0: policy_step=67200, reward_env_0=87.64251708984375
+Rank-0: policy_step=67200, reward_env_1=90.27301788330078
+Rank-0: policy_step=67200, reward_env_2=91.33873748779297
+Rank-0: policy_step=67200, reward_env_3=87.61074829101562
+Rank-0: policy_step=68000, reward_env_0=92.26692962646484
+Rank-0: policy_step=68000, reward_env_1=116.5773696899414
+Rank-0: policy_step=68000, reward_env_2=91.63981628417969
+Rank-0: policy_step=68000, reward_env_3=92.00128936767578
+Rank-0: policy_step=68800, reward_env_0=93.09695434570312
+Rank-0: policy_step=68800, reward_env_1=89.05068969726562
+Rank-0: policy_step=68800, reward_env_2=96.73452758789062
+Rank-0: policy_step=68800, reward_env_3=89.0163803100586
+Rank-0: policy_step=69600, reward_env_0=87.0428695678711
+Rank-0: policy_step=69600, reward_env_1=83.9072265625
+Rank-0: policy_step=69600, reward_env_2=87.37674713134766
+Rank-0: policy_step=69600, reward_env_3=102.39584350585938
+Rank-0: policy_step=70400, reward_env_0=66.8333740234375
+Rank-0: policy_step=70400, reward_env_1=71.01915740966797
+Rank-0: policy_step=70400, reward_env_2=81.93022918701172
+Rank-0: policy_step=70400, reward_env_3=69.37014770507812
+Rank-0: policy_step=71200, reward_env_0=64.3596420288086
+Rank-0: policy_step=71200, reward_env_1=66.4620590209961
+Rank-0: policy_step=71200, reward_env_2=75.82453918457031
+Rank-0: policy_step=71200, reward_env_3=69.21360778808594
+Rank-0: policy_step=72000, reward_env_0=89.55802154541016
+Rank-0: policy_step=72000, reward_env_1=87.80015563964844
+Rank-0: policy_step=72000, reward_env_2=103.66743469238281
+Rank-0: policy_step=72000, reward_env_3=94.0036392211914
+Rank-0: policy_step=72800, reward_env_0=69.09154510498047
+Rank-0: policy_step=72800, reward_env_1=70.03533935546875
+Rank-0: policy_step=72800, reward_env_2=90.22293090820312
+Rank-0: policy_step=72800, reward_env_3=103.23118591308594
+Rank-0: policy_step=73600, reward_env_0=88.23100280761719
+Rank-0: policy_step=73600, reward_env_1=92.08958435058594
+Rank-0: policy_step=73600, reward_env_2=86.54210662841797
+Rank-0: policy_step=73600, reward_env_3=91.37714385986328
+Rank-0: policy_step=74400, reward_env_0=53.87367630004883
+Rank-0: policy_step=74400, reward_env_1=64.56366729736328
+Rank-0: policy_step=74400, reward_env_2=81.59432220458984
+Rank-0: policy_step=74400, reward_env_3=85.66134643554688
+Rank-0: policy_step=75200, reward_env_0=89.40955352783203
+Rank-0: policy_step=75200, reward_env_1=102.82423400878906
+Rank-0: policy_step=75200, reward_env_2=91.76165771484375
+Rank-0: policy_step=75200, reward_env_3=79.60238647460938
+Rank-0: policy_step=76000, reward_env_0=86.64981079101562
+Rank-0: policy_step=76000, reward_env_1=107.248291015625
+Rank-0: policy_step=76000, reward_env_2=100.62263488769531
+Rank-0: policy_step=76000, reward_env_3=81.81758880615234
+Rank-0: policy_step=76800, reward_env_0=88.94097137451172
+Rank-0: policy_step=76800, reward_env_1=86.1589126586914
+Rank-0: policy_step=76800, reward_env_2=85.5374984741211
+Rank-0: policy_step=76800, reward_env_3=89.0855941772461
+Rank-0: policy_step=77600, reward_env_0=89.8915786743164
+Rank-0: policy_step=77600, reward_env_1=86.86930084228516
+Rank-0: policy_step=77600, reward_env_2=87.92965698242188
+Rank-0: policy_step=77600, reward_env_3=89.35559844970703
+Rank-0: policy_step=78400, reward_env_0=85.76457977294922
+Rank-0: policy_step=78400, reward_env_1=87.57669830322266
+Rank-0: policy_step=78400, reward_env_2=89.33367919921875
+Rank-0: policy_step=78400, reward_env_3=90.2293701171875
+Rank-0: policy_step=79200, reward_env_0=92.73340606689453
+Rank-0: policy_step=79200, reward_env_1=86.97753143310547
+Rank-0: policy_step=79200, reward_env_2=102.1980209350586
+Rank-0: policy_step=79200, reward_env_3=86.53316497802734
+Rank-0: policy_step=80000, reward_env_0=86.25068664550781
+Rank-0: policy_step=80000, reward_env_1=85.16632843017578
+Rank-0: policy_step=80000, reward_env_2=84.42545318603516
+Rank-0: policy_step=80000, reward_env_3=90.48741912841797
+Rank-0: policy_step=80800, reward_env_0=89.0611572265625
+Rank-0: policy_step=80800, reward_env_1=89.3307876586914
+Rank-0: policy_step=80800, reward_env_2=88.5684814453125
+Rank-0: policy_step=80800, reward_env_3=84.58737182617188
+Rank-0: policy_step=81600, reward_env_0=92.85400390625
+Rank-0: policy_step=81600, reward_env_1=92.97605895996094
+Rank-0: policy_step=81600, reward_env_2=68.43321228027344
+Rank-0: policy_step=81600, reward_env_3=61.78219223022461
+Rank-0: policy_step=82400, reward_env_0=85.07228088378906
+Rank-0: policy_step=82400, reward_env_1=88.50309753417969
+Rank-0: policy_step=82400, reward_env_2=81.27597045898438
+Rank-0: policy_step=82400, reward_env_3=89.87841033935547
+Rank-0: policy_step=83200, reward_env_0=93.9013442993164
+Rank-0: policy_step=83200, reward_env_1=87.06816864013672
+Rank-0: policy_step=83200, reward_env_2=95.87824249267578
+Rank-0: policy_step=83200, reward_env_3=86.34210968017578
+Rank-0: policy_step=84000, reward_env_0=88.43014526367188
+Rank-0: policy_step=84000, reward_env_1=89.46790313720703
+Rank-0: policy_step=84000, reward_env_2=91.56407165527344
+Rank-0: policy_step=84000, reward_env_3=87.52124786376953
+Rank-0: policy_step=84800, reward_env_0=85.32936096191406
+Rank-0: policy_step=84800, reward_env_1=86.47163391113281
+Rank-0: policy_step=84800, reward_env_2=90.67658996582031
+Rank-0: policy_step=84800, reward_env_3=87.97673034667969
+Rank-0: policy_step=85600, reward_env_0=97.1408462524414
+Rank-0: policy_step=85600, reward_env_1=86.56802368164062
+Rank-0: policy_step=85600, reward_env_2=90.9869384765625
+Rank-0: policy_step=85600, reward_env_3=87.34359741210938
+Rank-0: policy_step=86400, reward_env_0=90.65552520751953
+Rank-0: policy_step=86400, reward_env_1=88.20933532714844
+Rank-0: policy_step=86400, reward_env_2=85.50442504882812
+Rank-0: policy_step=86400, reward_env_3=93.52290344238281
+Rank-0: policy_step=87200, reward_env_0=87.42691802978516
+Rank-0: policy_step=87200, reward_env_1=87.53072357177734
+Rank-0: policy_step=87200, reward_env_2=89.46627044677734
+Rank-0: policy_step=87200, reward_env_3=88.64814758300781
+Rank-0: policy_step=88000, reward_env_0=91.35760498046875
+Rank-0: policy_step=88000, reward_env_1=92.02278900146484
+Rank-0: policy_step=88000, reward_env_2=85.87291717529297
+Rank-0: policy_step=88000, reward_env_3=88.43766021728516
+Rank-0: policy_step=88800, reward_env_0=88.43122863769531
+Rank-0: policy_step=88800, reward_env_1=88.8946304321289
+Rank-0: policy_step=88800, reward_env_2=91.57315063476562
+Rank-0: policy_step=88800, reward_env_3=94.98602294921875
+Rank-0: policy_step=89600, reward_env_0=89.2219467163086
+Rank-0: policy_step=89600, reward_env_1=88.41696166992188
+Rank-0: policy_step=89600, reward_env_2=101.4586181640625
+Rank-0: policy_step=89600, reward_env_3=87.62368774414062
+Rank-0: policy_step=90400, reward_env_0=88.58904266357422
+Rank-0: policy_step=90400, reward_env_1=86.02638244628906
+Rank-0: policy_step=90400, reward_env_2=89.29252624511719
+Rank-0: policy_step=90400, reward_env_3=90.30925750732422
+Rank-0: policy_step=91200, reward_env_0=99.79258728027344
+Rank-0: policy_step=91200, reward_env_1=89.23934936523438
+Rank-0: policy_step=91200, reward_env_2=88.03238677978516
+Rank-0: policy_step=91200, reward_env_3=90.83890533447266
+Rank-0: policy_step=92000, reward_env_0=101.24639892578125
+Rank-0: policy_step=92000, reward_env_1=65.71600341796875
+Rank-0: policy_step=92000, reward_env_2=101.41522216796875
+Rank-0: policy_step=92000, reward_env_3=88.17642211914062
+Rank-0: policy_step=92800, reward_env_0=94.91032409667969
+Rank-0: policy_step=92800, reward_env_1=104.71180725097656
+Rank-0: policy_step=92800, reward_env_2=82.36772918701172
+Rank-0: policy_step=92800, reward_env_3=92.69803619384766
+Rank-0: policy_step=93600, reward_env_0=86.9636459350586
+Rank-0: policy_step=93600, reward_env_1=84.2676773071289
+Rank-0: policy_step=93600, reward_env_2=95.8038330078125
+Rank-0: policy_step=93600, reward_env_3=92.61032104492188
+Rank-0: policy_step=94400, reward_env_0=90.574462890625
+Rank-0: policy_step=94400, reward_env_1=90.70162200927734
+Rank-0: policy_step=94400, reward_env_2=88.15386962890625
+Rank-0: policy_step=94400, reward_env_3=87.6678695678711
+Rank-0: policy_step=95200, reward_env_0=91.7201919555664
+Rank-0: policy_step=95200, reward_env_1=89.25836944580078
+Rank-0: policy_step=95200, reward_env_2=103.04717254638672
+Rank-0: policy_step=95200, reward_env_3=93.451171875
+Rank-0: policy_step=96000, reward_env_0=93.8036880493164
+Rank-0: policy_step=96000, reward_env_1=96.12422180175781
+Rank-0: policy_step=96000, reward_env_2=101.87400817871094
+Rank-0: policy_step=96000, reward_env_3=95.25305938720703
+Rank-0: policy_step=96800, reward_env_0=93.78446197509766
+Rank-0: policy_step=96800, reward_env_1=92.27972412109375
+Rank-0: policy_step=96800, reward_env_2=92.18354034423828
+Rank-0: policy_step=96800, reward_env_3=95.84658813476562
+Rank-0: policy_step=97600, reward_env_0=88.26827239990234
+Rank-0: policy_step=97600, reward_env_1=77.13021087646484
+Rank-0: policy_step=97600, reward_env_2=95.15076446533203
+Rank-0: policy_step=97600, reward_env_3=77.91663360595703
+Rank-0: policy_step=98400, reward_env_0=89.95028686523438
+Rank-0: policy_step=98400, reward_env_1=90.69314575195312
+Rank-0: policy_step=98400, reward_env_2=90.85315704345703
+Rank-0: policy_step=98400, reward_env_3=91.96553802490234
+Rank-0: policy_step=99200, reward_env_0=90.56073760986328
+Rank-0: policy_step=99200, reward_env_1=85.40142059326172
+Rank-0: policy_step=99200, reward_env_2=93.26349639892578
+Rank-0: policy_step=99200, reward_env_3=87.47319793701172
+Rank-0: policy_step=100000, reward_env_0=88.99269104003906
+Rank-0: policy_step=100000, reward_env_1=92.99552154541016
+Rank-0: policy_step=100000, reward_env_2=89.3069076538086
+Rank-0: policy_step=100000, reward_env_3=88.76164245605469
+Rank-0: policy_step=100800, reward_env_0=95.88299560546875
+Rank-0: policy_step=100800, reward_env_1=87.83586883544922
+Rank-0: policy_step=100800, reward_env_2=94.18063354492188
+Rank-0: policy_step=100800, reward_env_3=102.11869812011719
+Rank-0: policy_step=101600, reward_env_0=92.31865692138672
+Rank-0: policy_step=101600, reward_env_1=94.70685577392578
+Rank-0: policy_step=101600, reward_env_2=96.13836669921875
+Rank-0: policy_step=101600, reward_env_3=94.01044464111328
+Rank-0: policy_step=102400, reward_env_0=95.16497802734375
+Rank-0: policy_step=102400, reward_env_1=97.42008972167969
+Rank-0: policy_step=102400, reward_env_2=92.76484680175781
+Rank-0: policy_step=102400, reward_env_3=94.2281265258789
+Rank-0: policy_step=103200, reward_env_0=89.0013198852539
+Rank-0: policy_step=103200, reward_env_1=89.6835708618164
+Rank-0: policy_step=103200, reward_env_2=93.24984741210938
+Rank-0: policy_step=103200, reward_env_3=95.47538757324219
+Rank-0: policy_step=104000, reward_env_0=95.13765716552734
+Rank-0: policy_step=104000, reward_env_1=89.80866241455078
+Rank-0: policy_step=104000, reward_env_2=91.48200988769531
+Rank-0: policy_step=104000, reward_env_3=94.23090362548828
+Rank-0: policy_step=104800, reward_env_0=91.53434753417969
+Rank-0: policy_step=104800, reward_env_1=89.27633666992188
+Rank-0: policy_step=104800, reward_env_2=97.98795318603516
+Rank-0: policy_step=104800, reward_env_3=95.1878662109375
+Rank-0: policy_step=105600, reward_env_0=91.22454071044922
+Rank-0: policy_step=105600, reward_env_1=87.00483703613281
+Rank-0: policy_step=105600, reward_env_2=93.23492431640625
+Rank-0: policy_step=105600, reward_env_3=104.19529724121094
+Rank-0: policy_step=106400, reward_env_0=88.0257797241211
+Rank-0: policy_step=106400, reward_env_1=96.7946548461914
+Rank-0: policy_step=106400, reward_env_2=96.15229797363281
+Rank-0: policy_step=106400, reward_env_3=88.18919372558594
+Rank-0: policy_step=107200, reward_env_0=93.87996673583984
+Rank-0: policy_step=107200, reward_env_1=86.67300415039062
+Rank-0: policy_step=107200, reward_env_2=88.97736358642578
+Rank-0: policy_step=107200, reward_env_3=91.88231658935547
+Rank-0: policy_step=108000, reward_env_0=80.34183502197266
+Rank-0: policy_step=108000, reward_env_1=78.16631317138672
+Rank-0: policy_step=108000, reward_env_2=95.08488464355469
+Rank-0: policy_step=108000, reward_env_3=85.49015808105469
+Rank-0: policy_step=108800, reward_env_0=85.04681396484375
+Rank-0: policy_step=108800, reward_env_1=91.401123046875
+Rank-0: policy_step=108800, reward_env_2=92.8055419921875
+Rank-0: policy_step=108800, reward_env_3=91.61470031738281
+Rank-0: policy_step=109600, reward_env_0=92.65158081054688
+Rank-0: policy_step=109600, reward_env_1=93.78202819824219
+Rank-0: policy_step=109600, reward_env_2=94.50984191894531
+Rank-0: policy_step=109600, reward_env_3=96.3533935546875
+Rank-0: policy_step=110400, reward_env_0=94.12266540527344
+Rank-0: policy_step=110400, reward_env_1=90.38844299316406
+Rank-0: policy_step=110400, reward_env_2=95.73522186279297
+Rank-0: policy_step=110400, reward_env_3=94.17332458496094
+Rank-0: policy_step=111200, reward_env_0=96.98882293701172
+Rank-0: policy_step=111200, reward_env_1=95.77482604980469
+Rank-0: policy_step=111200, reward_env_2=92.2820053100586
+Rank-0: policy_step=111200, reward_env_3=94.60559844970703
+Rank-0: policy_step=112000, reward_env_0=96.00370788574219
+Rank-0: policy_step=112000, reward_env_1=97.52543640136719
+Rank-0: policy_step=112000, reward_env_2=96.45112609863281
+Rank-0: policy_step=112000, reward_env_3=92.3725357055664
+Rank-0: policy_step=112800, reward_env_0=97.68704223632812
+Rank-0: policy_step=112800, reward_env_1=97.48377990722656
+Rank-0: policy_step=112800, reward_env_2=90.61554718017578
+Rank-0: policy_step=112800, reward_env_3=95.79682922363281
+Rank-0: policy_step=113600, reward_env_0=96.14741516113281
+Rank-0: policy_step=113600, reward_env_1=94.90071105957031
+Rank-0: policy_step=113600, reward_env_2=94.59609985351562
+Rank-0: policy_step=113600, reward_env_3=97.25145721435547
+Rank-0: policy_step=114400, reward_env_0=95.68907928466797
+Rank-0: policy_step=114400, reward_env_1=95.0565185546875
+Rank-0: policy_step=114400, reward_env_2=96.03129577636719
+Rank-0: policy_step=114400, reward_env_3=96.41619110107422
+Rank-0: policy_step=115200, reward_env_0=96.71841430664062
+Rank-0: policy_step=115200, reward_env_1=95.07791137695312
+Rank-0: policy_step=115200, reward_env_2=96.60649871826172
+Rank-0: policy_step=115200, reward_env_3=98.35238647460938
+Rank-0: policy_step=116000, reward_env_0=84.07200622558594
+Rank-0: policy_step=116000, reward_env_1=99.48487854003906
+Rank-0: policy_step=116000, reward_env_2=86.62216186523438
+Rank-0: policy_step=116000, reward_env_3=100.34090423583984
+Rank-0: policy_step=116800, reward_env_0=91.72752380371094
+Rank-0: policy_step=116800, reward_env_1=90.60893249511719
+Rank-0: policy_step=116800, reward_env_2=91.65170288085938
+Rank-0: policy_step=116800, reward_env_3=96.333251953125
+Rank-0: policy_step=117600, reward_env_0=91.22034454345703
+Rank-0: policy_step=117600, reward_env_1=97.15742492675781
+Rank-0: policy_step=117600, reward_env_2=94.91686248779297
+Rank-0: policy_step=117600, reward_env_3=94.47091674804688
+Rank-0: policy_step=118400, reward_env_0=93.95741271972656
+Rank-0: policy_step=118400, reward_env_1=95.78410339355469
+Rank-0: policy_step=118400, reward_env_2=95.45243835449219
+Rank-0: policy_step=118400, reward_env_3=94.18251037597656
+Rank-0: policy_step=119200, reward_env_0=96.62138366699219
+Rank-0: policy_step=119200, reward_env_1=98.88880920410156
+Rank-0: policy_step=119200, reward_env_2=95.9492416381836
+Rank-0: policy_step=119200, reward_env_3=94.26875305175781
+Rank-0: policy_step=120000, reward_env_0=103.33592987060547
+Rank-0: policy_step=120000, reward_env_1=105.2160873413086
+Rank-0: policy_step=120000, reward_env_2=94.61543273925781
+Rank-0: policy_step=120000, reward_env_3=101.64412689208984
+Rank-0: policy_step=120800, reward_env_0=96.89122009277344
+Rank-0: policy_step=120800, reward_env_1=108.20361328125
+Rank-0: policy_step=120800, reward_env_2=95.84962463378906
+Rank-0: policy_step=120800, reward_env_3=94.70999908447266
+Rank-0: policy_step=121600, reward_env_0=107.43648529052734
+Rank-0: policy_step=121600, reward_env_1=104.55126190185547
+Rank-0: policy_step=121600, reward_env_2=96.67990112304688
+Rank-0: policy_step=121600, reward_env_3=97.09381103515625
+Rank-0: policy_step=122400, reward_env_0=97.33349609375
+Rank-0: policy_step=122400, reward_env_1=94.03524780273438
+Rank-0: policy_step=122400, reward_env_2=92.60408020019531
+Rank-0: policy_step=122400, reward_env_3=97.56377410888672

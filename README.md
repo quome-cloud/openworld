@@ -52,7 +52,7 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 
 - **Training-free & deterministic.** Dynamics are *synthesized, verified code*, not
   learned latents — no datasets, no GPUs, bit-exact rollouts, **zero compounding
-  error**.
+  error**. ([How does it solve tasks with zero data?](docs/how-openworld-solves-with-zero-data.md))
 - **Verifiable by construction.** Every candidate dynamics program passes syntax,
   sandboxed smoke-run, invariant, and (optional) LLM-critic gates before it is
   accepted. The accepted code is a plain `.py` you can read, diff, and unit-test.

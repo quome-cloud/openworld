@@ -141,42 +141,30 @@
 {\centering\large\bfseries Abstract\par}
 \smallskip
 \fontsize{9.5}{11.3}\selectfont
-World models built on learned neural latent dynamics---including the pixel, video,
-and 3D ``spatial-intelligence'' generators that now dominate the term---are
-data-hungry, stochastic, and opaque, with their values frozen into weights. We
-study a different, complementary species: \emph{symbolic} world models whose
-dynamics are executable, verifiable \emph{code} over a typed symbolic state (not
-pixels or latents). Code World Models promise this alternative---environment
-dynamics as executable, verifiable
-programs---but no lightweight framework has brought the paradigm to local
-hardware. We present \textbf{\openworld}, a zero-dependency Python framework in
-which a local LLM plans, writes, and \emph{verifies} the executable dynamics of a
-\emph{declared} world; objectives stay open, editable artifacts weighted by
+World models built on learned neural latent dynamics are data-hungry,
+stochastic, and opaque, their values frozen into weights. Code-based world
+models promise an alternative---dynamics as executable, verifiable programs---but no
+lightweight framework has brought the paradigm to local hardware. We present
+\textbf{\openworld}, a zero-dependency Python framework in which a local LLM
+plans, writes, and \emph{verifies} the executable dynamics of a \emph{declared}
+world \emph{on demand}: an agent that needs a simulator authors and verifies one,
+then calls it. Objectives stay open, editable artifacts weighted by
 inference-time moral dials; a tuner searches world, policy, and value
-configurations jointly; and an agent-as-a-judge selects among behaviors. Across
-\NumExperiments{} seed-fixed experiments on local 7B/3B/1.5B models, verified
-synthesized dynamics are exact on \MultiCodeExact{} twenty-step rollouts across
-three ground-truth worlds and answer $10\times$ out-of-distribution probes at
-\CodeOODRate{}, from \emph{zero} transitions---where per-step LLM prediction and
-a trained MLP given 10{,}000 transitions compound error and collapse out of
-distribution. The payoff is decision-making: depth-3 planning through the
-verified model matches planning through the ground truth exactly and beats
-planning through a hallucinating model, which scores worse than no model at
-all---so the world model is a simulator an agent can profitably call. Against a
-world model \emph{trained} on environment transitions (not just the LLM proxy),
-the verified model attains optimal control return from \emph{zero} data, while a
-trained model needs thousands of transitions to approach it and planning through
-it underperforms model-free control in nearly half of runs.
-Compositional synthesis carries the paradigm past the monolithic complexity
-cliff; it extends to stochastic worlds, to induction on equal information
-(observed traces, no rule text), and to next-token sequence models that
-length-generalize where direct prediction does not. Verification and judging are
-measured, not assumed---verification certifies executable, invariant-respecting
-code, not rule-correctness, so exactness reflects a capable-enough generator gated
-by cheap checks, not the gate alone. Within the symbolic-state regime these worlds inhabit, a
-training-free, verified, symbolic world model on consumer hardware eliminates
-compounding rollout error at zero training cost. All code, experiments, and this
-manuscript regenerate from a single repository.
+configurations jointly; an agent-as-a-judge selects among behaviors. The payoff
+is decision-making. Across \NumExperiments{} seed-fixed experiments on local
+7B/3B/1.5B models, verified dynamics are exact on \MultiCodeExact{} twenty-step
+rollouts across three ground-truth worlds and answer $10\times$
+out-of-distribution probes at \CodeOODRate{} from \emph{zero} transitions---where
+per-step LLM prediction and a trained MLP given 10{,}000 transitions compound
+error and collapse. Depth-3 planning through the verified model matches the
+ground truth exactly and beats planning through a hallucinating model, which
+scores worse than no model at all. Compositional synthesis carries the paradigm
+past the monolithic complexity cliff and extends to stochastic worlds, to
+induction from observed traces alone (no rule text), and to next-token models
+that length-generalize where direct prediction does not---with verification and
+judging measured, not assumed. Within the symbolic-state regime these worlds
+inhabit, \openworld{} eliminates compounding rollout error at zero training cost;
+all code, experiments, and this manuscript regenerate from one repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%

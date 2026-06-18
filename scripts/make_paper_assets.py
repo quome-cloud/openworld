@@ -3311,20 +3311,27 @@ def table_cartpole_ablation(e67):
                      f"{v['x']:.2f} & {v['theta_dot']:.2f} & {pct(bc.get(k, 0) or 0)} \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]
     (TABLES / "cartpole_ablation.tex").write_text("\n".join(lines) + "\n")
-def table_prototyping(e68):
-    """E68: per-sector prototyping-latency benchmark -- 100 worlds built + timed by
-    Claude Code (openworld build), one row per sector."""
+def table_prototyping(e68, e68b):
+    """E68/E68b: per-sector prototyping-latency benchmark -- 100 worlds built + timed by
+    Claude Code (openworld build), one row per sector. 'Validated' = pass the structural
+    validate_spec gate (E68); 'Executable' = also evolve state under a random rollout in
+    the stricter behavioral audit (E68b)."""
     nice = {"healthcare": "Healthcare", "financial": "Financial services",
             "legal": "Legal", "cybersecurity": "Cybersecurity \\& IT ops",
             "energy": "Energy \\& climate", "agentic": "Agentic-AI"}
-    lines = ["\\begin{tabular}{lccc}", "\\toprule",
-             "Sector & Worlds & Validated & Median build \\\\", "\\midrule"]
+    ne = {}
+    for w in e68b.get("not_executable", []):
+        ne[w["sector"]] = ne.get(w["sector"], 0) + 1
+    lines = ["\\begin{tabular}{lcccc}", "\\toprule",
+             "Sector & Worlds & Validated & Executable & Median build \\\\", "\\midrule"]
     for sec, s in e68["by_sector"].items():
+        ex = s["n"] - ne.get(sec, 0)
         lines.append(f"{nice.get(sec, sec)} & {s['n']} & {s['validated']}/{s['n']} & "
-                     f"{s['median_minutes']:.1f} min \\\\")
+                     f"{ex}/{s['n']} & {s['median_minutes']:.1f} min \\\\")
     lines += ["\\midrule",
               f"\\textbf{{All}} & \\textbf{{{e68['n_worlds']}}} & "
               f"\\textbf{{{e68['n_validated']}/{e68['n_worlds']}}} & "
+              f"\\textbf{{{e68b['n_executable']}/{e68b['n_recipes']}}} & "
               f"\\textbf{{{e68['median_minutes']:.1f} min}} \\\\",
               "\\bottomrule", "\\end{tabular}"]
     (TABLES / "prototyping.tex").write_text("\n".join(lines) + "\n")
@@ -3338,6 +3345,107 @@ def fig_prototyping():
     from showcase_figure import render
     from openworld.spec import to_spec
     render(to_spec(build_showcase_world()), FIGS / "prototyping_pipeline.png")
+
+
+def fig_world_atlas(e68, e68b):
+    """Atlas of all 100 prototyped worlds: one row per world, grouped + colored by
+    sector, with per-world structural/behavioral characteristics (state vars, actions,
+    build minutes, perceive/emit/objectives/composite boundaries, and behavioral
+    executability). Generated from the E68/E68b per-world records, so it can't drift."""
+    import matplotlib.colors as mc
+    order = ["healthcare", "financial", "legal", "cybersecurity", "energy", "agentic"]
+    nice = {"healthcare": "Healthcare", "financial": "Financial", "legal": "Legal",
+            "cybersecurity": "Cybersecurity", "energy": "Energy", "agentic": "Agentic-AI"}
+    color = {"healthcare": "#0d8a8a", "financial": "#1f5fbf", "legal": "#6a4c93",
+             "cybersecurity": "#b3402f", "energy": "#2e8b57", "agentic": "#c8861a"}
+    not_exec = {(w["sector"], w["world"]) for w in e68b.get("not_executable", [])}
+    ok = [w for w in e68["worlds"] if w.get("status") == "ok"]
+    by = {}
+    for w in ok:
+        by.setdefault(w["sector"], []).append(w)
+    for s in by:
+        by[s].sort(key=lambda w: w["minutes"])
+    rows = []
+    for s in order:
+        rows.extend(by.get(s, []))
+    n = len(rows)
+
+    num_cols = [("State", "n_state"), ("Act", "n_actions"), ("Min", "minutes")]
+    bool_cols = [("Perc", "has_perception"), ("Emit", "has_emit"),
+                 ("Obj", "has_objectives"), ("Comp", "has_composite")]
+    heads = [h for h, _ in num_cols] + [h for h, _ in bool_cols] + ["Exec"]
+    ncol = len(heads)
+    norms = {}
+    for _, key in num_cols:
+        vals = [w[key] for w in rows]
+        lo, hi = min(vals), max(vals)
+        norms[key] = (lo, hi if hi > lo else lo + 1)
+
+    def shade(base, t):
+        rgb = mc.to_rgb(base)
+        a = 0.15 + 0.85 * max(0.0, min(1.0, t))
+        return tuple(1 - a * (1 - c) for c in rgb)
+
+    half = (n + 1) // 2
+    chunks = [rows[:half], rows[half:]]
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 0.155 * half + 1.5))
+    for ax, chunk in zip(axes, chunks):
+        m = len(chunk)
+        ax.set_xlim(-0.6, ncol)
+        ax.set_ylim(0, half)
+        ax.invert_yaxis()
+        for i, w in enumerate(chunk):
+            sec = w["sector"]
+            base = color[sec]
+            cx = 0
+            for _, key in num_cols:
+                lo, hi = norms[key]
+                t = (w[key] - lo) / (hi - lo)
+                ax.add_patch(plt.Rectangle((cx, i), 1, 1, facecolor=shade(base, t),
+                                           edgecolor="white", lw=0.4))
+                v = w[key]
+                txt = f"{v:.1f}" if key == "minutes" else str(v)
+                ax.text(cx + 0.5, i + 0.5, txt, ha="center", va="center", fontsize=4.2,
+                        color="white" if t > 0.62 else "#222222")
+                cx += 1
+            for _, key in bool_cols:
+                on = bool(w.get(key))
+                ax.add_patch(plt.Rectangle((cx, i), 1, 1, facecolor=base if on else "#ededed",
+                                           edgecolor="white", lw=0.4))
+                ax.text(cx + 0.5, i + 0.5, "●" if on else "·", ha="center",
+                        va="center", fontsize=4.5, color="white" if on else "#bbbbbb")
+                cx += 1
+            ex = (sec, w["world"]) not in not_exec
+            ax.add_patch(plt.Rectangle((cx, i), 1, 1, facecolor="#2e8b57" if ex else "#c0392b",
+                                       edgecolor="white", lw=0.4))
+            ax.text(cx + 0.5, i + 0.5, "✓" if ex else "✗", ha="center", va="center",
+                    fontsize=4.5, color="white")
+        ax.set_yticks([i + 0.5 for i in range(m)])
+        ax.set_yticklabels([w["world"].replace("_", " ") for w in chunk], fontsize=4.0)
+        for tick, w in zip(ax.get_yticklabels(), chunk):
+            tick.set_color(color[w["sector"]])
+        ax.set_xticks([j + 0.5 for j in range(ncol)])
+        ax.set_xticklabels(heads, fontsize=6)
+        ax.xaxis.set_ticks_position("top")
+        ax.xaxis.set_label_position("top")
+        ax.tick_params(length=0)
+        for sp in ax.spines.values():
+            sp.set_visible(False)
+        prev = None
+        for i, w in enumerate(chunk):
+            if prev is not None and w["sector"] != prev:
+                ax.axhline(i, color="#999999", lw=0.5)
+            prev = w["sector"]
+    handles = [plt.Line2D([0], [0], marker="s", ls="", mfc=color[s], mec="none", ms=7,
+                          label=nice[s]) for s in order]
+    fig.legend(handles=handles, loc="lower center", ncol=6, fontsize=7, frameon=False,
+               bbox_to_anchor=(0.5, -0.005))
+    fig.suptitle(f"Atlas of the {n} prototyped worlds  "
+                 "(rows grouped & colored by sector; numeric-cell shade is value within column)",
+                 fontsize=9.5, y=1.0)
+    fig.tight_layout(rect=(0, 0.025, 1, 0.985))
+    fig.savefig(FIGS / "world_atlas.png", dpi=210, bbox_inches="tight")
+    plt.close(fig)
 
 
 def main():
@@ -3407,7 +3515,8 @@ def main():
     table_minigrid_bench(data["e65_minigrid_bench"])
     table_cartpole(data["e67_cartpole_bench"])
     table_cartpole_ablation(data["e67_cartpole_bench"])
-    table_prototyping(data["e68_prototyping_latency"])
+    table_prototyping(data["e68_prototyping_latency"], data["e68b_recipe_audit"])
+    fig_world_atlas(data["e68_prototyping_latency"], data["e68b_recipe_audit"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

@@ -1,0 +1,86 @@
+{
+  "task": "cross-domain generalization across the 100-world composite: where does competence on a new world come from -- the model, learned weights, or reading the spec?",
+  "config": {
+    "horizon": 14,
+    "planner_k": 20,
+    "planner_h": 6,
+    "q_episodes": 250,
+    "n_bins": 4,
+    "seed": 71
+  },
+  "n_worlds_used": 79,
+  "n_by_sector": {
+    "healthcare": 14,
+    "financial": 13,
+    "legal": 14,
+    "cybersecurity": 14,
+    "energy": 14,
+    "agentic": 10
+  },
+  "n_objective_named": 26,
+  "note": "competence normalized per world to [random=0, planner=1]; the model-based planner is 1.0 everywhere by construction (generalist via the model).",
+  "specialist_self_competence": 0.642,
+  "transfer": {
+    "same_sector_mean": 0.224,
+    "cross_sector_mean": 0.253,
+    "n_same": 237,
+    "n_cross": 237
+  },
+  "learning_curve": {
+    "episodes": [
+      0,
+      10,
+      25,
+      50,
+      100
+    ],
+    "competence": [
+      0.348,
+      0.578,
+      0.578,
+      0.655,
+      0.592
+    ]
+  },
+  "zero_shot": {
+    "planner_model_based": 1.0,
+    "llm_read_spec": {
+      "qwen2.5:7b": 0.32,
+      "qwen2.5-coder:32b": 0.344
+    },
+    "model_free_foreign_weights": 0.253,
+    "random": 0.0
+  },
+  "llm_agents": {
+    "qwen2.5:7b": {
+      "by_sector": {
+        "healthcare": 0.01,
+        "financial": 0.837,
+        "legal": 0.363,
+        "cybersecurity": 0.375,
+        "energy": 0.059,
+        "agentic": 0.275
+      },
+      "mean": 0.32
+    },
+    "qwen2.5-coder:32b": {
+      "by_sector": {
+        "healthcare": 0.453,
+        "financial": 0.212,
+        "legal": 0.363,
+        "cybersecurity": 0.375,
+        "energy": 0.386,
+        "agentic": 0.275
+      },
+      "mean": 0.344
+    }
+  },
+  "experiment": "e71_generalization",
+  "timestamp": "2026-06-18T11:00:38",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

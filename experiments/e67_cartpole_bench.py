@@ -26,7 +26,7 @@ import json
 import random
 import re
 from pathlib import Path
-from statistics import mean
+from statistics import mean, stdev
 
 import numpy as np
 
@@ -106,6 +106,22 @@ def parse_dreamer(path, thresh=100.0):
             "episodes": len(pairs), "hardware": "A100 (us-central1-f)"}
 
 
+def parse_dreamer_multiseed(paths, thresh=100.0):
+    """Aggregate per-seed DreamerV3 runs into mean +/- sd -- the multi-seed error bars."""
+    per = [parse_dreamer(p, thresh) for p in paths]
+    per = [x for x in per if x.get("status") == "ran"]
+    if not per:
+        return {"status": "missing"}
+    rewards = [x["final_mean_reward"] for x in per]
+    steps = [x["steps_to_reward_100"] for x in per if x["steps_to_reward_100"] is not None]
+    return {"status": "ran", "obs": "64x64 RGB", "n_seeds": len(per),
+            "final_mean_reward": round(mean(rewards), 1),
+            "final_reward_std": round(stdev(rewards), 1) if len(rewards) > 1 else 0.0,
+            "steps_to_reward_100": round(mean(steps)) if steps else None,
+            "steps_std": round(stdev(steps)) if len(steps) > 1 else 0,
+            "per_seed": per, "hardware": "A100 (us-central1-f)"}
+
+
 def _load(name):
     p = ART / name
     return json.loads(p.read_text()) if p.exists() else {}
@@ -124,7 +140,7 @@ def main():
         "openworld": {"method": "CEM-MPC over verified model", "training_transitions": 0,
                       "solve_rate": round(ow_solve, 3), "n_starts": N_STARTS},
         "random_control": {"solve_rate": round(rnd_solve, 3)},
-        "dreamerv3": parse_dreamer(ART / "dreamer.log"),
+        "dreamerv3": parse_dreamer_multiseed([ART / f"dreamer_seed{s}.log" for s in (0, 1, 2)]),
         "dreamerv2": parse_dreamer(ART / "dreamerv2.log"),
         "vjepa2": {"planning_solve_rate": vj.get("solve_rate"),
                    "dynamics_final_loss": vj.get("dynamics_final_loss"),

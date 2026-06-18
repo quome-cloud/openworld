@@ -1428,8 +1428,9 @@ bit-identical against an independent reference. The picture holds, and sharpens
 (Table~\ref{tab:cartpole}). OpenWorld plans the swing-up with CEM-MPC and solves
 \CartOpenWorldSolve{} of episodes with \emph{zero} data (random control \CartRandomSolve).
 DreamerV3, learning a latent world model from pixels end to end, reaches reward
-\CartDreamerReward{} and first swings up around \CartDreamerSteps{} environment steps---about
-$5\times$ more sample-efficient than DreamerV2. The perceptual species (V-JEPA-2 and other
+\CartDreamerReward{}$\pm$\CartDreamerRewardSD{} and first swings up around
+\CartDreamerSteps{}$\pm$\CartDreamerStepsSD{} environment steps (mean$\pm$sd over
+\CartDreamerSeeds{} seeds)---about $5\times$ more sample-efficient than DreamerV2. The perceptual species (V-JEPA-2 and other
 frozen encoders) scores \CartVjepaSolve{} through \emph{every} controller we tried. That
 last result is the interesting one, and it is not what it first looks like: the frozen
 features encode the full state perfectly well; the failure is \emph{control}, not

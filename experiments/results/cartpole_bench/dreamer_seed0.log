@@ -1,0 +1,492 @@
+CONFIG
+├── algo
+│   └── name: dreamer_v3                                                        
+│       total_steps: 35000                                                      
+│       per_rank_batch_size: 16                                                 
+│       run_test: true                                                          
+│       cnn_keys:                                                               
+│         encoder:                                                              
+│         - image                                                               
+│         decoder:                                                              
+│         - image                                                               
+│       mlp_keys:                                                               
+│         encoder: []                                                           
+│         decoder: []                                                           
+│       world_model:                                                            
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 0.0001                                                          
+│           eps: 1.0e-08                                                        
+│           weight_decay: 0                                                     
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         discrete_size: 32                                                     
+│         stochastic_size: 32                                                   
+│         kl_dynamic: 0.5                                                       
+│         kl_representation: 0.1                                                
+│         kl_free_nats: 1.0                                                     
+│         kl_regularizer: 1.0                                                   
+│         continue_scale_factor: 1.0                                            
+│         clip_gradients: 1000.0                                                
+│         decoupled_rssm: false                                                 
+│         learnable_initial_recurrent_state: true                               
+│         encoder:                                                              
+│           cnn_channels_multiplier: 32                                         
+│           cnn_act: torch.nn.SiLU                                              
+│           dense_act: torch.nn.SiLU                                            
+│           mlp_layers: 2                                                       
+│           cnn_layer_norm:                                                     
+│             cls: sheeprl.models.models.LayerNormChannelLast                   
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           mlp_layer_norm:                                                     
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           dense_units: 512                                                    
+│         recurrent_model:                                                      
+│           recurrent_state_size: 512                                           
+│           layer_norm:                                                         
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           dense_units: 512                                                    
+│         transition_model:                                                     
+│           hidden_size: 512                                                    
+│           dense_act: torch.nn.SiLU                                            
+│           layer_norm:                                                         
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│         representation_model:                                                 
+│           hidden_size: 512                                                    
+│           dense_act: torch.nn.SiLU                                            
+│           layer_norm:                                                         
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│         observation_model:                                                    
+│           cnn_channels_multiplier: 32                                         
+│           cnn_act: torch.nn.SiLU                                              
+│           dense_act: torch.nn.SiLU                                            
+│           mlp_layers: 2                                                       
+│           cnn_layer_norm:                                                     
+│             cls: sheeprl.models.models.LayerNormChannelLast                   
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           mlp_layer_norm:                                                     
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           dense_units: 512                                                    
+│         reward_model:                                                         
+│           dense_act: torch.nn.SiLU                                            
+│           mlp_layers: 2                                                       
+│           layer_norm:                                                         
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           dense_units: 512                                                    
+│           bins: 255                                                           
+│         discount_model:                                                       
+│           learnable: true                                                     
+│           dense_act: torch.nn.SiLU                                            
+│           mlp_layers: 2                                                       
+│           layer_norm:                                                         
+│             cls: sheeprl.models.models.LayerNorm                              
+│             kw:                                                               
+│               eps: 0.001                                                      
+│           dense_units: 512                                                    
+│       actor:                                                                  
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 8.0e-05                                                         
+│           eps: 1.0e-05                                                        
+│           weight_decay: 0                                                     
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         cls: sheeprl.algos.dreamer_v3.agent.Actor                             
+│         ent_coef: 0.0003                                                      
+│         min_std: 0.1                                                          
+│         max_std: 1.0                                                          
+│         init_std: 2.0                                                         
+│         dense_act: torch.nn.SiLU                                              
+│         mlp_layers: 2                                                         
+│         layer_norm:                                                           
+│           cls: sheeprl.models.models.LayerNorm                                
+│           kw:                                                                 
+│             eps: 0.001                                                        
+│         dense_units: 512                                                      
+│         clip_gradients: 100.0                                                 
+│         unimix: 0.01                                                          
+│         action_clip: 1.0                                                      
+│         moments:                                                              
+│           decay: 0.99                                                         
+│           max: 1.0                                                            
+│           percentile:                                                         
+│             low: 0.05                                                         
+│             high: 0.95                                                        
+│       critic:                                                                 
+│         optimizer:                                                            
+│           _target_: torch.optim.Adam                                          
+│           lr: 8.0e-05                                                         
+│           eps: 1.0e-05                                                        
+│           weight_decay: 0                                                     
+│           betas:                                                              
+│           - 0.9                                                               
+│           - 0.999                                                             
+│         dense_act: torch.nn.SiLU                                              
+│         mlp_layers: 2                                                         
+│         layer_norm:                                                           
+│           cls: sheeprl.models.models.LayerNorm                                
+│           kw:                                                                 
+│             eps: 0.001                                                        
+│         dense_units: 512                                                      
+│         per_rank_target_network_update_freq: 1                                
+│         tau: 0.02                                                             
+│         bins: 255                                                             
+│         clip_gradients: 100.0                                                 
+│       gamma: 0.996996996996997                                                
+│       lmbda: 0.95                                                             
+│       horizon: 15                                                             
+│       replay_ratio: 1                                                         
+│       learning_starts: 1024                                                   
+│       per_rank_pretrain_steps: 0                                              
+│       per_rank_sequence_length: 64                                            
+│       cnn_layer_norm:                                                         
+│         cls: sheeprl.models.models.LayerNormChannelLast                       
+│         kw:                                                                   
+│           eps: 0.001                                                          
+│       mlp_layer_norm:                                                         
+│         cls: sheeprl.models.models.LayerNorm                                  
+│         kw:                                                                   
+│           eps: 0.001                                                          
+│       dense_units: 512                                                        
+│       mlp_layers: 2                                                           
+│       dense_act: torch.nn.SiLU                                                
+│       cnn_act: torch.nn.SiLU                                                  
+│       unimix: 0.01                                                            
+│       hafner_initialization: true                                             
+│       player:                                                                 
+│         discrete_size: 32                                                     
+│                                                                               
+├── buffer
+│   └── size: 1000000                                                           
+│       memmap: true                                                            
+│       validate_args: false                                                    
+│       from_numpy: false                                                       
+│       checkpoint: true                                                        
+│                                                                               
+├── checkpoint
+│   └── every: 100000000                                                        
+│       resume_from: null                                                       
+│       save_last: true                                                         
+│       keep_last: 5                                                            
+│                                                                               
+├── env
+│   └── id: CartpoleSwingupVerified-v0                                          
+│       num_envs: 4                                                             
+│       frame_stack: 1                                                          
+│       sync_env: false                                                         
+│       screen_size: 64                                                         
+│       action_repeat: 1                                                        
+│       grayscale: false                                                        
+│       clip_rewards: false                                                     
+│       capture_video: true                                                     
+│       frame_stack_dilation: 1                                                 
+│       actions_as_observation:                                                 
+│         num_stack: -1                                                         
+│         noop: You MUST define the NOOP                                        
+│         dilation: 1                                                           
+│       max_episode_steps: null                                                 
+│       reward_as_observation: false                                            
+│       wrapper:                                                                
+│         _target_: gymnasium.make                                              
+│         id: CartpoleSwingupVerified-v0                                        
+│         render_mode: rgb_array                                                
+│       mask_velocities: false                                                  
+│                                                                               
+├── fabric
+│   └── _target_: lightning.fabric.Fabric                                       
+│       devices: 1                                                              
+│       num_nodes: 1                                                            
+│       strategy: auto                                                          
+│       accelerator: gpu                                                        
+│       precision: 32-true                                                      
+│       callbacks:                                                              
+│       - _target_: sheeprl.utils.callback.CheckpointCallback                   
+│         keep_last: 5                                                          
+│                                                                               
+└── metric
+    └── log_every: 1000                                                         
+        disable_timer: false                                                    
+        log_level: 1                                                            
+        sync_on_compute: false                                                  
+        aggregator:                                                             
+          _target_: sheeprl.utils.metric.MetricAggregator                       
+          raise_on_missing: false                                               
+          metrics:                                                              
+            Rewards/rew_avg:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Game/ep_len_avg:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/world_model_loss:                                              
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/value_loss:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/policy_loss:                                                   
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/observation_loss:                                              
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/reward_loss:                                                   
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/state_loss:                                                    
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Loss/continue_loss:                                                 
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/kl:                                                           
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/post_entropy:                                                 
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            State/prior_entropy:                                                
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/world_model:                                                  
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/actor:                                                        
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+            Grads/critic:                                                       
+              _target_: torchmetrics.MeanMetric                                 
+              sync_on_compute: false                                            
+        logger:                                                                 
+          _target_: lightning.fabric.loggers.TensorBoardLogger                  
+          name: cartpole_seed0                                                  
+          root_dir: logs/runs//home/jim/out                                     
+          version: null                                                         
+          default_hp_metric: true                                               
+          prefix: ''                                                            
+          sub_dir: null                                                         
+                                                                                
+Seed set to 0
+/home/jim/sv/lib/python3.10/site-packages/sheeprl/utils/logger.py:22: UserWarning: The specified root directory for the TensorBoardLogger is different from the experiment one, so the logger one will be ignored and replaced with the experiment root directory
+  warnings.warn(
+Missing logger folder: /home/jim/out/cartpole_seed0
+Log dir: /home/jim/out/cartpole_seed0/version_0
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/experimental/wrappers/rendering.py:166: UserWarning: [33mWARN: Overwriting existing videos at /home/jim/out/cartpole_seed0/version_0/train_videos folder (try specifying a different `video_folder` for the `RecordVideo` wrapper if this is not desired)[0m
+  logger.warn(
+Encoder CNN keys: ['image']
+Encoder MLP keys: []
+Decoder CNN keys: ['image']
+Decoder MLP keys: []
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+Rank-0: policy_step=800, reward_env_0=4.2277302742004395
+Rank-0: policy_step=800, reward_env_1=1.0201988220214844
+Rank-0: policy_step=800, reward_env_2=1.4853708744049072
+Rank-0: policy_step=800, reward_env_3=3.739377021789551
+/home/jim/sv/lib/python3.10/site-packages/sheeprl/algos/dreamer_v3/agent.py:658: UserWarning: Use of index_put_ on expanded tensors is deprecated. Please clone() the tensor before performing this operation. This also applies to advanced indexing e.g. tensor[indices] = tensor (Triggered internally at /pytorch/aten/src/ATen/native/TensorAdvancedIndexing.cpp:967.)
+  self.recurrent_state[:, reset_envs], stochastic_state = self.rssm.get_initial_states((1, len(reset_envs)))
+/home/jim/sv/lib/python3.10/site-packages/torchmetrics/utilities/prints.py:43: UserWarning: The ``compute`` method of metric MeanMetric was called before the ``update`` method which may lead to errors, as metric states have not yet been updated.
+  warnings.warn(*args, **kwargs)
+Rank-0: policy_step=1600, reward_env_0=2.903021812438965
+Rank-0: policy_step=1600, reward_env_1=1.8694007396697998
+Rank-0: policy_step=1600, reward_env_2=8.197867393493652
+Rank-0: policy_step=1600, reward_env_3=8.8396577835083
+Rank-0: policy_step=2400, reward_env_0=16.751949310302734
+Rank-0: policy_step=2400, reward_env_1=8.792226791381836
+Rank-0: policy_step=2400, reward_env_2=14.624014854431152
+Rank-0: policy_step=2400, reward_env_3=16.89082908630371
+Rank-0: policy_step=3200, reward_env_0=26.82942771911621
+Rank-0: policy_step=3200, reward_env_1=43.304237365722656
+Rank-0: policy_step=3200, reward_env_2=52.966163635253906
+Rank-0: policy_step=3200, reward_env_3=44.65530776977539
+Rank-0: policy_step=4000, reward_env_0=50.06562423706055
+Rank-0: policy_step=4000, reward_env_1=41.98610305786133
+Rank-0: policy_step=4000, reward_env_2=46.883304595947266
+Rank-0: policy_step=4000, reward_env_3=48.271888732910156
+Rank-0: policy_step=4800, reward_env_0=18.541362762451172
+Rank-0: policy_step=4800, reward_env_1=80.15425872802734
+Rank-0: policy_step=4800, reward_env_2=22.821651458740234
+Rank-0: policy_step=4800, reward_env_3=22.093364715576172
+Rank-0: policy_step=5600, reward_env_0=79.81217956542969
+Rank-0: policy_step=5600, reward_env_1=81.65623474121094
+Rank-0: policy_step=5600, reward_env_2=85.36788177490234
+Rank-0: policy_step=5600, reward_env_3=83.475341796875
+Rank-0: policy_step=6400, reward_env_0=57.05026626586914
+Rank-0: policy_step=6400, reward_env_1=56.53582000732422
+Rank-0: policy_step=6400, reward_env_2=49.27055358886719
+Rank-0: policy_step=6400, reward_env_3=55.29853820800781
+Rank-0: policy_step=7200, reward_env_0=75.91072082519531
+Rank-0: policy_step=7200, reward_env_1=84.02388763427734
+Rank-0: policy_step=7200, reward_env_2=84.50418853759766
+Rank-0: policy_step=7200, reward_env_3=81.30823516845703
+Rank-0: policy_step=8000, reward_env_0=85.97525787353516
+Rank-0: policy_step=8000, reward_env_1=91.02787780761719
+Rank-0: policy_step=8000, reward_env_2=81.34960174560547
+Rank-0: policy_step=8000, reward_env_3=97.76582336425781
+Rank-0: policy_step=8800, reward_env_0=90.39215850830078
+Rank-0: policy_step=8800, reward_env_1=91.87989807128906
+Rank-0: policy_step=8800, reward_env_2=90.3018798828125
+Rank-0: policy_step=8800, reward_env_3=100.03836059570312
+Rank-0: policy_step=9600, reward_env_0=93.37615203857422
+Rank-0: policy_step=9600, reward_env_1=93.48069763183594
+Rank-0: policy_step=9600, reward_env_2=99.74060821533203
+Rank-0: policy_step=9600, reward_env_3=88.77334594726562
+Rank-0: policy_step=10400, reward_env_0=92.32564544677734
+Rank-0: policy_step=10400, reward_env_1=101.73030853271484
+Rank-0: policy_step=10400, reward_env_2=98.90013122558594
+Rank-0: policy_step=10400, reward_env_3=91.75782775878906
+Rank-0: policy_step=11200, reward_env_0=93.4104995727539
+Rank-0: policy_step=11200, reward_env_1=93.8302993774414
+Rank-0: policy_step=11200, reward_env_2=105.05201721191406
+Rank-0: policy_step=11200, reward_env_3=92.2025375366211
+Rank-0: policy_step=12000, reward_env_0=93.34127044677734
+Rank-0: policy_step=12000, reward_env_1=101.4611587524414
+Rank-0: policy_step=12000, reward_env_2=95.2083511352539
+Rank-0: policy_step=12000, reward_env_3=104.06280517578125
+Rank-0: policy_step=12800, reward_env_0=107.31214904785156
+Rank-0: policy_step=12800, reward_env_1=93.23193359375
+Rank-0: policy_step=12800, reward_env_2=96.51866149902344
+Rank-0: policy_step=12800, reward_env_3=94.76359558105469
+Rank-0: policy_step=13600, reward_env_0=104.00379180908203
+Rank-0: policy_step=13600, reward_env_1=103.55298614501953
+Rank-0: policy_step=13600, reward_env_2=105.47283935546875
+Rank-0: policy_step=13600, reward_env_3=33.56890869140625
+Rank-0: policy_step=14400, reward_env_0=104.97765350341797
+Rank-0: policy_step=14400, reward_env_1=102.63744354248047
+Rank-0: policy_step=14400, reward_env_2=107.94725799560547
+Rank-0: policy_step=14400, reward_env_3=105.79926300048828
+Rank-0: policy_step=15200, reward_env_0=100.64703369140625
+Rank-0: policy_step=15200, reward_env_1=99.39930725097656
+Rank-0: policy_step=15200, reward_env_2=97.02273559570312
+Rank-0: policy_step=15200, reward_env_3=105.9902572631836
+Rank-0: policy_step=16000, reward_env_0=124.4847412109375
+Rank-0: policy_step=16000, reward_env_1=109.19373321533203
+Rank-0: policy_step=16000, reward_env_2=124.39930725097656
+Rank-0: policy_step=16000, reward_env_3=115.56050872802734
+Rank-0: policy_step=16800, reward_env_0=93.93842315673828
+Rank-0: policy_step=16800, reward_env_1=91.49160766601562
+Rank-0: policy_step=16800, reward_env_2=81.71826934814453
+Rank-0: policy_step=16800, reward_env_3=81.9301528930664
+Rank-0: policy_step=17600, reward_env_0=118.65587615966797
+Rank-0: policy_step=17600, reward_env_1=122.11914825439453
+Rank-0: policy_step=17600, reward_env_2=111.48797607421875
+Rank-0: policy_step=17600, reward_env_3=111.08436584472656
+Rank-0: policy_step=18400, reward_env_0=123.08030700683594
+Rank-0: policy_step=18400, reward_env_1=122.32691955566406
+Rank-0: policy_step=18400, reward_env_2=117.62616729736328
+Rank-0: policy_step=18400, reward_env_3=122.71339416503906
+Rank-0: policy_step=19200, reward_env_0=112.3510513305664
+Rank-0: policy_step=19200, reward_env_1=122.64116668701172
+Rank-0: policy_step=19200, reward_env_2=105.71234893798828
+Rank-0: policy_step=19200, reward_env_3=97.00889587402344
+Rank-0: policy_step=20000, reward_env_0=124.3006362915039
+Rank-0: policy_step=20000, reward_env_1=124.86293029785156
+Rank-0: policy_step=20000, reward_env_2=98.3765869140625
+Rank-0: policy_step=20000, reward_env_3=120.87454986572266
+Rank-0: policy_step=20800, reward_env_0=122.99687957763672
+Rank-0: policy_step=20800, reward_env_1=115.0440673828125
+Rank-0: policy_step=20800, reward_env_2=115.59243774414062
+Rank-0: policy_step=20800, reward_env_3=125.5146255493164
+Rank-0: policy_step=21600, reward_env_0=83.58415222167969
+Rank-0: policy_step=21600, reward_env_1=88.6673583984375
+Rank-0: policy_step=21600, reward_env_2=95.1407470703125
+Rank-0: policy_step=21600, reward_env_3=93.03063201904297
+Rank-0: policy_step=22400, reward_env_0=119.82103729248047
+Rank-0: policy_step=22400, reward_env_1=119.82391357421875
+Rank-0: policy_step=22400, reward_env_2=132.59027099609375
+Rank-0: policy_step=22400, reward_env_3=89.28555297851562
+Rank-0: policy_step=23200, reward_env_0=97.71355438232422
+Rank-0: policy_step=23200, reward_env_1=119.65528869628906
+Rank-0: policy_step=23200, reward_env_2=95.1081771850586
+Rank-0: policy_step=23200, reward_env_3=120.02655792236328
+Rank-0: policy_step=24000, reward_env_0=105.47405242919922
+Rank-0: policy_step=24000, reward_env_1=118.1705322265625
+Rank-0: policy_step=24000, reward_env_2=122.47687530517578
+Rank-0: policy_step=24000, reward_env_3=123.58647155761719
+Rank-0: policy_step=24800, reward_env_0=116.35382843017578
+Rank-0: policy_step=24800, reward_env_1=143.67530822753906
+Rank-0: policy_step=24800, reward_env_2=102.58229064941406
+Rank-0: policy_step=24800, reward_env_3=120.3201904296875
+Rank-0: policy_step=25600, reward_env_0=113.40472412109375
+Rank-0: policy_step=25600, reward_env_1=124.22473907470703
+Rank-0: policy_step=25600, reward_env_2=116.65034484863281
+Rank-0: policy_step=25600, reward_env_3=124.6229019165039
+Rank-0: policy_step=26400, reward_env_0=122.9190444946289
+Rank-0: policy_step=26400, reward_env_1=122.14002227783203
+Rank-0: policy_step=26400, reward_env_2=122.20706176757812
+Rank-0: policy_step=26400, reward_env_3=118.8028335571289
+Rank-0: policy_step=27200, reward_env_0=136.35601806640625
+Rank-0: policy_step=27200, reward_env_1=142.680908203125
+Rank-0: policy_step=27200, reward_env_2=122.61905670166016
+Rank-0: policy_step=27200, reward_env_3=102.27224731445312
+Rank-0: policy_step=28000, reward_env_0=142.763916015625
+Rank-0: policy_step=28000, reward_env_1=120.47360229492188
+Rank-0: policy_step=28000, reward_env_2=102.26768493652344
+Rank-0: policy_step=28000, reward_env_3=119.24162292480469
+Rank-0: policy_step=28800, reward_env_0=137.1979522705078
+Rank-0: policy_step=28800, reward_env_1=117.24272155761719
+Rank-0: policy_step=28800, reward_env_2=133.71031188964844
+Rank-0: policy_step=28800, reward_env_3=137.0105438232422
+Rank-0: policy_step=29600, reward_env_0=139.12298583984375
+Rank-0: policy_step=29600, reward_env_1=141.47048950195312
+Rank-0: policy_step=29600, reward_env_2=121.70394134521484
+Rank-0: policy_step=29600, reward_env_3=140.48648071289062
+Rank-0: policy_step=30400, reward_env_0=142.6250762939453
+Rank-0: policy_step=30400, reward_env_1=139.286376953125
+Rank-0: policy_step=30400, reward_env_2=139.56602478027344
+Rank-0: policy_step=30400, reward_env_3=141.31248474121094
+Rank-0: policy_step=31200, reward_env_0=133.2900390625
+Rank-0: policy_step=31200, reward_env_1=137.4215545654297
+Rank-0: policy_step=31200, reward_env_2=137.6926727294922
+Rank-0: policy_step=31200, reward_env_3=140.60508728027344
+Rank-0: policy_step=32000, reward_env_0=137.19569396972656
+Rank-0: policy_step=32000, reward_env_1=141.30551147460938
+Rank-0: policy_step=32000, reward_env_2=136.8160400390625
+Rank-0: policy_step=32000, reward_env_3=139.1102294921875
+Rank-0: policy_step=32800, reward_env_0=134.9592742919922
+Rank-0: policy_step=32800, reward_env_1=133.65325927734375
+Rank-0: policy_step=32800, reward_env_2=134.0941925048828
+Rank-0: policy_step=32800, reward_env_3=139.3489532470703
+Rank-0: policy_step=33600, reward_env_0=97.30179595947266
+Rank-0: policy_step=33600, reward_env_1=139.85447692871094
+Rank-0: policy_step=33600, reward_env_2=121.41461944580078
+Rank-0: policy_step=33600, reward_env_3=119.1693344116211
+Rank-0: policy_step=34400, reward_env_0=145.05535888671875
+Rank-0: policy_step=34400, reward_env_1=109.81836700439453
+Rank-0: policy_step=34400, reward_env_2=142.75442504882812
+Rank-0: policy_step=34400, reward_env_3=122.72449493408203
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/home/jim/sv/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py:159: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+Test - Reward: 141.81849336071951

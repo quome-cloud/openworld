@@ -13,10 +13,40 @@
   "dreamerv3": {
     "status": "ran",
     "obs": "64x64 RGB",
-    "max_step": 29600,
-    "final_mean_reward": 122.1,
-    "steps_to_reward_100": 11200,
-    "episodes": 148,
+    "n_seeds": 3,
+    "final_mean_reward": 120.4,
+    "final_reward_std": 9.1,
+    "steps_to_reward_100": 8800,
+    "steps_std": 2400,
+    "per_seed": [
+      {
+        "status": "ran",
+        "obs": "64x64 RGB",
+        "max_step": 34400,
+        "final_mean_reward": 130.9,
+        "steps_to_reward_100": 8800,
+        "episodes": 172,
+        "hardware": "A100 (us-central1-f)"
+      },
+      {
+        "status": "ran",
+        "obs": "64x64 RGB",
+        "max_step": 34400,
+        "final_mean_reward": 115.6,
+        "steps_to_reward_100": 11200,
+        "episodes": 172,
+        "hardware": "A100 (us-central1-f)"
+      },
+      {
+        "status": "ran",
+        "obs": "64x64 RGB",
+        "max_step": 34400,
+        "final_mean_reward": 114.6,
+        "steps_to_reward_100": 6400,
+        "episodes": 172,
+        "hardware": "A100 (us-central1-f)"
+      }
+    ],
     "hardware": "A100 (us-central1-f)"
   },
   "dreamerv2": {
@@ -65,7 +95,7 @@
     "finding": "frozen features (V-JEPA/DINOv2/ViT) decode the full state (sin/cos theta ~0.95-0.998) yet every bolt-on controller (planning, BC, DAgger, frame-stacked DAgger) scores 0; the bottleneck is end-to-end task training, not perception. (An earlier raw-angle probe wrongly suggested the pole angle was unencoded -- an artifact of regressing a periodic quantity; sin/cos decoding corrects it.)"
   },
   "experiment": "e67_cartpole_bench",
-  "timestamp": "2026-06-17T22:58:47",
+  "timestamp": "2026-06-18T16:20:39",
   "platform": "macOS-26.5-arm64-arm-64bit",
   "env": {
     "python": "3.9.18",

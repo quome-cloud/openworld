@@ -2321,7 +2321,10 @@ def numbers_tex(d):
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
         macro("CartDreamerReward", f"{d['e67_cartpole_bench']['dreamerv3']['final_mean_reward']:.0f}"),
-        macro("CartDreamerSteps", f"{d['e67_cartpole_bench']['dreamerv3']['steps_to_reward_100']/1000:.0f}k"),
+        macro("CartDreamerRewardSD", f"{d['e67_cartpole_bench']['dreamerv3']['final_reward_std']:.0f}"),
+        macro("CartDreamerSteps", f"{d['e67_cartpole_bench']['dreamerv3']['steps_to_reward_100']/1000:.1f}k"),
+        macro("CartDreamerStepsSD", f"{d['e67_cartpole_bench']['dreamerv3']['steps_std']/1000:.1f}k"),
+        macro("CartDreamerSeeds", str(d['e67_cartpole_bench']['dreamerv3']['n_seeds'])),
         macro("CartDreamerTwoSteps", f"{d['e67_cartpole_bench']['dreamerv2']['steps_to_reward_100']/1000:.0f}k"),
         macro("CartVjepaSolve", pct(d["e67_cartpole_bench"]["vjepa2"]["planning_solve_rate"])),
         macro("CartDinoSinTheta",
@@ -3308,8 +3311,10 @@ def table_cartpole(e67):
     lines = ["\\begin{tabular}{llcl}", "\\toprule",
              "World model & Species & Train data & Result \\\\", "\\midrule",
              f"OpenWorld & verified code & 0 & {pct(ow['solve_rate'])} solve (CEM-MPC, 0-shot) \\\\",
-             f"DreamerV3 & learned (pixels) & {dv3['steps_to_reward_100']//1000}k steps & "
-             f"reward {dv3['final_mean_reward']:.0f}; first solve $\\sim${dv3['steps_to_reward_100']//1000}k steps \\\\",
+             f"DreamerV3 & learned (pixels) & ${dv3['steps_to_reward_100']/1000:.1f}$k steps & "
+             f"reward ${dv3['final_mean_reward']:.0f}{{\\pm}}{dv3['final_reward_std']:.0f}$; first solve "
+             f"${dv3['steps_to_reward_100']/1000:.1f}{{\\pm}}{dv3['steps_std']/1000:.1f}$k steps "
+             f"({dv3['n_seeds']} seeds) \\\\",
              f"DreamerV2 & learned (pixels) & {dv2['steps_to_reward_100']//1000}k steps & "
              f"reward {dv2['final_mean_reward']:.0f} ($\\sim$5$\\times$ less sample-efficient) \\\\",
              f"V-JEPA-2 \\& frozen enc. & perceptual (frozen) & pretrained & "

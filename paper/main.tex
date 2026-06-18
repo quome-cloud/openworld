@@ -557,13 +557,24 @@ world models from one-line descriptions via \texttt{openworld build}, spanning
 energy/climate, and agentic-AI---and timed wall-clock from the command to a spec that
 passes \texttt{validate\_spec} (i.e.\ is servable). The result (Table~\ref{tab:prototyping}):
 \textbf{\ProtoValidationRate{} of the \ProtoNumWorlds{} worlds built and validated},
-at a \textbf{median of \ProtoMedianMinutes{} minutes} each (mean \ProtoMeanMinutes,
-max \ProtoMaxMinutes). Every validated world is saved as a reusable, servable recipe.
-Hand-authoring a comparable simulator is typically days to weeks; here it is minutes,
-end to end, and the artifact is verified by construction rather than hoped-correct.
-This is the paper's practical thesis: when dynamics are writable, prototyping a
-\emph{correct} world model is a minutes-scale, push-button activity, and the rest of the
-paper establishes that the resulting models are exact, composable, and steerable.
+at a \textbf{median of \ProtoMedianMinutes{} minutes} each (mean \ProtoMeanMinutes;
+95\% bootstrap CI on the median \ProtoMedianCI{} min; \ProtoPNinetyMinutes{} min at the
+$90$th percentile; max \ProtoMaxMinutes; std \ProtoStdMinutes)---a tight distribution, not
+a lucky median. \texttt{validate\_spec} is a structural gate, so we also \emph{behaviorally}
+audit the recipes (Appendix~\ref{sec:vjepa-control} describes the loader): loading each via
+\texttt{from\_spec}, stepping it under a random rollout, and requiring the state to actually
+evolve. \textbf{\ProtoExecutableRate{} (\ProtoNExecutable/\ProtoNumWorlds) are behaviorally
+executable}---they run and change state, not merely well-formed (the one exception is a
+recipe whose random-action rollout leaves state unchanged). Every validated world is saved
+as a reusable, servable recipe.
+
+Hand-authoring a comparable simulator is, in our experience and in published accounts of
+simulator/digital-twin development, a days-to-weeks effort (we report this as an estimate
+from practice, not a controlled human study); here it is minutes, end to end, and the
+artifact is verified by construction rather than hoped-correct. This is the paper's
+practical thesis: when dynamics are writable, prototyping a \emph{correct} world model is a
+minutes-scale, push-button activity, and the rest of the paper establishes that the
+resulting models are exact, composable, and steerable.
 
 \begin{table}[htb]\centering\small
 \input{tables/prototyping.tex}

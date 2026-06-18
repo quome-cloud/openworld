@@ -523,7 +523,7 @@ domain tutorials, the three instrumented worlds, the \NumTasks-task coding
 benchmark, and every experiment script used here.
 
 % ============================================================================
-\input{sections/dag_causal}
+OpenWorld also supports \emph{causal DAGs} as a world-specification modality---a DAG compiles to a verified structural causal model with built-in assumption testing, demonstrated on a social-determinants-of-health world (E64); see Appendix~\ref{sec:dag}.
 
 % ============================================================================
 \section{Experimental Setup}
@@ -2522,6 +2522,8 @@ re-identifies away-changes in a step; the per-world window does not reliably
 recover from away-changes within a visit (hatched = no recovery).}
 \label{fig:agent-traversal}
 \end{figure}
+
+\input{sections/dag_causal}
 
 \section{Additional domain demonstrations}\label{app:domains}
 These experiments express the framework across domains beyond the symbolic-world-model thesis benchmarked in the main text. They are demonstrations of expressiveness, not load-bearing evidence for the central claims, and are collected here to keep the main results focused; each is self-contained and regenerates from the same pipeline.

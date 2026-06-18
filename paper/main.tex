@@ -858,281 +858,7 @@ slower and leaves \ActivePassiveUnresolved{}/\ActiveRules{} rules unresolved.}
 \label{fig:active-induction}
 \end{figure}
 
-\subsubsection{A database for many worlds: holding a non-enumerable version space (E46)}\label{sec:many-worlds}
-E43 maintains its version space as an explicit list of candidate worlds, which
-works for hundreds but cannot survive the regime where parameter counts and
-ranges grow and the world space becomes effectively infinite. E46 supplies the
-data structure that does. The transition of a parametric world family decomposes
-into \emph{mechanisms}, each predicting one observable of the next state from the
-observed state and a small \emph{scope} of parameters (for the sprint family:
-the ship debt increment depends only on \texttt{ship\_debt}, the bug interaction
-only on $k$, and so on). Because each transition is observed in full, the
-likelihood factorises over observables, so the store keeps one small factor per
-mechanism scope rather than the global product---a finite, symbolic
-representation of an enormous world set, in the spirit of conditional-table and
-provenance-semiring databases. The factor values live in a pluggable \emph{semiring} (an algebra with an
-``add'' and a ``multiply'' operation), so the \emph{same} store answers Boolean (is a world still possible?), counting
-(how many worlds remain?), and probability (a posterior over parameters)
-queries; an observation reweights only the touched factors, and a prediction
-marginalises only the relevant one.
-
-The payoff is the version-space result scaled past enumeration
-(Figure~\ref{fig:many-worlds}, Table~\ref{tab:many-worlds}). On small spaces the
-factored store's count, marginals, and expected-next-state match brute-force
-enumeration \emph{exactly}. On large ones it maintains an exact version space and
-posterior over \ManyWorldsMax{} worlds in \ManyWorldsMaxMs{}\,ms---narrowing them
-to \ManyWorldsConsistent{} consistent worlds and peaking the posterior on the
-true rule---where the explicit enumeration of E43 is infeasible beyond
-\ManyWorldsEnumMax{}. Update and query cost scale as the \emph{sum} of the
-parameter-domain sizes rather than their product. The boundary is the
-probabilistic-database one: when a mechanism couples $w$ parameters
-non-separably its factor grows as $d^{w}$ (at $w{=}\ManyWorldsCoupleWidth$ the
-factor holds \ManyWorldsCoupleFactor{} entries versus \ManyWorldsCoupleIdeal{}
-for the separable ideal), degrading toward enumeration---the $\#$P-hardness of
-exact query evaluation, surfaced and measured rather than hidden. Together with
-E43 this is active inference over a world space too large to write down:
-\S\ref{sec:active-induction} chooses actions to shrink the set, E46 holds and
-queries it.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/many_worlds.png}
-\caption{\textbf{A factored, semiring-annotated store for many worlds (E46).}
-\textbf{Left:} update+query time vs.\ world-space size; the factored store stays
-cheap to \ManyWorldsMax{} worlds (cost $\sim$ the \emph{sum} of domain sizes)
-while explicit enumeration (E43-style) grows with the world count and becomes
-infeasible past \ManyWorldsEnumMax. \textbf{Right:} the boundary---a
-mechanism coupling $w$ parameters has a factor of size $d^{w}$, degrading toward
-enumeration as coupling grows (the $\#$P analogue).}
-\label{fig:many-worlds}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E46 factored vs.\ enumerated version space.} ``Consistent'' is
-the number of worlds surviving the same observed transitions; the factored store
-matches brute force exactly where enumeration is feasible and continues far
-past it.}
-\label{tab:many-worlds}
-\input{tables/many_worlds}
-\end{table}
-
-\subsubsection{Path integrals over learning trajectories (E49)}\label{sec:path-integral}
-E46 searches the space of worlds for a problem; E49 asks how an agent should
-\emph{traverse} that space---in what order to master worlds---to solve a new,
-out-of-distribution problem as directly as possible. We cast it as a path
-integral over learning trajectories: a trajectory is an ordering of skills to
-learn, weighted by $e^{-\beta S}$ with the action $S$ the trajectory's total
-learning cost---the sum of per-skill costs (in abstract effort units), each skill
-cheap to acquire once its prerequisites are mastered and dear from scratch; the
-sum is dominated by the least-action path, the most direct curriculum. Crucially
-this needs \emph{no new machinery}: a path integral is a sum over paths, which is
-a semiring computation, so we reuse the E46 \texttt{Semiring} and swap the value
-ring---tropical $(\min,+)$ for the least-action path, log (log-sum-exp,~$+$) for
-the full partition function---and run a forward/backward dynamic program (DP) over
-capability-states. The combinatorially many trajectories are summed
-\emph{without enumeration}: \PathTraj{} distinct trajectories are accounted for by
-a DP over just \PathStates{} states.
-
-Skills compose cheaply once their prerequisites are mastered and are expensive to
-learn from scratch, and the target (``\PathGoal'') is a \emph{novel composition},
-so the least-action path reuses mastered sub-worlds---compositional transfer
-rather than learning the target blind. The agent's trajectory is built
-\emph{from its spec}: a senior SWE, a director, and a CEO start with different
-capabilities and get different optimal curricula to the same goal (cost
-\PathSweCost{}, \PathDirCost{}, \PathCeoCost{} respectively;
-Table~\ref{tab:path-integral}, Figure~\ref{fig:path-integral}). All three are
-far below unplanned baselines---random ordering averages \PathRandom{} because it
-pays the from-scratch penalty for learning composites before their
-prerequisites---and far below learning the goal from scratch (\PathScratch{}), a
-$\PathSpeedup\times$ compositional-transfer speedup. As the inverse temperature
-$\beta$ grows the free energy $-\tfrac1\beta\log Z$ rises from the
-entropy-dominated regime (many near-equivalent orderings) to the least-action
-cost---the path integral collapsing onto the optimal curriculum---while the
-forward$\times$backward marginals flag exactly the worlds that lie on it. The
-bridge is the point: one semiring engine now answers version-space, counting,
-posterior \emph{and} optimal-trajectory queries over composite-world spaces, and
-turns an agent spec into a concrete learning path toward an OOD goal.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/path_integral.png}
-\caption{\textbf{Path integrals over learning trajectories (E49).} \textbf{A:}
-per-agent least-action curriculum cost vs.\ unplanned baselines and the
-from-scratch reference. \textbf{B:} path-integral marginals (the worlds on the
-optimal path). \textbf{C:} free energy $-\tfrac1\beta\log Z$ rises to the
-least-action cost as $\beta$ grows---the integral collapsing onto the optimal
-curriculum. \textbf{D:} \PathTraj{} trajectories summed over \PathStates{} DP
-states (no enumeration).}
-\label{fig:path-integral}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E49 agent-spec $\to$ trajectory.} Least-action curriculum cost
-to the OOD goal by starting role, vs.\ unplanned baselines; the from-scratch
-(no-transfer) cost is \PathScratch{}.}
-\label{tab:path-integral}
-\input{tables/path_integral}
-\end{table}
-
-\subsubsection{Next-token world models: exact length generalization (E45)}\label{sec:next-token}
-The induction results so far live in the framework's own state--action worlds.
-E45 lands the same thesis on the LLM field's native task---next-token
-prediction---and its native failure, length generalization on algorithmic
-sequences. The framing is ``synthesize the rule, don't \emph{be} the rule'': the
-\emph{same} local model (qwen3-coder:30b), given short solved examples, is used two
-ways---asked to predict the next character directly, and asked to synthesise a
-verified program (a world model of the sequence's generator) that is then run.
-We use \NextTokTasks{} deterministic tasks whose next character needs memory a
-fixed window cannot hold: \texttt{parity} (running XOR), \texttt{dyck}
-(bracket-nesting depth), and \texttt{copy} (a long-range retrieval: the answer is
-the first character of the context). Models are trained on lengths up to
-\NextTokTrainLen{} and tested out to \NextTokMaxLen{}.
-
-Where synthesis recovers the rule it does so exactly, and the induced program is
-\emph{length-invariant by construction}: it is exact at every length on
-\NextTokExactTasks/\NextTokTasks{} tasks (\NextTokSymOod{} mean out-of-distribution
-accuracy), because it recomputes its state from the whole prefix rather than a
-fixed window (Figure~\ref{fig:next-token}, Table~\ref{tab:next-token}). Every
-learned alternative decays with length: the $n$-gram (\NextTokNgramOod{} OOD) and
-the fixed-window MLP (\NextTokMlpOod{}) cannot represent unbounded-memory rules,
-and the \emph{same} 30B predicting directly---good in-distribution
-(\NextTokDirectIn)---falls to \NextTokDirectOod{} out of distribution: the
-canonical transformer length-generalization failure, with the synthesise-a-program
-mode of the identical model as the remedy.
-
-This applies where the next-token process has exact structure---code, formal
-languages, grammar- or JSON-constrained generation, tool and protocol
-outputs---the regime where an agent can profitably call a synthesized model
-rather than predict tokens directly.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/next_token.png}
-\caption{\textbf{Next-token world models (E45).} \textbf{Left:} next-character
-accuracy vs.\ sequence length (mean over tasks). The induced symbolic program
-stays exact past the training lengths; the $n$-gram, the fixed-window MLP, and the
-\emph{same} LLM predicting directly all decay. \textbf{Right:} mean
-out-of-distribution accuracy by method. Same model, two modes: synthesising a
-verified program length-generalises where predicting tokens directly does not.}
-\label{fig:next-token}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E45 next-token length generalization.} Per-task next-character
-exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
-\NextTokMaxLen). Only the synthesised symbolic program is exact OOD.}
-\label{tab:next-token}
-\input{tables/next_token}
-\end{table}
-
-\subsubsection{A composite corporate world: individual, division, and company goals (E48)}\label{sec:corporate}
-The framework's structural primitives---nested composition, aggregation,
-hierarchical observation, multi-level objectives---map almost one-to-one onto an
-organization, so E48 models a DigitalOcean-style PaaS company
-(\CorpDivisions{} divisions, \$\CorpRevenue{}M revenue) as a nested
-\texttt{CompositeWorld}: company $\triangleright$ divisions $\triangleright$
-individuals, with revenue rolled up by \texttt{Aggregator}s and agents (senior
-SWE, director, CEO) acting at different scope (Figure~\ref{fig:corporate},
-Table~\ref{tab:corporate}). Division revenue has diminishing returns in effort,
-so the company-optimal allocation spreads effort by marginal return---and
-individual-optimal diverges from it. Perception is supplied by
-\textbf{openworld-corp}, a committed dataset of \CorpTranscripts{} LLM-generated,
-state-grounded transcripts (all-hands, exec staff, division reviews, retros,
-standups, 1:1s, Slack) across three quarters; it is meant to be \emph{used}---
-swap the org seed or drop in a real company's transcripts (same schema) to run
-the model on an actual organization.
-
-Four agent-level results. \emph{Individual vs collective}: as a selfishness dial
-turns agents from company-aligned to promotion-chasing, company growth falls from
-\CorpAlignedGrowth\% to \CorpSelfishGrowth\% while the promotion Gini rises from
-\CorpAlignedGini{} to \CorpSelfishGini---local optimization concentrates rewards
-and starves the aggregate (the E44/E08 Pareto on an org chart). \emph{Value-of-
-action}: optimizing each level's decision in turn, the CEO's portfolio
-reallocation is the dominant lever ($+\CorpCeoPct\%$ company growth) over a
-director's ($+\CorpDirPct\%$) and an IC's ($+\CorpIcPct\%$)---leverage lives at
-the top. \emph{Perception is granularity-bound}: division-level metrics are
-recoverable from both the all-hands and a division review (they are stated), but
-the individual promotion signal is recovered \CorpIndivOneOnOne\% of the time
-from a 1:1 and \CorpIndivAllHands\% from the all-hands---aggregate meetings
-preserve division state and lose individual state, so an agent must traverse to
-the right meeting for the right decision (the hierarchical-observation contract,
-\S\ref{sec:traversal}). \emph{Navigation policy}: at every level a principled
-(marginal-value) policy beats a greedy one. Throughout, the revenue aggregator
-never drifts from the leaves---the composite stays exact.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.96\linewidth]{figs/corporate_world.png}
-\caption{\textbf{A composite corporate world (E48).} \textbf{Top:} the org as a
-nested \texttt{CompositeWorld} (company $\triangleright$ divisions
-$\triangleright$ individuals); revenue aggregates upward; agents act at their
-level. \textbf{A:} selfishness trades company growth for a higher promotion Gini.
-\textbf{B:} value-of-action by level---the CEO's allocation is the dominant lever.
-\textbf{C:} from \CorpTranscripts{} real transcripts, division metrics are
-recoverable from any meeting but the individual promo signal only from 1:1s.
-\textbf{D:} a principled per-role policy beats greedy.}
-\label{fig:corporate}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E48 agent-level results} on the composite corporate world with
-the openworld-corp transcript dataset as perception.}
-\label{tab:corporate}
-\input{tables/corporate_world}
-\end{table}
-
-\subsubsection{A startup growth world model: what drives a YC-style batch (E51)}\label{sec:startups}
-The same composite machinery as the corporate world (E48), turned on a cohort of
-startups: a batch of \StartupN{} startups is a \texttt{CompositeWorld} of startup
-child-worlds, each evolving from its factors (team, market, product-market fit,
-grit, capital). Growth is multiplicative in PMF (no fit, no growth); revenue
-compounds; burn depletes runway; traction-gated fundraising extends it;
-idiosyncratic shocks kill some regardless of merit; the batch's total value
-created, survival rate, and top-decile value share are \texttt{Aggregator}s
-(Figure~\ref{fig:startups}, Table~\ref{tab:startups}).
-
-Four results. \emph{What drives growth (causal value-of-factor)}: lifting each
-factor to its 90th percentile across the batch, PMF moves total value most
-(\StartupPmfDelta\%), while doubling everyone's capital moves it
-\StartupCapitalDelta\%---money is not the constraint, fit is. \emph{Power law of
-returns}: only \StartupSurvival\% survive and the top decile captures
-\StartupTopDecile\% of all value (Gini \StartupGini)---the venture home-run
-dynamic. \emph{Counterfactual attribution}: a no-PMF batch produces
-\StartupNoPmf\% of base value, and doubling capital while holding PMF low yields
-\StartupCapLowPmf\%---spend cannot substitute for fit, separating the true driver
-from the spend. \emph{Bounded predictability}: month-6 traction is informative but
-not decisive (Spearman \StartupSpearman{}; only \StartupTopOverlap\% of the
-eventual top decile were already in the month-6 top decile)---startup outcomes are
-more predictable than market moves (E50), because they are driven by persistent
-factors, yet the tail stays luck-laden, so the single biggest winner is hard to
-call early. The composite stays exact: the batch value aggregator never drifts
-from the leaves.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/startups.png}
-\caption{\textbf{Startup growth world model (E51).} \textbf{A:} causal
-value-of-factor---PMF dominates, capital barely moves total value. \textbf{B:}
-the power law---the top decile captures \StartupTopDecile\% of value. \textbf{C:}
-counterfactuals---no PMF, or money without PMF, collapses the batch. \textbf{D:}
-month-6 traction vs.\ final value ($\rho=\StartupSpearman$)---informative but not
-decisive; the tail is luck-laden.}
-\label{fig:startups}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E51 startup batch}: causal value-of-factor (PMF $\gg$ capital)
-and the power law of outcomes.}
-\label{tab:startups}
-\input{tables/startups}
-\end{table}
-
-\paragraph{Further domain demonstrations.} Six additional worlds exercise the framework \emph{outside} its core symbolic-world-model thesis---special relativity (E47), same-day trading (E50), wavelet denoising (E52), abstract-interpretation rollout bounds (E54), information-geometric world identification (E55), and optimal-transport drift detection (E56). They demonstrate expressiveness rather than carry the central argument, so they are collected in Appendix~\ref{app:domains}.
+\paragraph{Further world models on the same primitives.} Beyond induction, the framework expresses many additional world models that showcase expressiveness rather than carry the central argument: a non-enumerable version-space database (E46), path integrals over learning trajectories (E49), next-token world models with exact length generalization (E45), composite corporate (E48) and startup-growth (E51) worlds, a tree-of-thoughts brain simulator with real persistent memory (E58, E59), and the full perceive$\to$world$\to$emit$\to$act boundary (E60). These are detailed in Appendix~\ref{app:more}.
 
 \subsubsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
 For world models to be shared the way trained models are, a world needs a
@@ -1194,155 +920,6 @@ a nested composite): all validate and reconstruct exactly (\SpecsRoundTrip{}
 exact) at a few KB each.}
 \label{tab:worldspecs}
 \input{tables/world_specs}
-\end{table}
-
-\subsubsection{A brain simulator: tree-of-thoughts ReAct with real memory (E58)}\label{sec:brain}
-As a capstone for composition + perception + agency, we build a \emph{brain} as a
-world-of-worlds (Figure~\ref{fig:brain-card}): a \textsc{conscious} world (working
-memory --- the current thought and plan), an \textsc{unconscious} world (long-term,
-content-addressable memory: a learned transition model and cached plans), and an
-\textsc{environment} world the brain acts on. A perceptor maps an outside situation
-into the conscious world; bridges \emph{retrieve} memories into working memory,
-\emph{consolidate} experience into long-term memory, and \emph{act} on the
-environment --- the perceive$\to$world$\to$act loop. The whole brain serializes to a
-spec and round-trips losslessly (\S\ref{sec:specs}).
-
-An agent runs a ReAct loop with \emph{tree-of-thoughts}: perceive $\to$ retrieve
-$\to$ \emph{think} (expand a depth-$D$ tree over the learned model to find a plan to
-the goal) $\to$ act on the real environment $\to$ observe $\to$ consolidate. Memory
-is real and persistent, so a re-encountered situation is recalled, not re-derived.
-On a deterministic $\BrainNodes$-node navigation environment (optimal path length
-$L=\BrainOptimal$), two results hold (Figure~\ref{fig:brain}, Table~\ref{tab:brain}):
-\textbf{(A) memory wins} --- the brain's persistent unconscious drives steps-to-goal
-down to the optimal $L=\BrainFinal$ within a couple of episodes, while a memoryless
-agent (unconscious wiped each episode) stays flat at $\sim\BrainNoMem$ and a random
-agent flails at $\sim\BrainRandom$; \textbf{(B) how much to think} --- with the model
-known, steps fall as the planning depth $D$ rises and \emph{plateau} once
-$D\!\geq\!$ the needed horizon (here $D=\BrainPlateau$): bounded simulated lookahead
-helps exactly up to the goal horizon, and no further. This is a controlled synthetic
-cognitive task, not a claim about real brains --- it shows the framework can compose
-a brain-like architecture and that memory and bounded lookahead measurably help.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.62\linewidth]{figs/brain_card.png}
-\caption{\textbf{The brain as a world-of-worlds (E58).} A generated model card:
-a \textsc{conscious} and an \textsc{unconscious} world plus the
-\textsc{environment}, coupled by retrieve/consolidate/act bridges, with a perception
-boundary in and an action boundary out.}
-\label{fig:brain-card}
-\end{figure}
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/brain.png}
-\caption{\textbf{Tree-of-thoughts ReAct with real memory (E58).} \textbf{A:} a
-brain with persistent memory learns to the optimal path; memoryless and random do
-not. \textbf{B:} steps-to-goal fall with planning depth and plateau once depth
-reaches the goal horizon (success rate, right axis, saturates at 1.0).}
-\label{fig:brain}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E58 brain agents}: mean and final-episode steps-to-goal (optimal
-$L=\BrainOptimal$). Persistent memory reaches optimal; memoryless/random do not.}
-\label{tab:brain}
-\input{tables/brain}
-\end{table}
-
-\subsubsection{The brain around a frozen model, as a composable world (E59)}\label{sec:brainarch}
-If the backbone is a powerful LLM, what should the \emph{brain around it} look like?
-We illustrate the design space with a controlled study whose backbone is
-\emph{modeled}, not measured: a fixed-capability oracle that answers iff the needed
-fact is in its context --- correctly for simple tasks, and with a fixed per-draft
-probability for hard ones --- the \emph{same} capability for every architecture. We
-then assemble brains as composite worlds that differ in whether they retrieve from
-long-term memory, how many tree-of-thoughts drafts they generate, and whether they
-verify them, on a recalled-fact~+~verify suite. \textbf{We stress that the accuracy
-ordering below is a consequence of these modeling assumptions, not an empirical
-finding}: retrieval makes the rare-fact questions answerable by definition, and
-best-of-$N$~+~verify wins the hard questions because several independent draws beat one.
-The experiment's purpose is to show that the framework expresses and serializes these
-architectures, and to fix the value proposition precisely; the headline numbers are
-arithmetic illustrations of it.
-
-Under that modeled backbone (Figure~\ref{fig:brain-arch}, Table~\ref{tab:brainarch}),
-the bare LLM scores $\ArchBare$; adding retrieval lifts it to $\ArchMem$; adding
-best-of-$N$ with a verifier lifts the hard questions; and the richest brain reaches
-$\ArchOpt$ ($+\ArchLift$ absolute over the bare backbone with no change to the LLM),
-which a sweep over all $\ArchConfigs$ architectures recovers. The \emph{empirical}
-content is engineering, not the lift: the brain serializes to a spec (with a real LLM
-emit channel) and round-trips losslessly, and a live Ollama run exercises the genuine
-text-in~$\to$~reason~$\to$~text-out loop (\texttt{TextPerceptor}~+~\texttt{LLMEmitter}).
-The point the study makes precisely is \emph{with the model frozen, the world model
-around it is what you optimize} --- a hypothesis this controlled setup illustrates and
-that a real held-constant backbone would be needed to establish.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/brain_arch.png}
-\caption{\textbf{Architecture around a frozen model (E59), modeled backbone.} \textbf{A:}
-under a fixed-capability modeled backbone, task accuracy rises from the bare backbone
-through retrieval and best-of-$N$+verify to the richest brain --- an arithmetic
-illustration of the modeling assumptions, not a measured effect. \textbf{B:} a sweep
-over the $\ArchConfigs$-architecture space recovers the richest configuration.}
-\label{fig:brain-arch}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E59 brain architectures} on the recalled-fact+verify suite, with the
-LLM backbone held constant. Memory and verified best-of-$N$ each add accuracy; the
-optimized brain reaches $\ArchOpt$ ($+\ArchLift$ over the bare LLM).}
-\label{tab:brainarch}
-\input{tables/brain_arch}
-\end{table}
-
-\subsubsection{The perceive $\to$ world $\to$ emit $\to$ act boundary (E60)}\label{sec:ioboundary}
-A world model is only useful to a developer if real inputs can get \emph{in} and real
-actions can get \emph{out} under a checkable contract. E60 assembles a support-desk
-world from the framework's full I/O boundary and validates each piece as a working,
-serializable component. A \texttt{JSONPerceptor} ingests a structured ticket and a
-\texttt{RegexPerceptor} pulls fields from free text, each guarded by a
-\texttt{PerceptionGate}; a content-addressable \texttt{MemoryStore} recalls the closest
-past resolution; a \texttt{ToolEmitter} backed by a typed \texttt{ToolRegistry} executes
-the chosen fix; and a verified-code \texttt{CodeEmitter} writes the report, contract-checked
-by an \texttt{EmissionGate}. On $\IOTickets$ realistic paraphrased tickets (synonyms,
-dropped and reordered words, typos --- not the canonical wording shuffled), the
-content-addressable \texttt{MemoryStore} routes $\IOReca\%$ to the correct tool, ahead of
-a fair lexical token-overlap (Jaccard) baseline at $\IOJac\%$ and far ahead of naive
-exact-key dict lookup at $\IOExact\%$ (Figure~\ref{fig:io-boundary}A); the gap over the
-Jaccard baseline is modest and we report the numbers as measured rather than tuning the
-paraphrases. The assembled world resolves $\IORes\%$ end to end through real tool calls
-(routing follows recall). The contract gates catch every injected fault --- all
-$\IOGateIn$ malformed inputs and the out-of-contract output
-(Figure~\ref{fig:io-boundary}B) --- while passing valid traffic. The entire world,
-spanning all $\IOComponents$ components, serializes to a spec and round-trips losslessly
-with no LLM in the loop (an optional Ollama run uses an \texttt{LLMEmitter} to draft the
-customer-facing reply), making the perceive/emit/act boundary a portable, deterministically
-verifiable artifact (Table~\ref{tab:ioboundary}). The contribution here is the
-engineering boundary itself; the recall numbers characterize a stdlib sub-word matcher,
-not a learned embedding model.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/io_boundary.png}
-\caption{\textbf{A working I/O boundary (E60).} \textbf{A:} on realistic paraphrased
-tickets, content-addressable recall ($\IOReca\%$) beats a fair lexical token-overlap
-baseline ($\IOJac\%$) and naive exact-key lookup ($\IOExact\%$); the assembled world
-resolves $\IORes\%$ end to end via real tool calls. \textbf{B:} the perception and
-emission gates reject every injected malformed input and out-of-contract output.}
-\label{fig:io-boundary}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E60 I/O components.} Each perceptor, emitter, gate, and the memory
-store, the boundary it sits on, and confirmation that the serializable support-desk
-world exercises it.}
-\label{tab:ioboundary}
-\input{tables/io_boundary}
 \end{table}
 
 \subsection{Supporting ablations}
@@ -1924,103 +1501,7 @@ collapses.}
 \label{tab:composition}
 \end{table}
 
-\subsection{The sprint allocation across a capability ladder (E35)}\label{sec:ladder}
-E34's finding---that reallocating a shared budget cannot raise the ceiling,
-and that a greedy ``closest-to-passing'' policy tarpits---was measured with a
-1.5B/7B repair model. E35 re-runs the three allocation conditions across a
-capability ladder spanning three model families (Figure~\ref{fig:sprint-ladder}):
-qwen2.5:7b (the E34 anchor), deepseek-r1:14b, gpt-oss:20b, and qwen3-coder:30b.
-Two patterns emerge, both clean. First, the fixed-protocol ceiling rises
-monotonically with capability---15, \LadderDeepseekFixed, \LadderGptossFixed,
-\LadderQwenCoderFixed{} of 20---so the benchmark discriminates model strength as
-intended. Second, the greedy tarpit is \emph{capability-gated}: catastrophic at
-7B (1/20, it sinks the whole budget into one near-miss), it progressively
-defangs with scale and at gpt-oss:20b not only stops tarpitting but clears the
-\emph{entire} board (\LadderGptossGreedy/20), with qwen3-coder:30b at
-\LadderQwenCoderGreedy/20. The allocation pathology, in other words, is a symptom
-of a model that cannot finish the task it fixates on; give it enough capability
-and the fixation becomes harmless. Across all four models and three families
-the qualitative reading of E34 holds---allocation policy is dominated by base
-capability---now with the capability axis made explicit.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.85\linewidth]{figs/sprint_ladder.png}
-\caption{\textbf{The sprint allocation across a capability ladder (E35).}
-Tasks solved on OpenWorld-SWE-bench under the three allocation conditions, by
-repair model (increasing capability left to right; budget 80). The
-fixed-protocol ceiling rises with capability; the greedy tarpit (a lone
-solved task at 7B) defangs with scale, clearing all 20 at gpt-oss:20b.}
-\label{fig:sprint-ladder}
-\end{figure}
-
-\subsection{Composition yields better representations (E36)}\label{sec:representations}
-E12 and E19 measured what a learner needs to match a \emph{single}
-synthesized world; E36 asks the representational question directly on
-\emph{factored} worlds, where composition's advantage should appear if it
-exists anywhere. The world is an economy of $K$ parametric sectors (the E30
-substrate); we sample transitions and learn, pitting a zoo of
-\RepNumMono{} monolithic learners on the joint state---linear/ridge
-regression, 1-NN and $k$-NN, kernel SVR, a Gaussian process, a random
-forest, histogram gradient boosting, a Koopman/EDMD operator on a degree-2
-lift, and a two-hidden-layer MLP---against a composite of small per-sector
-learners and the exact symbolic composite, on three axes a learned dynamics
-model is judged by (Table~\ref{tab:representations},
-Figure~\ref{fig:representations}). The comparison is capacity-fair: the
-monolith is given at least as many parameters as the composite's children
-combined (\RepMonoParams{} vs.\ \RepCompParams{} at $K{=}5$), so any gap is
-representational, not a matter of model size.
-
-\emph{Compositional generalization.} Training covers each sector's full
-marginal value range but only a thin slice of the joint product; the test
-set is the full product, dominated by sector-value \emph{combinations} never
-seen together. The composite needs only the marginals---each child sees its
-whole small local space---so its accuracy is flat in $K$ (learned-MLP
-\RepCompGenLo--\RepCompGenHi; learned-trees and symbolic exact). The entire
-monolithic family needs the joint and collapses as the unseen fraction
-grows: every one of the \RepNumMono{} learners falls below $0.03$ by $K{=}5$
-\emph{except} gradient boosting, the strongest, which still decays from
-\RepBestMonoLo{} to \RepBestMonoHi{}---one to two orders of magnitude below
-the composite. Crucially, the collapse is not an MLP artifact: it holds
-across kernel methods, trees, Gaussian processes, and a Koopman operator
-alike, and factoring rescues a \emph{non-MLP} child too---per-sector
-gradient boosting reaches \RepCompHgbHi{} where joint gradient boosting
-cannot. \emph{Interference.} Trained on the sectors in sequence, the
-monolith forgets the first the moment it learns the second (retained
-accuracy \RepIntfMono); the composite stores each child separately and
-retains \RepIntfComp. \emph{Sample efficiency.} At 100 training transitions
-the composite reaches \RepSampCompLo{} against the monolith's
-\RepSampMonoLo, and the symbolic composite needs none. The decisive pattern
-is a three-tier gradient---monolithic learning collapses (every model class
-tried) $\to$ factored learning recovers most of it $\to$ symbolic factoring
-is exact and training-free. Factoring the representation, not scaling or
-swapping the learner, is what buys generalization here.
-
-\begin{table}[htb]\centering\small
-\input{tables/representations.tex}
-\caption{E36 compositional generalization: exact next-state accuracy on
-\emph{novel} sector combinations, by number of parts $K$. Every monolithic
-learner over the joint state collapses as $K$ grows (gradient boosting, the
-strongest, decays from \RepBestMonoLo{} to \RepBestMonoHi; the rest sit near
-chance); factoring the same problem into per-sector learners holds flat, and
-is exact with a strong child learner or with synthesized code.}
-\label{tab:representations}
-\end{table}
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=\linewidth]{figs/representations.png}
-\caption{\textbf{Composition vs.\ monolithic learners (E36)} on a factored
-$K$-sector world, capacity-fair. \textbf{A:} exact accuracy on novel sector
-combinations---the whole monolithic family (shaded range over
-\RepNumMono{} learners; best, boosted trees, shown) collapses as $K$ grows,
-while both composite learners and the symbolic composite stay flat near or
-at 1.0. \textbf{B:} accuracy retained on the first part after training
-through all $K$---the monolith suffers catastrophic interference, the
-composite does not. \textbf{C:} accuracy vs.\ training transitions---the
-composite learns from far less data, the symbolic composite from none.}
-\label{fig:representations}
-\end{figure}
+\paragraph{Further capabilities.} Four additional studies are detailed in Appendix~\ref{app:more}: the sprint allocation across a capability ladder (E35), composition yielding better representations (E36), adaptation to sudden unannounced rule changes (E41), and agents traversing connected worlds with changing rules (E42).
 
 \subsection{Feeding the real world in: multimodal perception (E39--E40)}\label{sec:perception}
 The worlds so far are driven by symbolic inputs. A \emph{perception boundary}
@@ -2067,90 +1548,6 @@ scale. \textbf{B:} end-to-end forecast accuracy equals perception accuracy
 (the dynamics add zero error), so the system degrades only as fast as its
 perception does.}
 \label{fig:perception}
-\end{figure}
-
-\subsection{Adapting to sudden, unannounced rule changes (E41)}\label{sec:nonstationary}
-E32 handled a regime switch whose timing was \emph{known}, via a pre-verified
-\texttt{PhasedTransition}. E41 asks the harder question a non-stationary world
-poses: when the rules change suddenly and \emph{without announcement}, who
-notices, and how fast do they recover? A reservoir tracks toward a hidden
-target at a hidden rate; that regime jumps at \NonStatChanges{} unannounced
-times in a 120-step episode, and at each step the current level is read
-through the perception boundary and four predictors forecast the next level
-(Figure~\ref{fig:nonstationary}). A symbolic monitor that watches its own
-prediction error and re-identifies the rule from the post-change transient
-recovers in \NonStatSymLag{} step(s) at each change---snapping back to exact
-(\NonStatSymAcc{} overall). A standard sliding-window 1-NN recovers only as its
-window refills (\NonStatWinLag{} steps; \NonStatWinAcc{} overall, and only
-approximate), and a static model frozen on the first regime never recovers
-(\NonStatFrozenAcc), trailed against an oracle that knows the change times
-(0-lag, exact). The cumulative-error curves (Figure~\ref{fig:nonstationary}A)
-make the difference plain: the symbolic monitor's regret is nearly flat with a
-small step at each change, while the frozen model's climbs without bound. Under
-noisy perception the ranking is unchanged and every method's error floor rises
-by exactly the perception error---the E39 decomposition, now riding on top of
-the adaptation dynamics. The mechanism behind the fast recovery is the same one
-the paper rests on: because the dynamics are an explicit, identifiable program,
-a handful of post-change observations re-pin the rule exactly, where a
-statistical model must re-estimate over a window. The boundary is equally
-explicit: this holds when the changed rule stays within the identifiable family
-the monitor searches; a change to an undeclarable rule admits no exact
-recovery.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/nonstationary.png}
-\caption{\textbf{Adapting to sudden unannounced rule changes (E41).} A
-reservoir's hidden regime jumps at the marked steps; predictions run through
-the perception boundary. \textbf{A:} cumulative wrong predictions---the
-symbolic monitor (ours) stays nearly flat, the sliding-window learner steps up
-and slowly recovers, the static-frozen model climbs without bound, the oracle
-is flat at zero. \textbf{B:} recovery lag per change---\NonStatSymLag{} steps
-for the symbolic monitor (to exact) versus \NonStatWinLag{} for the window;
-the frozen model never recovers.}
-\label{fig:nonstationary}
-\end{figure}
-
-\subsection{Agents traversing connected worlds with changing rules (E42)}\label{sec:traversal}
-E42 is the capstone: it combines composition, toll routes, non-stationary
-rules, and per-world perception, and asks whether an agent can track each
-world's rule \emph{at the belief level} as it hops between them and the rules
-change---including changes that happen while it is away. Two reservoir worlds
-are joined by a toll \texttt{Route}; each has its own changing regime and its
-own perception boundary; an agent hops every \AgentDwell{} steps
-(\AgentHops{} arrivals, \AgentTolls{} tolls paid), and four belief models
-predict the current world's next state from the same perceived observations
-(Figure~\ref{fig:agent-traversal}). The decisive contrast is between
-\emph{separating} a belief per world and \emph{sharing} one. The symbolic
-per-world monitor scores \AgentSymAcc{} and, crucially, returns to a world it
-left \emph{unchanged} almost for free (recovery \AgentSymUnchg{} steps),
-recovering to exact in \AgentSymChanged{} step when the world changed while it
-was away. The single shared learner scores \AgentSharedAcc---and pays a
-recovery cost of \AgentSharedUnchg{} steps even returning to a world that
-\emph{did not change}, because learning the other world overwrote its belief:
-catastrophic interference (the E36 result) now induced purely by traversal. A
-per-world sliding window avoids interference (\AgentWinAcc) but does not
-reliably re-identify an away-change within a single visit. The lesson threads
-the whole paper together: separating dynamics into per-world programs---the
-composition principle---is what lets an agent carry one world's rule across an
-absence intact and re-pin it from a few observations when it has changed, where
-an entangled belief cannot hold two worlds at once. The boundary is the
-familiar one: exact re-identification holds while the changed rule stays in the
-identifiable family.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/agent_traversal.png}
-\caption{\textbf{Agents traversing connected worlds with changing rules
-(E42).} Two worlds joined by a toll route, each non-stationary, each with its
-own perception boundary; an agent hops between them. \textbf{A:} prediction
-accuracy tracking the current world's rule across hops. \textbf{B:} recovery
-lag on arrival, split by whether the world's rule changed while the agent was
-away. The shared-belief learner pays an interference cost even returning to an
-\emph{unchanged} world; the per-world symbolic monitor returns nearly free and
-re-identifies away-changes in a step; the per-world window does not reliably
-recover from away-changes within a visit (hatched = no recovery).}
-\label{fig:agent-traversal}
 \end{figure}
 
 \subsection{An emergent economy from composed verified rules (E44)}\label{sec:economy}
@@ -2515,6 +1912,616 @@ when outcomes look fine. In E7/E15, the rubric judge compressed mid-range
 episodes toward similar scores (rank correlation \JudgeSpearman{} rather than
 1.0, dropping to \RubricParaRho{} under paraphrase), consistent with known
 LLM-judge coarseness~\cite{llmjudge2023}.
+
+\section{Additional experiments moved from the main text}\label{app:more}
+The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
+
+\subsection{A database for many worlds: holding a non-enumerable version space (E46)}\label{sec:many-worlds}
+E43 maintains its version space as an explicit list of candidate worlds, which
+works for hundreds but cannot survive the regime where parameter counts and
+ranges grow and the world space becomes effectively infinite. E46 supplies the
+data structure that does. The transition of a parametric world family decomposes
+into \emph{mechanisms}, each predicting one observable of the next state from the
+observed state and a small \emph{scope} of parameters (for the sprint family:
+the ship debt increment depends only on \texttt{ship\_debt}, the bug interaction
+only on $k$, and so on). Because each transition is observed in full, the
+likelihood factorises over observables, so the store keeps one small factor per
+mechanism scope rather than the global product---a finite, symbolic
+representation of an enormous world set, in the spirit of conditional-table and
+provenance-semiring databases. The factor values live in a pluggable \emph{semiring} (an algebra with an
+``add'' and a ``multiply'' operation), so the \emph{same} store answers Boolean (is a world still possible?), counting
+(how many worlds remain?), and probability (a posterior over parameters)
+queries; an observation reweights only the touched factors, and a prediction
+marginalises only the relevant one.
+
+The payoff is the version-space result scaled past enumeration
+(Figure~\ref{fig:many-worlds}, Table~\ref{tab:many-worlds}). On small spaces the
+factored store's count, marginals, and expected-next-state match brute-force
+enumeration \emph{exactly}. On large ones it maintains an exact version space and
+posterior over \ManyWorldsMax{} worlds in \ManyWorldsMaxMs{}\,ms---narrowing them
+to \ManyWorldsConsistent{} consistent worlds and peaking the posterior on the
+true rule---where the explicit enumeration of E43 is infeasible beyond
+\ManyWorldsEnumMax{}. Update and query cost scale as the \emph{sum} of the
+parameter-domain sizes rather than their product. The boundary is the
+probabilistic-database one: when a mechanism couples $w$ parameters
+non-separably its factor grows as $d^{w}$ (at $w{=}\ManyWorldsCoupleWidth$ the
+factor holds \ManyWorldsCoupleFactor{} entries versus \ManyWorldsCoupleIdeal{}
+for the separable ideal), degrading toward enumeration---the $\#$P-hardness of
+exact query evaluation, surfaced and measured rather than hidden. Together with
+E43 this is active inference over a world space too large to write down:
+\S\ref{sec:active-induction} chooses actions to shrink the set, E46 holds and
+queries it.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/many_worlds.png}
+\caption{\textbf{A factored, semiring-annotated store for many worlds (E46).}
+\textbf{Left:} update+query time vs.\ world-space size; the factored store stays
+cheap to \ManyWorldsMax{} worlds (cost $\sim$ the \emph{sum} of domain sizes)
+while explicit enumeration (E43-style) grows with the world count and becomes
+infeasible past \ManyWorldsEnumMax. \textbf{Right:} the boundary---a
+mechanism coupling $w$ parameters has a factor of size $d^{w}$, degrading toward
+enumeration as coupling grows (the $\#$P analogue).}
+\label{fig:many-worlds}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E46 factored vs.\ enumerated version space.} ``Consistent'' is
+the number of worlds surviving the same observed transitions; the factored store
+matches brute force exactly where enumeration is feasible and continues far
+past it.}
+\label{tab:many-worlds}
+\input{tables/many_worlds}
+\end{table}
+
+\subsection{Path integrals over learning trajectories (E49)}\label{sec:path-integral}
+E46 searches the space of worlds for a problem; E49 asks how an agent should
+\emph{traverse} that space---in what order to master worlds---to solve a new,
+out-of-distribution problem as directly as possible. We cast it as a path
+integral over learning trajectories: a trajectory is an ordering of skills to
+learn, weighted by $e^{-\beta S}$ with the action $S$ the trajectory's total
+learning cost---the sum of per-skill costs (in abstract effort units), each skill
+cheap to acquire once its prerequisites are mastered and dear from scratch; the
+sum is dominated by the least-action path, the most direct curriculum. Crucially
+this needs \emph{no new machinery}: a path integral is a sum over paths, which is
+a semiring computation, so we reuse the E46 \texttt{Semiring} and swap the value
+ring---tropical $(\min,+)$ for the least-action path, log (log-sum-exp,~$+$) for
+the full partition function---and run a forward/backward dynamic program (DP) over
+capability-states. The combinatorially many trajectories are summed
+\emph{without enumeration}: \PathTraj{} distinct trajectories are accounted for by
+a DP over just \PathStates{} states.
+
+Skills compose cheaply once their prerequisites are mastered and are expensive to
+learn from scratch, and the target (``\PathGoal'') is a \emph{novel composition},
+so the least-action path reuses mastered sub-worlds---compositional transfer
+rather than learning the target blind. The agent's trajectory is built
+\emph{from its spec}: a senior SWE, a director, and a CEO start with different
+capabilities and get different optimal curricula to the same goal (cost
+\PathSweCost{}, \PathDirCost{}, \PathCeoCost{} respectively;
+Table~\ref{tab:path-integral}, Figure~\ref{fig:path-integral}). All three are
+far below unplanned baselines---random ordering averages \PathRandom{} because it
+pays the from-scratch penalty for learning composites before their
+prerequisites---and far below learning the goal from scratch (\PathScratch{}), a
+$\PathSpeedup\times$ compositional-transfer speedup. As the inverse temperature
+$\beta$ grows the free energy $-\tfrac1\beta\log Z$ rises from the
+entropy-dominated regime (many near-equivalent orderings) to the least-action
+cost---the path integral collapsing onto the optimal curriculum---while the
+forward$\times$backward marginals flag exactly the worlds that lie on it. The
+bridge is the point: one semiring engine now answers version-space, counting,
+posterior \emph{and} optimal-trajectory queries over composite-world spaces, and
+turns an agent spec into a concrete learning path toward an OOD goal.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/path_integral.png}
+\caption{\textbf{Path integrals over learning trajectories (E49).} \textbf{A:}
+per-agent least-action curriculum cost vs.\ unplanned baselines and the
+from-scratch reference. \textbf{B:} path-integral marginals (the worlds on the
+optimal path). \textbf{C:} free energy $-\tfrac1\beta\log Z$ rises to the
+least-action cost as $\beta$ grows---the integral collapsing onto the optimal
+curriculum. \textbf{D:} \PathTraj{} trajectories summed over \PathStates{} DP
+states (no enumeration).}
+\label{fig:path-integral}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E49 agent-spec $\to$ trajectory.} Least-action curriculum cost
+to the OOD goal by starting role, vs.\ unplanned baselines; the from-scratch
+(no-transfer) cost is \PathScratch{}.}
+\label{tab:path-integral}
+\input{tables/path_integral}
+\end{table}
+
+\subsection{Next-token world models: exact length generalization (E45)}\label{sec:next-token}
+The induction results so far live in the framework's own state--action worlds.
+E45 lands the same thesis on the LLM field's native task---next-token
+prediction---and its native failure, length generalization on algorithmic
+sequences. The framing is ``synthesize the rule, don't \emph{be} the rule'': the
+\emph{same} local model (qwen3-coder:30b), given short solved examples, is used two
+ways---asked to predict the next character directly, and asked to synthesise a
+verified program (a world model of the sequence's generator) that is then run.
+We use \NextTokTasks{} deterministic tasks whose next character needs memory a
+fixed window cannot hold: \texttt{parity} (running XOR), \texttt{dyck}
+(bracket-nesting depth), and \texttt{copy} (a long-range retrieval: the answer is
+the first character of the context). Models are trained on lengths up to
+\NextTokTrainLen{} and tested out to \NextTokMaxLen{}.
+
+Where synthesis recovers the rule it does so exactly, and the induced program is
+\emph{length-invariant by construction}: it is exact at every length on
+\NextTokExactTasks/\NextTokTasks{} tasks (\NextTokSymOod{} mean out-of-distribution
+accuracy), because it recomputes its state from the whole prefix rather than a
+fixed window (Figure~\ref{fig:next-token}, Table~\ref{tab:next-token}). Every
+learned alternative decays with length: the $n$-gram (\NextTokNgramOod{} OOD) and
+the fixed-window MLP (\NextTokMlpOod{}) cannot represent unbounded-memory rules,
+and the \emph{same} 30B predicting directly---good in-distribution
+(\NextTokDirectIn)---falls to \NextTokDirectOod{} out of distribution: the
+canonical transformer length-generalization failure, with the synthesise-a-program
+mode of the identical model as the remedy.
+
+This applies where the next-token process has exact structure---code, formal
+languages, grammar- or JSON-constrained generation, tool and protocol
+outputs---the regime where an agent can profitably call a synthesized model
+rather than predict tokens directly.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/next_token.png}
+\caption{\textbf{Next-token world models (E45).} \textbf{Left:} next-character
+accuracy vs.\ sequence length (mean over tasks). The induced symbolic program
+stays exact past the training lengths; the $n$-gram, the fixed-window MLP, and the
+\emph{same} LLM predicting directly all decay. \textbf{Right:} mean
+out-of-distribution accuracy by method. Same model, two modes: synthesising a
+verified program length-generalises where predicting tokens directly does not.}
+\label{fig:next-token}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E45 next-token length generalization.} Per-task next-character
+exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
+\NextTokMaxLen). Only the synthesised symbolic program is exact OOD.}
+\label{tab:next-token}
+\input{tables/next_token}
+\end{table}
+
+\subsection{A composite corporate world: individual, division, and company goals (E48)}\label{sec:corporate}
+The framework's structural primitives---nested composition, aggregation,
+hierarchical observation, multi-level objectives---map almost one-to-one onto an
+organization, so E48 models a DigitalOcean-style PaaS company
+(\CorpDivisions{} divisions, \$\CorpRevenue{}M revenue) as a nested
+\texttt{CompositeWorld}: company $\triangleright$ divisions $\triangleright$
+individuals, with revenue rolled up by \texttt{Aggregator}s and agents (senior
+SWE, director, CEO) acting at different scope (Figure~\ref{fig:corporate},
+Table~\ref{tab:corporate}). Division revenue has diminishing returns in effort,
+so the company-optimal allocation spreads effort by marginal return---and
+individual-optimal diverges from it. Perception is supplied by
+\textbf{openworld-corp}, a committed dataset of \CorpTranscripts{} LLM-generated,
+state-grounded transcripts (all-hands, exec staff, division reviews, retros,
+standups, 1:1s, Slack) across three quarters; it is meant to be \emph{used}---
+swap the org seed or drop in a real company's transcripts (same schema) to run
+the model on an actual organization.
+
+Four agent-level results. \emph{Individual vs collective}: as a selfishness dial
+turns agents from company-aligned to promotion-chasing, company growth falls from
+\CorpAlignedGrowth\% to \CorpSelfishGrowth\% while the promotion Gini rises from
+\CorpAlignedGini{} to \CorpSelfishGini---local optimization concentrates rewards
+and starves the aggregate (the E44/E08 Pareto on an org chart). \emph{Value-of-
+action}: optimizing each level's decision in turn, the CEO's portfolio
+reallocation is the dominant lever ($+\CorpCeoPct\%$ company growth) over a
+director's ($+\CorpDirPct\%$) and an IC's ($+\CorpIcPct\%$)---leverage lives at
+the top. \emph{Perception is granularity-bound}: division-level metrics are
+recoverable from both the all-hands and a division review (they are stated), but
+the individual promotion signal is recovered \CorpIndivOneOnOne\% of the time
+from a 1:1 and \CorpIndivAllHands\% from the all-hands---aggregate meetings
+preserve division state and lose individual state, so an agent must traverse to
+the right meeting for the right decision (the hierarchical-observation contract,
+\S\ref{sec:traversal}). \emph{Navigation policy}: at every level a principled
+(marginal-value) policy beats a greedy one. Throughout, the revenue aggregator
+never drifts from the leaves---the composite stays exact.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.96\linewidth]{figs/corporate_world.png}
+\caption{\textbf{A composite corporate world (E48).} \textbf{Top:} the org as a
+nested \texttt{CompositeWorld} (company $\triangleright$ divisions
+$\triangleright$ individuals); revenue aggregates upward; agents act at their
+level. \textbf{A:} selfishness trades company growth for a higher promotion Gini.
+\textbf{B:} value-of-action by level---the CEO's allocation is the dominant lever.
+\textbf{C:} from \CorpTranscripts{} real transcripts, division metrics are
+recoverable from any meeting but the individual promo signal only from 1:1s.
+\textbf{D:} a principled per-role policy beats greedy.}
+\label{fig:corporate}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E48 agent-level results} on the composite corporate world with
+the openworld-corp transcript dataset as perception.}
+\label{tab:corporate}
+\input{tables/corporate_world}
+\end{table}
+
+\subsection{A startup growth world model: what drives a YC-style batch (E51)}\label{sec:startups}
+The same composite machinery as the corporate world (E48), turned on a cohort of
+startups: a batch of \StartupN{} startups is a \texttt{CompositeWorld} of startup
+child-worlds, each evolving from its factors (team, market, product-market fit,
+grit, capital). Growth is multiplicative in PMF (no fit, no growth); revenue
+compounds; burn depletes runway; traction-gated fundraising extends it;
+idiosyncratic shocks kill some regardless of merit; the batch's total value
+created, survival rate, and top-decile value share are \texttt{Aggregator}s
+(Figure~\ref{fig:startups}, Table~\ref{tab:startups}).
+
+Four results. \emph{What drives growth (causal value-of-factor)}: lifting each
+factor to its 90th percentile across the batch, PMF moves total value most
+(\StartupPmfDelta\%), while doubling everyone's capital moves it
+\StartupCapitalDelta\%---money is not the constraint, fit is. \emph{Power law of
+returns}: only \StartupSurvival\% survive and the top decile captures
+\StartupTopDecile\% of all value (Gini \StartupGini)---the venture home-run
+dynamic. \emph{Counterfactual attribution}: a no-PMF batch produces
+\StartupNoPmf\% of base value, and doubling capital while holding PMF low yields
+\StartupCapLowPmf\%---spend cannot substitute for fit, separating the true driver
+from the spend. \emph{Bounded predictability}: month-6 traction is informative but
+not decisive (Spearman \StartupSpearman{}; only \StartupTopOverlap\% of the
+eventual top decile were already in the month-6 top decile)---startup outcomes are
+more predictable than market moves (E50), because they are driven by persistent
+factors, yet the tail stays luck-laden, so the single biggest winner is hard to
+call early. The composite stays exact: the batch value aggregator never drifts
+from the leaves.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/startups.png}
+\caption{\textbf{Startup growth world model (E51).} \textbf{A:} causal
+value-of-factor---PMF dominates, capital barely moves total value. \textbf{B:}
+the power law---the top decile captures \StartupTopDecile\% of value. \textbf{C:}
+counterfactuals---no PMF, or money without PMF, collapses the batch. \textbf{D:}
+month-6 traction vs.\ final value ($\rho=\StartupSpearman$)---informative but not
+decisive; the tail is luck-laden.}
+\label{fig:startups}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E51 startup batch}: causal value-of-factor (PMF $\gg$ capital)
+and the power law of outcomes.}
+\label{tab:startups}
+\input{tables/startups}
+\end{table}
+
+\paragraph{Further domain demonstrations.} Six additional worlds exercise the framework \emph{outside} its core symbolic-world-model thesis---special relativity (E47), same-day trading (E50), wavelet denoising (E52), abstract-interpretation rollout bounds (E54), information-geometric world identification (E55), and optimal-transport drift detection (E56). They demonstrate expressiveness rather than carry the central argument, so they are collected in Appendix~\ref{app:domains}.
+
+\subsection{A brain simulator: tree-of-thoughts ReAct with real memory (E58)}\label{sec:brain}
+As a capstone for composition + perception + agency, we build a \emph{brain} as a
+world-of-worlds (Figure~\ref{fig:brain-card}): a \textsc{conscious} world (working
+memory --- the current thought and plan), an \textsc{unconscious} world (long-term,
+content-addressable memory: a learned transition model and cached plans), and an
+\textsc{environment} world the brain acts on. A perceptor maps an outside situation
+into the conscious world; bridges \emph{retrieve} memories into working memory,
+\emph{consolidate} experience into long-term memory, and \emph{act} on the
+environment --- the perceive$\to$world$\to$act loop. The whole brain serializes to a
+spec and round-trips losslessly (\S\ref{sec:specs}).
+
+An agent runs a ReAct loop with \emph{tree-of-thoughts}: perceive $\to$ retrieve
+$\to$ \emph{think} (expand a depth-$D$ tree over the learned model to find a plan to
+the goal) $\to$ act on the real environment $\to$ observe $\to$ consolidate. Memory
+is real and persistent, so a re-encountered situation is recalled, not re-derived.
+On a deterministic $\BrainNodes$-node navigation environment (optimal path length
+$L=\BrainOptimal$), two results hold (Figure~\ref{fig:brain}, Table~\ref{tab:brain}):
+\textbf{(A) memory wins} --- the brain's persistent unconscious drives steps-to-goal
+down to the optimal $L=\BrainFinal$ within a couple of episodes, while a memoryless
+agent (unconscious wiped each episode) stays flat at $\sim\BrainNoMem$ and a random
+agent flails at $\sim\BrainRandom$; \textbf{(B) how much to think} --- with the model
+known, steps fall as the planning depth $D$ rises and \emph{plateau} once
+$D\!\geq\!$ the needed horizon (here $D=\BrainPlateau$): bounded simulated lookahead
+helps exactly up to the goal horizon, and no further. This is a controlled synthetic
+cognitive task, not a claim about real brains --- it shows the framework can compose
+a brain-like architecture and that memory and bounded lookahead measurably help.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/brain_card.png}
+\caption{\textbf{The brain as a world-of-worlds (E58).} A generated model card:
+a \textsc{conscious} and an \textsc{unconscious} world plus the
+\textsc{environment}, coupled by retrieve/consolidate/act bridges, with a perception
+boundary in and an action boundary out.}
+\label{fig:brain-card}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/brain.png}
+\caption{\textbf{Tree-of-thoughts ReAct with real memory (E58).} \textbf{A:} a
+brain with persistent memory learns to the optimal path; memoryless and random do
+not. \textbf{B:} steps-to-goal fall with planning depth and plateau once depth
+reaches the goal horizon (success rate, right axis, saturates at 1.0).}
+\label{fig:brain}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E58 brain agents}: mean and final-episode steps-to-goal (optimal
+$L=\BrainOptimal$). Persistent memory reaches optimal; memoryless/random do not.}
+\label{tab:brain}
+\input{tables/brain}
+\end{table}
+
+\subsection{The brain around a frozen model, as a composable world (E59)}\label{sec:brainarch}
+If the backbone is a powerful LLM, what should the \emph{brain around it} look like?
+We illustrate the design space with a controlled study whose backbone is
+\emph{modeled}, not measured: a fixed-capability oracle that answers iff the needed
+fact is in its context --- correctly for simple tasks, and with a fixed per-draft
+probability for hard ones --- the \emph{same} capability for every architecture. We
+then assemble brains as composite worlds that differ in whether they retrieve from
+long-term memory, how many tree-of-thoughts drafts they generate, and whether they
+verify them, on a recalled-fact~+~verify suite. \textbf{We stress that the accuracy
+ordering below is a consequence of these modeling assumptions, not an empirical
+finding}: retrieval makes the rare-fact questions answerable by definition, and
+best-of-$N$~+~verify wins the hard questions because several independent draws beat one.
+The experiment's purpose is to show that the framework expresses and serializes these
+architectures, and to fix the value proposition precisely; the headline numbers are
+arithmetic illustrations of it.
+
+Under that modeled backbone (Figure~\ref{fig:brain-arch}, Table~\ref{tab:brainarch}),
+the bare LLM scores $\ArchBare$; adding retrieval lifts it to $\ArchMem$; adding
+best-of-$N$ with a verifier lifts the hard questions; and the richest brain reaches
+$\ArchOpt$ ($+\ArchLift$ absolute over the bare backbone with no change to the LLM),
+which a sweep over all $\ArchConfigs$ architectures recovers. The \emph{empirical}
+content is engineering, not the lift: the brain serializes to a spec (with a real LLM
+emit channel) and round-trips losslessly, and a live Ollama run exercises the genuine
+text-in~$\to$~reason~$\to$~text-out loop (\texttt{TextPerceptor}~+~\texttt{LLMEmitter}).
+The point the study makes precisely is \emph{with the model frozen, the world model
+around it is what you optimize} --- a hypothesis this controlled setup illustrates and
+that a real held-constant backbone would be needed to establish.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/brain_arch.png}
+\caption{\textbf{Architecture around a frozen model (E59), modeled backbone.} \textbf{A:}
+under a fixed-capability modeled backbone, task accuracy rises from the bare backbone
+through retrieval and best-of-$N$+verify to the richest brain --- an arithmetic
+illustration of the modeling assumptions, not a measured effect. \textbf{B:} a sweep
+over the $\ArchConfigs$-architecture space recovers the richest configuration.}
+\label{fig:brain-arch}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E59 brain architectures} on the recalled-fact+verify suite, with the
+LLM backbone held constant. Memory and verified best-of-$N$ each add accuracy; the
+optimized brain reaches $\ArchOpt$ ($+\ArchLift$ over the bare LLM).}
+\label{tab:brainarch}
+\input{tables/brain_arch}
+\end{table}
+
+\subsection{The perceive $\to$ world $\to$ emit $\to$ act boundary (E60)}\label{sec:ioboundary}
+A world model is only useful to a developer if real inputs can get \emph{in} and real
+actions can get \emph{out} under a checkable contract. E60 assembles a support-desk
+world from the framework's full I/O boundary and validates each piece as a working,
+serializable component. A \texttt{JSONPerceptor} ingests a structured ticket and a
+\texttt{RegexPerceptor} pulls fields from free text, each guarded by a
+\texttt{PerceptionGate}; a content-addressable \texttt{MemoryStore} recalls the closest
+past resolution; a \texttt{ToolEmitter} backed by a typed \texttt{ToolRegistry} executes
+the chosen fix; and a verified-code \texttt{CodeEmitter} writes the report, contract-checked
+by an \texttt{EmissionGate}. On $\IOTickets$ realistic paraphrased tickets (synonyms,
+dropped and reordered words, typos --- not the canonical wording shuffled), the
+content-addressable \texttt{MemoryStore} routes $\IOReca\%$ to the correct tool, ahead of
+a fair lexical token-overlap (Jaccard) baseline at $\IOJac\%$ and far ahead of naive
+exact-key dict lookup at $\IOExact\%$ (Figure~\ref{fig:io-boundary}A); the gap over the
+Jaccard baseline is modest and we report the numbers as measured rather than tuning the
+paraphrases. The assembled world resolves $\IORes\%$ end to end through real tool calls
+(routing follows recall). The contract gates catch every injected fault --- all
+$\IOGateIn$ malformed inputs and the out-of-contract output
+(Figure~\ref{fig:io-boundary}B) --- while passing valid traffic. The entire world,
+spanning all $\IOComponents$ components, serializes to a spec and round-trips losslessly
+with no LLM in the loop (an optional Ollama run uses an \texttt{LLMEmitter} to draft the
+customer-facing reply), making the perceive/emit/act boundary a portable, deterministically
+verifiable artifact (Table~\ref{tab:ioboundary}). The contribution here is the
+engineering boundary itself; the recall numbers characterize a stdlib sub-word matcher,
+not a learned embedding model.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/io_boundary.png}
+\caption{\textbf{A working I/O boundary (E60).} \textbf{A:} on realistic paraphrased
+tickets, content-addressable recall ($\IOReca\%$) beats a fair lexical token-overlap
+baseline ($\IOJac\%$) and naive exact-key lookup ($\IOExact\%$); the assembled world
+resolves $\IORes\%$ end to end via real tool calls. \textbf{B:} the perception and
+emission gates reject every injected malformed input and out-of-contract output.}
+\label{fig:io-boundary}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E60 I/O components.} Each perceptor, emitter, gate, and the memory
+store, the boundary it sits on, and confirmation that the serializable support-desk
+world exercises it.}
+\label{tab:ioboundary}
+\input{tables/io_boundary}
+\end{table}
+
+\subsection{The sprint allocation across a capability ladder (E35)}\label{sec:ladder}
+E34's finding---that reallocating a shared budget cannot raise the ceiling,
+and that a greedy ``closest-to-passing'' policy tarpits---was measured with a
+1.5B/7B repair model. E35 re-runs the three allocation conditions across a
+capability ladder spanning three model families (Figure~\ref{fig:sprint-ladder}):
+qwen2.5:7b (the E34 anchor), deepseek-r1:14b, gpt-oss:20b, and qwen3-coder:30b.
+Two patterns emerge, both clean. First, the fixed-protocol ceiling rises
+monotonically with capability---15, \LadderDeepseekFixed, \LadderGptossFixed,
+\LadderQwenCoderFixed{} of 20---so the benchmark discriminates model strength as
+intended. Second, the greedy tarpit is \emph{capability-gated}: catastrophic at
+7B (1/20, it sinks the whole budget into one near-miss), it progressively
+defangs with scale and at gpt-oss:20b not only stops tarpitting but clears the
+\emph{entire} board (\LadderGptossGreedy/20), with qwen3-coder:30b at
+\LadderQwenCoderGreedy/20. The allocation pathology, in other words, is a symptom
+of a model that cannot finish the task it fixates on; give it enough capability
+and the fixation becomes harmless. Across all four models and three families
+the qualitative reading of E34 holds---allocation policy is dominated by base
+capability---now with the capability axis made explicit.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.85\linewidth]{figs/sprint_ladder.png}
+\caption{\textbf{The sprint allocation across a capability ladder (E35).}
+Tasks solved on OpenWorld-SWE-bench under the three allocation conditions, by
+repair model (increasing capability left to right; budget 80). The
+fixed-protocol ceiling rises with capability; the greedy tarpit (a lone
+solved task at 7B) defangs with scale, clearing all 20 at gpt-oss:20b.}
+\label{fig:sprint-ladder}
+\end{figure}
+
+\subsection{Composition yields better representations (E36)}\label{sec:representations}
+E12 and E19 measured what a learner needs to match a \emph{single}
+synthesized world; E36 asks the representational question directly on
+\emph{factored} worlds, where composition's advantage should appear if it
+exists anywhere. The world is an economy of $K$ parametric sectors (the E30
+substrate); we sample transitions and learn, pitting a zoo of
+\RepNumMono{} monolithic learners on the joint state---linear/ridge
+regression, 1-NN and $k$-NN, kernel SVR, a Gaussian process, a random
+forest, histogram gradient boosting, a Koopman/EDMD operator on a degree-2
+lift, and a two-hidden-layer MLP---against a composite of small per-sector
+learners and the exact symbolic composite, on three axes a learned dynamics
+model is judged by (Table~\ref{tab:representations},
+Figure~\ref{fig:representations}). The comparison is capacity-fair: the
+monolith is given at least as many parameters as the composite's children
+combined (\RepMonoParams{} vs.\ \RepCompParams{} at $K{=}5$), so any gap is
+representational, not a matter of model size.
+
+\emph{Compositional generalization.} Training covers each sector's full
+marginal value range but only a thin slice of the joint product; the test
+set is the full product, dominated by sector-value \emph{combinations} never
+seen together. The composite needs only the marginals---each child sees its
+whole small local space---so its accuracy is flat in $K$ (learned-MLP
+\RepCompGenLo--\RepCompGenHi; learned-trees and symbolic exact). The entire
+monolithic family needs the joint and collapses as the unseen fraction
+grows: every one of the \RepNumMono{} learners falls below $0.03$ by $K{=}5$
+\emph{except} gradient boosting, the strongest, which still decays from
+\RepBestMonoLo{} to \RepBestMonoHi{}---one to two orders of magnitude below
+the composite. Crucially, the collapse is not an MLP artifact: it holds
+across kernel methods, trees, Gaussian processes, and a Koopman operator
+alike, and factoring rescues a \emph{non-MLP} child too---per-sector
+gradient boosting reaches \RepCompHgbHi{} where joint gradient boosting
+cannot. \emph{Interference.} Trained on the sectors in sequence, the
+monolith forgets the first the moment it learns the second (retained
+accuracy \RepIntfMono); the composite stores each child separately and
+retains \RepIntfComp. \emph{Sample efficiency.} At 100 training transitions
+the composite reaches \RepSampCompLo{} against the monolith's
+\RepSampMonoLo, and the symbolic composite needs none. The decisive pattern
+is a three-tier gradient---monolithic learning collapses (every model class
+tried) $\to$ factored learning recovers most of it $\to$ symbolic factoring
+is exact and training-free. Factoring the representation, not scaling or
+swapping the learner, is what buys generalization here.
+
+\begin{table}[htb]\centering\small
+\input{tables/representations.tex}
+\caption{E36 compositional generalization: exact next-state accuracy on
+\emph{novel} sector combinations, by number of parts $K$. Every monolithic
+learner over the joint state collapses as $K$ grows (gradient boosting, the
+strongest, decays from \RepBestMonoLo{} to \RepBestMonoHi; the rest sit near
+chance); factoring the same problem into per-sector learners holds flat, and
+is exact with a strong child learner or with synthesized code.}
+\label{tab:representations}
+\end{table}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\linewidth]{figs/representations.png}
+\caption{\textbf{Composition vs.\ monolithic learners (E36)} on a factored
+$K$-sector world, capacity-fair. \textbf{A:} exact accuracy on novel sector
+combinations---the whole monolithic family (shaded range over
+\RepNumMono{} learners; best, boosted trees, shown) collapses as $K$ grows,
+while both composite learners and the symbolic composite stay flat near or
+at 1.0. \textbf{B:} accuracy retained on the first part after training
+through all $K$---the monolith suffers catastrophic interference, the
+composite does not. \textbf{C:} accuracy vs.\ training transitions---the
+composite learns from far less data, the symbolic composite from none.}
+\label{fig:representations}
+\end{figure}
+
+\subsection{Adapting to sudden, unannounced rule changes (E41)}\label{sec:nonstationary}
+E32 handled a regime switch whose timing was \emph{known}, via a pre-verified
+\texttt{PhasedTransition}. E41 asks the harder question a non-stationary world
+poses: when the rules change suddenly and \emph{without announcement}, who
+notices, and how fast do they recover? A reservoir tracks toward a hidden
+target at a hidden rate; that regime jumps at \NonStatChanges{} unannounced
+times in a 120-step episode, and at each step the current level is read
+through the perception boundary and four predictors forecast the next level
+(Figure~\ref{fig:nonstationary}). A symbolic monitor that watches its own
+prediction error and re-identifies the rule from the post-change transient
+recovers in \NonStatSymLag{} step(s) at each change---snapping back to exact
+(\NonStatSymAcc{} overall). A standard sliding-window 1-NN recovers only as its
+window refills (\NonStatWinLag{} steps; \NonStatWinAcc{} overall, and only
+approximate), and a static model frozen on the first regime never recovers
+(\NonStatFrozenAcc), trailed against an oracle that knows the change times
+(0-lag, exact). The cumulative-error curves (Figure~\ref{fig:nonstationary}A)
+make the difference plain: the symbolic monitor's regret is nearly flat with a
+small step at each change, while the frozen model's climbs without bound. Under
+noisy perception the ranking is unchanged and every method's error floor rises
+by exactly the perception error---the E39 decomposition, now riding on top of
+the adaptation dynamics. The mechanism behind the fast recovery is the same one
+the paper rests on: because the dynamics are an explicit, identifiable program,
+a handful of post-change observations re-pin the rule exactly, where a
+statistical model must re-estimate over a window. The boundary is equally
+explicit: this holds when the changed rule stays within the identifiable family
+the monitor searches; a change to an undeclarable rule admits no exact
+recovery.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/nonstationary.png}
+\caption{\textbf{Adapting to sudden unannounced rule changes (E41).} A
+reservoir's hidden regime jumps at the marked steps; predictions run through
+the perception boundary. \textbf{A:} cumulative wrong predictions---the
+symbolic monitor (ours) stays nearly flat, the sliding-window learner steps up
+and slowly recovers, the static-frozen model climbs without bound, the oracle
+is flat at zero. \textbf{B:} recovery lag per change---\NonStatSymLag{} steps
+for the symbolic monitor (to exact) versus \NonStatWinLag{} for the window;
+the frozen model never recovers.}
+\label{fig:nonstationary}
+\end{figure}
+
+\subsection{Agents traversing connected worlds with changing rules (E42)}\label{sec:traversal}
+E42 is the capstone: it combines composition, toll routes, non-stationary
+rules, and per-world perception, and asks whether an agent can track each
+world's rule \emph{at the belief level} as it hops between them and the rules
+change---including changes that happen while it is away. Two reservoir worlds
+are joined by a toll \texttt{Route}; each has its own changing regime and its
+own perception boundary; an agent hops every \AgentDwell{} steps
+(\AgentHops{} arrivals, \AgentTolls{} tolls paid), and four belief models
+predict the current world's next state from the same perceived observations
+(Figure~\ref{fig:agent-traversal}). The decisive contrast is between
+\emph{separating} a belief per world and \emph{sharing} one. The symbolic
+per-world monitor scores \AgentSymAcc{} and, crucially, returns to a world it
+left \emph{unchanged} almost for free (recovery \AgentSymUnchg{} steps),
+recovering to exact in \AgentSymChanged{} step when the world changed while it
+was away. The single shared learner scores \AgentSharedAcc---and pays a
+recovery cost of \AgentSharedUnchg{} steps even returning to a world that
+\emph{did not change}, because learning the other world overwrote its belief:
+catastrophic interference (the E36 result) now induced purely by traversal. A
+per-world sliding window avoids interference (\AgentWinAcc) but does not
+reliably re-identify an away-change within a single visit. The lesson threads
+the whole paper together: separating dynamics into per-world programs---the
+composition principle---is what lets an agent carry one world's rule across an
+absence intact and re-pin it from a few observations when it has changed, where
+an entangled belief cannot hold two worlds at once. The boundary is the
+familiar one: exact re-identification holds while the changed rule stays in the
+identifiable family.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/agent_traversal.png}
+\caption{\textbf{Agents traversing connected worlds with changing rules
+(E42).} Two worlds joined by a toll route, each non-stationary, each with its
+own perception boundary; an agent hops between them. \textbf{A:} prediction
+accuracy tracking the current world's rule across hops. \textbf{B:} recovery
+lag on arrival, split by whether the world's rule changed while the agent was
+away. The shared-belief learner pays an interference cost even returning to an
+\emph{unchanged} world; the per-world symbolic monitor returns nearly free and
+re-identifies away-changes in a step; the per-world window does not reliably
+recover from away-changes within a visit (hatched = no recovery).}
+\label{fig:agent-traversal}
+\end{figure}
 
 \section{Additional domain demonstrations}\label{app:domains}
 These experiments express the framework across domains beyond the symbolic-world-model thesis benchmarked in the main text. They are demonstrations of expressiveness, not load-bearing evidence for the central claims, and are collected here to keep the main results focused; each is self-contained and regenerates from the same pipeline.

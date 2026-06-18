@@ -325,11 +325,14 @@ contributions are as follows:
   models, but a fast way to prototype them.
   \item \textbf{The prototyping benchmark.} A \ProtoNumWorlds-world benchmark across
   \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal,
-  cybersecurity, energy, agentic-AI) in which Claude Code built and validated
-  \emph{every} world (\ProtoValidationRate) at a median of \ProtoMedianMinutes{}
-  minutes (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes), with \ProtoExecutableRate{}
-  behaviorally executable on an independent audit---against the days-to-weeks of
-  hand-building. All \ProtoNumWorlds{} ship as runnable recipes.
+  cybersecurity, energy, agentic-AI) in which Claude Code built \emph{every} world at a
+  median of \ProtoMedianMinutes{} minutes (p90 \ProtoPNinetyMinutes, max
+  \ProtoMaxMinutes). Two gates of increasing strictness: \ProtoValidationRate{} pass the
+  structural \texttt{validate\_spec} gate (well-formed, round-tripping, servable), and
+  \ProtoExecutableRate{} additionally clear a stricter \emph{behavioral} audit (load,
+  random-rollout, require state to change)---against the days-to-weeks of hand-building.
+  All \ProtoNumWorlds{} ship as runnable recipes (characterized in
+  Figure~\ref{fig:world-atlas}).
   \item \textbf{Trustworthiness of the fast prototypes.} On three worlds with known
   ground truth, verified synthesized dynamics are exact on \MultiCodeExact{}
   \RolloutSteps-step rollouts (95\% CI \MultiCodeCI) and answer $10\times$
@@ -597,10 +600,15 @@ resulting models are exact, composable, and steerable.
 
 \begin{table}[htb]\centering\small
 \input{tables/prototyping.tex}
-\caption{\textbf{Prototyping-latency benchmark (E68).} \ProtoNumWorlds{} world models
+\caption{\textbf{Prototyping-latency benchmark (E68/E68b).} \ProtoNumWorlds{} world models
 across \ProtoNumSectors{} sectors, each authored by Claude Code (\texttt{openworld
-build}) and timed to a validated, servable spec; all saved as recipes. Wall-clock varies
-run-to-run (LLM latency), so this reproduces in distribution (minutes-scale).}
+build}) and timed; all saved as recipes. Two gates of increasing strictness:
+\emph{Validated} counts worlds passing the structural \texttt{validate\_spec} gate
+(well-formed, round-tripping, servable; \ProtoValidationRate); \emph{Executable} counts
+those that also evolve state under a random rollout in the behavioral audit
+(\ProtoExecutableRate; the one exception is a recipe whose random-action rollout leaves
+state unchanged). Wall-clock varies run-to-run (LLM latency), so this reproduces in
+distribution (minutes-scale). Per-world characteristics: Figure~\ref{fig:world-atlas}.}
 \label{tab:prototyping}
 \end{table}
 
@@ -2020,6 +2028,29 @@ LLM-judge coarseness~\cite{llmjudge2023}.
 
 \section{Additional experiments moved from the main text}\label{app:more}
 The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
+
+\subsection{Atlas of the \ProtoNumWorlds{} prototyped worlds}\label{sec:world-atlas}
+Figure~\ref{fig:world-atlas} characterizes every world from the prototyping benchmark
+(\S\ref{sec:proto-latency}) at a glance: one row per world, grouped and colored by sector,
+showing each world's symbolic-state size, action count, build time, which boundaries it
+declares (perceive / emit / objectives / composite), and whether it clears the behavioral
+audit. Every world declares both a perceive boundary (a \texttt{CodePerceptor}, runnable
+server-side with no LLM) and an emit boundary; the prototypes are flat (non-composite)
+single worlds. The figure is generated directly from the E68/E68b per-world records, so it
+cannot drift from the measured results.
+
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth,height=0.92\textheight,keepaspectratio]{figs/world_atlas.png}
+\caption{\textbf{Atlas of the \ProtoNumWorlds{} prototyped worlds (E68/E68b).} One row per
+world, grouped and colored by sector (legend at bottom). Numeric columns (state variables,
+actions, build minutes) are shaded by value within the column; boundary columns
+(\emph{Perc}eive, \emph{Emit}, \emph{Obj}ectives, \emph{Comp}osite) are filled when the
+world declares that component; \emph{Exec} marks whether the world clears the behavioral
+audit (green \checkmark) or not (red, the single \texttt{budget\_envelope} recipe whose
+random-action rollout leaves state unchanged). All \ProtoNumWorlds{} declare perceive and
+emit boundaries; none is composite. Generated from the per-world records.}
+\label{fig:world-atlas}
+\end{figure}
 
 \subsection{Why frozen perceptual world models don't control cartpole (E67)}\label{sec:vjepa-control}
 The cartpole head-to-head (Section~\ref{sec:cartpole}) gives the perceptual species its

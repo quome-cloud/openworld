@@ -1,0 +1,107 @@
+{
+  "domain": "healthcare",
+  "n_source_worlds": 12,
+  "n_principles": 20,
+  "principles": [
+    {
+      "name": "avoid_readmission",
+      "goal": "minimize readmission_risk",
+      "source_world": "readmission_risk"
+    },
+    {
+      "name": "timely_discharge",
+      "goal": "minimize length_of_stay",
+      "source_world": "readmission_risk"
+    },
+    {
+      "name": "continuity_of_care",
+      "goal": "maximize followup_scheduled",
+      "source_world": "readmission_risk"
+    },
+    {
+      "name": "transplant as many as possible",
+      "goal": "max num_transplanted",
+      "source_world": "organ_matching"
+    },
+    {
+      "name": "clear the waitlist",
+      "goal": "min num_waiting",
+      "source_world": "organ_matching"
+    },
+    {
+      "name": "throughput",
+      "goal": "max discharged",
+      "source_world": "ed_triage"
+    },
+    {
+      "name": "sickest seen first",
+      "goal": "min wait of low-acuity patients",
+      "source_world": "ed_triage"
+    },
+    {
+      "name": "minimize_sepsis_risk",
+      "goal": "minimize the risk score",
+      "source_world": "sepsis_warning"
+    },
+    {
+      "name": "timely_escalation",
+      "goal": "escalate before risk crosses 50",
+      "source_world": "sepsis_warning"
+    },
+    {
+      "name": "avoid_overtreatment",
+      "goal": "minimize unnecessary treat actions",
+      "source_world": "sepsis_warning"
+    },
+    {
+      "name": "clear_backlog",
+      "goal": "minimize submitted_count + under_review_count (drain the queue)",
+      "source_world": "claims_adjudication"
+    },
+    {
+      "name": "adjudicate",
+      "goal": "maximize approved_count + denied_count (reach a final decision)",
+      "source_world": "claims_adjudication"
+    },
+    {
+      "name": "throughput",
+      "goal": "maximize booked",
+      "source_world": "or_scheduling"
+    },
+    {
+      "name": "utilization",
+      "goal": "maximize utilization",
+      "source_world": "or_scheduling"
+    },
+    {
+      "name": "safety",
+      "goal": "minimize rejected",
+      "source_world": "or_scheduling"
+    },
+    {
+      "name": "contain the outbreak",
+      "goal": "min infected",
+      "source_world": "infection_control"
+    },
+    {
+      "name": "get patients well",
+      "goal": "max recovered",
+      "source_world": "infection_control"
+    },
+    {
+      "name": "fulfillment",
+      "goal": "minimize waitlist_len",
+      "source_world": "dialysis_sched"
+    },
+    {
+      "name": "adherence",
+      "goal": "minimize missed_count",
+      "source_world": "dialysis_sched"
+    },
+    {
+      "name": "review_all_interactions",
+      "goal": "minimize unreviewed_count",
+      "source_world": "med_reconciliation"
+    }
+  ]
+}

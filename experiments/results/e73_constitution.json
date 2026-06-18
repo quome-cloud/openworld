@@ -1,0 +1,53 @@
+{
+  "task": "E73 data + constitution stage: world-level train/test split, planner-labeled SFT data, and the emitted domain constitution for the de-risk run",
+  "domain": "healthcare",
+  "n_worlds": 17,
+  "n_train_worlds": 12,
+  "n_test_worlds": 5,
+  "train_worlds": [
+    "readmission_risk",
+    "vaccine_coldchain",
+    "organ_matching",
+    "appointment_sched",
+    "ed_triage",
+    "sepsis_warning",
+    "claims_adjudication",
+    "or_scheduling",
+    "infection_control",
+    "ward_staffing",
+    "dialysis_sched",
+    "med_reconciliation"
+  ],
+  "test_worlds": [
+    "pharmacy_inventory",
+    "ambulance_dispatch",
+    "icu_beds",
+    "telehealth_queue",
+    "glucose_mgmt"
+  ],
+  "n_sft_examples": 720,
+  "n_objective_named_train": 6,
+  "constitution_n_principles": 20,
+  "test_controllable": 3,
+  "artifacts": {
+    "sft": "experiments/results/e73_artifacts/sft_train.jsonl",
+    "constitution": "experiments/results/e73_artifacts/constitution.json",
+    "test_manifest": "experiments/results/e73_artifacts/test_manifest.json"
+  },
+  "config": {
+    "test_fraction": 0.3,
+    "horizon": 14,
+    "states_per_world": 60,
+    "planner_k": 20,
+    "planner_h": 6,
+    "seed": 73
+  },
+  "experiment": "e73_constitution",
+  "timestamp": "2026-06-18T11:39:13",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

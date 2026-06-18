@@ -1,0 +1,127 @@
+[
+  {
+    "world": "pharmacy_inventory",
+    "sector": "healthcare",
+    "target": "expired_total",
+    "dir": -1,
+    "objective_named": true,
+    "actions": [
+      "dispense",
+      "reorder",
+      "expire"
+    ],
+    "g_random": -7.5,
+    "g_planner": -0.0,
+    "controllable": true,
+    "rules": "'dispense' removes units of a drug from stock, consuming the soonest-to-expire batch first (FEFO); an under-filled request records a stockout.; 'reorder' adds a fresh batch of a drug, expiring 'shelf_life_days' after the current day.; 'expire' advances the clock by one day (or 'days') and discards every batch whose expiry day has been reached, adding its units to expired_total.; Stock is never negative and expired units can never be dispensed.",
+    "description": "a pharmacy inventory world with stock and expiry; actions dispense, reorder, expire",
+    "initial_state": {
+      "day": 0,
+      "reorder_threshold": 50,
+      "reorder_qty": 100,
+      "shelf_life_days": 90,
+      "dispensed_total": 0,
+      "expired_total": 0,
+      "stockouts": 0,
+      "orders_placed": 0
+    }
+  },
+  {
+    "world": "ambulance_dispatch",
+    "sector": "healthcare",
+    "target": "time",
+    "dir": 1,
+    "objective_named": false,
+    "actions": [
+      "dispatch",
+      "arrive",
+      "return"
+    ],
+    "g_random": 6.9167,
+    "g_planner": 8.0,
+    "controllable": true,
+    "rules": "An incident has a priority (1 = most urgent) and a status: waiting -> assigned -> onscene -> resolved.; A unit has a status forming the lifecycle: idle -> enroute -> onscene -> idle.; 'dispatch' sends an idle unit to a waiting incident: the unit becomes enroute and the incident assigned. If params are omitted, the first idle unit is sent to the most urgent waiting incident.; 'arrive' marks an enroute unit onscene; its incident also becomes onscene.; 'return' clears an onscene unit back to idle, resolves its incident, and increments 'resolved'.; Every successful action advances 'time' by one tick; illegal actions are no-ops.; A unit serves at most one incident at a time, and an incident is he",
+    "description": "an ambulance dispatch world: incidents by priority and units; actions dispatch, arrive, return",
+    "initial_state": {
+      "time": 0,
+      "resolved": 0,
+      "available": 2,
+      "incoming_priority": 0
+    }
+  },
+  {
+    "world": "icu_beds",
+    "sector": "healthcare",
+    "target": "time",
+    "dir": 1,
+    "objective_named": false,
+    "actions": [
+      "admit",
+      "transfer",
+      "discharge"
+    ],
+    "g_random": 14.0,
+    "g_planner": 14.0,
+    "controllable": false,
+    "rules": "Each ward has a fixed bed capacity; occupancy of a ward never exceeds its capacity.; admit: seat a waiting (or perceived 'pending') patient into a ward that has a free bed; with no params, take the head of the waitlist and the lowest-named ward with space. If no bed is available the patient keeps waiting.; transfer: relocate an admitted patient to a different ward that has a free bed; the source frees a bed and the target fills one, so total occupancy is unchanged. With no params, move the lowest-acuity patient from the fullest ward to the ward with the most free space.; discharge: release an admitted patient, freeing a bed in their ward; with no params, discharge the lowest-acuity patient.;",
+    "description": "an ICU bed-allocation world across wards with bed counts; actions admit, transfer, discharge as beds free up",
+    "initial_state": {
+      "total_capacity": 9,
+      "occupied_beds": 3,
+      "free_beds": 6,
+      "waiting_count": 3,
+      "admitted_count": 3,
+      "discharged_count": 0,
+      "transferred_count": 0,
+      "time": 0
+    }
+  },
+  {
+    "world": "telehealth_queue",
+    "sector": "healthcare",
+    "target": "next_id",
+    "dir": 1,
+    "objective_named": false,
+    "actions": [
+      "enqueue",
+      "route",
+      "complete",
+      "noop"
+    ],
+    "g_random": 3.5417,
+    "g_planner": 14.0,
+    "controllable": true,
+    "rules": "A visit's lifecycle is waiting -> routed -> completed; it advances one stage per action.; enqueue adds a new visit to the waiting pool with an auto-assigned, monotonically increasing id.; Priority is an integer 1..5 (5 = most urgent), clamped into range; it defaults to 3.; route removes a visit from the waiting pool and appends it to the queue for its own specialty.; route and complete select the most urgent visit first, breaking ties by earliest arrival (lowest id).; complete removes the head of a specialty's provider queue and records it as completed.; num_waiting, num_routed, and num_completed always equal the sizes of their respective structures.; Actions with nothing to act on (e.g. rou",
+    "description": "a telehealth visit queue routed by specialty; actions enqueue, route, complete",
+    "initial_state": {
+      "next_id": 1,
+      "num_waiting": 0,
+      "num_routed": 0,
+      "num_completed": 0
+    }
+  },
+  {
+    "world": "glucose_mgmt",
+    "sector": "healthcare",
+    "target": "minutes",
+    "dir": 1,
+    "objective_named": false,
+    "actions": [
+      "dose_insulin",
+      "eat",
+      "exercise",
+      "wait"
+    ],
+    "g_random": 420.0,
+    "g_planner": 420.0,
+    "controllable": false,
+    "rules": "Each step advances 30 minutes of simulated time.; 'dose_insulin' adds its 'units' param (default 1.0) to insulin-on-board (iob).; 'eat' adds its 'carbs' param (default 45.0 g) to carbs-on-board (cob).; Each step half of carbs-on-board digests, raising glucose by 3 mg/dL per gram digested.; Each step 30% of insulin-on-board absorbs, lowering glucose by 40 mg/dL per unit absorbed.; 'exercise' burns 30 mg/dL per unit of intensity (default 1.0) and boosts insulin sensitivity by 50% per unit of intensity for that step.; Endogenous liver output drifts glucose 10% of the way back to a 100 mg/dL baseline each step.; Glucose is clamped to [20, 600] mg/dL; status is hypoglycemia (<70), in_range (70-18",
+    "description": "a diabetes glucose-management world: blood glucose responds to dose, meals, exercise; actions dose_insulin, eat, exercise",
+    "initial_state": {
+      "glucose": 120.0,
+      "iob": 0.0,
+      "cob": 0.0,
+      "minutes": 0
+    }
+  }
+]

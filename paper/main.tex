@@ -793,6 +793,56 @@ twenty-step rollouts bit-exactly (95\% CI \MultiCodeCI) versus \MultiLLMExact{}
 for the LLM proxy. We treat the divergence figure as illustrative of the
 mechanism and the exact-match rate as the result.
 
+\subsection{World-time compute: traversing world models to generalize from fewer examples}\label{sec:world-time}
+The results so far buy a \emph{correct} world model cheaply. A verified world model is also a
+\emph{generator}: it produces unlimited, exactly-labelled experience and exposes its own
+rules, so an agent can \emph{traverse} many worlds of a domain and distil the shared skill.
+We call spending compute this way---fine-tuning a model on trajectories drawn from traversed,
+verified world models rather than on scarce real examples---\textbf{world-time compute}, a
+training-time analogue of test-time compute.
+
+We test it on a \emph{family} of diagnosis worlds (E74): one POMDP template (a hidden
+disease; order tests to reveal symptoms; commit a diagnosis) instantiated as
+\WTNumTrainWorlds{}${+}$\WTNumTestWorlds{} specialties that share a goal and action grammar
+but differ in their symptom\,$\to$\,disease structure. We hold out whole specialties (a
+world-level train/test split, as in supervised learning): fine-tune a model on traversed
+\emph{train} specialties, then measure diagnostic accuracy on \WTNumTestWorlds{}
+\emph{unseen} specialties (\WTNumCases{} cases), bracketed by a prior-only floor (\WTFloor)
+and an oracle handed the rules (\WTOracle).
+
+Two findings (Figure~\ref{fig:world-time}). \emph{(i) Generalization, not memorization:}
+world-time compute lifts held-out accuracy at every model size---from \WTSmallBase{} to
+\WTSmallFT{} at \WTSmallName{}, and from \WTLargeBase{} to \WTLargeFT{} at \WTLargeName{}---%
+moving the model toward the rules-given oracle on specialties it never trained on.
+\emph{(ii) It is a small-model multiplier:} the gain is largest where capability is
+scarcest ($+\WTSmallGain$ points at \WTSmallName{} versus $+\WTLargeGain$ at \WTLargeName),
+then plateaus rather than vanishing, so even capable models keep a few points. An offline
+analogue agrees---a learner that has distilled the family's structure diagnoses a held-out
+specialty from fewer cases than one learning from scratch (\WTMetaFewShot{} vs
+\WTScratchFewShot{} at a single case per disease).
+
+The \emph{family} is what makes this work. Fine-tuning on \emph{heterogeneous}, unrelated
+worlds that share no task structure yields no such transfer (E71, E73): there is no shared
+skill to distil, so a policy expert on one world is no better than chance on another.
+World-time compute pays off precisely when the traversed worlds form a domain---then more
+traversal becomes a lever on generalization, complementary to train-time data and test-time
+search. (Scope: the model-size sweep mixes precisions---0.5B--7B are bf16 LoRA, the larger
+sizes 4-bit QLoRA---and the per-\emph{number}-of-worlds axis saturates quickly, so we claim a
+compute \emph{lever}, not a clean world-count scaling law.)
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.92\linewidth]{figs/world_time_compute.png}
+\caption{\textbf{World-time compute (E74).} Held-out diagnostic accuracy on
+\WTNumTestWorlds{} \emph{unseen} diagnosis specialties, before (gray) and after (orange)
+fine-tuning on trajectories traversed through \WTNumTrainWorlds{} \emph{train} specialties'
+verified world models, across model size. The shaded band and labels are the per-size
+generalization gain. Fine-tuning moves every model toward the rules-given oracle, with the
+largest lift for the smallest models---world traversal is a sample-efficiency multiplier,
+strongest where capability is scarcest. Fine-tuning on unrelated, heterogeneous worlds gives
+no such transfer (E71, E73).}
+\label{fig:world-time}
+\end{figure}
+
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An

@@ -1,0 +1,108 @@
+{
+  "task": "diagnosis world family: meta-learning generalization across specialties (hold out whole specialties; clean diagnostic-accuracy oracle)",
+  "config": {
+    "n_specialties": 120,
+    "n_train": 80,
+    "diseases": 6,
+    "features": 12,
+    "signature": 3,
+    "n_grid": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "k_grid": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "eval_patients": 150,
+    "seed": 74
+  },
+  "prior_only_floor": 0.3404,
+  "oracle_ceiling": 0.8553,
+  "learning_curve": {
+    "n_grid": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "meta_acc": [
+      0.703,
+      0.783,
+      0.8252,
+      0.8293,
+      0.8405,
+      0.84
+    ],
+    "scratch_acc": [
+      0.6797,
+      0.7678,
+      0.8227,
+      0.8423,
+      0.846,
+      0.8425
+    ],
+    "meta_tests": [
+      8.967,
+      7.489,
+      6.42,
+      6.093,
+      5.818,
+      5.658
+    ],
+    "scratch_tests": [
+      11.842,
+      10.818,
+      9.24,
+      7.802,
+      7.038,
+      6.341
+    ]
+  },
+  "meta_prior": {
+    "mu_lo": 0.1,
+    "mu_hi": 0.8279,
+    "pi": 0.25
+  },
+  "meta_vs_k": {
+    "k_grid": [
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "acc": [
+      0.7742,
+      0.773,
+      0.7433,
+      0.7848,
+      0.7837,
+      0.7937
+    ]
+  },
+  "framework_grounding": {
+    "validate_problems": [],
+    "roundtrip_ok": true
+  },
+  "note": "meta = empirical-Bayes prior over symptom->disease structure fit on TRAIN specialties; scratch = uninformed. Held-out specialties only.",
+  "experiment": "e74_diagnosis",
+  "timestamp": "2026-06-18T12:14:04",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

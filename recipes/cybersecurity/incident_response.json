@@ -1,0 +1,232 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "incident_response",
+  "description": "a security incident-response lifecycle world; actions detect, triage, contain, eradicate, recover",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "security",
+      "incident-response",
+      "lifecycle",
+      "leaf"
+    ],
+    "lineage": "build/incident_response.py",
+    "metrics": {},
+    "description": "a security incident-response lifecycle world; actions detect, triage, contain, eradicate, recover"
+  },
+  "state_schema": {
+    "phase": "str",
+    "threat_present": "bool",
+    "detected": "bool",
+    "scope_known": "bool",
+    "contained": "bool",
+    "eradicated": "bool",
+    "recovered": "bool",
+    "services_online": "bool",
+    "affected_hosts": "int",
+    "data_exfiltrated": "int",
+    "severity": "int",
+    "risk": "int",
+    "timeline": "list"
+  },
+  "initial_state": {
+    "phase": "monitoring",
+    "threat_present": true,
+    "detected": false,
+    "scope_known": false,
+    "contained": false,
+    "eradicated": false,
+    "recovered": false,
+    "services_online": true,
+    "affected_hosts": 4,
+    "data_exfiltrated": 0,
+    "severity": 0,
+    "risk": 0,
+    "timeline": []
+  },
+  "actions": [
+    "detect",
+    "triage",
+    "contain",
+    "eradicate",
+    "recover"
+  ],
+  "rules": [
+    "The lifecycle is strictly ordered: monitoring -> detected -> triaged -> contained -> eradicated -> recovered. Each action advances exactly one phase and only from the immediately preceding phase.",
+    "'detect' fires only while monitoring and only if a threat is present; it marks the incident detected.",
+    "'triage' (from detected) confirms scope and scores severity and risk from the number of affected hosts and whether data was exfiltrated.",
+    "'contain' (from triaged) isolates affected systems: it stops the spread and cuts risk, but takes services offline.",
+    "'eradicate' (from contained) removes the threat from the environment.",
+    "'recover' (from eradicated) restores services and drives residual risk to zero, resolving the incident.",
+    "Any action taken out of order is a no-op and leaves the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    phase = s.get(\"phase\", \"monitoring\")\n\n    def advance(to_phase):\n        # Only genuine phase transitions touch state, so out-of-order actions\n        # stay exact no-ops and the lifecycle graph remains a clean chain.\n        log = list(s.get(\"timeline\", []))\n        log.append(name)\n        s[\"timeline\"] = log\n        s[\"phase\"] = to_phase\n\n    if name == \"detect\":\n        # Surface a live intrusion the monitoring stack has not yet flagged.\n        if phase == \"monitoring\" and s.get(\"threat_present\"):\n            s[\"detected\"] = True\n            advance(\"detected\")\n    elif name == \"triage\":\n        # Confirm scope and score severity/risk from the blast radius.\n        if phase == \"detected\":\n            hosts = int(s.get(\"affected_hosts\", 0))\n            leaked = 2 if int(s.get(\"data_exfiltrated\", 0)) > 0 else 0\n            sev = min(10, hosts * 2 + leaked)\n            s[\"severity\"] = sev\n            s[\"risk\"] = sev\n            s[\"scope_known\"] = True\n            advance(\"triaged\")\n    elif name == \"contain\":\n        # Isolate affected systems: spread stops, but service goes offline.\n        if phase == \"triaged\":\n            s[\"contained\"] = True\n            s[\"services_online\"] = False\n            s[\"risk\"] = max(0, int(s.get(\"risk\", 0)) - 4)\n            advance(\"contained\")\n    elif name == \"eradicate\":\n        # Remove the adversary's foothold from the environment.\n        if phase == \"contained\":\n            s[\"threat_present\"] = False\n            s[\"eradicated\"] = True\n            s[\"risk\"] = max(0, int(s.get(\"risk\", 0)) - 2)\n            advance(\"eradicated\")\n    elif name == \"recover\":\n        # Restore clean systems to production; the incident is resolved.\n        if phase == \"eradicated\":\n            s[\"recovered\"] = True\n            s[\"services_online\"] = True\n            s[\"risk\"] = 0\n            advance(\"recovered\")\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "affected_hosts",
+        "threat_present"
+      ],
+      "schema": {
+        "affected_hosts": {
+          "type": "int",
+          "range": [
+            0,
+            9999
+          ]
+        },
+        "threat_present": "bool"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower(); v = v.strip()\n        if k in ('affected_hosts', 'hosts'):\n            out['affected_hosts'] = int(v) if v.lstrip('-').isdigit() else 0\n        elif k in ('indicator', 'ioc', 'signature'):\n            out['threat_present'] = bool(v) and v.lower() not in ('none', 'clean')\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "severity",
+        "risk",
+        "affected_hosts",
+        "data_exfiltrated",
+        "recovered",
+        "services_online"
+      ],
+      "report": "incident [{phase}] severity {severity}/10, risk {risk}, {affected_hosts} hosts affected, {data_exfiltrated} records lost; recovered={recovered}, services_online={services_online}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "fully resolve the incident",
+      "goal": "max recovered"
+    },
+    {
+      "name": "minimize residual risk",
+      "goal": "min risk"
+    },
+    {
+      "name": "limit data loss",
+      "goal": "min data_exfiltrated"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "detect",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "risk 0",
+            "severity 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "risk 0",
+            "severity 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "risk 8",
+            "severity 8"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "risk 4",
+            "severity 8"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "risk 2",
+            "severity 8"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "risk 0",
+            "severity 8"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "detect"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "triage, contain, eradicate"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "triage"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "detect, contain, eradicate"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "contain"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "detect, triage, eradicate"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "eradicate"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "detect, triage, contain"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "recover"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "detect, triage, contain"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

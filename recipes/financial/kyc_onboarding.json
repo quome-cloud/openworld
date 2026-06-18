@@ -1,0 +1,228 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "kyc_onboarding",
+  "description": "a KYC onboarding world with verification tiers; actions submit_docs, verify, approve, reject",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a KYC onboarding world with verification tiers; actions submit_docs, verify, approve, reject"
+  },
+  "state_schema": {
+    "applicant": "str",
+    "requested_tier": "int",
+    "stage": "str",
+    "docs_count": "int",
+    "checks_passed": "int",
+    "attempts": "int",
+    "granted_tier": "int",
+    "decision_reason": "str"
+  },
+  "initial_state": {
+    "applicant": "applicant_001",
+    "requested_tier": 2,
+    "stage": "onboarding",
+    "docs_count": 0,
+    "checks_passed": 0,
+    "attempts": 0,
+    "granted_tier": 0,
+    "decision_reason": ""
+  },
+  "actions": [
+    "submit_docs",
+    "verify",
+    "approve",
+    "reject"
+  ],
+  "rules": [
+    "Verification tiers run from 1 (basic) to 3 (enhanced); tier N requires N documents and N passed checks.",
+    "submit_docs files one document per call, capped at the requested tier's requirement, and moves the applicant to 'submitted'.",
+    "verify runs one check per call and records an attempt; a check clears only when a supporting document is already on file.",
+    "An applicant becomes 'verified' once both passed checks and filed documents meet the requested tier.",
+    "approve only succeeds from 'verified' and grants the requested tier; reject is allowed from any non-terminal stage and grants tier 0.",
+    "'approved' and 'rejected' are terminal stages: further actions leave the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # Tier N requires N documents on file and N passed checks before approval.\n    REQUIRED = {1: 1, 2: 2, 3: 3}\n    tier = int(s.get(\"requested_tier\", 1))\n    if tier not in REQUIRED:\n        tier = 1\n        s[\"requested_tier\"] = 1\n    need = REQUIRED[tier]\n\n    stage = s.get(\"stage\", \"onboarding\")\n\n    # 'approved' and 'rejected' are absorbing: nothing changes once decided.\n    if stage in (\"approved\", \"rejected\"):\n        return s\n\n    if name == \"submit_docs\":\n        # File one document per call, capped at the requested tier's requirement.\n        if stage in (\"onboarding\", \"submitted\"):\n            s[\"docs_count\"] = min(need, int(s.get(\"docs_count\", 0)) + 1)\n            s[\"stage\"] = \"submitted\"\n\n    elif name == \"verify\":\n        # Run one check per call (always an attempt); a check can only clear\n        # while a supporting document is already on file.\n        if stage in (\"submitted\", \"verifying\"):\n            s[\"attempts\"] = int(s.get(\"attempts\", 0)) + 1\n            if int(s.get(\"checks_passed\", 0)) < int(s.get(\"docs_count\", 0)):\n                s[\"checks_passed\"] = int(s.get(\"checks_passed\", 0)) + 1\n            if (int(s.get(\"checks_passed\", 0)) >= need\n                    and int(s.get(\"docs_count\", 0)) >= need):\n                s[\"stage\"] = \"verified\"\n            else:\n                s[\"stage\"] = \"verifying\"\n\n    elif name == \"approve\":\n        # Approval only from a fully verified application; grants the tier.\n        if stage == \"verified\":\n            s[\"stage\"] = \"approved\"\n            s[\"granted_tier\"] = tier\n            s[\"decision_reason\"] = \"tier \" + str(tier) + \" checks satisfied\"\n\n    elif name == \"reject\":\n        # Allowed from any non-terminal stage; grants no tier.\n        s[\"stage\"] = \"rejected\"\n        s[\"granted_tier\"] = 0\n        s[\"decision_reason\"] = str(params.get(\"reason\", \"verification not satisfied\"))\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "requested_tier",
+        "docs_count"
+      ],
+      "schema": {
+        "requested_tier": {
+          "type": "int",
+          "range": [
+            1,
+            3
+          ]
+        },
+        "docs_count": {
+          "type": "int",
+          "range": [
+            0,
+            3
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, str):\n        fields = {}\n        for line in data.splitlines():\n            if \":\" in line:\n                k, v = line.split(\":\", 1)\n                fields[k.strip().lower()] = v.strip()\n    else:\n        fields = {str(k).lower(): v for k, v in dict(data).items()}\n\n    out = {}\n    tier = fields.get(\"tier\")\n    if tier is None:\n        tier = fields.get(\"requested_tier\")\n    if tier is not None:\n        try:\n            out[\"requested_tier\"] = max(1, min(3, int(tier)))\n        except (ValueError, TypeError):\n            pass\n\n    docs = fields.get(\"documents\")\n    if docs is None:\n        docs = fields.get(\"docs\")\n    if docs is None:\n        docs = fields.get(\"doc_count\")\n    if docs is not None:\n        try:\n            out[\"docs_count\"] = max(0, min(3, int(docs)))\n        except (ValueError, TypeError):\n            pass\n\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "applicant",
+        "stage",
+        "requested_tier",
+        "granted_tier",
+        "docs_count",
+        "checks_passed",
+        "decision_reason"
+      ],
+      "report": "KYC {applicant}: stage={stage}, requested tier {requested_tier}, granted tier {granted_tier} ({docs_count} docs, {checks_passed} checks). {decision_reason}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "verified_approvals",
+      "goal": "maximize"
+    },
+    {
+      "name": "false_approvals",
+      "goal": "minimize"
+    },
+    {
+      "name": "verify_attempts",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "submit_docs",
+    "series": {
+      "docs_count": [
+        0.0,
+        1.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "attempts 0",
+            "checks_passed 0",
+            "docs_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "attempts 0",
+            "checks_passed 0",
+            "docs_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "attempts 0",
+            "checks_passed 0",
+            "docs_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "attempts 0",
+            "checks_passed 0",
+            "docs_count 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "attempts 1",
+            "checks_passed 1",
+            "docs_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "attempts 0",
+            "checks_passed 0",
+            "docs_count 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "submit_docs"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "reject"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "verify, approve"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "submit_docs"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "verify"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "reject"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "approve"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

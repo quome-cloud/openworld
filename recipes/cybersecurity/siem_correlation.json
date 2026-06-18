@@ -1,0 +1,274 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "siem_correlation",
+  "description": "a SIEM event-correlation world raising incidents; actions ingest, correlate, escalate",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a SIEM event-correlation world raising incidents; actions ingest, correlate, escalate"
+  },
+  "state_schema": {
+    "tick": "int",
+    "event_buffer": "list",
+    "buffer_size": "int",
+    "events_ingested": "int",
+    "incidents": "list",
+    "incidents_raised": "int",
+    "open_incidents": "int",
+    "escalations": "int",
+    "next_incident_id": "int",
+    "threat_score": "int",
+    "alert_log": "list"
+  },
+  "initial_state": {
+    "tick": 0,
+    "event_buffer": [],
+    "buffer_size": 0,
+    "events_ingested": 0,
+    "incidents": [],
+    "incidents_raised": 0,
+    "open_incidents": 0,
+    "escalations": 0,
+    "next_incident_id": 1,
+    "threat_score": 0,
+    "alert_log": []
+  },
+  "actions": [
+    "ingest",
+    "correlate",
+    "escalate"
+  ],
+  "rules": [
+    "'ingest' appends one security event to the correlation buffer and adds its severity (1-5) to the running threat_score; with no params a deterministic event is synthesized from the tick.",
+    "'correlate' groups buffered events by source IP; any source with >= 3 buffered events condenses into a new open incident whose severity is the sum of its events' severities, and those events leave the buffer.",
+    "'escalate' promotes every open incident with severity >= 8 to status 'escalated' (tier-2 response) and increments the escalations counter.",
+    "Every action advances the tick by one; the dynamics are deterministic and replayable."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    # copy the mutable structures we touch (the sandbox deep-copies the input,\n    # but we stay explicit so the dynamics never alias prior-state objects)\n    s[\"event_buffer\"] = list(s.get(\"event_buffer\", []))\n    s[\"incidents\"] = [dict(i) for i in s.get(\"incidents\", [])]\n    s[\"alert_log\"] = list(s.get(\"alert_log\", []))\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    SOURCES = [\"192.168.1.10\", \"192.168.1.20\", \"10.0.0.5\", \"203.0.113.7\"]\n    TYPES = [\"failed_login\", \"port_scan\", \"malware_alert\",\n             \"data_exfil\", \"priv_escalation\"]\n    CORRELATION_THRESHOLD = 3   # events from one source -> raise an incident\n    ESCALATION_THRESHOLD = 8    # incident severity score -> escalate to tier-2\n\n    tick = s.get(\"tick\", 0)\n\n    if name == \"ingest\":\n        # take an explicit event, else synthesize a deterministic one from the tick\n        source = params.get(\"source\", SOURCES[tick % len(SOURCES)])\n        etype = params.get(\"type\", TYPES[(tick // 2) % len(TYPES)])\n        try:\n            severity = int(params.get(\"severity\", 1 + (tick * 2 + 1) % 5))\n        except (ValueError, TypeError):\n            severity = 1\n        severity = max(1, min(5, severity))\n        event = {\"id\": s.get(\"events_ingested\", 0) + 1, \"source\": source,\n                 \"type\": etype, \"severity\": severity, \"t\": tick}\n        s[\"event_buffer\"].append(event)\n        s[\"events_ingested\"] = s.get(\"events_ingested\", 0) + 1\n        s[\"threat_score\"] = s.get(\"threat_score\", 0) + severity\n        s[\"buffer_size\"] = len(s[\"event_buffer\"])\n        s[\"tick\"] = tick + 1\n\n    elif name == \"correlate\":\n        # group buffered events by source; busy sources condense into incidents\n        groups = {}\n        for ev in s[\"event_buffer\"]:\n            groups.setdefault(ev[\"source\"], []).append(ev)\n        remaining = []\n        for src in sorted(groups):\n            evs = groups[src]\n            if len(evs) >= CORRELATION_THRESHOLD:\n                sev = sum(e[\"severity\"] for e in evs)\n                inc = {\"id\": s.get(\"next_incident_id\", 1), \"source\": src,\n                       \"event_count\": len(evs), \"severity\": sev,\n                       \"types\": sorted(set(e[\"type\"] for e in evs)),\n                       \"status\": \"open\"}\n                s[\"incidents\"].append(inc)\n                s[\"next_incident_id\"] = s.get(\"next_incident_id\", 1) + 1\n                s[\"incidents_raised\"] = s.get(\"incidents_raised\", 0) + 1\n                s[\"alert_log\"].append(\n                    \"INCIDENT %d raised for %s (%d events, sev %d)\"\n                    % (inc[\"id\"], src, len(evs), sev))\n            else:\n                remaining.extend(evs)   # not enough yet -- keep correlating later\n        s[\"event_buffer\"] = remaining\n        s[\"buffer_size\"] = len(remaining)\n        s[\"open_incidents\"] = sum(1 for i in s[\"incidents\"] if i[\"status\"] == \"open\")\n        s[\"tick\"] = tick + 1\n\n    elif name == \"escalate\":\n        # promote open incidents past the response threshold to tier-2\n        escalated_now = 0\n        for inc in s[\"incidents\"]:\n            if inc[\"status\"] == \"open\" and inc[\"severity\"] >= ESCALATION_THRESHOLD:\n                inc[\"status\"] = \"escalated\"\n                escalated_now += 1\n                s[\"alert_log\"].append(\n                    \"INCIDENT %d ESCALATED to tier-2 (sev %d)\"\n                    % (inc[\"id\"], inc[\"severity\"]))\n        s[\"escalations\"] = s.get(\"escalations\", 0) + escalated_now\n        s[\"open_incidents\"] = sum(1 for i in s[\"incidents\"] if i[\"status\"] == \"open\")\n        s[\"tick\"] = tick + 1\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "candidate_source",
+        "candidate_type",
+        "candidate_severity"
+      ],
+      "schema": {
+        "candidate_source": "str",
+        "candidate_type": "str",
+        "candidate_severity": {
+          "type": "int",
+          "range": [
+            1,
+            5
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    fields = {}\n    for token in text.replace(\",\", \" \").split():\n        if \"=\" in token:\n            k, v = token.split(\"=\", 1)\n            fields[k.strip()] = v.strip()\n    try:\n        sev = int(fields.get(\"severity\", \"1\"))\n    except (ValueError, TypeError):\n        sev = 1\n    return {\n        \"candidate_source\": fields.get(\"src\") or fields.get(\"source\") or \"unknown\",\n        \"candidate_type\": fields.get(\"type\") or fields.get(\"event\") or \"generic\",\n        \"candidate_severity\": max(1, min(5, sev)),\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "events_ingested",
+        "incidents_raised",
+        "open_incidents",
+        "escalations",
+        "threat_score",
+        "alert_log"
+      ],
+      "report": "SIEM status: {events_ingested} events ingested, {incidents_raised} incidents raised ({open_incidents} open, {escalations} escalated), threat score {threat_score}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "incident_coverage",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "timely_escalation",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "buffer_backlog",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "ingest",
+    "series": {
+      "tick": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "buffer_size": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "events_ingested": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "threat_score": [
+        0.0,
+        2.0,
+        6.0,
+        7.0,
+        10.0,
+        15.0,
+        17.0,
+        21.0,
+        22.0,
+        25.0,
+        30.0,
+        32.0,
+        36.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "buffer_size 0",
+            "events_ingested 0",
+            "threat_score 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "buffer_size 1",
+            "events_ingested 1",
+            "threat_score 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "buffer_size 0",
+            "events_ingested 0",
+            "threat_score 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "buffer_size 2",
+            "events_ingested 2",
+            "threat_score 6"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "buffer_size 1",
+            "events_ingested 1",
+            "threat_score 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "buffer_size 1",
+            "events_ingested 1",
+            "threat_score 4"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "ingest"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "correlate"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "escalate"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "ingest"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "correlate"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "escalate"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "ingest"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

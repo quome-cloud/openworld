@@ -1,0 +1,178 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ipo_allocation",
+  "description": "an IPO share-allocation world across bids with oversubscription; actions bid, allocate, scale_back",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "finance",
+      "ipo",
+      "allocation",
+      "leaf"
+    ],
+    "lineage": "build/ipo_allocation.py",
+    "metrics": {},
+    "description": "an IPO share-allocation world across bids with oversubscription; actions bid, allocate, scale_back"
+  },
+  "state_schema": {
+    "shares_offered": "int",
+    "bids": "dict",
+    "allocations": "dict",
+    "total_demand": "int",
+    "total_allocated": "int",
+    "available": "int",
+    "oversubscription": "float",
+    "status": "str"
+  },
+  "initial_state": {
+    "shares_offered": 1000,
+    "bids": {
+      "alpha_fund": 600,
+      "beta_capital": 500,
+      "retail_pool": 400
+    },
+    "allocations": {},
+    "total_demand": 1500,
+    "total_allocated": 0,
+    "available": 1000,
+    "oversubscription": 1.5,
+    "status": "open"
+  },
+  "actions": [
+    "bid",
+    "allocate",
+    "scale_back"
+  ],
+  "rules": [
+    "'bid' records or updates a bidder's requested share count and reopens the book, clearing any prior allocation.",
+    "'allocate' fills the book: if total demand is at or below shares_offered every bid is filled in full; if oversubscribed each bidder receives floor(requested * shares_offered / total_demand) shares (pro-rata).",
+    "'scale_back' reduces a named bidder's allocation by the given shares, returning them to the available pool.",
+    "Invariants: oversubscription = total_demand / shares_offered; available = shares_offered - total_allocated; total_allocated never exceeds shares_offered."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    params = action.get(\"params\") or {}\n\n    bids = dict(s.get(\"bids\", {}))\n    allocations = dict(s.get(\"allocations\", {}))\n    offered = int(s.get(\"shares_offered\", 0))\n\n    if name == \"bid\":\n        # Record/update a bidder's order. Any change to demand reopens the book,\n        # so a stale allocation is cleared and must be recomputed.\n        bidder = params.get(\"bidder\")\n        shares = params.get(\"shares\", 0)\n        if bidder is not None and isinstance(shares, (int, float)) and shares > 0:\n            bids[bidder] = int(shares)\n            allocations = {}\n            s[\"status\"] = \"open\"\n\n    elif name == \"allocate\":\n        # Fill the book. Undersubscribed -> everyone filled in full.\n        # Oversubscribed -> pro-rata by floor(req * offered / demand).\n        demand = sum(int(v) for v in bids.values())\n        allocations = {}\n        if demand > 0:\n            if demand <= offered:\n                for b, req in bids.items():\n                    allocations[b] = int(req)\n            else:\n                for b, req in bids.items():\n                    allocations[b] = int(int(req) * offered // demand)\n            s[\"status\"] = \"allocated\"\n\n    elif name == \"scale_back\":\n        # Reduce a named bidder's allocation, returning shares to the pool.\n        bidder = params.get(\"bidder\")\n        shares = params.get(\"shares\", 0)\n        if bidder in allocations and isinstance(shares, (int, float)) and shares > 0:\n            allocations[bidder] = max(0, int(allocations[bidder]) - int(shares))\n            s[\"status\"] = \"scaled_back\"\n\n    total_demand = sum(int(v) for v in bids.values())\n    total_allocated = sum(int(v) for v in allocations.values())\n    s[\"bids\"] = bids\n    s[\"allocations\"] = allocations\n    s[\"total_demand\"] = total_demand\n    s[\"total_allocated\"] = total_allocated\n    s[\"available\"] = offered - total_allocated\n    s[\"oversubscription\"] = round(total_demand / offered, 4) if offered else 0.0\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "shares_offered"
+      ],
+      "schema": {
+        "shares_offered": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower()\n            v = v.strip()\n            if k in ('shares_offered', 'offered', 'size'):\n                if v.lstrip('-').isdigit():\n                    out['shares_offered'] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "shares_offered",
+        "total_demand",
+        "oversubscription",
+        "total_allocated",
+        "available",
+        "status"
+      ],
+      "report": "IPO {status}: offered {shares_offered}, demand {total_demand} ({oversubscription}x); allocated {total_allocated}, {available} left on the table"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "fully subscribe the offering",
+      "goal": "max total_allocated"
+    },
+    {
+      "name": "minimize shares left unsold",
+      "goal": "min available"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "allocate",
+    "series": {
+      "total_allocated": [
+        0.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0,
+        999.0
+      ],
+      "available": [
+        1000.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "available 1000",
+            "total_allocated 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "available 1",
+            "total_allocated 999"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "allocate"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "bid, scale_back"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "bid, allocate, scale_back"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

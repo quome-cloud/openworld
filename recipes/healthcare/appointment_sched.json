@@ -1,0 +1,308 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "appointment_sched",
+  "description": "a clinic appointment scheduling world with no-shows and overbooking; actions book, cancel, overbook",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a clinic appointment scheduling world with no-shows and overbooking; actions book, cancel, overbook"
+  },
+  "state_schema": {
+    "capacity": "int",
+    "booked": "int",
+    "overbooked": "int",
+    "scheduled": "int",
+    "cancellations": "int",
+    "no_show_rate": "float",
+    "expected_no_shows": "int",
+    "expected_arrivals": "int",
+    "expected_idle": "int",
+    "expected_overflow": "int",
+    "utilization": "float"
+  },
+  "initial_state": {
+    "capacity": 8,
+    "booked": 0,
+    "overbooked": 0,
+    "scheduled": 0,
+    "cancellations": 0,
+    "no_show_rate": 0.2,
+    "expected_no_shows": 0,
+    "expected_arrivals": 0,
+    "expected_idle": 8,
+    "expected_overflow": 0,
+    "utilization": 0.0
+  },
+  "actions": [
+    "book",
+    "cancel",
+    "overbook"
+  ],
+  "rules": [
+    "The clinic session has `capacity` physical appointment slots.",
+    "`book` fills one free regular slot (only while booked < capacity); once all regular slots are taken a `book` is refused and the schedule is unchanged.",
+    "`overbook` deliberately schedules one appointment beyond capacity (a double-booked slot), incrementing `overbooked` even when regular slots remain free -- the clinic's hedge against no-shows.",
+    "`cancel` removes one appointment, releasing an overbooked appointment before a regular one, and increments `cancellations`; with nothing scheduled it is a no-op.",
+    "Each scheduled patient independently fails to show with probability `no_show_rate`; `expected_no_shows = round(scheduled * no_show_rate)` and `expected_arrivals = scheduled - expected_no_shows`.",
+    "`expected_idle = max(0, capacity - expected_arrivals)` is wasted capacity; `expected_overflow = max(0, expected_arrivals - capacity)` is arrivals with no slot.",
+    "`utilization = min(expected_arrivals, capacity) / capacity`.",
+    "Dynamics are deterministic given the schedule: overbooking trades expected idle slots against the risk of overflow."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    cap = s[\"capacity\"]\n    booked = s[\"booked\"]\n    over = s[\"overbooked\"]\n\n    if name == \"book\":\n        # Fill one free regular slot. If every regular slot is taken the\n        # booking is refused (you must 'overbook' to exceed capacity).\n        if booked < cap:\n            booked = booked + 1\n    elif name == \"overbook\":\n        # Deliberately schedule one appointment beyond capacity -- a\n        # double-booked slot -- even when regular slots remain free.\n        over = over + 1\n    elif name == \"cancel\":\n        # Drop one appointment, releasing an overbooked one before a regular\n        # one, and record the cancellation. No-op when nothing is scheduled.\n        if over > 0:\n            over = over - 1\n            s[\"cancellations\"] = s[\"cancellations\"] + 1\n        elif booked > 0:\n            booked = booked - 1\n            s[\"cancellations\"] = s[\"cancellations\"] + 1\n    # any other action (e.g. noop) leaves the schedule unchanged\n\n    s[\"booked\"] = booked\n    s[\"overbooked\"] = over\n    scheduled = booked + over\n    s[\"scheduled\"] = scheduled\n\n    # Expected-value no-show accounting (deterministic, hence verifiable).\n    rate = s[\"no_show_rate\"]\n    expected_no_shows = int(round(scheduled * rate))\n    arrivals = scheduled - expected_no_shows\n    s[\"expected_no_shows\"] = expected_no_shows\n    s[\"expected_arrivals\"] = arrivals\n    s[\"expected_idle\"] = max(0, cap - arrivals)          # wasted capacity\n    s[\"expected_overflow\"] = max(0, arrivals - cap)      # patients with no slot\n    s[\"utilization\"] = round(min(arrivals, cap) / cap, 4) if cap else 0.0\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "capacity",
+        "no_show_rate"
+      ],
+      "schema": {
+        "capacity": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        },
+        "no_show_rate": {
+          "type": "float",
+          "range": [
+            0.0,
+            1.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, _, val = line.partition(\":\")\n        key = key.strip().lower()\n        val = val.strip()\n        if key in (\"capacity\", \"slots\"):\n            try:\n                out[\"capacity\"] = int(float(val))\n            except (ValueError, TypeError):\n                pass\n        elif key in (\"no_show_rate\", \"noshow_rate\", \"no_show\", \"noshow\"):\n            try:\n                out[\"no_show_rate\"] = float(val)\n            except (ValueError, TypeError):\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "capacity",
+        "booked",
+        "overbooked",
+        "scheduled",
+        "no_show_rate",
+        "expected_no_shows",
+        "expected_arrivals",
+        "expected_idle",
+        "expected_overflow",
+        "utilization"
+      ],
+      "report": "Clinic schedule: {booked}/{capacity} regular slots booked, {overbooked} overbooked ({scheduled} on the books). At a {no_show_rate} no-show rate, expecting {expected_no_shows} no-shows -> {expected_arrivals} arrivals. Idle slots: {expected_idle}, overflow: {expected_overflow}. Utilization {utilization}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "utilization",
+      "goal": "maximize"
+    },
+    {
+      "name": "expected_overflow",
+      "goal": "minimize"
+    },
+    {
+      "name": "expected_idle",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "book",
+    "series": {
+      "booked": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ],
+      "scheduled": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ],
+      "expected_no_shows": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "expected_arrivals": [
+        0.0,
+        1.0,
+        2.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ],
+      "expected_idle": [
+        8.0,
+        7.0,
+        6.0,
+        6.0,
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "utilization": [
+        0.0,
+        0.125,
+        0.25,
+        0.25,
+        0.375,
+        0.5,
+        0.625,
+        0.75,
+        0.75,
+        0.75,
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "booked 0",
+            "cancellations 0",
+            "expected_arrivals 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "booked 1",
+            "cancellations 0",
+            "expected_arrivals 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "booked 0",
+            "cancellations 0",
+            "expected_arrivals 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "booked 2",
+            "cancellations 0",
+            "expected_arrivals 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "booked 0",
+            "cancellations 1",
+            "expected_arrivals 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "booked 1",
+            "cancellations 0",
+            "expected_arrivals 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "book"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "overbook"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "cancel"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "book"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "cancel"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "overbook"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

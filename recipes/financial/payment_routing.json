@@ -1,0 +1,252 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "payment_routing",
+  "description": "a payment routing world across rails by cost and speed; actions route, retry, reverse",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "payments",
+      "routing",
+      "fintech",
+      "leaf"
+    ],
+    "lineage": "build/payment_routing.py",
+    "metrics": {},
+    "description": "a payment routing world across rails by cost and speed; actions route, retry, reverse"
+  },
+  "state_schema": {
+    "amount": "int",
+    "status": "str",
+    "rail": "str",
+    "attempts": "int",
+    "fees_paid": "int",
+    "latency": "int",
+    "settled_amount": "int",
+    "rails": "dict"
+  },
+  "initial_state": {
+    "amount": 1000,
+    "status": "pending",
+    "rail": "",
+    "attempts": 0,
+    "fees_paid": 0,
+    "latency": 0,
+    "settled_amount": 0,
+    "rails": {
+      "ach": {
+        "fee": 5,
+        "speed": 72,
+        "limit": 25000
+      },
+      "card": {
+        "fee": 60,
+        "speed": 24,
+        "limit": 5000
+      },
+      "rtp": {
+        "fee": 25,
+        "speed": 0,
+        "limit": 100000
+      },
+      "wire": {
+        "fee": 200,
+        "speed": 1,
+        "limit": 1000000
+      }
+    }
+  },
+  "actions": [
+    "route",
+    "retry",
+    "reverse"
+  ],
+  "rules": [
+    "Each rail trades cost against speed: cheap rails (ach) are slow with lower limits; fast rails (rtp, wire) cost more.",
+    "route(rail): attempt the payment on the named rail (default 'ach') when pending or failed; it charges that rail's fee and one attempt.",
+    "An attempt settles iff amount <= the rail's limit; otherwise it fails (the fee is still spent).",
+    "retry(rail): only valid after a failed attempt; re-routes on the given rail (default: the last rail used), charging its fee again.",
+    "reverse: only a settled payment can be reversed; it claws back the delivered amount and charges a reversal fee equal to the rail's fee. Routing fees already paid are not refunded.",
+    "'settled' and 'reversed' are terminal: routing or reversing from them is a no-op."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"\")\n    params = action.get(\"params\") or {}\n    rails = s.get(\"rails\", {})\n\n    def attempt(rail):\n        # One routing attempt on `rail`: always costs a fee and an attempt;\n        # settles iff the rail can carry the amount, else the attempt fails.\n        if rail not in rails:\n            return\n        cfg = rails[rail]\n        s[\"attempts\"] = s[\"attempts\"] + 1\n        s[\"fees_paid\"] = s[\"fees_paid\"] + cfg[\"fee\"]\n        s[\"rail\"] = rail\n        if s[\"amount\"] <= cfg[\"limit\"]:\n            s[\"status\"] = \"settled\"\n            s[\"latency\"] = s[\"latency\"] + cfg[\"speed\"]\n            s[\"settled_amount\"] = s[\"amount\"]\n        else:\n            s[\"status\"] = \"failed\"\n\n    if name == \"route\":\n        # Route a fresh or previously-failed payment on the chosen rail.\n        if s[\"status\"] in (\"pending\", \"failed\"):\n            attempt(params.get(\"rail\", \"ach\"))\n    elif name == \"retry\":\n        # Only after a rejection; re-route (default: a higher-limit fallback).\n        if s[\"status\"] == \"failed\":\n            attempt(params.get(\"rail\", s.get(\"rail\") or \"ach\"))\n    elif name == \"reverse\":\n        # Only a settled payment can be reversed; the delivered amount is\n        # clawed back, a reversal fee is charged, and paid routing fees are\n        # NOT refunded.\n        if s[\"status\"] == \"settled\":\n            cfg = rails.get(s.get(\"rail\", \"\"), {})\n            s[\"fees_paid\"] = s[\"fees_paid\"] + cfg.get(\"fee\", 0)\n            s[\"settled_amount\"] = 0\n            s[\"status\"] = \"reversed\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "amount"
+      ],
+      "schema": {
+        "amount": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower(); v = v.strip()\n            if k == 'amount' and v.lstrip('-').isdigit():\n                out['amount'] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "rail",
+        "settled_amount",
+        "fees_paid",
+        "latency",
+        "attempts"
+      ],
+      "report": "payment {status} via {rail}: delivered {settled_amount}, cost {fees_paid}, latency {latency}h over {attempts} attempt(s)"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "settle the payment",
+      "goal": "max settled_amount"
+    },
+    {
+      "name": "minimize cost",
+      "goal": "min fees_paid"
+    },
+    {
+      "name": "minimize delay",
+      "goal": "min latency"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "route",
+    "series": {
+      "attempts": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fees_paid": [
+        0.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "latency": [
+        0.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0,
+        72.0
+      ],
+      "settled_amount": [
+        0.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "attempts 0",
+            "fees_paid 0",
+            "latency 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "attempts 1",
+            "fees_paid 5",
+            "latency 72"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "attempts 1",
+            "fees_paid 10",
+            "latency 72"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "route"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "retry, reverse"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "reverse"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "route, retry"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "route, retry, reverse"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

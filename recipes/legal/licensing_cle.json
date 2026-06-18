@@ -1,0 +1,253 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "licensing_cle",
+  "description": "a professional licensing and CLE-credit tracking world; actions accrue_credits, renew, lapse",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a professional licensing and CLE-credit tracking world; actions accrue_credits, renew, lapse"
+  },
+  "state_schema": {
+    "day": "int",
+    "license_status": "str",
+    "credits_earned": "float",
+    "credits_required": "int",
+    "period_days_remaining": "int",
+    "renewals": "int",
+    "fees_paid": "float",
+    "lapsed_count": "int",
+    "pending_credits": "float",
+    "last_filing_category": "str"
+  },
+  "initial_state": {
+    "day": 0,
+    "license_status": "active",
+    "credits_earned": 0.0,
+    "credits_required": 24,
+    "period_days_remaining": 730,
+    "renewals": 0,
+    "fees_paid": 0.0,
+    "lapsed_count": 0,
+    "pending_credits": 0.0,
+    "last_filing_category": ""
+  },
+  "actions": [
+    "accrue_credits",
+    "renew",
+    "lapse"
+  ],
+  "rules": [
+    "A license is either 'active' or 'lapsed'. Only an active license may accrue CLE credits or be renewed.",
+    "accrue_credits logs completed CLE hours (from a perceived filing's pending_credits, an explicit `amount` param, or a 4-hour default) onto an active license and advances the calendar 30 days, consuming the compliance period.",
+    "If the compliance period reaches zero before renewal, the license automatically lapses and lapsed_count increments.",
+    "renew succeeds only when the license is active and credits_earned >= credits_required; on success it charges a fee, increments renewals, zeroes credits_earned, and resets period_days_remaining to a fresh 730-day window. Otherwise it is a no-op.",
+    "lapse immediately marks an active license 'lapsed', zeroes outstanding credits, ends the compliance period, and increments lapsed_count.",
+    "Monotonic counters never decrease: day, renewals, fees_paid, and lapsed_count only ever rise."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    active = s[\"license_status\"] == \"active\"\n\n    if name == \"accrue_credits\":\n        # Credits can come from a perceived filing (pending_credits) or an\n        # explicit `amount`; default to a single 4-hour course.\n        amount = params.get(\"amount\")\n        if amount is None:\n            amount = s[\"pending_credits\"] if s[\"pending_credits\"] > 0 else 4.0\n        amount = max(0.0, float(amount))\n        if active:\n            s[\"credits_earned\"] = round(s[\"credits_earned\"] + amount, 2)\n            s[\"day\"] = s[\"day\"] + 30\n            s[\"period_days_remaining\"] = max(0, s[\"period_days_remaining\"] - 30)\n            # A blown deadline with the period exhausted lapses the license.\n            if s[\"period_days_remaining\"] == 0:\n                s[\"license_status\"] = \"lapsed\"\n                s[\"lapsed_count\"] = s[\"lapsed_count\"] + 1\n        s[\"pending_credits\"] = 0.0\n\n    elif name == \"renew\":\n        fee = max(0.0, float(params.get(\"fee\", 350.0)))\n        if active and s[\"credits_earned\"] >= s[\"credits_required\"]:\n            s[\"renewals\"] = s[\"renewals\"] + 1\n            s[\"fees_paid\"] = round(s[\"fees_paid\"] + fee, 2)\n            s[\"credits_earned\"] = 0.0          # reset for the next period\n            s[\"period_days_remaining\"] = 730   # fresh two-year compliance window\n\n    elif name == \"lapse\":\n        if active:\n            s[\"license_status\"] = \"lapsed\"\n            s[\"lapsed_count\"] = s[\"lapsed_count\"] + 1\n            s[\"credits_earned\"] = 0.0\n            s[\"period_days_remaining\"] = 0\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_credits",
+        "last_filing_category"
+      ],
+      "schema": {
+        "pending_credits": {
+          "type": "float",
+          "range": [
+            0.0,
+            100.0
+          ]
+        },
+        "last_filing_category": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data.get(\"text\", data))\n    # Normalize \"key: value\" and \"key:value\" into \"key value\" token pairs.\n    tokens = text.replace(\",\", \" \").replace(\":\", \": \").split()\n    hours = 0.0\n    category = \"\"\n    pending_key = \"\"\n    for token in tokens:\n        if token.endswith(\":\"):\n            pending_key = token[:-1].strip().lower()\n            continue\n        if pending_key in (\"hours\", \"credits\"):\n            try:\n                hours = float(token)\n            except (ValueError, TypeError):\n                hours = 0.0\n        elif pending_key in (\"category\", \"topic\"):\n            category = token.strip().lower()\n        pending_key = \"\"\n    return {\"pending_credits\": max(0.0, hours), \"last_filing_category\": category}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "license_status",
+        "credits_earned",
+        "credits_required",
+        "period_days_remaining",
+        "renewals",
+        "lapsed_count",
+        "fees_paid"
+      ],
+      "report": "License is {license_status}. CLE progress: {credits_earned} of {credits_required} credits with {period_days_remaining} days left in the period. Renewals to date: {renewals} (fees paid ${fees_paid}); lapses: {lapsed_count}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "renewals_completed",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "credits_earned",
+      "goal": "maximize",
+      "weight": 0.5
+    },
+    {
+      "name": "lapsed_count",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "lapse",
+    "series": {
+      "period_days_remaining": [
+        730.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lapsed_count": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "credits_earned 0",
+            "day 0",
+            "lapsed_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "credits_earned 4",
+            "day 30",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "credits_earned 0",
+            "day 0",
+            "lapsed_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "credits_earned 8",
+            "day 60",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "credits_earned 0",
+            "day 30",
+            "lapsed_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "credits_earned 12",
+            "day 90",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "accrue_credits"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "lapse"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "renew"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "accrue_credits"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "lapse"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "renew"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "accrue_credits, renew, lapse"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "accrue_credits"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "renew"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

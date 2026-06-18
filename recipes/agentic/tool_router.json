@@ -1,0 +1,267 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "tool_router",
+  "description": "a router world delegating to specialized agents; actions route, delegate, aggregate",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a router world delegating to specialized agents; actions route, delegate, aggregate"
+  },
+  "state_schema": {
+    "specialists": "dict",
+    "requests": "list[dict]",
+    "routing": "dict",
+    "queues": "dict",
+    "results": "dict",
+    "report": "dict",
+    "log": "list",
+    "pending": "int",
+    "routed": "int",
+    "delegated": "int",
+    "completed": "int",
+    "aggregated": "int"
+  },
+  "initial_state": {
+    "specialists": {
+      "search": "web",
+      "coder": "code",
+      "analyst": "data"
+    },
+    "requests": [
+      {
+        "id": 1,
+        "kind": "web",
+        "stage": "new",
+        "assigned": null
+      },
+      {
+        "id": 2,
+        "kind": "code",
+        "stage": "new",
+        "assigned": null
+      },
+      {
+        "id": 3,
+        "kind": "data",
+        "stage": "new",
+        "assigned": null
+      },
+      {
+        "id": 4,
+        "kind": "code",
+        "stage": "new",
+        "assigned": null
+      }
+    ],
+    "routing": {},
+    "queues": {
+      "search": [],
+      "coder": [],
+      "analyst": []
+    },
+    "results": {
+      "search": [],
+      "coder": [],
+      "analyst": []
+    },
+    "report": {},
+    "log": [],
+    "pending": 4,
+    "routed": 0,
+    "delegated": 0,
+    "completed": 0,
+    "aggregated": 0
+  },
+  "actions": [
+    "route",
+    "delegate",
+    "aggregate",
+    "receive"
+  ],
+  "rules": [
+    "Requests advance through a fixed pipeline: new -> routed -> delegated -> done.",
+    "route: assign the lowest-id 'new' request to the specialist whose domain matches its kind (first specialist is the catch-all).",
+    "delegate: move one 'routed' request onto its assigned specialist's work queue.",
+    "aggregate: execute every 'delegated' task, collect each specialist's results, and summarize them into one combined report.",
+    "receive: an inbound request (perceived or parametrized) joins the inbox as a new task.",
+    "Dynamics are deterministic: ties are broken by ascending request id; no randomness."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef _match_specialist(kind, specialists):\n    # Pick the specialist whose domain equals the request kind; fall back to the\n    # first declared specialist (the catch-all) when nothing matches.\n    for name in sorted(specialists):\n        if specialists[name] == kind:\n            return name\n    return sorted(specialists)[0] if specialists else \"generalist\"\n\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    requests = [dict(r) for r in s.get(\"requests\", [])]\n    specialists = dict(s.get(\"specialists\", {}))\n    routing = dict(s.get(\"routing\", {}))\n    queues = {k: list(v) for k, v in s.get(\"queues\", {}).items()}\n    results = {k: list(v) for k, v in s.get(\"results\", {}).items()}\n    report = dict(s.get(\"report\", {}))\n    log = list(s.get(\"log\", []))\n\n    if name == \"route\":\n        # Route the lowest-id request still sitting in the inbox to a specialist.\n        pending = sorted([r for r in requests if r.get(\"stage\") == \"new\"],\n                         key=lambda r: r[\"id\"])\n        if pending:\n            req = pending[0]\n            spec = _match_specialist(req.get(\"kind\"), specialists)\n            req[\"stage\"] = \"routed\"\n            req[\"assigned\"] = spec\n            routing[str(req[\"id\"])] = spec\n            log.append(\"route #%d (%s) -> %s\" % (req[\"id\"], req.get(\"kind\"), spec))\n\n    elif name == \"delegate\":\n        # Hand one routed request to its specialist's work queue.\n        routed = sorted([r for r in requests if r.get(\"stage\") == \"routed\"],\n                        key=lambda r: r[\"id\"])\n        if routed:\n            req = routed[0]\n            spec = req.get(\"assigned\") or routing.get(str(req[\"id\"]))\n            if spec is not None:\n                queues.setdefault(spec, [])\n                queues[spec].append(req[\"id\"])\n                req[\"stage\"] = \"delegated\"\n                log.append(\"delegate #%d -> %s queue\" % (req[\"id\"], spec))\n\n    elif name == \"aggregate\":\n        # Every delegated task is executed by its specialist and the results are\n        # collected, then summarized into one combined report.\n        delegated = sorted([r for r in requests if r.get(\"stage\") == \"delegated\"],\n                           key=lambda r: r[\"id\"])\n        for req in delegated:\n            spec = req.get(\"assigned\") or routing.get(str(req[\"id\"]))\n            if spec is None:\n                continue\n            results.setdefault(spec, [])\n            results[spec].append({\"id\": req[\"id\"], \"kind\": req.get(\"kind\"),\n                                  \"by\": spec})\n            if req[\"id\"] in queues.get(spec, []):\n                queues[spec] = [x for x in queues[spec] if x != req[\"id\"]]\n            req[\"stage\"] = \"done\"\n            log.append(\"aggregate #%d done by %s\" % (req[\"id\"], spec))\n        report = {spec: len(results.get(spec, [])) for spec in sorted(specialists)}\n        report[\"total\"] = sum(report.values())\n\n    elif name == \"receive\":\n        # Optional intake hook: a perceived/parametrized request joins the inbox.\n        kind = params.get(\"kind\")\n        if kind is not None:\n            next_id = max([r[\"id\"] for r in requests], default=0) + 1\n            requests.append({\"id\": next_id, \"kind\": kind, \"stage\": \"new\",\n                             \"assigned\": None})\n            log.append(\"receive #%d (%s)\" % (next_id, kind))\n\n    # Recompute the pipeline counters so progress is visible as plain scalars.\n    def _count(stage):\n        return sum(1 for r in requests if r.get(\"stage\") == stage)\n\n    s[\"requests\"] = requests\n    s[\"specialists\"] = specialists\n    s[\"routing\"] = routing\n    s[\"queues\"] = queues\n    s[\"results\"] = results\n    s[\"report\"] = report\n    s[\"log\"] = log\n    s[\"pending\"] = _count(\"new\")\n    s[\"routed\"] = _count(\"routed\")\n    s[\"delegated\"] = _count(\"delegated\")\n    s[\"completed\"] = _count(\"done\")\n    s[\"aggregated\"] = report.get(\"total\", 0)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "incoming_kind"
+      ],
+      "schema": {
+        "incoming_kind": "str"
+      },
+      "code": "\ndef perceive(data):\n    # data is the raw request payload; normalize to a routing 'kind'.\n    if isinstance(data, dict):\n        kind = data.get(\"kind\") or data.get(\"domain\") or \"web\"\n    else:\n        kind = str(data)\n    return {\"incoming_kind\": str(kind)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "report",
+        "completed",
+        "pending",
+        "log"
+      ],
+      "report": "Router handled {completed} request(s) across specialists; {pending} still pending. Aggregated report: {report}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "throughput",
+      "goal": "maximize completed"
+    },
+    {
+      "name": "backlog",
+      "goal": "minimize pending"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "route",
+    "series": {
+      "pending": [
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "routed": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "delegated 0",
+            "pending 4",
+            "routed 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "delegated 0",
+            "pending 3",
+            "routed 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "delegated 0",
+            "pending 4",
+            "routed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "delegated 0",
+            "pending 2",
+            "routed 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "delegated 1",
+            "pending 3",
+            "routed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "delegated 0",
+            "pending 3",
+            "routed 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "route"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "aggregate"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "delegate, receive"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "route"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "delegate"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "aggregate"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "receive"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

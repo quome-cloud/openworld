@@ -1,0 +1,234 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "glucose_mgmt",
+  "description": "a diabetes glucose-management world: blood glucose responds to dose, meals, exercise; actions dose_insulin, eat, exercise",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a diabetes glucose-management world: blood glucose responds to dose, meals, exercise; actions dose_insulin, eat, exercise"
+  },
+  "state_schema": {
+    "glucose": "float",
+    "iob": "float",
+    "cob": "float",
+    "minutes": "int",
+    "status": "str"
+  },
+  "initial_state": {
+    "glucose": 120.0,
+    "iob": 0.0,
+    "cob": 0.0,
+    "minutes": 0,
+    "status": "in_range"
+  },
+  "actions": [
+    "dose_insulin",
+    "eat",
+    "exercise",
+    "wait"
+  ],
+  "rules": [
+    "Each step advances 30 minutes of simulated time.",
+    "'dose_insulin' adds its 'units' param (default 1.0) to insulin-on-board (iob).",
+    "'eat' adds its 'carbs' param (default 45.0 g) to carbs-on-board (cob).",
+    "Each step half of carbs-on-board digests, raising glucose by 3 mg/dL per gram digested.",
+    "Each step 30% of insulin-on-board absorbs, lowering glucose by 40 mg/dL per unit absorbed.",
+    "'exercise' burns 30 mg/dL per unit of intensity (default 1.0) and boosts insulin sensitivity by 50% per unit of intensity for that step.",
+    "Endogenous liver output drifts glucose 10% of the way back to a 100 mg/dL baseline each step.",
+    "Glucose is clamped to [20, 600] mg/dL; status is hypoglycemia (<70), in_range (70-180), or hyperglycemia (>180)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"wait\")\n    params = action.get(\"params\") or {}\n\n    # --- actions deposit into the on-board compartments -------------------\n    if name == \"dose_insulin\":\n        s[\"iob\"] = s.get(\"iob\", 0.0) + float(params.get(\"units\", 1.0))\n    elif name == \"eat\":\n        s[\"cob\"] = s.get(\"cob\", 0.0) + float(params.get(\"carbs\", 45.0))\n\n    # --- model constants (per 30-min step) --------------------------------\n    CARB_ABSORB = 0.5      # fraction of carbs-on-board digested per step\n    INSULIN_ABSORB = 0.3   # fraction of insulin-on-board absorbed per step\n    CARB_GAIN = 3.0        # mg/dL glucose rise per gram of carb digested\n    ISF = 40.0             # mg/dL glucose drop per unit of insulin absorbed\n    BASELINE = 100.0       # basal set-point the liver drifts toward\n    DRIFT = 0.1            # endogenous pull toward baseline per step\n\n    glucose = float(s.get(\"glucose\", 120.0))\n    cob = float(s.get(\"cob\", 0.0))\n    iob = float(s.get(\"iob\", 0.0))\n\n    carbs_digested = cob * CARB_ABSORB\n    insulin_absorbed = iob * INSULIN_ABSORB\n\n    # carbs raise glucose\n    glucose += CARB_GAIN * carbs_digested\n\n    # exercise: direct glucose uptake plus heightened insulin sensitivity\n    sensitivity = ISF\n    if name == \"exercise\":\n        intensity = float(params.get(\"intensity\", 1.0))\n        sensitivity *= (1.0 + 0.5 * intensity)\n        glucose -= 30.0 * intensity\n\n    # insulin lowers glucose\n    glucose -= sensitivity * insulin_absorbed\n\n    # liver/basal homeostasis pulls toward baseline\n    glucose += DRIFT * (BASELINE - glucose)\n\n    # decay the on-board compartments by what was used this step\n    cob = max(0.0, cob - carbs_digested)\n    iob = max(0.0, iob - insulin_absorbed)\n\n    # clamp to a physiological range\n    glucose = max(20.0, min(600.0, glucose))\n\n    if glucose < 70.0:\n        status = \"hypoglycemia\"\n    elif glucose > 180.0:\n        status = \"hyperglycemia\"\n    else:\n        status = \"in_range\"\n\n    s[\"glucose\"] = round(glucose, 2)\n    s[\"cob\"] = round(cob, 4)\n    s[\"iob\"] = round(iob, 4)\n    s[\"status\"] = status\n    s[\"minutes\"] = int(s.get(\"minutes\", 0)) + 30\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "glucose"
+      ],
+      "schema": {
+        "glucose": {
+          "type": "float",
+          "range": [
+            20.0,
+            600.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data).lower()\n    idx = text.find(\"glucose\")\n    if idx >= 0:\n        text = text[idx + len(\"glucose\"):]\n    num = \"\"\n    for ch in text:\n        if ch.isdigit() or ch == \".\":\n            num += ch\n        elif num:\n            break\n    if not num:\n        return {}\n    return {\"glucose\": round(float(num), 2)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "glucose",
+        "status",
+        "iob",
+        "cob",
+        "minutes"
+      ],
+      "report": "t={minutes}min: blood glucose {glucose} mg/dL ({status}); insulin-on-board {iob} U, carbs-on-board {cob} g."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "time_in_range",
+      "goal": "maximize"
+    },
+    {
+      "name": "avoid_hypoglycemia",
+      "goal": "minimize"
+    },
+    {
+      "name": "avoid_hyperglycemia",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "eat",
+    "series": {
+      "glucose": [
+        120.0,
+        178.75,
+        262.0,
+        352.11,
+        440.81,
+        524.43,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0
+      ],
+      "cob": [
+        0.0,
+        22.5,
+        33.75,
+        39.375,
+        42.1875,
+        43.5938,
+        44.2969,
+        44.6484,
+        44.8242,
+        44.9121,
+        44.9561,
+        44.978,
+        44.989
+      ],
+      "minutes": [
+        0.0,
+        30.0,
+        60.0,
+        90.0,
+        120.0,
+        150.0,
+        180.0,
+        210.0,
+        240.0,
+        270.0,
+        300.0,
+        330.0,
+        360.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cob 0",
+            "glucose 120",
+            "iob 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cob 0",
+            "glucose 107.2",
+            "iob 0.7"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cob 22.5",
+            "glucose 178.75",
+            "iob 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cob 0",
+            "glucose 91",
+            "iob 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cob 0",
+            "glucose 118",
+            "iob 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cob 0",
+            "glucose 88.12",
+            "iob 1.19"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "dose_insulin"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "eat"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "exercise"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "wait"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "dose_insulin"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

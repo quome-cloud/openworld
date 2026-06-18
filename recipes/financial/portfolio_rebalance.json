@@ -1,0 +1,257 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "portfolio_rebalance",
+  "description": "a portfolio rebalancing world drifting from target weights; actions buy, sell, rebalance",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a portfolio rebalancing world drifting from target weights; actions buy, sell, rebalance"
+  },
+  "state_schema": {
+    "prices": "dict",
+    "units": "dict",
+    "targets": "dict",
+    "weights": "dict",
+    "cash": "float",
+    "trade_size": "float",
+    "drift": "float",
+    "value": "float",
+    "seed": "int"
+  },
+  "initial_state": {
+    "prices": {
+      "stocks": 100.0,
+      "bonds": 100.0,
+      "gold": 100.0
+    },
+    "units": {
+      "stocks": 60.0,
+      "bonds": 30.0,
+      "gold": 10.0
+    },
+    "targets": {
+      "stocks": 0.6,
+      "bonds": 0.3,
+      "gold": 0.1
+    },
+    "weights": {
+      "stocks": 0.6,
+      "bonds": 0.3,
+      "gold": 0.1
+    },
+    "cash": 2000.0,
+    "trade_size": 1000.0,
+    "drift": 0.0,
+    "value": 12000.0,
+    "seed": 7
+  },
+  "actions": [
+    "buy",
+    "sell",
+    "rebalance"
+  ],
+  "rules": [
+    "Every step begins with a market tick: each asset price is multiplied by 1 + a seeded shock in [-5%, +5%], so realized weights drift off target.",
+    "'rebalance' reallocates the invested capital across assets to match the target weights exactly; it is cash-neutral and drives drift to 0.",
+    "'buy' spends one trade_size of cash (or all remaining cash) on the most underweight asset; 'sell' raises one trade_size of cash from the most overweight asset.",
+    "weights are each asset's share of invested value; drift is the L1 distance between weights and targets; value is invested plus cash.",
+    "Paste an 'asset: price' quote board to mark prices to market; the three known assets default to 100.0 and unknown/invalid lines are ignored."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    targets = dict(s.get(\"targets\", {}))\n    assets = sorted(targets)\n    prices = dict(s.get(\"prices\", {}))\n    units = dict(s.get(\"units\", {}))\n    cash = float(s.get(\"cash\", 0.0))\n    trade = float(s.get(\"trade_size\", 1000.0))\n    vol = 0.05  # per-step price volatility\n\n    # (1) market tick: a seeded shock moves each price; advance the seed so the\n    # next step draws a fresh, deterministic, replayable shock.\n    seed = int(s.get(\"seed\", 0))\n    rng = random.Random(seed)\n    for a in assets:\n        prices[a] = round(prices[a] * (1.0 + rng.uniform(-vol, vol)), 6)\n    s[\"seed\"] = (seed * 1103515245 + 12345) % (2 ** 31)\n\n    def value(a):\n        return units.get(a, 0.0) * prices.get(a, 0.0)\n\n    def invested():\n        return sum(value(a) for a in assets)\n\n    inv = invested()\n    # (2) apply the action against the freshly ticked prices.\n    if name == \"rebalance\" and inv > 0:\n        for a in assets:                              # cash-neutral reallocation\n            units[a] = (targets[a] * inv) / prices[a] if prices[a] > 0 else 0.0\n    elif name == \"buy\" and cash > 0 and inv > 0:\n        under = min(assets, key=lambda a: value(a) / inv - targets[a])\n        spend = min(cash, trade)\n        if prices[under] > 0:\n            units[under] = units.get(under, 0.0) + spend / prices[under]\n            cash -= spend\n    elif name == \"sell\" and inv > 0:\n        over = max(assets, key=lambda a: value(a) / inv - targets[a])\n        proceeds = min(value(over), trade)\n        if prices[over] > 0:\n            units[over] = units.get(over, 0.0) - proceeds / prices[over]\n            cash += proceeds\n\n    inv = invested()\n    weights = {a: (value(a) / inv if inv > 0 else 0.0) for a in assets}\n    drift = round(sum(abs(weights[a] - targets[a]) for a in assets), 6)\n\n    s[\"prices\"] = prices\n    s[\"units\"] = {a: round(units.get(a, 0.0), 6) for a in assets}\n    s[\"cash\"] = round(cash, 6)\n    s[\"weights\"] = {a: round(weights[a], 6) for a in assets}\n    s[\"drift\"] = drift\n    s[\"value\"] = round(inv + cash, 6)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "prices"
+      ],
+      "schema": {},
+      "code": "\ndef perceive(data):\n    prices = {\"bonds\": 100.0, \"gold\": 100.0, \"stocks\": 100.0}\n    for line in str(data).splitlines():\n        line = line.strip()\n        if not line or ':' not in line:\n            continue\n        name, val = line.split(':', 1)\n        name = name.strip().lower()\n        try:\n            p = float(val.strip())\n        except ValueError:\n            continue\n        if name in prices and p > 0:\n            prices[name] = round(p, 6)\n    return {\"prices\": prices}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "weights",
+        "targets",
+        "drift",
+        "cash",
+        "value"
+      ],
+      "report": "value {value} | drift {drift} | weights {weights} vs targets {targets} | cash {cash}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "track the target allocation",
+      "goal": "min drift"
+    },
+    {
+      "name": "grow the portfolio",
+      "goal": "max value"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "buy",
+    "series": {
+      "cash": [
+        2000.0,
+        1000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift": [
+        0.0,
+        0.1175,
+        0.0636,
+        0.0775,
+        0.049,
+        0.0331,
+        0.0275,
+        0.0448,
+        0.0721,
+        0.0787,
+        0.0802,
+        0.0577,
+        0.0517
+      ],
+      "value": [
+        12000.0,
+        12002.7955,
+        11662.0817,
+        11390.0679,
+        11348.3237,
+        11512.4681,
+        11342.1189,
+        11033.8825,
+        11100.0675,
+        11328.954,
+        11319.3826,
+        11504.5741,
+        11581.4727
+      ],
+      "seed": [
+        7.0,
+        1282168116.0,
+        642666333.0,
+        712265938.0,
+        1486001571.0,
+        2131988640.0,
+        220562521.0,
+        2099423262.0,
+        2083449087.0,
+        523310796.0,
+        715197717.0,
+        734865450.0,
+        1662195227.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cash 2000",
+            "drift 0",
+            "seed 7"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cash 1000",
+            "drift 0.117481",
+            "seed 1.28217e+09"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cash 3000",
+            "drift 0.069116",
+            "seed 1.28217e+09"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cash 2000",
+            "drift 0",
+            "seed 1.28217e+09"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cash 0",
+            "drift 0.063575",
+            "seed 6.42666e+08"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cash 2000",
+            "drift 0.006464",
+            "seed 6.42666e+08"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "buy"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "sell"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "rebalance"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "buy"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "sell"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

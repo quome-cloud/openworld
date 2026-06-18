@@ -1,0 +1,251 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "claims_adjudication",
+  "description": "a health-insurance claims adjudication world with claim states; actions submit, review, approve, deny",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a health-insurance claims adjudication world with claim states; actions submit, review, approve, deny"
+  },
+  "state_schema": {
+    "claims": "list",
+    "next_id": "int",
+    "submitted_count": "int",
+    "under_review_count": "int",
+    "approved_count": "int",
+    "denied_count": "int",
+    "total_claims": "int",
+    "total_approved_amount": "float",
+    "total_denied_amount": "float",
+    "pending_amount": "null",
+    "pending_claimant": "null",
+    "pending_service": "null",
+    "last_action": "null"
+  },
+  "initial_state": {
+    "claims": [],
+    "next_id": 1,
+    "submitted_count": 0,
+    "under_review_count": 0,
+    "approved_count": 0,
+    "denied_count": 0,
+    "total_claims": 0,
+    "total_approved_amount": 0.0,
+    "total_denied_amount": 0.0,
+    "pending_amount": null,
+    "pending_claimant": null,
+    "pending_service": null,
+    "last_action": null
+  },
+  "actions": [
+    "submit",
+    "review",
+    "approve",
+    "deny"
+  ],
+  "rules": [
+    "A claim enters the world via `submit`, starting in the `submitted` state.",
+    "`review` moves the oldest `submitted` claim to `under_review`.",
+    "`approve` moves the oldest `under_review` claim to `approved` and pays its amount.",
+    "`deny` moves the oldest `under_review` claim to `denied`; nothing is paid.",
+    "A claim must be reviewed before it can be approved or denied; a `submitted` claim cannot be approved or denied directly.",
+    "`approved` and `denied` are terminal states; a claim never leaves them.",
+    "An action whose targeted eligible claim does not exist is a no-op.",
+    "Without an explicit `claim_id`, each action acts on the oldest eligible claim, so the queue is adjudicated first-in, first-out."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    claims = [dict(c) for c in s.get(\"claims\", [])]\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def oldest_with(status):\n        cid = params.get(\"claim_id\")\n        if cid is not None:\n            for cl in claims:\n                if cl.get(\"id\") == cid and cl.get(\"status\") == status:\n                    return cl\n            return None\n        for cl in claims:\n            if cl.get(\"status\") == status:\n                return cl\n        return None\n\n    if name == \"submit\":\n        cid = int(s.get(\"next_id\", 1))\n        amount = params.get(\"amount\")\n        if amount is None:\n            amount = s.get(\"pending_amount\")\n        if amount is None:\n            amount = round(100.0 + 50.0 * cid, 2)\n        amount = float(amount)\n        claimant = (params.get(\"claimant\") or s.get(\"pending_claimant\")\n                    or action.get(\"agent\") or \"anonymous\")\n        service = params.get(\"service\") or s.get(\"pending_service\") or \"unspecified\"\n        claims.append({\n            \"id\": cid,\n            \"claimant\": claimant,\n            \"service\": service,\n            \"amount\": amount,\n            \"status\": \"submitted\",\n        })\n        s[\"next_id\"] = cid + 1\n        # consume any perceived intake so it is not reused on the next submit\n        s[\"pending_amount\"] = None\n        s[\"pending_claimant\"] = None\n        s[\"pending_service\"] = None\n\n    elif name == \"review\":\n        cl = oldest_with(\"submitted\")\n        if cl is not None:\n            cl[\"status\"] = \"under_review\"\n\n    elif name == \"approve\":\n        cl = oldest_with(\"under_review\")\n        if cl is not None:\n            cl[\"status\"] = \"approved\"\n\n    elif name == \"deny\":\n        cl = oldest_with(\"under_review\")\n        if cl is not None:\n            cl[\"status\"] = \"denied\"\n    # any other action name is a no-op: the world is left unchanged\n\n    def n(status):\n        return sum(1 for cl in claims if cl.get(\"status\") == status)\n\n    s[\"claims\"] = claims\n    s[\"submitted_count\"] = n(\"submitted\")\n    s[\"under_review_count\"] = n(\"under_review\")\n    s[\"approved_count\"] = n(\"approved\")\n    s[\"denied_count\"] = n(\"denied\")\n    s[\"total_claims\"] = len(claims)\n    s[\"total_approved_amount\"] = round(\n        sum(cl[\"amount\"] for cl in claims if cl.get(\"status\") == \"approved\"), 2)\n    s[\"total_denied_amount\"] = round(\n        sum(cl[\"amount\"] for cl in claims if cl.get(\"status\") == \"denied\"), 2)\n    s[\"last_action\"] = name\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_amount",
+        "pending_claimant",
+        "pending_service"
+      ],
+      "schema": {
+        "pending_amount": {
+          "type": "float",
+          "range": [
+            0.0,
+            10000000.0
+          ]
+        },
+        "pending_claimant": "str",
+        "pending_service": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = str(data)\n    out = {}\n    for part in text.replace(\"\\n\", \";\").split(\";\"):\n        if \":\" not in part:\n            continue\n        key, _, val = part.partition(\":\")\n        key = key.strip().lower()\n        val = val.strip()\n        if key in (\"amount\", \"charge\", \"billed\", \"cost\"):\n            cleaned = val.replace(\"$\", \"\").replace(\",\", \"\")\n            try:\n                out[\"pending_amount\"] = float(cleaned)\n            except ValueError:\n                pass\n        elif key in (\"claimant\", \"patient\", \"member\"):\n            out[\"pending_claimant\"] = val\n        elif key in (\"service\", \"procedure\", \"code\"):\n            out[\"pending_service\"] = val\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "total_claims",
+        "submitted_count",
+        "under_review_count",
+        "approved_count",
+        "denied_count",
+        "total_approved_amount"
+      ],
+      "report": "Claims adjudication summary: {total_claims} claim(s) total -- {submitted_count} submitted, {under_review_count} under review, {approved_count} approved (${total_approved_amount} paid), {denied_count} denied."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "clear_backlog",
+      "goal": "minimize submitted_count + under_review_count (drain the queue)"
+    },
+    {
+      "name": "adjudicate",
+      "goal": "maximize approved_count + denied_count (reach a final decision)"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "submit",
+    "series": {
+      "next_id": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0
+      ],
+      "submitted_count": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "total_claims": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "next_id 1",
+            "submitted_count 0",
+            "total_claims 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "next_id 2",
+            "submitted_count 1",
+            "total_claims 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "next_id 1",
+            "submitted_count 0",
+            "total_claims 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "next_id 1",
+            "submitted_count 0",
+            "total_claims 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "next_id 1",
+            "submitted_count 0",
+            "total_claims 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "next_id 3",
+            "submitted_count 2",
+            "total_claims 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "submit"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "review"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "approve"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "deny"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "submit"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

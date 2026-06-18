@@ -1,0 +1,224 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "discovery_deadlines",
+  "description": "a discovery request/response deadline world; actions serve, object, respond, compel",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a discovery request/response deadline world; actions serve, object, respond, compel"
+  },
+  "state_schema": {
+    "day": "int",
+    "response_period": "int",
+    "request_served": "bool",
+    "deadline": "int",
+    "objection_served": "bool",
+    "response_served": "bool",
+    "response_timely": "bool",
+    "motion_to_compel": "str",
+    "dispute_open": "bool",
+    "status": "str"
+  },
+  "initial_state": {
+    "day": 0,
+    "response_period": 30,
+    "request_served": false,
+    "deadline": 0,
+    "objection_served": false,
+    "response_served": false,
+    "response_timely": false,
+    "motion_to_compel": "none",
+    "dispute_open": false,
+    "status": "predisclosure"
+  },
+  "actions": [
+    "serve",
+    "object",
+    "respond",
+    "compel"
+  ],
+  "rules": [
+    "A request must be served before objections, responses, or a motion to compel have any effect.",
+    "Serving a request sets the response deadline to the service day plus the response_period (default 30 days).",
+    "The responding party may object and/or respond; a response is timely only if served on or before the deadline.",
+    "A motion to compel may be filed only after the deadline has been waited out, and is granted when the request is overdue and unanswered, answered late, or met only with objections.",
+    "A motion to compel is denied as moot when the request was fully and timely answered with no standing objections.",
+    "Each event is idempotent: repeating an action that has already taken effect leaves the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    period = s.get(\"response_period\", 30)\n\n    # Requesting party serves the discovery request -> starts the response clock.\n    if name == \"serve\":\n        if not s[\"request_served\"]:\n            s[\"request_served\"] = True\n            s[\"deadline\"] = s[\"day\"] + period\n            s[\"status\"] = \"awaiting_response\"\n        return s\n\n    # Responding party serves objections -> opens a dispute over the request.\n    if name == \"object\":\n        if s[\"request_served\"] and not s[\"objection_served\"]:\n            s[\"day\"] = s[\"day\"] + 7\n            s[\"objection_served\"] = True\n            s[\"dispute_open\"] = True\n            if not s[\"response_served\"]:\n                s[\"status\"] = \"objections_pending\"\n        return s\n\n    # Responding party serves substantive responses; timely iff on or before\n    # the deadline.\n    if name == \"respond\":\n        if s[\"request_served\"] and not s[\"response_served\"]:\n            s[\"day\"] = s[\"day\"] + 21\n            s[\"response_served\"] = True\n            timely = s[\"day\"] <= s[\"deadline\"]\n            s[\"response_timely\"] = timely\n            s[\"status\"] = \"responded_timely\" if timely else \"responded_late\"\n        return s\n\n    # Requesting party moves to compel. The motion is filed only after waiting\n    # out the deadline, so the clock advances. It is granted when the request is\n    # unanswered-and-overdue, answered late, or met only with objections; it is\n    # denied (moot) when the request was fully and timely satisfied.\n    if name == \"compel\":\n        if s[\"request_served\"] and s[\"motion_to_compel\"] == \"none\":\n            s[\"day\"] = s[\"day\"] + 35\n            overdue = s[\"day\"] > s[\"deadline\"]\n            complied = (s[\"response_served\"] and s[\"response_timely\"]\n                        and not s[\"objection_served\"])\n            ripe = (not complied) and (s[\"objection_served\"] or overdue)\n            if ripe:\n                s[\"motion_to_compel\"] = \"granted\"\n                s[\"dispute_open\"] = False\n                s[\"status\"] = \"compelled\"\n            else:\n                s[\"motion_to_compel\"] = \"denied\"\n                s[\"status\"] = \"motion_denied\"\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "request_served",
+        "day"
+      ],
+      "schema": {
+        "request_served": "bool",
+        "day": {
+          "type": "int",
+          "range": [
+            0,
+            3650
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data.get(\"text\", \"\"))\n    low = text.lower()\n    out = {}\n    if (\"request\" in low or \"interrogator\" in low or \"production\" in low) and        (\"served\" in low or \"propounded\" in low or \"filed\" in low):\n        out[\"request_served\"] = True\n    for token in low.replace(\",\", \" \").split():\n        if token.startswith(\"day=\"):\n            try:\n                out[\"day\"] = int(token.split(\"=\", 1)[1])\n            except (ValueError, KeyError):\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "day",
+        "deadline",
+        "request_served",
+        "objection_served",
+        "response_served",
+        "response_timely",
+        "motion_to_compel"
+      ],
+      "report": "Discovery posture: {status} (day {day}).\nRequest served: {request_served}; response due day {deadline}.\nObjections served: {objection_served}; response served: {response_served} (timely: {response_timely}).\nMotion to compel: {motion_to_compel}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "timely_response",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "avoid_motion_to_compel",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "serve",
+    "series": {
+      "deadline": [
+        0.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "deadline 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 0",
+            "deadline 30"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 7",
+            "deadline 30"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 21",
+            "deadline 30"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 35",
+            "deadline 30"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 28",
+            "deadline 30"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "serve"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "object, respond, compel"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "object"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "respond"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "compel"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "serve"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "respond"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "serve, object"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

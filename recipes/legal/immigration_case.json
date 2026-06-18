@@ -1,0 +1,243 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "immigration_case",
+  "description": "an immigration application status world; actions file, rfe, respond, decide",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an immigration application status world; actions file, rfe, respond, decide"
+  },
+  "state_schema": {
+    "status": "str",
+    "evidence_score": "int",
+    "rfe_outstanding": "bool",
+    "rfe_count": "int",
+    "decision": "str",
+    "days_elapsed": "int"
+  },
+  "initial_state": {
+    "status": "not_filed",
+    "evidence_score": 0,
+    "rfe_outstanding": false,
+    "rfe_count": 0,
+    "decision": "",
+    "days_elapsed": 0
+  },
+  "actions": [
+    "file",
+    "rfe",
+    "respond",
+    "decide"
+  ],
+  "rules": [
+    "A case starts not_filed; `file` is valid only then and moves it to filed (under review).",
+    "`rfe` is valid only on a filed case with no RFE outstanding; it requests evidence and marks one outstanding.",
+    "`respond` is valid only while an RFE is outstanding; it cures the RFE, adds evidence, and returns the case to review.",
+    "A case cannot be decided while an RFE is outstanding.",
+    "`decide` is valid only on a filed case under review; it approves if evidence_score >= 60, otherwise denies.",
+    "approved and denied are terminal; no action changes a decided case.",
+    "Each valid action advances days_elapsed by one; invalid actions leave the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n\n    APPROVAL_BAR = 60\n    FILE_SCORE = 50\n    RFE_RESPONSE_SCORE = 30\n\n    status = s.get(\"status\", \"not_filed\")\n\n    # Terminal states accept no further actions.\n    if status in (\"approved\", \"denied\"):\n        return s\n\n    if name == \"file\":\n        # A case can only be filed once, from the start.\n        if status != \"not_filed\":\n            return s\n        s[\"status\"] = \"filed\"\n        s[\"evidence_score\"] = s.get(\"evidence_score\", 0) + FILE_SCORE\n        s[\"days_elapsed\"] = s.get(\"days_elapsed\", 0) + 1\n        return s\n\n    if name == \"rfe\":\n        # USCIS issues a Request for Evidence only on a case under review that\n        # has no RFE already outstanding.\n        if status != \"filed\" or s.get(\"rfe_outstanding\", False):\n            return s\n        s[\"status\"] = \"rfe_issued\"\n        s[\"rfe_outstanding\"] = True\n        s[\"rfe_count\"] = s.get(\"rfe_count\", 0) + 1\n        s[\"days_elapsed\"] = s.get(\"days_elapsed\", 0) + 1\n        return s\n\n    if name == \"respond\":\n        # The applicant can only respond while an RFE is outstanding; doing so\n        # cures it and strengthens the record, returning the case to review.\n        if not s.get(\"rfe_outstanding\", False):\n            return s\n        s[\"status\"] = \"filed\"\n        s[\"rfe_outstanding\"] = False\n        s[\"evidence_score\"] = s.get(\"evidence_score\", 0) + RFE_RESPONSE_SCORE\n        s[\"days_elapsed\"] = s.get(\"days_elapsed\", 0) + 1\n        return s\n\n    if name == \"decide\":\n        # Adjudication requires a filed case under review with no RFE pending.\n        if status != \"filed\" or s.get(\"rfe_outstanding\", False):\n            return s\n        approved = s.get(\"evidence_score\", 0) >= APPROVAL_BAR\n        s[\"status\"] = \"approved\" if approved else \"denied\"\n        s[\"decision\"] = s[\"status\"]\n        s[\"days_elapsed\"] = s.get(\"days_elapsed\", 0) + 1\n        return s\n\n    # Unknown action / noop: world unchanged.\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "evidence_score"
+      ],
+      "schema": {
+        "evidence_score": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        fields = {str(k).strip().lower(): v for k, v in data.items()}\n    else:\n        fields = {}\n        for line in str(data).splitlines():\n            if \":\" in line:\n                k, v = line.split(\":\", 1)\n                fields[k.strip().lower()] = v.strip()\n    out = {}\n    exhibits = fields.get(\"exhibits\")\n    if exhibits is not None:\n        try:\n            n = int(exhibits)\n        except (ValueError, TypeError):\n            n = 0\n        out[\"evidence_score\"] = max(0, min(100, 10 * n))\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "evidence_score",
+        "rfe_count",
+        "decision",
+        "days_elapsed"
+      ],
+      "report": "Case status: {status} (decision: {decision}). Evidence score {evidence_score}/100 after {rfe_count} RFE(s); {days_elapsed} processing day(s) elapsed."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "approval",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "processing_days",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "file",
+    "series": {
+      "evidence_score": [
+        0.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0
+      ],
+      "days_elapsed": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "days_elapsed 0",
+            "evidence_score 0",
+            "rfe_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "days_elapsed 1",
+            "evidence_score 50",
+            "rfe_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "days_elapsed 2",
+            "evidence_score 50",
+            "rfe_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "days_elapsed 2",
+            "evidence_score 50",
+            "rfe_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "days_elapsed 3",
+            "evidence_score 80",
+            "rfe_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "days_elapsed 4",
+            "evidence_score 80",
+            "rfe_count 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "file"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "rfe, respond, decide"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "rfe"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "decide"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "file, respond"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "respond"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "file, rfe, decide"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "file, rfe, respond"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "rfe"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "file, respond"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

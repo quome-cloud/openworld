@@ -1,0 +1,272 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "task_decomposition",
+  "description": "an agent goal-decomposition world; actions plan, execute, replan, complete",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent goal-decomposition world; actions plan, execute, replan, complete"
+  },
+  "state_schema": {
+    "goal": "str",
+    "phase": "str",
+    "subtasks": "list",
+    "cursor": "int",
+    "plan_version": "int",
+    "steps": "int",
+    "done_count": "int",
+    "pending_count": "int",
+    "failed_count": "int",
+    "completed": "bool"
+  },
+  "initial_state": {
+    "goal": "ship the feature",
+    "phase": "unplanned",
+    "subtasks": [],
+    "cursor": 0,
+    "plan_version": 0,
+    "steps": 0,
+    "done_count": 0,
+    "pending_count": 0,
+    "failed_count": 0,
+    "completed": false
+  },
+  "actions": [
+    "plan",
+    "execute",
+    "replan",
+    "complete"
+  ],
+  "rules": [
+    "plan: from the 'unplanned' phase, decompose the goal into an ordered list of pending subtasks and enter 'executing' with plan_version 1; a no-op once planned.",
+    "execute: while 'executing', mark the next pending subtask done and advance the cursor; the 'implement solution' subtask fails the first attempt (before any replan), dropping the agent to the 'replanning' phase.",
+    "replan: reset any failed subtask back to pending, increment plan_version, and return to 'executing' so the brittle step can be retried successfully.",
+    "complete: once every subtask is done, enter the 'done' phase and set completed=True.",
+    "steps increments on every attempted action; done/pending/failed counts always reflect the current subtask list."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else None\n    subtasks = [dict(t) for t in s.get(\"subtasks\", [])]\n\n    # Every attempted action is a step, whether or not it changes structure.\n    s[\"steps\"] = int(s.get(\"steps\", 0)) + 1\n\n    if name == \"plan\":\n        # Decompose the goal -- only from the unplanned phase, only once.\n        if s.get(\"phase\") == \"unplanned\" and not subtasks:\n            blueprint = [\"clarify requirements\", \"design approach\",\n                         \"implement solution\", \"verify result\"]\n            subtasks = [{\"id\": i + 1, \"desc\": d, \"status\": \"pending\"}\n                        for i, d in enumerate(blueprint)]\n            s[\"phase\"] = \"executing\"\n            s[\"cursor\"] = 0\n            s[\"plan_version\"] = 1\n\n    elif name == \"execute\":\n        # Work the next pending subtask; only while actively executing.\n        if s.get(\"phase\") == \"executing\":\n            idx = -1\n            for i in range(len(subtasks)):\n                if subtasks[i][\"status\"] == \"pending\":\n                    idx = i\n                    break\n            if idx >= 0:\n                brittle = (subtasks[idx][\"desc\"] == \"implement solution\"\n                           and int(s.get(\"plan_version\", 0)) < 2)\n                if brittle:\n                    # Execution reveals the plan was insufficient.\n                    subtasks[idx][\"status\"] = \"failed\"\n                    s[\"phase\"] = \"replanning\"\n                else:\n                    subtasks[idx][\"status\"] = \"done\"\n                    s[\"cursor\"] = idx + 1\n\n    elif name == \"replan\":\n        # Recover: reopen failed subtasks and revise the plan.\n        if s.get(\"phase\") in (\"executing\", \"replanning\"):\n            changed = False\n            for t in subtasks:\n                if t[\"status\"] == \"failed\":\n                    t[\"status\"] = \"pending\"\n                    changed = True\n            if changed:\n                s[\"plan_version\"] = int(s.get(\"plan_version\", 0)) + 1\n                s[\"phase\"] = \"executing\"\n\n    elif name == \"complete\":\n        # Finalize only when the whole plan is done.\n        if subtasks and all(t[\"status\"] == \"done\" for t in subtasks):\n            s[\"phase\"] = \"done\"\n            s[\"completed\"] = True\n\n    # Keep the derived counts in sync with the subtask list.\n    s[\"subtasks\"] = subtasks\n    s[\"done_count\"] = sum(1 for t in subtasks if t[\"status\"] == \"done\")\n    s[\"pending_count\"] = sum(1 for t in subtasks if t[\"status\"] == \"pending\")\n    s[\"failed_count\"] = sum(1 for t in subtasks if t[\"status\"] == \"failed\")\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "goal"
+      ],
+      "schema": {
+        "goal": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for line in text.splitlines():\n        if \":\" in line:\n            key, value = line.split(\":\", 1)\n            if key.strip().lower() == \"goal\":\n                out[\"goal\"] = value.strip()\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "goal",
+        "phase",
+        "plan_version",
+        "done_count",
+        "pending_count",
+        "failed_count",
+        "completed"
+      ],
+      "report": "Goal '{goal}': phase={phase}, plan v{plan_version}, {done_count} done / {pending_count} pending / {failed_count} failed, completed={completed}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "complete_goal",
+      "goal": "maximize: drive completed to True (every subtask done)"
+    },
+    {
+      "name": "minimize_steps",
+      "goal": "minimize: actions taken to reach completion"
+    },
+    {
+      "name": "plan_stability",
+      "goal": "minimize: plan_version (fewer replans is better)"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "plan",
+    "series": {
+      "plan_version": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "steps": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "pending_count": [
+        0.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cursor 0",
+            "done_count 0",
+            "pending_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cursor 0",
+            "done_count 0",
+            "pending_count 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cursor 0",
+            "done_count 0",
+            "pending_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cursor 0",
+            "done_count 0",
+            "pending_count 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cursor 1",
+            "done_count 1",
+            "pending_count 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cursor 0",
+            "done_count 0",
+            "pending_count 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "plan"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "execute"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "replan"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "complete"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "plan"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "execute"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "replan"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "complete"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "plan"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "execute"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "replan"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "complete"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

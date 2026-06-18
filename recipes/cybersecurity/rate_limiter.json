@@ -1,0 +1,232 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "rate_limiter",
+  "description": "an API rate-limiter world (token bucket) with refill; actions request, refill, throttle",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an API rate-limiter world (token bucket) with refill; actions request, refill, throttle"
+  },
+  "state_schema": {
+    "tokens": "int",
+    "capacity": "int",
+    "refill_amount": "int",
+    "throttle_cost": "int",
+    "throttled": "bool",
+    "served": "int",
+    "denied": "int"
+  },
+  "initial_state": {
+    "tokens": 10,
+    "capacity": 10,
+    "refill_amount": 4,
+    "throttle_cost": 2,
+    "throttled": false,
+    "served": 0,
+    "denied": 0
+  },
+  "actions": [
+    "request",
+    "refill",
+    "throttle"
+  ],
+  "rules": [
+    "The bucket holds between 0 and `capacity` tokens at all times.",
+    "A `request` costs 1 token normally, or `throttle_cost` tokens while throttled; if the bucket holds enough tokens it is granted (tokens decrease, `served` += 1), otherwise it is rate-limited (`denied` += 1) and tokens are unchanged.",
+    "`request` may carry a `count` param to attempt several calls in one step (a burst).",
+    "`refill` adds `refill_amount` tokens (or a `amount` param override), capped at `capacity`.",
+    "`throttle` toggles defensive throttling, or sets it explicitly via an `on` param.",
+    "Dynamics are deterministic: identical (state, action) always yield the same next state."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    capacity = s[\"capacity\"]\n    cost = s[\"throttle_cost\"] if s[\"throttled\"] else 1\n\n    if name == \"request\":\n        # How many API calls to attempt this step (default 1).\n        count = int(params.get(\"count\", 1))\n        for _ in range(max(0, count)):\n            if s[\"tokens\"] >= cost:\n                s[\"tokens\"] -= cost\n                s[\"served\"] += 1\n            else:\n                # Bucket exhausted -> request is rate-limited.\n                s[\"denied\"] += 1\n\n    elif name == \"refill\":\n        amount = int(params.get(\"amount\", s[\"refill_amount\"]))\n        s[\"tokens\"] = min(capacity, s[\"tokens\"] + max(0, amount))\n\n    elif name == \"throttle\":\n        # Engage / release defensive throttling. An explicit `on` param wins;\n        # otherwise toggle the current mode.\n        if \"on\" in params:\n            s[\"throttled\"] = bool(params[\"on\"])\n        else:\n            s[\"throttled\"] = not s[\"throttled\"]\n\n    # Clamp to invariants the contract promises (never negative, never over cap).\n    s[\"tokens\"] = max(0, min(capacity, s[\"tokens\"]))\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_requests"
+      ],
+      "schema": {
+        "pending_requests": {
+          "type": "int",
+          "range": [
+            0,
+            1000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    # data: {\"queue_depth\": <int>} -> symbolic pending-request count\n    depth = int(data.get(\"queue_depth\", 0))\n    return {\"pending_requests\": max(0, depth)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "tokens",
+        "capacity",
+        "throttled",
+        "served",
+        "denied"
+      ],
+      "report": "Rate limiter: {tokens}/{capacity} tokens (throttled={throttled}); served={served}, denied={denied}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "throughput",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "rejected",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {
+      "tokens": [
+        10.0,
+        9.0,
+        8.0,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "served": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "denied": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        2.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "served 0",
+            "tokens 10"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "served 1",
+            "tokens 9"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "served 0",
+            "tokens 10"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "served 2",
+            "tokens 8"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "served 1",
+            "tokens 10"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "served 1",
+            "tokens 9"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "throttle"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "refill"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "request"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "refill"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "throttle"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

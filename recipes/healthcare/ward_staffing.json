@@ -1,0 +1,254 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ward_staffing",
+  "description": "a nurse staffing world maintaining nurse-to-patient ratios across shifts; actions assign, call_float, overtime",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a nurse staffing world maintaining nurse-to-patient ratios across shifts; actions assign, call_float, overtime"
+  },
+  "state_schema": {
+    "shifts": "list[str]",
+    "shift_index": "int",
+    "target_ratio": "int",
+    "patients": "dict",
+    "assigned": "dict",
+    "staff_pool": "int",
+    "float_pool": "int",
+    "overtime_used": "int",
+    "cost": "int",
+    "required_nurses": "dict",
+    "compliant": "dict",
+    "understaffed": "list[str]",
+    "all_compliant": "bool",
+    "log": "list"
+  },
+  "initial_state": {
+    "shifts": [
+      "day",
+      "evening",
+      "night"
+    ],
+    "shift_index": 0,
+    "target_ratio": 4,
+    "patients": {
+      "day": 22,
+      "evening": 18,
+      "night": 12
+    },
+    "assigned": {
+      "day": 3,
+      "evening": 4,
+      "night": 3
+    },
+    "staff_pool": 6,
+    "float_pool": 3,
+    "overtime_used": 0,
+    "cost": 0,
+    "required_nurses": {
+      "day": 6,
+      "evening": 5,
+      "night": 3
+    },
+    "compliant": {
+      "day": false,
+      "evening": false,
+      "night": true
+    },
+    "understaffed": [
+      "day",
+      "evening"
+    ],
+    "all_compliant": false,
+    "log": []
+  },
+  "actions": [
+    "assign",
+    "call_float",
+    "overtime"
+  ],
+  "rules": [
+    "Each shift must staff enough nurses to cover its census at or below target_ratio patients per nurse (a shift is compliant when assigned nurses >= ceil(patients / target_ratio)).",
+    "assign draws a regular nurse from staff_pool (cost 10 each) and only fills as many as the pool holds.",
+    "call_float draws a nurse from the shared float_pool (cost 15 each) and only fills as many as the pool holds.",
+    "overtime holds a nurse past their shift (cost 25 each) and has no pool limit; it is the lever of last resort.",
+    "An action with no named shift applies to the shift currently being staffed (shift_index); an unfillable or unknown action is a no-op."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    # copy nested containers so we never mutate the caller's state\n    s[\"patients\"] = dict(s.get(\"patients\", {}))\n    s[\"assigned\"] = dict(s.get(\"assigned\", {}))\n    s[\"log\"] = list(s.get(\"log\", []))\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    shifts = list(s.get(\"shifts\", []))\n\n    # target shift: explicit param, else the shift currently being staffed\n    shift = params.get(\"shift\")\n    if shift is None:\n        idx = s.get(\"shift_index\", 0)\n        shift = shifts[idx] if shifts and 0 <= idx < len(shifts) else None\n\n    count = params.get(\"count\", 1)\n    try:\n        count = int(count)\n    except (ValueError, TypeError):\n        count = 1\n    if count < 1:\n        count = 1\n\n    valid_shift = shift in s[\"assigned\"]\n\n    if name == \"assign\" and valid_shift:\n        n = min(count, s.get(\"staff_pool\", 0))\n        if n > 0:\n            s[\"staff_pool\"] = s.get(\"staff_pool\", 0) - n\n            s[\"assigned\"][shift] = s[\"assigned\"].get(shift, 0) + n\n            s[\"cost\"] = s.get(\"cost\", 0) + n * 10\n            s[\"log\"].append(\"assign \" + str(n) + \" regular -> \" + str(shift))\n    elif name == \"call_float\" and valid_shift:\n        n = min(count, s.get(\"float_pool\", 0))\n        if n > 0:\n            s[\"float_pool\"] = s.get(\"float_pool\", 0) - n\n            s[\"assigned\"][shift] = s[\"assigned\"].get(shift, 0) + n\n            s[\"cost\"] = s.get(\"cost\", 0) + n * 15\n            s[\"log\"].append(\"call_float \" + str(n) + \" -> \" + str(shift))\n    elif name == \"overtime\" and valid_shift:\n        n = count\n        s[\"assigned\"][shift] = s[\"assigned\"].get(shift, 0) + n\n        s[\"overtime_used\"] = s.get(\"overtime_used\", 0) + n\n        s[\"cost\"] = s.get(\"cost\", 0) + n * 25\n        s[\"log\"].append(\"overtime \" + str(n) + \" -> \" + str(shift))\n    # any other / unfillable action leaves staffing unchanged (a no-op)\n\n    # recompute required coverage and per-shift compliance from scratch\n    target = s.get(\"target_ratio\", 4)\n    if target < 1:\n        target = 1\n    required = {}\n    compliant = {}\n    understaffed = []\n    for sh in shifts:\n        pts = s[\"patients\"].get(sh, 0)\n        req = (pts + target - 1) // target  # ceil(pts / target)\n        have = s[\"assigned\"].get(sh, 0)\n        required[sh] = req\n        compliant[sh] = have >= req\n        if have < req:\n            understaffed.append(sh)\n    s[\"required_nurses\"] = required\n    s[\"compliant\"] = compliant\n    s[\"understaffed\"] = understaffed\n    s[\"all_compliant\"] = (len(understaffed) == 0)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "patients"
+      ],
+      "schema": {
+        "patients": "dict"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    known = [\"day\", \"evening\", \"night\"]\n    census = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        k, v = line.split(\":\", 1)\n        k = k.strip().lower()\n        v = v.strip()\n        if k in known:\n            try:\n                census[k] = int(v)\n            except (ValueError, TypeError):\n                pass\n    return {\"patients\": census} if census else {}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "shifts",
+        "patients",
+        "assigned",
+        "required_nurses",
+        "compliant",
+        "understaffed",
+        "all_compliant",
+        "staff_pool",
+        "float_pool",
+        "overtime_used",
+        "cost"
+      ],
+      "report": "Ward staffing status (target {target_ratio}:1). Understaffed shifts: {understaffed}. All compliant: {all_compliant}. Pools left -- staff {staff_pool}, float {float_pool}; overtime used {overtime_used}; cost {cost}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "ratio_compliance",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "staffing_cost",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "overtime",
+    "series": {
+      "overtime_used": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "cost": [
+        0.0,
+        25.0,
+        50.0,
+        75.0,
+        100.0,
+        125.0,
+        150.0,
+        175.0,
+        200.0,
+        225.0,
+        250.0,
+        275.0,
+        300.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cost 0",
+            "float_pool 3",
+            "overtime_used 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cost 10",
+            "float_pool 3",
+            "overtime_used 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cost 15",
+            "float_pool 2",
+            "overtime_used 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cost 25",
+            "float_pool 3",
+            "overtime_used 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cost 20",
+            "float_pool 3",
+            "overtime_used 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cost 25",
+            "float_pool 2",
+            "overtime_used 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "assign"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "call_float"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "overtime"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "assign"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "call_float"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

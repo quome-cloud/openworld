@@ -1,0 +1,265 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "agent_handoff",
+  "description": "an agent-to-human escalation world; actions handle, escalate, resolve",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent-to-human escalation world; actions handle, escalate, resolve"
+  },
+  "state_schema": {
+    "owner": "str",
+    "status": "str",
+    "complexity": "float",
+    "confidence": "float",
+    "attempts": "int",
+    "escalations": "int",
+    "sla_remaining": "int",
+    "human_engaged": "bool",
+    "resolved": "bool",
+    "breached": "bool"
+  },
+  "initial_state": {
+    "owner": "agent",
+    "status": "open",
+    "complexity": 0.7,
+    "confidence": 0.4,
+    "attempts": 0,
+    "escalations": 0,
+    "sla_remaining": 8,
+    "human_engaged": false,
+    "resolved": false,
+    "breached": false
+  },
+  "actions": [
+    "handle",
+    "escalate",
+    "resolve"
+  ],
+  "rules": [
+    "A case is owned by the agent until it is escalated to a human.",
+    "handle: the current owner works the case; the agent gains confidence with diminishing returns against complexity, a human becomes fully confident.",
+    "escalate: transfers ownership from the agent to a human and engages them; it has no effect once the case is already with a human.",
+    "resolve: the agent may close the case only when its confidence is at least the case's complexity; an engaged human may always close the case.",
+    "Every action consumes one unit of the SLA budget.",
+    "A resolved case is terminal and ignores all further actions.",
+    "If the SLA budget reaches zero before resolution, the case is breached."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n\n    # A resolved case is terminal: it absorbs every further action unchanged.\n    if s.get(\"resolved\"):\n        return s\n\n    # Time passes on every action; the SLA clock ticks down.\n    s[\"sla_remaining\"] = max(0, int(s.get(\"sla_remaining\", 0)) - 1)\n\n    if name == \"handle\":\n        # Only the current owner can work the case.\n        s[\"status\"] = \"in_progress\"\n        s[\"attempts\"] = int(s.get(\"attempts\", 0)) + 1\n        if s.get(\"owner\") == \"agent\":\n            # The agent makes progress, but with diminishing returns against\n            # complexity: hard cases barely move the confidence needle.\n            gain = round(0.2 * (1.0 - float(s.get(\"complexity\", 0.0))), 3)\n            s[\"confidence\"] = round(min(1.0, float(s.get(\"confidence\", 0.0)) + gain), 3)\n        else:\n            # A human working the case is fully competent: it becomes closeable.\n            s[\"confidence\"] = 1.0\n\n    elif name == \"escalate\":\n        # Hand the case off to a human. Idempotent once already escalated.\n        if s.get(\"owner\") == \"agent\":\n            s[\"owner\"] = \"human\"\n            s[\"human_engaged\"] = True\n            s[\"status\"] = \"in_progress\"\n            s[\"escalations\"] = int(s.get(\"escalations\", 0)) + 1\n\n    elif name == \"resolve\":\n        # The agent may only close a case it is confident enough to own;\n        # a human may always close the case they hold.\n        if s.get(\"owner\") == \"human\" and s.get(\"human_engaged\"):\n            s[\"resolved\"] = True\n            s[\"status\"] = \"resolved\"\n        elif s.get(\"owner\") == \"agent\" and float(s.get(\"confidence\", 0.0)) >= float(s.get(\"complexity\", 0.0)):\n            s[\"resolved\"] = True\n            s[\"status\"] = \"resolved\"\n\n    # An unresolved case that has burned its whole budget is in breach.\n    if not s.get(\"resolved\") and s.get(\"sla_remaining\", 0) <= 0:\n        s[\"breached\"] = True\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "complexity",
+        "confidence",
+        "sla_remaining"
+      ],
+      "schema": {
+        "complexity": {
+          "type": "float",
+          "range": [
+            0.0,
+            1.0
+          ]
+        },
+        "confidence": {
+          "type": "float",
+          "range": [
+            0.0,
+            1.0
+          ]
+        },
+        "sla_remaining": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        text = str(data.get(\"text\", \"\"))\n        words = int(data.get(\"words\", len(text.split())))\n        priority = str(data.get(\"priority\", \"normal\"))\n    else:\n        text = str(data)\n        words = len(text.split())\n        priority = \"normal\"\n    # Longer tickets read as more complex; the agent's confidence is the inverse.\n    complexity = round(min(1.0, max(0.0, words / 200.0)), 3)\n    confidence = round(max(0.0, 1.0 - complexity), 3)\n    sla_remaining = 4 if priority == \"urgent\" else 8\n    return {\"complexity\": complexity, \"confidence\": confidence, \"sla_remaining\": sla_remaining}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "owner",
+        "status",
+        "confidence",
+        "complexity",
+        "attempts",
+        "escalations",
+        "sla_remaining",
+        "resolved",
+        "breached"
+      ],
+      "report": "Case is {status} (owner: {owner}). confidence={confidence} vs complexity={complexity} after {attempts} attempt(s) and {escalations} escalation(s); sla_remaining={sla_remaining}, resolved={resolved}, breached={breached}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "resolve_case",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "avoid_sla_breach",
+      "goal": "minimize",
+      "weight": 0.7
+    },
+    {
+      "name": "minimize_escalations",
+      "goal": "minimize",
+      "weight": 0.3
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "handle",
+    "series": {
+      "confidence": [
+        0.4,
+        0.46,
+        0.52,
+        0.58,
+        0.64,
+        0.7,
+        0.76,
+        0.82,
+        0.88,
+        0.94,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "attempts": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "sla_remaining": [
+        8.0,
+        7.0,
+        6.0,
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "attempts 0",
+            "confidence 0.4",
+            "escalations 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "attempts 1",
+            "confidence 0.46",
+            "escalations 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "attempts 0",
+            "confidence 0.4",
+            "escalations 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "attempts 0",
+            "confidence 0.4",
+            "escalations 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "attempts 2",
+            "confidence 0.52",
+            "escalations 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "attempts 1",
+            "confidence 0.46",
+            "escalations 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "handle"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "escalate"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "resolve"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "handle"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "escalate"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

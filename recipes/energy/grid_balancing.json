@@ -1,0 +1,288 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "grid_balancing",
+  "description": "a power-grid balancing world with supply, demand, and frequency; actions dispatch, curtail, shed_load",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a power-grid balancing world with supply, demand, and frequency; actions dispatch, curtail, shed_load"
+  },
+  "state_schema": {
+    "supply": "float",
+    "demand": "float",
+    "reserve": "float",
+    "load_shed": "float",
+    "imbalance": "float",
+    "frequency": "float",
+    "blackout": "bool",
+    "time": "int"
+  },
+  "initial_state": {
+    "supply": 900.0,
+    "demand": 1000.0,
+    "reserve": 300.0,
+    "load_shed": 0.0,
+    "imbalance": -100.0,
+    "frequency": 49.5,
+    "blackout": false,
+    "time": 0
+  },
+  "actions": [
+    "dispatch",
+    "curtail",
+    "shed_load"
+  ],
+  "rules": [
+    "Grid frequency is 50.0 Hz when supply equals demand; it moves 0.005 Hz per MW of imbalance (supply - demand).",
+    "dispatch brings 50 MW of reserve generation online: supply rises and reserve falls, bounded by available reserve.",
+    "curtail backs 50 MW of generation off: supply falls and reserve rises, never below zero supply.",
+    "shed_load is an emergency control that disconnects 100 MW of demand, accumulating into load_shed.",
+    "Each action accepts an optional params['amount'] in MW overriding its default block size.",
+    "If frequency leaves the protective band [49.0, 51.0] Hz the grid trips: blackout latches True and the state is absorbing."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n    params = action.get(\"params\", {}) if isinstance(action, dict) else {}\n    if not isinstance(params, dict):\n        params = {}\n\n    NOMINAL = 50.0          # Hz, balanced grid\n    SENS = 0.005            # Hz per MW of (supply - demand) imbalance\n    DISPATCH_STEP = 50.0    # MW reserve brought online per dispatch\n    CURTAIL_STEP = 50.0     # MW generation backed off per curtail\n    SHED_STEP = 100.0       # MW load disconnected per shed_load\n    SAFE_LOW, SAFE_HIGH = 49.0, 51.0\n\n    supply = float(s.get(\"supply\", 0.0))\n    demand = float(s.get(\"demand\", 0.0))\n    reserve = float(s.get(\"reserve\", 0.0))\n    shed = float(s.get(\"load_shed\", 0.0))\n    blackout = bool(s.get(\"blackout\", False))\n\n    raw = params.get(\"amount\")\n    try:\n        amount = float(raw) if raw is not None else None\n    except (TypeError, ValueError):\n        amount = None\n\n    # A tripped grid is an absorbing state: ignore further control input.\n    if not blackout:\n        if name == \"dispatch\":\n            delta = amount if amount is not None else DISPATCH_STEP\n            delta = max(0.0, min(delta, reserve))      # can't dispatch beyond reserve\n            supply += delta\n            reserve -= delta\n        elif name == \"curtail\":\n            delta = amount if amount is not None else CURTAIL_STEP\n            delta = max(0.0, min(delta, supply))       # can't curtail below zero\n            supply -= delta\n            reserve += delta\n        elif name == \"shed_load\":\n            delta = amount if amount is not None else SHED_STEP\n            delta = max(0.0, min(delta, demand))       # can't shed more than the load\n            demand -= delta\n            shed += delta\n        # any other (e.g. noop / unknown) action leaves the balance unchanged\n\n    imbalance = supply - demand\n    frequency = round(NOMINAL + SENS * imbalance, 4)\n    if frequency < SAFE_LOW or frequency > SAFE_HIGH:\n        blackout = True\n\n    s[\"supply\"] = round(supply, 4)\n    s[\"demand\"] = round(demand, 4)\n    s[\"reserve\"] = round(reserve, 4)\n    s[\"load_shed\"] = round(shed, 4)\n    s[\"imbalance\"] = round(imbalance, 4)\n    s[\"frequency\"] = frequency\n    s[\"blackout\"] = blackout\n    s[\"time\"] = int(s.get(\"time\", 0)) + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "supply",
+        "demand",
+        "frequency"
+      ],
+      "schema": {
+        "supply": {
+          "type": "float",
+          "range": [
+            0.0,
+            5000.0
+          ]
+        },
+        "demand": {
+          "type": "float",
+          "range": [
+            0.0,
+            5000.0
+          ]
+        },
+        "frequency": {
+          "type": "float",
+          "range": [
+            45.0,
+            55.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    for ch in (\"=\", \":\", \",\", \";\", \"\\n\", \"\\t\"):\n        text = text.replace(ch, \" \")\n    toks = text.split()\n    fields = {\"supply\", \"demand\", \"frequency\"}\n    out = {}\n    for i in range(len(toks) - 1):\n        key = toks[i].strip().lower()\n        if key in fields:\n            try:\n                out[key] = float(toks[i + 1])\n            except ValueError:\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "supply",
+        "demand",
+        "imbalance",
+        "frequency",
+        "reserve",
+        "load_shed",
+        "blackout"
+      ],
+      "report": "Grid status @ t={time}: supply={supply} MW, demand={demand} MW (imbalance={imbalance} MW) -> frequency={frequency} Hz. Reserve {reserve} MW, load shed {load_shed} MW. Blackout={blackout}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "frequency_stability",
+      "goal": "minimize |frequency - 50.0| (Hz off nominal)",
+      "weight": 1.0
+    },
+    {
+      "name": "avoid_blackout",
+      "goal": "keep frequency within [49.0, 51.0] Hz so blackout stays False",
+      "weight": 1.0
+    },
+    {
+      "name": "minimize_load_shed",
+      "goal": "minimize load_shed (MW of demand disconnected)",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "shed_load",
+    "series": {
+      "demand": [
+        1000.0,
+        900.0,
+        800.0,
+        700.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0,
+        600.0
+      ],
+      "load_shed": [
+        0.0,
+        100.0,
+        200.0,
+        300.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0,
+        400.0
+      ],
+      "imbalance": [
+        -100.0,
+        0.0,
+        100.0,
+        200.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0
+      ],
+      "frequency": [
+        49.5,
+        50.0,
+        50.5,
+        51.0,
+        51.5,
+        51.5,
+        51.5,
+        51.5,
+        51.5,
+        51.5,
+        51.5,
+        51.5,
+        51.5
+      ],
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "demand 1000",
+            "frequency 49.5",
+            "imbalance -100"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "demand 1000",
+            "frequency 49.75",
+            "imbalance -50"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "demand 1000",
+            "frequency 49.25",
+            "imbalance -150"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "demand 900",
+            "frequency 50",
+            "imbalance 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "demand 1000",
+            "frequency 50",
+            "imbalance 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "demand 1000",
+            "frequency 49.5",
+            "imbalance -100"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "dispatch"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "curtail"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "shed_load"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "dispatch"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "curtail"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,274 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ed_triage",
+  "description": "an ED triage world: patients arrive with an acuity level and wait; actions triage, assign_bed, discharge; sicker patients are seen first",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "healthcare",
+      "triage",
+      "perception",
+      "leaf"
+    ],
+    "lineage": "build/ed_triage.py",
+    "metrics": {},
+    "description": "an ED triage world: patients arrive with an acuity level and wait; actions triage, assign_bed, discharge; sicker patients are seen first"
+  },
+  "state_schema": {
+    "clock": "int",
+    "beds_total": "int",
+    "next_id": "int",
+    "pending_acuity": "int",
+    "discharged": "int",
+    "waiting": "int",
+    "triaged": "int",
+    "beds_occupied": "int",
+    "patients": "list[dict]"
+  },
+  "initial_state": {
+    "clock": 0,
+    "beds_total": 3,
+    "next_id": 6,
+    "pending_acuity": 0,
+    "discharged": 0,
+    "waiting": 3,
+    "triaged": 1,
+    "beds_occupied": 1,
+    "patients": [
+      {
+        "id": 1,
+        "acuity": 2,
+        "status": "waiting",
+        "wait": 4
+      },
+      {
+        "id": 2,
+        "acuity": 5,
+        "status": "waiting",
+        "wait": 1
+      },
+      {
+        "id": 3,
+        "acuity": 1,
+        "status": "waiting",
+        "wait": 0
+      },
+      {
+        "id": 4,
+        "acuity": 3,
+        "status": "triaged",
+        "wait": 6
+      },
+      {
+        "id": 5,
+        "acuity": 4,
+        "status": "in_bed",
+        "wait": 9
+      }
+    ]
+  },
+  "actions": [
+    "triage",
+    "assign_bed",
+    "discharge"
+  ],
+  "rules": [
+    "Acuity is 1..5 where 1 is the most acute (sickest) and 5 the least.",
+    "Each patient advances waiting -> triaged -> in_bed -> discharged.",
+    "Every action advances the clock by 1 and ages the wait of every patient still waiting or triaged.",
+    "'triage' moves the sickest waiting patient to triaged.",
+    "'assign_bed' moves the sickest triaged patient into a bed, only if a bed is free (beds_occupied < beds_total).",
+    "'discharge' discharges the sickest in-bed patient, freeing a bed and incrementing discharged.",
+    "Sicker patients are always selected first; ties break by longest wait, then lowest id.",
+    "A perceived arrival (pending_acuity in 1..5) is admitted as a new waiting patient on the next step."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    patients = [dict(p) for p in s.get(\"patients\", [])]\n    name = action.get(\"name\")\n    beds_total = s.get(\"beds_total\", 0)\n\n    # --- common prelude: advance the clock and age everyone still waiting ---\n    s[\"clock\"] = s.get(\"clock\", 0) + 1\n    for p in patients:\n        if p.get(\"status\") in (\"waiting\", \"triaged\"):\n            p[\"wait\"] = p.get(\"wait\", 0) + 1\n\n    # --- admit an arrival staged by perception (pending_acuity in 1..5) ---\n    pending = s.get(\"pending_acuity\", 0)\n    if isinstance(pending, int) and 1 <= pending <= 5:\n        new_id = s.get(\"next_id\", 1)\n        patients.append({\"id\": new_id, \"acuity\": pending,\n                         \"status\": \"waiting\", \"wait\": 0})\n        s[\"next_id\"] = new_id + 1\n        s[\"pending_acuity\"] = 0\n\n    def sickest(status):\n        # lowest acuity first (sickest), then longest wait, then lowest id\n        elig = [p for p in patients if p.get(\"status\") == status]\n        if not elig:\n            return None\n        return sorted(elig, key=lambda p: (p.get(\"acuity\", 5),\n                                           -p.get(\"wait\", 0),\n                                           p.get(\"id\", 0)))[0]\n\n    occupied = sum(1 for p in patients if p.get(\"status\") == \"in_bed\")\n\n    if name == \"triage\":\n        p = sickest(\"waiting\")\n        if p is not None:\n            p[\"status\"] = \"triaged\"\n    elif name == \"assign_bed\":\n        if occupied < beds_total:\n            p = sickest(\"triaged\")\n            if p is not None:\n                p[\"status\"] = \"in_bed\"\n    elif name == \"discharge\":\n        p = sickest(\"in_bed\")\n        if p is not None:\n            p[\"status\"] = \"discharged\"\n            s[\"discharged\"] = s.get(\"discharged\", 0) + 1\n\n    # --- derived counts kept on the state for reporting / previews ---\n    s[\"patients\"] = patients\n    s[\"waiting\"] = sum(1 for p in patients if p.get(\"status\") == \"waiting\")\n    s[\"triaged\"] = sum(1 for p in patients if p.get(\"status\") == \"triaged\")\n    s[\"beds_occupied\"] = sum(1 for p in patients if p.get(\"status\") == \"in_bed\")\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_acuity"
+      ],
+      "schema": {
+        "pending_acuity": {
+          "type": "int",
+          "range": [
+            1,
+            5
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    acuity = None\n    if isinstance(data, dict):\n        acuity = data.get(\"acuity\")\n    else:\n        text = str(data).lower()\n        # prefer the number written after the word 'acuity'\n        if \"acuity\" in text:\n            tail = text.split(\"acuity\", 1)[1]\n            num = \"\"\n            for ch in tail:\n                if ch.isdigit():\n                    num += ch\n                elif num:\n                    break\n            if num:\n                acuity = int(num)\n        # otherwise take the first standalone integer in the note\n        if acuity is None:\n            for token in text.replace(\",\", \" \").replace(\":\", \" \").split():\n                if token.isdigit():\n                    acuity = int(token)\n                    break\n    if acuity is None:\n        return {}\n    acuity = int(acuity)\n    if acuity < 1:\n        acuity = 1\n    if acuity > 5:\n        acuity = 5\n    return {\"pending_acuity\": acuity}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "clock",
+        "waiting",
+        "triaged",
+        "beds_occupied",
+        "beds_total",
+        "discharged"
+      ],
+      "report": "t={clock}: {waiting} waiting, {triaged} triaged, {beds_occupied}/{beds_total} beds in use, {discharged} discharged"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "throughput",
+      "goal": "max discharged"
+    },
+    {
+      "name": "sickest seen first",
+      "goal": "min wait of low-acuity patients"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "triage",
+    "series": {
+      "clock": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "waiting": [
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triaged": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "beds_occupied 1",
+            "clock 0",
+            "discharged 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "beds_occupied 1",
+            "clock 1",
+            "discharged 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "beds_occupied 2",
+            "clock 1",
+            "discharged 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "beds_occupied 0",
+            "clock 1",
+            "discharged 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "beds_occupied 1",
+            "clock 2",
+            "discharged 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "beds_occupied 2",
+            "clock 2",
+            "discharged 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "triage"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "assign_bed"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "discharge"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "triage"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "assign_bed"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

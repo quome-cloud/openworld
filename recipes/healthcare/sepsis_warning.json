@@ -1,0 +1,357 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "sepsis_warning",
+  "description": "a sepsis early-warning world: vitals drift and a risk score rises; actions monitor, escalate, treat to lower risk",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a sepsis early-warning world: vitals drift and a risk score rises; actions monitor, escalate, treat to lower risk"
+  },
+  "state_schema": {
+    "tick": "int",
+    "heart_rate": "float",
+    "resp_rate": "float",
+    "temp_c": "float",
+    "sys_bp": "float",
+    "lactate": "float",
+    "monitoring_level": "int",
+    "escalated": "bool",
+    "antibiotics_given": "bool",
+    "treatments": "int",
+    "risk": "int"
+  },
+  "initial_state": {
+    "tick": 0,
+    "heart_rate": 88.0,
+    "resp_rate": 19.0,
+    "temp_c": 37.6,
+    "sys_bp": 112.0,
+    "lactate": 1.4,
+    "monitoring_level": 0,
+    "escalated": false,
+    "antibiotics_given": false,
+    "treatments": 0,
+    "risk": 19
+  },
+  "actions": [
+    "monitor",
+    "escalate",
+    "treat",
+    "wait"
+  ],
+  "rules": [
+    "Every tick the vitals drift away from their healthy baselines (heart rate, respiratory rate, and temperature rise; systolic blood pressure falls; lactate rises) -- the patient is deteriorating toward sepsis.",
+    "The risk score (0-100) is a deterministic function of how far the vitals have strayed from baseline; only low blood pressure and high lactate count as harmful.",
+    "'monitor' raises the monitoring level (max 2); closer observation slows further drift but does not itself reverse the vitals.",
+    "'escalate' summons the rapid-response team: monitoring jumps to continuous, drift slows further, and any subsequent 'treat' is markedly more effective.",
+    "'treat' administers antibiotics and fluids, pulling every vital back toward its baseline and lowering risk; it is twice as effective once the patient is escalated.",
+    "'wait' takes no clinical action, so only drift applies and risk keeps climbing.",
+    "Dynamics are deterministic and contain no randomness, so rollouts replay exactly."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nNORMAL = {\"heart_rate\": 75.0, \"resp_rate\": 16.0, \"temp_c\": 37.0,\n          \"sys_bp\": 120.0, \"lactate\": 1.0}\n\ndef _risk(s):\n    # weighted deviation of each vital from its healthy baseline; only LOW\n    # blood pressure and HIGH lactate are pathological, so those are one-sided.\n    dev = 0.0\n    dev += abs(s[\"heart_rate\"] - NORMAL[\"heart_rate\"]) / 5.0\n    dev += abs(s[\"resp_rate\"] - NORMAL[\"resp_rate\"]) / 2.0\n    dev += abs(s[\"temp_c\"] - NORMAL[\"temp_c\"]) / 0.3\n    dev += max(0.0, NORMAL[\"sys_bp\"] - s[\"sys_bp\"]) / 5.0\n    dev += max(0.0, s[\"lactate\"] - NORMAL[\"lactate\"]) / 0.4\n    return max(0, min(100, int(round(dev * 2.2))))\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"wait\")\n    s[\"tick\"] = int(s.get(\"tick\", 0)) + 1\n\n    level = int(s.get(\"monitoring_level\", 0))\n    escalated = bool(s.get(\"escalated\", False))\n\n    # closer monitoring and escalation slow how fast the illness progresses\n    drift = 1.0 - 0.15 * level\n    if escalated:\n        drift *= 0.7\n    if drift < 0.0:\n        drift = 0.0\n\n    # vitals drift away from normal (sepsis progresses) every tick\n    s[\"heart_rate\"] = round(s.get(\"heart_rate\", 75.0) + 4.0 * drift, 2)\n    s[\"resp_rate\"] = round(s.get(\"resp_rate\", 16.0) + 1.5 * drift, 2)\n    s[\"temp_c\"] = round(s.get(\"temp_c\", 37.0) + 0.2 * drift, 2)\n    s[\"sys_bp\"] = round(s.get(\"sys_bp\", 120.0) - 3.0 * drift, 2)\n    s[\"lactate\"] = round(s.get(\"lactate\", 1.0) + 0.3 * drift, 2)\n\n    if name == \"monitor\":\n        s[\"monitoring_level\"] = min(2, level + 1)\n    elif name == \"escalate\":\n        s[\"escalated\"] = True\n        s[\"monitoring_level\"] = 2\n    elif name == \"treat\":\n        s[\"antibiotics_given\"] = True\n        s[\"treatments\"] = int(s.get(\"treatments\", 0)) + 1\n        # antibiotics + fluids pull each vital back toward its baseline;\n        # an escalated patient is in a setting where treatment lands harder.\n        frac = 0.30 + (0.30 if escalated else 0.0)\n        for k, base in NORMAL.items():\n            s[k] = round(s[k] + (base - s[k]) * frac, 2)\n    # \"wait\": no clinical action this tick -- only drift applies\n\n    s[\"risk\"] = _risk(s)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "heart_rate",
+        "resp_rate",
+        "temp_c",
+        "sys_bp",
+        "lactate"
+      ],
+      "schema": {
+        "heart_rate": {
+          "type": "float",
+          "range": [
+            20.0,
+            250.0
+          ]
+        },
+        "resp_rate": {
+          "type": "float",
+          "range": [
+            4.0,
+            60.0
+          ]
+        },
+        "temp_c": {
+          "type": "float",
+          "range": [
+            30.0,
+            45.0
+          ]
+        },
+        "sys_bp": {
+          "type": "float",
+          "range": [
+            40.0,
+            260.0
+          ]
+        },
+        "lactate": {
+          "type": "float",
+          "range": [
+            0.0,
+            30.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if not isinstance(data, dict):\n        return {}\n\n    def read(*keys):\n        for k in keys:\n            if k in data and data[k] is not None:\n                return float(data[k])\n        return None\n\n    out = {}\n    hr = read(\"heart_rate\", \"hr\", \"pulse\")\n    if hr is not None:\n        out[\"heart_rate\"] = round(hr, 2)\n    rr = read(\"resp_rate\", \"rr\", \"respiratory_rate\")\n    if rr is not None:\n        out[\"resp_rate\"] = round(rr, 2)\n    t = read(\"temp_c\", \"temp\", \"temperature\")\n    if t is not None:\n        out[\"temp_c\"] = round(t, 2)\n    bp = read(\"sys_bp\", \"sbp\", \"systolic\")\n    if bp is not None:\n        out[\"sys_bp\"] = round(bp, 2)\n    lac = read(\"lactate\")\n    if lac is not None:\n        out[\"lactate\"] = round(lac, 2)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "tick",
+        "risk",
+        "heart_rate",
+        "resp_rate",
+        "temp_c",
+        "sys_bp",
+        "lactate",
+        "monitoring_level",
+        "escalated",
+        "antibiotics_given"
+      ],
+      "report": "t={tick} | SEPSIS RISK {risk}/100 | HR {heart_rate} RR {resp_rate} T {temp_c}C SBP {sys_bp} lactate {lactate} | monitoring L{monitoring_level} escalated={escalated} antibiotics={antibiotics_given}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize_sepsis_risk",
+      "goal": "minimize the risk score"
+    },
+    {
+      "name": "timely_escalation",
+      "goal": "escalate before risk crosses 50"
+    },
+    {
+      "name": "avoid_overtreatment",
+      "goal": "minimize unnecessary treat actions"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "escalate",
+    "series": {
+      "tick": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "heart_rate": [
+        88.0,
+        92.0,
+        93.96,
+        95.92,
+        97.88,
+        99.84,
+        101.8,
+        103.76,
+        105.72,
+        107.68,
+        109.64,
+        111.6,
+        113.56
+      ],
+      "resp_rate": [
+        19.0,
+        20.5,
+        21.23,
+        21.96,
+        22.7,
+        23.43,
+        24.16,
+        24.89,
+        25.62,
+        26.36,
+        27.09,
+        27.82,
+        28.55
+      ],
+      "temp_c": [
+        37.6,
+        37.8,
+        37.9,
+        38.0,
+        38.1,
+        38.2,
+        38.3,
+        38.4,
+        38.5,
+        38.6,
+        38.7,
+        38.8,
+        38.9
+      ],
+      "sys_bp": [
+        112.0,
+        109.0,
+        107.53,
+        106.06,
+        104.59,
+        103.12,
+        101.65,
+        100.18,
+        98.71,
+        97.24,
+        95.77,
+        94.3,
+        92.83
+      ],
+      "lactate": [
+        1.4,
+        1.7,
+        1.85,
+        2.0,
+        2.15,
+        2.3,
+        2.45,
+        2.6,
+        2.75,
+        2.9,
+        3.05,
+        3.2,
+        3.35
+      ],
+      "monitoring_level": [
+        0.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "risk": [
+        19.0,
+        27.0,
+        31.0,
+        35.0,
+        39.0,
+        42.0,
+        46.0,
+        50.0,
+        54.0,
+        58.0,
+        62.0,
+        66.0,
+        70.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "heart_rate 88",
+            "lactate 1.4",
+            "monitoring_level 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "heart_rate 92",
+            "lactate 1.7",
+            "monitoring_level 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "heart_rate 92",
+            "lactate 1.7",
+            "monitoring_level 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "heart_rate 86.9",
+            "lactate 1.49",
+            "monitoring_level 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "heart_rate 92",
+            "lactate 1.7",
+            "monitoring_level 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "heart_rate 95.4",
+            "lactate 1.96",
+            "monitoring_level 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "monitor"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "escalate"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "treat"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "wait"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "monitor"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

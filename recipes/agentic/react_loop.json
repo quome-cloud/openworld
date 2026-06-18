@@ -1,0 +1,243 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "react_loop",
+  "description": "a ReAct reasoning-loop world (thought, act, observe); actions think, act, observe, answer",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a ReAct reasoning-loop world (thought, act, observe); actions think, act, observe, answer"
+  },
+  "state_schema": {
+    "question": "str",
+    "phase": "str",
+    "cycle": "int",
+    "steps": "int",
+    "thoughts": "int",
+    "acts": "int",
+    "observations": "int",
+    "rejected": "int",
+    "last_thought": "str",
+    "last_action": "str",
+    "last_observation": "str",
+    "trace": "list",
+    "answer": "str",
+    "done": "bool"
+  },
+  "initial_state": {
+    "question": "",
+    "phase": "think",
+    "cycle": 0,
+    "steps": 0,
+    "thoughts": 0,
+    "acts": 0,
+    "observations": 0,
+    "rejected": 0,
+    "last_thought": "",
+    "last_action": "",
+    "last_observation": "",
+    "trace": [],
+    "answer": "",
+    "done": false
+  },
+  "actions": [
+    "think",
+    "act",
+    "observe",
+    "answer"
+  ],
+  "rules": [
+    "ReAct interleaves reasoning and acting: each cycle is Thought -> Act -> Observation.",
+    "A Thought may only begin a cycle (phase 'think'); it records reasoning and moves to phase 'act'.",
+    "An Act must be preceded by a Thought (phase 'act'); it issues a tool call and moves to phase 'observe'.",
+    "An Observation must follow an Act (phase 'observe'); it records the result, completes the cycle, and returns to phase 'think'.",
+    "An Answer is the terminal Finish action, chosen in place of an Act after a Thought (phase 'act'); it sets the final answer and terminates the episode.",
+    "Once answered, the episode is done and all further actions are ignored.",
+    "Out-of-phase or unknown actions are rejected (counted and logged) and never change the phase."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    trace = list(s.get(\"trace\", []))\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # Terminal: once an answer is given the episode is done; ignore everything.\n    if s.get(\"done\"):\n        return s\n\n    s[\"steps\"] = int(s.get(\"steps\", 0)) + 1\n    phase = s.get(\"phase\", \"think\")\n\n    def reject(reason):\n        s[\"rejected\"] = int(s.get(\"rejected\", 0)) + 1\n        trace.append(\"[rejected] \" + str(name) + \" in phase '\" + str(phase) + \"': \" + reason)\n        s[\"trace\"] = trace\n        return s\n\n    if name == \"think\":\n        if phase != \"think\":\n            return reject(\"a thought may only begin a cycle\")\n        thought = str(params.get(\"content\", params.get(\"text\", \"\")))\n        s[\"thoughts\"] = int(s.get(\"thoughts\", 0)) + 1\n        s[\"last_thought\"] = thought\n        s[\"phase\"] = \"act\"\n        trace.append(\"Thought \" + str(s[\"thoughts\"]) + \": \" + thought)\n        s[\"trace\"] = trace\n        return s\n\n    if name == \"act\":\n        if phase != \"act\":\n            return reject(\"an action must be preceded by a thought\")\n        tool = str(params.get(\"tool\", params.get(\"content\", params.get(\"text\", \"\"))))\n        s[\"acts\"] = int(s.get(\"acts\", 0)) + 1\n        s[\"last_action\"] = tool\n        s[\"phase\"] = \"observe\"\n        trace.append(\"Action \" + str(s[\"acts\"]) + \": \" + tool)\n        s[\"trace\"] = trace\n        return s\n\n    if name == \"observe\":\n        if phase != \"observe\":\n            return reject(\"an observation must follow an action\")\n        obs = str(params.get(\"content\", params.get(\"result\", params.get(\"text\", \"\"))))\n        s[\"observations\"] = int(s.get(\"observations\", 0)) + 1\n        s[\"last_observation\"] = obs\n        s[\"cycle\"] = int(s.get(\"cycle\", 0)) + 1\n        s[\"phase\"] = \"think\"\n        trace.append(\"Observation \" + str(s[\"observations\"]) + \": \" + obs)\n        s[\"trace\"] = trace\n        return s\n\n    if name == \"answer\":\n        if phase != \"act\":\n            return reject(\"an answer is the terminal action and must follow a thought\")\n        ans = str(params.get(\"content\", params.get(\"text\", \"\")))\n        s[\"answer\"] = ans\n        s[\"done\"] = True\n        s[\"phase\"] = \"answer\"\n        trace.append(\"Answer: \" + ans)\n        s[\"trace\"] = trace\n        return s\n\n    return reject(\"unknown action\")\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "question"
+      ],
+      "schema": {
+        "question": "str"
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        q = data.get(\"question\", data.get(\"task\", data.get(\"text\", \"\")))\n    else:\n        q = data\n    return {\"question\": str(q)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "question",
+        "answer",
+        "cycle",
+        "steps",
+        "trace"
+      ],
+      "report": "ReAct on: {question}\n{trace}\nFinal answer: {answer}  ({cycle} cycles, {steps} steps)"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reach_answer",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "steps",
+      "goal": "minimize",
+      "weight": 0.25
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "think",
+    "series": {
+      "steps": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "thoughts": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rejected": [
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "rejected 0",
+            "steps 0",
+            "thoughts 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "rejected 0",
+            "steps 1",
+            "thoughts 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "rejected 1",
+            "steps 1",
+            "thoughts 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "rejected 1",
+            "steps 1",
+            "thoughts 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "rejected 1",
+            "steps 1",
+            "thoughts 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "rejected 1",
+            "steps 2",
+            "thoughts 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "think"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "act"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "observe"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "answer"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "think"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

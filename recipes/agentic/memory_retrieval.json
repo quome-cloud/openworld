@@ -1,0 +1,265 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "memory_retrieval",
+  "description": "an agent with episodic memory; actions store, retrieve, act",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent with episodic memory; actions store, retrieve, act"
+  },
+  "state_schema": {
+    "memory": "list[dict]",
+    "size": "int",
+    "clock": "int",
+    "recalled": "null",
+    "recalled_cue": "null",
+    "log": "list",
+    "stored": "int",
+    "retrieved": "int",
+    "acted": "int",
+    "hits": "int",
+    "misses": "int"
+  },
+  "initial_state": {
+    "memory": [
+      {
+        "cue": "wake",
+        "value": "the agent woke up",
+        "t": 0
+      },
+      {
+        "cue": "goal",
+        "value": "find the blue key",
+        "t": 1
+      }
+    ],
+    "size": 2,
+    "clock": 2,
+    "recalled": null,
+    "recalled_cue": null,
+    "log": [],
+    "stored": 0,
+    "retrieved": 0,
+    "acted": 0,
+    "hits": 0,
+    "misses": 0
+  },
+  "actions": [
+    "store",
+    "retrieve",
+    "act"
+  ],
+  "rules": [
+    "Paste one episode per line as 'cue: value'; perception loads them into memory, replacing any previous batch and stamping each with a clock t.",
+    "'store' appends a new (cue, value) episode to memory and ticks the clock.",
+    "'retrieve' scans memory newest-first for a matching cue: a hit brings that value to mind (recalled) and counts a hit; a miss clears recalled and counts a miss.",
+    "'act' consumes the recalled value (logging it) and then clears it; acting with nothing recalled is a no-op tick.",
+    "`size` always equals the number of episodes in memory; the clock advances once per recognized action."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    mem = [dict(r) for r in s.get(\"memory\", [])]\n    t = s.get(\"clock\", 0)\n    name = action.get(\"name\")\n    params = action.get(\"params\", {}) or {}\n\n    if name == \"store\":\n        cue = str(params.get(\"cue\", \"episode-\" + str(t)))\n        value = str(params.get(\"value\", \"observation at t=\" + str(t)))\n        mem.append({\"cue\": cue, \"value\": value, \"t\": t})\n        s[\"stored\"] = s.get(\"stored\", 0) + 1\n    elif name == \"retrieve\":\n        cue = str(params.get(\"cue\", \"\"))\n        found = None\n        for rec in reversed(mem):                 # most-recent match wins\n            if rec.get(\"cue\") == cue:\n                found = rec\n                break\n        s[\"retrieved\"] = s.get(\"retrieved\", 0) + 1\n        if found is not None:\n            s[\"recalled\"] = found.get(\"value\")\n            s[\"recalled_cue\"] = cue\n            s[\"hits\"] = s.get(\"hits\", 0) + 1\n        else:\n            s[\"recalled\"] = None\n            s[\"recalled_cue\"] = None\n            s[\"misses\"] = s.get(\"misses\", 0) + 1\n    elif name == \"act\":\n        if s.get(\"recalled\") is not None:\n            log = list(s.get(\"log\", []))\n            log.append({\"cue\": s.get(\"recalled_cue\"), \"value\": s.get(\"recalled\"),\n                        \"t\": t})\n            s[\"log\"] = log\n            s[\"acted\"] = s.get(\"acted\", 0) + 1\n            s[\"recalled\"] = None                  # consumed; nothing in mind now\n            s[\"recalled_cue\"] = None\n    else:\n        return s                                  # unknown action: no-op, no tick\n\n    s[\"memory\"] = mem\n    s[\"size\"] = len(mem)\n    s[\"clock\"] = t + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "memory",
+        "size",
+        "clock"
+      ],
+      "schema": {
+        "size": {
+          "type": "int",
+          "range": [
+            0,
+            9999
+          ]
+        },
+        "clock": {
+          "type": "int",
+          "range": [
+            0,
+            9999
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    mem = []\n    t = 0\n    for line in str(data).splitlines():\n        line = line.strip()\n        if not line:\n            continue\n        if ':' in line:\n            cue, value = line.split(':', 1)\n            cue, value = cue.strip(), value.strip()\n        else:\n            cue = value = line\n        mem.append({\"cue\": cue, \"value\": value, \"t\": t})\n        t += 1\n    return {\"memory\": mem, \"size\": len(mem), \"clock\": len(mem)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "clock",
+        "size",
+        "recalled",
+        "stored",
+        "retrieved",
+        "hits",
+        "misses",
+        "acted"
+      ],
+      "report": "t{clock} | {size} episodes, recalled={recalled} | stored {stored}, retrieved {retrieved} (hits {hits}/misses {misses}), acted {acted}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "recall successfully",
+      "goal": "max hits"
+    },
+    {
+      "name": "act on what you remember",
+      "goal": "max acted"
+    },
+    {
+      "name": "avoid blank recall",
+      "goal": "min misses"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "store",
+    "series": {
+      "size": [
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0
+      ],
+      "clock": [
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0
+      ],
+      "stored": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "clock 2",
+            "misses 0",
+            "retrieved 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "clock 3",
+            "misses 0",
+            "retrieved 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "clock 3",
+            "misses 1",
+            "retrieved 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "clock 3",
+            "misses 0",
+            "retrieved 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "clock 4",
+            "misses 0",
+            "retrieved 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "clock 4",
+            "misses 1",
+            "retrieved 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "store"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "retrieve"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "act"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "store"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "retrieve"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

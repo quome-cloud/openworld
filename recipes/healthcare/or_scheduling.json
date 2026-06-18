@@ -1,0 +1,308 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "or_scheduling",
+  "description": "an operating-room scheduling world: cases with durations and rooms; actions book, delay, cancel without double-booking",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an operating-room scheduling world: cases with durations and rooms; actions book, delay, cancel without double-booking"
+  },
+  "state_schema": {
+    "rooms": "list[str]",
+    "horizon": "int",
+    "cases": "dict",
+    "booked": "int",
+    "pending": "int",
+    "utilization": "int",
+    "rejected": "int"
+  },
+  "initial_state": {
+    "rooms": [
+      "OR1",
+      "OR2"
+    ],
+    "horizon": 8,
+    "cases": {
+      "C1": {
+        "name": "appendectomy",
+        "duration": 2,
+        "status": "pending",
+        "room": null,
+        "start": null
+      },
+      "C2": {
+        "name": "knee replacement",
+        "duration": 3,
+        "status": "pending",
+        "room": null,
+        "start": null
+      },
+      "C3": {
+        "name": "cataract",
+        "duration": 1,
+        "status": "pending",
+        "room": null,
+        "start": null
+      },
+      "C4": {
+        "name": "cardiac bypass",
+        "duration": 4,
+        "status": "pending",
+        "room": null,
+        "start": null
+      },
+      "C5": {
+        "name": "hernia repair",
+        "duration": 2,
+        "status": "pending",
+        "room": null,
+        "start": null
+      }
+    },
+    "booked": 0,
+    "pending": 5,
+    "utilization": 0,
+    "rejected": 0
+  },
+  "actions": [
+    "book",
+    "delay",
+    "cancel"
+  ],
+  "rules": [
+    "A case occupies the half-open interval [start, start + duration) in exactly one room.",
+    "book schedules a pending case; it is allowed only if the interval lies within the room's open hours [0, horizon) and does not overlap any case already booked in that room. Such a request never double-books: an infeasible booking is refused and increments 'rejected' instead, leaving the schedule unchanged.",
+    "When book omits room/start, the earliest non-overlapping slot (scanning rooms in order, earliest start first) is chosen deterministically.",
+    "delay moves an already-booked case to a strictly later start in the same room, only when the shifted interval still fits without overlap; otherwise it is refused.",
+    "cancel returns a booked case to 'pending' and frees its room and start time.",
+    "booked, pending, utilization (booked room-hours) and rejected are derived counters recomputed every step. Invariant: no two cases ever overlap in the same room."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    cases = {cid: dict(c) for cid, c in s.get(\"cases\", {}).items()}\n    rooms = list(s.get(\"rooms\", []))\n    horizon = int(s.get(\"horizon\", 0))\n    rejected = int(s.get(\"rejected\", 0))\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def booked_intervals(room, exclude=None):\n        out = []\n        for cid, c in cases.items():\n            if cid == exclude:\n                continue\n            if c.get(\"status\") == \"booked\" and c.get(\"room\") == room:\n                st = c.get(\"start\")\n                if st is not None:\n                    out.append((st, st + int(c.get(\"duration\", 0))))\n        return out\n\n    def fits(room, start, duration, exclude=None):\n        if room not in rooms or start is None:\n            return False\n        if start < 0 or start + duration > horizon:\n            return False\n        for (a, b) in booked_intervals(room, exclude):\n            if start < b and a < start + duration:   # half-open overlap\n                return False\n        return True\n\n    def earliest_slot(duration, room=None, exclude=None, min_start=0):\n        candidates = [room] if room is not None else rooms\n        best = None\n        for r in candidates:\n            for st in range(max(0, min_start), horizon - duration + 1):\n                if fits(r, st, duration, exclude):\n                    if best is None or st < best[1]:\n                        best = (r, st)\n                    break   # earliest fitting start in this room\n        return best\n\n    if name == \"book\":\n        cid = params.get(\"case\")\n        if cid is None:\n            pend = [k for k in sorted(cases) if cases[k].get(\"status\") == \"pending\"]\n            cid = pend[0] if pend else None\n        if cid in cases and cases[cid].get(\"status\") == \"pending\":\n            dur = int(cases[cid].get(\"duration\", 0))\n            room = params.get(\"room\")\n            start = params.get(\"start\")\n            if start is None:\n                slot = earliest_slot(dur, room=room)\n                if slot is not None:\n                    room, start = slot\n            if fits(room, start, dur):\n                cases[cid][\"status\"] = \"booked\"\n                cases[cid][\"room\"] = room\n                cases[cid][\"start\"] = start\n            else:\n                rejected += 1\n        else:\n            rejected += 1\n\n    elif name == \"delay\":\n        cid = params.get(\"case\")\n        if cid is None:\n            bk = [k for k in sorted(cases) if cases[k].get(\"status\") == \"booked\"]\n            cid = bk[0] if bk else None\n        if cid in cases and cases[cid].get(\"status\") == \"booked\":\n            c = cases[cid]\n            dur = int(c.get(\"duration\", 0))\n            room = c.get(\"room\")\n            cur = int(c.get(\"start\", 0))\n            if \"start\" in params and params.get(\"start\") is not None:\n                new = params.get(\"start\")\n            elif params.get(\"by\") is not None:\n                new = cur + int(params.get(\"by\"))\n            else:\n                slot = earliest_slot(dur, room=room, exclude=cid, min_start=cur + 1)\n                new = slot[1] if slot is not None else None\n            if new is not None and new > cur and fits(room, new, dur, exclude=cid):\n                c[\"start\"] = new\n            else:\n                rejected += 1\n        else:\n            rejected += 1\n\n    elif name == \"cancel\":\n        cid = params.get(\"case\")\n        if cid is None:\n            bk = [k for k in sorted(cases) if cases[k].get(\"status\") == \"booked\"]\n            cid = bk[-1] if bk else None\n        if cid in cases and cases[cid].get(\"status\") == \"booked\":\n            cases[cid][\"status\"] = \"pending\"\n            cases[cid][\"room\"] = None\n            cases[cid][\"start\"] = None\n        else:\n            rejected += 1\n\n    s[\"cases\"] = cases\n    s[\"booked\"] = sum(1 for c in cases.values() if c.get(\"status\") == \"booked\")\n    s[\"pending\"] = sum(1 for c in cases.values() if c.get(\"status\") == \"pending\")\n    s[\"utilization\"] = sum(int(c.get(\"duration\", 0)) for c in cases.values()\n                           if c.get(\"status\") == \"booked\")\n    s[\"rejected\"] = rejected\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "rooms",
+        "horizon",
+        "cases",
+        "booked",
+        "pending",
+        "utilization",
+        "rejected"
+      ],
+      "schema": {
+        "horizon": {
+          "type": "int",
+          "range": [
+            0,
+            48
+          ]
+        },
+        "booked": "int",
+        "pending": "int",
+        "utilization": "int",
+        "rejected": "int"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    rooms = []\n    horizon = 0\n    cases = {}\n    for raw in text.split(\"\\n\"):\n        line = raw.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        low = line.lower()\n        if low.startswith(\"rooms:\"):\n            rooms = [r.strip() for r in line.split(\":\", 1)[1].split(\",\") if r.strip()]\n        elif low.startswith(\"horizon:\"):\n            try:\n                horizon = int(line.split(\":\", 1)[1].strip())\n            except ValueError:\n                horizon = 0\n        else:\n            parts = line.split()\n            if len(parts) >= 3:\n                cid, cname, dur = parts[0], parts[1], parts[2]\n            elif len(parts) == 2:\n                cid, cname, dur = parts[0], parts[0], parts[1]\n            else:\n                continue\n            try:\n                duration = int(dur)\n            except ValueError:\n                continue\n            cases[cid] = {\"name\": cname.replace(\"_\", \" \"), \"duration\": duration,\n                          \"status\": \"pending\", \"room\": None, \"start\": None}\n    return {\n        \"rooms\": rooms,\n        \"horizon\": horizon,\n        \"cases\": cases,\n        \"booked\": 0,\n        \"pending\": len(cases),\n        \"utilization\": 0,\n        \"rejected\": 0,\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "booked",
+        "pending",
+        "utilization",
+        "rejected"
+      ],
+      "report": "OR schedule: {booked} cases booked, {pending} pending, {utilization} room-hours used, {rejected} requests refused (no double-booking)."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "throughput",
+      "goal": "maximize booked"
+    },
+    {
+      "name": "utilization",
+      "goal": "maximize utilization"
+    },
+    {
+      "name": "safety",
+      "goal": "minimize rejected"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "book",
+    "series": {
+      "booked": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "pending": [
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "utilization": [
+        0.0,
+        2.0,
+        5.0,
+        6.0,
+        10.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "rejected": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "booked 0",
+            "pending 5",
+            "rejected 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "booked 1",
+            "pending 4",
+            "rejected 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "booked 0",
+            "pending 5",
+            "rejected 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "booked 2",
+            "pending 3",
+            "rejected 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "booked 1",
+            "pending 4",
+            "rejected 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "booked 1",
+            "pending 4",
+            "rejected 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "book"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "delay"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "cancel"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "book"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "delay"
+        },
+        {
+          "src": 1,
+          "dst": 0,
+          "action": "cancel"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "book"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

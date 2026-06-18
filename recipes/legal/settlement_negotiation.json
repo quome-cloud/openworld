@@ -1,0 +1,228 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "settlement_negotiation",
+  "description": "Two parties negotiate a legal settlement over a single money amount: one offers, the other counters, accepts, or rejects; accept settles the case, reject ends it in impasse.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "Two parties negotiate a legal settlement over a single money amount: one offers, the other counters, accepts, or rejects; accept settles the case, reject ends it in impasse."
+  },
+  "state_schema": {
+    "status": "str",
+    "round": "int",
+    "current_offer": "float",
+    "offer_by": "str",
+    "settled_amount": "float",
+    "plaintiff_demand": "float",
+    "defendant_budget": "float"
+  },
+  "initial_state": {
+    "status": "open",
+    "round": 0,
+    "current_offer": 0.0,
+    "offer_by": "",
+    "settled_amount": 0.0,
+    "plaintiff_demand": 100.0,
+    "defendant_budget": 60.0
+  },
+  "actions": [
+    "offer",
+    "counter",
+    "accept",
+    "reject"
+  ],
+  "rules": [
+    "'offer' places an amount on the table and makes the acting party the owner of the standing offer.",
+    "'counter' replaces the standing offer with a revised amount from the other party; the negotiation stays open.",
+    "'accept' settles the case at the standing offer; 'status' becomes 'settled' and 'settled_amount' is fixed.",
+    "'reject' ends the negotiation in impasse; 'status' becomes 'failed' and no settlement is reached.",
+    "'accept' and 'reject' do nothing while there is no standing offer.",
+    "'settled' and 'failed' are terminal: once reached, the state never changes."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    agent = action.get(\"agent\") or \"party\"\n\n    # terminal states are absorbing: nothing changes once settled or failed.\n    if s.get(\"status\") in (\"settled\", \"failed\"):\n        return s\n\n    def clamp(x):\n        x = float(x)\n        return round(x if x > 0.0 else 0.0, 2)\n\n    has_offer = bool(s.get(\"offer_by\"))\n\n    if name == \"offer\":\n        # put an opening number on the table; default to the plaintiff's demand.\n        amount = params.get(\"amount\")\n        if amount is None:\n            amount = s.get(\"plaintiff_demand\", 0)\n        s[\"current_offer\"] = clamp(amount)\n        s[\"offer_by\"] = agent\n        s[\"round\"] = int(s.get(\"round\", 0)) + 1\n        s[\"status\"] = \"open\"\n    elif name == \"counter\":\n        # revise the standing number; default: split the gap toward the\n        # defendant's budget (a concession that converges the two sides).\n        amount = params.get(\"amount\")\n        if amount is None:\n            standing = s.get(\"current_offer\", 0)\n            target = s.get(\"defendant_budget\", standing)\n            amount = (standing + target) / 2.0\n        s[\"current_offer\"] = clamp(amount)\n        s[\"offer_by\"] = agent\n        s[\"round\"] = int(s.get(\"round\", 0)) + 1\n        s[\"status\"] = \"open\"\n    elif name == \"accept\":\n        # accept the standing offer -> the case settles at that figure.\n        if has_offer:\n            s[\"status\"] = \"settled\"\n            s[\"settled_amount\"] = clamp(s.get(\"current_offer\", 0))\n        # nothing on the table: nothing to accept, negotiation stays open.\n    elif name == \"reject\":\n        # walk away from the standing offer -> impasse, no settlement.\n        if has_offer:\n            s[\"status\"] = \"failed\"\n        # nothing on the table: nothing to reject, negotiation stays open.\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "current_offer",
+        "offer_by"
+      ],
+      "schema": {
+        "current_offer": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000.0
+          ]
+        },
+        "offer_by": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, val = line.split(\":\", 1)\n        key = key.strip().lower()\n        val = val.strip()\n        if key in (\"amount\", \"offer\"):\n            try:\n                out[\"current_offer\"] = round(float(val.replace(\",\", \"\").lstrip(\"$\")), 2)\n            except ValueError:\n                pass\n        elif key in (\"party\", \"from\", \"offer_by\"):\n            out[\"offer_by\"] = val\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "round",
+        "current_offer",
+        "offer_by",
+        "settled_amount"
+      ],
+      "report": "Settlement negotiation [{status}] after {round} round(s). Standing offer: {current_offer} from '{offer_by}'. Settled amount: {settled_amount}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reach_settlement",
+      "goal": "maximize"
+    },
+    {
+      "name": "plaintiff_recovery",
+      "goal": "maximize"
+    },
+    {
+      "name": "defendant_cost",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "offer",
+    "series": {
+      "round": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "current_offer": [
+        0.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "current_offer 0",
+            "round 0",
+            "settled_amount 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "current_offer 100",
+            "round 1",
+            "settled_amount 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "current_offer 30",
+            "round 1",
+            "settled_amount 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "current_offer 100",
+            "round 2",
+            "settled_amount 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "current_offer 80",
+            "round 2",
+            "settled_amount 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "current_offer 100",
+            "round 1",
+            "settled_amount 100"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "offer"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "counter"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "accept, reject"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "offer"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "counter"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "accept"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

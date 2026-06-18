@@ -1,0 +1,323 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "dialysis_sched",
+  "description": "a dialysis chair scheduling world across sessions; actions schedule, swap, miss",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a dialysis chair scheduling world across sessions; actions schedule, swap, miss"
+  },
+  "state_schema": {
+    "chairs": "int",
+    "sessions": "list[str]",
+    "assignments": "dict",
+    "patients": "dict",
+    "waitlist": "list[str]",
+    "pending_patient": "str",
+    "pending_need": "int",
+    "scheduled_count": "int",
+    "open_slots": "int",
+    "waitlist_len": "int",
+    "utilization": "float",
+    "missed_count": "int",
+    "swaps": "int",
+    "tick": "int"
+  },
+  "initial_state": {
+    "chairs": 3,
+    "sessions": [
+      "mon",
+      "wed",
+      "fri"
+    ],
+    "assignments": {
+      "mon": [
+        "p1",
+        "p2"
+      ],
+      "wed": [
+        "p1",
+        "p2"
+      ],
+      "fri": [
+        "p1"
+      ]
+    },
+    "patients": {
+      "p1": 3,
+      "p2": 3,
+      "p3": 3
+    },
+    "waitlist": [
+      "p2",
+      "p3",
+      "p3",
+      "p3"
+    ],
+    "pending_patient": "",
+    "pending_need": 0,
+    "scheduled_count": 5,
+    "open_slots": 4,
+    "waitlist_len": 4,
+    "utilization": 0.556,
+    "missed_count": 0,
+    "swaps": 0,
+    "tick": 0
+  },
+  "actions": [
+    "schedule",
+    "swap",
+    "miss"
+  ],
+  "rules": [
+    "Each session seats at most `chairs` patients; no session may exceed capacity.",
+    "A patient appears at most once in any single session (no double-booking a chair).",
+    "`schedule` first admits any perceived referral onto the waitlist, then seats the next waiting patient in the first session that has an open chair.",
+    "`swap` relocates one booked patient from a fuller session to a session with room; it never changes how many patients are booked overall.",
+    "`miss` frees a booked patient's chair, increments missed_count, and returns the recurring session need to the waitlist.",
+    "Derived totals (scheduled_count, open_slots, waitlist_len, utilization) are recomputed every step and are always consistent with `assignments`.",
+    "Dynamics are deterministic: the next state depends only on (state, action)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef _recompute(s):\n    cap = s[\"chairs\"] * len(s[\"sessions\"])\n    used = 0\n    for ss in s[\"sessions\"]:\n        used += len(s[\"assignments\"].get(ss, []))\n    s[\"scheduled_count\"] = used\n    s[\"open_slots\"] = cap - used\n    s[\"waitlist_len\"] = len(s[\"waitlist\"])\n    s[\"utilization\"] = round(used / cap, 3) if cap else 0.0\n    return s\n\n\ndef _fullest(s):\n    booked = [ss for ss in s[\"sessions\"] if s[\"assignments\"].get(ss)]\n    booked = sorted(booked, key=lambda ss: (-len(s[\"assignments\"][ss]), ss))\n    return booked[0] if booked else None\n\n\ndef _emptiest_with_room(s):\n    cand = sorted(s[\"sessions\"], key=lambda ss: (len(s[\"assignments\"].get(ss, [])), ss))\n    for ss in cand:\n        if len(s[\"assignments\"].get(ss, [])) < s[\"chairs\"]:\n            return ss\n    return None\n\n\ndef transition(state, action):\n    s = dict(state)\n    s[\"assignments\"] = {k: list(v) for k, v in s[\"assignments\"].items()}\n    s[\"waitlist\"] = list(s[\"waitlist\"])\n    s[\"patients\"] = dict(s[\"patients\"])\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    if name == \"schedule\":\n        # 1) admit a perceived referral onto the waitlist.\n        pid = s.get(\"pending_patient\") or \"\"\n        if pid:\n            need = int(s.get(\"pending_need\") or 0)\n            s[\"patients\"][pid] = need\n            for _ in range(max(need, 0)):\n                s[\"waitlist\"].append(pid)\n            s[\"pending_patient\"] = \"\"\n            s[\"pending_need\"] = 0\n        # 2) seat the next waiting patient in an open chair.\n        patient = params.get(\"patient\")\n        if patient is None and s[\"waitlist\"]:\n            patient = s[\"waitlist\"][0]\n        if patient is not None:\n            session = params.get(\"session\")\n            target = None\n            if session in s[\"sessions\"]:\n                lst = s[\"assignments\"].get(session, [])\n                if len(lst) < s[\"chairs\"] and patient not in lst:\n                    target = session\n            else:\n                for ss in s[\"sessions\"]:\n                    lst = s[\"assignments\"].setdefault(ss, [])\n                    if len(lst) < s[\"chairs\"] and patient not in lst:\n                        target = ss\n                        break\n            if target is not None:\n                s[\"assignments\"].setdefault(target, []).append(patient)\n                if patient in s[\"waitlist\"]:\n                    s[\"waitlist\"].remove(patient)\n\n    elif name == \"swap\":\n        frm = params.get(\"from_session\")\n        to = params.get(\"to_session\")\n        if frm not in s[\"sessions\"]:\n            frm = _fullest(s)\n        if to not in s[\"sessions\"]:\n            to = _emptiest_with_room(s)\n        if frm and to and frm != to and s[\"assignments\"].get(frm):\n            patient = params.get(\"patient\")\n            if patient not in s[\"assignments\"].get(frm, []):\n                patient = s[\"assignments\"][frm][-1]\n            dst = s[\"assignments\"].setdefault(to, [])\n            if len(dst) < s[\"chairs\"] and patient not in dst:\n                s[\"assignments\"][frm].remove(patient)\n                dst.append(patient)\n                s[\"swaps\"] = s.get(\"swaps\", 0) + 1\n\n    elif name == \"miss\":\n        session = params.get(\"session\")\n        if session not in s[\"sessions\"] or not s[\"assignments\"].get(session):\n            session = _fullest(s)\n        if session and s[\"assignments\"].get(session):\n            patient = params.get(\"patient\")\n            if patient not in s[\"assignments\"][session]:\n                patient = s[\"assignments\"][session][-1]\n            s[\"assignments\"][session].remove(patient)\n            s[\"missed_count\"] = s.get(\"missed_count\", 0) + 1\n            # the recurring need did not go away \u2014 it returns to the waitlist.\n            s[\"waitlist\"].append(patient)\n\n    s[\"tick\"] = s.get(\"tick\", 0) + 1\n    return _recompute(s)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_patient",
+        "pending_need"
+      ],
+      "schema": {
+        "pending_patient": "str",
+        "pending_need": {
+          "type": "int",
+          "range": [
+            0,
+            7
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data).lower().replace(\"\\n\", \";\")\n    patient = \"\"\n    need = 0\n    for part in text.split(\";\"):\n        if \":\" not in part:\n            continue\n        k, v = part.split(\":\", 1)\n        k = k.strip()\n        v = v.strip()\n        if k in (\"patient\", \"name\", \"id\") and v:\n            patient = v.split()[0]\n        elif k in (\"need\", \"sessions\", \"frequency\", \"need_per_week\"):\n            digits = \"\".join(ch for ch in v if ch.isdigit())\n            need = int(digits) if digits else 0\n    if need < 0:\n        need = 0\n    if need > 7:\n        need = 7\n    return {\"pending_patient\": patient, \"pending_need\": need}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "scheduled_count",
+        "open_slots",
+        "waitlist_len",
+        "missed_count",
+        "swaps",
+        "utilization"
+      ],
+      "report": "Dialysis roster \u2014 {scheduled_count} sessions booked across {chairs} chairs ({utilization} utilization), {open_slots} open chairs, {waitlist_len} waiting, {missed_count} missed, {swaps} swaps."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "fulfillment",
+      "goal": "minimize waitlist_len"
+    },
+    {
+      "name": "adherence",
+      "goal": "minimize missed_count"
+    },
+    {
+      "name": "utilization",
+      "goal": "maximize utilization"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "miss",
+    "series": {
+      "scheduled_count": [
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "open_slots": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0
+      ],
+      "waitlist_len": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0
+      ],
+      "utilization": [
+        0.556,
+        0.444,
+        0.333,
+        0.222,
+        0.111,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "missed_count": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "tick": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "missed_count 0",
+            "open_slots 4",
+            "scheduled_count 5"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "missed_count 0",
+            "open_slots 3",
+            "scheduled_count 6"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "missed_count 0",
+            "open_slots 4",
+            "scheduled_count 5"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "missed_count 1",
+            "open_slots 5",
+            "scheduled_count 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "missed_count 0",
+            "open_slots 2",
+            "scheduled_count 7"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "missed_count 0",
+            "open_slots 3",
+            "scheduled_count 6"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "schedule"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "swap"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "miss"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "schedule"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "swap"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

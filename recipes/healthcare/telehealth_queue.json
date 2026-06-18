@@ -1,0 +1,246 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "telehealth_queue",
+  "description": "a telehealth visit queue routed by specialty; actions enqueue, route, complete",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a telehealth visit queue routed by specialty; actions enqueue, route, complete"
+  },
+  "state_schema": {
+    "specialties": "list[str]",
+    "next_id": "int",
+    "waiting": "list",
+    "routed": "dict",
+    "completed": "list",
+    "num_waiting": "int",
+    "num_routed": "int",
+    "num_completed": "int"
+  },
+  "initial_state": {
+    "specialties": [
+      "cardiology",
+      "dermatology",
+      "psychiatry"
+    ],
+    "next_id": 1,
+    "waiting": [],
+    "routed": {
+      "cardiology": [],
+      "dermatology": [],
+      "psychiatry": []
+    },
+    "completed": [],
+    "num_waiting": 0,
+    "num_routed": 0,
+    "num_completed": 0
+  },
+  "actions": [
+    "enqueue",
+    "route",
+    "complete",
+    "noop"
+  ],
+  "rules": [
+    "A visit's lifecycle is waiting -> routed -> completed; it advances one stage per action.",
+    "enqueue adds a new visit to the waiting pool with an auto-assigned, monotonically increasing id.",
+    "Priority is an integer 1..5 (5 = most urgent), clamped into range; it defaults to 3.",
+    "route removes a visit from the waiting pool and appends it to the queue for its own specialty.",
+    "route and complete select the most urgent visit first, breaking ties by earliest arrival (lowest id).",
+    "complete removes the head of a specialty's provider queue and records it as completed.",
+    "num_waiting, num_routed, and num_completed always equal the sizes of their respective structures.",
+    "Actions with nothing to act on (e.g. route with an empty pool) leave the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    specialties = list(s.get(\"specialties\", []))\n    waiting = [dict(v) for v in s.get(\"waiting\", [])]\n    routed = {k: [dict(v) for v in vs] for k, vs in s.get(\"routed\", {}).items()}\n    completed = [dict(v) for v in s.get(\"completed\", [])]\n    next_id = int(s.get(\"next_id\", 1))\n\n    def clamp_priority(p):\n        if not isinstance(p, int) or isinstance(p, bool):\n            return 3\n        return max(1, min(5, p))\n\n    # urgent-first, then arrival order (FIFO within a priority band)\n    def order_key(v):\n        return (-v[\"priority\"], v[\"id\"])\n\n    if name == \"enqueue\":\n        # New visit joins the waiting pool. Specialty defaults to a round-robin\n        # over the configured specialties so unparameterized rollouts stay live.\n        specialty = params.get(\"specialty\")\n        if specialty not in specialties:\n            specialty = (specialties[(next_id - 1) % len(specialties)]\n                         if specialties else \"general\")\n        visit = {\n            \"id\": next_id,\n            \"specialty\": specialty,\n            \"priority\": clamp_priority(params.get(\"priority\")),\n            \"status\": \"waiting\",\n        }\n        waiting.append(visit)\n        next_id += 1\n\n    elif name == \"route\":\n        # Move a waiting visit into its specialty's provider queue. Pick by\n        # explicit id if given, else the most-urgent / earliest waiting visit.\n        target = None\n        vid = params.get(\"id\")\n        if vid is not None:\n            for v in waiting:\n                if v[\"id\"] == vid:\n                    target = v\n                    break\n        if target is None and waiting:\n            target = sorted(waiting, key=order_key)[0]\n        if target is not None:\n            waiting = [v for v in waiting if v[\"id\"] != target[\"id\"]]\n            spec = target[\"specialty\"]\n            if spec not in routed:\n                routed[spec] = []\n            routed[spec].append(dict(target, status=\"routed\"))\n\n    elif name == \"complete\":\n        # A provider finishes the head of a specialty queue. Pick the named\n        # specialty if it has anyone queued, else the queue holding the single\n        # most-urgent routed visit across all specialties.\n        spec = params.get(\"specialty\")\n        queue_spec = spec if (spec in routed and routed[spec]) else None\n        if queue_spec is None:\n            best = None  # (priority, -id, specialty)\n            for k, vs in routed.items():\n                if vs:\n                    head = sorted(vs, key=order_key)[0]\n                    cand = (head[\"priority\"], -head[\"id\"], k)\n                    if best is None or cand > best:\n                        best = cand\n            if best is not None:\n                queue_spec = best[2]\n        if queue_spec is not None and routed.get(queue_spec):\n            head = sorted(routed[queue_spec], key=order_key)[0]\n            routed[queue_spec] = [v for v in routed[queue_spec]\n                                  if v[\"id\"] != head[\"id\"]]\n            completed.append({\n                \"id\": head[\"id\"],\n                \"specialty\": head[\"specialty\"],\n                \"priority\": head[\"priority\"],\n                \"status\": \"completed\",\n            })\n\n    # noop / unrecognized actions fall through, leaving the queues untouched.\n\n    s[\"waiting\"] = waiting\n    s[\"routed\"] = routed\n    s[\"completed\"] = completed\n    s[\"next_id\"] = next_id\n    s[\"num_waiting\"] = len(waiting)\n    s[\"num_routed\"] = sum(len(vs) for vs in routed.values())\n    s[\"num_completed\"] = len(completed)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "intake_specialty",
+        "intake_priority"
+      ],
+      "schema": {
+        "intake_specialty": "str",
+        "intake_priority": {
+          "type": "int",
+          "range": [
+            1,
+            5
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    fields = {}\n    if isinstance(data, dict):\n        fields = dict(data)\n    else:\n        for part in str(data).replace(\",\", \";\").split(\";\"):\n            if \"=\" in part:\n                k, v = part.split(\"=\", 1)\n                fields[k.strip()] = v.strip()\n            elif \":\" in part:\n                k, v = part.split(\":\", 1)\n                fields[k.strip()] = v.strip()\n    out = {}\n    spec = fields.get(\"specialty\")\n    if spec is not None:\n        out[\"intake_specialty\"] = str(spec).strip().lower()\n    pri = fields.get(\"priority\")\n    if pri is not None:\n        try:\n            p = int(pri)\n        except (ValueError, TypeError):\n            p = 3\n        out[\"intake_priority\"] = max(1, min(5, p))\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "num_waiting",
+        "num_routed",
+        "num_completed"
+      ],
+      "report": "Telehealth queue: {num_waiting} waiting, {num_routed} routed to providers, {num_completed} completed."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize_waiting",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "maximize_completed",
+      "goal": "maximize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "enqueue",
+    "series": {
+      "next_id": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0
+      ],
+      "num_waiting": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "next_id 1",
+            "num_routed 0",
+            "num_waiting 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "next_id 2",
+            "num_routed 0",
+            "num_waiting 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "next_id 3",
+            "num_routed 0",
+            "num_waiting 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "next_id 2",
+            "num_routed 1",
+            "num_waiting 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "next_id 4",
+            "num_routed 0",
+            "num_waiting 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "next_id 3",
+            "num_routed 1",
+            "num_waiting 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "enqueue"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "route, complete, noop"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "enqueue"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "route"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "complete, noop"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "enqueue"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "route"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "complete, noop"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

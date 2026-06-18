@@ -1,0 +1,271 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "recycling_mrf",
+  "description": "a recycling material-recovery-facility flow world; actions sort, bale, reject_contam",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "recycling",
+      "flow",
+      "mrf",
+      "leaf"
+    ],
+    "lineage": "build/recycling_mrf.py",
+    "metrics": {},
+    "description": "a recycling material-recovery-facility flow world; actions sort, bale, reject_contam"
+  },
+  "state_schema": {
+    "infeed": "int",
+    "contam": "int",
+    "sorted": "int",
+    "residue": "int",
+    "bales": "int",
+    "rejected": "int",
+    "bale_size": "int"
+  },
+  "initial_state": {
+    "infeed": 20,
+    "contam": 6,
+    "sorted": 0,
+    "residue": 0,
+    "bales": 0,
+    "rejected": 0,
+    "bale_size": 5
+  },
+  "actions": [
+    "sort",
+    "bale",
+    "reject_contam"
+  ],
+  "rules": [
+    "'sort' empties the infeed: contaminant units move to residue and the remaining clean units move to sorted.",
+    "'bale' compresses one bale_size of sorted material into a finished bale (only when at least bale_size units are staged).",
+    "'reject_contam' diverts all accumulated residue to rejected, clearing the residue holding.",
+    "Mass is conserved: every unit entering the infeed ends as a baled unit, staged in sorted, or rejected as residue."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n\n    if name == \"sort\":\n        # Run the whole infeed batch across the sort line: the contaminant\n        # fraction drops to residue, the rest is clean commodity for baling.\n        feed = s[\"infeed\"]\n        if feed > 0:\n            bad = min(s[\"contam\"], feed)\n            good = feed - bad\n            s[\"sorted\"] = s[\"sorted\"] + good\n            s[\"residue\"] = s[\"residue\"] + bad\n            s[\"infeed\"] = 0\n            s[\"contam\"] = 0\n\n    elif name == \"bale\":\n        # Compress one bale-worth of sorted material into a finished bale.\n        size = s[\"bale_size\"]\n        if size > 0 and s[\"sorted\"] >= size:\n            s[\"sorted\"] = s[\"sorted\"] - size\n            s[\"bales\"] = s[\"bales\"] + 1\n\n    elif name == \"reject_contam\":\n        # Ship the separated contamination out of the facility as residue.\n        if s[\"residue\"] > 0:\n            s[\"rejected\"] = s[\"rejected\"] + s[\"residue\"]\n            s[\"residue\"] = 0\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "infeed",
+        "contam"
+      ],
+      "schema": {
+        "infeed": {
+          "type": "int",
+          "range": [
+            0,
+            999
+          ]
+        },
+        "contam": {
+          "type": "int",
+          "range": [
+            0,
+            999
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip(); v = v.strip()\n            if k in ('infeed', 'contam'):\n                out[k] = int(v) if v.lstrip('-').isdigit() else 0\n    # A manifest can never declare more contaminant than total infeed.\n    if 'infeed' in out and 'contam' in out:\n        out['contam'] = min(out['contam'], out['infeed'])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "bales",
+        "sorted",
+        "residue",
+        "rejected"
+      ],
+      "report": "shipped {bales} bales; {sorted} staged, {residue} residue held, {rejected} rejected"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "recover material",
+      "goal": "max bales"
+    },
+    {
+      "name": "clear contamination",
+      "goal": "min residue"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "sort",
+    "series": {
+      "infeed": [
+        20.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "contam": [
+        6.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sorted": [
+        0.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0,
+        14.0
+      ],
+      "residue": [
+        0.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "bales 0",
+            "contam 6",
+            "infeed 20"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "bales 0",
+            "contam 0",
+            "infeed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "bales 1",
+            "contam 0",
+            "infeed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "bales 0",
+            "contam 0",
+            "infeed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "bales 2",
+            "contam 0",
+            "infeed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "bales 1",
+            "contam 0",
+            "infeed 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "sort"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "bale, reject_contam"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "bale"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "reject_contam"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "sort"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "bale"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "reject_contam"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "sort"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

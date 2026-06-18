@@ -1,0 +1,211 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "court_calendar",
+  "description": "a court calendar and judge-assignment world; actions assign, reschedule, hear",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "court",
+      "scheduling",
+      "assignment",
+      "leaf"
+    ],
+    "lineage": "build/court_calendar.py",
+    "metrics": {},
+    "description": "a court calendar and judge-assignment world; actions assign, reschedule, hear"
+  },
+  "state_schema": {
+    "day": "int",
+    "judges": "dict",
+    "cases": "dict",
+    "heard": "int"
+  },
+  "initial_state": {
+    "day": 0,
+    "judges": {
+      "hand": {
+        "load": 0,
+        "capacity": 2
+      },
+      "marshall": {
+        "load": 0,
+        "capacity": 2
+      }
+    },
+    "cases": {
+      "C1": {
+        "status": "filed",
+        "judge": null,
+        "day": null
+      },
+      "C2": {
+        "status": "filed",
+        "judge": null,
+        "day": null
+      },
+      "C3": {
+        "status": "filed",
+        "judge": null,
+        "day": null
+      }
+    },
+    "heard": 0
+  },
+  "actions": [
+    "assign",
+    "reschedule",
+    "hear"
+  ],
+  "rules": [
+    "A case advances strictly: filed -> assigned -> scheduled -> heard.",
+    "'assign' gives a filed case to a named judge who still has spare capacity (load < capacity), raising that judge's load by one; with no params it picks the next filed case and the least-loaded available judge.",
+    "A judge cannot be assigned a case beyond their capacity.",
+    "'reschedule' places an assigned (or already scheduled) case onto a calendar day, marking it scheduled; with no day it moves to the next day.",
+    "'hear' disposes a scheduled case: it becomes heard, the count of heard cases rises by one, the assigned judge's load drops by one, and the court day advances to the hearing day.",
+    "Any action whose target is missing, ineligible, or out of capacity leaves the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    judges = {k: dict(v) for k, v in s[\"judges\"].items()}\n    cases = {k: dict(v) for k, v in s[\"cases\"].items()}\n    s[\"judges\"] = judges\n    s[\"cases\"] = cases\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def least_loaded_judge():\n        free = sorted((v[\"load\"], k) for k, v in judges.items()\n                      if v[\"load\"] < v[\"capacity\"])\n        return free[0][1] if free else None\n\n    if name == \"assign\":\n        case = params.get(\"case\")\n        if case is None:\n            waiting = sorted(k for k, c in cases.items() if c[\"judge\"] is None\n                             and c[\"status\"] == \"filed\")\n            case = waiting[0] if waiting else None\n        judge = params.get(\"judge\")\n        if judge is None and case is not None:\n            judge = least_loaded_judge()\n        if (case in cases and judge in judges\n                and cases[case][\"judge\"] is None\n                and cases[case][\"status\"] == \"filed\"\n                and judges[judge][\"load\"] < judges[judge][\"capacity\"]):\n            cases[case][\"judge\"] = judge\n            cases[case][\"status\"] = \"assigned\"\n            judges[judge][\"load\"] += 1\n\n    elif name == \"reschedule\":\n        case = params.get(\"case\")\n        if case is None:\n            pending = sorted(k for k, c in cases.items()\n                             if c[\"status\"] in (\"assigned\", \"scheduled\"))\n            case = pending[0] if pending else None\n        if case in cases and cases[case][\"status\"] in (\"assigned\", \"scheduled\"):\n            day = params.get(\"day\")\n            if day is None:\n                day = (cases[case][\"day\"] or s[\"day\"]) + 1\n            cases[case][\"day\"] = int(day)\n            cases[case][\"status\"] = \"scheduled\"\n\n    elif name == \"hear\":\n        case = params.get(\"case\")\n        if case is None:\n            ready = sorted(k for k, c in cases.items()\n                           if c[\"status\"] == \"scheduled\" and c[\"judge\"] is not None)\n            case = ready[0] if ready else None\n        if (case in cases and cases[case][\"status\"] == \"scheduled\"\n                and cases[case][\"judge\"] is not None):\n            judge = cases[case][\"judge\"]\n            cases[case][\"status\"] = \"heard\"\n            s[\"heard\"] = s[\"heard\"] + 1\n            if judges[judge][\"load\"] > 0:\n                judges[judge][\"load\"] -= 1\n            s[\"day\"] = max(s[\"day\"], int(cases[case][\"day\"]))\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "day"
+      ],
+      "schema": {
+        "day": {
+          "type": "int",
+          "range": [
+            0,
+            365
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower(); v = v.strip()\n            if k == 'day' and v.lstrip('-').isdigit():\n                out['day'] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "heard"
+      ],
+      "report": "court day {day}: {heard} cases heard"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "clear the docket",
+      "goal": "max heard"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "assign",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 0",
+            "heard 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "assign"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "reschedule, hear"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "assign"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "reschedule"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "hear"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "assign"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "reschedule"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "hear"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

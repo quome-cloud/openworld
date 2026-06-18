@@ -1,0 +1,236 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "collections",
+  "description": "a debt-collections world with aging buckets; actions remind, negotiate, charge_off",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a debt-collections world with aging buckets; actions remind, negotiate, charge_off"
+  },
+  "state_schema": {
+    "day": "int",
+    "buckets": "dict",
+    "recovered": "float",
+    "charged_off": "float",
+    "forgiven": "float",
+    "settlements": "int",
+    "outstanding": "float"
+  },
+  "initial_state": {
+    "day": 0,
+    "buckets": {
+      "current": 12000.0,
+      "30": 6000.0,
+      "60": 3500.0,
+      "90": 2000.0,
+      "120plus": 1500.0
+    },
+    "recovered": 0.0,
+    "charged_off": 0.0,
+    "forgiven": 0.0,
+    "settlements": 0,
+    "outstanding": 25000.0
+  },
+  "actions": [
+    "remind",
+    "negotiate",
+    "charge_off"
+  ],
+  "rules": [
+    "State holds a closed book of receivables in ordered aging buckets: current -> 30 -> 60 -> 90 -> 120plus days past due.",
+    "Each action is one 30-day collection cycle and advances 'day' by 30.",
+    "'remind' collects a bucket-dependent fraction (current 50%, 30-day 35%) of the freshest balances into 'recovered'; older buckets do not respond.",
+    "'negotiate' settles a targeted bucket (default '90') at a settlement fraction (default 0.5): that fraction is collected into 'recovered', the remainder is added to 'forgiven', the bucket is cleared, and 'settlements' increments when the bucket was non-empty.",
+    "'charge_off' writes a targeted bucket (default oldest, '120plus') off the book: its full balance moves into 'charged_off' and the bucket is cleared.",
+    "After the action, unpaid balances age forward exactly one bucket; the 120plus bucket accumulates in place. No new debt enters the book.",
+    "Money is conserved: every dollar leaving a bucket lands in recovered, charged_off, or forgiven; 'outstanding' always equals the sum of buckets."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nORDER = [\"current\", \"30\", \"60\", \"90\", \"120plus\"]\n# collectibility falls as debt ages -- fresher balances pay more readily.\nRATE = {\"current\": 0.5, \"30\": 0.35, \"60\": 0.2, \"90\": 0.1, \"120plus\": 0.05}\n\n\ndef _round(x):\n    return round(float(x), 2)\n\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    buckets = {b: _round(s.get(\"buckets\", {}).get(b, 0.0)) for b in ORDER}\n    recovered = _round(s.get(\"recovered\", 0.0))\n    charged_off = _round(s.get(\"charged_off\", 0.0))\n    forgiven = _round(s.get(\"forgiven\", 0.0))\n    settlements = int(s.get(\"settlements\", 0))\n    day = int(s.get(\"day\", 0))\n\n    if name == \"remind\":\n        # a dunning reminder nudges payment on the freshest buckets only.\n        for b in (\"current\", \"30\"):\n            pay = _round(buckets[b] * RATE[b])\n            buckets[b] = _round(buckets[b] - pay)\n            recovered = _round(recovered + pay)\n    elif name == \"negotiate\":\n        # settle a targeted bucket: collect a settlement fraction now, forgive\n        # the remainder, and clear the bucket either way.\n        target = params.get(\"bucket\", \"90\")\n        frac = float(params.get(\"settle\", 0.5))\n        frac = max(0.0, min(1.0, frac))\n        bal = buckets.get(target, 0.0)\n        pay = _round(bal * frac)\n        recovered = _round(recovered + pay)\n        forgiven = _round(forgiven + (bal - pay))\n        if target in buckets:\n            buckets[target] = 0.0\n        if bal > 0:\n            settlements += 1\n    elif name == \"charge_off\":\n        # write a deemed-uncollectible bucket off the book as a loss.\n        target = params.get(\"bucket\", \"120plus\")\n        loss = buckets.get(target, 0.0)\n        charged_off = _round(charged_off + loss)\n        if target in buckets:\n            buckets[target] = 0.0\n\n    # the cycle closes: unpaid balances age forward one bucket; 120plus piles up.\n    aged = {b: 0.0 for b in ORDER}\n    for i, b in enumerate(ORDER):\n        dst = ORDER[i] if i == len(ORDER) - 1 else ORDER[i + 1]\n        aged[dst] = _round(aged[dst] + buckets[b])\n\n    s[\"buckets\"] = aged\n    s[\"recovered\"] = recovered\n    s[\"charged_off\"] = charged_off\n    s[\"forgiven\"] = forgiven\n    s[\"settlements\"] = settlements\n    s[\"outstanding\"] = _round(sum(aged.values()))\n    s[\"day\"] = day + 30\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "buckets"
+      ],
+      "schema": {
+        "buckets": "dict"
+      },
+      "code": "\ndef perceive(data):\n    # Ingest a portfolio snapshot of `bucket=amount` lines into the aging book,\n    # e.g. \"current=12000\\n30=4000\\n90=1500\". Unknown buckets are ignored.\n    known = {\"current\", \"30\", \"60\", \"90\", \"120plus\"}\n    buckets = {}\n    for line in str(data).strip().splitlines():\n        if \"=\" not in line:\n            continue\n        key, value = line.split(\"=\", 1)\n        key = key.strip()\n        if key not in known:\n            continue\n        try:\n            buckets[key] = round(float(value.strip()), 2)\n        except (ValueError, TypeError):\n            continue\n    return {\"buckets\": buckets}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "outstanding",
+        "recovered",
+        "charged_off",
+        "forgiven",
+        "settlements",
+        "buckets"
+      ],
+      "report": "Collections status @ day {day}: outstanding ${outstanding}, recovered ${recovered}, charged off ${charged_off}, forgiven ${forgiven} across {settlements} settlement(s). Aging buckets: {buckets}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "recovery",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "losses",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "remind",
+    "series": {
+      "day": [
+        0.0,
+        30.0,
+        60.0,
+        90.0,
+        120.0,
+        150.0,
+        180.0,
+        210.0,
+        240.0,
+        270.0,
+        300.0,
+        330.0,
+        360.0
+      ],
+      "recovered": [
+        0.0,
+        8100.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0,
+        10200.0
+      ],
+      "outstanding": [
+        25000.0,
+        16900.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0,
+        14800.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "charged_off 0",
+            "day 0",
+            "forgiven 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "charged_off 0",
+            "day 30",
+            "forgiven 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "charged_off 0",
+            "day 30",
+            "forgiven 1000"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "charged_off 1500",
+            "day 30",
+            "forgiven 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "charged_off 0",
+            "day 60",
+            "forgiven 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "charged_off 0",
+            "day 60",
+            "forgiven 1750"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "remind"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "negotiate"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "charge_off"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "remind"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "negotiate"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

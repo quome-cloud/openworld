@@ -1,0 +1,161 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "tool_use_sandbox",
+  "description": "an agent world choosing tools to satisfy a request; actions call_tool, observe, finish",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "agent",
+      "tool-use",
+      "leaf"
+    ],
+    "lineage": "build/tool_use_sandbox.py",
+    "metrics": {},
+    "description": "an agent world choosing tools to satisfy a request; actions call_tool, observe, finish"
+  },
+  "state_schema": {
+    "request": "str",
+    "available_tools": "list[str]",
+    "required_tools": "list[str]",
+    "called_tools": "list",
+    "pending": "int",
+    "observed": "int",
+    "steps": "int",
+    "finished": "bool",
+    "satisfied": "bool"
+  },
+  "initial_state": {
+    "request": "",
+    "available_tools": [
+      "web_search",
+      "calculator",
+      "weather"
+    ],
+    "required_tools": [
+      "web_search",
+      "calculator"
+    ],
+    "called_tools": [],
+    "pending": 0,
+    "observed": 0,
+    "steps": 0,
+    "finished": false,
+    "satisfied": false
+  },
+  "actions": [
+    "call_tool",
+    "observe",
+    "finish"
+  ],
+  "rules": [
+    "'call_tool' with params.tool runs that tool if it is in available_tools and the agent has not finished; it records the call and leaves one result pending observation.",
+    "'observe' consumes one pending tool result, turning it into an observation.",
+    "'finish' ends the episode; the request is satisfied only if every required tool has been called and no tool result is left unobserved.",
+    "Once finished, the state is terminal and no further action changes it."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    if s.get(\"finished\"):\n        return s\n    if name == \"call_tool\":\n        tool = params.get(\"tool\")\n        if tool in s.get(\"available_tools\", []):\n            s[\"called_tools\"] = list(s.get(\"called_tools\", [])) + [tool]\n            s[\"pending\"] = s.get(\"pending\", 0) + 1\n            s[\"steps\"] = s.get(\"steps\", 0) + 1\n    elif name == \"observe\":\n        if s.get(\"pending\", 0) > 0:\n            s[\"pending\"] = s[\"pending\"] - 1\n            s[\"observed\"] = s.get(\"observed\", 0) + 1\n            s[\"steps\"] = s.get(\"steps\", 0) + 1\n    elif name == \"finish\":\n        required = set(s.get(\"required_tools\", []))\n        called = set(s.get(\"called_tools\", []))\n        s[\"satisfied\"] = required.issubset(called) and s.get(\"pending\", 0) == 0\n        s[\"finished\"] = True\n        s[\"steps\"] = s.get(\"steps\", 0) + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "request",
+        "available_tools",
+        "required_tools"
+      ],
+      "schema": {
+        "request": "str",
+        "available_tools": "list",
+        "required_tools": "list"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower(); v = v.strip()\n        if k == 'request':\n            out['request'] = v\n        elif k in ('tools', 'available'):\n            out['available_tools'] = [t.strip() for t in v.split(',') if t.strip()]\n        elif k in ('needs', 'required'):\n            out['required_tools'] = [t.strip() for t in v.split(',') if t.strip()]\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "request",
+        "called_tools",
+        "observed",
+        "satisfied"
+      ],
+      "report": "request {request!r}: called {called_tools}, {observed} observed -> satisfied={satisfied}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "satisfy the request",
+      "goal": "max satisfied"
+    },
+    {
+      "name": "be efficient",
+      "goal": "min steps"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "finish",
+    "series": {
+      "steps": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "steps 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "steps 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "finish"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "call_tool, observe"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "call_tool, observe, finish"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

@@ -312,19 +312,33 @@ A review of the world-model landscape reveals distinct strategy families with
 a recurring tension---fidelity and scale on one side; verifiability, sample
 efficiency, and steerability on the other (Table~\ref{tab:related}).
 
-\paragraph{Contributions.} Our contributions are as follows:
+\paragraph{Contributions.} Aligned with the prototyping thesis above, our
+contributions are as follows:
 \begin{enumerate}
-  \item \textbf{The central result.} On three worlds with known ground
-  truth, verified synthesized dynamics are exact on \MultiCodeExact{}
-  \RolloutSteps-step evaluation rollouts (95\% CI \MultiCodeCI) and answer
-  $10\times$ out-of-distribution probes at \CodeOODRate, while the LLM
-  next-state proxy completes \MultiLLMExact{} rollouts and a trained MLP
-  given 10{,}000 transitions scores \MLPOODTenK{} out of
-  distribution---while the symbolic engine, executing code rather than a
-  model call per step, rolls out at native speed (throughput in \S\ref{sec:results}).
-  \item \textbf{The system.} \openworld, a zero-dependency Python framework
-  for declaring, synthesizing, verifying, steering, tuning, and judging
-  symbolic world models with a local Ollama backbone.
+  \item \textbf{The prototyping framework.} \openworld, a zero-dependency Python
+  framework that turns authoring a \emph{verified} code world model into a
+  minutes-scale, push-button activity. A local LLM (or Claude Code) declares the
+  spec---symbolic state, a verified \texttt{transition}, perceptors (the perceive
+  boundary), composition (worlds within worlds), dial-steerable objectives, and an
+  emit/act boundary---which is then checked, served from one command, and shared as
+  a portable artifact. This is the ``PyTorch moment'' the paper argues for: not new
+  models, but a fast way to prototype them.
+  \item \textbf{The prototyping benchmark.} A \ProtoNumWorlds-world benchmark across
+  \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal,
+  cybersecurity, energy, agentic-AI) in which Claude Code built and validated
+  \emph{every} world (\ProtoValidationRate) at a median of \ProtoMedianMinutes{}
+  minutes (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes), with \ProtoExecutableRate{}
+  behaviorally executable on an independent audit---against the days-to-weeks of
+  hand-building. All \ProtoNumWorlds{} ship as runnable recipes.
+  \item \textbf{Trustworthiness of the fast prototypes.} On three worlds with known
+  ground truth, verified synthesized dynamics are exact on \MultiCodeExact{}
+  \RolloutSteps-step rollouts (95\% CI \MultiCodeCI) and answer $10\times$
+  out-of-distribution probes at \CodeOODRate{} from \emph{zero} transitions, while the
+  LLM next-state proxy completes \MultiLLMExact{} rollouts and a 10{,}000-transition
+  MLP scores \MLPOODTenK{} out of distribution; planning through the verified model
+  matches ground truth and beats planning through a hallucinating one, and on shared
+  benchmarks (MiniGrid, continuous-control cartpole) the $0$-shot verified model
+  matches or beats a trained DreamerV3 and a frozen-perceptual V-JEPA-2.
   \item \textbf{The benchmark and protocol.} Three ground-truth-instrumented
   worlds, a \NumTasks-task program-repair benchmark (the coding world), and
   \NumExperiments{} seed-fixed experiments with paired statistical tests,
@@ -338,15 +352,6 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   yet \emph{none} is branch-exact (a 100\% branch-level false-accept rate),
   so exactness reflects generator capability gated by cheap checks, not the gate.
 \end{enumerate}
-
-We deliberately do \emph{not} list the LLM judge as a contribution. Pooled over
-\PooledRounds{} rounds its selection edge over random is \emph{estimated, not
-established} (\PooledJudge{} vs \PooledRandom, exact McNemar
-$p=\PooledMcNemarP$---not significant; an independent replication alone gives
-$p=\NewMcNemarP$); we report it (\S\ref{sec:judge-results}) as an exploratory
-finding whose sharper signal is a position-bias audit (order-sensitive choices,
-order-stable accuracy), and whose rubric scores track a ground-truth objective at
-Spearman $\rho=\JudgeSpearman$ ($p=\RubricOrigP$).
 
 \paragraph{Positioning in the field.} \openworld{} operationalizes the
 symbolic side of the learned-vs-symbolic divide: it is the CWM

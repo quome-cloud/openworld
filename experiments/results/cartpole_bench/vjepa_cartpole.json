@@ -1,0 +1,15 @@
+{
+  "method": "v-jepa2 frozen encoder + learned latent dynamics + reward + CEM-MPC",
+  "model": "facebook/vjepa2-vitl-fpc64-256",
+  "status": "ran",
+  "embedding_dim": 1024,
+  "transitions_for_dynamics": 1500,
+  "dynamics_final_loss": 0.023892048746347427,
+  "reward_head_final_loss": 0.00011248584632994607,
+  "solve_rate": 0.0,
+  "episodes": 5,
+  "horizon": 60,
+  "objective": "plan against learned latent reward head (not goal-distance)",
+  "training": "encoder FROZEN (internet-video pretrained); only the latent dynamics + reward heads are trained on this task",
+  "caveat": "natural-video pretraining -> simulated renders are OOD; measures whether frozen V-JEPA features support a planmable world model here"
+}

@@ -1,0 +1,18 @@
+{
+  "method": "frozen V-JEPA-2 features: decodability probe + behavioral cloning",
+  "model": "facebook/vjepa2-vitl-fpc64-256",
+  "status": "ran",
+  "embedding_dim": 1024,
+  "expert": "OpenWorld CEM-MPC (100% solver)",
+  "expert_demos": 2400,
+  "state_decode_r2": {
+    "x": 0.988,
+    "x_dot": 0.966,
+    "theta": -0.04,
+    "theta_dot": 0.987
+  },
+  "bc_action_mse": 0.0663,
+  "bc_solve_rate": 0.0,
+  "bc_eval_episodes": 5,
+  "note": "encoder FROZEN; probe asks if features encode the controllable state, BC asks if a reactive policy on those features can solve it"
+}

@@ -41,6 +41,106 @@ to data.**
 
 ---
 
+## Worked examples
+
+### Example 1 — A complete world from scratch (~15 lines, zero data)
+
+The model is just a function. Here is an entire world — a reservoir you fill/drain —
+plus a zero-data planner that finds how to reach exactly level 7:
+
+```python
+from collections import deque
+from openworld import World, CodeTransition
+from openworld.state import Action
+
+CODE = '''
+def transition(state, action):
+    s = dict(state)
+    if action["name"] == "fill":    s["level"] = min(10, s["level"] + 3)
+    elif action["name"] == "drain": s["level"] = max(0,  s["level"] - 2)
+    return s
+'''
+w = World(name="reservoir", description="a tank you fill (+3) or drain (-2)",
+          initial_state={"level": 0}, actions=["fill", "drain"],
+          rules=["fill adds 3 (cap 10); drain removes 2 (floor 0)"],
+          transition=CodeTransition(CODE))
+
+# Plan to exactly level 7 by breadth-first search over the verified transition:
+seen, q = {0}, deque([({"level": 0}, [])])
+while q:
+    s, plan = q.popleft()
+    if s["level"] == 7:
+        print(plan); break                       # ['fill', 'fill', 'fill', 'drain']
+    for a in w.actions:                           # 0 -> 3 -> 6 -> 9 -> 7
+        ns = dict(w.transition.step(s, Action(a)))
+        if ns["level"] not in seen:
+            seen.add(ns["level"]); q.append((ns, plan + [a]))
+```
+
+No dataset, no training, no GPU — the plan is *computed* by searching a function. Swap
+in any dynamics you can write (inventory, a state machine, an ODE) and the same pattern
+solves it.
+
+### Example 2 — The model is code you can *read* (MiniGrid DoorKey)
+
+The DoorKey transition is plain, auditable Python (`experiments/minigrid_world.py`):
+
+```python
+# excerpt of MINIGRID_CODE
+if name == "forward":
+    nx, ny = s["x"] + dx, s["y"] + dy
+    blocked = (... or (nx, ny) in walls
+               or ((nx, ny) == door_pos and not s["door_open"])     # closed door blocks
+               or ((nx, ny) == key_pos  and not s["has_key"]))      # key on ground blocks
+    if not blocked:
+        s["x"], s["y"] = nx, ny
+elif name == "toggle":                                              # open the door...
+    if (s["x"] + dx, s["y"] + dy) == door_pos and s["has_key"]:     # ...if holding the key
+        s["door_open"] = True
+```
+
+Breadth-first search over it returns the **optimal 11-step plan** (grab key → open door
+→ reach goal), with **0 training transitions**. And this isn't a toy re-implementation:
+the transition is validated **bit-for-bit, 600/600 steps, against the real Farama
+`minigrid`** (`bench/validate_minigrid.py`), so it's the *same* task DreamerV3 learns
+from pixels — which needs ~10k interactions just to first succeed (experiment **E65**).
+
+### Example 3 — Continuous control by planning (cartpole swing-up)
+
+For physics, the "rules" are the equations of motion (`experiments/cartpole_world.py`):
+
+```python
+# excerpt: one Euler step of the standard cartpole ODE
+temp  = (force + polemass_length * theta_dot**2 * sin(theta)) / total_mass
+thacc = (g*sin(theta) - cos(theta)*temp) / (length * (4/3 - masspole*cos(theta)**2/total_mass))
+s["theta"]     = theta + tau * theta_dot
+s["theta_dot"] = theta_dot + tau * thacc
+```
+
+A planner (CEM-MPC) rolls candidate force-sequences through this verified model in
+imagination, keeps the best, and executes — **swinging the pole up and balancing it 100%
+of the time with zero data** (vs. a random controller at 0%). The swing-up maneuver is
+*discovered* by search, not hardcoded (experiment **E67**).
+
+### Example 4 — Zero data isn't only for *solving* — also for *prediction*
+
+Because the transition is exact, **rollouts are bit-exact and have zero compounding
+error** — you can ask "what happens if I take this sequence of actions?" and get the
+right answer indefinitely:
+
+```python
+s = dict(w.initial_state)
+for a in ["fill", "fill", "drain", "fill"]:
+    s = dict(w.transition.step(s, Action(a)))   # 0 -> 3 -> 6 -> 4 -> 7, exactly
+```
+
+A *learned* next-state model (or an LLM asked to predict the next state) drifts after a
+few steps; the verified code does not, by construction. OpenWorld's experiments quantify
+this: verified code stays exact both in- and out-of-distribution, while the learned/LLM
+proxy diverges (**E01/E10**).
+
+---
+
 ## The honest trade-off (why this isn't a free lunch — and why we still test V-JEPA)
 
 OpenWorld's zero-data solve works **only because the dynamics are cleanly writable as

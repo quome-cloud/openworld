@@ -19,11 +19,8 @@ paper/main.blg
 paper/main.log
 paper/main.out
 paper/main.toc
-_template/main.aux
-_template/main.bbl
-_template/main.blg
-_template/main.log
-_template/main.out
+# paper template scaffold (not part of the project)
+_template/
 datasets/openworld-market/predictions.jsonl
 datasets/openworld-market/daily.log
 gallery/preview.html

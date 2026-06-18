@@ -16,6 +16,8 @@ ROOT = Path(__file__).parent.parent
 RESULTS = ROOT / "experiments" / "results"
 FIGS = ROOT / "paper" / "figs"
 TABLES = ROOT / "paper" / "tables"
+import sys as _sys
+_sys.path.insert(0, str(ROOT / "experiments"))   # for showcase_world / showcase_figure
 
 BLUE, ORANGE, TEAL, SLATE, PURPLE = "#1D4ED8", "#D97706", "#0F766E", "#475569", "#6D28D9"
 
@@ -3248,9 +3250,20 @@ def table_minigrid_bench(e65):
     (TABLES / "minigrid_bench.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_prototyping():
+    """The framework legend figure: the showcase world's spec rendered as the
+    perceive -> world -> emit -> act pipeline (generated from the real spec, so the
+    box labels can never drift from the code)."""
+    from showcase_world import build_showcase_world
+    from showcase_figure import render
+    from openworld.spec import to_spec
+    render(to_spec(build_showcase_world()), FIGS / "prototyping_pipeline.png")
+
+
 def main():
     FIGS.mkdir(exist_ok=True)
     TABLES.mkdir(exist_ok=True)
+    fig_prototyping()
     data = {name: load(name) for name in EXPERIMENTS}
     fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
     fig_learned(data["e12_learned_baseline"])

@@ -526,6 +526,55 @@ benchmark, and every experiment script used here.
 OpenWorld also supports \emph{causal DAGs} as a world-specification modality---a DAG compiles to a verified structural causal model with built-in assumption testing, demonstrated on a social-determinants-of-health world (E64); see Appendix~\ref{sec:dag}.
 
 % ============================================================================
+\section{Prototyping code world models}\label{sec:prototyping}
+Deep learning had no shortage of models before PyTorch---it had no fast way to
+\emph{prototype} them. Code world models are in the same place today: writing a
+faithful simulator of a domain is a multi-day-to-multi-week engineering effort, which
+is why most teams never build one. OpenWorld targets exactly this gap. A world model is
+a small declarative spec---symbolic state, a verified \texttt{transition}, optional
+perceptors (the perceive boundary), composition (worlds within worlds, joined by
+bridges and rolled up by aggregators), declared objectives steerable by dials, and an
+emit/act boundary---and every piece is a few lines you write or that Claude Code writes
+for you (Figure~\ref{fig:prototyping}). The same spec then serves: \texttt{openworld
+serve} exposes it as a stateless inference API with a live view.
+
+\begin{figure}[htb]\centering
+\includegraphics[width=\linewidth]{figs/prototyping_pipeline.png}
+\caption{\textbf{A code world model in OpenWorld, end to end.} External inputs are
+turned into symbolic state by \emph{perceptors} (any modality), stepped by verified
+\emph{transition} code inside a \emph{composite} of nested worlds (coupled by bridges,
+summarized by aggregators), scored by \emph{objectives} that a \emph{dial} retunes at
+inference time, and turned back into reports and tool-calls at the \emph{emit/act}
+boundary. The figure is generated from a real spec (\texttt{to\_spec}), so the labels
+cannot drift from the code.}
+\label{fig:prototyping}
+\end{figure}
+
+\subsection{How fast is prototyping? \ProtoNumWorlds{} worlds in minutes (E68)}\label{sec:proto-latency}
+To measure the prototyping path directly, we asked Claude Code to author \ProtoNumWorlds{}
+world models from one-line descriptions via \texttt{openworld build}, spanning
+\ProtoNumSectors{} sectors---healthcare, financial services, legal, cybersecurity,
+energy/climate, and agentic-AI---and timed wall-clock from the command to a spec that
+passes \texttt{validate\_spec} (i.e.\ is servable). The result (Table~\ref{tab:prototyping}):
+\textbf{\ProtoValidationRate{} of the \ProtoNumWorlds{} worlds built and validated},
+at a \textbf{median of \ProtoMedianMinutes{} minutes} each (mean \ProtoMeanMinutes,
+max \ProtoMaxMinutes). Every validated world is saved as a reusable, servable recipe.
+Hand-authoring a comparable simulator is typically days to weeks; here it is minutes,
+end to end, and the artifact is verified by construction rather than hoped-correct.
+This is the paper's practical thesis: when dynamics are writable, prototyping a
+\emph{correct} world model is a minutes-scale, push-button activity, and the rest of the
+paper establishes that the resulting models are exact, composable, and steerable.
+
+\begin{table}[htb]\centering\small
+\input{tables/prototyping.tex}
+\caption{\textbf{Prototyping-latency benchmark (E68).} \ProtoNumWorlds{} world models
+across \ProtoNumSectors{} sectors, each authored by Claude Code (\texttt{openworld
+build}) and timed to a validated, servable spec; all saved as recipes. Wall-clock varies
+run-to-run (LLM latency), so this reproduces in distribution (minutes-scale).}
+\label{tab:prototyping}
+\end{table}
+
+% ============================================================================
 \section{Experimental Setup}
 \paragraph{Worlds with ground truth.} Three deterministic oracle worlds
 instrument every dynamics comparison: \emph{sprint} (backlog/debt/bug

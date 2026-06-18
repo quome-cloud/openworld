@@ -1,0 +1,37 @@
+{
+  "task": "audit of the 100 Claude-Code-built world recipes (behavioral correctness + timing spread)",
+  "n_recipes": 100,
+  "n_executable": 99,
+  "behavioral_executable_rate": 0.99,
+  "executable_note": "loads via from_spec(allow_code=True), steps without error, and state evolves under a random rollout -- a stronger check than validate_spec's structural gate",
+  "timing_distribution_minutes": {
+    "n": 100,
+    "mean": 3.01,
+    "median": 2.83,
+    "std": 0.72,
+    "p10": 2.28,
+    "p25": 2.56,
+    "p75": 3.35,
+    "p90": 3.93,
+    "p99": 6.13,
+    "median_ci95": [
+      2.75,
+      2.98
+    ]
+  },
+  "not_executable": [
+    {
+      "sector": "financial",
+      "world": "budget_envelope",
+      "executable": false
+    }
+  ],
+  "experiment": "e68b_recipe_audit",
+  "timestamp": "2026-06-18T08:00:50",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "env": {
+    "python": "3.9.18",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.4"
+  }
+}

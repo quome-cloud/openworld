@@ -43,7 +43,7 @@ EXPERIMENTS = [
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
     "e67_cartpole_bench",
-    "e68_prototyping_latency",
+    "e68_prototyping_latency", "e68b_recipe_audit",
 ]
 
 
@@ -2313,6 +2313,13 @@ def numbers_tex(d):
         macro("ProtoMeanMinutes", f"{d['e68_prototyping_latency']['mean_minutes']:.1f}"),
         macro("ProtoMaxMinutes", f"{d['e68_prototyping_latency']['max_minutes']:.1f}"),
         macro("ProtoValidationRate", pct(d["e68_prototyping_latency"]["validation_rate"])),
+        # E68b audit: behavioral correctness + build-time distribution
+        macro("ProtoExecutableRate", pct(d["e68b_recipe_audit"]["behavioral_executable_rate"])),
+        macro("ProtoNExecutable", str(d["e68b_recipe_audit"]["n_executable"])),
+        macro("ProtoPNinetyMinutes", f"{d['e68b_recipe_audit']['timing_distribution_minutes']['p90']:.1f}"),
+        macro("ProtoStdMinutes", f"{d['e68b_recipe_audit']['timing_distribution_minutes']['std']:.1f}"),
+        macro("ProtoMedianCI",
+              "{:.1f}--{:.1f}".format(*d["e68b_recipe_audit"]["timing_distribution_minutes"]["median_ci95"])),
         # E65 MiniGrid head-to-head (trained vs verified on a shared benchmark)
         macro("MGOpenWorldPlan", str(d["e65_minigrid_bench"]["openworld"]["plan_length"])),
         macro("MGDreamerFirstSolve",

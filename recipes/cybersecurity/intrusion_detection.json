@@ -1,0 +1,274 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "intrusion_detection",
+  "description": "an intrusion-detection alert escalation world; actions alert, investigate, block, dismiss",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an intrusion-detection alert escalation world; actions alert, investigate, block, dismiss"
+  },
+  "state_schema": {
+    "stage": "str",
+    "severity": "int",
+    "confidence": "int",
+    "threat_active": "bool",
+    "analyst_load": "int",
+    "alerts_raised": "int",
+    "investigations": "int",
+    "blocked": "int",
+    "dismissed": "int"
+  },
+  "initial_state": {
+    "stage": "idle",
+    "severity": 2,
+    "confidence": 0,
+    "threat_active": true,
+    "analyst_load": 0,
+    "alerts_raised": 0,
+    "investigations": 0,
+    "blocked": 0,
+    "dismissed": 0
+  },
+  "actions": [
+    "alert",
+    "investigate",
+    "block",
+    "dismiss"
+  ],
+  "rules": [
+    "'alert' opens a case only from a closed queue (idle/blocked/dismissed); it raises severity (+3, capped at 10), sets a baseline confidence, and adds one to analyst_load.",
+    "'investigate' is valid only on an open case (alerted/investigating); it raises analyst confidence by 25 (capped at 100) toward a verdict.",
+    "'block' resolves an open case by containment: it clears threat_active, zeroes severity, and frees one unit of analyst_load.",
+    "'dismiss' resolves an open case as a false positive: it zeroes confidence and frees analyst_load, but leaves threat_active unchanged.",
+    "Both resolutions (block/dismiss) return the queue to a closed state so a new alert can be raised, making the lifecycle cyclic."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n    stage = s.get(\"stage\", \"idle\")\n\n    if name == \"alert\":\n        # Raise an alert on the current signal; only from a closed/idle queue.\n        if stage in (\"idle\", \"blocked\", \"dismissed\"):\n            s[\"stage\"] = \"alerted\"\n            s[\"alerts_raised\"] = s.get(\"alerts_raised\", 0) + 1\n            s[\"severity\"] = min(10, s.get(\"severity\", 0) + 3)\n            s[\"confidence\"] = max(s.get(\"confidence\", 0), 20)\n            s[\"analyst_load\"] = s.get(\"analyst_load\", 0) + 1\n\n    elif name == \"investigate\":\n        # Analyst triages an open alert: builds confidence (only valid when open).\n        if stage in (\"alerted\", \"investigating\"):\n            s[\"stage\"] = \"investigating\"\n            s[\"investigations\"] = s.get(\"investigations\", 0) + 1\n            s[\"confidence\"] = min(100, s.get(\"confidence\", 0) + 25)\n\n    elif name == \"block\":\n        # Contain the intrusion: clears the active threat and closes the case.\n        if stage in (\"alerted\", \"investigating\"):\n            s[\"stage\"] = \"blocked\"\n            s[\"blocked\"] = s.get(\"blocked\", 0) + 1\n            s[\"threat_active\"] = False\n            s[\"severity\"] = 0\n            s[\"analyst_load\"] = max(0, s.get(\"analyst_load\", 0) - 1)\n\n    elif name == \"dismiss\":\n        # Close the case as a false positive: no containment, threat unchanged.\n        if stage in (\"alerted\", \"investigating\"):\n            s[\"stage\"] = \"dismissed\"\n            s[\"dismissed\"] = s.get(\"dismissed\", 0) + 1\n            s[\"confidence\"] = 0\n            s[\"severity\"] = max(0, s.get(\"severity\", 0) - 2)\n            s[\"analyst_load\"] = max(0, s.get(\"analyst_load\", 0) - 1)\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "severity",
+        "threat_active"
+      ],
+      "schema": {
+        "severity": {
+          "type": "int",
+          "range": [
+            0,
+            10
+          ]
+        },
+        "threat_active": "bool"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else (data.get(\"text\", \"\") if isinstance(data, dict) else str(data))\n    low = text.lower()\n    severity = 0\n    for keyword, weight in ((\"critical\", 10), (\"malware\", 9), (\"ransomware\", 10),\n                            (\"exploit\", 8), (\"breach\", 9), (\"bruteforce\", 6),\n                            (\"portscan\", 4), (\"scan\", 4), (\"login\", 2)):\n        if keyword in low:\n            severity = max(severity, weight)\n    threat_active = severity >= 6\n    return {\"severity\": severity, \"threat_active\": threat_active}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "stage",
+        "severity",
+        "confidence",
+        "threat_active",
+        "analyst_load"
+      ],
+      "report": "Case [{stage}] severity={severity} confidence={confidence}% threat_active={threat_active} analyst_load={analyst_load}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "contain_threats",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "minimize_analyst_load",
+      "goal": "minimize",
+      "weight": 0.5
+    },
+    {
+      "name": "minimize_false_dismissals",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "alert",
+    "series": {
+      "severity": [
+        2.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "confidence": [
+        0.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0
+      ],
+      "analyst_load": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "alerts_raised": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "alerts_raised 0",
+            "analyst_load 0",
+            "blocked 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "alerts_raised 1",
+            "analyst_load 1",
+            "blocked 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "alerts_raised 1",
+            "analyst_load 1",
+            "blocked 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "alerts_raised 1",
+            "analyst_load 0",
+            "blocked 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "alerts_raised 1",
+            "analyst_load 0",
+            "blocked 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "alerts_raised 1",
+            "analyst_load 1",
+            "blocked 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "alert"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "investigate, block, dismiss"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "investigate"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "block"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "dismiss"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "alert"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "investigate"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "alert"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

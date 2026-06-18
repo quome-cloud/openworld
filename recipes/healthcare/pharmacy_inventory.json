@@ -1,0 +1,236 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "pharmacy_inventory",
+  "description": "a pharmacy inventory world with stock and expiry; actions dispense, reorder, expire",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a pharmacy inventory world with stock and expiry; actions dispense, reorder, expire"
+  },
+  "state_schema": {
+    "day": "int",
+    "batches": "list[dict]",
+    "reorder_threshold": "int",
+    "reorder_qty": "int",
+    "shelf_life_days": "int",
+    "dispensed_total": "int",
+    "expired_total": "int",
+    "stockouts": "int",
+    "orders_placed": "int"
+  },
+  "initial_state": {
+    "day": 0,
+    "batches": [
+      {
+        "drug": "amoxicillin",
+        "qty": 120,
+        "expires_on": 30
+      },
+      {
+        "drug": "amoxicillin",
+        "qty": 60,
+        "expires_on": 7
+      },
+      {
+        "drug": "ibuprofen",
+        "qty": 200,
+        "expires_on": 60
+      },
+      {
+        "drug": "insulin",
+        "qty": 40,
+        "expires_on": 14
+      }
+    ],
+    "reorder_threshold": 50,
+    "reorder_qty": 100,
+    "shelf_life_days": 90,
+    "dispensed_total": 0,
+    "expired_total": 0,
+    "stockouts": 0,
+    "orders_placed": 0
+  },
+  "actions": [
+    "dispense",
+    "reorder",
+    "expire"
+  ],
+  "rules": [
+    "'dispense' removes units of a drug from stock, consuming the soonest-to-expire batch first (FEFO); an under-filled request records a stockout.",
+    "'reorder' adds a fresh batch of a drug, expiring 'shelf_life_days' after the current day.",
+    "'expire' advances the clock by one day (or 'days') and discards every batch whose expiry day has been reached, adding its units to expired_total.",
+    "Stock is never negative and expired units can never be dispensed."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    s[\"batches\"] = [dict(b) for b in s.get(\"batches\", [])]\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    day = s.get(\"day\", 0)\n\n    def drugs():\n        seen = []\n        for b in s[\"batches\"]:\n            if b[\"drug\"] not in seen:\n                seen.append(b[\"drug\"])\n        return seen\n\n    def stock(drug):\n        return sum(b[\"qty\"] for b in s[\"batches\"] if b[\"drug\"] == drug)\n\n    if name == \"dispense\":\n        # Default to the first drug that has any stock; pull 10 units by default.\n        drug = params.get(\"drug\")\n        if drug is None:\n            on_hand = [d for d in drugs() if stock(d) > 0]\n            drug = on_hand[0] if on_hand else (drugs()[0] if drugs() else None)\n        qty = int(params.get(\"qty\", 10))\n        remaining = qty\n        dispensed = 0\n        # FEFO: consume the soonest-to-expire batches first.\n        for b in sorted([b for b in s[\"batches\"] if b[\"drug\"] == drug],\n                        key=lambda b: b[\"expires_on\"]):\n            if remaining <= 0:\n                break\n            take = min(b[\"qty\"], remaining)\n            b[\"qty\"] -= take\n            remaining -= take\n            dispensed += take\n        s[\"batches\"] = [b for b in s[\"batches\"] if b[\"qty\"] > 0]\n        s[\"dispensed_total\"] = s.get(\"dispensed_total\", 0) + dispensed\n        if remaining > 0:\n            s[\"stockouts\"] = s.get(\"stockouts\", 0) + 1\n        return s\n\n    if name == \"reorder\":\n        # Default to restocking a drug at or below the reorder threshold.\n        drug = params.get(\"drug\")\n        if drug is None:\n            ds = drugs()\n            low = [d for d in ds if stock(d) <= s.get(\"reorder_threshold\", 50)]\n            drug = low[0] if low else (ds[0] if ds else \"amoxicillin\")\n        qty = int(params.get(\"qty\", s.get(\"reorder_qty\", 100)))\n        shelf_life = int(params.get(\"shelf_life_days\", s.get(\"shelf_life_days\", 90)))\n        s[\"batches\"] = s[\"batches\"] + [\n            {\"drug\": drug, \"qty\": qty, \"expires_on\": day + shelf_life}]\n        s[\"orders_placed\"] = s.get(\"orders_placed\", 0) + 1\n        return s\n\n    if name == \"expire\":\n        # Advance the clock and discard anything that has reached its expiry day.\n        days = max(1, int(params.get(\"days\", 1)))\n        s[\"day\"] = day + days\n        kept, discarded = [], 0\n        for b in s[\"batches\"]:\n            if b[\"expires_on\"] <= s[\"day\"]:\n                discarded += b[\"qty\"]\n            else:\n                kept.append(b)\n        s[\"batches\"] = kept\n        s[\"expired_total\"] = s.get(\"expired_total\", 0) + discarded\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "reorder_threshold",
+        "reorder_qty"
+      ],
+      "schema": {
+        "reorder_threshold": {
+          "type": "int",
+          "range": [
+            0,
+            1000
+          ]
+        },
+        "reorder_qty": {
+          "type": "int",
+          "range": [
+            0,
+            1000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if \"reorder_threshold\" in data:\n        out[\"reorder_threshold\"] = int(data[\"reorder_threshold\"])\n    if \"reorder_qty\" in data:\n        out[\"reorder_qty\"] = int(data[\"reorder_qty\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "dispensed_total",
+        "expired_total",
+        "stockouts",
+        "orders_placed"
+      ],
+      "report": "Pharmacy day {day}: {dispensed_total} units dispensed, {expired_total} expired, {stockouts} stockouts, {orders_placed} orders placed."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize_waste",
+      "goal": "minimize expired_total"
+    },
+    {
+      "name": "avoid_stockouts",
+      "goal": "minimize stockouts"
+    },
+    {
+      "name": "service_level",
+      "goal": "maximize dispensed_total"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "dispense",
+    "series": {
+      "dispensed_total": [
+        0.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "dispensed_total 0",
+            "orders_placed 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 0",
+            "dispensed_total 10",
+            "orders_placed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 0",
+            "dispensed_total 0",
+            "orders_placed 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 1",
+            "dispensed_total 0",
+            "orders_placed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 0",
+            "dispensed_total 20",
+            "orders_placed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 0",
+            "dispensed_total 10",
+            "orders_placed 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "dispense"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "reorder"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "expire"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "dispense"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "reorder"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

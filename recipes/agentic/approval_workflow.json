@@ -1,0 +1,223 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "approval_workflow",
+  "description": "an agent executing an approval-workflow world; actions submit, review, approve, execute",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent executing an approval-workflow world; actions submit, review, approve, execute"
+  },
+  "state_schema": {
+    "stage": "str",
+    "progress": "int",
+    "submitted": "bool",
+    "reviewed": "bool",
+    "approved": "bool",
+    "executed": "bool",
+    "requester": "str",
+    "amount": "int",
+    "log": "list",
+    "last_blocked": "str",
+    "blocked_count": "int"
+  },
+  "initial_state": {
+    "stage": "draft",
+    "progress": 0,
+    "submitted": false,
+    "reviewed": false,
+    "approved": false,
+    "executed": false,
+    "requester": "",
+    "amount": 0,
+    "log": [],
+    "last_blocked": "",
+    "blocked_count": 0
+  },
+  "actions": [
+    "submit",
+    "review",
+    "approve",
+    "execute"
+  ],
+  "rules": [
+    "Stages advance in strict order: draft -> submitted -> reviewed -> approved -> executed.",
+    "submit is legal only in draft; review only after submission; approve only after review; execute only after approval.",
+    "Each action is the sole legal move out of exactly one stage; it sets that stage's flag and advances `stage`.",
+    "An out-of-order action is a no-op for the pipeline: it never skips, repeats, or reverses a stage; it only records last_blocked / blocked_count.",
+    "executed is terminal -- no action changes the stage once the request is executed.",
+    "progress counts completed stages (0..4); the log is an append-only audit trail of accepted actions."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    agent = action.get(\"agent\") or \"agent\"\n    stage = s.get(\"stage\", \"draft\")\n\n    # action -> (stage it is legal from, stage it moves to, the flag it sets)\n    gates = {\n        \"submit\":  (\"draft\",     \"submitted\", \"submitted\"),\n        \"review\":  (\"submitted\", \"reviewed\",  \"reviewed\"),\n        \"approve\": (\"reviewed\",  \"approved\",  \"approved\"),\n        \"execute\": (\"approved\",  \"executed\",  \"executed\"),\n    }\n\n    if name in gates:\n        required, next_stage, flag = gates[name]\n        if stage == required:\n            s[flag] = True\n            s[\"stage\"] = next_stage\n            s[\"progress\"] = int(s.get(\"progress\", 0)) + 1\n            log = list(s.get(\"log\", []))\n            log.append({\"action\": name, \"by\": agent, \"stage\": next_stage})\n            s[\"log\"] = log\n        else:\n            # gated: illegal at this stage -> record a rejected attempt, no advance\n            s[\"last_blocked\"] = name\n            s[\"blocked_count\"] = int(s.get(\"blocked_count\", 0)) + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "requester",
+        "amount"
+      ],
+      "schema": {
+        "requester": "str",
+        "amount": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    return {\n        \"requester\": str(data.get(\"requester\", \"\")),\n        \"amount\": int(data.get(\"amount\", 0)),\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "stage",
+        "progress",
+        "requester",
+        "amount",
+        "blocked_count"
+      ],
+      "report": "Approval request by {requester} for {amount}: stage={stage} ({progress}/4 complete), {blocked_count} blocked attempt(s)."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reach_executed",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "blocked_attempts",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "submit",
+    "series": {
+      "progress": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blocked_count": [
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "blocked_count 0",
+            "progress 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "blocked_count 0",
+            "progress 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "blocked_count 1",
+            "progress 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "blocked_count 1",
+            "progress 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "blocked_count 1",
+            "progress 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "blocked_count 1",
+            "progress 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "submit"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "review"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "approve"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "execute"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "submit"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

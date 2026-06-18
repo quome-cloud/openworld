@@ -1,0 +1,230 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "fraud_scoring",
+  "description": "a card-transaction fraud world: transactions get a risk score and holds; actions score, hold, release, block",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a card-transaction fraud world: transactions get a risk score and holds; actions score, hold, release, block"
+  },
+  "state_schema": {
+    "amount": "int",
+    "merchant_risk": "int",
+    "velocity": "int",
+    "score": "int",
+    "scored": "bool",
+    "flagged": "bool",
+    "status": "str",
+    "card_frozen": "bool",
+    "holds_placed": "int",
+    "releases": "int",
+    "blocks": "int"
+  },
+  "initial_state": {
+    "amount": 0,
+    "merchant_risk": 0,
+    "velocity": 0,
+    "score": 0,
+    "scored": false,
+    "flagged": false,
+    "status": "pending",
+    "card_frozen": false,
+    "holds_placed": 0,
+    "releases": 0,
+    "blocks": 0
+  },
+  "actions": [
+    "score",
+    "hold",
+    "release",
+    "block"
+  ],
+  "rules": [
+    "'score' computes risk = amount//100 + merchant_risk + velocity*5, clamped to 0-100, and flags the transaction when score >= 50.",
+    "'hold' places a hold (status -> held) on a pending or released transaction whose card is not frozen, incrementing holds_placed.",
+    "'release' clears a hold (status held -> released), incrementing releases.",
+    "'block' is terminal: it freezes the card and stops the transaction (status -> blocked), incrementing blocks.",
+    "Actions are idempotent when their precondition is not met."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    HIGH = 50\n    if name == \"score\":\n        risk = (s[\"amount\"] // 100) + s[\"merchant_risk\"] + s[\"velocity\"] * 5\n        s[\"score\"] = max(0, min(100, int(risk)))\n        s[\"scored\"] = True\n        s[\"flagged\"] = s[\"score\"] >= HIGH\n    elif name == \"hold\":\n        # A hold can be placed on a live transaction (never on a frozen card).\n        if s[\"status\"] in (\"pending\", \"released\") and not s[\"card_frozen\"]:\n            s[\"status\"] = \"held\"\n            s[\"holds_placed\"] = s[\"holds_placed\"] + 1\n    elif name == \"release\":\n        # Releasing clears an existing hold and lets the transaction settle.\n        if s[\"status\"] == \"held\":\n            s[\"status\"] = \"released\"\n            s[\"releases\"] = s[\"releases\"] + 1\n    elif name == \"block\":\n        # Blocking is terminal: it freezes the card and stops the transaction.\n        if s[\"status\"] != \"blocked\":\n            s[\"status\"] = \"blocked\"\n            s[\"card_frozen\"] = True\n            s[\"blocks\"] = s[\"blocks\"] + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "amount",
+        "merchant_risk",
+        "velocity"
+      ],
+      "schema": {
+        "amount": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "merchant_risk": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        },
+        "velocity": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower(); v = v.strip()\n        if k in ('amount', 'merchant_risk', 'velocity'):\n            n = int(v) if v.lstrip('-').isdigit() else 0\n            out[k] = max(0, n)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "score",
+        "status",
+        "flagged",
+        "holds_placed",
+        "releases",
+        "blocks"
+      ],
+      "report": "risk {score}/100 ({status}) -- holds {holds_placed}, released {releases}, blocked {blocks}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "catch fraud",
+      "goal": "hold or block flagged (high-risk) transactions"
+    },
+    {
+      "name": "minimize friction",
+      "goal": "min holds_placed on low-risk transactions"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "hold",
+    "series": {
+      "holds_placed": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "blocks 0",
+            "holds_placed 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "blocks 0",
+            "holds_placed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "blocks 0",
+            "holds_placed 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "blocks 1",
+            "holds_placed 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "blocks 0",
+            "holds_placed 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "blocks 1",
+            "holds_placed 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "score"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "hold"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "block"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "release"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "hold"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "block"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "score, release"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

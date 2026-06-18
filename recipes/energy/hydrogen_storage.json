@@ -1,0 +1,275 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "hydrogen_storage",
+  "description": "a hydrogen production/storage cycle world; actions electrolyze, store, fuel",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a hydrogen production/storage cycle world; actions electrolyze, store, fuel"
+  },
+  "state_schema": {
+    "power_kwh": "float",
+    "water_l": "float",
+    "h2_loose_kg": "float",
+    "h2_stored_kg": "float",
+    "tank_capacity_kg": "float",
+    "o2_kg": "float",
+    "fuel_delivered_kg": "float",
+    "energy_delivered_kwh": "float",
+    "step": "int"
+  },
+  "initial_state": {
+    "power_kwh": 300.0,
+    "water_l": 200.0,
+    "h2_loose_kg": 0.0,
+    "h2_stored_kg": 0.0,
+    "tank_capacity_kg": 10.0,
+    "o2_kg": 0.0,
+    "fuel_delivered_kg": 0.0,
+    "energy_delivered_kwh": 0.0,
+    "step": 0
+  },
+  "actions": [
+    "electrolyze",
+    "store",
+    "fuel"
+  ],
+  "rules": [
+    "State is conserved: H2 only moves loose -> stored -> fuel; it is never created except by 'electrolyze'.",
+    "'electrolyze' consumes 50 kWh of power and 9 L of water per kg of H2 produced, emitting 8 kg O2 per kg H2; output is capped at 2 kg/step and by available power and water.",
+    "'store' compresses loose H2 into the tank at 3 kWh/kg, capped at 5 kg/step, never exceeding tank_capacity_kg.",
+    "'fuel' dispenses stored H2 to the load at up to 3 kg/step, delivering 33.3 kWh of usable energy per kg.",
+    "No resource ever goes negative and the tank never overfills; every action advances 'step' by 1.",
+    "An action may pass params['kg'] to request a smaller batch than the per-step cap."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # --- physical constants (per kg of H2) ---\n    KWH_PER_KG   = 50.0   # electricity to electrolyze 1 kg H2\n    WATER_PER_KG = 9.0    # liters of water consumed per kg H2 (2 H2O -> 2 H2 + O2)\n    O2_PER_KG    = 8.0    # kg O2 byproduct per kg H2 (mass ratio 16:2)\n    COMPRESS_KWH = 3.0    # electricity to compress 1 kg H2 into the tank\n    LHV_KWH_PER_KG = 33.3 # usable energy released per kg H2 burned/cell\n\n    # --- per-step throughput caps (facility rates) ---\n    ELECTROLYZE_RATE = 2.0\n    STORE_RATE       = 5.0\n    FUEL_RATE        = 3.0\n\n    def clamp(x):\n        x = round(float(x), 6)\n        return 0.0 if x < 0 else x\n\n    if name == \"electrolyze\":\n        # H2 produced is bounded by the rate cap and by available power + water.\n        cap = float(params.get(\"kg\", ELECTROLYZE_RATE))\n        made = min(cap, ELECTROLYZE_RATE,\n                   s[\"power_kwh\"] / KWH_PER_KG,\n                   s[\"water_l\"] / WATER_PER_KG)\n        made = clamp(made)\n        s[\"power_kwh\"]   = clamp(s[\"power_kwh\"] - made * KWH_PER_KG)\n        s[\"water_l\"]     = clamp(s[\"water_l\"] - made * WATER_PER_KG)\n        s[\"h2_loose_kg\"] = clamp(s[\"h2_loose_kg\"] + made)\n        s[\"o2_kg\"]       = clamp(s[\"o2_kg\"] + made * O2_PER_KG)\n\n    elif name == \"store\":\n        # Compress loose H2 into the tank, bounded by rate, free capacity, power.\n        cap = float(params.get(\"kg\", STORE_RATE))\n        headroom = s[\"tank_capacity_kg\"] - s[\"h2_stored_kg\"]\n        moved = min(cap, STORE_RATE, s[\"h2_loose_kg\"],\n                    headroom, s[\"power_kwh\"] / COMPRESS_KWH)\n        moved = clamp(moved)\n        s[\"h2_loose_kg\"]  = clamp(s[\"h2_loose_kg\"] - moved)\n        s[\"h2_stored_kg\"] = clamp(s[\"h2_stored_kg\"] + moved)\n        s[\"power_kwh\"]    = clamp(s[\"power_kwh\"] - moved * COMPRESS_KWH)\n\n    elif name == \"fuel\":\n        # Dispense stored H2 to the load, delivering its usable energy.\n        cap = float(params.get(\"kg\", FUEL_RATE))\n        used = min(cap, FUEL_RATE, s[\"h2_stored_kg\"])\n        used = clamp(used)\n        s[\"h2_stored_kg\"]        = clamp(s[\"h2_stored_kg\"] - used)\n        s[\"fuel_delivered_kg\"]   = clamp(s[\"fuel_delivered_kg\"] + used)\n        s[\"energy_delivered_kwh\"] = clamp(s[\"energy_delivered_kwh\"] + used * LHV_KWH_PER_KG)\n\n    # any other action (incl. noop) leaves the facility idle\n    s[\"step\"] = int(s.get(\"step\", 0)) + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "power_kwh",
+        "water_l"
+      ],
+      "schema": {
+        "power_kwh": "float",
+        "water_l": "float"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if \"grid_kwh\" in data:\n        out[\"power_kwh\"] = float(data[\"grid_kwh\"])\n    if \"water_l\" in data:\n        out[\"water_l\"] = float(data[\"water_l\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "h2_loose_kg",
+        "h2_stored_kg",
+        "tank_capacity_kg",
+        "fuel_delivered_kg",
+        "energy_delivered_kwh",
+        "power_kwh",
+        "water_l"
+      ],
+      "report": "Hydrogen facility @ step {step}: {h2_stored_kg} kg stored of {tank_capacity_kg} kg capacity ({h2_loose_kg} kg loose). Delivered {fuel_delivered_kg} kg fuel = {energy_delivered_kwh} kWh. Reserves: {power_kwh} kWh power, {water_l} L water."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "fuel_delivered",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "energy_delivered",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "loose_h2_stranded",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "electrolyze",
+    "series": {
+      "power_kwh": [
+        300.0,
+        200.0,
+        100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "water_l": [
+        200.0,
+        182.0,
+        164.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0,
+        146.0
+      ],
+      "h2_loose_kg": [
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ],
+      "o2_kg": [
+        0.0,
+        16.0,
+        32.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0,
+        48.0
+      ],
+      "step": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "h2_loose_kg 0",
+            "h2_stored_kg 0",
+            "o2_kg 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "h2_loose_kg 2",
+            "h2_stored_kg 0",
+            "o2_kg 16"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "h2_loose_kg 0",
+            "h2_stored_kg 0",
+            "o2_kg 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "h2_loose_kg 4",
+            "h2_stored_kg 0",
+            "o2_kg 32"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "h2_loose_kg 0",
+            "h2_stored_kg 2",
+            "o2_kg 16"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "h2_loose_kg 2",
+            "h2_stored_kg 0",
+            "o2_kg 16"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "electrolyze"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "store"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "fuel"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "electrolyze"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "store"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "fuel"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

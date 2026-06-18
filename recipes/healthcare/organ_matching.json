@@ -1,0 +1,248 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "organ_matching",
+  "description": "an organ transplant waitlist world matching by compatibility and urgency; actions list, match, transplant",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "healthcare",
+      "matching",
+      "leaf"
+    ],
+    "lineage": "build/organ_matching.py",
+    "metrics": {},
+    "description": "an organ transplant waitlist world matching by compatibility and urgency; actions list, match, transplant"
+  },
+  "state_schema": {
+    "pending_candidates": "list[dict]",
+    "waitlist": "list",
+    "organs": "list[dict]",
+    "pending_match": "null",
+    "incoming": "null",
+    "transplants": "list",
+    "num_waiting": "int",
+    "num_organs": "int",
+    "num_transplanted": "int"
+  },
+  "initial_state": {
+    "pending_candidates": [
+      {
+        "id": "c1",
+        "blood_type": "O",
+        "urgency": 9,
+        "waiting_days": 200,
+        "organ_needed": "kidney"
+      },
+      {
+        "id": "c2",
+        "blood_type": "A",
+        "urgency": 6,
+        "waiting_days": 50,
+        "organ_needed": "liver"
+      },
+      {
+        "id": "c3",
+        "blood_type": "B",
+        "urgency": 8,
+        "waiting_days": 120,
+        "organ_needed": "kidney"
+      },
+      {
+        "id": "c4",
+        "blood_type": "AB",
+        "urgency": 5,
+        "waiting_days": 20,
+        "organ_needed": "heart"
+      }
+    ],
+    "waitlist": [],
+    "organs": [
+      {
+        "id": "o1",
+        "blood_type": "O",
+        "organ_type": "kidney"
+      },
+      {
+        "id": "o2",
+        "blood_type": "A",
+        "organ_type": "liver"
+      },
+      {
+        "id": "o3",
+        "blood_type": "O",
+        "organ_type": "heart"
+      }
+    ],
+    "pending_match": null,
+    "incoming": null,
+    "transplants": [],
+    "num_waiting": 0,
+    "num_organs": 3,
+    "num_transplanted": 0
+  },
+  "actions": [
+    "list",
+    "match",
+    "transplant"
+  ],
+  "rules": [
+    "'list' admits the next queued (or perceived) candidate onto the waitlist, kept sorted by urgency (desc), then waiting time, then id.",
+    "'match' allocates one available organ to the most urgent ABO-compatible candidate needing that organ type, recording it as the pending match; if no compatible pair exists the pending match is cleared.",
+    "ABO compatibility: O donates to anyone, A to A/AB, B to B/AB, AB to AB only; the organ type must also equal the candidate's needed organ.",
+    "'transplant' executes the pending match: it removes the organ and recipient, appends a completed transplant, and clears the pending match.",
+    "Organs and waitlist seats are conserved -- a transplant consumes exactly one of each and never duplicates either."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # ABO donor->recipient compatibility: O is the universal donor, AB the\n    # universal recipient.\n    abo = {\n        \"O\": (\"O\", \"A\", \"B\", \"AB\"),\n        \"A\": (\"A\", \"AB\"),\n        \"B\": (\"B\", \"AB\"),\n        \"AB\": (\"AB\",),\n    }\n\n    def compatible(organ, cand):\n        if cand.get(\"organ_needed\") != organ.get(\"organ_type\"):\n            return False\n        return cand.get(\"blood_type\") in abo.get(organ.get(\"blood_type\"), ())\n\n    # work on fresh copies so nested structures never alias the input\n    waitlist = [dict(c) for c in s.get(\"waitlist\", [])]\n    organs = [dict(o) for o in s.get(\"organs\", [])]\n    pending = [dict(c) for c in s.get(\"pending_candidates\", [])]\n    transplants = [dict(t) for t in s.get(\"transplants\", [])]\n    pending_match = s.get(\"pending_match\")\n    incoming = s.get(\"incoming\")\n\n    if name == \"list\":\n        # add a perceived/explicit candidate, else admit the next queued one\n        cand = params.get(\"candidate\") or incoming\n        if cand:\n            waitlist.append(dict(cand))\n            incoming = None\n        elif pending:\n            waitlist.append(pending.pop(0))\n        # keep the most urgent first; tie-break by longer wait, then id\n        waitlist = sorted(\n            waitlist,\n            key=lambda c: (-int(c.get(\"urgency\", 0)),\n                           -int(c.get(\"waiting_days\", 0)),\n                           str(c.get(\"id\", \"\"))),\n        )\n\n    elif name == \"match\":\n        # allocate one organ to the most urgent compatible candidate\n        best = None\n        best_rank = None\n        for o in organs:\n            for c in waitlist:\n                if not compatible(o, c):\n                    continue\n                # higher urgency, then longer wait wins; smaller id breaks ties\n                rank = (int(c.get(\"urgency\", 0)), int(c.get(\"waiting_days\", 0)))\n                better = (\n                    best is None\n                    or rank > best_rank\n                    or (rank == best_rank\n                        and str(c.get(\"id\", \"\")) < str(best[1].get(\"id\", \"\")))\n                )\n                if better:\n                    best = (o, c)\n                    best_rank = rank\n        if best is not None:\n            o, c = best\n            pending_match = {\n                \"organ_id\": o.get(\"id\"),\n                \"candidate_id\": c.get(\"id\"),\n                \"organ_type\": o.get(\"organ_type\"),\n                \"blood_type\": c.get(\"blood_type\"),\n                \"urgency\": int(c.get(\"urgency\", 0)),\n            }\n        else:\n            pending_match = None\n\n    elif name == \"transplant\":\n        # execute the standing match: consume the organ, graduate the recipient\n        if pending_match:\n            oid = pending_match.get(\"organ_id\")\n            cid = pending_match.get(\"candidate_id\")\n            organ = None\n            remaining_organs = []\n            for o in organs:\n                if o.get(\"id\") == oid and organ is None:\n                    organ = o\n                else:\n                    remaining_organs.append(o)\n            recipient = None\n            remaining_wait = []\n            for c in waitlist:\n                if c.get(\"id\") == cid and recipient is None:\n                    recipient = c\n                else:\n                    remaining_wait.append(c)\n            if organ is not None and recipient is not None:\n                organs = remaining_organs\n                waitlist = remaining_wait\n                transplants.append({\n                    \"organ_id\": oid,\n                    \"candidate_id\": cid,\n                    \"organ_type\": organ.get(\"organ_type\"),\n                    \"blood_type\": recipient.get(\"blood_type\"),\n                    \"urgency\": int(recipient.get(\"urgency\", 0)),\n                })\n        pending_match = None\n\n    s[\"waitlist\"] = waitlist\n    s[\"organs\"] = organs\n    s[\"pending_candidates\"] = pending\n    s[\"transplants\"] = transplants\n    s[\"pending_match\"] = pending_match\n    s[\"incoming\"] = incoming\n    s[\"num_waiting\"] = len(waitlist)\n    s[\"num_organs\"] = len(organs)\n    s[\"num_transplanted\"] = len(transplants)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "incoming"
+      ],
+      "schema": {
+        "incoming": "dict"
+      },
+      "code": "\ndef perceive(data):\n    rec = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            rec[k.strip().lower()] = v.strip()\n    if not rec:\n        return {}\n\n    def num(x):\n        x = str(x)\n        return int(x) if x.lstrip('-').isdigit() else 0\n\n    cand = {\n        \"id\": rec.get(\"id\", \"c?\"),\n        \"blood_type\": rec.get(\"blood\", rec.get(\"blood_type\", \"O\")).upper(),\n        \"urgency\": num(rec.get(\"urgency\", 0)),\n        \"waiting_days\": num(rec.get(\"days\", rec.get(\"waiting_days\", 0))),\n        \"organ_needed\": rec.get(\"organ\", rec.get(\"organ_needed\", \"kidney\")).lower(),\n    }\n    return {\"incoming\": cand}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "num_waiting",
+        "num_organs",
+        "num_transplanted"
+      ],
+      "report": "waitlist {num_waiting}, organs available {num_organs}, transplants done {num_transplanted}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "transplant as many as possible",
+      "goal": "max num_transplanted"
+    },
+    {
+      "name": "clear the waitlist",
+      "goal": "min num_waiting"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "list",
+    "series": {
+      "num_waiting": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "num_waiting 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "num_waiting 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "num_waiting 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "num_waiting 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "num_waiting 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "num_waiting 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "list"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "match, transplant"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "list"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "match"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "transplant"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "list"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "match"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "transplant"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

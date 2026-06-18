@@ -1,0 +1,272 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "cert_rotation",
+  "description": "a TLS certificate rotation/expiry world; actions issue, rotate, expire, revoke",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "security",
+      "tls",
+      "pki",
+      "lifecycle",
+      "leaf"
+    ],
+    "lineage": "build/cert_rotation.py",
+    "metrics": {},
+    "description": "a TLS certificate rotation/expiry world; actions issue, rotate, expire, revoke"
+  },
+  "state_schema": {
+    "status": "str",
+    "clock": "int",
+    "serial": "int",
+    "expires_at": "int",
+    "lifetime": "int",
+    "issued": "int",
+    "rotations": "int",
+    "expired": "int",
+    "revoked": "int"
+  },
+  "initial_state": {
+    "status": "none",
+    "clock": 0,
+    "serial": 0,
+    "expires_at": 0,
+    "lifetime": 90,
+    "issued": 0,
+    "rotations": 0,
+    "expired": 0,
+    "revoked": 0
+  },
+  "actions": [
+    "issue",
+    "rotate",
+    "expire",
+    "revoke"
+  ],
+  "rules": [
+    "A certificate is one of: none, valid, expired, revoked.",
+    "'issue' mints a fresh certificate only when none is live (status none, expired, or revoked): it bumps the serial, sets status to valid, and sets expires_at to clock + lifetime. Issuing while valid is a no-op.",
+    "'rotate' replaces a valid certificate with a new one before expiry: it bumps the serial, increments rotations, and resets expires_at to clock + lifetime. Rotating when not valid is a no-op.",
+    "'expire' advances the clock to the live certificate's expires_at and marks it expired; only a valid certificate can expire.",
+    "'revoke' immediately invalidates a valid certificate; only a valid certificate can be revoked.",
+    "issued counts every mint (issue and rotate); expired and revoked count lapses and revocations respectively."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    status = s[\"status\"]\n\n    if name == \"issue\":\n        # Mint a fresh certificate only when no live one exists. Issuing while a\n        # certificate is already valid is a no-op (use rotate to replace it).\n        if status in (\"none\", \"expired\", \"revoked\"):\n            s[\"serial\"] = s[\"serial\"] + 1\n            s[\"issued\"] = s[\"issued\"] + 1\n            s[\"status\"] = \"valid\"\n            s[\"expires_at\"] = s[\"clock\"] + s[\"lifetime\"]\n\n    elif name == \"rotate\":\n        # Proactively replace the live certificate before expiry: new serial,\n        # fresh validity window, clock unchanged. Only meaningful while valid.\n        if status == \"valid\":\n            s[\"serial\"] = s[\"serial\"] + 1\n            s[\"issued\"] = s[\"issued\"] + 1\n            s[\"rotations\"] = s[\"rotations\"] + 1\n            s[\"expires_at\"] = s[\"clock\"] + s[\"lifetime\"]\n\n    elif name == \"expire\":\n        # Time advances to the certificate's notAfter; a live cert lapses.\n        if status == \"valid\":\n            s[\"clock\"] = max(s[\"clock\"], s[\"expires_at\"])\n            s[\"status\"] = \"expired\"\n            s[\"expired\"] = s[\"expired\"] + 1\n\n    elif name == \"revoke\":\n        # Immediately invalidate the live certificate (e.g. key compromise).\n        if status == \"valid\":\n            s[\"status\"] = \"revoked\"\n            s[\"revoked\"] = s[\"revoked\"] + 1\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "lifetime",
+        "clock"
+      ],
+      "schema": {
+        "lifetime": {
+          "type": "int",
+          "range": [
+            1,
+            825
+          ]
+        },
+        "clock": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower(); v = v.strip()\n            if k in ('lifetime', 'clock') and v.lstrip('-').isdigit():\n                out[k] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "serial",
+        "expires_at",
+        "clock",
+        "issued",
+        "rotations",
+        "expired",
+        "revoked"
+      ],
+      "report": "cert #{serial} {status}, expires day {expires_at} (now day {clock}); issued {issued}, rotated {rotations}, expired {expired}, revoked {revoked}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "rotate before expiry",
+      "goal": "max rotations"
+    },
+    {
+      "name": "avoid expirations",
+      "goal": "min expired"
+    },
+    {
+      "name": "avoid revocations",
+      "goal": "min revoked"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "issue",
+    "series": {
+      "serial": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "expires_at": [
+        0.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "issued": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "clock 0",
+            "expired 0",
+            "expires_at 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "clock 0",
+            "expired 0",
+            "expires_at 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "clock 0",
+            "expired 0",
+            "expires_at 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "clock 90",
+            "expired 1",
+            "expires_at 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "clock 0",
+            "expired 0",
+            "expires_at 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "clock 0",
+            "expired 0",
+            "expires_at 90"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "issue"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "rotate, expire, revoke"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "rotate"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "expire"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "revoke"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "issue"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "rotate"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "issue"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

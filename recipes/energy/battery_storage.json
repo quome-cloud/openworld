@@ -1,0 +1,274 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "battery_storage",
+  "description": "a grid-battery arbitrage world with state of charge; actions charge, discharge, hold",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a grid-battery arbitrage world with state of charge; actions charge, discharge, hold"
+  },
+  "state_schema": {
+    "t": "int",
+    "soc": "float",
+    "capacity": "float",
+    "power": "float",
+    "efficiency": "float",
+    "price": "float",
+    "prices": "list[float]",
+    "cash": "float",
+    "throughput": "float",
+    "last_action": "str"
+  },
+  "initial_state": {
+    "t": 0,
+    "soc": 0.0,
+    "capacity": 100.0,
+    "power": 25.0,
+    "efficiency": 0.9,
+    "price": 0.1,
+    "prices": [
+      0.1,
+      0.08,
+      0.12,
+      0.2,
+      0.35,
+      0.25
+    ],
+    "cash": 0.0,
+    "throughput": 0.0,
+    "last_action": "hold"
+  },
+  "actions": [
+    "charge",
+    "discharge",
+    "hold"
+  ],
+  "rules": [
+    "State of charge `soc` is measured in kWh and is always clamped to [0, capacity]; the battery can never over- or under-fill.",
+    "`charge` buys energy from the grid: it stores up to `power` kWh limited by remaining headroom (capacity - soc). Round-trip losses fall on the intake, so storing `stored` kWh draws `stored / efficiency` from the grid and decreases cash by price * stored / efficiency.",
+    "`discharge` sells energy to the grid: it releases up to `power` kWh limited by the available soc, increasing cash by price * sold and decreasing soc by that amount.",
+    "`hold` leaves soc and cash unchanged.",
+    "Every action advances `t` by one slot and sets the next `price` from the fixed `prices` schedule indexed by t modulo its length.",
+    "Arbitrage profit accumulates in `cash`: buy when the scheduled price is low and discharge when it is high. `throughput` tracks total kWh cycled as a proxy for battery wear."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"hold\")\n\n    soc = float(s.get(\"soc\", 0.0))\n    cap = float(s.get(\"capacity\", 0.0))\n    power = float(s.get(\"power\", 0.0))\n    eff = float(s.get(\"efficiency\", 1.0))\n    price = float(s.get(\"price\", 0.0))\n    cash = float(s.get(\"cash\", 0.0))\n    throughput = float(s.get(\"throughput\", 0.0))\n\n    moved = 0.0\n    if name == \"charge\":\n        # Store up to `power` kWh, bounded by remaining headroom. Round-trip\n        # losses fall on the way in: drawing `stored / eff` from the grid yields\n        # `stored` kWh in the battery, so cash falls by price * stored / eff.\n        stored = min(power, cap - soc)\n        if stored < 0.0:\n            stored = 0.0\n        grid_draw = stored / eff if eff > 0 else stored\n        cash -= price * grid_draw\n        soc += stored\n        moved = stored\n    elif name == \"discharge\":\n        # Sell up to `power` kWh, bounded by what is stored, at the current\n        # price; cash rises by price * sold and the battery drains by `sold`.\n        sold = min(power, soc)\n        if sold < 0.0:\n            sold = 0.0\n        cash += price * sold\n        soc -= sold\n        moved = sold\n    # `hold`: soc and cash are unchanged.\n\n    throughput += moved\n\n    # Advance time and step the deterministic price schedule for the next slot.\n    prices = list(s.get(\"prices\", [price]))\n    t = int(s.get(\"t\", 0)) + 1\n    next_price = prices[t % len(prices)] if prices else price\n\n    s[\"t\"] = t\n    s[\"soc\"] = round(soc, 6)\n    s[\"cash\"] = round(cash, 6)\n    s[\"throughput\"] = round(throughput, 6)\n    s[\"price\"] = next_price\n    s[\"last_action\"] = name\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "price"
+      ],
+      "schema": {
+        "price": {
+          "type": "float",
+          "range": [
+            0.0,
+            100.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for token in str(data).replace(\",\", \" \").split():\n        if \"=\" in token:\n            key, value = token.split(\"=\", 1)\n            if key.strip() == \"price\":\n                try:\n                    out[\"price\"] = float(value)\n                except ValueError:\n                    pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "t",
+        "soc",
+        "capacity",
+        "price",
+        "cash"
+      ],
+      "report": "t={t}: SoC={soc}/{capacity} kWh | price=${price}/kWh | cash=${cash}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "arbitrage_profit",
+      "goal": "maximize"
+    },
+    {
+      "name": "cycling_wear",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "charge",
+    "series": {
+      "t": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "soc": [
+        0.0,
+        25.0,
+        50.0,
+        75.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "price": [
+        0.1,
+        0.08,
+        0.12,
+        0.2,
+        0.35,
+        0.25,
+        0.1,
+        0.08,
+        0.12,
+        0.2,
+        0.35,
+        0.25,
+        0.1
+      ],
+      "cash": [
+        0.0,
+        -2.7778,
+        -5.0,
+        -8.3333,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889,
+        -13.8889
+      ],
+      "throughput": [
+        0.0,
+        25.0,
+        50.0,
+        75.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cash 0",
+            "price 0.1",
+            "soc 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cash -2.77778",
+            "price 0.08",
+            "soc 25"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cash 0",
+            "price 0.08",
+            "soc 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cash 0",
+            "price 0.08",
+            "soc 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cash -5",
+            "price 0.12",
+            "soc 50"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cash -0.777778",
+            "price 0.12",
+            "soc 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "charge"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "discharge"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "hold"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "charge"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "discharge"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "change_mgmt",
+  "description": "an IT change-management (CAB) approval world; actions request, approve, deploy, rollback",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "governance",
+      "approval",
+      "leaf"
+    ],
+    "lineage": "build/change_mgmt.py",
+    "metrics": {},
+    "description": "an IT change-management (CAB) approval world; actions request, approve, deploy, rollback"
+  },
+  "state_schema": {
+    "status": "str",
+    "approvals": "int",
+    "required_approvals": "int",
+    "risk": "int",
+    "deployments": "int",
+    "rollbacks": "int",
+    "change_id": "int"
+  },
+  "initial_state": {
+    "status": "idle",
+    "approvals": 0,
+    "required_approvals": 2,
+    "risk": 1,
+    "deployments": 0,
+    "rollbacks": 0,
+    "change_id": 0
+  },
+  "actions": [
+    "request",
+    "approve",
+    "deploy",
+    "rollback"
+  ],
+  "rules": [
+    "'request' opens a new change request (status -> requested) only when no change is in flight (idle, deployed, or rolled_back); it resets approvals to 0, records the change's risk, and assigns a new change_id.",
+    "'approve' records one CAB member's sign-off on a 'requested' change; when approvals reach required_approvals the change is promoted to 'approved'.",
+    "'deploy' is legal only for an 'approved' change: it sets status to 'deployed' and increments deployments. An unapproved change can never deploy.",
+    "'rollback' reverts a 'deployed' change to 'rolled_back' and increments rollbacks; a new request may then begin the cycle again."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    params = action.get(\"params\") or {}\n    status = s[\"status\"]\n\n    if name == \"request\":\n        # Open a fresh change request only when nothing is in flight: at start,\n        # or after the previous change deployed or was rolled back.\n        if status in (\"idle\", \"deployed\", \"rolled_back\"):\n            s[\"status\"] = \"requested\"\n            s[\"approvals\"] = 0\n            s[\"risk\"] = int(params.get(\"risk\", s[\"risk\"]))\n            s[\"required_approvals\"] = int(\n                params.get(\"required_approvals\", s[\"required_approvals\"]))\n            s[\"change_id\"] = s[\"change_id\"] + 1\n    elif name == \"approve\":\n        # Each CAB member casts one approval; quorum promotes the change.\n        if status == \"requested\":\n            s[\"approvals\"] = s[\"approvals\"] + 1\n            if s[\"approvals\"] >= s[\"required_approvals\"]:\n                s[\"status\"] = \"approved\"\n    elif name == \"deploy\":\n        # Production is gated on approval: only an 'approved' change may ship.\n        if status == \"approved\":\n            s[\"status\"] = \"deployed\"\n            s[\"deployments\"] = s[\"deployments\"] + 1\n    elif name == \"rollback\":\n        # Revert a live deployment; the change closes as 'rolled_back'.\n        if status == \"deployed\":\n            s[\"status\"] = \"rolled_back\"\n            s[\"rollbacks\"] = s[\"rollbacks\"] + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "risk",
+        "required_approvals"
+      ],
+      "schema": {
+        "risk": {
+          "type": "int",
+          "range": [
+            1,
+            5
+          ]
+        },
+        "required_approvals": {
+          "type": "int",
+          "range": [
+            1,
+            7
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower().replace(' ', '_')\n            v = v.strip()\n            if k in ('risk', 'required_approvals') and v.lstrip('-').isdigit():\n                out[k] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "change_id",
+        "status",
+        "approvals",
+        "required_approvals",
+        "deployments",
+        "rollbacks"
+      ],
+      "report": "change #{change_id} [{status}] \u2014 {approvals}/{required_approvals} approvals; {deployments} deployed, {rollbacks} rolled back"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "ship approved changes",
+      "goal": "max deployments"
+    },
+    {
+      "name": "keep production stable",
+      "goal": "min rollbacks"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {
+      "change_id": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "approvals 0",
+            "change_id 0",
+            "deployments 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "approvals 0",
+            "change_id 1",
+            "deployments 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "approvals 1",
+            "change_id 1",
+            "deployments 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "approvals 2",
+            "change_id 1",
+            "deployments 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "approvals 2",
+            "change_id 1",
+            "deployments 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "approvals 0",
+            "change_id 2",
+            "deployments 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "approve, deploy, rollback"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "approve"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "request, deploy, rollback"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "approve"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "request, deploy, rollback"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "deploy"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "request, approve, rollback"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "request"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "approve, deploy"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

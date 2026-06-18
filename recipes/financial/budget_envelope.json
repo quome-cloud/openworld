@@ -1,0 +1,226 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "budget_envelope",
+  "description": "a personal budgeting world with spending envelopes and rollovers; actions spend, transfer, rollover",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a personal budgeting world with spending envelopes and rollovers; actions spend, transfer, rollover"
+  },
+  "state_schema": {
+    "period": "int",
+    "envelopes": "dict",
+    "allocations": "dict",
+    "spent_total": "float",
+    "rollover_total": "float",
+    "last": "str"
+  },
+  "initial_state": {
+    "period": 1,
+    "envelopes": {
+      "groceries": 400.0,
+      "rent": 1200.0,
+      "fun": 150.0,
+      "savings": 300.0
+    },
+    "allocations": {
+      "groceries": 400.0,
+      "rent": 1200.0,
+      "fun": 150.0,
+      "savings": 300.0
+    },
+    "spent_total": 0.0,
+    "rollover_total": 0.0,
+    "last": "init"
+  },
+  "actions": [
+    "spend",
+    "transfer",
+    "rollover"
+  ],
+  "rules": [
+    "'spend' deducts params.amount (default 50) from params.envelope; spending is capped at the envelope's balance (no overdraft) and spent_total rises by the amount actually paid.",
+    "'transfer' moves params.amount (default 25) from params.from to params.to, capped at the source balance; total funds across envelopes are conserved.",
+    "'rollover' advances to a new period: every envelope keeps its remaining balance (carried into rollover_total) and is then topped up by its monthly allocation; period increments by one.",
+    "Unknown or missing envelope names fall back to deterministic defaults so every action is total; balances are rounded to cents."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    # Copy nested mappings so we never mutate the caller's state in place.\n    env = dict(s.get(\"envelopes\", {}))\n    alloc = dict(s.get(\"allocations\", {}))\n    s[\"envelopes\"] = env\n    s[\"allocations\"] = alloc\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    names = sorted(env)  # deterministic order for defaulted targets\n\n    def amount_of(raw, default):\n        try:\n            v = float(raw)\n        except (TypeError, ValueError):\n            return float(default)\n        return v if v > 0 else float(default)\n\n    if name == \"spend\":\n        target = params.get(\"envelope\")\n        if target not in env:\n            target = names[0] if names else None\n        amt = amount_of(params.get(\"amount\"), 50.0)\n        if target is not None:\n            # No overdraft: you can only pay what the envelope holds; any\n            # shortfall is simply not spent.\n            paid = min(amt, env[target])\n            env[target] = round(env[target] - paid, 2)\n            s[\"spent_total\"] = round(s.get(\"spent_total\", 0.0) + paid, 2)\n        s[\"last\"] = \"spend\"\n\n    elif name == \"transfer\":\n        src = params.get(\"from\")\n        dst = params.get(\"to\")\n        if src not in env:\n            src = names[0] if names else None\n        if dst not in env or dst == src:\n            dst = next((n for n in names if n != src), None)\n        amt = amount_of(params.get(\"amount\"), 25.0)\n        if src is not None and dst is not None and src != dst:\n            # Conserve total funds: move only what the source can give.\n            moved = min(amt, env[src])\n            env[src] = round(env[src] - moved, 2)\n            env[dst] = round(env[dst] + moved, 2)\n        s[\"last\"] = \"transfer\"\n\n    elif name == \"rollover\":\n        # Start a new period: each envelope keeps whatever is left (the rollover)\n        # and is then topped up by its monthly allocation.\n        carried = 0.0\n        for k in env:\n            carried += env[k]\n            env[k] = round(env[k] + alloc.get(k, 0.0), 2)\n        s[\"period\"] = int(s.get(\"period\", 1)) + 1\n        s[\"rollover_total\"] = round(s.get(\"rollover_total\", 0.0) + carried, 2)\n        s[\"last\"] = \"rollover\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "envelopes",
+        "period"
+      ],
+      "schema": {
+        "envelopes": "dict",
+        "period": {
+          "type": "int",
+          "range": [
+            0,
+            9999
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    env = {}\n    for line in str(data).splitlines():\n        if \":\" not in line:\n            continue\n        key, val = line.split(\":\", 1)\n        key = key.strip().lower()\n        val = val.strip().replace(\"$\", \"\").replace(\",\", \"\")\n        if not key:\n            continue\n        if key == \"period\":\n            try:\n                out[\"period\"] = int(float(val))\n            except (TypeError, ValueError):\n                pass\n        else:\n            try:\n                env[key] = round(float(val), 2)\n            except (TypeError, ValueError):\n                pass\n    if env:\n        out[\"envelopes\"] = env\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "period",
+        "spent_total",
+        "rollover_total"
+      ],
+      "report": "period {period}: spent {spent_total} so far, {rollover_total} rolled over"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "stay solvent",
+      "goal": "keep every envelope balance at or above zero"
+    },
+    {
+      "name": "grow savings",
+      "goal": "max savings"
+    },
+    {
+      "name": "spend the plan",
+      "goal": "max spent_total without overdrawing any envelope"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "rollover",
+    "series": {
+      "period": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0
+      ],
+      "rollover_total": [
+        0.0,
+        2050.0,
+        6150.0,
+        12300.0,
+        20500.0,
+        30750.0,
+        43050.0,
+        57400.0,
+        73800.0,
+        92250.0,
+        112750.0,
+        135300.0,
+        159900.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "period 1",
+            "rollover_total 0",
+            "spent_total 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "period 1",
+            "rollover_total 0",
+            "spent_total 50"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "period 2",
+            "rollover_total 2050",
+            "spent_total 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "period 1",
+            "rollover_total 0",
+            "spent_total 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "period 2",
+            "rollover_total 2000",
+            "spent_total 50"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "period 2",
+            "rollover_total 2050",
+            "spent_total 50"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "spend"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "rollover"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "spend"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "rollover"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "spend"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

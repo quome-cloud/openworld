@@ -1,0 +1,288 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "foia_request",
+  "description": "a FOIA request-processing world with exemptions; actions submit, review, release, redact",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a FOIA request-processing world with exemptions; actions submit, review, release, redact"
+  },
+  "state_schema": {
+    "status": "str",
+    "request_text": "str",
+    "responsive_records": "int",
+    "reviewed_records": "int",
+    "exempt_records": "int",
+    "exemptions": "list",
+    "pages_total": "int",
+    "exempt_pages": "int",
+    "pages_redacted": "int",
+    "pages_released": "int",
+    "redactions_applied": "int",
+    "released": "bool",
+    "fee": "int",
+    "day": "int"
+  },
+  "initial_state": {
+    "status": "draft",
+    "request_text": "",
+    "responsive_records": 0,
+    "reviewed_records": 0,
+    "exempt_records": 0,
+    "exemptions": [],
+    "pages_total": 0,
+    "exempt_pages": 0,
+    "pages_redacted": 0,
+    "pages_released": 0,
+    "redactions_applied": 0,
+    "released": false,
+    "fee": 0,
+    "day": 0
+  },
+  "actions": [
+    "submit",
+    "review",
+    "redact",
+    "release"
+  ],
+  "rules": [
+    "A request must be submitted before it can be reviewed.",
+    "Review examines responsive records and flags any exempt material, citing the FOIA exemption(s) invoked (e.g. b6 personal privacy, b5 deliberative).",
+    "Every responsive record must be reviewed before the request can be released.",
+    "Exempt pages must be redacted before the records that contain them are released.",
+    "Release is blocked until all exempt pages have been redacted.",
+    "The disposition is 'released_in_full' when nothing was redacted, 'denied' when every page was withheld, otherwise 'partially_released'.",
+    "Each action advances the processing clock by one day and may accrue fees; completed dispositions are terminal."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    status = s.get(\"status\", \"draft\")\n    responsive = int(s.get(\"responsive_records\", 0))\n    reviewed = int(s.get(\"reviewed_records\", 0))\n    exempt_records = int(s.get(\"exempt_records\", 0))\n    exemptions = list(s.get(\"exemptions\", []))\n    pages_total = int(s.get(\"pages_total\", 0))\n    exempt_pages = int(s.get(\"exempt_pages\", 0))\n    pages_redacted = int(s.get(\"pages_redacted\", 0))\n    pages_released = int(s.get(\"pages_released\", 0))\n    redactions = int(s.get(\"redactions_applied\", 0))\n    released = bool(s.get(\"released\", False))\n    fee = int(s.get(\"fee\", 0))\n    day = int(s.get(\"day\", 0))\n\n    # pages held per responsive record (used to size review/redaction batches)\n    ppr = (pages_total // responsive) if responsive > 0 else 0\n\n    if name == \"submit\":\n        # Only a fresh draft can be submitted; resubmits are no-ops.\n        if status == \"draft\":\n            text = params.get(\"text\") or s.get(\"request_text\") or \"Records request\"\n            recs = int(params.get(\"records\", responsive if responsive > 0 else 6))\n            pages = int(params.get(\"pages\", pages_total if pages_total > 0 else 30))\n            s[\"request_text\"] = str(text)\n            s[\"responsive_records\"] = max(recs, 0)\n            s[\"pages_total\"] = max(pages, 0)\n            s[\"status\"] = \"submitted\"\n            s[\"day\"] = day + 1\n        return s\n\n    if name == \"review\":\n        # Examine responsive records in batches, flagging exempt material.\n        if status in (\"submitted\", \"under_review\") and reviewed < responsive:\n            batch = int(params.get(\"count\", 1))\n            if batch < 1:\n                batch = 1\n            n = min(batch, responsive - reviewed)\n            new_exempt_pages = 0\n            for i in range(n):\n                idx = reviewed + i + 1          # 1-based record index\n                if idx % 2 == 0:               # every other record holds exempt material\n                    exempt_records += 1\n                    new_exempt_pages += ppr\n            reviewed += n\n            exempt_pages += new_exempt_pages\n            # Cite the exemptions invoked as exempt material is found.\n            if exempt_records > 0 and \"b6\" not in exemptions:   # personal privacy\n                exemptions.append(\"b6\")\n            if exempt_records > 2 and \"b5\" not in exemptions:   # deliberative process\n                exemptions.append(\"b5\")\n            fee += n * 5                       # search fee, $5 per record\n            s[\"reviewed_records\"] = reviewed\n            s[\"exempt_records\"] = exempt_records\n            s[\"exempt_pages\"] = exempt_pages\n            s[\"exemptions\"] = exemptions\n            s[\"fee\"] = fee\n            s[\"day\"] = day + 1\n            s[\"status\"] = \"reviewed\" if reviewed >= responsive else \"under_review\"\n        return s\n\n    if name == \"redact\":\n        # Black out exempt pages; release is blocked until none remain.\n        if status in (\"reviewed\", \"redacting\") and pages_redacted < exempt_pages:\n            batch = int(params.get(\"pages\", ppr if ppr > 0 else 1))\n            if batch < 1:\n                batch = 1\n            n = min(batch, exempt_pages - pages_redacted)\n            pages_redacted += n\n            redactions += 1\n            fee += n                           # duplication cost, $1 per page\n            s[\"pages_redacted\"] = pages_redacted\n            s[\"redactions_applied\"] = redactions\n            s[\"fee\"] = fee\n            s[\"day\"] = day + 1\n            s[\"status\"] = \"reviewed\" if pages_redacted >= exempt_pages else \"redacting\"\n        return s\n\n    if name == \"release\":\n        # Disposition is only lawful once review is complete and all exempt\n        # pages are redacted.\n        if (status in (\"reviewed\", \"redacting\")\n                and responsive > 0 and reviewed >= responsive\n                and pages_redacted >= exempt_pages\n                and not released):\n            pages_released = max(pages_total - pages_redacted, 0)\n            s[\"pages_released\"] = pages_released\n            s[\"released\"] = True\n            if pages_redacted == 0:\n                s[\"status\"] = \"released_in_full\"\n            elif pages_released == 0:\n                s[\"status\"] = \"denied\"\n            else:\n                s[\"status\"] = \"partially_released\"\n            s[\"day\"] = day + 1\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "request_text",
+        "responsive_records",
+        "pages_total"
+      ],
+      "schema": {
+        "request_text": "str",
+        "responsive_records": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "pages_total": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        src = {}\n        for k, v in data.items():\n            src[str(k).strip().lower()] = v\n    else:\n        src = {}\n        for line in str(data).splitlines():\n            if \":\" in line:\n                k, v = line.split(\":\", 1)\n                src[k.strip().lower()] = v.strip()\n    out = {}\n    subject = src.get(\"subject\") or src.get(\"text\") or src.get(\"request\")\n    if subject:\n        out[\"request_text\"] = str(subject)\n    records = src.get(\"records\")\n    if records is not None:\n        try:\n            out[\"responsive_records\"] = int(records)\n        except (ValueError, TypeError):\n            pass\n    pages = src.get(\"pages\")\n    if pages is not None:\n        try:\n            out[\"pages_total\"] = int(pages)\n        except (ValueError, TypeError):\n            pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "pages_total",
+        "pages_released",
+        "pages_redacted",
+        "exemptions",
+        "redactions_applied",
+        "fee"
+      ],
+      "report": "FOIA response \u2014 disposition: {status}. {pages_released} of {pages_total} pages released, {pages_redacted} redacted under exemptions {exemptions} ({redactions_applied} redaction passes). Processing fee: ${fee}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "responsiveness",
+      "goal": "maximize"
+    },
+    {
+      "name": "exemption_compliance",
+      "goal": "maximize"
+    },
+    {
+      "name": "processing_time",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "submit",
+    "series": {
+      "responsive_records": [
+        0.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ],
+      "pages_total": [
+        0.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0
+      ],
+      "day": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "exempt_pages 0",
+            "exempt_records 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 1",
+            "exempt_pages 0",
+            "exempt_records 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 2",
+            "exempt_pages 0",
+            "exempt_records 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 3",
+            "exempt_pages 5",
+            "exempt_records 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 4",
+            "exempt_pages 5",
+            "exempt_records 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 5",
+            "exempt_pages 10",
+            "exempt_records 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "submit"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "review, redact, release"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "review"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "submit, redact, release"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "review"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "submit, redact, release"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "review"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "submit, redact, release"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "review"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "submit, redact, release"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

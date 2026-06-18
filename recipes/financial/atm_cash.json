@@ -1,0 +1,269 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "atm_cash",
+  "description": "an ATM cash-management world with balance and replenishment; actions withdraw, deposit, replenish",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an ATM cash-management world with balance and replenishment; actions withdraw, deposit, replenish"
+  },
+  "state_schema": {
+    "balance": "int",
+    "atm_cash": "int",
+    "capacity": "int",
+    "withdraw_limit": "int",
+    "transactions": "int",
+    "rejected": "int",
+    "last_action": "str",
+    "last_amount": "int",
+    "last_accepted": "bool"
+  },
+  "initial_state": {
+    "balance": 500,
+    "atm_cash": 2000,
+    "capacity": 10000,
+    "withdraw_limit": 500,
+    "transactions": 0,
+    "rejected": 0,
+    "last_action": "none",
+    "last_amount": 0,
+    "last_accepted": false
+  },
+  "actions": [
+    "withdraw",
+    "deposit",
+    "replenish"
+  ],
+  "rules": [
+    "A withdrawal is accepted only when the amount is positive, within the per-withdrawal limit, covered by the account balance, and covered by the cash currently in the ATM; it then lowers both balance and atm_cash by the amount.",
+    "A deposit adds the amount to both the balance and the ATM's cash, and is rejected if it would push atm_cash above capacity.",
+    "Replenishment refills the ATM's cash cassette by the amount, clamped so atm_cash never exceeds capacity, and never changes the account balance.",
+    "atm_cash always stays between 0 and capacity, and balance is never negative.",
+    "Any request that fails its preconditions is rejected and leaves balance and atm_cash unchanged.",
+    "Each accepted action increments transactions; each rejected action increments rejected."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # Amount is an integer number of dollars; default 100, never negative.\n    amount = params.get(\"amount\", 100)\n    try:\n        amount = int(amount)\n    except (ValueError, TypeError):\n        amount = 0\n    if amount < 0:\n        amount = 0\n\n    balance = s.get(\"balance\", 0)\n    atm_cash = s.get(\"atm_cash\", 0)\n    capacity = s.get(\"capacity\", 0)\n    limit = s.get(\"withdraw_limit\", 0)\n\n    accepted = False\n    if name == \"withdraw\":\n        # Need a positive amount within the per-withdrawal limit, covered by\n        # both the account balance and the cash physically in the machine.\n        if 0 < amount <= limit and amount <= balance and amount <= atm_cash:\n            balance -= amount\n            atm_cash -= amount\n            accepted = True\n    elif name == \"deposit\":\n        # Cash in: grows the balance and fills the cassette, never overfilling.\n        if amount > 0 and atm_cash + amount <= capacity:\n            balance += amount\n            atm_cash += amount\n            accepted = True\n    elif name == \"replenish\":\n        # Technician tops up the cassette; clamp at capacity, balance untouched.\n        new_cash = min(capacity, atm_cash + amount)\n        if amount > 0 and new_cash != atm_cash:\n            atm_cash = new_cash\n            accepted = True\n\n    s[\"balance\"] = balance\n    s[\"atm_cash\"] = atm_cash\n    s[\"last_action\"] = name\n    s[\"last_amount\"] = amount\n    s[\"last_accepted\"] = accepted\n    s[\"transactions\"] = s.get(\"transactions\", 0) + (1 if accepted else 0)\n    s[\"rejected\"] = s.get(\"rejected\", 0) + (0 if accepted else 1)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "atm_cash"
+      ],
+      "schema": {
+        "atm_cash": {
+          "type": "int",
+          "range": [
+            0,
+            10000
+          ]
+        }
+      },
+      "code": "def perceive(data):\n    return {'atm_cash': int(data['cash_count'])}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "balance",
+        "atm_cash",
+        "capacity",
+        "transactions",
+        "rejected"
+      ],
+      "report": "ATM status -- account balance ${balance}; cassette ${atm_cash}/${capacity}; {transactions} accepted, {rejected} rejected."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "stay_stocked",
+      "goal": "maximize atm_cash"
+    },
+    {
+      "name": "serve_customers",
+      "goal": "maximize transactions"
+    },
+    {
+      "name": "avoid_failures",
+      "goal": "minimize rejected"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "withdraw",
+    "series": {
+      "balance": [
+        500.0,
+        400.0,
+        300.0,
+        200.0,
+        100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "atm_cash": [
+        2000.0,
+        1900.0,
+        1800.0,
+        1700.0,
+        1600.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0,
+        1500.0
+      ],
+      "transactions": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "rejected": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "last_amount": [
+        0.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "atm_cash 2000",
+            "balance 500",
+            "last_amount 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "atm_cash 1900",
+            "balance 400",
+            "last_amount 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "atm_cash 2100",
+            "balance 600",
+            "last_amount 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "atm_cash 2100",
+            "balance 500",
+            "last_amount 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "atm_cash 1800",
+            "balance 300",
+            "last_amount 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "atm_cash 2000",
+            "balance 500",
+            "last_amount 100"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "withdraw"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "deposit"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "replenish"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "withdraw"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "deposit"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

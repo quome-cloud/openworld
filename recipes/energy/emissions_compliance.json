@@ -1,0 +1,311 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "emissions_compliance",
+  "description": "A plant runs against a regulatory emissions cap. 'run' raises the production rate (more output, more emissions), 'throttle' lowers it, and 'scrub' engages the scrubber to cut emissions at a cost to output. Stay under the cap while producing as much as possible.",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "compliance",
+      "emissions",
+      "energy",
+      "leaf"
+    ],
+    "lineage": "build/emissions_compliance.py",
+    "metrics": {},
+    "description": "A plant runs against a regulatory emissions cap. 'run' raises the production rate (more output, more emissions), 'throttle' lowers it, and 'scrub' engages the scrubber to cut emissions at a cost to output. Stay under the cap while producing as much as possible."
+  },
+  "state_schema": {
+    "cap": "int",
+    "rate": "int",
+    "scrubber": "bool",
+    "emissions": "int",
+    "output": "int",
+    "compliant": "bool",
+    "headroom": "int",
+    "cumulative_emissions": "int",
+    "cumulative_output": "int",
+    "violations": "int"
+  },
+  "initial_state": {
+    "cap": 50,
+    "rate": 5,
+    "scrubber": false,
+    "emissions": 50,
+    "output": 50,
+    "compliant": true,
+    "headroom": 0,
+    "cumulative_emissions": 0,
+    "cumulative_output": 0,
+    "violations": 0
+  },
+  "actions": [
+    "run",
+    "scrub",
+    "throttle"
+  ],
+  "rules": [
+    "'run' raises the production rate by 2 (capped at 10); output and raw emissions rise with the rate.",
+    "'throttle' lowers the production rate by 2 (floored at 0); output and emissions fall with the rate.",
+    "'scrub' engages the scrubber, cutting emissions to 40% of raw but reducing output to 80% (the scrubber's parasitic load).",
+    "Raw emissions are rate*10 and output is rate*10 before the scrubber.",
+    "The plant is compliant for a step when emissions <= cap; each step over the cap increments 'violations'."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n\n    EMIT_PER_UNIT = 10      # raw emissions per unit of production rate\n    OUTPUT_PER_UNIT = 10    # output produced per unit of production rate\n    RATE_MAX = 10           # ceiling on the production rate\n    RATE_STEP = 2           # how much run/throttle move the rate per step\n    SCRUB_REMAIN = 0.4      # scrubber lets 40% of raw emissions through\n    SCRUB_PARASITIC = 0.8   # scrubber's parasitic load: output drops to 80%\n\n    rate = s[\"rate\"]\n    scrubber = s[\"scrubber\"]\n\n    if name == \"run\":\n        rate = min(RATE_MAX, rate + RATE_STEP)      # spin the plant up\n    elif name == \"throttle\":\n        rate = max(0, rate - RATE_STEP)             # spin the plant down\n    elif name == \"scrub\":\n        scrubber = True                             # engage the scrubber\n    # any other action is a no-op: the plant simply holds its operating point\n\n    raw = rate * EMIT_PER_UNIT\n    emissions = int(round(raw * SCRUB_REMAIN)) if scrubber else raw\n    output = (int(round(rate * OUTPUT_PER_UNIT * SCRUB_PARASITIC))\n              if scrubber else rate * OUTPUT_PER_UNIT)\n    compliant = emissions <= s[\"cap\"]\n\n    s[\"rate\"] = rate\n    s[\"scrubber\"] = scrubber\n    s[\"emissions\"] = emissions\n    s[\"output\"] = output\n    s[\"compliant\"] = compliant\n    s[\"headroom\"] = s[\"cap\"] - emissions                 # signed slack under cap\n    s[\"cumulative_emissions\"] = s[\"cumulative_emissions\"] + emissions\n    s[\"cumulative_output\"] = s[\"cumulative_output\"] + output\n    s[\"violations\"] = s[\"violations\"] + (0 if compliant else 1)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "cap",
+        "rate",
+        "scrubber"
+      ],
+      "schema": {
+        "cap": {
+          "type": "int",
+          "range": [
+            0,
+            999
+          ]
+        },
+        "rate": {
+          "type": "int",
+          "range": [
+            0,
+            10
+          ]
+        },
+        "scrubber": "bool"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower()\n        v = v.strip().lower()\n        if k in ('cap', 'rate'):\n            out[k] = int(v) if v.lstrip('-').isdigit() else 0\n        elif k == 'scrubber':\n            out[k] = v in ('on', 'true', 'yes', '1', 'engaged')\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "emissions",
+        "cap",
+        "compliant",
+        "output",
+        "violations"
+      ],
+      "report": "emissions {emissions}/{cap} (compliant={compliant}); output {output}; {violations} violation(s) so far"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "stay under the cap",
+      "goal": "min violations"
+    },
+    {
+      "name": "keep producing",
+      "goal": "max cumulative_output"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "run",
+    "series": {
+      "rate": [
+        5.0,
+        7.0,
+        9.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "emissions": [
+        50.0,
+        70.0,
+        90.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "output": [
+        50.0,
+        70.0,
+        90.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "headroom": [
+        0.0,
+        -20.0,
+        -40.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0,
+        -50.0
+      ],
+      "cumulative_emissions": [
+        0.0,
+        70.0,
+        160.0,
+        260.0,
+        360.0,
+        460.0,
+        560.0,
+        660.0,
+        760.0,
+        860.0,
+        960.0,
+        1060.0,
+        1160.0
+      ],
+      "cumulative_output": [
+        0.0,
+        70.0,
+        160.0,
+        260.0,
+        360.0,
+        460.0,
+        560.0,
+        660.0,
+        760.0,
+        860.0,
+        960.0,
+        1060.0,
+        1160.0
+      ],
+      "violations": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cumulative_emissions 0",
+            "cumulative_output 0",
+            "emissions 50"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cumulative_emissions 70",
+            "cumulative_output 70",
+            "emissions 70"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cumulative_emissions 20",
+            "cumulative_output 40",
+            "emissions 20"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cumulative_emissions 30",
+            "cumulative_output 30",
+            "emissions 30"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cumulative_emissions 160",
+            "cumulative_output 160",
+            "emissions 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cumulative_emissions 98",
+            "cumulative_output 126",
+            "emissions 28"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "run"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "scrub"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "throttle"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "run"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "scrub"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

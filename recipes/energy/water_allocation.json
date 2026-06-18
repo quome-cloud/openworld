@@ -1,0 +1,294 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "water_allocation",
+  "description": "a reservoir water-allocation world across users; actions release, ration, refill",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "resource-allocation",
+      "reservoir",
+      "leaf"
+    ],
+    "lineage": "build/water_allocation.py",
+    "metrics": {},
+    "description": "a reservoir water-allocation world across users; actions release, ration, refill"
+  },
+  "state_schema": {
+    "reservoir": "float",
+    "capacity": "float",
+    "inflow": "float",
+    "ration_factor": "float",
+    "shortfall": "float",
+    "cycle": "int",
+    "alloc_farms": "float",
+    "alloc_city": "float",
+    "alloc_industry": "float",
+    "recv_farms": "float",
+    "recv_city": "float",
+    "recv_industry": "float"
+  },
+  "initial_state": {
+    "reservoir": 1000.0,
+    "capacity": 1200.0,
+    "inflow": 150.0,
+    "ration_factor": 1.0,
+    "shortfall": 0.0,
+    "cycle": 0,
+    "alloc_farms": 120.0,
+    "alloc_city": 90.0,
+    "alloc_industry": 60.0,
+    "recv_farms": 0.0,
+    "recv_city": 0.0,
+    "recv_industry": 0.0
+  },
+  "actions": [
+    "release",
+    "ration",
+    "refill"
+  ],
+  "rules": [
+    "'release' delivers each user's allocation x ration_factor out of the reservoir; if total demand exceeds stored water, deliveries scale down proportionally and the unmet amount becomes 'shortfall'.",
+    "'ration' sets the global ration_factor, clamped to [0, 1], to conserve water.",
+    "'refill' adds inflow (params 'amount', default = expected inflow) to the reservoir, never exceeding capacity.",
+    "The reservoir is conserved: water leaves only via release and enters only via refill."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nUSERS = (\"farms\", \"city\", \"industry\")\n\ndef transition(state, action):\n    s = dict(state)\n    # actions arrive as {\"name\": ..., \"params\": {...}} (params absent in previews)\n    if isinstance(action, dict):\n        name = action.get(\"name\")\n        params = action.get(\"params\") or {}\n    else:\n        name, params = action, {}\n\n    if name == \"release\":\n        rf = float(s.get(\"ration_factor\", 1.0))\n        desired = {u: float(s[\"alloc_\" + u]) * rf for u in USERS}\n        total = sum(desired.values())\n        avail = float(s[\"reservoir\"])\n        if total <= avail or total <= 0:\n            scale, s[\"shortfall\"] = 1.0, 0.0\n        else:\n            scale = avail / total\n            s[\"shortfall\"] = round(total - avail, 3)\n        delivered = 0.0\n        for u in USERS:\n            d = desired[u] * scale\n            s[\"recv_\" + u] = round(float(s[\"recv_\" + u]) + d, 3)\n            delivered += d\n        s[\"reservoir\"] = round(avail - delivered, 3)\n        s[\"cycle\"] = int(s.get(\"cycle\", 0)) + 1\n\n    elif name == \"ration\":\n        factor = float(params.get(\"factor\", 0.5))\n        s[\"ration_factor\"] = max(0.0, min(1.0, factor))\n\n    elif name == \"refill\":\n        amount = float(params.get(\"amount\", s.get(\"inflow\", 0.0)))\n        amount = max(0.0, amount)\n        s[\"reservoir\"] = round(min(float(s[\"capacity\"]),\n                                   float(s[\"reservoir\"]) + amount), 3)\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "inflow"
+      ],
+      "schema": {
+        "inflow": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k, v = k.strip().lower(), v.strip()\n        if k in ('inflow', 'forecast'):\n            try:\n                out['inflow'] = max(0.0, float(v))\n            except ValueError:\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "cycle",
+        "reservoir",
+        "ration_factor",
+        "shortfall",
+        "recv_farms",
+        "recv_city",
+        "recv_industry"
+      ],
+      "report": "cycle {cycle}: reservoir {reservoir} (ration x{ration_factor}); delivered farms={recv_farms} city={recv_city} industry={recv_industry}; shortfall {shortfall}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "meet demand",
+      "goal": "max recv_farms + recv_city + recv_industry"
+    },
+    {
+      "name": "avoid depletion",
+      "goal": "keep reservoir > 0"
+    },
+    {
+      "name": "minimize shortfall",
+      "goal": "min shortfall"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "release",
+    "series": {
+      "reservoir": [
+        1000.0,
+        730.0,
+        460.0,
+        190.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "shortfall": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        80.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0
+      ],
+      "cycle": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "recv_farms": [
+        0.0,
+        120.0,
+        240.0,
+        360.0,
+        444.444,
+        444.444,
+        444.444,
+        444.444,
+        444.444,
+        444.444,
+        444.444,
+        444.444,
+        444.444
+      ],
+      "recv_city": [
+        0.0,
+        90.0,
+        180.0,
+        270.0,
+        333.333,
+        333.333,
+        333.333,
+        333.333,
+        333.333,
+        333.333,
+        333.333,
+        333.333,
+        333.333
+      ],
+      "recv_industry": [
+        0.0,
+        60.0,
+        120.0,
+        180.0,
+        222.222,
+        222.222,
+        222.222,
+        222.222,
+        222.222,
+        222.222,
+        222.222,
+        222.222,
+        222.222
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cycle 0",
+            "ration_factor 1",
+            "recv_city 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cycle 1",
+            "ration_factor 1",
+            "recv_city 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cycle 0",
+            "ration_factor 0.5",
+            "recv_city 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cycle 0",
+            "ration_factor 1",
+            "recv_city 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cycle 2",
+            "ration_factor 1",
+            "recv_city 180"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cycle 1",
+            "ration_factor 0.5",
+            "recv_city 90"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "release"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "ration"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "refill"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "release"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "ration"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ddos_mitigation",
+  "description": "a DDoS mitigation world with traffic scrubbing; actions detect, scrub, blackhole",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a DDoS mitigation world with traffic scrubbing; actions detect, scrub, blackhole"
+  },
+  "state_schema": {
+    "attack_pps": "int",
+    "legit_pps": "int",
+    "capacity_pps": "int",
+    "scrub_efficiency": "float",
+    "detected": "bool",
+    "scrubbing": "bool",
+    "blackholed": "bool",
+    "to_server_pps": "int",
+    "served_pps": "int",
+    "dropped_pps": "int",
+    "status": "str"
+  },
+  "initial_state": {
+    "attack_pps": 800000,
+    "legit_pps": 20000,
+    "capacity_pps": 100000,
+    "scrub_efficiency": 0.99,
+    "detected": false,
+    "scrubbing": false,
+    "blackholed": false,
+    "to_server_pps": 820000,
+    "served_pps": 0,
+    "dropped_pps": 0,
+    "status": "overloaded"
+  },
+  "actions": [
+    "detect",
+    "scrub",
+    "blackhole",
+    "restore"
+  ],
+  "rules": [
+    "Each step recomputes to_server_pps, served_pps, dropped_pps, and status from the mitigation posture (scrubbing/blackholed) and traffic levels.",
+    "'detect' sets detected=True when attack_pps + legit_pps exceeds capacity_pps; it observes but does not change traffic routing.",
+    "'scrub' enables traffic scrubbing: scrub_efficiency of attack_pps is dropped and the rest plus legit_pps is forwarded; scrubbing and blackhole are mutually exclusive.",
+    "'blackhole' null-routes the target: all traffic (attack and legitimate) is dropped and served_pps falls to 0 (status 'blackholed').",
+    "'restore' clears all mitigation and returns to normal routing.",
+    "When forwarded traffic is within capacity_pps, legitimate traffic is fully served (status 'mitigated' under scrubbing, 'nominal' with no attack); otherwise the edge is 'overloaded' and served_pps is 0."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef _recompute(s):\n    attack = s[\"attack_pps\"]\n    legit = s[\"legit_pps\"]\n    cap = s[\"capacity_pps\"]\n    eff = s[\"scrub_efficiency\"]\n    if s[\"blackholed\"]:\n        # Null-route: everything is dropped at the edge, service goes dark.\n        s[\"to_server_pps\"] = 0\n        s[\"served_pps\"] = 0\n        s[\"dropped_pps\"] = attack + legit\n        s[\"status\"] = \"blackholed\"\n    elif s[\"scrubbing\"]:\n        # Scrubbing center filters the flood; a small fraction leaks through.\n        leaked = int(round(attack * (1.0 - eff)))\n        to_server = legit + leaked\n        s[\"to_server_pps\"] = to_server\n        s[\"dropped_pps\"] = attack - leaked\n        if to_server <= cap:\n            s[\"served_pps\"] = legit\n            s[\"status\"] = \"mitigated\"\n        else:\n            # Even scrubbed residue overwhelms the edge.\n            s[\"served_pps\"] = 0\n            s[\"status\"] = \"overloaded\"\n    else:\n        # No mitigation: raw traffic hits the edge.\n        incoming = attack + legit\n        s[\"to_server_pps\"] = incoming\n        s[\"dropped_pps\"] = 0\n        if incoming <= cap:\n            s[\"served_pps\"] = legit\n            s[\"status\"] = \"nominal\"\n        else:\n            # Congestion collapse: the flood starves legitimate traffic.\n            s[\"served_pps\"] = 0\n            s[\"status\"] = \"overloaded\"\n    return s\n\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n    if name == \"detect\":\n        # Detection trips when total volume exceeds what the edge can absorb.\n        s[\"detected\"] = (s[\"attack_pps\"] + s[\"legit_pps\"]) > s[\"capacity_pps\"]\n    elif name == \"scrub\":\n        s[\"scrubbing\"] = True\n        s[\"blackholed\"] = False\n    elif name == \"blackhole\":\n        s[\"blackholed\"] = True\n        s[\"scrubbing\"] = False\n    elif name == \"restore\":\n        s[\"scrubbing\"] = False\n        s[\"blackholed\"] = False\n    return _recompute(s)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "attack_pps",
+        "legit_pps"
+      ],
+      "schema": {
+        "attack_pps": {
+          "type": "int",
+          "range": [
+            0,
+            100000000
+          ]
+        },
+        "legit_pps": {
+          "type": "int",
+          "range": [
+            0,
+            100000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    # data is a telemetry sample, e.g. {\"attack_pps\": 750000, \"legit_pps\": 18000}.\n    out = {}\n    if isinstance(data, dict):\n        if \"attack_pps\" in data:\n            out[\"attack_pps\"] = int(data[\"attack_pps\"])\n        if \"legit_pps\" in data:\n            out[\"legit_pps\"] = int(data[\"legit_pps\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "detected",
+        "to_server_pps",
+        "served_pps",
+        "dropped_pps"
+      ],
+      "report": "DDoS mitigation status: {status} (attack detected: {detected}). Traffic to server: {to_server_pps} pps; legitimate served: {served_pps} pps; dropped: {dropped_pps} pps."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "serve_legitimate_traffic",
+      "goal": "maximize served_pps"
+    },
+    {
+      "name": "drop_attack_traffic",
+      "goal": "maximize dropped_pps"
+    },
+    {
+      "name": "avoid_full_outage",
+      "goal": "minimize time in status 'blackholed'"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "blackhole",
+    "series": {
+      "to_server_pps": [
+        820000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dropped_pps": [
+        0.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0,
+        820000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "dropped_pps 0",
+            "served_pps 0",
+            "to_server_pps 820000"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "dropped_pps 0",
+            "served_pps 0",
+            "to_server_pps 820000"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "dropped_pps 792000",
+            "served_pps 20000",
+            "to_server_pps 28000"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "dropped_pps 820000",
+            "served_pps 0",
+            "to_server_pps 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "dropped_pps 792000",
+            "served_pps 20000",
+            "to_server_pps 28000"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "dropped_pps 820000",
+            "served_pps 0",
+            "to_server_pps 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "detect"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "scrub"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "blackhole"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "restore"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "scrub"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "blackhole"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "detect, restore"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

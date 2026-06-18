@@ -1,0 +1,308 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "autoscale",
+  "description": "a compute autoscaling world reacting to load; actions scale_up, scale_down, hold",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a compute autoscaling world reacting to load; actions scale_up, scale_down, hold"
+  },
+  "state_schema": {
+    "servers": "int",
+    "load": "int",
+    "capacity_per_server": "int",
+    "total_capacity": "int",
+    "utilization": "float",
+    "dropped": "int",
+    "cost": "float",
+    "cost_per_server": "float",
+    "min_servers": "int",
+    "max_servers": "int",
+    "load_base": "float",
+    "load_amp": "float",
+    "t": "int"
+  },
+  "initial_state": {
+    "servers": 3,
+    "load": 600,
+    "capacity_per_server": 100,
+    "total_capacity": 300,
+    "utilization": 2.0,
+    "dropped": 300,
+    "cost": 0.0,
+    "cost_per_server": 1.0,
+    "min_servers": 1,
+    "max_servers": 20,
+    "load_base": 600.0,
+    "load_amp": 350.0,
+    "t": 0
+  },
+  "actions": [
+    "scale_up",
+    "scale_down",
+    "hold"
+  ],
+  "rules": [
+    "'scale_up' adds one instance, never exceeding max_servers.",
+    "'scale_down' removes one instance, never dropping below min_servers.",
+    "'hold' leaves the fleet size unchanged.",
+    "Each step, demand (load) advances along a deterministic curve unless a perceived reading overrides it before the step.",
+    "total_capacity = servers * capacity_per_server; utilization = load / total_capacity.",
+    "Requests beyond total_capacity are dropped (dropped = max(0, load - total_capacity)).",
+    "cost accrues by servers * cost_per_server every step."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"hold\") if isinstance(action, dict) else str(action)\n\n    lo = int(s.get(\"min_servers\", 1))\n    hi = int(s.get(\"max_servers\", 20))\n    servers = int(s.get(\"servers\", 1))\n\n    # 1) apply the autoscaling decision, clamped to the group bounds\n    if name == \"scale_up\":\n        servers = min(hi, servers + 1)\n    elif name == \"scale_down\":\n        servers = max(lo, servers - 1)\n    # \"hold\" (or anything unknown) leaves the fleet unchanged\n    s[\"servers\"] = servers\n\n    # 2) advance the exogenous demand on a deterministic curve (a daily-style\n    #    swell). Live perception can override \"load\" before the next step.\n    t = int(s.get(\"t\", 0))\n    base = float(s.get(\"load_base\", 600.0))\n    amp = float(s.get(\"load_amp\", 350.0))\n    load = int(round(base + amp * math.sin(t / 2.5)))\n    load = max(0, load)\n    s[\"load\"] = load\n\n    # 3) recompute health against the (possibly resized) fleet\n    cap_each = int(s.get(\"capacity_per_server\", 100))\n    total_capacity = servers * cap_each\n    s[\"total_capacity\"] = total_capacity\n    if total_capacity > 0:\n        s[\"utilization\"] = round(load / total_capacity, 3)\n    else:\n        s[\"utilization\"] = 0.0\n    s[\"dropped\"] = max(0, load - total_capacity)\n\n    # 4) accrue cost for running the fleet this step\n    cost_each = float(s.get(\"cost_per_server\", 1.0))\n    s[\"cost\"] = round(float(s.get(\"cost\", 0.0)) + servers * cost_each, 3)\n\n    s[\"t\"] = t + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "load"
+      ],
+      "schema": {
+        "load": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data).strip().lower().replace(',', ' ')\n    value = None\n    for token in text.split():\n        if token.startswith(\"load=\") and token.split(\"=\", 1)[1].isdigit():\n            value = token.split(\"=\", 1)[1]\n        elif token.isdigit():\n            value = token\n    if value is None:\n        return {}\n    return {\"load\": int(value)}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "servers",
+        "load",
+        "utilization",
+        "dropped",
+        "cost"
+      ],
+      "report": "Fleet: {servers} instances serving load={load} (utilization {utilization}); dropped={dropped}; cost={cost}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "avoid_overload",
+      "goal": "minimize dropped"
+    },
+    {
+      "name": "control_cost",
+      "goal": "minimize cost"
+    },
+    {
+      "name": "healthy_utilization",
+      "goal": "keep utilization near 0.7"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "scale_up",
+    "series": {
+      "servers": [
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0
+      ],
+      "load": [
+        600.0,
+        600.0,
+        736.0,
+        851.0,
+        926.0,
+        950.0,
+        918.0,
+        836.0,
+        717.0,
+        580.0,
+        445.0,
+        335.0,
+        267.0
+      ],
+      "total_capacity": [
+        300.0,
+        400.0,
+        500.0,
+        600.0,
+        700.0,
+        800.0,
+        900.0,
+        1000.0,
+        1100.0,
+        1200.0,
+        1300.0,
+        1400.0,
+        1500.0
+      ],
+      "utilization": [
+        2.0,
+        1.5,
+        1.472,
+        1.418,
+        1.323,
+        1.188,
+        1.02,
+        0.836,
+        0.652,
+        0.483,
+        0.342,
+        0.239,
+        0.178
+      ],
+      "dropped": [
+        300.0,
+        200.0,
+        236.0,
+        251.0,
+        226.0,
+        150.0,
+        18.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "cost": [
+        0.0,
+        4.0,
+        9.0,
+        15.0,
+        22.0,
+        30.0,
+        39.0,
+        49.0,
+        60.0,
+        72.0,
+        85.0,
+        99.0,
+        114.0
+      ],
+      "t": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cost 0",
+            "dropped 300",
+            "load 600"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cost 4",
+            "dropped 200",
+            "load 600"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cost 2",
+            "dropped 400",
+            "load 600"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cost 3",
+            "dropped 300",
+            "load 600"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cost 9",
+            "dropped 236",
+            "load 736"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cost 7",
+            "dropped 436",
+            "load 736"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "scale_up"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "scale_down"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "hold"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "scale_up"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "scale_down"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

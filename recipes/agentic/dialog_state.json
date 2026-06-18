@@ -1,0 +1,202 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "dialog_state",
+  "description": "a dialog agent managing conversation slots world; actions ask, fill_slot, confirm, complete",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a dialog agent managing conversation slots world; actions ask, fill_slot, confirm, complete"
+  },
+  "state_schema": {
+    "slots": "dict",
+    "pending": "null",
+    "confirmed": "bool",
+    "status": "str",
+    "filled_count": "int",
+    "turns": "int",
+    "last_action": "null",
+    "user_utterance": "null",
+    "provided_slot": "null",
+    "provided_value": "null"
+  },
+  "initial_state": {
+    "slots": {
+      "destination": null,
+      "date": null,
+      "guests": null
+    },
+    "pending": null,
+    "confirmed": false,
+    "status": "collecting",
+    "filled_count": 0,
+    "turns": 0,
+    "last_action": null,
+    "user_utterance": null,
+    "provided_slot": null,
+    "provided_value": null
+  },
+  "actions": [
+    "ask",
+    "fill_slot",
+    "confirm",
+    "complete"
+  ],
+  "rules": [
+    "There are three slots to collect: destination, date, guests.",
+    "'ask' marks a slot as pending: the named slot if given and still empty, otherwise the first empty slot.",
+    "'fill_slot' records a value into the named slot (or the pending slot) and clears it from pending; any value can only be set when one is provided.",
+    "Re-filling any slot invalidates a prior confirmation and returns the dialog to the 'collecting' phase.",
+    "'confirm' is only accepted when every slot is filled; it sets confirmed and moves to the 'confirming' phase.",
+    "'complete' is only accepted on a fully filled, confirmed form; it moves the dialog to the terminal 'done' phase.",
+    "Once 'done', the dialog is terminal and slots no longer change."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    slots = dict(s.get(\"slots\", {}))\n    name = action.get(\"name\")\n    params = action.get(\"params\", {}) or {}\n\n    s[\"turns\"] = s.get(\"turns\", 0) + 1\n    s[\"last_action\"] = name\n\n    def all_filled():\n        return bool(slots) and all(v is not None for v in slots.values())\n\n    # `done` is terminal: only the turn counter advances.\n    if s.get(\"status\") == \"done\":\n        s[\"slots\"] = slots\n        s[\"filled_count\"] = sum(1 for v in slots.values() if v is not None)\n        return s\n\n    if name == \"ask\":\n        # Ask about the named slot, or fall back to the first still-empty slot.\n        slot = params.get(\"slot\")\n        if slot is None:\n            for k in slots:\n                if slots[k] is None:\n                    slot = k\n                    break\n        if slot is not None and slot in slots and slots[slot] is None:\n            s[\"pending\"] = slot\n\n    elif name == \"fill_slot\":\n        # The value lands in the named slot, or the one we're waiting on.\n        slot = params.get(\"slot\")\n        if slot is None:\n            slot = s.get(\"pending\")\n        value = params.get(\"value\")\n        if slot is not None and slot in slots and value is not None:\n            slots[slot] = value\n            if s.get(\"pending\") == slot:\n                s[\"pending\"] = None\n            # The form changed, so any earlier confirmation no longer holds.\n            s[\"confirmed\"] = False\n            s[\"status\"] = \"collecting\"\n\n    elif name == \"confirm\":\n        # Confirmation is only meaningful once the whole form is filled.\n        if all_filled():\n            s[\"confirmed\"] = True\n            s[\"status\"] = \"confirming\"\n            s[\"pending\"] = None\n\n    elif name == \"complete\":\n        # Finalize only a fully filled, confirmed form.\n        if all_filled() and s.get(\"confirmed\"):\n            s[\"status\"] = \"done\"\n            s[\"pending\"] = None\n\n    s[\"slots\"] = slots\n    s[\"filled_count\"] = sum(1 for v in slots.values() if v is not None)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "user_utterance",
+        "provided_slot",
+        "provided_value"
+      ],
+      "schema": {
+        "user_utterance": "str",
+        "provided_slot": "str",
+        "provided_value": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data.get(\"text\", \"\"))\n    out = {\"user_utterance\": text}\n    if \":\" in text:\n        slot, _, value = text.partition(\":\")\n        slot = slot.strip().lower()\n        value = value.strip()\n        if slot:\n            out[\"provided_slot\"] = slot\n        if value:\n            out[\"provided_value\"] = value\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "filled_count",
+        "pending",
+        "confirmed"
+      ],
+      "report": "Dialog [{status}]: {filled_count}/3 slots filled, asking about {pending}, confirmed={confirmed}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "complete_dialog",
+      "goal": "reach status 'done'"
+    },
+    {
+      "name": "fill_all_slots",
+      "goal": "maximize filled_count"
+    },
+    {
+      "name": "efficient",
+      "goal": "minimize turns"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "ask",
+    "series": {
+      "turns": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "turns 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "turns 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "turns 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "turns 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "turns 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "turns 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "ask"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "fill_slot"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "confirm"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "complete"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "ask"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

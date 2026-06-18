@@ -1,0 +1,275 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "carbon_market",
+  "description": "A carbon cap-and-trade market: a regulated firm emits CO2, then buys, sells, and retires allowances on a price-responsive market to stay within its emissions cap.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "A carbon cap-and-trade market: a regulated firm emits CO2, then buys, sells, and retires allowances on a price-responsive market to stay within its emissions cap."
+  },
+  "state_schema": {
+    "cap": "int",
+    "credits": "int",
+    "emissions": "int",
+    "retired": "int",
+    "cash": "float",
+    "price": "float",
+    "market_supply": "int",
+    "uncovered": "int",
+    "over_cap": "int",
+    "compliant": "bool"
+  },
+  "initial_state": {
+    "cap": 10,
+    "credits": 5,
+    "emissions": 0,
+    "retired": 0,
+    "cash": 100.0,
+    "price": 10.0,
+    "market_supply": 20,
+    "uncovered": 0,
+    "over_cap": 0,
+    "compliant": true
+  },
+  "actions": [
+    "emit",
+    "buy_credit",
+    "sell_credit",
+    "retire"
+  ],
+  "rules": [
+    "'emit' releases one tonne of CO2 (times the optional 'qty'): emissions rises and the carbon price drifts up as compliance demand tightens.",
+    "'buy_credit' purchases one allowance per unit from the market at the current price while market_supply exists and cash covers it: credits +1, cash -price, market_supply -1, and the price rises with demand.",
+    "'sell_credit' sells one held allowance per unit back to the market: credits -1, cash +price, market_supply +1, and the price falls (never below 1.0).",
+    "'retire' permanently surrenders one held allowance per unit for compliance: credits -1, retired +1; retired allowances never re-enter the market.",
+    "Trades that cannot be afforded or covered are skipped; no balance ever goes negative.",
+    "A firm is compliant only when every emitted tonne is covered by a retired allowance (uncovered == 0) and cumulative emissions stay within the cap (over_cap == 0)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    qty = int(params.get(\"qty\", 1) or 1)\n    if qty < 1:\n        qty = 1\n    PRICE_FLOOR = 1.0\n\n    if name == \"emit\":\n        # Emitting a tonne adds compliance demand; scarcity drifts the price up.\n        s[\"emissions\"] = int(s[\"emissions\"]) + qty\n        s[\"price\"] = round(float(s[\"price\"]) + 0.5 * qty, 4)\n\n    elif name == \"buy_credit\":\n        # Buy one allowance at a time while the market has supply and cash covers\n        # it; each purchase nudges the price up with demand.\n        for _ in range(qty):\n            price = float(s[\"price\"])\n            if int(s[\"market_supply\"]) > 0 and float(s[\"cash\"]) >= price:\n                s[\"credits\"] = int(s[\"credits\"]) + 1\n                s[\"cash\"] = round(float(s[\"cash\"]) - price, 4)\n                s[\"market_supply\"] = int(s[\"market_supply\"]) - 1\n                s[\"price\"] = round(price + 1.0, 4)\n            else:\n                break\n\n    elif name == \"sell_credit\":\n        # Sell held allowances back; added supply softens the price (to a floor).\n        for _ in range(qty):\n            if int(s[\"credits\"]) > 0:\n                price = float(s[\"price\"])\n                s[\"credits\"] = int(s[\"credits\"]) - 1\n                s[\"cash\"] = round(float(s[\"cash\"]) + price, 4)\n                s[\"market_supply\"] = int(s[\"market_supply\"]) + 1\n                s[\"price\"] = round(max(PRICE_FLOOR, price - 1.0), 4)\n            else:\n                break\n\n    elif name == \"retire\":\n        # Permanently surrender held allowances for compliance; retired credits\n        # leave circulation forever, tightening effective supply.\n        for _ in range(qty):\n            if int(s[\"credits\"]) > 0:\n                s[\"credits\"] = int(s[\"credits\"]) - 1\n                s[\"retired\"] = int(s[\"retired\"]) + 1\n                s[\"price\"] = round(float(s[\"price\"]) + 0.5, 4)\n            else:\n                break\n\n    # Recompute the compliance invariants after every step. A firm is compliant\n    # only when every emitted tonne is covered by a retired allowance AND\n    # cumulative emissions stay within the regulatory cap.\n    s[\"uncovered\"] = max(0, int(s[\"emissions\"]) - int(s[\"retired\"]))\n    s[\"over_cap\"] = max(0, int(s[\"emissions\"]) - int(s[\"cap\"]))\n    s[\"compliant\"] = bool(s[\"uncovered\"] == 0 and s[\"over_cap\"] == 0)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "price",
+        "market_supply",
+        "cap"
+      ],
+      "schema": {
+        "price": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000.0
+          ]
+        },
+        "market_supply": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "cap": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower()\n            v = v.strip()\n            if k in ('price', 'market_supply', 'cap'):\n                try:\n                    out[k] = float(v) if k == 'price' else int(float(v))\n                except ValueError:\n                    pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "emissions",
+        "retired",
+        "credits",
+        "cash",
+        "price",
+        "uncovered",
+        "compliant"
+      ],
+      "report": "emitted {emissions}t, retired {retired}, holding {credits} allowances; cash {cash} at price {price}; {uncovered} tonnes uncovered (compliant={compliant})"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "stay compliant",
+      "goal": "min uncovered"
+    },
+    {
+      "name": "respect the cap",
+      "goal": "min over_cap"
+    },
+    {
+      "name": "trade profitably",
+      "goal": "max cash"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "buy_credit",
+    "series": {
+      "credits": [
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0,
+        12.0
+      ],
+      "cash": [
+        100.0,
+        90.0,
+        79.0,
+        67.0,
+        54.0,
+        40.0,
+        25.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0,
+        9.0
+      ],
+      "price": [
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        17.0,
+        17.0,
+        17.0,
+        17.0,
+        17.0
+      ],
+      "market_supply": [
+        20.0,
+        19.0,
+        18.0,
+        17.0,
+        16.0,
+        15.0,
+        14.0,
+        13.0,
+        13.0,
+        13.0,
+        13.0,
+        13.0,
+        13.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cash 100",
+            "credits 5",
+            "emissions 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cash 100",
+            "credits 5",
+            "emissions 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cash 90",
+            "credits 6",
+            "emissions 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cash 110",
+            "credits 4",
+            "emissions 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cash 100",
+            "credits 4",
+            "emissions 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cash 100",
+            "credits 5",
+            "emissions 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "emit"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "buy_credit"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "sell_credit"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "retire"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "emit"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

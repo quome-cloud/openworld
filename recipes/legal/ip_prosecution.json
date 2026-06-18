@@ -1,0 +1,217 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ip_prosecution",
+  "description": "a patent prosecution lifecycle world; actions file, office_action, respond, grant",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a patent prosecution lifecycle world; actions file, office_action, respond, grant"
+  },
+  "state_schema": {
+    "status": "str",
+    "filed": "bool",
+    "granted": "bool",
+    "pending_office_action": "bool",
+    "office_actions": "int",
+    "responses": "int",
+    "claims": "int"
+  },
+  "initial_state": {
+    "status": "unfiled",
+    "filed": false,
+    "granted": false,
+    "pending_office_action": false,
+    "office_actions": 0,
+    "responses": 0,
+    "claims": 20
+  },
+  "actions": [
+    "file",
+    "office_action",
+    "respond",
+    "grant"
+  ],
+  "rules": [
+    "'file' starts prosecution: only an unfiled application can be filed, moving it from 'unfiled' to 'pending'.",
+    "'office_action' is the examiner issuing a rejection; it is valid from 'pending' or 'responded', sets status to 'awaiting_response', and increments office_actions.",
+    "'respond' is valid only while an office action is outstanding ('awaiting_response'); it sets status to 'responded', increments responses, and narrows the claim set by three (floor of one claim).",
+    "'grant' allows the application from 'pending' or 'responded' (never while an OA is outstanding), setting status to 'granted'.",
+    "Prosecution may loop office_action -> respond any number of times before a grant. Illegal-for-status actions are no-ops."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n\n    status = s.get(\"status\", \"unfiled\")\n\n    if name == \"file\":\n        # Only an unfiled application can be filed.\n        if status == \"unfiled\":\n            s[\"status\"] = \"pending\"\n            s[\"filed\"] = True\n\n    elif name == \"office_action\":\n        # The examiner can act on a fresh filing or after a response.\n        if status in (\"pending\", \"responded\"):\n            s[\"status\"] = \"awaiting_response\"\n            s[\"pending_office_action\"] = True\n            s[\"office_actions\"] = int(s.get(\"office_actions\", 0)) + 1\n\n    elif name == \"respond\":\n        # The applicant may only respond while an OA is outstanding.\n        if status == \"awaiting_response\":\n            s[\"status\"] = \"responded\"\n            s[\"pending_office_action\"] = False\n            s[\"responses\"] = int(s.get(\"responses\", 0)) + 1\n            # Responding amends/narrows the claims (never below one claim).\n            s[\"claims\"] = max(1, int(s.get(\"claims\", 0)) - 3)\n\n    elif name == \"grant\":\n        # Allowance is possible from a clean pending app or after a response,\n        # but never while an office action is still outstanding.\n        if status in (\"pending\", \"responded\"):\n            s[\"status\"] = \"granted\"\n            s[\"granted\"] = True\n            s[\"pending_office_action\"] = False\n\n    # Unknown or illegal-for-status actions leave the world unchanged.\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_office_action",
+        "rejected_claims"
+      ],
+      "schema": {
+        "pending_office_action": "bool",
+        "rejected_claims": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        text = str(data.get(\"text\", \"\"))\n        rejected = data.get(\"rejected_claims\")\n    else:\n        text = str(data)\n        rejected = None\n    if rejected is None:\n        # Count claim references like \"claim 1\", \"claim 12\" in the OA body.\n        words = text.replace(\",\", \" \").replace(\".\", \" \").split()\n        rejected = 0\n        for i, w in enumerate(words[:-1]):\n            if w.lower() == \"claim\" and words[i + 1].isdigit():\n                rejected += 1\n    rejected = max(0, int(rejected))\n    return {\"pending_office_action\": True, \"rejected_claims\": rejected}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "filed",
+        "office_actions",
+        "responses",
+        "claims",
+        "granted"
+      ],
+      "report": "Patent application status: {status}. Filed: {filed}. Office actions issued: {office_actions}; responses filed: {responses}. Claims on file: {claims}. Granted: {granted}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "secure_grant",
+      "goal": "maximize"
+    },
+    {
+      "name": "minimize_office_actions",
+      "goal": "minimize"
+    },
+    {
+      "name": "preserve_claims",
+      "goal": "maximize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "file",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "claims 20",
+            "office_actions 0",
+            "responses 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "claims 20",
+            "office_actions 0",
+            "responses 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "claims 20",
+            "office_actions 1",
+            "responses 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "claims 20",
+            "office_actions 0",
+            "responses 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "claims 17",
+            "office_actions 1",
+            "responses 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "claims 17",
+            "office_actions 2",
+            "responses 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "file"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "office_action, respond, grant"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "office_action"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "grant"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "file, respond"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "respond"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "file, office_action, grant"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "file, office_action, respond"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "office_action"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "file, respond"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "actor_critic",
+  "description": "an actor-critic agent loop world with critique; actions act, critique, revise",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an actor-critic agent loop world with critique; actions act, critique, revise"
+  },
+  "state_schema": {
+    "phase": "str",
+    "draft_version": "int",
+    "quality": "int",
+    "critique_score": "int",
+    "pending_critique": "bool",
+    "iterations": "int",
+    "feedback": "str",
+    "last_action": "str"
+  },
+  "initial_state": {
+    "phase": "idle",
+    "draft_version": 0,
+    "quality": 0,
+    "critique_score": 0,
+    "pending_critique": false,
+    "iterations": 0,
+    "feedback": "",
+    "last_action": ""
+  },
+  "actions": [
+    "act",
+    "critique",
+    "revise"
+  ],
+  "rules": [
+    "act produces the first draft (quality 40) only when no draft exists yet; otherwise it is a no-op.",
+    "critique scores the current draft and sets a pending critique, but only when a draft exists and none is already pending.",
+    "revise improves the draft by closing half the gap to 100 and clears the pending critique; it is a no-op unless a critique is pending.",
+    "quality is monotonically non-decreasing and bounded in [0, 100]; the loop converges.",
+    "the canonical cycle is act, then repeated critique -> revise rounds."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n\n    if name == \"act\":\n        # The actor writes an initial draft, but only if none exists yet.\n        if s.get(\"draft_version\", 0) == 0:\n            s[\"draft_version\"] = 1\n            s[\"quality\"] = max(40, int(s.get(\"quality\", 0)))\n            s[\"pending_critique\"] = False\n            s[\"feedback\"] = \"\"\n            s[\"phase\"] = \"drafted\"\n        s[\"last_action\"] = \"act\"\n        return s\n\n    if name == \"critique\":\n        # The critic can only judge an existing draft, and only once per draft.\n        if s.get(\"draft_version\", 0) >= 1 and not s.get(\"pending_critique\", False):\n            quality = int(s.get(\"quality\", 0))\n            gap = 100 - quality\n            s[\"critique_score\"] = quality\n            s[\"pending_critique\"] = True\n            s[\"feedback\"] = \"raise quality by \" + str(gap) + \" to reach 100\"\n            s[\"phase\"] = \"critiqued\"\n        s[\"last_action\"] = \"critique\"\n        return s\n\n    if name == \"revise\":\n        # The actor revises only when a fresh critique is pending.\n        if s.get(\"pending_critique\", False):\n            quality = int(s.get(\"quality\", 0))\n            quality = quality + (100 - quality) // 2\n            s[\"quality\"] = quality\n            s[\"draft_version\"] = int(s.get(\"draft_version\", 0)) + 1\n            s[\"iterations\"] = int(s.get(\"iterations\", 0)) + 1\n            s[\"pending_critique\"] = False\n            s[\"feedback\"] = \"\"\n            s[\"phase\"] = \"revised\"\n        s[\"last_action\"] = \"revise\"\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "quality"
+      ],
+      "schema": {
+        "quality": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    quality = 0\n    for line in text.splitlines():\n        if \":\" in line:\n            key, value = line.split(\":\", 1)\n            if key.strip() == \"quality\":\n                try:\n                    quality = int(value.strip())\n                except ValueError:\n                    quality = 0\n    if quality < 0:\n        quality = 0\n    if quality > 100:\n        quality = 100\n    return {\"quality\": quality}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "draft_version",
+        "quality",
+        "critique_score",
+        "pending_critique",
+        "iterations",
+        "feedback"
+      ],
+      "report": "Actor-critic loop @ phase={phase}: draft v{draft_version}, quality {quality}/100 (last critic score {critique_score}), {iterations} revision cycle(s). pending_critique={pending_critique}. feedback: {feedback}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "draft_quality",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "revision_efficiency",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "act",
+    "series": {
+      "draft_version": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "quality": [
+        0.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "critique_score 0",
+            "draft_version 0",
+            "quality 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "critique_score 0",
+            "draft_version 1",
+            "quality 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "critique_score 0",
+            "draft_version 0",
+            "quality 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "critique_score 0",
+            "draft_version 0",
+            "quality 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "critique_score 40",
+            "draft_version 1",
+            "quality 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "critique_score 0",
+            "draft_version 1",
+            "quality 40"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "act"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "critique"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "revise"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "critique"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "revise"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "act"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

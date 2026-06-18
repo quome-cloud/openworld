@@ -1,0 +1,235 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "phishing_triage",
+  "description": "a phishing-report triage world; actions report, analyze, quarantine, educate",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "security",
+      "phishing",
+      "triage",
+      "leaf"
+    ],
+    "lineage": "build/phishing_triage.py",
+    "metrics": {},
+    "description": "a phishing-report triage world; actions report, analyze, quarantine, educate"
+  },
+  "state_schema": {
+    "pending": "int",
+    "confirmed": "int",
+    "quarantined": "int",
+    "educated": "int",
+    "risk": "int"
+  },
+  "initial_state": {
+    "pending": 0,
+    "confirmed": 0,
+    "quarantined": 0,
+    "educated": 0,
+    "risk": 0
+  },
+  "actions": [
+    "report",
+    "analyze",
+    "quarantine",
+    "educate"
+  ],
+  "rules": [
+    "'report' adds one email to the pending-analysis queue and raises risk by 5 (capped at 100).",
+    "'analyze' moves one email from pending to confirmed (no-op when pending is 0).",
+    "'quarantine' moves one email from confirmed to quarantined and lowers risk by 10, floored at 0 (no-op when confirmed is 0).",
+    "'educate' trains one user (educated += 1) and lowers risk by 3, floored at 0.",
+    "risk is clamped to the range [0, 100]; counts never go negative."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if name == \"report\":\n        # A user flags a suspicious email: it joins the analysis queue and raises\n        # exposure until someone handles it.\n        s[\"pending\"] = s[\"pending\"] + 1\n        s[\"risk\"] = min(100, s[\"risk\"] + 5)\n    elif name == \"analyze\":\n        # An analyst triages the oldest pending report and confirms it as phishing.\n        if s[\"pending\"] > 0:\n            s[\"pending\"] = s[\"pending\"] - 1\n            s[\"confirmed\"] = s[\"confirmed\"] + 1\n    elif name == \"quarantine\":\n        # Pull a confirmed phishing message from inboxes: the threat is removed\n        # and org risk drops materially.\n        if s[\"confirmed\"] > 0:\n            s[\"confirmed\"] = s[\"confirmed\"] - 1\n            s[\"quarantined\"] = s[\"quarantined\"] + 1\n            s[\"risk\"] = max(0, s[\"risk\"] - 10)\n    elif name == \"educate\":\n        # Train users so fewer take the bait next time: a smaller, steady risk cut.\n        s[\"educated\"] = s[\"educated\"] + 1\n        s[\"risk\"] = max(0, s[\"risk\"] - 3)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending",
+        "risk"
+      ],
+      "schema": {
+        "pending": {
+          "type": "int",
+          "range": [
+            0,
+            99
+          ]
+        },
+        "risk": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower(); v = v.strip()\n        if k in ('pending', 'risk'):\n            n = int(v) if v.lstrip('-').isdigit() else 0\n            if k == 'pending':\n                out['pending'] = max(0, min(99, n))\n            else:\n                out['risk'] = max(0, min(100, n))\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "pending",
+        "confirmed",
+        "quarantined",
+        "educated",
+        "risk"
+      ],
+      "report": "triage: {pending} pending, {confirmed} confirmed, {quarantined} quarantined, {educated} trained; risk {risk}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reduce exposure",
+      "goal": "min risk"
+    },
+    {
+      "name": "remove threats",
+      "goal": "max quarantined"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "report",
+    "series": {
+      "pending": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "risk": [
+        0.0,
+        5.0,
+        10.0,
+        15.0,
+        20.0,
+        25.0,
+        30.0,
+        35.0,
+        40.0,
+        45.0,
+        50.0,
+        55.0,
+        60.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "confirmed 0",
+            "educated 0",
+            "pending 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "confirmed 0",
+            "educated 0",
+            "pending 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "confirmed 0",
+            "educated 1",
+            "pending 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "confirmed 0",
+            "educated 0",
+            "pending 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "confirmed 1",
+            "educated 0",
+            "pending 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "confirmed 0",
+            "educated 1",
+            "pending 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "report"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "educate"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "analyze, quarantine"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "report"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "analyze"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "educate"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "quarantine"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

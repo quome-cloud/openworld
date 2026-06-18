@@ -1,0 +1,284 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "infection_control",
+  "description": "a hospital infection-spread world (SIR-like) with isolation capacity; actions isolate, treat, screen",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "epidemiology",
+      "SIR",
+      "healthcare",
+      "leaf"
+    ],
+    "lineage": "build/infection_control.py",
+    "metrics": {},
+    "description": "a hospital infection-spread world (SIR-like) with isolation capacity; actions isolate, treat, screen"
+  },
+  "state_schema": {
+    "susceptible": "int",
+    "infected": "int",
+    "isolated": "int",
+    "recovered": "int",
+    "detected": "int",
+    "isolation_capacity": "int",
+    "day": "int"
+  },
+  "initial_state": {
+    "susceptible": 80,
+    "infected": 20,
+    "isolated": 0,
+    "recovered": 0,
+    "detected": 0,
+    "isolation_capacity": 15,
+    "day": 0
+  },
+  "actions": [
+    "screen",
+    "isolate",
+    "treat"
+  ],
+  "rules": [
+    "Patients flow Susceptible -> Infected -> Recovered; Isolated holds infected patients pulled into isolation beds. Total population N = susceptible + infected + isolated + recovered is conserved.",
+    "Each action advances exactly one day: circulating infected spread to susceptibles (isolated patients do not spread) and a baseline fraction of all active cases recovers, regardless of the action chosen.",
+    "'screen' reveals more of the circulating infected as 'detected'; you can only isolate cases you have detected.",
+    "'isolate' moves detected, circulating infected into free isolation beds, bounded by isolation_capacity; isolated patients stop spreading.",
+    "'treat' clears an extra fraction of all active infections (circulating and isolated) straight to recovered.",
+    "Isolated never exceeds isolation_capacity and no compartment goes negative."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    S = s[\"susceptible\"]; I = s[\"infected\"]; Q = s[\"isolated\"]\n    R = s[\"recovered\"]; det = s[\"detected\"]; cap = s[\"isolation_capacity\"]\n    N = S + I + Q + R\n\n    beta = 0.35          # infections per circulating-infected contact, per day\n    gamma = 0.10         # baseline fraction of active cases recovering per day\n    screen_yield = 8     # circulating infected newly revealed by one screen\n    treat_boost = 0.25   # extra fraction of active cases cleared by treatment\n\n    # --- 1. immediate effect of the policy action -----------------------------\n    if name == \"screen\":\n        # testing can only reveal infected who are actually circulating\n        det = min(I, det + screen_yield)\n    elif name == \"isolate\":\n        # move detected, circulating infected into free isolation beds\n        free = max(0, cap - Q)\n        moved = min(free, det, I)\n        I -= moved; Q += moved; det -= moved\n    elif name == \"treat\":\n        # treatment clears a fraction of every active infection to recovered\n        rec_I = int(round(treat_boost * I))\n        rec_Q = int(round(treat_boost * Q))\n        I -= rec_I; Q -= rec_Q; R += rec_I + rec_Q\n        det = min(det, I)\n\n    # --- 2. one natural epidemic day ------------------------------------------\n    new_inf = min(S, int(round(beta * S * I / N))) if N > 0 else 0\n    rec_I = int(round(gamma * I))\n    rec_Q = int(round(gamma * Q))\n    S -= new_inf\n    I += new_inf - rec_I\n    Q -= rec_Q\n    R += rec_I + rec_Q\n    det = min(det, I)    # fresh infections are undetected; clamp to circulating\n\n    s[\"susceptible\"] = S; s[\"infected\"] = I; s[\"isolated\"] = Q\n    s[\"recovered\"] = R; s[\"detected\"] = det\n    s[\"day\"] = s[\"day\"] + 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "susceptible",
+        "infected",
+        "isolation_capacity"
+      ],
+      "schema": {
+        "susceptible": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "infected": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "isolation_capacity": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower().replace(' ', '_'); v = v.strip()\n        if k in ('susceptible', 'infected', 'isolation_capacity'):\n            n = int(v) if v.lstrip('-').isdigit() else 0\n            out[k] = max(0, n)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "susceptible",
+        "infected",
+        "isolated",
+        "recovered",
+        "detected",
+        "isolation_capacity"
+      ],
+      "report": "day {day}: S {susceptible} | I {infected} (detected {detected}) | isolated {isolated}/{isolation_capacity} | R {recovered}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "contain the outbreak",
+      "goal": "min infected"
+    },
+    {
+      "name": "get patients well",
+      "goal": "max recovered"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "screen",
+    "series": {
+      "susceptible": [
+        80.0,
+        74.0,
+        68.0,
+        61.0,
+        54.0,
+        47.0,
+        41.0,
+        35.0,
+        30.0,
+        25.0,
+        21.0,
+        18.0,
+        15.0
+      ],
+      "infected": [
+        20.0,
+        24.0,
+        28.0,
+        32.0,
+        36.0,
+        39.0,
+        41.0,
+        43.0,
+        44.0,
+        45.0,
+        45.0,
+        44.0,
+        43.0
+      ],
+      "recovered": [
+        0.0,
+        2.0,
+        4.0,
+        7.0,
+        10.0,
+        14.0,
+        18.0,
+        22.0,
+        26.0,
+        30.0,
+        34.0,
+        38.0,
+        42.0
+      ],
+      "detected": [
+        0.0,
+        8.0,
+        16.0,
+        24.0,
+        32.0,
+        36.0,
+        39.0,
+        41.0,
+        43.0,
+        44.0,
+        45.0,
+        44.0,
+        43.0
+      ],
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "detected 0",
+            "infected 20"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 1",
+            "detected 8",
+            "infected 24"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 1",
+            "detected 0",
+            "infected 24"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 1",
+            "detected 0",
+            "infected 17"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 2",
+            "detected 16",
+            "infected 28"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 2",
+            "detected 0",
+            "infected 18"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "screen"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "isolate"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "treat"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "screen"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "isolate"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

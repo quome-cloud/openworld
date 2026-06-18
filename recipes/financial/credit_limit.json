@@ -1,0 +1,247 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "credit_limit",
+  "description": "a credit-limit management world with utilization and risk; actions increase, decrease, freeze",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "finance",
+      "credit",
+      "risk",
+      "leaf"
+    ],
+    "lineage": "build/credit_limit.py",
+    "metrics": {},
+    "description": "a credit-limit management world with utilization and risk; actions increase, decrease, freeze"
+  },
+  "state_schema": {
+    "credit_limit": "int",
+    "balance": "int",
+    "utilization": "int",
+    "risk_score": "int",
+    "frozen": "bool",
+    "status": "str"
+  },
+  "initial_state": {
+    "credit_limit": 5000,
+    "balance": 2000,
+    "utilization": 40,
+    "risk_score": 16,
+    "frozen": false,
+    "status": "active"
+  },
+  "actions": [
+    "increase",
+    "decrease",
+    "freeze"
+  ],
+  "rules": [
+    "'increase' raises credit_limit by params.amount (default 1000), unless the account is frozen.",
+    "'decrease' lowers credit_limit by params.amount (default 1000), never below 0, unless the account is frozen.",
+    "'freeze' freezes the account; while frozen, 'increase' and 'decrease' are no-ops.",
+    "utilization = round(100 * balance / credit_limit) percent, or 100 when credit_limit is 0.",
+    "risk_score = round(min(100, utilization)^2 / 100), clamped to 0..100; risk rises convexly with utilization.",
+    "status is 'frozen' when the account is frozen, otherwise 'active'."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # amount to move the limit by (the lever's magnitude); default 1000\n    amount = params.get(\"amount\", 1000)\n    try:\n        amount = int(amount)\n    except (TypeError, ValueError):\n        amount = 1000\n    if amount < 0:\n        amount = 0\n\n    frozen = bool(s.get(\"frozen\", False))\n    limit = int(s.get(\"credit_limit\", 0))\n    balance = int(s.get(\"balance\", 0))\n\n    if name == \"increase\" and not frozen:\n        limit = limit + amount\n    elif name == \"decrease\" and not frozen:\n        limit = max(0, limit - amount)\n    elif name == \"freeze\":\n        frozen = True\n    # any other action (or a lever on a frozen account) leaves the limit as-is\n\n    # --- derived signals -----------------------------------------------------\n    # utilization: percent of the limit currently used. With no limit the\n    # account is treated as fully maxed out.\n    if limit > 0:\n        utilization = int(round(100.0 * balance / limit))\n    else:\n        utilization = 100\n    utilization = max(0, min(200, utilization))\n\n    # risk rises convexly with utilization: light use is cheap, a near-maxed\n    # line is disproportionately risky. Clamped to 0..100.\n    capped = min(100, utilization)\n    risk_score = int(round((capped * capped) / 100.0))\n    risk_score = max(0, min(100, risk_score))\n\n    s[\"credit_limit\"] = limit\n    s[\"balance\"] = balance\n    s[\"frozen\"] = frozen\n    s[\"utilization\"] = utilization\n    s[\"risk_score\"] = risk_score\n    s[\"status\"] = \"frozen\" if frozen else \"active\"\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "credit_limit",
+        "balance"
+      ],
+      "schema": {
+        "credit_limit": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "balance": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower().replace(' ', '_')\n        v = v.strip().replace(',', '').replace('$', '')\n        if k in ('credit_limit', 'balance') and v.lstrip('-').isdigit():\n            out[k] = int(v)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "credit_limit",
+        "balance",
+        "utilization",
+        "risk_score",
+        "status"
+      ],
+      "report": "limit {credit_limit}, balance {balance} -> utilization {utilization}%, risk {risk_score}/100 ({status})"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "contain risk exposure",
+      "goal": "min risk_score"
+    },
+    {
+      "name": "extend available credit",
+      "goal": "max credit_limit"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "decrease",
+    "series": {
+      "credit_limit": [
+        5000.0,
+        4000.0,
+        3000.0,
+        2000.0,
+        1000.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "utilization": [
+        40.0,
+        50.0,
+        67.0,
+        100.0,
+        200.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "risk_score": [
+        16.0,
+        25.0,
+        45.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "credit_limit 5000",
+            "risk_score 16",
+            "utilization 40"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "credit_limit 6000",
+            "risk_score 11",
+            "utilization 33"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "credit_limit 4000",
+            "risk_score 25",
+            "utilization 50"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "credit_limit 5000",
+            "risk_score 16",
+            "utilization 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "credit_limit 7000",
+            "risk_score 8",
+            "utilization 29"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "credit_limit 6000",
+            "risk_score 11",
+            "utilization 33"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "increase"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "decrease"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "freeze"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "increase"
+        },
+        {
+          "src": 1,
+          "dst": 0,
+          "action": "decrease"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "freeze"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

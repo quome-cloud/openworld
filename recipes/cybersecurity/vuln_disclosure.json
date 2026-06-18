@@ -1,0 +1,273 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "vuln_disclosure",
+  "description": "a coordinated vulnerability-disclosure timeline world; actions report, triage, fix, disclose",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a coordinated vulnerability-disclosure timeline world; actions report, triage, fix, disclose"
+  },
+  "state_schema": {
+    "day": "int",
+    "phase": "str",
+    "reported": "bool",
+    "triaged": "bool",
+    "fixed": "bool",
+    "disclosed": "bool",
+    "patch_available": "bool",
+    "public": "bool",
+    "cvss": "float",
+    "severity": "str",
+    "embargo_window": "int",
+    "report_day": "int",
+    "deadline_day": "int",
+    "days_to_deadline": "int",
+    "overdue": "bool"
+  },
+  "initial_state": {
+    "day": 0,
+    "phase": "discovered",
+    "reported": false,
+    "triaged": false,
+    "fixed": false,
+    "disclosed": false,
+    "patch_available": false,
+    "public": false,
+    "cvss": 0.0,
+    "severity": "unknown",
+    "embargo_window": 90,
+    "report_day": -1,
+    "deadline_day": -1,
+    "days_to_deadline": 90,
+    "overdue": false
+  },
+  "actions": [
+    "report",
+    "triage",
+    "fix",
+    "disclose"
+  ],
+  "rules": [
+    "The lifecycle is strictly ordered: report -> triage -> fix -> disclose.",
+    "'report' files the vulnerability with the vendor, starts the timeline, and opens a 90-day coordinated-disclosure embargo from the report day.",
+    "'triage' is only valid after a report; the vendor confirms it and assigns a CVSS score and severity bucket.",
+    "'fix' is only valid after triage; it ships a patch (patch becomes available).",
+    "'disclose' is only valid after a fix exists (coordinated disclosure); it makes the technical details public.",
+    "An action taken out of order, or repeated, is an inert no-op that leaves the state unchanged.",
+    "Each action advances the calendar; 'days_to_deadline' counts down from the report day and 'overdue' flags an expired embargo that is still undisclosed."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n\n    # --- realistic per-phase calendar costs (days) ---\n    REPORT_LAG = 1     # researcher writes up and submits the report\n    TRIAGE_LAG = 2     # vendor confirms, scores, and accepts the bug\n    FIX_LAG = 21       # engineering develops and validates a patch\n    DISCLOSE_LAG = 7   # publication / advisory release after patch is ready\n\n    if name == \"report\":\n        # A researcher reports the vulnerability to the vendor. Starts the clock\n        # and the coordinated-disclosure embargo window.\n        if not s[\"reported\"]:\n            s[\"day\"] = s[\"day\"] + REPORT_LAG\n            s[\"reported\"] = True\n            s[\"phase\"] = \"reported\"\n            s[\"report_day\"] = s[\"day\"]\n            s[\"deadline_day\"] = s[\"day\"] + s[\"embargo_window\"]\n\n    elif name == \"triage\":\n        # The vendor confirms and scores the report. If perception already\n        # supplied a CVSS, bucket the severity from it; otherwise assume a\n        # default high-severity assessment.\n        if s[\"reported\"] and not s[\"triaged\"]:\n            s[\"day\"] = s[\"day\"] + TRIAGE_LAG\n            s[\"triaged\"] = True\n            s[\"phase\"] = \"triaged\"\n            if s[\"cvss\"] <= 0.0:\n                s[\"cvss\"] = 8.8\n            c = s[\"cvss\"]\n            if c >= 9.0:\n                s[\"severity\"] = \"critical\"\n            elif c >= 7.0:\n                s[\"severity\"] = \"high\"\n            elif c >= 4.0:\n                s[\"severity\"] = \"medium\"\n            elif c > 0.0:\n                s[\"severity\"] = \"low\"\n            else:\n                s[\"severity\"] = \"none\"\n\n    elif name == \"fix\":\n        # Engineering ships a patch. Only meaningful after triage.\n        if s[\"triaged\"] and not s[\"fixed\"]:\n            s[\"day\"] = s[\"day\"] + FIX_LAG\n            s[\"fixed\"] = True\n            s[\"patch_available\"] = True\n            s[\"phase\"] = \"fixed\"\n\n    elif name == \"disclose\":\n        # Coordinated disclosure: details are made public only once a patch\n        # exists. Disclosing before a fix is not permitted, so it is a no-op.\n        if s[\"fixed\"] and not s[\"disclosed\"]:\n            s[\"day\"] = s[\"day\"] + DISCLOSE_LAG\n            s[\"disclosed\"] = True\n            s[\"public\"] = True\n            s[\"phase\"] = \"disclosed\"\n\n    # --- derived timeline fields -------------------------------------------- #\n    if s[\"reported\"]:\n        s[\"days_to_deadline\"] = s[\"deadline_day\"] - s[\"day\"]\n        s[\"overdue\"] = (s[\"day\"] > s[\"deadline_day\"]) and (not s[\"disclosed\"])\n    else:\n        s[\"days_to_deadline\"] = s[\"embargo_window\"]\n        s[\"overdue\"] = False\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "cvss",
+        "severity"
+      ],
+      "schema": {
+        "cvss": {
+          "type": "float",
+          "range": [
+            0.0,
+            10.0
+          ]
+        },
+        "severity": "str"
+      },
+      "code": "\ndef perceive(data):\n    # Accept a structured payload ({\"cvss\": 9.1}) or a simple advisory text with\n    # a \"cvss: <n>\" line. Returns only the fields this sensor owns.\n    cvss = None\n    if isinstance(data, dict):\n        cvss = data.get(\"cvss\")\n    else:\n        for line in str(data).splitlines():\n            if \":\" in line:\n                key, val = line.split(\":\", 1)\n                if key.strip().lower() == \"cvss\":\n                    try:\n                        cvss = float(val.strip())\n                    except (ValueError, TypeError):\n                        cvss = None\n    if cvss is None:\n        return {}\n    try:\n        cvss = float(cvss)\n    except (ValueError, TypeError):\n        return {}\n    cvss = max(0.0, min(10.0, cvss))\n    if cvss >= 9.0:\n        sev = \"critical\"\n    elif cvss >= 7.0:\n        sev = \"high\"\n    elif cvss >= 4.0:\n        sev = \"medium\"\n    elif cvss > 0.0:\n        sev = \"low\"\n    else:\n        sev = \"none\"\n    return {\"cvss\": round(cvss, 1), \"severity\": sev}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "day",
+        "severity",
+        "cvss",
+        "patch_available",
+        "public",
+        "days_to_deadline",
+        "overdue"
+      ],
+      "report": "CVD status on day {day}: phase={phase}, severity={severity} (CVSS {cvss}). Patch available: {patch_available}; public: {public}. Days to disclosure deadline: {days_to_deadline} (overdue: {overdue})."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reach_disclosure",
+      "goal": "drive the vulnerability all the way to a public, coordinated disclosure"
+    },
+    {
+      "name": "patch_before_disclosure",
+      "goal": "ensure a patch is available before any public disclosure (no 0-day drop)"
+    },
+    {
+      "name": "meet_embargo",
+      "goal": "disclose before the embargo deadline so 'overdue' is never True"
+    },
+    {
+      "name": "minimize_time_to_fix",
+      "goal": "minimize the day on which the patch becomes available"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "report",
+    "series": {
+      "day": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "report_day": [
+        -1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "deadline_day": [
+        -1.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cvss 0",
+            "day 0",
+            "days_to_deadline 90"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cvss 0",
+            "day 1",
+            "days_to_deadline 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cvss 8.8",
+            "day 3",
+            "days_to_deadline 88"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cvss 8.8",
+            "day 24",
+            "days_to_deadline 67"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cvss 8.8",
+            "day 31",
+            "days_to_deadline 60"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "report"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "triage, fix, disclose"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "triage"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "report, fix, disclose"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "fix"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "report, triage, disclose"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "disclose"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "report, triage, fix"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "report, triage, fix"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

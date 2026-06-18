@@ -1,0 +1,245 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "sol_tracking",
+  "description": "a statute-of-limitations tracking world per claim; actions accrue, toll, file, bar",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a statute-of-limitations tracking world per claim; actions accrue, toll, file, bar"
+  },
+  "state_schema": {
+    "day": "int",
+    "limitations_period_days": "int",
+    "status": "str",
+    "accrued": "bool",
+    "accrual_day": "int",
+    "elapsed_days": "int",
+    "remaining_days": "int",
+    "tolled": "bool",
+    "toll_reason": "str",
+    "toll_days": "int",
+    "filed": "bool",
+    "filing_day": "int",
+    "barred": "bool"
+  },
+  "initial_state": {
+    "day": 0,
+    "limitations_period_days": 730,
+    "status": "pending",
+    "accrued": false,
+    "accrual_day": -1,
+    "elapsed_days": 0,
+    "remaining_days": 730,
+    "tolled": false,
+    "toll_reason": "",
+    "toll_days": 0,
+    "filed": false,
+    "filing_day": -1,
+    "barred": false
+  },
+  "actions": [
+    "accrue",
+    "tick",
+    "toll",
+    "resume",
+    "file",
+    "bar"
+  ],
+  "rules": [
+    "A claim starts 'pending'. 'accrue' starts the limitations clock once, recording the accrual day and moving the claim to 'running'.",
+    "'tick' advances the calendar one day (or params['days']). A 'running' clock adds one elapsed day toward the limit per day; a 'tolled' clock adds a toll day instead and does not approach the limit.",
+    "'toll' pauses a 'running' clock for a stated reason (e.g. minority, defendant absence, fraudulent concealment); 'resume' restarts it.",
+    "elapsed_days never decreases; remaining_days = max(0, period - elapsed).",
+    "'file' succeeds only for an accrued claim that is unfiled, unbarred, and still within the period; it stops the clock and satisfies the SOL.",
+    "When elapsed_days reaches the limitations period on an unfiled claim, the claim becomes time-barred \u2014 automatically on 'tick', or on demand via 'bar' (the limitations defense). 'filed' and 'barred' are terminal."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    # Statute-of-limitations clock for a single claim. The limit is counted in\n    # *non-tolled* elapsed days since accrual; tolling pauses that count while the\n    # calendar keeps moving. Filing satisfies the SOL; running out bars the claim.\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    period = s[\"limitations_period_days\"]\n\n    if name == \"accrue\":\n        # The cause of action accrues: the limitations clock starts. Idempotent \u2014\n        # a claim accrues exactly once, only out of the 'pending' status.\n        if s[\"status\"] == \"pending\" and not s[\"accrued\"]:\n            s[\"accrued\"] = True\n            s[\"accrual_day\"] = s[\"day\"]\n            s[\"elapsed_days\"] = 0\n            s[\"tolled\"] = False\n            s[\"status\"] = \"running\"\n            s[\"remaining_days\"] = period\n\n    elif name == \"toll\":\n        # Pause the running clock for a legal tolling reason. Counted days freeze.\n        if s[\"status\"] == \"running\":\n            s[\"tolled\"] = True\n            s[\"status\"] = \"tolled\"\n            s[\"toll_reason\"] = str(params.get(\"reason\", \"unspecified\"))\n\n    elif name == \"resume\":\n        # The tolling condition is lifted; the clock runs again.\n        if s[\"status\"] == \"tolled\":\n            s[\"tolled\"] = False\n            s[\"status\"] = \"running\"\n            s[\"toll_reason\"] = \"\"\n\n    elif name == \"tick\":\n        # Advance the calendar by one day (or params['days']). Only a *running*\n        # clock accrues elapsed days toward the limit; a tolled clock banks\n        # toll_days instead; terminal/pending claims just see the date move.\n        days = params.get(\"days\", 1)\n        if not isinstance(days, int) or isinstance(days, bool) or days < 0:\n            days = 1\n        for _ in range(days):\n            s[\"day\"] += 1\n            if s[\"status\"] == \"running\":\n                s[\"elapsed_days\"] += 1\n                if s[\"elapsed_days\"] >= period:\n                    # Period exhausted with no filing -> time-barred.\n                    s[\"status\"] = \"barred\"\n                    s[\"barred\"] = True\n            elif s[\"status\"] == \"tolled\":\n                s[\"toll_days\"] += 1\n        s[\"remaining_days\"] = max(0, period - s[\"elapsed_days\"])\n\n    elif name == \"file\":\n        # File suit. Succeeds only if the claim has accrued, is not already filed\n        # or barred, and the clock still has time left. Filing stops the clock.\n        if (s[\"accrued\"] and not s[\"barred\"] and not s[\"filed\"]\n                and s[\"elapsed_days\"] < period):\n            s[\"filed\"] = True\n            s[\"filing_day\"] = s[\"day\"]\n            s[\"status\"] = \"filed\"\n            s[\"remaining_days\"] = max(0, period - s[\"elapsed_days\"])\n\n    elif name == \"bar\":\n        # Raise the limitations defense: if the clock has run out on an accrued,\n        # unfiled claim, it is time-barred.\n        if (s[\"accrued\"] and not s[\"filed\"] and not s[\"barred\"]\n                and s[\"elapsed_days\"] >= period):\n            s[\"status\"] = \"barred\"\n            s[\"barred\"] = True\n        s[\"remaining_days\"] = max(0, period - s[\"elapsed_days\"])\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "limitations_period_days",
+        "accrual_day"
+      ],
+      "schema": {
+        "limitations_period_days": {
+          "type": "int",
+          "range": [
+            0,
+            36500
+          ]
+        },
+        "accrual_day": {
+          "type": "int",
+          "range": [
+            -1,
+            36500
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    # data: a structured claim-intake record. Maps the claim type to its statutory\n    # period (overridable by an explicit period_days) and reads an accrual day.\n    periods = {\n        \"personal_injury\": 730,\n        \"breach_of_contract\": 1460,\n        \"fraud\": 1095,\n        \"defamation\": 365,\n        \"property_damage\": 1095,\n        \"medical_malpractice\": 913,\n    }\n    out = {}\n    if \"period_days\" in data:\n        out[\"limitations_period_days\"] = int(data[\"period_days\"])\n    elif data.get(\"claim_type\") in periods:\n        out[\"limitations_period_days\"] = int(periods[data[\"claim_type\"]])\n    if \"accrual_day\" in data:\n        out[\"accrual_day\"] = int(data[\"accrual_day\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "day",
+        "accrual_day",
+        "elapsed_days",
+        "remaining_days",
+        "limitations_period_days",
+        "filed",
+        "filing_day",
+        "barred",
+        "tolled",
+        "toll_reason"
+      ],
+      "report": "SOL claim status: {status} (day {day}). Accrued day {accrual_day}; {elapsed_days}/{limitations_period_days} days elapsed, {remaining_days} remaining. Tolled={tolled} ({toll_reason}). Filed={filed} (day {filing_day}). Time-barred={barred}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "timely_filing",
+      "goal": "file the claim before it is time-barred"
+    },
+    {
+      "name": "avoid_bar",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "preserve_runway",
+      "goal": "maximize remaining_days at filing"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "accrue",
+    "series": {
+      "accrual_day": [
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "accrual_day -1",
+            "day 0",
+            "elapsed_days 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "accrual_day 0",
+            "day 0",
+            "elapsed_days 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "accrual_day -1",
+            "day 1",
+            "elapsed_days 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "accrual_day 0",
+            "day 1",
+            "elapsed_days 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "accrual_day 0",
+            "day 0",
+            "elapsed_days 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "accrual_day 0",
+            "day 0",
+            "elapsed_days 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "accrue"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "tick"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "toll, resume, file"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "tick"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "toll"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "file"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "accrue, resume, bar"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

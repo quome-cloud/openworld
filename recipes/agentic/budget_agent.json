@@ -1,0 +1,295 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "budget_agent",
+  "description": "an agent under a token/cost budget; actions call, cache, stop",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent under a token/cost budget; actions call, cache, stop"
+  },
+  "state_schema": {
+    "budget": "int",
+    "spent": "int",
+    "calls": "int",
+    "cache_hits": "int",
+    "cached": "int",
+    "results": "int",
+    "stopped": "bool",
+    "call_cost": "int",
+    "cache_cost": "int"
+  },
+  "initial_state": {
+    "budget": 100,
+    "spent": 0,
+    "calls": 0,
+    "cache_hits": 0,
+    "cached": 0,
+    "results": 0,
+    "stopped": false,
+    "call_cost": 10,
+    "cache_cost": 1
+  },
+  "actions": [
+    "call",
+    "cache",
+    "stop"
+  ],
+  "rules": [
+    "'call' makes a fresh model call: it pays call_cost from the budget, produces a result, and warms the cache so that result can be reused.",
+    "'cache' reuses a cached result for the cheaper cache_cost; it is a no-op until at least one 'call' has warmed the cache.",
+    "Any action that cannot be paid for from the remaining budget is a no-op, so the budget never goes negative; budget + spent stays constant.",
+    "'stop' halts the agent; once stopped, every action (including stop) is a no-op. results always equals calls + cache_hits."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    if s.get(\"stopped\"):\n        return s                              # halted: every action is a no-op\n    if name == \"call\":\n        cost = s[\"call_cost\"]\n        if s[\"budget\"] >= cost:\n            s[\"budget\"] -= cost\n            s[\"spent\"] += cost\n            s[\"calls\"] += 1\n            s[\"cached\"] += 1                  # result is now reusable from cache\n            s[\"results\"] += 1\n    elif name == \"cache\":\n        cost = s[\"cache_cost\"]\n        if s[\"cached\"] > 0 and s[\"budget\"] >= cost:\n            s[\"budget\"] -= cost\n            s[\"spent\"] += cost\n            s[\"cache_hits\"] += 1              # served a result from the cache\n            s[\"results\"] += 1\n    elif name == \"stop\":\n        s[\"stopped\"] = True\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "budget",
+        "call_cost",
+        "cache_cost",
+        "spent",
+        "calls",
+        "cache_hits",
+        "cached",
+        "results",
+        "stopped"
+      ],
+      "schema": {
+        "budget": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "call_cost": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        },
+        "cache_cost": {
+          "type": "int",
+          "range": [
+            0,
+            1000000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    cfg = {\"budget\": 100, \"call_cost\": 10, \"cache_cost\": 1}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        key, val = line.split(':', 1)\n        key = key.strip().lower().replace(' ', '_')\n        val = val.strip()\n        if key in cfg and val.lstrip('-').isdigit():\n            cfg[key] = max(0, int(val))\n    return {\n        \"budget\": cfg[\"budget\"],\n        \"call_cost\": cfg[\"call_cost\"],\n        \"cache_cost\": cfg[\"cache_cost\"],\n        \"spent\": 0, \"calls\": 0, \"cache_hits\": 0,\n        \"cached\": 0, \"results\": 0, \"stopped\": False,\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "budget",
+        "spent",
+        "results",
+        "calls",
+        "cache_hits",
+        "stopped"
+      ],
+      "report": "budget {budget} (spent {spent}) | results {results} = {calls} calls + {cache_hits} cache hits | stopped {stopped}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "do useful work",
+      "goal": "max results"
+    },
+    {
+      "name": "stay within budget",
+      "goal": "min spent"
+    },
+    {
+      "name": "prefer cache over fresh calls",
+      "goal": "max cache_hits"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "call",
+    "series": {
+      "budget": [
+        100.0,
+        90.0,
+        80.0,
+        70.0,
+        60.0,
+        50.0,
+        40.0,
+        30.0,
+        20.0,
+        10.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "spent": [
+        0.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "calls": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "cached": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "results": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "budget 100",
+            "cache_hits 0",
+            "cached 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "budget 90",
+            "cache_hits 0",
+            "cached 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "budget 100",
+            "cache_hits 0",
+            "cached 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "budget 80",
+            "cache_hits 0",
+            "cached 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "budget 89",
+            "cache_hits 1",
+            "cached 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "budget 90",
+            "cache_hits 0",
+            "cached 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "call"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "stop"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "cache"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "call"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "cache"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "stop"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

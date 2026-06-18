@@ -1,0 +1,291 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "heat_pump",
+  "description": "a building heat-pump and thermal-envelope world; actions heat, cool, setback",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a building heat-pump and thermal-envelope world; actions heat, cool, setback"
+  },
+  "state_schema": {
+    "indoor_temp": "float",
+    "outdoor_temp": "float",
+    "outdoor_mean": "float",
+    "outdoor_amp": "float",
+    "setpoint": "float",
+    "setback_setpoint": "float",
+    "mode": "str",
+    "cop": "float",
+    "hvac_power_kw": "float",
+    "energy_kwh": "float",
+    "comfort_gap": "float",
+    "hour": "int"
+  },
+  "initial_state": {
+    "indoor_temp": 18.0,
+    "outdoor_temp": 2.0,
+    "outdoor_mean": 2.0,
+    "outdoor_amp": 4.0,
+    "setpoint": 21.0,
+    "setback_setpoint": 16.0,
+    "mode": "idle",
+    "cop": 0.0,
+    "hvac_power_kw": 0.0,
+    "energy_kwh": 0.0,
+    "comfort_gap": 3.0,
+    "hour": 0
+  },
+  "actions": [
+    "heat",
+    "cool",
+    "setback"
+  ],
+  "rules": [
+    "The building is a lumped-capacitance thermal model: indoor air has heat capacity C (kWh/degC) and loses heat to outdoors through envelope conductance UA (kW/degC); each step advances one hour.",
+    "outdoor_temp follows a diurnal sinusoid around outdoor_mean with amplitude outdoor_amp, peaking mid-afternoon.",
+    "'heat' runs the pump in heating mode with proportional control toward setpoint; thermal output is capped at COP times rated electrical power.",
+    "'cool' runs the pump in cooling mode toward setpoint, removing heat, capped the same way.",
+    "'setback' relaxes the target to setback_setpoint (freeze protection only), so the building drifts on its envelope and HVAC energy use drops.",
+    "COP is a Carnot fraction (ETA) of the ideal cycle for the current temperature lift, clamped to [1, 8]; it falls as the indoor/outdoor gap widens.",
+    "energy_kwh accumulates electrical input (kW times one hour); comfort_gap is the absolute distance from setpoint -- smaller is more comfortable."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\n# `math` is provided by the sandbox namespace (imports are unavailable).\nC = 3.0        # building thermal capacitance, kWh/degC\nUA = 0.30      # envelope conductance (heat-loss coefficient), kW/degC\nDT = 1.0       # hours per step\nP_RATED = 3.0  # rated electrical input of the heat pump, kW\nETA = 0.45     # fraction of the Carnot COP actually achieved\nKP = 0.8       # proportional gain: degC of error -> kW of thermal demand\nDELTA_T = 5.0  # supply/evaporator approach vs. indoor air, degC\n\n\ndef _clamp(x, lo, hi):\n    return max(lo, min(hi, x))\n\n\ndef _heating_cop(t_in, t_out):\n    # Carnot COP for heating = T_hot / (T_hot - T_cold), temps in Kelvin.\n    t_hot = t_in + DELTA_T\n    lift = t_hot - t_out\n    if lift <= 1.0:\n        return 8.0\n    return _clamp(ETA * (t_hot + 273.15) / lift, 1.0, 8.0)\n\n\ndef _cooling_cop(t_in, t_out):\n    # Carnot COP for cooling = T_cold / (T_hot - T_cold), temps in Kelvin.\n    t_cold = t_in - DELTA_T\n    lift = t_out - t_cold\n    if lift <= 1.0:\n        return 8.0\n    return _clamp(ETA * (t_cold + 273.15) / lift, 1.0, 8.0)\n\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n\n    indoor = float(s[\"indoor_temp\"])\n    setpoint = float(s[\"setpoint\"])\n    setback_sp = float(s[\"setback_setpoint\"])\n    hour = int(s.get(\"hour\", 0))\n\n    q_hp = 0.0      # thermal power into the building, kW (+heat, -cool)\n    p_elec = 0.0    # electrical power drawn by the pump, kW\n    cop = 0.0\n    mode = \"idle\"\n\n    # This step's physics use the current outdoor_temp held in state, so a\n    # perceived/injected reading is honoured. The autonomous diurnal model only\n    # advances outdoor_temp for the *next* step (below).\n    outdoor = float(s[\"outdoor_temp\"])\n    mean = float(s[\"outdoor_mean\"])\n    amp = float(s[\"outdoor_amp\"])\n\n    # Demand = steady-state load feedforward (UA * gap to ambient) + a\n    # proportional term that closes the remaining error. The feedforward is what\n    # lets the pump actually hold the target against envelope losses instead of\n    # drooping short of it.\n    if name == \"heat\":\n        mode = \"heating\"\n        cop = _heating_cop(indoor, outdoor)\n        error = setpoint - indoor\n        if error > 0.0:\n            demand = max(0.0, UA * (setpoint - outdoor)) + KP * error\n            q_hp = min(demand, cop * P_RATED)\n            p_elec = q_hp / cop\n    elif name == \"cool\":\n        mode = \"cooling\"\n        cop = _cooling_cop(indoor, outdoor)\n        error = indoor - setpoint\n        if error > 0.0:\n            demand = max(0.0, UA * (outdoor - setpoint)) + KP * error\n            q_hp = -min(demand, cop * P_RATED)\n            p_elec = (-q_hp) / cop\n    elif name == \"setback\":\n        # Relaxed target: only protect against drifting below setback_setpoint.\n        mode = \"setback\"\n        if indoor < setback_sp:\n            cop = _heating_cop(indoor, outdoor)\n            demand = max(0.0, UA * (setback_sp - outdoor)) + KP * (setback_sp - indoor)\n            q_hp = min(demand, cop * P_RATED)\n            p_elec = q_hp / cop\n\n    # Lumped-capacitance envelope update: C dT/dt = Q_hp - UA (T_in - T_out)\n    q_loss = UA * (indoor - outdoor)\n    indoor_next = indoor + (DT / C) * (q_hp - q_loss)\n\n    # advance the clock and the diurnal outdoor temperature\n    hour_next = hour + 1\n    outdoor_next = mean + amp * math.sin(2.0 * math.pi * (hour_next - 9.0) / 24.0)\n\n    s[\"indoor_temp\"] = round(indoor_next, 3)\n    s[\"outdoor_temp\"] = round(outdoor_next, 3)\n    s[\"mode\"] = mode\n    s[\"cop\"] = round(cop, 3)\n    s[\"hvac_power_kw\"] = round(p_elec, 3)\n    s[\"energy_kwh\"] = round(float(s.get(\"energy_kwh\", 0.0)) + p_elec * DT, 3)\n    s[\"comfort_gap\"] = round(abs(indoor_next - setpoint), 3)\n    s[\"hour\"] = hour_next\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "indoor_temp",
+        "outdoor_temp",
+        "setpoint"
+      ],
+      "schema": {
+        "indoor_temp": {
+          "type": "float",
+          "range": [
+            -50.0,
+            60.0
+          ]
+        },
+        "outdoor_temp": {
+          "type": "float",
+          "range": [
+            -60.0,
+            60.0
+          ]
+        },
+        "setpoint": {
+          "type": "float",
+          "range": [
+            5.0,
+            35.0
+          ]
+        }
+      },
+      "code": "def perceive(data):\n    out = {}\n    for k in ('indoor_temp', 'outdoor_temp', 'setpoint'):\n        if k in data and data[k] is not None:\n            out[k] = float(data[k])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "hour",
+        "indoor_temp",
+        "setpoint",
+        "mode",
+        "cop",
+        "hvac_power_kw",
+        "energy_kwh",
+        "comfort_gap"
+      ],
+      "report": "Hour {hour}: indoor {indoor_temp}C (target {setpoint}C), mode={mode}, COP={cop}, HVAC draw {hvac_power_kw} kW, cumulative {energy_kwh} kWh, comfort gap {comfort_gap}C."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "comfort",
+      "goal": "minimize comfort_gap (keep indoor_temp near setpoint)"
+    },
+    {
+      "name": "energy",
+      "goal": "minimize energy_kwh"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "cool",
+    "series": {
+      "indoor_temp": [
+        18.0,
+        16.4,
+        14.614,
+        12.966,
+        11.469,
+        10.136,
+        8.976,
+        7.996,
+        7.196,
+        6.573,
+        6.116,
+        5.808,
+        5.627
+      ],
+      "outdoor_temp": [
+        2.0,
+        -1.464,
+        -1.864,
+        -2.0,
+        -1.864,
+        -1.464,
+        -0.828,
+        0.0,
+        0.965,
+        2.0,
+        3.035,
+        4.0,
+        4.828
+      ],
+      "cop": [
+        0.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ],
+      "comfort_gap": [
+        3.0,
+        4.6,
+        6.386,
+        8.034,
+        9.531,
+        10.864,
+        12.024,
+        13.004,
+        13.804,
+        14.427,
+        14.884,
+        15.192,
+        15.373
+      ],
+      "hour": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "comfort_gap 3",
+            "cop 0",
+            "energy_kwh 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "comfort_gap 1.9",
+            "cop 6.346",
+            "energy_kwh 1.276"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "comfort_gap 4.6",
+            "cop 8",
+            "energy_kwh 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "comfort_gap 4.6",
+            "cop 0",
+            "energy_kwh 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "comfort_gap 1.203",
+            "cop 5.232",
+            "energy_kwh 2.854"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "comfort_gap 3.956",
+            "cop 8",
+            "energy_kwh 1.276"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "heat"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "cool"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "setback"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "heat"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "cool"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

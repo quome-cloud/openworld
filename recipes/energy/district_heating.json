@@ -1,0 +1,308 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "district_heating",
+  "description": "a district-heating network temperature-control world; actions heat, circulate, throttle",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a district-heating network temperature-control world; actions heat, circulate, throttle"
+  },
+  "state_schema": {
+    "plant_temp_c": "float",
+    "supply_temp_c": "float",
+    "return_temp_c": "float",
+    "flow": "float",
+    "fuel": "float",
+    "ambient_c": "float",
+    "demand_c": "float",
+    "delivered_kwh": "float",
+    "pump_kwh": "float",
+    "unmet_demand_c": "float"
+  },
+  "initial_state": {
+    "plant_temp_c": 70.0,
+    "supply_temp_c": 58.0,
+    "return_temp_c": 44.0,
+    "flow": 40.0,
+    "fuel": 100.0,
+    "ambient_c": 4.0,
+    "demand_c": 65.0,
+    "delivered_kwh": 0.0,
+    "pump_kwh": 0.0,
+    "unmet_demand_c": 7.0
+  },
+  "actions": [
+    "heat",
+    "circulate",
+    "throttle"
+  ],
+  "rules": [
+    "Every tick the plant, supply and return temperatures relax toward the outdoor air temperature (ambient_c): the network continuously loses heat.",
+    "'heat' fires the burner: it spends up to 5 fuel units (scaled by the optional 'rate' in [0,1], default 1) to raise plant_temp_c toward its 95\u00b0C ceiling; efficiency falls as the plant nears the ceiling and heating stops once fuel is exhausted.",
+    "'circulate' opens the pump (flow rises toward 100%, by 'open', default 15): hot water carries heat plant->supply, then consumers draw it supply->return, accumulating delivered_kwh and pump_kwh with the flow.",
+    "'throttle' closes the valve a notch (flow falls toward 0%, by 'close', default 15), cutting heat loss and pump load.",
+    "Invariants: temperatures stay in [0, 120]\u00b0C with plant_temp_c never exceeding the 95\u00b0C ceiling; flow stays in [0, 100]%; fuel never goes negative; delivered_kwh and pump_kwh are non-decreasing."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n    params = (action.get(\"params\") or {}) if isinstance(action, dict) else {}\n\n    PLANT_MAX, TEMP_MIN, TEMP_MAX = 95.0, 0.0, 120.0\n    FLOW_MIN, FLOW_MAX = 0.0, 100.0\n\n    def clamp(x, lo, hi):\n        return max(lo, min(hi, x))\n\n    plant  = float(s.get(\"plant_temp_c\", 70.0))\n    supply = float(s.get(\"supply_temp_c\", 58.0))\n    ret    = float(s.get(\"return_temp_c\", 44.0))\n    flow   = float(s.get(\"flow\", 40.0))\n    fuel   = float(s.get(\"fuel\", 100.0))\n    ambient = float(s.get(\"ambient_c\", 4.0))\n    demand  = float(s.get(\"demand_c\", 65.0))\n    delivered = float(s.get(\"delivered_kwh\", 0.0))\n    pump      = float(s.get(\"pump_kwh\", 0.0))\n\n    # --- passive tick: pipes always shed heat toward the outdoor air ---\n    plant  -= 0.03 * (plant - ambient)\n    supply -= 0.05 * (supply - ambient)\n    ret    -= 0.04 * (ret - ambient)\n\n    if name == \"heat\":\n        # Fire the burner. `rate` in [0,1] is the firing fraction (default full).\n        rate = clamp(float(params.get(\"rate\", 1.0)), 0.0, 1.0)\n        burn = min(fuel, 5.0 * rate)              # only burn fuel that exists\n        if burn > 0.0:\n            eff = burn / 5.0                      # realized firing fraction\n            plant += eff * 0.5 * (PLANT_MAX - plant)   # approach ceiling, never exceed\n            fuel  -= burn\n\n    elif name == \"circulate\":\n        # Open the pump and exchange/deliver heat across the network.\n        flow = clamp(flow + float(params.get(\"open\", 15.0)), FLOW_MIN, FLOW_MAX)\n        f = flow / FLOW_MAX\n        dps = 0.4 * f * (plant - supply)          # plant -> supply exchange\n        supply += dps\n        plant  -= 0.5 * dps                       # plant is a large buffer, cools less\n        draw = 0.5 * f * (supply - ret)           # consumers draw heat supply -> return\n        ret    += draw\n        supply -= 0.3 * draw\n        delivered += max(0.0, draw) * flow * 0.1  # cumulative heat to consumers\n        pump += flow * 0.05                        # pump electricity scales with flow\n\n    elif name == \"throttle\":\n        # Close the valve a notch: less flow -> less loss and pump load.\n        flow = clamp(flow - float(params.get(\"close\", 15.0)), FLOW_MIN, FLOW_MAX)\n        pump += flow * 0.02\n\n    plant  = round(clamp(plant,  TEMP_MIN, TEMP_MAX), 3)\n    supply = round(clamp(supply, TEMP_MIN, TEMP_MAX), 3)\n    ret    = round(clamp(ret,    TEMP_MIN, TEMP_MAX), 3)\n    flow   = round(clamp(flow,   FLOW_MIN, FLOW_MAX), 3)\n    fuel   = round(max(0.0, fuel), 3)\n    delivered = round(delivered, 3)\n    pump      = round(pump, 3)\n\n    s.update({\n        \"plant_temp_c\": plant, \"supply_temp_c\": supply, \"return_temp_c\": ret,\n        \"flow\": flow, \"fuel\": fuel, \"ambient_c\": ambient, \"demand_c\": demand,\n        \"delivered_kwh\": delivered, \"pump_kwh\": pump,\n        # derived comfort signal: how far supply sits below the consumer setpoint\n        \"unmet_demand_c\": round(max(0.0, demand - supply), 3),\n    })\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "ambient_c",
+        "demand_c"
+      ],
+      "schema": {
+        "ambient_c": {
+          "type": "float",
+          "range": [
+            -40.0,
+            40.0
+          ]
+        },
+        "demand_c": {
+          "type": "float",
+          "range": [
+            0.0,
+            120.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if \"outdoor_c\" in data:\n        out[\"ambient_c\"] = float(data[\"outdoor_c\"])\n    if \"target_c\" in data:\n        out[\"demand_c\"] = float(data[\"target_c\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "supply_temp_c",
+        "demand_c",
+        "unmet_demand_c",
+        "flow",
+        "fuel"
+      ],
+      "report": "Supply {supply_temp_c}\u00b0C vs target {demand_c}\u00b0C (unmet {unmet_demand_c}\u00b0C); flow {flow}%, fuel {fuel} left."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "comfort",
+      "goal": "minimize unmet_demand_c"
+    },
+    {
+      "name": "conserve_fuel",
+      "goal": "maximize fuel"
+    },
+    {
+      "name": "pump_economy",
+      "goal": "minimize pump_kwh"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "circulate",
+    "series": {
+      "plant_temp_c": [
+        70.0,
+        66.621,
+        63.261,
+        60.085,
+        57.204,
+        54.78,
+        52.653,
+        50.719,
+        48.92,
+        47.222,
+        45.605,
+        44.058,
+        42.573
+      ],
+      "supply_temp_c": [
+        58.0,
+        56.803,
+        55.853,
+        54.957,
+        53.968,
+        52.67,
+        51.183,
+        49.613,
+        48.022,
+        46.447,
+        44.908,
+        43.413,
+        41.966
+      ],
+      "return_temp_c": [
+        44.0,
+        46.717,
+        49.249,
+        51.101,
+        52.012,
+        51.608,
+        50.574,
+        49.241,
+        47.779,
+        46.275,
+        44.774,
+        43.302,
+        41.869
+      ],
+      "flow": [
+        40.0,
+        55.0,
+        70.0,
+        85.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ],
+      "delivered_kwh": [
+        0.0,
+        23.744,
+        53.43,
+        84.559,
+        112.507,
+        127.674,
+        136.378,
+        141.681,
+        145.156,
+        147.624,
+        149.529,
+        151.115,
+        152.505
+      ],
+      "pump_kwh": [
+        0.0,
+        2.75,
+        6.25,
+        10.5,
+        15.5,
+        20.5,
+        25.5,
+        30.5,
+        35.5,
+        40.5,
+        45.5,
+        50.5,
+        55.5
+      ],
+      "unmet_demand_c": [
+        7.0,
+        8.197,
+        9.147,
+        10.043,
+        11.032,
+        12.33,
+        13.817,
+        15.387,
+        16.978,
+        18.553,
+        20.092,
+        21.587,
+        23.034
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "delivered_kwh 0",
+            "flow 40",
+            "fuel 100"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "delivered_kwh 0",
+            "flow 40",
+            "fuel 95"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "delivered_kwh 23.744",
+            "flow 55",
+            "fuel 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "delivered_kwh 0",
+            "flow 25",
+            "fuel 100"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "delivered_kwh 0",
+            "flow 40",
+            "fuel 90"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "delivered_kwh 26.756",
+            "flow 55",
+            "fuel 95"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "heat"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "circulate"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "throttle"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "heat"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "circulate"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

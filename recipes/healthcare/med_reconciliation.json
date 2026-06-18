@@ -1,0 +1,185 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "med_reconciliation",
+  "description": "a medication reconciliation world: a patient's med list with interaction risk; actions add_med, remove_med, flag_interaction",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a medication reconciliation world: a patient's med list with interaction risk; actions add_med, remove_med, flag_interaction"
+  },
+  "state_schema": {
+    "meds": "list[str]",
+    "risk_score": "int",
+    "interaction_count": "int",
+    "flagged": "list",
+    "unreviewed_count": "int"
+  },
+  "initial_state": {
+    "meds": [
+      "aspirin",
+      "digoxin",
+      "furosemide",
+      "lisinopril",
+      "metformin",
+      "spironolactone",
+      "warfarin"
+    ],
+    "risk_score": 8,
+    "interaction_count": 3,
+    "flagged": [],
+    "unreviewed_count": 3
+  },
+  "actions": [
+    "add_med",
+    "remove_med",
+    "flag_interaction"
+  ],
+  "rules": [
+    "add_med adds action.params['name'] to the med list if not already present.",
+    "remove_med removes action.params['name'] and discards any flag that named it.",
+    "flag_interaction reviews one interacting pair: the pair in action.params['pair'] if given and currently interacting, otherwise the highest-severity interaction not yet flagged.",
+    "risk_score is the sum of severities over every interacting pair of current meds; interaction_count is how many such pairs exist.",
+    "unreviewed_count is the number of interacting pairs not yet flagged and is never negative.",
+    "Interactions are scored from a fixed knowledge base; severity is 1 (minor), 2 (moderate), or 3 (major)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    s[\"meds\"] = sorted(set(str(m).strip().lower() for m in s.get(\"meds\", []) if str(m).strip()))\n    s[\"flagged\"] = list(s.get(\"flagged\", []))\n\n    # Known pairwise interactions: sorted (drug_a, drug_b) -> (severity, note).\n    # Severity: 1 minor, 2 moderate, 3 major.\n    KB = {\n        (\"aspirin\", \"warfarin\"): (3, \"increased bleeding risk\"),\n        (\"ibuprofen\", \"warfarin\"): (3, \"GI bleeding risk\"),\n        (\"lisinopril\", \"spironolactone\"): (3, \"hyperkalemia\"),\n        (\"lisinopril\", \"potassium\"): (2, \"hyperkalemia\"),\n        (\"clarithromycin\", \"simvastatin\"): (3, \"rhabdomyolysis\"),\n        (\"nitroglycerin\", \"sildenafil\"): (3, \"severe hypotension\"),\n        (\"digoxin\", \"furosemide\"): (2, \"digoxin toxicity from hypokalemia\"),\n        (\"metformin\", \"prednisone\"): (1, \"reduced glycemic control\"),\n    }\n\n    def pair_key(a, b):\n        return (a, b) if a <= b else (b, a)\n\n    def interacting_pairs(meds):\n        out = []\n        meds = sorted(set(meds))\n        for i in range(len(meds)):\n            for j in range(i + 1, len(meds)):\n                key = pair_key(meds[i], meds[j])\n                if key in KB:\n                    sev, note = KB[key]\n                    out.append((key[0], key[1], sev, note))\n        return out\n\n    def arg_med(params):\n        return str(params.get(\"name\") or params.get(\"med\") or \"\").strip().lower()\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    if name == \"add_med\":\n        med = arg_med(params)\n        if med and med not in s[\"meds\"]:\n            s[\"meds\"].append(med)\n            s[\"meds\"].sort()\n    elif name == \"remove_med\":\n        med = arg_med(params)\n        if med in s[\"meds\"]:\n            s[\"meds\"].remove(med)\n            # a flag is only meaningful while both of its drugs are present\n            s[\"flagged\"] = [f for f in s[\"flagged\"] if med not in f]\n    elif name == \"flag_interaction\":\n        pairs = interacting_pairs(s[\"meds\"])\n        flagged_keys = set(f.split(\":\", 1)[0].strip() for f in s[\"flagged\"])\n\n        target = None\n        req = params.get(\"pair\")\n        if isinstance(req, (list, tuple)) and len(req) == 2:\n            key = pair_key(str(req[0]).strip().lower(), str(req[1]).strip().lower())\n            for (pa, pb, sev, note) in pairs:\n                if (pa, pb) == key:\n                    target = (pa, pb, sev, note)\n                    break\n        if target is None:\n            # auto-pick the most severe interaction not yet reviewed\n            candidates = [p for p in pairs if (p[0] + \"+\" + p[1]) not in flagged_keys]\n            candidates.sort(key=lambda p: (-p[2], p[0], p[1]))\n            if candidates:\n                target = candidates[0]\n        if target is not None:\n            pa, pb, sev, note = target\n            tag = pa + \"+\" + pb\n            if tag not in flagged_keys:\n                s[\"flagged\"].append(tag + \": \" + note + \" (severity \" + str(sev) + \")\")\n\n    # recompute derived risk fields from the current list\n    pairs = interacting_pairs(s[\"meds\"])\n    s[\"interaction_count\"] = len(pairs)\n    s[\"risk_score\"] = sum(p[2] for p in pairs)\n    s[\"flagged\"] = sorted(set(s[\"flagged\"]))\n    s[\"unreviewed_count\"] = max(0, len(pairs) - len(s[\"flagged\"]))\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "meds"
+      ],
+      "schema": {
+        "meds": "list"
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        raw = data.get(\"meds\") or data.get(\"medications\") or []\n    else:\n        raw = []\n        for line in str(data).splitlines():\n            for chunk in line.replace(\";\", \",\").split(\",\"):\n                raw.append(chunk)\n    meds = sorted(set(str(m).strip().lower() for m in raw if str(m).strip()))\n    return {\"meds\": meds}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "meds",
+        "risk_score",
+        "interaction_count",
+        "unreviewed_count",
+        "flagged"
+      ],
+      "report": "Medication reconciliation\nActive meds ({interaction_count} interacting pairs): {meds}\nInteraction risk score: {risk_score}\nUnreviewed interactions: {unreviewed_count}\nFlagged: {flagged}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize_interaction_risk",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "review_all_interactions",
+      "goal": "minimize unreviewed_count",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "flag_interaction",
+    "series": {
+      "unreviewed_count": [
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "unreviewed_count 3"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "unreviewed_count 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "unreviewed_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "unreviewed_count 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "flag_interaction"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "add_med, remove_med"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "flag_interaction"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "add_med, remove_med"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "flag_interaction"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "add_med, remove_med"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "add_med, remove_med, flag_interaction"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "solar_farm",
+  "description": "a solar-farm output world with weather and curtailment; actions generate, curtail, store",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a solar-farm output world with weather and curtailment; actions generate, curtail, store"
+  },
+  "state_schema": {
+    "hour": "int",
+    "capacity_mw": "float",
+    "grid_limit_mw": "float",
+    "charge_rate_mw": "float",
+    "battery_mwh": "float",
+    "battery_capacity_mwh": "float",
+    "cloud_cover": "float",
+    "weather": "str",
+    "seed": "int",
+    "potential_mw": "float",
+    "output_mw": "float",
+    "curtailed_mw": "float",
+    "cumulative_generated_mwh": "float",
+    "cumulative_curtailed_mwh": "float",
+    "cumulative_stored_mwh": "float"
+  },
+  "initial_state": {
+    "hour": 6,
+    "capacity_mw": 100.0,
+    "grid_limit_mw": 60.0,
+    "charge_rate_mw": 20.0,
+    "battery_mwh": 0.0,
+    "battery_capacity_mwh": 50.0,
+    "cloud_cover": 0.3,
+    "weather": "partly_cloudy",
+    "seed": 7,
+    "potential_mw": 0.0,
+    "output_mw": 0.0,
+    "curtailed_mw": 0.0,
+    "cumulative_generated_mwh": 0.0,
+    "cumulative_curtailed_mwh": 0.0,
+    "cumulative_stored_mwh": 0.0
+  },
+  "actions": [
+    "generate",
+    "curtail",
+    "store"
+  ],
+  "rules": [
+    "Each step advances the clock by one hour and recomputes weather.",
+    "Solar potential = capacity x diurnal sun curve (half-sine, peak at noon, zero outside hours 6-18) x (1 - cloud_cover).",
+    "Cloud cover follows a bounded random walk seeded from state, so rollouts are stochastic but exactly replayable.",
+    "'generate' exports min(potential, grid_limit); any excess above the grid export limit is forced curtailment.",
+    "'curtail' deliberately holds back params['fraction'] (default 0.5) of potential; the withheld energy is counted as curtailed.",
+    "'store' charges the battery first (bounded by charge rate and remaining headroom), then exports the remainder under the grid limit.",
+    "One hour at constant MW equals that many MWh; cumulative MWh delivered, curtailed, and stored accumulate over the run."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"generate\")\n    params = action.get(\"params\") or {}\n\n    capacity = s[\"capacity_mw\"]\n    grid_limit = s[\"grid_limit_mw\"]\n    charge_rate = s[\"charge_rate_mw\"]\n    batt = s[\"battery_mwh\"]\n    batt_cap = s[\"battery_capacity_mwh\"]\n    hour = int(s[\"hour\"])\n\n    # Weather: bounded random walk on cloud cover, seeded from state so the\n    # trajectory is deterministic given (seed, hour).\n    rng = random.Random(int(s[\"seed\"]) * 1000 + hour)\n    cloud = s[\"cloud_cover\"] + rng.uniform(-0.15, 0.15)\n    cloud = min(1.0, max(0.0, cloud))\n    if cloud < 0.2:\n        weather = \"sunny\"\n    elif cloud < 0.5:\n        weather = \"partly_cloudy\"\n    elif cloud < 0.8:\n        weather = \"cloudy\"\n    else:\n        weather = \"overcast\"\n\n    # Diurnal solar potential: half-sine over daylight hours 6..18.\n    if 6 <= hour <= 18:\n        sun = math.sin(math.pi * (hour - 6) / 12.0)\n    else:\n        sun = 0.0\n    sun = max(0.0, sun)\n    potential = round(capacity * sun * (1.0 - cloud), 3)\n\n    charged = 0.0\n    if name == \"store\":\n        # Fill the battery first, then export whatever is left (capped by grid).\n        headroom = max(0.0, batt_cap - batt)\n        charged = min(potential, charge_rate, headroom)\n        spare = potential - charged\n        output = min(spare, grid_limit)\n        curtailed = spare - output\n    elif name == \"curtail\":\n        # Hold back a fraction on purpose; the rest still respects the grid cap.\n        fraction = params.get(\"fraction\", 0.5)\n        fraction = min(1.0, max(0.0, fraction))\n        target = potential * (1.0 - fraction)\n        output = min(target, grid_limit)\n        curtailed = potential - output\n    else:  # \"generate\"\n        output = min(potential, grid_limit)\n        curtailed = potential - output\n\n    output = round(output, 3)\n    curtailed = round(curtailed, 3)\n    batt = round(batt + charged, 3)\n\n    s[\"hour\"] = (hour + 1) % 24\n    s[\"cloud_cover\"] = round(cloud, 3)\n    s[\"weather\"] = weather\n    s[\"potential_mw\"] = potential\n    s[\"output_mw\"] = output\n    s[\"curtailed_mw\"] = curtailed\n    s[\"battery_mwh\"] = batt\n    s[\"cumulative_generated_mwh\"] = round(s[\"cumulative_generated_mwh\"] + output, 3)\n    s[\"cumulative_curtailed_mwh\"] = round(s[\"cumulative_curtailed_mwh\"] + curtailed, 3)\n    s[\"cumulative_stored_mwh\"] = round(s[\"cumulative_stored_mwh\"] + charged, 3)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "cloud_cover"
+      ],
+      "schema": {
+        "cloud_cover": {
+          "type": "float",
+          "range": [
+            0.0,
+            1.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        value = data.get(\"cloud_cover\")\n    else:\n        text = str(data)\n        value = None\n        for part in text.replace(\",\", \"\\n\").splitlines():\n            if \"cloud_cover\" in part and \":\" in part:\n                value = part.split(\":\", 1)[1].strip()\n        if value is None:\n            value = text.strip()\n    try:\n        value = float(value)\n    except (TypeError, ValueError):\n        return {}\n    value = min(1.0, max(0.0, value))\n    return {\"cloud_cover\": value}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "hour",
+        "weather",
+        "potential_mw",
+        "output_mw",
+        "curtailed_mw",
+        "battery_mwh",
+        "cumulative_generated_mwh",
+        "cumulative_curtailed_mwh"
+      ],
+      "report": "Hour {hour:02d} | {weather} | potential {potential_mw} MW -> export {output_mw} MW, curtailed {curtailed_mw} MW, battery {battery_mwh}/{battery_capacity_mwh} MWh | total generated {cumulative_generated_mwh} MWh, curtailed {cumulative_curtailed_mwh} MWh"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "energy_delivered",
+      "goal": "maximize cumulative_generated_mwh"
+    },
+    {
+      "name": "minimize_curtailment",
+      "goal": "minimize cumulative_curtailed_mwh"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "generate",
+    "series": {
+      "hour": [
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0
+      ],
+      "cloud_cover": [
+        0.3,
+        0.257,
+        0.289,
+        0.366,
+        0.311,
+        0.444,
+        0.58,
+        0.569,
+        0.714,
+        0.582,
+        0.506,
+        0.39,
+        0.521
+      ],
+      "potential_mw": [
+        0.0,
+        0.0,
+        18.397,
+        31.718,
+        48.752,
+        48.121,
+        40.588,
+        43.081,
+        27.64,
+        36.203,
+        34.905,
+        30.491,
+        12.402
+      ],
+      "output_mw": [
+        0.0,
+        0.0,
+        18.397,
+        31.718,
+        48.752,
+        48.121,
+        40.588,
+        43.081,
+        27.64,
+        36.203,
+        34.905,
+        30.491,
+        12.402
+      ],
+      "cumulative_generated_mwh": [
+        0.0,
+        0.0,
+        18.397,
+        50.115,
+        98.867,
+        146.988,
+        187.576,
+        230.657,
+        258.297,
+        294.5,
+        329.405,
+        359.896,
+        372.298
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "battery_mwh 0",
+            "cloud_cover 0.3",
+            "cumulative_curtailed_mwh 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "battery_mwh 0",
+            "cloud_cover 0.257",
+            "cumulative_curtailed_mwh 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "battery_mwh 0",
+            "cloud_cover 0.289",
+            "cumulative_curtailed_mwh 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "battery_mwh 0",
+            "cloud_cover 0.289",
+            "cumulative_curtailed_mwh 9.198"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "battery_mwh 18.397",
+            "cloud_cover 0.289",
+            "cumulative_curtailed_mwh 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "battery_mwh 0",
+            "cloud_cover 0.366",
+            "cumulative_curtailed_mwh 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "generate"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "curtail"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "store"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "generate"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "curtail"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "store"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "generate"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

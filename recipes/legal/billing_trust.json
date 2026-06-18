@@ -1,0 +1,229 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "billing_trust",
+  "description": "a legal billing and trust-accounting (IOLTA) world; actions bill, deposit, disburse, reconcile",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "legal",
+      "accounting",
+      "iolta",
+      "leaf"
+    ],
+    "lineage": "build/billing_trust.py",
+    "metrics": {},
+    "description": "a legal billing and trust-accounting (IOLTA) world; actions bill, deposit, disburse, reconcile"
+  },
+  "state_schema": {
+    "client_ledgers": "dict",
+    "receivable": "dict",
+    "trust_balance": "float",
+    "operating_balance": "float",
+    "bank_statement_balance": "float",
+    "total_billed": "float",
+    "total_disbursed": "float",
+    "reconciliations": "int",
+    "violations": "int",
+    "reconciled": "bool",
+    "last_action": "str",
+    "note": "str"
+  },
+  "initial_state": {
+    "client_ledgers": {
+      "acme": 0.0,
+      "globex": 0.0
+    },
+    "receivable": {
+      "acme": 0.0,
+      "globex": 0.0
+    },
+    "trust_balance": 0.0,
+    "operating_balance": 0.0,
+    "bank_statement_balance": 0.0,
+    "total_billed": 0.0,
+    "total_disbursed": 0.0,
+    "reconciliations": 0,
+    "violations": 0,
+    "reconciled": true,
+    "last_action": "init",
+    "note": "trust ledgers opened"
+  },
+  "actions": [
+    "bill",
+    "deposit",
+    "disburse",
+    "reconcile"
+  ],
+  "rules": [
+    "Client retainers live in the pooled IOLTA trust account, tracked per client in client_ledgers; the firm's own money lives in operating_balance. The two are never commingled.",
+    "'bill' records earned legal fees as a receivable owed by a client and moves no cash.",
+    "'deposit' places a client retainer into trust, raising both trust_balance and that client's ledger by the same amount.",
+    "'disburse' transfers earned fees from a client's trust ledger to the operating account; it is blocked and counted as a violation if it exceeds either that client's trust balance or their billed fees.",
+    "A client's trust ledger may never go negative: using one client's funds for another is misappropriation and is refused by the dynamics.",
+    "trust_balance always equals the sum of all client ledgers (the trust control account).",
+    "'reconcile' performs a three-way check that the book trust balance, the sum of the client ledgers, and the perceived bank_statement_balance all agree; any mismatch is flagged as a violation."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    # copy the nested ledgers we mutate so we never alias the caller's state\n    ledgers = dict(s.get(\"client_ledgers\", {}))\n    receivable = dict(s.get(\"receivable\", {}))\n    s[\"client_ledgers\"] = ledgers\n    s[\"receivable\"] = receivable\n\n    name = action.get(\"name\", \"noop\")\n    params = action.get(\"params\") or {}\n\n    # resolve the client this action touches (default to the first open ledger\n    # so a param-less preview/smoke step still exercises the dynamics)\n    known = sorted(ledgers)\n    chosen = params.get(\"client\")\n    if chosen is None:\n        chosen = known[0] if known else \"client_a\"\n    client = str(chosen)\n\n    def amount_of(default):\n        v = params.get(\"amount\", default)\n        try:\n            return round(float(v), 2)\n        except (ValueError, TypeError):\n            return float(default)\n\n    s[\"last_action\"] = name\n    s[\"note\"] = \"\"\n\n    if name == \"bill\":\n        amount = amount_of(1000.0)\n        if amount <= 0:\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = \"rejected bill: non-positive amount\"\n        else:\n            receivable[client] = round(receivable.get(client, 0.0) + amount, 2)\n            s[\"total_billed\"] = round(s.get(\"total_billed\", 0.0) + amount, 2)\n            s[\"note\"] = \"billed \" + client + \" \" + str(amount)\n        # billing accrues a receivable only; no trust/operating cash moves\n\n    elif name == \"deposit\":\n        amount = amount_of(500.0)\n        if amount <= 0:\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = \"rejected deposit: non-positive amount\"\n        else:\n            ledgers[client] = round(ledgers.get(client, 0.0) + amount, 2)\n            s[\"trust_balance\"] = round(s.get(\"trust_balance\", 0.0) + amount, 2)\n            s[\"note\"] = \"deposited \" + str(amount) + \" into trust for \" + client\n            # book moved ahead of the bank statement: must re-reconcile\n            s[\"reconciled\"] = False\n\n    elif name == \"disburse\":\n        amount = amount_of(300.0)\n        held = ledgers.get(client, 0.0)\n        owed = receivable.get(client, 0.0)\n        if amount <= 0:\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = \"rejected disburse: non-positive amount\"\n        elif amount > held + 1e-9:\n            # would overdraw this client's trust -> spending other clients'\n            # money: commingling / misappropriation. Blocked, not applied.\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = (\"blocked: disburse \" + str(amount) + \" exceeds \" + client\n                         + \" trust balance \" + str(round(held, 2)) + \" (commingling)\")\n        elif amount > owed + 1e-9:\n            # may only withdraw fees actually earned and billed\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = (\"blocked: disburse \" + str(amount) + \" exceeds billed fees \"\n                         + str(round(owed, 2)) + \" for \" + client)\n        else:\n            ledgers[client] = round(held - amount, 2)\n            receivable[client] = round(owed - amount, 2)\n            s[\"trust_balance\"] = round(s.get(\"trust_balance\", 0.0) - amount, 2)\n            s[\"operating_balance\"] = round(s.get(\"operating_balance\", 0.0) + amount, 2)\n            s[\"total_disbursed\"] = round(s.get(\"total_disbursed\", 0.0) + amount, 2)\n            s[\"note\"] = \"disbursed earned fees \" + str(amount) + \" from \" + client\n            s[\"reconciled\"] = False\n\n    elif name == \"reconcile\":\n        book = round(s.get(\"trust_balance\", 0.0), 2)\n        ledger_sum = round(sum(ledgers.values()), 2)\n        bank = round(float(s.get(\"bank_statement_balance\", book)), 2)\n        balanced = abs(book - ledger_sum) < 0.005 and abs(book - bank) < 0.005\n        s[\"reconciled\"] = bool(balanced)\n        s[\"reconciliations\"] = s.get(\"reconciliations\", 0) + 1\n        if balanced:\n            s[\"note\"] = \"three-way reconciliation OK: book=ledgers=bank=\" + str(book)\n        else:\n            s[\"violations\"] = s.get(\"violations\", 0) + 1\n            s[\"note\"] = (\"reconciliation FAILED: book=\" + str(book) + \" ledgers=\"\n                         + str(ledger_sum) + \" bank=\" + str(bank))\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "bank_statement_balance"
+      ],
+      "schema": {
+        "bank_statement_balance": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower()\n            v = v.strip().replace(',', '').replace('$', '')\n            if 'bank' in k or 'statement' in k:\n                try:\n                    out['bank_statement_balance'] = round(float(v), 2)\n                except (ValueError, TypeError):\n                    pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "trust_balance",
+        "operating_balance",
+        "total_billed",
+        "total_disbursed",
+        "reconciled",
+        "violations"
+      ],
+      "report": "Trust {trust_balance} | Operating {operating_balance} | billed {total_billed}, disbursed {total_disbursed} | reconciled {reconciled} | violations {violations}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "keep the trust reconciled",
+      "goal": "max reconciliations"
+    },
+    {
+      "name": "never misappropriate client funds",
+      "goal": "min violations"
+    },
+    {
+      "name": "collect earned fees",
+      "goal": "max total_disbursed"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "bill",
+    "series": {
+      "total_billed": [
+        0.0,
+        1000.0,
+        2000.0,
+        3000.0,
+        4000.0,
+        5000.0,
+        6000.0,
+        7000.0,
+        8000.0,
+        9000.0,
+        10000.0,
+        11000.0,
+        12000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "reconciliations 0",
+            "total_billed 0",
+            "trust_balance 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "reconciliations 0",
+            "total_billed 1000",
+            "trust_balance 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "reconciliations 0",
+            "total_billed 0",
+            "trust_balance 500"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "reconciliations 0",
+            "total_billed 0",
+            "trust_balance 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "reconciliations 1",
+            "total_billed 0",
+            "trust_balance 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "reconciliations 0",
+            "total_billed 2000",
+            "trust_balance 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "bill"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "deposit"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "disburse"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "reconcile"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "bill"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

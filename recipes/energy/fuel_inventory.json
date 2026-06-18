@@ -1,0 +1,293 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "fuel_inventory",
+  "description": "a power-plant fuel-inventory world with reorder; actions burn, reorder, ration",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "energy",
+      "inventory",
+      "reorder",
+      "leaf"
+    ],
+    "lineage": "build/fuel_inventory.py",
+    "metrics": {},
+    "description": "a power-plant fuel-inventory world with reorder; actions burn, reorder, ration"
+  },
+  "state_schema": {
+    "t": "int",
+    "fuel": "float",
+    "capacity": "float",
+    "demand": "float",
+    "ration_factor": "float",
+    "rationed": "bool",
+    "reorder_point": "float",
+    "reorder_qty": "float",
+    "lead_time": "int",
+    "pending": "float",
+    "eta": "int",
+    "unit_cost": "float",
+    "cost": "float",
+    "energy_per_ton": "float",
+    "power": "float",
+    "shortfalls": "int",
+    "last_action": "str"
+  },
+  "initial_state": {
+    "t": 0,
+    "fuel": 80.0,
+    "capacity": 200.0,
+    "demand": 20.0,
+    "ration_factor": 0.5,
+    "rationed": false,
+    "reorder_point": 40.0,
+    "reorder_qty": 120.0,
+    "lead_time": 3,
+    "pending": 0.0,
+    "eta": 0,
+    "unit_cost": 50.0,
+    "cost": 0.0,
+    "energy_per_ton": 1.0,
+    "power": 0.0,
+    "shortfalls": 0,
+    "last_action": "burn"
+  },
+  "actions": [
+    "burn",
+    "reorder",
+    "ration"
+  ],
+  "rules": [
+    "`fuel` is the stockpile in tons and is always clamped to [0, capacity]; it can never go negative or exceed capacity.",
+    "`burn` consumes fuel to make power: it burns `demand` tons (or `ration_factor * demand` while rationing) and adds `energy_per_ton` MWh per ton burned to `power`.",
+    "If the stockpile cannot cover the wanted burn, the plant burns whatever fuel remains and increments `shortfalls` to record the brownout.",
+    "`reorder` places a single fixed delivery of `reorder_qty` tons that arrives after `lead_time` slots; it is ignored while an order is already in flight, and bills `unit_cost` per ton to cumulative `cost`.",
+    "A delivery in flight counts down `eta` by one each slot and is added to `fuel` (clamped to capacity) when `eta` reaches zero.",
+    "`ration` toggles conservation mode, trading output for endurance by cutting subsequent burns to `ration_factor` of demand.",
+    "`reorder_point` is an advisory threshold: reorder before `fuel` falls below it (accounting for lead time) to avoid shortfalls.",
+    "Every action advances `t` by one slot."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"burn\")\n\n    fuel = float(s.get(\"fuel\", 0.0))\n    cap = float(s.get(\"capacity\", 0.0))\n    demand = float(s.get(\"demand\", 0.0))\n    ration_factor = float(s.get(\"ration_factor\", 1.0))\n    rationed = bool(s.get(\"rationed\", False))\n    reorder_qty = float(s.get(\"reorder_qty\", 0.0))\n    lead_time = int(s.get(\"lead_time\", 0))\n    pending = float(s.get(\"pending\", 0.0))\n    eta = int(s.get(\"eta\", 0))\n    unit_cost = float(s.get(\"unit_cost\", 0.0))\n    cost = float(s.get(\"cost\", 0.0))\n    power = float(s.get(\"power\", 0.0))\n    energy_per_ton = float(s.get(\"energy_per_ton\", 1.0))\n    shortfalls = int(s.get(\"shortfalls\", 0))\n\n    # 1) Receive a delivery that lands this slot: an in-flight order's eta counts\n    #    down each step and the fuel arrives (clamped to capacity) when it hits 0.\n    if eta > 0:\n        eta -= 1\n        if eta == 0 and pending > 0.0:\n            fuel = min(cap, fuel + pending)\n            pending = 0.0\n\n    # 2) Apply the chosen action.\n    if name == \"burn\":\n        # Burn to meet demand (cut to ration_factor of demand while rationing).\n        # If the stockpile cannot cover it, burn what is left and log a shortfall.\n        want = demand * ration_factor if rationed else demand\n        burned = want if want <= fuel else fuel\n        if burned < want:\n            shortfalls += 1\n        fuel -= burned\n        power += burned * energy_per_ton\n    elif name == \"reorder\":\n        # Place a fixed replenishment order, but only when none is already in\n        # flight; it arrives after `lead_time` slots and bills unit_cost per ton.\n        if eta == 0 and pending == 0.0:\n            pending = reorder_qty\n            eta = lead_time\n            cost += unit_cost * reorder_qty\n    elif name == \"ration\":\n        # Toggle conservation mode: cuts future burn to ration_factor of demand.\n        rationed = not rationed\n\n    s[\"t\"] = int(s.get(\"t\", 0)) + 1\n    s[\"fuel\"] = round(fuel, 6)\n    s[\"pending\"] = round(pending, 6)\n    s[\"eta\"] = eta\n    s[\"cost\"] = round(cost, 6)\n    s[\"power\"] = round(power, 6)\n    s[\"shortfalls\"] = shortfalls\n    s[\"rationed\"] = rationed\n    s[\"last_action\"] = name\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "demand"
+      ],
+      "schema": {
+        "demand": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for token in str(data).replace(\",\", \" \").split():\n        if \"=\" in token:\n            key, value = token.split(\"=\", 1)\n            if key.strip() == \"demand\":\n                try:\n                    out[\"demand\"] = float(value)\n                except ValueError:\n                    pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "t",
+        "fuel",
+        "eta",
+        "power",
+        "cost",
+        "shortfalls"
+      ],
+      "report": "t={t}: fuel={fuel} tons | incoming in {eta} | power={power} MWh | cost=${cost} | shortfalls={shortfalls}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "power_generated",
+      "goal": "maximize"
+    },
+    {
+      "name": "shortfalls",
+      "goal": "minimize"
+    },
+    {
+      "name": "procurement_cost",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "reorder",
+    "series": {
+      "t": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "fuel": [
+        80.0,
+        80.0,
+        80.0,
+        80.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0
+      ],
+      "pending": [
+        0.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0
+      ],
+      "eta": [
+        0.0,
+        3.0,
+        2.0,
+        1.0,
+        3.0,
+        2.0,
+        1.0,
+        3.0,
+        2.0,
+        1.0,
+        3.0,
+        2.0,
+        1.0
+      ],
+      "cost": [
+        0.0,
+        6000.0,
+        6000.0,
+        6000.0,
+        12000.0,
+        12000.0,
+        12000.0,
+        18000.0,
+        18000.0,
+        18000.0,
+        24000.0,
+        24000.0,
+        24000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cost 0",
+            "eta 0",
+            "fuel 80"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cost 0",
+            "eta 0",
+            "fuel 60"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cost 6000",
+            "eta 3",
+            "fuel 80"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cost 0",
+            "eta 0",
+            "fuel 80"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cost 0",
+            "eta 0",
+            "fuel 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cost 6000",
+            "eta 3",
+            "fuel 60"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "burn"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "reorder"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "ration"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "burn"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "reorder"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "insurance_pricing",
+  "description": "an insurance premium-pricing world by risk pool; actions quote, bind, renew, lapse",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an insurance premium-pricing world by risk pool; actions quote, bind, renew, lapse"
+  },
+  "state_schema": {
+    "risk_pool": "str",
+    "risk_factors": "dict",
+    "base_premium": "float",
+    "claims_load": "float",
+    "renewal_drift": "float",
+    "policy_status": "str",
+    "quoted_premium": "float",
+    "bound_premium": "float",
+    "term_months": "int",
+    "renewals": "int",
+    "policies_in_force": "int",
+    "written_premium": "float",
+    "lapsed_count": "int"
+  },
+  "initial_state": {
+    "risk_pool": "standard",
+    "risk_factors": {
+      "preferred": 0.8,
+      "standard": 1.0,
+      "substandard": 1.6
+    },
+    "base_premium": 1000.0,
+    "claims_load": 0.0,
+    "renewal_drift": 0.05,
+    "policy_status": "none",
+    "quoted_premium": 0.0,
+    "bound_premium": 0.0,
+    "term_months": 12,
+    "renewals": 0,
+    "policies_in_force": 0,
+    "written_premium": 0.0,
+    "lapsed_count": 0
+  },
+  "actions": [
+    "quote",
+    "bind",
+    "renew",
+    "lapse"
+  ],
+  "rules": [
+    "Premium = base_premium * risk_factor[risk_pool] * (1 + claims_load), rounded to cents.",
+    "Each risk pool has a fixed relative risk factor; higher-risk pools price higher.",
+    "quote prices the active pool and sets status to 'quoted'; it never changes the in-force book.",
+    "bind is only valid from a 'quoted' status; it locks the quote, increments policies_in_force and adds the premium to written_premium.",
+    "renew is only valid from a 'bound' status; claims experience drifts up by renewal_drift and the policy is repriced at the higher load.",
+    "lapse is only valid from a 'bound' status; it removes the policy from force and increments lapsed_count.",
+    "Illegal actions for the current status are no-ops, leaving state unchanged.",
+    "An action may switch the active risk pool by passing params.risk_pool."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    factors = s.get(\"risk_factors\", {})\n\n    # An action may retarget the active risk pool before pricing.\n    requested = params.get(\"risk_pool\")\n    if requested in factors:\n        s[\"risk_pool\"] = requested\n    pool = s.get(\"risk_pool\")\n    factor = factors.get(pool, 1.0)\n\n    def price(load):\n        return round(s.get(\"base_premium\", 0.0) * factor * (1.0 + load), 2)\n\n    status = s.get(\"policy_status\", \"none\")\n\n    if name == \"quote\":\n        s[\"quoted_premium\"] = price(s.get(\"claims_load\", 0.0))\n        s[\"policy_status\"] = \"quoted\"\n\n    elif name == \"bind\":\n        if status == \"quoted\":\n            s[\"bound_premium\"] = s.get(\"quoted_premium\", 0.0)\n            s[\"policy_status\"] = \"bound\"\n            s[\"policies_in_force\"] = s.get(\"policies_in_force\", 0) + 1\n            s[\"written_premium\"] = round(\n                s.get(\"written_premium\", 0.0) + s[\"bound_premium\"], 2)\n\n    elif name == \"renew\":\n        if status == \"bound\":\n            load = round(s.get(\"claims_load\", 0.0) + s.get(\"renewal_drift\", 0.05), 4)\n            s[\"claims_load\"] = load\n            new_premium = price(load)\n            s[\"bound_premium\"] = new_premium\n            s[\"quoted_premium\"] = new_premium\n            s[\"renewals\"] = s.get(\"renewals\", 0) + 1\n            s[\"written_premium\"] = round(\n                s.get(\"written_premium\", 0.0) + new_premium, 2)\n\n    elif name == \"lapse\":\n        if status == \"bound\":\n            s[\"policy_status\"] = \"lapsed\"\n            s[\"policies_in_force\"] = max(0, s.get(\"policies_in_force\", 0) - 1)\n            s[\"lapsed_count\"] = s.get(\"lapsed_count\", 0) + 1\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "risk_pool",
+        "base_premium"
+      ],
+      "schema": {
+        "risk_pool": "str",
+        "base_premium": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, _, val = line.partition(\":\")\n        key = key.strip().lower().replace(\" \", \"_\")\n        val = val.strip()\n        if key in (\"risk_pool\", \"pool\"):\n            out[\"risk_pool\"] = val.lower()\n        elif key in (\"base_premium\", \"premium\", \"base\"):\n            cleaned = val.replace(\",\", \"\").replace(\"$\", \"\")\n            try:\n                out[\"base_premium\"] = float(cleaned)\n            except ValueError:\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "risk_pool",
+        "bound_premium",
+        "renewals",
+        "policies_in_force",
+        "written_premium",
+        "lapsed_count"
+      ],
+      "report": "Pool '{risk_pool}': {policies_in_force} in force across {renewals} renewals, ${written_premium} written premium, {lapsed_count} lapsed; current bound premium ${bound_premium}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "underwriting_volume",
+      "goal": "maximize written_premium",
+      "weight": 1.0
+    },
+    {
+      "name": "retention",
+      "goal": "minimize lapsed_count",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "quote",
+    "series": {
+      "quoted_premium": [
+        0.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0,
+        1000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "bound_premium 0",
+            "claims_load 0",
+            "lapsed_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "bound_premium 0",
+            "claims_load 0",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "bound_premium 1000",
+            "claims_load 0",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "bound_premium 1000",
+            "claims_load 0",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "bound_premium 1050",
+            "claims_load 0.05",
+            "lapsed_count 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "bound_premium 1000",
+            "claims_load 0",
+            "lapsed_count 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "quote"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "bind, renew, lapse"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "bind"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "quote, renew, lapse"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "quote"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "renew"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "lapse"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "bind"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

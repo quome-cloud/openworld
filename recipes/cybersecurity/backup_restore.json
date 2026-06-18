@@ -1,0 +1,268 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "backup_restore",
+  "description": "A backup/restore lifecycle world with a Recovery Point Objective: the clock advances each tick, widening the data-loss window until a verified recovery point is re-established. Actions: backup, verify, restore.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "A backup/restore lifecycle world with a Recovery Point Objective: the clock advances each tick, widening the data-loss window until a verified recovery point is re-established. Actions: backup, verify, restore."
+  },
+  "state_schema": {
+    "time": "int",
+    "rpo_target": "int",
+    "last_backup_time": "int",
+    "backup_verified": "bool",
+    "last_verified_time": "int",
+    "exposure": "int",
+    "rpo_violation": "bool",
+    "backups_taken": "int",
+    "backups_verified": "int",
+    "restores": "int",
+    "status": "str"
+  },
+  "initial_state": {
+    "time": 0,
+    "rpo_target": 5,
+    "last_backup_time": -1,
+    "backup_verified": false,
+    "last_verified_time": -1,
+    "exposure": 0,
+    "rpo_violation": false,
+    "backups_taken": 0,
+    "backups_verified": 0,
+    "restores": 0,
+    "status": "operational"
+  },
+  "actions": [
+    "backup",
+    "verify",
+    "restore"
+  ],
+  "rules": [
+    "Every action advances the clock by one tick; ongoing writes widen the data-loss window since the last trusted recovery point.",
+    "'backup' captures the live data at the current time as a new, UNVERIFIED restore point.",
+    "'verify' validates the latest backup; only a verified backup becomes the trusted recovery point (last_verified_time).",
+    "'restore' is only possible from a trusted recovery point; it recovers the system to that point and collapses exposure to zero for that tick.",
+    "exposure = time - last_verified_time (or time if nothing is verified); an RPO violation occurs whenever exposure exceeds rpo_target."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n\n    # Time always advances: ongoing writes accumulate recovery-point exposure.\n    s[\"time\"] = s[\"time\"] + 1\n\n    if name == \"backup\":\n        # Capture the live data now as a new, not-yet-trusted restore point.\n        s[\"last_backup_time\"] = s[\"time\"]\n        s[\"backup_verified\"] = False\n        s[\"backups_taken\"] = s[\"backups_taken\"] + 1\n        s[\"status\"] = \"operational\"\n    elif name == \"verify\":\n        # Validate the latest backup; only an unverified, existing backup can be\n        # verified, and verification promotes it to the trusted recovery point.\n        if s[\"last_backup_time\"] >= 0 and not s[\"backup_verified\"]:\n            s[\"backup_verified\"] = True\n            s[\"backups_verified\"] = s[\"backups_verified\"] + 1\n            s[\"last_verified_time\"] = s[\"last_backup_time\"]\n    elif name == \"restore\":\n        # Recover only from a trusted (verified) recovery point. After recovery\n        # the live data matches that point, so exposure collapses for this tick.\n        if s[\"last_verified_time\"] >= 0:\n            s[\"restores\"] = s[\"restores\"] + 1\n            s[\"status\"] = \"restored\"\n            s[\"last_verified_time\"] = s[\"time\"]\n\n    # Recompute the data-loss window and RPO compliance.\n    if s[\"last_verified_time\"] >= 0:\n        s[\"exposure\"] = s[\"time\"] - s[\"last_verified_time\"]\n    else:\n        s[\"exposure\"] = s[\"time\"]\n    s[\"rpo_violation\"] = s[\"exposure\"] > s[\"rpo_target\"]\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "rpo_target"
+      ],
+      "schema": {
+        "rpo_target": {
+          "type": "int",
+          "range": [
+            0,
+            1000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    text = data if isinstance(data, str) else str(data)\n    for line in text.splitlines():\n        if \"=\" not in line:\n            continue\n        key, _, value = line.partition(\"=\")\n        key = key.strip()\n        value = value.strip()\n        if key == \"rpo_target\":\n            try:\n                out[\"rpo_target\"] = int(value)\n            except (ValueError, TypeError):\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "time",
+        "last_backup_time",
+        "backup_verified",
+        "last_verified_time",
+        "exposure",
+        "rpo_target",
+        "rpo_violation",
+        "backups_taken",
+        "backups_verified",
+        "restores",
+        "status"
+      ],
+      "report": "t={time} status={status} | last backup @ {last_backup_time} (verified={backup_verified}) | trusted recovery point @ {last_verified_time} | exposure={exposure}/{rpo_target} rpo_violation={rpo_violation} | backups={backups_taken} verified={backups_verified} restores={restores}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "data_loss_exposure",
+      "goal": "minimize"
+    },
+    {
+      "name": "rpo_compliance",
+      "goal": "maximize"
+    },
+    {
+      "name": "verified_recovery_points",
+      "goal": "maximize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "backup",
+    "series": {
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "last_backup_time": [
+        -1.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "exposure": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "backups_taken": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "backups_taken 0",
+            "backups_verified 0",
+            "exposure 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "backups_taken 1",
+            "backups_verified 0",
+            "exposure 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "backups_taken 0",
+            "backups_verified 0",
+            "exposure 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "backups_taken 2",
+            "backups_verified 0",
+            "exposure 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "backups_taken 1",
+            "backups_verified 1",
+            "exposure 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "backups_taken 1",
+            "backups_verified 0",
+            "exposure 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "backup"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "verify"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "restore"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "backup"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "verify"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "restore"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

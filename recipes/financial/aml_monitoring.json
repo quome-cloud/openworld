@@ -1,0 +1,318 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "aml_monitoring",
+  "description": "an AML transaction-monitoring world raising alerts on patterns; actions flag, investigate, file_sar, clear",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "aml",
+      "compliance",
+      "monitoring",
+      "perception",
+      "leaf"
+    ],
+    "lineage": "build/aml_monitoring.py",
+    "metrics": {},
+    "description": "an AML transaction-monitoring world raising alerts on patterns; actions flag, investigate, file_sar, clear"
+  },
+  "state_schema": {
+    "amount_total": "int",
+    "txn_count": "int",
+    "structuring_count": "int",
+    "cross_border": "int",
+    "risk_score": "int",
+    "alert": "bool",
+    "status": "str",
+    "stage": "int",
+    "sars_filed": "int",
+    "cases_cleared": "int"
+  },
+  "initial_state": {
+    "amount_total": 48000,
+    "txn_count": 6,
+    "structuring_count": 4,
+    "cross_border": 2,
+    "risk_score": 0,
+    "alert": false,
+    "status": "monitoring",
+    "stage": 0,
+    "sars_filed": 0,
+    "cases_cleared": 0
+  },
+  "actions": [
+    "flag",
+    "investigate",
+    "file_sar",
+    "clear"
+  ],
+  "rules": [
+    "The monitoring engine rescores every step: risk_score = 3*structuring_count + 2*cross_border + 2*(amount_total>=10000) + 1*(txn_count>=10); an alert is raised when risk_score >= 5.",
+    "When an alert is first raised on a 'monitoring' case it advances to 'alerted'.",
+    "'flag' moves an 'alerted' case to 'flagged' (analyst confirms it merits review).",
+    "'investigate' moves a 'flagged' case to 'investigating' (a case is opened).",
+    "'file_sar' moves an 'investigating' case to 'sar_filed', files a Suspicious Activity Report, and clears the alert.",
+    "'clear' dismisses an alerted/flagged/investigating case as a false positive, moving it to 'cleared' and clearing the alert.",
+    "'sar_filed' and 'cleared' are terminal; further actions are no-ops."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nALERT_THRESHOLD = 5\n\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n\n    # 1) monitoring engine: (re)score the activity and raise an alert on patterns\n    score = 0\n    score += int(s.get(\"structuring_count\", 0)) * 3   # sub-threshold structuring\n    score += int(s.get(\"cross_border\", 0)) * 2        # cross-border layering legs\n    if int(s.get(\"amount_total\", 0)) >= 10000:        # large aggregate volume\n        score += 2\n    if int(s.get(\"txn_count\", 0)) >= 10:              # high transaction velocity\n        score += 1\n    s[\"risk_score\"] = score\n    s[\"alert\"] = score >= ALERT_THRESHOLD\n    if s[\"alert\"] and s[\"status\"] == \"monitoring\":\n        s[\"status\"] = \"alerted\"\n\n    # 2) analyst disposition lifecycle\n    status = s[\"status\"]\n    if name == \"flag\" and status == \"alerted\":\n        s[\"status\"] = \"flagged\"\n    elif name == \"investigate\" and status == \"flagged\":\n        s[\"status\"] = \"investigating\"\n    elif name == \"file_sar\" and status == \"investigating\":\n        s[\"status\"] = \"sar_filed\"\n        s[\"sars_filed\"] = int(s.get(\"sars_filed\", 0)) + 1\n        s[\"alert\"] = False\n    elif name == \"clear\" and status in (\"alerted\", \"flagged\", \"investigating\"):\n        s[\"status\"] = \"cleared\"\n        s[\"cases_cleared\"] = int(s.get(\"cases_cleared\", 0)) + 1\n        s[\"alert\"] = False\n\n    # numeric mirror of the lifecycle stage, for previews/sparklines\n    stage = {\"monitoring\": 0, \"alerted\": 1, \"flagged\": 2,\n             \"investigating\": 3, \"sar_filed\": 4, \"cleared\": 4}\n    s[\"stage\"] = stage.get(s[\"status\"], 0)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "amount_total",
+        "txn_count",
+        "structuring_count",
+        "cross_border"
+      ],
+      "schema": {
+        "amount_total": {
+          "type": "int",
+          "range": [
+            0,
+            100000000
+          ]
+        },
+        "txn_count": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "structuring_count": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "cross_border": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    amount_total = 0\n    txn_count = 0\n    structuring_count = 0\n    cross_border = 0\n    for line in str(data).splitlines():\n        line = line.strip()\n        if not line or ',' not in line:\n            continue\n        amt_str, country = line.split(',', 1)\n        amt_str = amt_str.strip().replace('$', '').replace(',', '')\n        country = country.strip().upper()\n        if not amt_str.lstrip('-').isdigit():\n            continue\n        amount = int(amt_str)\n        amount_total += amount\n        txn_count += 1\n        # a deposit parked just under the $10k currency-report line = structuring\n        if 9000 <= amount < 10000:\n            structuring_count += 1\n        if country and country != 'US':\n            cross_border += 1\n    return {\n        \"amount_total\": amount_total,\n        \"txn_count\": txn_count,\n        \"structuring_count\": structuring_count,\n        \"cross_border\": cross_border,\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "risk_score",
+        "alert",
+        "sars_filed",
+        "cases_cleared"
+      ],
+      "report": "case {status}: risk {risk_score} (alert={alert}) | SARs filed {sars_filed}, cleared {cases_cleared}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "file SARs on genuine suspicion",
+      "goal": "max sars_filed"
+    },
+    {
+      "name": "clear false positives",
+      "goal": "max cases_cleared"
+    },
+    {
+      "name": "resolve every alert",
+      "goal": "min alert"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "clear",
+    "series": {
+      "risk_score": [
+        0.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0
+      ],
+      "stage": [
+        0.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ],
+      "cases_cleared": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cases_cleared 0",
+            "risk_score 0",
+            "stage 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cases_cleared 0",
+            "risk_score 18",
+            "stage 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cases_cleared 0",
+            "risk_score 18",
+            "stage 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cases_cleared 1",
+            "risk_score 18",
+            "stage 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cases_cleared 0",
+            "risk_score 18",
+            "stage 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cases_cleared 1",
+            "risk_score 18",
+            "stage 4"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "flag"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "investigate"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "file_sar"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "clear"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "investigate"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "clear"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "flag, file_sar"
+        },
+        {
+          "src": 2,
+          "dst": 1,
+          "action": "flag"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "clear"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "investigate, file_sar"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "flag"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "investigate"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "file_sar"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "clear"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

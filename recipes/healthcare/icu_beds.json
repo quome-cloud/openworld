@@ -1,0 +1,318 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "icu_beds",
+  "description": "an ICU bed-allocation world across wards with bed counts; actions admit, transfer, discharge as beds free up",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an ICU bed-allocation world across wards with bed counts; actions admit, transfer, discharge as beds free up"
+  },
+  "state_schema": {
+    "wards": "dict",
+    "patients": "dict",
+    "waitlist": "list[dict]",
+    "pending": "dict",
+    "occupancy": "dict",
+    "total_capacity": "int",
+    "occupied_beds": "int",
+    "free_beds": "int",
+    "waiting_count": "int",
+    "admitted_count": "int",
+    "discharged_count": "int",
+    "transferred_count": "int",
+    "time": "int",
+    "last_event": "str"
+  },
+  "initial_state": {
+    "wards": {
+      "medical": {
+        "capacity": 4
+      },
+      "surgical": {
+        "capacity": 3
+      },
+      "neuro": {
+        "capacity": 2
+      }
+    },
+    "patients": {
+      "p1": {
+        "ward": "medical",
+        "acuity": 3
+      },
+      "p2": {
+        "ward": "medical",
+        "acuity": 2
+      },
+      "p3": {
+        "ward": "surgical",
+        "acuity": 4
+      }
+    },
+    "waitlist": [
+      {
+        "id": "w1",
+        "acuity": 4
+      },
+      {
+        "id": "w2",
+        "acuity": 2
+      },
+      {
+        "id": "w3",
+        "acuity": 5
+      }
+    ],
+    "pending": {},
+    "occupancy": {
+      "medical": 2,
+      "neuro": 0,
+      "surgical": 1
+    },
+    "total_capacity": 9,
+    "occupied_beds": 3,
+    "free_beds": 6,
+    "waiting_count": 3,
+    "admitted_count": 3,
+    "discharged_count": 0,
+    "transferred_count": 0,
+    "time": 0,
+    "last_event": "init"
+  },
+  "actions": [
+    "admit",
+    "transfer",
+    "discharge"
+  ],
+  "rules": [
+    "Each ward has a fixed bed capacity; occupancy of a ward never exceeds its capacity.",
+    "admit: seat a waiting (or perceived 'pending') patient into a ward that has a free bed; with no params, take the head of the waitlist and the lowest-named ward with space. If no bed is available the patient keeps waiting.",
+    "transfer: relocate an admitted patient to a different ward that has a free bed; the source frees a bed and the target fills one, so total occupancy is unchanged. With no params, move the lowest-acuity patient from the fullest ward to the ward with the most free space.",
+    "discharge: release an admitted patient, freeing a bed in their ward; with no params, discharge the lowest-acuity patient.",
+    "Beds free up via discharge and transfer-out, which makes waiting patients admissible on a later admit.",
+    "Derived views (occupancy, total_capacity, occupied_beds, free_beds, waiting_count) are recomputed every step; time advances by one."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    wards = {w: dict(v) for w, v in s.get(\"wards\", {}).items()}\n    patients = {p: dict(v) for p, v in s.get(\"patients\", {}).items()}\n    waitlist = [dict(r) for r in s.get(\"waitlist\", [])]\n    pending = dict(s.get(\"pending\", {}) or {})\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def cap(w):\n        return wards.get(w, {}).get(\"capacity\", 0)\n\n    def occ(w):\n        return sum(1 for r in patients.values() if r.get(\"ward\") == w)\n\n    def free(w):\n        return cap(w) - occ(w)\n\n    def first_free_ward(exclude=None):\n        # deterministic: lowest ward name (by sort) that has a free bed\n        for w in sorted(wards):\n            if w != exclude and free(w) > 0:\n                return w\n        return None\n\n    event = \"noop\"\n\n    if name == \"admit\":\n        # Resolve the candidate: explicit param, then a perceived request,\n        # then the head of the waitlist.\n        req = None\n        pid = params.get(\"patient\")\n        if pid is not None:\n            for r in waitlist:\n                if r.get(\"id\") == pid:\n                    req = r\n                    break\n            if req is None and pending.get(\"id\") == pid:\n                req = pending\n        if req is None and pending.get(\"id\") is not None:\n            req = pending\n        if req is None and waitlist:\n            req = waitlist[0]\n\n        if req is not None:\n            ward = params.get(\"ward\") or req.get(\"ward\") or first_free_ward()\n            if ward in wards and free(ward) > 0:\n                patients[req[\"id\"]] = {\"ward\": ward,\n                                       \"acuity\": int(req.get(\"acuity\", 3))}\n                waitlist = [r for r in waitlist if r.get(\"id\") != req[\"id\"]]\n                if pending.get(\"id\") == req[\"id\"]:\n                    pending = {}\n                s[\"admitted_count\"] = int(s.get(\"admitted_count\", 0)) + 1\n                event = \"admit %s -> %s\" % (req[\"id\"], ward)\n            else:\n                # No free bed where this patient could go: keep them waiting.\n                if pending.get(\"id\") == req.get(\"id\") and not any(\n                        r.get(\"id\") == req[\"id\"] for r in waitlist):\n                    waitlist = waitlist + [{\"id\": req[\"id\"],\n                                            \"acuity\": int(req.get(\"acuity\", 3))}]\n                    pending = {}\n                event = \"admit_blocked: no free bed\"\n\n    elif name == \"transfer\":\n        pid = params.get(\"patient\")\n        if pid is None and patients:\n            # default: move from the fullest ward (tie -> ward name) the\n            # patient with the lowest acuity (tie -> patient id).\n            src = max(sorted(wards), key=occ)\n            in_src = sorted((p for p, r in patients.items()\n                             if r.get(\"ward\") == src),\n                            key=lambda p: (patients[p].get(\"acuity\", 0), p))\n            pid = in_src[0] if in_src else None\n        if pid in patients:\n            cur = patients[pid].get(\"ward\")\n            dst = params.get(\"to_ward\") or first_free_ward(exclude=cur)\n            if dst in wards and dst != cur and free(dst) > 0:\n                patients[pid] = dict(patients[pid])\n                patients[pid][\"ward\"] = dst\n                s[\"transferred_count\"] = int(s.get(\"transferred_count\", 0)) + 1\n                event = \"transfer %s: %s -> %s\" % (pid, cur, dst)\n            else:\n                event = \"transfer_blocked: no free bed\"\n\n    elif name == \"discharge\":\n        pid = params.get(\"patient\")\n        if pid is None and patients:\n            # default: discharge the lowest-acuity patient (tie -> id).\n            pid = sorted(patients,\n                         key=lambda p: (patients[p].get(\"acuity\", 0), p))[0]\n        if pid in patients:\n            ward = patients[pid].get(\"ward\")\n            del patients[pid]\n            s[\"discharged_count\"] = int(s.get(\"discharged_count\", 0)) + 1\n            event = \"discharge %s from %s\" % (pid, ward)\n\n    # --- commit entities and recompute derived views (keeps the invariant) ---\n    s[\"wards\"] = wards\n    s[\"patients\"] = patients\n    s[\"waitlist\"] = waitlist\n    s[\"pending\"] = pending\n    s[\"occupancy\"] = {w: occ(w) for w in sorted(wards)}\n    s[\"total_capacity\"] = sum(cap(w) for w in wards)\n    s[\"occupied_beds\"] = len(patients)\n    s[\"free_beds\"] = s[\"total_capacity\"] - s[\"occupied_beds\"]\n    s[\"waiting_count\"] = len(waitlist)\n    s[\"time\"] = int(s.get(\"time\", 0)) + 1\n    s[\"last_event\"] = event\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending"
+      ],
+      "schema": {
+        "pending": "dict"
+      },
+      "code": "\ndef perceive(data):\n    # Accept a structured request dict ...\n    if isinstance(data, dict):\n        pid = data.get(\"id\") or data.get(\"patient\")\n        if pid is None:\n            return {}\n        req = {\"id\": str(pid), \"acuity\": int(data.get(\"acuity\", 3))}\n        ward = data.get(\"ward\")\n        if ward is not None:\n            req[\"ward\"] = str(ward)\n        return {\"pending\": req}\n    # ... or a free-text note like \"admit P9 acuity 5 ward surgical\".\n    toks = str(data).replace(\",\", \" \").split()\n    low = [t.lower() for t in toks]\n    req = {\"acuity\": 3}\n    for i, t in enumerate(low):\n        nxt = toks[i + 1] if i + 1 < len(toks) else None\n        if t in (\"patient\", \"id\", \"admit\") and nxt is not None:\n            req[\"id\"] = str(nxt)\n        elif t == \"acuity\" and nxt is not None:\n            try:\n                req[\"acuity\"] = int(nxt)\n            except (ValueError, TypeError):\n                pass\n        elif t == \"ward\" and nxt is not None:\n            req[\"ward\"] = str(nxt)\n    return {\"pending\": req} if req.get(\"id\") else {}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "time",
+        "occupancy",
+        "occupied_beds",
+        "total_capacity",
+        "free_beds",
+        "waiting_count",
+        "admitted_count",
+        "discharged_count",
+        "transferred_count",
+        "last_event"
+      ],
+      "report": "ICU status @ t{time}: {occupied_beds}/{total_capacity} beds occupied, {free_beds} free, {waiting_count} waiting. Last event: {last_event}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "access",
+      "goal": "minimize the number of patients waiting for an ICU bed"
+    },
+    {
+      "name": "utilization",
+      "goal": "maximize bed utilization without ever exceeding capacity"
+    },
+    {
+      "name": "safety",
+      "goal": "never exceed any ward's bed capacity"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "admit",
+    "series": {
+      "occupied_beds": [
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ],
+      "free_beds": [
+        6.0,
+        5.0,
+        4.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "waiting_count": [
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "admitted_count": [
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0,
+        6.0
+      ],
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "admitted_count 3",
+            "discharged_count 0",
+            "free_beds 6"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "admitted_count 4",
+            "discharged_count 0",
+            "free_beds 5"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "admitted_count 3",
+            "discharged_count 0",
+            "free_beds 6"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "admitted_count 3",
+            "discharged_count 1",
+            "free_beds 7"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "admitted_count 5",
+            "discharged_count 0",
+            "free_beds 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "admitted_count 4",
+            "discharged_count 0",
+            "free_beds 5"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "admit"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "transfer"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "discharge"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "admit"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "transfer"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

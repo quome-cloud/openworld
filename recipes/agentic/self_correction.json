@@ -1,0 +1,241 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "self_correction",
+  "description": "a self-correcting agent world that verifies and fixes; actions attempt, verify, fix, accept",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a self-correcting agent world that verifies and fixes; actions attempt, verify, fix, accept"
+  },
+  "state_schema": {
+    "status": "str",
+    "attempted": "bool",
+    "verified": "bool",
+    "passing": "bool",
+    "defects": "int",
+    "accepted": "bool",
+    "attempts": "int",
+    "checks": "int",
+    "fixes": "int"
+  },
+  "initial_state": {
+    "status": "idle",
+    "attempted": false,
+    "verified": false,
+    "passing": false,
+    "defects": 0,
+    "accepted": false,
+    "attempts": 0,
+    "checks": 0,
+    "fixes": 0
+  },
+  "actions": [
+    "attempt",
+    "verify",
+    "fix",
+    "accept"
+  ],
+  "rules": [
+    "'attempt' produces a fresh candidate solution with latent defects, unless the work is already accepted.",
+    "'verify' checks the current candidate and records whether it passes (zero remaining defects); it never modifies the candidate.",
+    "'fix' repairs exactly one detected defect and invalidates the prior verification, so the candidate must be re-verified before acceptance.",
+    "'accept' finalizes the work and is permitted only when the candidate has been verified with zero remaining defects.",
+    "Acceptance is terminal: once accepted, attempt/verify/fix are no-ops."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nINITIAL_DEFECTS = 3\n\ndef _relabel(s):\n    if s.get(\"accepted\"):\n        s[\"status\"] = \"accepted\"\n    elif not s.get(\"attempted\"):\n        s[\"status\"] = \"idle\"\n    elif not s.get(\"verified\"):\n        s[\"status\"] = \"draft\"\n    elif s.get(\"passing\"):\n        s[\"status\"] = \"passing\"\n    else:\n        s[\"status\"] = \"failing\"\n    return s\n\ndef transition(state, action):\n    s = dict(state)\n    a = action.get(\"name\")\n\n    if a == \"attempt\":\n        # Produce a fresh candidate (unless the work is already finalized).\n        if not s.get(\"accepted\"):\n            s[\"attempted\"] = True\n            s[\"verified\"] = False\n            s[\"passing\"] = False\n            s[\"defects\"] = INITIAL_DEFECTS\n            s[\"attempts\"] = s.get(\"attempts\", 0) + 1\n\n    elif a == \"verify\":\n        # Check the current candidate; record pass/fail. Does not edit it.\n        if s.get(\"attempted\") and not s.get(\"accepted\"):\n            s[\"verified\"] = True\n            s[\"passing\"] = s.get(\"defects\", 0) == 0\n            s[\"checks\"] = s.get(\"checks\", 0) + 1\n\n    elif a == \"fix\":\n        # Repair one detected defect; invalidate the prior verification.\n        if (s.get(\"attempted\") and not s.get(\"accepted\")\n                and s.get(\"verified\") and s.get(\"defects\", 0) > 0):\n            s[\"defects\"] = s.get(\"defects\", 0) - 1\n            s[\"verified\"] = False\n            s[\"passing\"] = False\n            s[\"fixes\"] = s.get(\"fixes\", 0) + 1\n\n    elif a == \"accept\":\n        # Finalize only a verified, defect-free candidate. Terminal.\n        if s.get(\"verified\") and s.get(\"defects\", 0) == 0 and not s.get(\"accepted\"):\n            s[\"accepted\"] = True\n\n    return _relabel(s)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "defects",
+        "verified",
+        "passing"
+      ],
+      "schema": {
+        "defects": {
+          "type": "int",
+          "range": [
+            0,
+            1000
+          ]
+        },
+        "verified": "bool",
+        "passing": "bool"
+      },
+      "code": "\ndef perceive(data):\n    failed = data.get(\"failed\", data.get(\"defects\", 0))\n    return {\"defects\": int(failed), \"verified\": True, \"passing\": int(failed) == 0}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "defects",
+        "attempts",
+        "checks",
+        "fixes",
+        "accepted"
+      ],
+      "report": "self-correction: status={status}, defects={defects} (attempts={attempts}, checks={checks}, fixes={fixes}, accepted={accepted})"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "accept_clean",
+      "goal": "reach an accepted, defect-free candidate"
+    },
+    {
+      "name": "minimize_churn",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "attempt",
+    "series": {
+      "defects": [
+        0.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "attempts": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "attempts 0",
+            "checks 0",
+            "defects 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "attempts 1",
+            "checks 0",
+            "defects 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "attempts 2",
+            "checks 0",
+            "defects 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "attempts 1",
+            "checks 1",
+            "defects 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "attempts 3",
+            "checks 0",
+            "defects 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "attempts 2",
+            "checks 1",
+            "defects 3"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "attempt"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "verify, fix, accept"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "attempt"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "verify"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "fix, accept"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "attempt"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "verify"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "fix, accept"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

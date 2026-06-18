@@ -1,0 +1,277 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "honeypot",
+  "description": "a honeypot attacker-interaction world; actions probe, engage, alert",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a honeypot attacker-interaction world; actions probe, engage, alert"
+  },
+  "state_schema": {
+    "step": "int",
+    "session_active": "bool",
+    "attacker_engagement": "int",
+    "intel_collected": "int",
+    "suspicion": "int",
+    "exposed_services": "int",
+    "compromised": "bool",
+    "defender_alerted": "bool",
+    "alerts_raised": "int",
+    "threat_level": "str"
+  },
+  "initial_state": {
+    "step": 0,
+    "session_active": true,
+    "attacker_engagement": 1,
+    "intel_collected": 0,
+    "suspicion": 0,
+    "exposed_services": 3,
+    "compromised": false,
+    "defender_alerted": false,
+    "alerts_raised": 0,
+    "threat_level": "low"
+  },
+  "actions": [
+    "probe",
+    "engage",
+    "alert"
+  ],
+  "rules": [
+    "'probe' gathers the most intel (+2) and deepens engagement (+1) but reaching back toward the adversary raises their suspicion (+2).",
+    "'engage' feeds convincing decoys: engagement +2, intel +1, one more exposed service, and suspicion -1 (it looks legitimate).",
+    "At engagement >= 7 the adversary believes they have compromised the box ('compromised' becomes true).",
+    "'alert' notifies the SOC: sets 'defender_alerted', increments 'alerts_raised', and is invisible to the adversary so suspicion is unchanged. It stays usable even after the session ends.",
+    "When suspicion reaches 8 the adversary disconnects and the session ends; probe/engage then have no effect.",
+    "'threat_level' is derived each tick from engagement (and compromise): low < medium(>=2) < high(>=5) < critical(>=8 or compromised).",
+    "All bounded counters are clamped to [0, 10]."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n\n    def clamp(x, lo=0, hi=10):\n        return max(lo, min(hi, x))\n\n    s[\"step\"] = s.get(\"step\", 0) + 1\n    engaged = bool(s.get(\"session_active\", True))\n\n    if name == \"probe\":\n        if engaged:\n            s[\"intel_collected\"] = s.get(\"intel_collected\", 0) + 2\n            s[\"attacker_engagement\"] = clamp(s.get(\"attacker_engagement\", 0) + 1)\n            s[\"suspicion\"] = clamp(s.get(\"suspicion\", 0) + 2)\n    elif name == \"engage\":\n        if engaged:\n            s[\"attacker_engagement\"] = clamp(s.get(\"attacker_engagement\", 0) + 2)\n            s[\"intel_collected\"] = s.get(\"intel_collected\", 0) + 1\n            s[\"suspicion\"] = clamp(s.get(\"suspicion\", 0) - 1)\n            s[\"exposed_services\"] = clamp(s.get(\"exposed_services\", 0) + 1)\n            if s[\"attacker_engagement\"] >= 7:\n                s[\"compromised\"] = True\n    elif name == \"alert\":\n        # internal SOC notification: invisible to the adversary, so suspicion\n        # is untouched. Stays meaningful even after the session has burned out.\n        if not s.get(\"defender_alerted\", False):\n            s[\"defender_alerted\"] = True\n        s[\"alerts_raised\"] = s.get(\"alerts_raised\", 0) + 1\n\n    # a sufficiently suspicious adversary disconnects and the trap goes cold\n    if s.get(\"suspicion\", 0) >= 8:\n        s[\"session_active\"] = False\n\n    eng = s.get(\"attacker_engagement\", 0)\n    if s.get(\"compromised\", False) or eng >= 8:\n        s[\"threat_level\"] = \"critical\"\n    elif eng >= 5:\n        s[\"threat_level\"] = \"high\"\n    elif eng >= 2:\n        s[\"threat_level\"] = \"medium\"\n    else:\n        s[\"threat_level\"] = \"low\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "attacker_engagement",
+        "suspicion",
+        "intel_collected"
+      ],
+      "schema": {
+        "attacker_engagement": {
+          "type": "int",
+          "range": [
+            0,
+            10
+          ]
+        },
+        "suspicion": {
+          "type": "int",
+          "range": [
+            0,
+            10
+          ]
+        },
+        "intel_collected": "int"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    fields = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, value = line.split(\":\", 1)\n        fields[key.strip().lower()] = value.strip()\n\n    def as_int(key, default=0):\n        try:\n            return int(fields.get(key, default))\n        except (ValueError, TypeError):\n            return default\n\n    out = {}\n    if \"packets\" in fields:\n        # connection volume is a proxy for how engaged the adversary is\n        out[\"attacker_engagement\"] = max(0, min(10, as_int(\"packets\") // 10))\n    if \"evasion\" in fields:\n        # observed evasion/anti-honeypot checks map to their suspicion\n        out[\"suspicion\"] = max(0, min(10, as_int(\"evasion\")))\n    if \"payloads\" in fields:\n        out[\"intel_collected\"] = max(0, as_int(\"payloads\"))\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "threat_level",
+        "attacker_engagement",
+        "intel_collected",
+        "suspicion",
+        "session_active",
+        "compromised",
+        "alerts_raised"
+      ],
+      "report": "Honeypot incident @ step {step}: threat={threat_level}, engagement={attacker_engagement}/10, intel={intel_collected}, suspicion={suspicion}/10, session_active={session_active}, compromised={compromised}, alerts={alerts_raised}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "harvest_intel",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "sustain_engagement",
+      "goal": "maximize",
+      "weight": 0.7
+    },
+    {
+      "name": "alert_defenders",
+      "goal": "maximize",
+      "weight": 0.8
+    },
+    {
+      "name": "avoid_detection",
+      "goal": "minimize",
+      "weight": 0.6
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "probe",
+    "series": {
+      "step": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "attacker_engagement": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "intel_collected": [
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ],
+      "suspicion": [
+        0.0,
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0,
+        8.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "alerts_raised 0",
+            "attacker_engagement 1",
+            "exposed_services 3"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "alerts_raised 0",
+            "attacker_engagement 2",
+            "exposed_services 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "alerts_raised 0",
+            "attacker_engagement 3",
+            "exposed_services 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "alerts_raised 1",
+            "attacker_engagement 1",
+            "exposed_services 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "alerts_raised 0",
+            "attacker_engagement 3",
+            "exposed_services 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "alerts_raised 0",
+            "attacker_engagement 4",
+            "exposed_services 4"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "probe"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "engage"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "alert"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "probe"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "engage"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

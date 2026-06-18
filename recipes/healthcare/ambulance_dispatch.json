@@ -1,0 +1,269 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ambulance_dispatch",
+  "description": "an ambulance dispatch world: incidents by priority and units; actions dispatch, arrive, return",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an ambulance dispatch world: incidents by priority and units; actions dispatch, arrive, return"
+  },
+  "state_schema": {
+    "time": "int",
+    "resolved": "int",
+    "available": "int",
+    "units": "dict",
+    "incidents": "dict",
+    "incoming_incident": "str",
+    "incoming_priority": "int"
+  },
+  "initial_state": {
+    "time": 0,
+    "resolved": 0,
+    "available": 2,
+    "units": {
+      "A1": {
+        "status": "idle",
+        "incident": null
+      },
+      "A2": {
+        "status": "idle",
+        "incident": null
+      }
+    },
+    "incidents": {
+      "I1": {
+        "priority": 1,
+        "status": "waiting",
+        "unit": null
+      },
+      "I2": {
+        "priority": 2,
+        "status": "waiting",
+        "unit": null
+      },
+      "I3": {
+        "priority": 3,
+        "status": "waiting",
+        "unit": null
+      }
+    },
+    "incoming_incident": "",
+    "incoming_priority": 0
+  },
+  "actions": [
+    "dispatch",
+    "arrive",
+    "return"
+  ],
+  "rules": [
+    "An incident has a priority (1 = most urgent) and a status: waiting -> assigned -> onscene -> resolved.",
+    "A unit has a status forming the lifecycle: idle -> enroute -> onscene -> idle.",
+    "'dispatch' sends an idle unit to a waiting incident: the unit becomes enroute and the incident assigned. If params are omitted, the first idle unit is sent to the most urgent waiting incident.",
+    "'arrive' marks an enroute unit onscene; its incident also becomes onscene.",
+    "'return' clears an onscene unit back to idle, resolves its incident, and increments 'resolved'.",
+    "Every successful action advances 'time' by one tick; illegal actions are no-ops.",
+    "A unit serves at most one incident at a time, and an incident is held by at most one unit."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    units = {u: dict(v) for u, v in s.get(\"units\", {}).items()}\n    incidents = {i: dict(v) for i, v in s.get(\"incidents\", {}).items()}\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def waiting_by_priority():\n        # most urgent first (lowest priority number), ties broken by id\n        pending = [i for i in incidents if incidents[i][\"status\"] == \"waiting\"]\n        return sorted(pending, key=lambda i: (incidents[i][\"priority\"], i))\n\n    def first_unit_with(status):\n        for u in sorted(units):\n            if units[u][\"status\"] == status:\n                return u\n        return None\n\n    def tick():\n        s[\"time\"] = s.get(\"time\", 0) + 1\n\n    if name == \"dispatch\":\n        unit = params.get(\"unit\") or first_unit_with(\"idle\")\n        inc = params.get(\"incident\")\n        if inc is None:\n            queue = waiting_by_priority()\n            inc = queue[0] if queue else None\n        if (unit in units and inc in incidents\n                and units[unit][\"status\"] == \"idle\"\n                and incidents[inc][\"status\"] == \"waiting\"):\n            units[unit][\"status\"] = \"enroute\"\n            units[unit][\"incident\"] = inc\n            incidents[inc][\"status\"] = \"assigned\"\n            incidents[inc][\"unit\"] = unit\n            tick()\n\n    elif name == \"arrive\":\n        unit = params.get(\"unit\") or first_unit_with(\"enroute\")\n        if unit in units and units[unit][\"status\"] == \"enroute\":\n            units[unit][\"status\"] = \"onscene\"\n            inc = units[unit][\"incident\"]\n            if inc in incidents:\n                incidents[inc][\"status\"] = \"onscene\"\n            tick()\n\n    elif name == \"return\":\n        unit = params.get(\"unit\") or first_unit_with(\"onscene\")\n        if unit in units and units[unit][\"status\"] == \"onscene\":\n            inc = units[unit][\"incident\"]\n            if inc in incidents:\n                incidents[inc][\"status\"] = \"resolved\"\n                incidents[inc][\"unit\"] = None\n            units[unit][\"status\"] = \"idle\"\n            units[unit][\"incident\"] = None\n            s[\"resolved\"] = s.get(\"resolved\", 0) + 1\n            tick()\n\n    s[\"units\"] = units\n    s[\"incidents\"] = incidents\n    s[\"available\"] = sum(1 for u in units if units[u][\"status\"] == \"idle\")\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "incoming_incident",
+        "incoming_priority"
+      ],
+      "schema": {
+        "incoming_incident": "str",
+        "incoming_priority": {
+          "type": "int",
+          "range": [
+            1,
+            5
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data)\n    out = {}\n    for line in text.split(\"\\n\"):\n        if \":\" not in line:\n            continue\n        key, val = line.split(\":\", 1)\n        key = key.strip().lower()\n        val = val.strip()\n        if key == \"incident\":\n            out[\"incoming_incident\"] = val\n        elif key == \"priority\":\n            try:\n                p = int(val)\n            except (ValueError, TypeError):\n                continue\n            if 1 <= p <= 5:\n                out[\"incoming_priority\"] = p\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "time",
+        "available",
+        "resolved",
+        "units",
+        "incidents"
+      ],
+      "report": "Dispatch board @ t={time}: {available} unit(s) available, {resolved} incident(s) resolved."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "incidents_resolved",
+      "goal": "maximize"
+    },
+    {
+      "name": "response_time",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "dispatch",
+    "series": {
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "available": [
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "available 2",
+            "resolved 0",
+            "time 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "available 1",
+            "resolved 0",
+            "time 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "available 0",
+            "resolved 0",
+            "time 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "available 1",
+            "resolved 0",
+            "time 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "available 0",
+            "resolved 0",
+            "time 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "available 2",
+            "resolved 1",
+            "time 3"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "dispatch"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "arrive, return"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "dispatch"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "arrive"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "return"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "arrive"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "dispatch, return"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "dispatch"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "return"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "arrive"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

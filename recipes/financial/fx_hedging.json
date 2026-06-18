@@ -1,0 +1,356 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "fx_hedging",
+  "description": "An FX exposure-hedging treasury: a book of open foreign-currency positions marked to a deterministic spot market; open, close, and hedge to manage net exposure and realized PnL.",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "finance",
+      "fx",
+      "hedging",
+      "treasury",
+      "leaf"
+    ],
+    "lineage": "build/fx_hedging.py",
+    "metrics": {},
+    "description": "An FX exposure-hedging treasury: a book of open foreign-currency positions marked to a deterministic spot market; open, close, and hedge to manage net exposure and realized PnL."
+  },
+  "state_schema": {
+    "tick": "int",
+    "spot": "dict",
+    "cash": "float",
+    "realized_pnl": "float",
+    "next_id": "int",
+    "risk_limit": "float",
+    "positions": "list[dict]",
+    "num_positions": "int",
+    "gross_exposure": "float",
+    "net_exposure": "float",
+    "hedged_notional": "float",
+    "hedge_ratio": "float",
+    "unrealized_pnl": "float",
+    "total_equity": "float",
+    "breach": "bool",
+    "headroom": "float"
+  },
+  "initial_state": {
+    "tick": 0,
+    "spot": {
+      "EURUSD": 1.085,
+      "GBPUSD": 1.27,
+      "AUDUSD": 0.66
+    },
+    "cash": 0.0,
+    "realized_pnl": 0.0,
+    "next_id": 3,
+    "risk_limit": 5000000.0,
+    "positions": [
+      {
+        "id": 1,
+        "pair": "EURUSD",
+        "side": "long",
+        "notional": 2000000.0,
+        "entry_rate": 1.085,
+        "hedged": 0.0,
+        "hedge_rate": 0.0
+      },
+      {
+        "id": 2,
+        "pair": "GBPUSD",
+        "side": "short",
+        "notional": 1000000.0,
+        "entry_rate": 1.27,
+        "hedged": 0.0,
+        "hedge_rate": 0.0
+      }
+    ],
+    "num_positions": 2,
+    "gross_exposure": 3440000.0,
+    "net_exposure": 900000.0,
+    "hedged_notional": 0.0,
+    "hedge_ratio": 0.0,
+    "unrealized_pnl": 0.0,
+    "total_equity": 0.0,
+    "breach": false,
+    "headroom": 4100000.0
+  },
+  "actions": [
+    "open",
+    "close",
+    "hedge"
+  ],
+  "rules": [
+    "Quotes are USD per one unit of foreign currency; a position's USD value is notional * spot.",
+    "Each action advances time one tick; the spot of every pair re-marks deterministically before the action is applied.",
+    "'open' adds a long or short position at the current spot for the given pair (default EURUSD long, 1,000,000 notional).",
+    "'close' removes a position and books its mark-to-market PnL into cash and realized_pnl (defaulting to the oldest open lot).",
+    "'hedge' locks part of a lot's notional at the current spot via amount or ratio (default: fully hedge the oldest lot still carrying open risk); the hedged slice's PnL is frozen and net_exposure shrinks accordingly.",
+    "net_exposure is the signed, unhedged USD exposure across the book; a breach is flagged whenever its absolute value exceeds risk_limit."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nBASE = {\"EURUSD\": 1.0850, \"GBPUSD\": 1.2700, \"AUDUSD\": 0.6600}\nAMP = {\"EURUSD\": 0.020, \"GBPUSD\": 0.025, \"AUDUSD\": 0.030}\nPHASE = {\"EURUSD\": 0.0, \"GBPUSD\": 1.7, \"AUDUSD\": 3.4}\nFREQ = 0.45  # radians of market cycle advanced per tick\n\n\ndef _spot(tick):\n    # Deterministic, bounded oscillation -> realistic FX wiggle, fully replayable.\n    return {p: round(BASE[p] * (1.0 + AMP[p] * math.sin(FREQ * tick + PHASE[p])), 6)\n            for p in BASE}\n\n\ndef _sign(side):\n    return 1.0 if side == \"long\" else -1.0\n\n\ndef _position_pnl(pos, spot):\n    # Unhedged slice floats with spot; hedged slice is locked at its forward rate.\n    sgn = _sign(pos[\"side\"])\n    rate = spot[pos[\"pair\"]]\n    open_units = pos[\"notional\"] - pos[\"hedged\"]\n    pnl_open = sgn * open_units * (rate - pos[\"entry_rate\"])\n    pnl_locked = sgn * pos[\"hedged\"] * (pos[\"hedge_rate\"] - pos[\"entry_rate\"])\n    return pnl_open + pnl_locked\n\n\ndef _find(positions, pid):\n    # sandbox builtins exclude next(); use a plain scan.\n    matches = [p for p in positions if p[\"id\"] == pid]\n    return matches[0] if matches else None\n\n\ndef _derive(s):\n    spot = s[\"spot\"]\n    gross = net = hedged_base = upnl = 0.0\n    for pos in s[\"positions\"]:\n        rate = spot[pos[\"pair\"]]\n        sgn = _sign(pos[\"side\"])\n        gross += pos[\"notional\"] * rate\n        net += sgn * (pos[\"notional\"] - pos[\"hedged\"]) * rate\n        hedged_base += pos[\"hedged\"] * rate\n        upnl += _position_pnl(pos, spot)\n    s[\"num_positions\"] = len(s[\"positions\"])\n    s[\"gross_exposure\"] = round(gross, 2)\n    s[\"net_exposure\"] = round(net, 2)\n    s[\"hedged_notional\"] = round(hedged_base, 2)\n    s[\"hedge_ratio\"] = round(hedged_base / gross, 4) if gross > 0 else 0.0\n    s[\"unrealized_pnl\"] = round(upnl, 2)\n    s[\"total_equity\"] = round(s[\"cash\"] + upnl, 2)\n    s[\"breach\"] = abs(net) > s[\"risk_limit\"]\n    s[\"headroom\"] = round(s[\"risk_limit\"] - abs(net), 2)\n    return s\n\n\ndef transition(state, action):\n    s = dict(state)\n    s[\"positions\"] = [dict(p) for p in s.get(\"positions\", [])]\n\n    # Time advances on every action; refresh the mark before acting on it.\n    s[\"tick\"] = int(s.get(\"tick\", 0)) + 1\n    s[\"spot\"] = _spot(s[\"tick\"])\n    spot = s[\"spot\"]\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    if name == \"open\":\n        pair = params.get(\"pair\")\n        if pair not in BASE:\n            pair = \"EURUSD\"\n        side = params.get(\"side\")\n        if side not in (\"long\", \"short\"):\n            side = \"long\"\n        try:\n            notional = abs(float(params.get(\"notional\", 1_000_000)))\n        except (TypeError, ValueError):\n            notional = 1_000_000.0\n        if notional > 0:\n            s[\"positions\"].append({\n                \"id\": int(s.get(\"next_id\", 1)),\n                \"pair\": pair,\n                \"side\": side,\n                \"notional\": round(notional, 2),\n                \"entry_rate\": spot[pair],\n                \"hedged\": 0.0,\n                \"hedge_rate\": 0.0,\n            })\n            s[\"next_id\"] = int(s.get(\"next_id\", 1)) + 1\n\n    elif name == \"close\":\n        pid = params.get(\"id\")\n        if pid is None and s[\"positions\"]:\n            pid = min(p[\"id\"] for p in s[\"positions\"])  # oldest open lot\n        target = _find(s[\"positions\"], pid)\n        if target is not None:\n            realized = _position_pnl(target, spot)\n            s[\"cash\"] = round(s[\"cash\"] + realized, 2)\n            s[\"realized_pnl\"] = round(s[\"realized_pnl\"] + realized, 2)\n            s[\"positions\"] = [p for p in s[\"positions\"] if p[\"id\"] != pid]\n\n    elif name == \"hedge\":\n        pid = params.get(\"id\")\n        if pid is None:\n            # Default: the oldest lot that still carries open risk.\n            open_lots = [p for p in s[\"positions\"] if p[\"hedged\"] < p[\"notional\"]]\n            if open_lots:\n                pid = min(p[\"id\"] for p in open_lots)\n        target = _find(s[\"positions\"], pid)\n        if target is not None:\n            room = target[\"notional\"] - target[\"hedged\"]\n            if \"amount\" in params and params[\"amount\"] is not None:\n                try:\n                    add = float(params[\"amount\"])\n                except (TypeError, ValueError):\n                    add = room\n            elif \"ratio\" in params and params[\"ratio\"] is not None:\n                try:\n                    ratio = min(max(float(params[\"ratio\"]), 0.0), 1.0)\n                except (TypeError, ValueError):\n                    ratio = 1.0\n                add = ratio * target[\"notional\"] - target[\"hedged\"]\n            else:\n                add = room  # full hedge by default\n            add = max(0.0, min(add, room))\n            if add > 0:\n                rate = spot[target[\"pair\"]]\n                new_hedged = target[\"hedged\"] + add\n                # Blend the locked forward rate across old and new hedged units.\n                blended = (target[\"hedged\"] * target[\"hedge_rate\"] + add * rate) / new_hedged\n                target[\"hedged\"] = round(new_hedged, 2)\n                target[\"hedge_rate\"] = round(blended, 6)\n\n    return _derive(s)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "risk_limit"
+      ],
+      "schema": {
+        "risk_limit": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000000000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if \":\" not in line:\n            continue\n        k, v = line.split(\":\", 1)\n        k = k.strip().lower().replace(\" \", \"_\")\n        v = v.strip().replace(\",\", \"\").replace(\"$\", \"\")\n        if k in (\"risk_limit\", \"limit\", \"max_net_exposure\"):\n            try:\n                out[\"risk_limit\"] = float(v)\n            except ValueError:\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "num_positions",
+        "gross_exposure",
+        "net_exposure",
+        "hedge_ratio",
+        "unrealized_pnl",
+        "realized_pnl",
+        "total_equity",
+        "breach"
+      ],
+      "report": "FX book: {num_positions} positions | gross ${gross_exposure} | net ${net_exposure} (hedge {hedge_ratio}) | uPnL ${unrealized_pnl} | rPnL ${realized_pnl} | equity ${total_equity} | breach={breach}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "stay within the risk limit",
+      "goal": "min abs(net_exposure)"
+    },
+    {
+      "name": "preserve equity",
+      "goal": "max total_equity"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "hedge",
+    "series": {
+      "tick": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "gross_exposure": [
+        3440000.0,
+        3485450.0,
+        3490363.0,
+        3485250.0,
+        3471127.0,
+        3450807.0,
+        3428335.0,
+        3408186.0,
+        3394370.0,
+        3389640.0,
+        3394938.0,
+        3409207.0,
+        3429607.0
+      ],
+      "net_exposure": [
+        900000.0,
+        -1296572.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hedged_notional": [
+        0.0,
+        2188878.0,
+        3490363.0,
+        3485250.0,
+        3471127.0,
+        3450807.0,
+        3428335.0,
+        3408186.0,
+        3394370.0,
+        3389640.0,
+        3394938.0,
+        3409207.0,
+        3429607.0
+      ],
+      "hedge_ratio": [
+        0.0,
+        0.628,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "unrealized_pnl": [
+        0.0,
+        -7694.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0
+      ],
+      "total_equity": [
+        0.0,
+        -7694.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0,
+        2511.0
+      ],
+      "headroom": [
+        4100000.0,
+        3703428.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0,
+        5000000.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cash 0",
+            "gross_exposure 3.44e+06",
+            "headroom 4.1e+06"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cash 0",
+            "gross_exposure 4.57989e+06",
+            "headroom 3.01326e+06"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cash 18878",
+            "gross_exposure 1.29657e+06",
+            "headroom 3.70343e+06"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cash 0",
+            "gross_exposure 3.48545e+06",
+            "headroom 3.70343e+06"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cash 0",
+            "gross_exposure 5.69436e+06",
+            "headroom 1.87838e+06"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cash 33996",
+            "gross_exposure 2.38836e+06",
+            "headroom 4.81563e+06"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "open"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "close"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "hedge"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "open"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "close"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "patch_management",
+  "description": "a vulnerability patch-management world by severity; actions scan, patch, defer, verify",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a vulnerability patch-management world by severity; actions scan, patch, defer, verify"
+  },
+  "state_schema": {
+    "day": "int",
+    "last_action": "str",
+    "unscanned": "dict",
+    "open": "dict",
+    "patched": "dict",
+    "deferred": "dict",
+    "verified": "dict",
+    "open_total": "int",
+    "patched_total": "int",
+    "deferred_total": "int",
+    "verified_total": "int",
+    "unscanned_total": "int",
+    "risk": "float"
+  },
+  "initial_state": {
+    "day": 0,
+    "last_action": "none",
+    "unscanned": {
+      "critical": 2,
+      "high": 3,
+      "medium": 4,
+      "low": 5
+    },
+    "open": {
+      "critical": 1,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    },
+    "patched": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "deferred": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "verified": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "open_total": 2,
+    "patched_total": 0,
+    "deferred_total": 0,
+    "verified_total": 0,
+    "unscanned_total": 14,
+    "risk": 50.0
+  },
+  "actions": [
+    "scan",
+    "patch",
+    "defer",
+    "verify"
+  ],
+  "rules": [
+    "Vulnerabilities are tracked by severity: critical, high, medium, low.",
+    "Each vulnerability lives in exactly one pool: unscanned, open, patched, deferred, or verified.",
+    "scan moves every unscanned vulnerability into the open backlog (latent risk becomes known risk).",
+    "patch remediates one open vulnerability, choosing the highest severity first (open -> patched).",
+    "defer postpones one open vulnerability, choosing the lowest severity first (open -> deferred).",
+    "verify confirms all applied patches as remediated (patched -> verified).",
+    "Risk = weighted sum with critical=40, high=10, medium=4, low=1; open and deferred at full weight, patched at half weight, verified and unscanned at zero.",
+    "The total vulnerability count across all five pools is conserved; actions only move them between pools.",
+    "Every action advances the day counter by one; unknown actions are no-ops that still advance time."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\nSEVERITIES = [\"critical\", \"high\", \"medium\", \"low\"]\nWEIGHT = {\"critical\": 40, \"high\": 10, \"medium\": 4, \"low\": 1}\n\ndef _risk(s):\n    # open & deferred carry full weight; a patch is half-trusted until verified.\n    r = 0.0\n    for sev in SEVERITIES:\n        w = WEIGHT[sev]\n        r += w * s[\"open\"][sev]\n        r += w * s[\"deferred\"][sev]\n        r += 0.5 * w * s[\"patched\"][sev]\n    return round(r, 1)\n\ndef _totals(s):\n    s[\"open_total\"] = sum(s[\"open\"].values())\n    s[\"patched_total\"] = sum(s[\"patched\"].values())\n    s[\"deferred_total\"] = sum(s[\"deferred\"].values())\n    s[\"verified_total\"] = sum(s[\"verified\"].values())\n    s[\"unscanned_total\"] = sum(s[\"unscanned\"].values())\n    s[\"risk\"] = _risk(s)\n    return s\n\ndef _copy_pools(s):\n    # deep-copy the per-severity pools so we never mutate the caller's dicts.\n    for pool in (\"unscanned\", \"open\", \"patched\", \"deferred\", \"verified\"):\n        s[pool] = dict(s[pool])\n    return s\n\ndef transition(state, action):\n    s = _copy_pools(dict(state))\n    name = action.get(\"name\") if isinstance(action, dict) else action\n    s[\"day\"] = s.get(\"day\", 0) + 1\n    s[\"last_action\"] = name\n\n    if name == \"scan\":\n        # A scan surfaces every latent vulnerability into the open backlog.\n        for sev in SEVERITIES:\n            s[\"open\"][sev] += s[\"unscanned\"][sev]\n            s[\"unscanned\"][sev] = 0\n\n    elif name == \"patch\":\n        # Remediate one open vulnerability, highest severity first.\n        for sev in SEVERITIES:                       # critical -> low\n            if s[\"open\"][sev] > 0:\n                s[\"open\"][sev] -= 1\n                s[\"patched\"][sev] += 1\n                break\n\n    elif name == \"defer\":\n        # Postpone one open vulnerability, lowest severity first.\n        for sev in reversed(SEVERITIES):             # low -> critical\n            if s[\"open\"][sev] > 0:\n                s[\"open\"][sev] -= 1\n                s[\"deferred\"][sev] += 1\n                break\n\n    elif name == \"verify\":\n        # Confirm every applied patch as fully remediated.\n        for sev in SEVERITIES:\n            s[\"verified\"][sev] += s[\"patched\"][sev]\n            s[\"patched\"][sev] = 0\n\n    # any other action is a no-op (the clock still advances)\n    return _totals(s)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "unscanned"
+      ],
+      "schema": {
+        "unscanned": "dict"
+      },
+      "code": "\ndef perceive(data):\n    sev = [\"critical\", \"high\", \"medium\", \"low\"]\n    if not isinstance(data, dict):\n        data = {}\n    counts = {k: int(data.get(k, 0)) for k in sev}\n    return {\"unscanned\": counts}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "risk",
+        "open_total",
+        "patched_total",
+        "deferred_total",
+        "verified_total",
+        "unscanned_total"
+      ],
+      "report": "Day {day}: risk={risk} | open={open_total} patched={patched_total} deferred={deferred_total} verified={verified_total} unscanned={unscanned_total}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize_risk",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "maximize_verified",
+      "goal": "maximize",
+      "weight": 0.5
+    },
+    {
+      "name": "limit_deferred",
+      "goal": "minimize",
+      "weight": 0.25
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "scan",
+    "series": {
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "open_total": [
+        2.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0,
+        16.0
+      ],
+      "unscanned_total": [
+        14.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "risk": [
+        50.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0,
+        181.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "deferred_total 0",
+            "open_total 2"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 1",
+            "deferred_total 0",
+            "open_total 16"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 1",
+            "deferred_total 0",
+            "open_total 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 1",
+            "deferred_total 1",
+            "open_total 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 1",
+            "deferred_total 0",
+            "open_total 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 2",
+            "deferred_total 0",
+            "open_total 16"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "scan"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "patch"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "defer"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "verify"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "scan"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

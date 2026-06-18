@@ -1,0 +1,217 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "nda_lifecycle",
+  "description": "an NDA lifecycle world with expiry and renewal; actions execute, amend, expire",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an NDA lifecycle world with expiry and renewal; actions execute, amend, expire"
+  },
+  "state_schema": {
+    "status": "str",
+    "day": "int",
+    "term_days": "int",
+    "executed_on": "null",
+    "expires_on": "null",
+    "version": "int",
+    "amendments": "int",
+    "renewals": "int",
+    "lapses": "int",
+    "parties": "int"
+  },
+  "initial_state": {
+    "status": "draft",
+    "day": 0,
+    "term_days": 365,
+    "executed_on": null,
+    "expires_on": null,
+    "version": 1,
+    "amendments": 0,
+    "renewals": 0,
+    "lapses": 0,
+    "parties": 2
+  },
+  "actions": [
+    "execute",
+    "amend",
+    "expire"
+  ],
+  "rules": [
+    "An NDA begins as a 'draft' and only an executed NDA is in force.",
+    "'execute' on a draft makes it 'active' and sets expires_on = day + term_days.",
+    "'execute' on an 'expired' NDA renews it: a fresh term begins on the current day, incrementing renewals and version.",
+    "'execute' on an already 'active' NDA has no effect (idempotent).",
+    "'amend' is only valid while 'active'; it increments amendments and version, and extends expires_on (and term_days) by params.extend_days when provided.",
+    "'expire' lapses an 'active' NDA: the clock advances to expires_on and status becomes 'expired'; on a draft or already-expired NDA it has no effect.",
+    "expires_on and executed_on are null while the NDA is a draft."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    status = s.get(\"status\", \"draft\")\n    day = int(s.get(\"day\", 0))\n    term = int(s.get(\"term_days\", 365))\n\n    if name == \"execute\":\n        # Bring a draft into force, or renew a lapsed agreement from today.\n        if status == \"draft\":\n            s[\"status\"] = \"active\"\n            s[\"executed_on\"] = day\n            s[\"expires_on\"] = day + term\n        elif status == \"expired\":\n            # Renewal: a fresh term begins on the day the old one lapsed.\n            s[\"status\"] = \"active\"\n            s[\"executed_on\"] = day\n            s[\"expires_on\"] = day + term\n            s[\"renewals\"] = int(s.get(\"renewals\", 0)) + 1\n            s[\"version\"] = int(s.get(\"version\", 1)) + 1\n        # Executing an already in-force NDA is a no-op (idempotent).\n\n    elif name == \"amend\":\n        # Amend the terms of an in-force NDA: bump the version and, optionally,\n        # extend the confidentiality term by `extend_days`.\n        if status == \"active\":\n            extend = int(params.get(\"extend_days\", 0))\n            if extend < 0:\n                extend = 0\n            s[\"amendments\"] = int(s.get(\"amendments\", 0)) + 1\n            s[\"version\"] = int(s.get(\"version\", 1)) + 1\n            if extend > 0:\n                s[\"expires_on\"] = int(s.get(\"expires_on\", day)) + extend\n                s[\"term_days\"] = term + extend\n\n    elif name == \"expire\":\n        # Advance the clock to the expiry date and lapse the NDA. Only an\n        # in-force NDA can expire; on a draft or already-lapsed NDA it is a\n        # no-op.\n        if status == \"active\":\n            expires_on = int(s.get(\"expires_on\", day))\n            if day < expires_on:\n                day = expires_on\n            s[\"day\"] = day\n            s[\"status\"] = \"expired\"\n            s[\"lapses\"] = int(s.get(\"lapses\", 0)) + 1\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "parties",
+        "term_days"
+      ],
+      "schema": {
+        "parties": {
+          "type": "int",
+          "range": [
+            1,
+            100
+          ]
+        },
+        "term_days": {
+          "type": "int",
+          "range": [
+            1,
+            3650
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if isinstance(data, dict):\n        if data.get(\"parties\") is not None:\n            out[\"parties\"] = int(data[\"parties\"])\n        if data.get(\"term_days\") is not None:\n            out[\"term_days\"] = int(data[\"term_days\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "day",
+        "expires_on",
+        "version",
+        "renewals",
+        "lapses"
+      ],
+      "report": "NDA v{version}: {status} (day {day}); expires on {expires_on}; {renewals} renewal(s), {lapses} lapse(s)."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "continuity",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "lapses",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "execute",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "amendments 0",
+            "day 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "amendments 0",
+            "day 0",
+            "executed_on 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "amendments 1",
+            "day 0",
+            "executed_on 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "amendments 0",
+            "day 365",
+            "executed_on 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "amendments 2",
+            "day 0",
+            "executed_on 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "amendments 1",
+            "day 365",
+            "executed_on 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "execute"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "amend, expire"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "amend"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "expire"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "execute"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "amend"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "expire"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "execute"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

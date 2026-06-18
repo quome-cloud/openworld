@@ -1,0 +1,321 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "liquidity_mgmt",
+  "description": "a bank liquidity/reserve management world; actions lend, borrow, hold to meet reserves",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a bank liquidity/reserve management world; actions lend, borrow, hold to meet reserves"
+  },
+  "state_schema": {
+    "day": "int",
+    "cash": "float",
+    "loans": "float",
+    "deposits": "float",
+    "borrowings": "float",
+    "reserve_ratio": "float",
+    "loan_rate": "float",
+    "borrow_rate": "float",
+    "lend_amount": "float",
+    "borrow_amount": "float",
+    "interest_income": "float",
+    "interest_expense": "float",
+    "required_reserve": "float",
+    "reserve_shortfall": "float",
+    "compliant": "bool",
+    "profit": "float"
+  },
+  "initial_state": {
+    "day": 0,
+    "cash": 30.0,
+    "loans": 200.0,
+    "deposits": 250.0,
+    "borrowings": 0.0,
+    "reserve_ratio": 0.1,
+    "loan_rate": 0.01,
+    "borrow_rate": 0.04,
+    "lend_amount": 20.0,
+    "borrow_amount": 20.0,
+    "interest_income": 0.0,
+    "interest_expense": 0.0,
+    "required_reserve": 25.0,
+    "reserve_shortfall": 0.0,
+    "compliant": true,
+    "profit": 0.0
+  },
+  "actions": [
+    "lend",
+    "borrow",
+    "hold",
+    "repay"
+  ],
+  "rules": [
+    "The bank must keep cash at or above its required reserve, which equals reserve_ratio * deposits.",
+    "'lend' moves lend_amount of cash into loans (never more cash than is held); this raises future interest income but lowers liquid reserves.",
+    "'borrow' raises borrow_amount of cash from the funding window, increasing both cash and borrowings (and future interest expense).",
+    "'repay' uses cash to pay down borrowings, limited by both cash on hand and outstanding borrowings, reducing future interest expense.",
+    "'hold' takes no balance-sheet action and simply lets reserves sit while a period elapses.",
+    "Every step advances one period: loans accrue interest_income at loan_rate and borrowings accrue interest_expense at borrow_rate; net interest is added to cash and to cumulative profit.",
+    "After each step, compliant is true iff cash >= required_reserve, and reserve_shortfall reports any deficit."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"hold\")\n    params = action.get(\"params\", {}) or {}\n\n    cash = float(s.get(\"cash\", 0.0))\n    loans = float(s.get(\"loans\", 0.0))\n    deposits = float(s.get(\"deposits\", 0.0))\n    borrowings = float(s.get(\"borrowings\", 0.0))\n    ratio = float(s.get(\"reserve_ratio\", 0.0))\n    loan_rate = float(s.get(\"loan_rate\", 0.0))\n    borrow_rate = float(s.get(\"borrow_rate\", 0.0))\n    profit = float(s.get(\"profit\", 0.0))\n\n    lend_amt = float(params.get(\"amount\", s.get(\"lend_amount\", 0.0)))\n    borrow_amt = float(params.get(\"amount\", s.get(\"borrow_amount\", 0.0)))\n\n    if name == \"lend\":\n        amt = max(0.0, min(lend_amt, cash))   # cannot lend cash it does not hold\n        cash -= amt\n        loans += amt\n    elif name == \"borrow\":\n        amt = max(0.0, borrow_amt)\n        cash += amt\n        borrowings += amt\n    elif name == \"repay\":\n        amt = max(0.0, min(borrow_amt, cash, borrowings))\n        cash -= amt\n        borrowings -= amt\n    # 'hold' (and any unknown action) makes no balance-sheet move.\n\n    # Time advances one period: interest accrues on assets and liabilities.\n    earned = round(loan_rate * loans, 4)\n    paid = round(borrow_rate * borrowings, 4)\n    net = round(earned - paid, 4)\n    cash = round(cash + net, 4)\n    profit = round(profit + net, 4)\n\n    required = round(ratio * deposits, 4)\n    s[\"day\"] = int(s.get(\"day\", 0)) + 1\n    s[\"cash\"] = cash\n    s[\"loans\"] = round(loans, 4)\n    s[\"deposits\"] = round(deposits, 4)\n    s[\"borrowings\"] = round(borrowings, 4)\n    s[\"interest_income\"] = earned\n    s[\"interest_expense\"] = paid\n    s[\"required_reserve\"] = required\n    s[\"reserve_shortfall\"] = round(max(0.0, required - cash), 4)\n    s[\"compliant\"] = cash >= required\n    s[\"profit\"] = profit\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "cash",
+        "deposits",
+        "borrowings"
+      ],
+      "schema": {
+        "cash": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000000000.0
+          ]
+        },
+        "deposits": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000000000.0
+          ]
+        },
+        "borrowings": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000000000.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        feed = data\n    else:\n        feed = {}\n        for line in str(data).splitlines():\n            if \":\" in line:\n                k, _, v = line.partition(\":\")\n                feed[k.strip().lower()] = v.strip()\n    out = {}\n    for key in (\"cash\", \"deposits\", \"borrowings\"):\n        if key in feed:\n            try:\n                out[key] = float(feed[key])\n            except (ValueError, TypeError):\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "cash",
+        "required_reserve",
+        "reserve_shortfall",
+        "borrowings",
+        "profit",
+        "compliant"
+      ],
+      "report": "Day {day}: cash {cash} vs required {required_reserve} (shortfall {reserve_shortfall}); borrowings {borrowings}; cumulative profit {profit}; compliant={compliant}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "meet_reserve_requirement",
+      "goal": "minimize reserve_shortfall",
+      "weight": 1.0
+    },
+    {
+      "name": "profitability",
+      "goal": "maximize profit",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "lend",
+    "series": {
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "cash": [
+        30.0,
+        12.2,
+        2.322,
+        2.3452,
+        2.3687,
+        2.3924,
+        2.4163,
+        2.4404,
+        2.4649,
+        2.4895,
+        2.5144,
+        2.5395,
+        2.5649
+      ],
+      "loans": [
+        200.0,
+        220.0,
+        232.2,
+        234.522,
+        236.8672,
+        239.2359,
+        241.6283,
+        244.0446,
+        246.485,
+        248.9499,
+        251.4394,
+        253.9538,
+        256.4933
+      ],
+      "interest_income": [
+        0.0,
+        2.2,
+        2.322,
+        2.3452,
+        2.3687,
+        2.3924,
+        2.4163,
+        2.4404,
+        2.4649,
+        2.4895,
+        2.5144,
+        2.5395,
+        2.5649
+      ],
+      "reserve_shortfall": [
+        0.0,
+        12.8,
+        22.678,
+        22.6548,
+        22.6313,
+        22.6076,
+        22.5837,
+        22.5596,
+        22.5351,
+        22.5105,
+        22.4856,
+        22.4605,
+        22.4351
+      ],
+      "profit": [
+        0.0,
+        2.2,
+        4.522,
+        6.8672,
+        9.2359,
+        11.6283,
+        14.0446,
+        16.485,
+        18.9499,
+        21.4394,
+        23.9538,
+        26.4933,
+        29.0582
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "borrowings 0",
+            "cash 30",
+            "day 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "borrowings 0",
+            "cash 12.2",
+            "day 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "borrowings 20",
+            "cash 51.2",
+            "day 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "borrowings 0",
+            "cash 32",
+            "day 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "borrowings 0",
+            "cash 2.322",
+            "day 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "borrowings 20",
+            "cash 33.6",
+            "day 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "lend"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "borrow"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "hold"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "repay"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "lend"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "borrow"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

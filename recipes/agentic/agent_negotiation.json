@@ -1,0 +1,226 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "agent_negotiation",
+  "description": "a two-agent negotiation world over a deal; actions offer, counter, accept, walk_away",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a two-agent negotiation world over a deal; actions offer, counter, accept, walk_away"
+  },
+  "state_schema": {
+    "status": "str",
+    "turn": "str",
+    "current_offer": "null",
+    "offer_by": "null",
+    "agreed_price": "null",
+    "round": "int",
+    "buyer_reservation": "int",
+    "seller_reservation": "int",
+    "last_action": "null",
+    "last_actor": "null"
+  },
+  "initial_state": {
+    "status": "open",
+    "turn": "buyer",
+    "current_offer": null,
+    "offer_by": null,
+    "agreed_price": null,
+    "round": 0,
+    "buyer_reservation": 100,
+    "seller_reservation": 60,
+    "last_action": null,
+    "last_actor": null
+  },
+  "actions": [
+    "offer",
+    "counter",
+    "accept",
+    "walk_away"
+  ],
+  "rules": [
+    "Two agents, 'buyer' and 'seller', negotiate over a single deal price.",
+    "Only the agent whose turn it is acts; the turn alternates after every offer or counter.",
+    "'offer' and 'counter' place a price on the table and pass the turn to the other agent; 'counter' is only valid once an offer already exists.",
+    "'accept' closes the deal at the current offer, but only the agent who did NOT make that offer may accept it.",
+    "'walk_away' ends the negotiation immediately with no deal.",
+    "Once the status is 'deal' or 'no_deal' the negotiation is frozen and no action changes it.",
+    "A mutually beneficial deal is only possible when seller_reservation <= buyer_reservation."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef _default_price(s, actor):\n    # A deterministic concession used when an action carries no explicit price,\n    # so rollouts stay replayable. Buyers open low, sellers open high, and each\n    # subsequent move concedes halfway toward the midpoint of the bargaining zone.\n    lo = float(s.get(\"seller_reservation\", 0))\n    hi = float(s.get(\"buyer_reservation\", 0))\n    mid = (lo + hi) / 2.0\n    cur = s.get(\"current_offer\")\n    if cur is None:\n        return lo if actor == \"buyer\" else hi\n    cur = float(cur)\n    return round(cur + (mid - cur) / 2.0, 2)\n\n\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    agent = action.get(\"agent\")\n\n    # A closed negotiation is frozen: no action changes a settled outcome.\n    if s.get(\"status\") != \"open\":\n        return s\n\n    # The acting agent: an explicit buyer/seller, else whoever holds the turn.\n    actor = agent if agent in (\"buyer\", \"seller\") else s.get(\"turn\")\n    other = \"seller\" if actor == \"buyer\" else \"buyer\"\n\n    if name in (\"offer\", \"counter\"):\n        # A counter only makes sense once a price is already on the table.\n        if name == \"counter\" and s.get(\"current_offer\") is None:\n            return s\n        price = params.get(\"price\")\n        if price is None:\n            price = _default_price(s, actor)\n        s[\"current_offer\"] = round(float(price), 2)\n        s[\"offer_by\"] = actor\n        s[\"turn\"] = other\n        s[\"round\"] = int(s.get(\"round\", 0)) + 1\n        s[\"last_action\"] = name\n        s[\"last_actor\"] = actor\n\n    elif name == \"accept\":\n        # You can only accept an offer the OTHER party put on the table.\n        if s.get(\"current_offer\") is None or s.get(\"offer_by\") == actor:\n            return s\n        s[\"status\"] = \"deal\"\n        s[\"agreed_price\"] = s[\"current_offer\"]\n        s[\"turn\"] = None\n        s[\"last_action\"] = \"accept\"\n        s[\"last_actor\"] = actor\n\n    elif name == \"walk_away\":\n        # Either party may abandon the table at any point, ending in no deal.\n        s[\"status\"] = \"no_deal\"\n        s[\"turn\"] = None\n        s[\"last_action\"] = \"walk_away\"\n        s[\"last_actor\"] = actor\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "current_offer",
+        "offer_by"
+      ],
+      "schema": {
+        "current_offer": {
+          "type": "float",
+          "range": [
+            0,
+            1000
+          ]
+        },
+        "offer_by": "str"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if isinstance(data, dict):\n        price = data.get(\"price\")\n        who = data.get(\"from\") or data.get(\"agent\") or data.get(\"by\")\n        if price is not None:\n            out[\"current_offer\"] = float(price)\n        if who in (\"buyer\", \"seller\"):\n            out[\"offer_by\"] = who\n        return out\n    text = str(data).lower()\n    if \"buyer\" in text:\n        out[\"offer_by\"] = \"buyer\"\n    elif \"seller\" in text:\n        out[\"offer_by\"] = \"seller\"\n    num = \"\"\n    for ch in text:\n        if ch.isdigit() or ch == \".\":\n            num += ch\n        elif num:\n            break\n    if num:\n        out[\"current_offer\"] = float(num)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "agreed_price",
+        "current_offer",
+        "offer_by",
+        "round",
+        "turn"
+      ],
+      "report": "Negotiation status: {status} (round {round}). Current offer: {current_offer} by {offer_by}; next to act: {turn}. Agreed price: {agreed_price}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "reach_deal",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "rounds_to_settle",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "offer",
+    "series": {
+      "round": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "current_offer": [
+        60.0,
+        70.0,
+        75.0,
+        77.5,
+        78.75,
+        79.38,
+        79.69,
+        79.84,
+        79.92,
+        79.96,
+        79.98,
+        79.99
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "round 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "current_offer 60",
+            "round 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "round 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "current_offer 70",
+            "round 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "current_offer 70",
+            "round 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "agreed_price 60",
+            "current_offer 60",
+            "round 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "offer"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "walk_away"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "counter, accept"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "offer"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "counter"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "accept"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

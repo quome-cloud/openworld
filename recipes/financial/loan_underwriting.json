@@ -1,0 +1,204 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "loan_underwriting",
+  "description": "a loan underwriting world with application states and risk; actions submit, verify, approve, decline",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a loan underwriting world with application states and risk; actions submit, verify, approve, decline"
+  },
+  "state_schema": {
+    "status": "str",
+    "amount": "int",
+    "income": "int",
+    "credit_score": "int",
+    "verified": "bool",
+    "risk_score": "float",
+    "decision": "str"
+  },
+  "initial_state": {
+    "status": "draft",
+    "amount": 25000,
+    "income": 60000,
+    "credit_score": 700,
+    "verified": false,
+    "risk_score": 0.0,
+    "decision": "pending"
+  },
+  "actions": [
+    "submit",
+    "verify",
+    "approve",
+    "decline"
+  ],
+  "rules": [
+    "An application moves through states draft -> submitted -> verified, then terminates at approved or declined.",
+    "'submit' is only valid from 'draft' and may carry amount/income/credit_score in its params.",
+    "'verify' is only valid from 'submitted'; it sets verified=true and computes risk_score from debt-to-income and credit quality (0=safe, 100=risky).",
+    "'approve' is only valid from 'verified' and only when risk_score <= 50; it sets status=approved.",
+    "'decline' is valid from 'submitted' or 'verified' and sets status=declined.",
+    "'approved' and 'declined' are terminal: no action changes them."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    status = s.get(\"status\", \"draft\")\n\n    # An applicant submits a draft application (optionally supplying the figures).\n    if name == \"submit\":\n        if status == \"draft\":\n            for k in (\"amount\", \"income\", \"credit_score\"):\n                if k in params:\n                    s[k] = params[k]\n            s[\"status\"] = \"submitted\"\n        return s\n\n    # The underwriter verifies the submitted figures and scores the risk. The\n    # risk score (0=safe .. 100=risky) blends debt-to-income with credit quality.\n    if name == \"verify\":\n        if status == \"submitted\":\n            income = s.get(\"income\", 0)\n            if income < 1:\n                income = 1\n            amount = s.get(\"amount\", 0)\n            credit = s.get(\"credit_score\", 600)\n            dti = amount / income\n            risk = dti * 40.0 + (800 - credit) / 8.0\n            risk = max(0.0, min(100.0, risk))\n            s[\"verified\"] = True\n            s[\"risk_score\"] = round(risk, 1)\n            s[\"status\"] = \"verified\"\n        return s\n\n    # Approve only a verified application whose risk is within tolerance.\n    if name == \"approve\":\n        if status == \"verified\" and s.get(\"risk_score\", 100.0) <= 50.0:\n            s[\"status\"] = \"approved\"\n            s[\"decision\"] = \"approved\"\n        return s\n\n    # Decline a submitted or verified application (e.g. risk too high).\n    if name == \"decline\":\n        if status in (\"submitted\", \"verified\"):\n            s[\"status\"] = \"declined\"\n            s[\"decision\"] = \"declined\"\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "amount",
+        "income",
+        "credit_score"
+      ],
+      "schema": {
+        "amount": {
+          "type": "int",
+          "range": [
+            0,
+            10000000
+          ]
+        },
+        "income": {
+          "type": "int",
+          "range": [
+            0,
+            100000000
+          ]
+        },
+        "credit_score": {
+          "type": "int",
+          "range": [
+            300,
+            850
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, _, val = line.partition(\":\")\n        key = key.strip().lower()\n        val = val.strip()\n        if key in (\"amount\", \"income\", \"credit_score\"):\n            try:\n                out[key] = int(float(val))\n            except (ValueError, TypeError):\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "amount",
+        "risk_score",
+        "decision"
+      ],
+      "report": "Loan application is {status}: amount {amount}, risk score {risk_score}, decision {decision}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "sound_decisions",
+      "goal": "approve low-risk applications and decline high-risk ones"
+    },
+    {
+      "name": "minimize_default_risk",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "submit",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "risk_score 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "risk_score 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "risk_score 29.2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "risk_score 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "risk_score 29.2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "risk_score 29.2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "submit"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "verify, approve, decline"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "verify"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "decline"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "submit, approve"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "approve"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "decline"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "submit, verify"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

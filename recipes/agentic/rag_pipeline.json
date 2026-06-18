@@ -1,0 +1,246 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "rag_pipeline",
+  "description": "a retrieval-augmented generation pipeline world; actions query, retrieve, generate, cite",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a retrieval-augmented generation pipeline world; actions query, retrieve, generate, cite"
+  },
+  "state_schema": {
+    "phase": "str",
+    "query": "str",
+    "queries_asked": "int",
+    "corpus_size": "int",
+    "retrieved": "list",
+    "context_tokens": "int",
+    "answer": "str",
+    "answer_tokens": "int",
+    "citations": "list",
+    "grounded": "bool",
+    "hallucination_risk": "float",
+    "steps": "int"
+  },
+  "initial_state": {
+    "phase": "idle",
+    "query": "",
+    "queries_asked": 0,
+    "corpus_size": 12,
+    "retrieved": [],
+    "context_tokens": 0,
+    "answer": "",
+    "answer_tokens": 0,
+    "citations": [],
+    "grounded": false,
+    "hallucination_risk": 1.0,
+    "steps": 0
+  },
+  "actions": [
+    "query",
+    "retrieve",
+    "generate",
+    "cite"
+  ],
+  "rules": [
+    "The pipeline advances through ordered phases: idle -> queried -> retrieved -> generated -> cited.",
+    "'query' may fire in any phase; it starts a fresh question and clears the retrieved docs, answer, and citations.",
+    "'retrieve' requires a posed query (phase 'queried' or 'retrieved'); it pulls top-k corpus docs into the context (deduped, deterministic).",
+    "'generate' requires retrieved context (phase 'retrieved' or 'generated'); it writes an answer whose hallucination risk falls as more docs support it.",
+    "'cite' requires a generated answer (phase 'generated' or 'cited'); it attributes the answer to every retrieved doc, sets grounded=True, and drives hallucination_risk to 0.",
+    "An action attempted out of phase is a no-op except that the step counter still advances.",
+    "Dynamics are pure and deterministic: doc ids, token counts, and grounding are functions of the state and action params only."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    s[\"steps\"] = int(s.get(\"steps\", 0)) + 1\n    corpus = int(s.get(\"corpus_size\", 12))\n\n    if name == \"query\":\n        # Ask (or re-ask): begin a fresh pipeline, discarding stale artifacts.\n        s[\"queries_asked\"] = int(s.get(\"queries_asked\", 0)) + 1\n        text = params.get(\"text\") or (\"question-%d\" % s[\"queries_asked\"])\n        s[\"query\"] = text\n        s[\"phase\"] = \"queried\"\n        s[\"retrieved\"] = []\n        s[\"context_tokens\"] = 0\n        s[\"answer\"] = \"\"\n        s[\"answer_tokens\"] = 0\n        s[\"citations\"] = []\n        s[\"grounded\"] = False\n        s[\"hallucination_risk\"] = 1.0\n\n    elif name == \"retrieve\":\n        # Fetch top-k docs from the corpus. Idempotent across repeats: the\n        # retrieved set only ever grows (deduped, deterministic order).\n        if s.get(\"phase\") in (\"queried\", \"retrieved\"):\n            k = int(params.get(\"top_k\", 3))\n            k = max(1, min(k, corpus))\n            seed = int(s.get(\"queries_asked\", 1))\n            seen = list(s.get(\"retrieved\", []))\n            for i in range(k):\n                doc = \"doc%d\" % (((seed * 7 + i) % corpus) + 1)\n                if doc not in seen:\n                    seen.append(doc)\n            s[\"retrieved\"] = seen\n            s[\"context_tokens\"] = len(seen) * 64\n            s[\"phase\"] = \"retrieved\"\n\n    elif name == \"generate\":\n        # Synthesize an answer conditioned on the retrieved context. Risk of an\n        # ungrounded claim falls as more supporting context is in hand, but the\n        # answer is not yet attributable until it is cited.\n        if s.get(\"phase\") in (\"retrieved\", \"generated\") and s.get(\"retrieved\"):\n            ndocs = len(s[\"retrieved\"])\n            s[\"answer\"] = \"Answer to %r grounded in %d retrieved doc(s).\" % (\n                s.get(\"query\", \"\"), ndocs)\n            s[\"answer_tokens\"] = 32 + int(s.get(\"context_tokens\", 0)) // 4\n            s[\"hallucination_risk\"] = round(1.0 / (1 + ndocs), 4)\n            s[\"phase\"] = \"generated\"\n\n    elif name == \"cite\":\n        # Attribute the answer to its sources: every retrieved doc becomes a\n        # citation, the answer is marked grounded, and hallucination risk -> 0.\n        if s.get(\"phase\") in (\"generated\", \"cited\") and s.get(\"answer\"):\n            s[\"citations\"] = list(s.get(\"retrieved\", []))\n            s[\"grounded\"] = len(s[\"citations\"]) > 0\n            if s[\"grounded\"]:\n                s[\"hallucination_risk\"] = 0.0\n            s[\"phase\"] = \"cited\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "query",
+        "phase"
+      ],
+      "schema": {
+        "query": "str",
+        "phase": "str"
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        text = data.get(\"text\") or data.get(\"query\") or \"\"\n    else:\n        text = str(data)\n    text = text.strip()\n    return {\"query\": text, \"phase\": \"queried\" if text else \"idle\"}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "query",
+        "answer",
+        "citations",
+        "grounded",
+        "hallucination_risk"
+      ],
+      "report": "Q: {query}\nA: {answer}\nSources: {citations}\nGrounded: {grounded} (hallucination risk {hallucination_risk})"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "answer_grounded",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "hallucination_risk",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "context_tokens",
+      "goal": "minimize",
+      "weight": 0.25
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "query",
+    "series": {
+      "queries_asked": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "steps": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "context_tokens 0",
+            "queries_asked 0",
+            "steps 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "context_tokens 0",
+            "queries_asked 1",
+            "steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "context_tokens 0",
+            "queries_asked 0",
+            "steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "context_tokens 0",
+            "queries_asked 2",
+            "steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "context_tokens 192",
+            "queries_asked 1",
+            "steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "context_tokens 0",
+            "queries_asked 1",
+            "steps 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "query"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "retrieve"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "generate"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "cite"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "query"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "retrieve"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "generate"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "cite"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

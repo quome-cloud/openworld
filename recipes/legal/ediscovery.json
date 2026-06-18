@@ -1,0 +1,246 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ediscovery",
+  "description": "an e-discovery review world labeling docs responsive/privileged; actions ingest, review, produce, withhold",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an e-discovery review world labeling docs responsive/privileged; actions ingest, review, produce, withhold"
+  },
+  "state_schema": {
+    "inbox": "int",
+    "next_id": "int",
+    "docs": "dict",
+    "ingested": "int",
+    "reviewed": "int",
+    "produced": "int",
+    "withheld": "int",
+    "log": "list"
+  },
+  "initial_state": {
+    "inbox": 4,
+    "next_id": 1,
+    "docs": {},
+    "ingested": 0,
+    "reviewed": 0,
+    "produced": 0,
+    "withheld": 0,
+    "log": []
+  },
+  "actions": [
+    "ingest",
+    "review",
+    "produce",
+    "withhold"
+  ],
+  "rules": [
+    "'ingest' moves one raw document from the inbox into the corpus as 'unreviewed'.",
+    "'review' labels an unreviewed document with responsive and privileged flags, making it 'reviewed'.",
+    "'produce' is legal only for a reviewed document that is responsive and not privileged.",
+    "'withhold' is legal for a reviewed document that is privileged or not responsive; it joins the privilege log.",
+    "A privileged document is never produced (no inadvertent disclosure).",
+    "Each document advances monotonically: unreviewed -> reviewed -> produced|withheld."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    docs = {k: dict(v) for k, v in s.get(\"docs\", {}).items()}\n    log = list(s.get(\"log\", []))\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    def ordered():\n        return sorted(docs, key=lambda x: int(x))\n\n    def first_status(status):\n        for did in ordered():\n            if docs[did][\"status\"] == status:\n                return did\n        return None\n\n    def first_reviewed(pred):\n        for did in ordered():\n            d = docs[did]\n            if d[\"status\"] == \"reviewed\" and pred(d):\n                return did\n        return None\n\n    if name == \"ingest\":\n        # Pull one raw document off the inbox into the review corpus.\n        if s.get(\"inbox\", 0) > 0:\n            did = str(s.get(\"next_id\", 1))\n            docs[did] = {\"status\": \"unreviewed\", \"responsive\": None,\n                         \"privileged\": None}\n            s[\"next_id\"] = s.get(\"next_id\", 1) + 1\n            s[\"inbox\"] = s[\"inbox\"] - 1\n            s[\"ingested\"] = s.get(\"ingested\", 0) + 1\n            log.append(\"ingest:\" + did)\n\n    elif name == \"review\":\n        # Label an unreviewed document responsive / privileged. When the labels\n        # are not supplied they are derived deterministically from the doc id so\n        # rollouts are replayable.\n        did = params.get(\"doc\") or first_status(\"unreviewed\")\n        if did is not None and did in docs and docs[did][\"status\"] == \"unreviewed\":\n            i = int(did)\n            responsive = params.get(\"responsive\")\n            if responsive is None:\n                responsive = (i % 2 == 1)\n            privileged = params.get(\"privileged\")\n            if privileged is None:\n                privileged = (i % 3 == 0)\n            docs[did][\"status\"] = \"reviewed\"\n            docs[did][\"responsive\"] = bool(responsive)\n            docs[did][\"privileged\"] = bool(privileged)\n            s[\"reviewed\"] = s.get(\"reviewed\", 0) + 1\n            log.append(\"review:\" + did)\n\n    elif name == \"produce\":\n        # Turn a reviewed document over to the requesting party. Only a\n        # responsive, non-privileged document may be produced.\n        eligible = lambda d: d[\"responsive\"] and not d[\"privileged\"]\n        did = params.get(\"doc\")\n        if did is None:\n            did = first_reviewed(eligible)\n        if (did is not None and did in docs\n                and docs[did][\"status\"] == \"reviewed\"\n                and eligible(docs[did])):\n            docs[did][\"status\"] = \"produced\"\n            s[\"produced\"] = s.get(\"produced\", 0) + 1\n            log.append(\"produce:\" + did)\n\n    elif name == \"withhold\":\n        # Hold a reviewed document back onto the privilege log. Legal for a\n        # privileged document or one that is simply not responsive.\n        eligible = lambda d: d[\"privileged\"] or not d[\"responsive\"]\n        did = params.get(\"doc\")\n        if did is None:\n            did = first_reviewed(eligible)\n        if (did is not None and did in docs\n                and docs[did][\"status\"] == \"reviewed\"\n                and eligible(docs[did])):\n            docs[did][\"status\"] = \"withheld\"\n            s[\"withheld\"] = s.get(\"withheld\", 0) + 1\n            log.append(\"withhold:\" + did)\n\n    s[\"docs\"] = docs\n    s[\"log\"] = log\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "inbox"
+      ],
+      "schema": {
+        "inbox": "int"
+      },
+      "code": "\ndef perceive(data):\n    if isinstance(data, dict):\n        docs = data.get(\"documents\", data.get(\"docs\", data))\n    else:\n        docs = data\n    if isinstance(docs, (list, dict)):\n        n = len(docs)\n    else:\n        n = int(docs)\n    return {\"inbox\": n}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "ingested",
+        "reviewed",
+        "produced",
+        "withheld"
+      ],
+      "report": "E-discovery review summary: {ingested} ingested, {reviewed} reviewed, {produced} produced, {withheld} withheld on the privilege log."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "review_completeness",
+      "goal": "maximize the fraction of ingested documents that are reviewed"
+    },
+    {
+      "name": "production_accuracy",
+      "goal": "maximize responsive, non-privileged documents produced"
+    },
+    {
+      "name": "privilege_protection",
+      "goal": "minimize privileged documents produced (avoid disclosure)"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "ingest",
+    "series": {
+      "inbox": [
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "next_id": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "ingested": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0,
+        4.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "inbox 4",
+            "ingested 0",
+            "next_id 1"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "inbox 3",
+            "ingested 1",
+            "next_id 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "inbox 2",
+            "ingested 2",
+            "next_id 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "inbox 3",
+            "ingested 1",
+            "next_id 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "inbox 1",
+            "ingested 3",
+            "next_id 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "inbox 2",
+            "ingested 2",
+            "next_id 3"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "ingest"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "review, produce, withhold"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "ingest"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "review"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "produce, withhold"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "ingest"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "review"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "produce, withhold"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

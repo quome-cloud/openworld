@@ -1,0 +1,252 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "regulatory_filing",
+  "description": "a regulatory filing-calendar world (e.g. SEC); actions prepare, file, amend, mark_late",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a regulatory filing-calendar world (e.g. SEC); actions prepare, file, amend, mark_late"
+  },
+  "state_schema": {
+    "filing_type": "str",
+    "today": "int",
+    "deadline": "int",
+    "days_remaining": "int",
+    "status": "str",
+    "prepared": "bool",
+    "filed": "bool",
+    "filed_on": "null",
+    "amendments": "int",
+    "late_flag": "bool",
+    "penalty": "int",
+    "log": "list"
+  },
+  "initial_state": {
+    "filing_type": "10-K",
+    "today": 0,
+    "deadline": 5,
+    "days_remaining": 5,
+    "status": "open",
+    "prepared": false,
+    "filed": false,
+    "filed_on": null,
+    "amendments": 0,
+    "late_flag": false,
+    "penalty": 0,
+    "log": []
+  },
+  "actions": [
+    "prepare",
+    "file",
+    "amend",
+    "mark_late"
+  ],
+  "rules": [
+    "Time advances by one calendar day on every action (params={'days': n} skips ahead n days).",
+    "'days_remaining' always equals deadline - today; it goes negative once the deadline has passed.",
+    "'prepare' marks the filing as prepared; it is allowed only before the filing is submitted and is idempotent.",
+    "'file' submits a prepared filing exactly once; it requires 'prepared' to be true and 'filed' to be false.",
+    "A filing submitted after the deadline (today > deadline) sets late_flag and accrues PENALTY_PER_DAY for each overdue day.",
+    "'amend' is allowed only after the filing has been submitted; each amend increments the amendment count.",
+    "'mark_late' applies only once the deadline has passed without a timely filing; it sets the penalty to the overdue-day count times PENALTY_PER_DAY.",
+    "State is symbolic and deterministic: the same (state, action) always yields the same next state."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    PENALTY_PER_DAY = 100\n\n    # The calendar always advances first: every action consumes >= 1 day.\n    days = params.get(\"days\", 1)\n    if not isinstance(days, int) or days < 1:\n        days = 1\n    s[\"today\"] = int(s.get(\"today\", 0)) + days\n    deadline = int(s.get(\"deadline\", 0))\n    s[\"days_remaining\"] = deadline - s[\"today\"]\n\n    log = list(s.get(\"log\", []))\n\n    def overdue(day):\n        return max(0, day - deadline)\n\n    if name == \"prepare\":\n        # Draft the filing. Allowed any time before it is filed; idempotent once\n        # prepared. Does not by itself satisfy the deadline.\n        if not s.get(\"filed\", False):\n            s[\"prepared\"] = True\n            if not s.get(\"late_flag\", False):\n                s[\"status\"] = \"prepared\"\n            log.append(\"day %d: prepared %s\" % (s[\"today\"], s.get(\"filing_type\")))\n\n    elif name == \"file\":\n        # Submit the prepared filing to the regulator. Requires a prepared draft\n        # and that it has not already been filed. Lateness is judged at filing.\n        if s.get(\"prepared\", False) and not s.get(\"filed\", False):\n            s[\"filed\"] = True\n            s[\"filed_on\"] = s[\"today\"]\n            late_days = overdue(s[\"today\"])\n            if late_days > 0:\n                s[\"late_flag\"] = True\n                s[\"penalty\"] = int(s.get(\"penalty\", 0)) + late_days * PENALTY_PER_DAY\n                s[\"status\"] = \"filed\"\n            else:\n                s[\"status\"] = \"filed\"\n            log.append(\"day %d: filed %s (%d day(s) %s deadline)\" % (\n                s[\"today\"], s.get(\"filing_type\"),\n                abs(s[\"days_remaining\"]),\n                \"past\" if late_days > 0 else \"before/on\"))\n\n    elif name == \"amend\":\n        # Correct a filing already submitted. Requires a prior filing; bumps the\n        # amendment count and reflects it in the status.\n        if s.get(\"filed\", False):\n            s[\"amendments\"] = int(s.get(\"amendments\", 0)) + 1\n            s[\"status\"] = \"amended\"\n            log.append(\"day %d: amended %s (amendment #%d)\" % (\n                s[\"today\"], s.get(\"filing_type\"), s[\"amendments\"]))\n\n    elif name == \"mark_late\":\n        # Administratively flag the filing as delinquent. Meaningful only once the\n        # deadline has passed without a timely submission; sets the accrued\n        # penalty to the current number of overdue days.\n        late_days = overdue(s[\"today\"])\n        if late_days > 0 and not (s.get(\"filed\", False) and not s.get(\"late_flag\", False)):\n            s[\"late_flag\"] = True\n            s[\"penalty\"] = late_days * PENALTY_PER_DAY\n            if not s.get(\"filed\", False):\n                s[\"status\"] = \"late\"\n            log.append(\"day %d: marked %s late (%d day(s) overdue)\" % (\n                s[\"today\"], s.get(\"filing_type\"), late_days))\n\n    s[\"log\"] = log\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "filing_type",
+        "deadline"
+      ],
+      "schema": {
+        "filing_type": "str",
+        "deadline": {
+          "type": "int",
+          "range": [
+            0,
+            3650
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    if isinstance(data, dict):\n        if data.get(\"filing_type\") is not None:\n            out[\"filing_type\"] = str(data[\"filing_type\"])\n        dl = data.get(\"deadline\", data.get(\"due_in_days\"))\n        if dl is not None:\n            out[\"deadline\"] = int(dl)\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "filing_type",
+        "status",
+        "today",
+        "deadline",
+        "days_remaining",
+        "filed_on",
+        "amendments",
+        "late_flag",
+        "penalty"
+      ],
+      "report": "Filing {filing_type}: status={status} on day {today} (deadline day {deadline}, {days_remaining} day(s) remaining). Filed on day {filed_on}; {amendments} amendment(s); late={late_flag}; penalty={penalty}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "timely_filing",
+      "goal": "file the report on or before the deadline (avoid late_flag)",
+      "weight": 1.0
+    },
+    {
+      "name": "minimize_penalty",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "minimize_amendments",
+      "goal": "minimize",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "prepare",
+    "series": {
+      "today": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "days_remaining": [
+        5.0,
+        4.0,
+        3.0,
+        2.0,
+        1.0,
+        0.0,
+        -1.0,
+        -2.0,
+        -3.0,
+        -4.0,
+        -5.0,
+        -6.0,
+        -7.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "days_remaining 5",
+            "today 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "days_remaining 4",
+            "today 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "days_remaining 4",
+            "today 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "days_remaining 3",
+            "today 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "days_remaining 3",
+            "filed_on 2",
+            "today 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "days_remaining 3",
+            "today 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "prepare"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "file"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "amend"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "mark_late"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "prepare"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "file"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "amend"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "mark_late"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

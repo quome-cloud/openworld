@@ -1,0 +1,234 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "demand_response",
+  "description": "a demand-response event world; actions enroll, curtail, settle",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a demand-response event world; actions enroll, curtail, settle"
+  },
+  "state_schema": {
+    "phase": "str",
+    "participants": "int",
+    "baseline_kw": "float",
+    "current_load_kw": "float",
+    "enrolled_kw": "float",
+    "target_reduction_kw": "float",
+    "delivered_kw": "float",
+    "shortfall_kw": "float",
+    "incentive_rate": "float",
+    "penalty_rate": "float",
+    "settlement": "float",
+    "event_active": "bool",
+    "settled": "bool"
+  },
+  "initial_state": {
+    "phase": "idle",
+    "participants": 0,
+    "baseline_kw": 100.0,
+    "current_load_kw": 100.0,
+    "enrolled_kw": 0.0,
+    "target_reduction_kw": 30.0,
+    "delivered_kw": 0.0,
+    "shortfall_kw": 0.0,
+    "incentive_rate": 0.5,
+    "penalty_rate": 1.0,
+    "settlement": 0.0,
+    "event_active": false,
+    "settled": false
+  },
+  "actions": [
+    "enroll",
+    "curtail",
+    "settle"
+  ],
+  "rules": [
+    "enroll adds curtailable capacity; total enrolled_kw is capped at baseline_kw and is refused once settled.",
+    "curtail opens the event and delivers load reduction, never exceeding enrolled_kw; current_load_kw = baseline_kw - delivered_kw.",
+    "settle pays incentive_rate per delivered kW minus penalty_rate per kW of shortfall against min(enrolled_kw, target_reduction_kw), then locks the event.",
+    "phase advances idle -> enrolled -> event_active -> settled and never moves backward."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    baseline = s.get(\"baseline_kw\", 100.0)\n\n    if name == \"enroll\":\n        # Register curtailable capacity into the program. Total enrolled\n        # capacity is capped at the baseline load (cannot promise to shed\n        # more than is actually drawn). Closed once the event is settled.\n        if s.get(\"settled\"):\n            return s\n        kw = float(params.get(\"kw\", 20.0))\n        s[\"enrolled_kw\"] = min(baseline, round(s.get(\"enrolled_kw\", 0.0) + kw, 4))\n        s[\"participants\"] = s.get(\"participants\", 0) + 1\n        if s.get(\"phase\") == \"idle\":\n            s[\"phase\"] = \"enrolled\"\n\n    elif name == \"curtail\":\n        # Shed load during the event. Delivered curtailment can never exceed\n        # enrolled capacity; current load drops by what is delivered.\n        if s.get(\"settled\"):\n            return s\n        s[\"event_active\"] = True\n        s[\"phase\"] = \"event_active\"\n        room = max(0.0, round(s.get(\"enrolled_kw\", 0.0) - s.get(\"delivered_kw\", 0.0), 4))\n        kw = min(float(params.get(\"kw\", 10.0)), room)\n        s[\"delivered_kw\"] = round(s.get(\"delivered_kw\", 0.0) + kw, 4)\n        s[\"current_load_kw\"] = round(baseline - s[\"delivered_kw\"], 4)\n\n    elif name == \"settle\":\n        # Close the event and compute the payout. Obligation is the smaller of\n        # what was enrolled and the dispatched target. Shortfall is the unmet\n        # part of that obligation; payout = incentive*delivered - penalty*short.\n        if s.get(\"settled\"):\n            return s\n        delivered = s.get(\"delivered_kw\", 0.0)\n        obligation = min(s.get(\"enrolled_kw\", 0.0), s.get(\"target_reduction_kw\", 0.0))\n        shortfall = max(0.0, round(obligation - delivered, 4))\n        revenue = s.get(\"incentive_rate\", 0.0) * delivered\n        penalty = s.get(\"penalty_rate\", 0.0) * shortfall\n        s[\"shortfall_kw\"] = shortfall\n        s[\"settlement\"] = round(revenue - penalty, 4)\n        s[\"settled\"] = True\n        s[\"event_active\"] = False\n        s[\"phase\"] = \"settled\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "target_reduction_kw",
+        "incentive_rate"
+      ],
+      "schema": {
+        "target_reduction_kw": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000.0
+          ]
+        },
+        "incentive_rate": {
+          "type": "float",
+          "range": [
+            0.0,
+            10.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    d = data if isinstance(data, dict) else {}\n    out = {}\n    if \"target_reduction_kw\" in d:\n        out[\"target_reduction_kw\"] = float(d[\"target_reduction_kw\"])\n    if \"incentive_rate\" in d:\n        out[\"incentive_rate\"] = float(d[\"incentive_rate\"])\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "enrolled_kw",
+        "delivered_kw",
+        "shortfall_kw",
+        "settlement"
+      ],
+      "report": "DR event [{phase}]: {participants} enrolled for {enrolled_kw} kW, delivered {delivered_kw} kW vs target {target_reduction_kw} kW (shortfall {shortfall_kw} kW) -> settlement ${settlement}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "meet_dispatch",
+      "goal": "minimize shortfall_kw"
+    },
+    {
+      "name": "participant_payout",
+      "goal": "maximize settlement"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "enroll",
+    "series": {
+      "participants": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "enrolled_kw": [
+        0.0,
+        20.0,
+        40.0,
+        60.0,
+        80.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "current_load_kw 100",
+            "delivered_kw 0",
+            "enrolled_kw 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "current_load_kw 100",
+            "delivered_kw 0",
+            "enrolled_kw 20"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "current_load_kw 100",
+            "delivered_kw 0",
+            "enrolled_kw 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "current_load_kw 100",
+            "delivered_kw 0",
+            "enrolled_kw 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "current_load_kw 100",
+            "delivered_kw 0",
+            "enrolled_kw 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "current_load_kw 90",
+            "delivered_kw 10",
+            "enrolled_kw 20"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "enroll"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "curtail"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "settle"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "enroll"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "curtail"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

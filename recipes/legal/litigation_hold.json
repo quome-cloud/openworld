@@ -1,0 +1,286 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "litigation_hold",
+  "description": "a litigation-hold preservation world; actions issue_hold, acknowledge, release",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "legal",
+      "compliance",
+      "preservation",
+      "leaf"
+    ],
+    "lineage": "build/litigation_hold.py",
+    "metrics": {},
+    "description": "a litigation-hold preservation world; actions issue_hold, acknowledge, release"
+  },
+  "state_schema": {
+    "status": "str",
+    "custodians": "int",
+    "acknowledged": "int",
+    "pending": "int",
+    "preserved_items": "int",
+    "released_items": "int",
+    "notices_sent": "int",
+    "breaches": "int",
+    "day": "int"
+  },
+  "initial_state": {
+    "status": "none",
+    "custodians": 0,
+    "acknowledged": 0,
+    "pending": 0,
+    "preserved_items": 0,
+    "released_items": 0,
+    "notices_sent": 0,
+    "breaches": 0,
+    "day": 0
+  },
+  "actions": [
+    "issue_hold",
+    "acknowledge",
+    "release"
+  ],
+  "rules": [
+    "'issue_hold' opens a hold (status -> 'active') or expands an active one: it notifies custodians and freezes their items from deletion.",
+    "'acknowledge' records one custodian's confirmation while the hold is active and acknowledgments are still outstanding.",
+    "Acknowledging with no active hold, or after every custodian has acknowledged, is a preservation breach.",
+    "'release' lifts an active hold once the matter resolves: frozen items are released and the duty ends (status -> 'released').",
+    "Releasing when no hold is active is a breach.",
+    "While a hold is active, preserved items are monotonic: nothing is released until 'release' is issued."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    s[\"day\"] = s.get(\"day\", 0) + 1\n\n    if name == \"issue_hold\":\n        # Counsel opens a hold, or expands the scope of an active one: more\n        # custodians are notified and more of their items are frozen.\n        add_custodians = int(params.get(\"custodians\", 1))\n        add_items = int(params.get(\"items\", 10))\n        if add_custodians < 0:\n            add_custodians = 0\n        if add_items < 0:\n            add_items = 0\n        s[\"status\"] = \"active\"\n        s[\"custodians\"] = s.get(\"custodians\", 0) + add_custodians\n        s[\"preserved_items\"] = s.get(\"preserved_items\", 0) + add_items\n        s[\"notices_sent\"] = s.get(\"notices_sent\", 0) + 1\n\n    elif name == \"acknowledge\":\n        # A custodian confirms receipt while the hold is active and confirmations\n        # are still outstanding. Acknowledging with no active hold, or after\n        # everyone has already acknowledged, is a compliance breach.\n        if s.get(\"status\") == \"active\" and s.get(\"acknowledged\", 0) < s.get(\"custodians\", 0):\n            s[\"acknowledged\"] = s.get(\"acknowledged\", 0) + 1\n        else:\n            s[\"breaches\"] = s.get(\"breaches\", 0) + 1\n\n    elif name == \"release\":\n        # Counsel lifts an active hold once the matter resolves: frozen items are\n        # released and the preservation duty ends. Releasing when nothing is on\n        # hold is a breach (no lawful order to lift).\n        if s.get(\"status\") == \"active\":\n            s[\"status\"] = \"released\"\n            s[\"released_items\"] = s.get(\"released_items\", 0) + s.get(\"preserved_items\", 0)\n            s[\"preserved_items\"] = 0\n            s[\"acknowledged\"] = 0\n            s[\"custodians\"] = 0\n        else:\n            s[\"breaches\"] = s.get(\"breaches\", 0) + 1\n\n    # Derived: custodians who still owe an acknowledgment.\n    s[\"pending\"] = max(0, s.get(\"custodians\", 0) - s.get(\"acknowledged\", 0))\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "custodians",
+        "preserved_items",
+        "status"
+      ],
+      "schema": {
+        "custodians": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "preserved_items": {
+          "type": "int",
+          "range": [
+            0,
+            1000000000
+          ]
+        },
+        "status": "str"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if ':' not in line:\n            continue\n        k, v = line.split(':', 1)\n        k = k.strip().lower(); v = v.strip()\n        if k in ('custodians', 'items'):\n            n = int(v) if v.lstrip('-').isdigit() else 0\n            out['custodians' if k == 'custodians' else 'preserved_items'] = max(0, n)\n        elif k == 'status' and v.lower() in ('active', 'released', 'none'):\n            out['status'] = v.lower()\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "custodians",
+        "acknowledged",
+        "pending",
+        "preserved_items",
+        "breaches"
+      ],
+      "report": "hold {status}: {acknowledged}/{custodians} custodians acknowledged ({pending} pending), {preserved_items} items preserved, {breaches} breaches"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "full acknowledgment",
+      "goal": "min pending"
+    },
+    {
+      "name": "preservation integrity",
+      "goal": "min breaches"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "issue_hold",
+    "series": {
+      "custodians": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "pending": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "preserved_items": [
+        0.0,
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0
+      ],
+      "notices_sent": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "acknowledged 0",
+            "breaches 0",
+            "custodians 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "acknowledged 0",
+            "breaches 0",
+            "custodians 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "acknowledged 0",
+            "breaches 1",
+            "custodians 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "acknowledged 0",
+            "breaches 0",
+            "custodians 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "acknowledged 1",
+            "breaches 0",
+            "custodians 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "acknowledged 0",
+            "breaches 0",
+            "custodians 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "issue_hold"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "acknowledge"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "release"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "issue_hold"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "acknowledge"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "release"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "ev_charging",
+  "description": "An EV charging station: cars wait in a queue, plug into a bank of chargers, draw power as they charge, can be throttled to share a station-wide load limit, and unplug when done.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "An EV charging station: cars wait in a queue, plug into a bank of chargers, draw power as they charge, can be throttled to share a station-wide load limit, and unplug when done."
+  },
+  "state_schema": {
+    "num_chargers": "int",
+    "load_limit": "int",
+    "default_rate": "int",
+    "throttled_rate": "int",
+    "charge_step_soc": "int",
+    "chargers": "list[dict]",
+    "queue": "list[dict]",
+    "total_load": "int",
+    "time": "int",
+    "served": "int"
+  },
+  "initial_state": {
+    "num_chargers": 2,
+    "load_limit": 16,
+    "default_rate": 11,
+    "throttled_rate": 7,
+    "charge_step_soc": 10,
+    "chargers": [
+      {
+        "vehicle": null,
+        "soc": 0,
+        "target": 0,
+        "rate": 0,
+        "throttled": false
+      },
+      {
+        "vehicle": null,
+        "soc": 0,
+        "target": 0,
+        "rate": 0,
+        "throttled": false
+      }
+    ],
+    "queue": [
+      {
+        "id": "EV1",
+        "soc": 20,
+        "target": 80
+      },
+      {
+        "id": "EV2",
+        "soc": 50,
+        "target": 90
+      },
+      {
+        "id": "EV3",
+        "soc": 10,
+        "target": 100
+      }
+    ],
+    "total_load": 0,
+    "time": 0,
+    "served": 0
+  },
+  "actions": [
+    "plug",
+    "charge",
+    "throttle",
+    "unplug"
+  ],
+  "rules": [
+    "The station total draw (total_load) never exceeds load_limit kW.",
+    "plug: move the front queued car into the first free charger; it draws no power until charged. No-op if no bay is free or the queue is empty.",
+    "charge: advance one tick; each occupied, unfinished charger draws its rate (throttled_rate if throttled, else default_rate), granted in charger order so the station total stays within load_limit, and its SoC rises in proportion to the granted rate, capped at the car's target.",
+    "throttle: cap every occupied charger at throttled_rate to fit more cars under load_limit; does not advance time.",
+    "unplug: release a finished car (SoC >= target) if any, else the first occupied bay; frees the bay and counts it served only if it left at target."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    chargers = [dict(c) for c in s.get(\"chargers\", [])]\n    queue = [dict(v) for v in s.get(\"queue\", [])]\n    name = action.get(\"name\")\n\n    load_limit = s.get(\"load_limit\", 0)\n    default_rate = s.get(\"default_rate\", 0)\n    throttled_rate = s.get(\"throttled_rate\", 0)\n    step_soc = s.get(\"charge_step_soc\", 0)\n\n    if name == \"plug\":\n        # Connect the next waiting vehicle to the first free charger. No power\n        # is drawn yet (rate 0); a later `charge` energizes it.\n        free_idx = -1\n        for i, c in enumerate(chargers):\n            if c.get(\"vehicle\") is None:\n                free_idx = i\n                break\n        if free_idx >= 0 and queue:\n            v = queue.pop(0)\n            chargers[free_idx] = {\n                \"vehicle\": v.get(\"id\"),\n                \"soc\": v.get(\"soc\", 0),\n                \"target\": v.get(\"target\", 100),\n                \"rate\": 0,\n                \"throttled\": False,\n            }\n\n    elif name == \"charge\":\n        # Advance one time step. Each occupied, not-yet-full charger requests its\n        # rate (throttled_rate if throttled, else default_rate). Rates are granted\n        # in charger order so the station total never exceeds load_limit; a charger\n        # that does not fully fit the remaining capacity gets only what is left.\n        # State of charge rises in proportion to the granted rate, capped at target.\n        remaining = load_limit\n        for c in chargers:\n            if c.get(\"vehicle\") is None:\n                c[\"rate\"] = 0\n                continue\n            soc = c.get(\"soc\", 0)\n            target = c.get(\"target\", 100)\n            if soc >= target:\n                c[\"rate\"] = 0\n                continue\n            want = throttled_rate if c.get(\"throttled\") else default_rate\n            give = want if want <= remaining else remaining\n            if give < 0:\n                give = 0\n            c[\"rate\"] = give\n            remaining = remaining - give\n            if give > 0 and default_rate > 0:\n                inc = int(round(give * step_soc / default_rate))\n                new_soc = soc + inc\n                c[\"soc\"] = target if new_soc > target else new_soc\n        s[\"time\"] = s.get(\"time\", 0) + 1\n\n    elif name == \"throttle\":\n        # Cap every occupied charger at throttled_rate, lowering the station's\n        # total load so more cars fit under load_limit. Does not advance time.\n        for c in chargers:\n            if c.get(\"vehicle\") is not None:\n                c[\"throttled\"] = True\n                if c.get(\"rate\", 0) > throttled_rate:\n                    c[\"rate\"] = throttled_rate\n\n    elif name == \"unplug\":\n        # Disconnect a finished car (soc >= target) if one exists, else the first\n        # occupied charger (an early departure). Free the bay and count a vehicle\n        # served only if it left at or above its target.\n        idx = -1\n        for i, c in enumerate(chargers):\n            if c.get(\"vehicle\") is not None and c.get(\"soc\", 0) >= c.get(\"target\", 100):\n                idx = i\n                break\n        if idx < 0:\n            for i, c in enumerate(chargers):\n                if c.get(\"vehicle\") is not None:\n                    idx = i\n                    break\n        if idx >= 0:\n            c = chargers[idx]\n            if c.get(\"soc\", 0) >= c.get(\"target\", 100):\n                s[\"served\"] = s.get(\"served\", 0) + 1\n            chargers[idx] = {\"vehicle\": None, \"soc\": 0, \"target\": 0,\n                             \"rate\": 0, \"throttled\": False}\n\n    # noop / unknown action: state passes through unchanged.\n\n    s[\"chargers\"] = chargers\n    s[\"queue\"] = queue\n    s[\"total_load\"] = sum(c.get(\"rate\", 0) for c in chargers)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "queue"
+      ],
+      "schema": {
+        "queue": "list"
+      },
+      "code": "\ndef perceive(data):\n    cars = []\n    for item in data.get(\"arrivals\", []):\n        cars.append({\n            \"id\": str(item.get(\"id\")),\n            \"soc\": int(item.get(\"soc\", 0)),\n            \"target\": int(item.get(\"target\", 100)),\n        })\n    return {\"queue\": cars}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "time",
+        "total_load",
+        "load_limit",
+        "served",
+        "chargers",
+        "queue"
+      ],
+      "report": "t={time}: load {total_load}/{load_limit} kW, served {served}, {queue_len} waiting across {num_chargers} chargers."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "throughput",
+      "goal": "maximize served"
+    },
+    {
+      "name": "respect_load_limit",
+      "goal": "keep total_load <= load_limit"
+    },
+    {
+      "name": "queue_wait",
+      "goal": "minimize cars left waiting in queue"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "charge",
+    "series": {
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "time 0",
+            "total_load 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "time 0",
+            "total_load 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "time 1",
+            "total_load 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "time 0",
+            "total_load 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "time 1",
+            "total_load 11"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "time 0",
+            "total_load 0"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "plug"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "charge"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "throttle, unplug"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "plug"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "charge"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "throttle"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

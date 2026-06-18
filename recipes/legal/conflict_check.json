@@ -1,0 +1,185 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "conflict_check",
+  "description": "a conflict-of-interest checking world for new matters; actions intake, screen, clear, decline",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a conflict-of-interest checking world for new matters; actions intake, screen, clear, decline"
+  },
+  "state_schema": {
+    "stage": "str",
+    "matter": "dict",
+    "existing_clients": "list[str]",
+    "conflicts": "list",
+    "screened": "bool",
+    "decision": "str",
+    "log": "list",
+    "matters_cleared": "int",
+    "matters_declined": "int"
+  },
+  "initial_state": {
+    "stage": "ready",
+    "matter": {
+      "client": "Wayne Enterprises",
+      "adverse_parties": [
+        "Globex Corp"
+      ],
+      "intake_complete": false
+    },
+    "existing_clients": [
+      "Acme Corp",
+      "Initech",
+      "Globex Corp"
+    ],
+    "conflicts": [],
+    "screened": false,
+    "decision": "pending",
+    "log": [],
+    "matters_cleared": 0,
+    "matters_declined": 0
+  },
+  "actions": [
+    "intake",
+    "screen",
+    "clear",
+    "decline"
+  ],
+  "rules": [
+    "A matter advances strictly ready -> intake -> screened -> (cleared | declined).",
+    "intake opens a file on a prospective matter named by a client; without a named client the matter cannot be intaken.",
+    "screen compares the matter's adverse parties against the firm's current client roster (existing_clients); each adverse party already represented is recorded as a conflict (case- and whitespace-insensitive).",
+    "clear may open a matter ONLY when it has been screened and carries no outstanding conflict; clearing a conflicted matter is forbidden and is a no-op.",
+    "decline refuses a screened matter and is the required outcome when an unwaivable conflict is found.",
+    "On clear the new client joins existing_clients; clear and decline both return the firm to 'ready' for the next intake.",
+    "Any action taken out of sequence leaves the world unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    matter = dict(s.get(\"matter\") or {})\n    existing = list(s.get(\"existing_clients\") or [])\n    log = list(s.get(\"log\") or [])\n\n    def norm(x):\n        return str(x).strip().lower()\n\n    def empty_matter():\n        return {\"client\": \"\", \"adverse_parties\": [], \"intake_complete\": False}\n\n    if name == \"intake\":\n        # Open a file on a fresh prospective matter; only when idle ('ready').\n        if s.get(\"stage\") != \"ready\":\n            return s\n        if \"client\" in params:\n            matter[\"client\"] = params[\"client\"]\n        if \"adverse_parties\" in params:\n            matter[\"adverse_parties\"] = list(params[\"adverse_parties\"])\n        # A matter cannot be intaken without a named prospective client.\n        if not matter.get(\"client\"):\n            return s\n        matter[\"adverse_parties\"] = list(matter.get(\"adverse_parties\") or [])\n        matter[\"intake_complete\"] = True\n        s[\"matter\"] = matter\n        s[\"stage\"] = \"intake\"\n        s[\"conflicts\"] = []\n        s[\"screened\"] = False\n        s[\"decision\"] = \"pending\"\n        log.append(\"intake\")\n        s[\"log\"] = log\n        return s\n\n    if name == \"screen\":\n        # Run the conflict check against the firm's current client roster.\n        if s.get(\"stage\") != \"intake\" or not matter.get(\"intake_complete\"):\n            return s\n        roster = set(norm(c) for c in existing)\n        conflicts = []\n        for party in matter.get(\"adverse_parties\") or []:\n            if norm(party) in roster and party not in conflicts:\n                conflicts.append(party)\n        s[\"conflicts\"] = conflicts\n        s[\"screened\"] = True\n        s[\"stage\"] = \"screened\"\n        log.append(\"screen\")\n        s[\"log\"] = log\n        return s\n\n    if name == \"clear\":\n        # Clear to open ONLY a screened matter with no outstanding conflict.\n        if s.get(\"stage\") != \"screened\":\n            return s\n        if s.get(\"conflicts\"):\n            return s  # guarded: a conflicted matter cannot be cleared\n        client = matter.get(\"client\")\n        if client and client not in existing:\n            existing.append(client)  # the new client joins the roster\n            s[\"existing_clients\"] = existing\n        s[\"decision\"] = \"cleared\"\n        s[\"stage\"] = \"ready\"\n        s[\"screened\"] = False\n        s[\"matters_cleared\"] = int(s.get(\"matters_cleared\", 0)) + 1\n        log.append(\"clear\")\n        s[\"log\"] = log\n        s[\"matter\"] = empty_matter()\n        return s\n\n    if name == \"decline\":\n        # Refuse a screened matter (the proper outcome for a real conflict).\n        if s.get(\"stage\") != \"screened\":\n            return s\n        s[\"decision\"] = \"declined\"\n        s[\"stage\"] = \"ready\"\n        s[\"screened\"] = False\n        s[\"matters_declined\"] = int(s.get(\"matters_declined\", 0)) + 1\n        log.append(\"decline\")\n        s[\"log\"] = log\n        s[\"matter\"] = empty_matter()\n        return s\n\n    return s  # unknown / out-of-order action: no-op (deterministic)\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "matter"
+      ],
+      "schema": {
+        "matter": "dict"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    client = \"\"\n    adverse = []\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, _, value = line.partition(\":\")\n        key = key.strip().lower()\n        value = value.strip()\n        if key in (\"client\", \"prospective client\", \"matter\"):\n            client = value\n        elif key in (\"adverse\", \"adverse parties\", \"against\", \"opposing\"):\n            parts = value.replace(\";\", \",\").split(\",\")\n            adverse = [p.strip() for p in parts if p.strip()]\n    return {\"matter\": {\"client\": client, \"adverse_parties\": adverse,\n                       \"intake_complete\": False}}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "matter",
+        "conflicts",
+        "decision",
+        "stage"
+      ],
+      "report": "CONFLICT-OF-INTEREST MEMO\nProspective client : {matter[client]}\nAdverse parties     : {matter[adverse_parties]}\nScreen status       : {stage}\nConflicts found     : {conflicts}\nDisposition         : {decision}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "protect_existing_clients",
+      "goal": "never clear a matter that carries an unwaived conflict",
+      "weight": 1.0
+    },
+    {
+      "name": "screen_before_decision",
+      "goal": "every cleared or declined matter must first have been screened",
+      "weight": 1.0
+    },
+    {
+      "name": "open_clean_business",
+      "goal": "maximize matters cleared once confirmed conflict-free",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "intake",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "matters_declined 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "matters_declined 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "matters_declined 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "matters_declined 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "intake"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "screen, clear, decline"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "screen"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "intake, clear, decline"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "decline"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "intake, screen, clear"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "intake, screen, clear"
+        }
+      ],
+      "truncated": false
+    }
+  }
+}

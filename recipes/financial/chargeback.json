@@ -1,0 +1,297 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "chargeback",
+  "description": "A single card dispute moving through the chargeback lifecycle: the issuer opens it (provisional credit + clawback), the merchant represents with evidence before a deadline, and the network resolves it won or lost while settling the money.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "A single card dispute moving through the chargeback lifecycle: the issuer opens it (provisional credit + clawback), the merchant represents with evidence before a deadline, and the network resolves it won or lost while settling the money."
+  },
+  "state_schema": {
+    "tick": "int",
+    "status": "str",
+    "amount": "int",
+    "evidence": "int",
+    "on_time": "int",
+    "deadline": "int",
+    "cardholder_credit": "int",
+    "merchant_balance": "int",
+    "fees": "int",
+    "disputes_opened": "int",
+    "disputes_won": "int",
+    "disputes_lost": "int"
+  },
+  "initial_state": {
+    "tick": 0,
+    "status": "none",
+    "amount": 120,
+    "evidence": 0,
+    "on_time": 0,
+    "deadline": 0,
+    "cardholder_credit": 0,
+    "merchant_balance": 0,
+    "fees": 0,
+    "disputes_opened": 0,
+    "disputes_won": 0,
+    "disputes_lost": 0
+  },
+  "actions": [
+    "open",
+    "represent",
+    "resolve"
+  ],
+  "rules": [
+    "A dispute has status none -> open -> represented -> won|lost. 'won' and 'lost' are terminal.",
+    "'open' fires only when status is 'none'. It sets status to 'open', credits the cardholder by 'amount', debits the merchant by 'amount' plus a 15 chargeback fee, records that fee, sets deadline = tick + 3, and increments disputes_opened.",
+    "'represent' fires only when status is 'open'. It sets status to 'represented', records evidence (the action's 'evidence' param, default 60, clamped to 0..100), sets on_time to 1 when tick <= deadline else 0, and charges the merchant a 5 representment fee.",
+    "'resolve' fires only when status is 'open' or 'represented'. The merchant wins iff the dispute was represented, on time, with evidence >= 50: funds and provisional credit are reversed and status becomes 'won'. Otherwise status becomes 'lost' and the chargeback stands.",
+    "An action whose precondition is unmet is a no-op except for the clock.",
+    "After EVERY action the clock 'tick' increases by 1."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"]\n    params = action.get(\"params\", {}) or {}\n\n    CHARGEBACK_FEE = 15      # network fee the merchant eats when a dispute opens\n    REPRESENT_FEE = 5        # filing fee for a representment\n    WINDOW = 3               # ticks the merchant has to represent\n    WIN_THRESHOLD = 50       # evidence strength needed to win a representment\n\n    if name == \"open\" and s[\"status\"] == \"none\":\n        # The issuer opens the dispute: provisional credit to the cardholder,\n        # funds + fee clawed back from the merchant.\n        s[\"status\"] = \"open\"\n        s[\"cardholder_credit\"] += s[\"amount\"]\n        s[\"merchant_balance\"] -= s[\"amount\"] + CHARGEBACK_FEE\n        s[\"fees\"] += CHARGEBACK_FEE\n        s[\"deadline\"] = s[\"tick\"] + WINDOW\n        s[\"disputes_opened\"] += 1\n\n    elif name == \"represent\" and s[\"status\"] == \"open\":\n        # The merchant contests with evidence. Strength comes from the action\n        # (default 60) and whether the filing beat the deadline is recorded now.\n        s[\"status\"] = \"represented\"\n        ev = params.get(\"evidence\", 60)\n        if ev < 0:\n            ev = 0\n        elif ev > 100:\n            ev = 100\n        s[\"evidence\"] = ev\n        s[\"on_time\"] = 1 if s[\"tick\"] <= s[\"deadline\"] else 0\n        s[\"merchant_balance\"] -= REPRESENT_FEE\n        s[\"fees\"] += REPRESENT_FEE\n\n    elif name == \"resolve\" and s[\"status\"] in (\"open\", \"represented\"):\n        # The network settles. A merchant wins only with an on-time\n        # representment that clears the evidence bar; otherwise the cardholder\n        # keeps the credit and the chargeback becomes final.\n        merchant_wins = (s[\"status\"] == \"represented\"\n                         and s[\"on_time\"] == 1\n                         and s[\"evidence\"] >= WIN_THRESHOLD)\n        if merchant_wins:\n            # Reverse the chargeback: funds returned, provisional credit pulled.\n            s[\"merchant_balance\"] += s[\"amount\"]\n            s[\"cardholder_credit\"] -= s[\"amount\"]\n            s[\"status\"] = \"won\"\n            s[\"disputes_won\"] += 1\n        else:\n            s[\"status\"] = \"lost\"\n            s[\"disputes_lost\"] += 1\n\n    # The clock always advances (open/represent/resolve and any no-op alike).\n    s[\"tick\"] += 1\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "amount"
+      ],
+      "schema": {
+        "amount": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    # Map a raw dispute-intake record onto the state fields it informs.\n    amount = data.get(\"amount\", data.get(\"transaction_amount\", 0))\n    try:\n        amount = int(round(float(amount)))\n    except (TypeError, ValueError):\n        amount = 0\n    if amount < 0:\n        amount = 0\n    elif amount > 100000:\n        amount = 100000\n    return {\"amount\": amount}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "amount",
+        "evidence",
+        "on_time",
+        "merchant_balance",
+        "cardholder_credit",
+        "fees"
+      ],
+      "report": "Dispute is '{status}' on a {amount} charge. Merchant balance {merchant_balance} (fees {fees}); cardholder credit {cardholder_credit}. Representment evidence {evidence}, on_time {on_time}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "protect merchant funds",
+      "goal": "max merchant_balance"
+    },
+    {
+      "name": "win disputes",
+      "goal": "max disputes_won"
+    },
+    {
+      "name": "limit fees",
+      "goal": "min fees"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "open",
+    "series": {
+      "tick": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "deadline": [
+        0.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "cardholder_credit": [
+        0.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0
+      ],
+      "merchant_balance": [
+        0.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0,
+        -135.0
+      ],
+      "fees": [
+        0.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "disputes_opened": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "cardholder_credit 0",
+            "deadline 0",
+            "disputes_lost 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "cardholder_credit 120",
+            "deadline 3",
+            "disputes_lost 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "cardholder_credit 0",
+            "deadline 0",
+            "disputes_lost 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "cardholder_credit 120",
+            "deadline 3",
+            "disputes_lost 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "cardholder_credit 120",
+            "deadline 3",
+            "disputes_lost 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "cardholder_credit 120",
+            "deadline 3",
+            "disputes_lost 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "open"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "represent"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "resolve"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "open"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "represent"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "resolve"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "firewall_change",
+  "description": "a firewall rule-change management world; actions request, review, apply, rollback",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a firewall rule-change management world; actions request, review, apply, rollback"
+  },
+  "state_schema": {
+    "status": "str",
+    "pending_rule": "str",
+    "requested_by": "str",
+    "risk": "str",
+    "reviewed_by": "str",
+    "review_decision": "str",
+    "active_rules": "list",
+    "last_applied_rule": "str",
+    "request_id": "int",
+    "requested_count": "int",
+    "applied_count": "int",
+    "rejected_count": "int",
+    "rollback_count": "int",
+    "audit_log": "list"
+  },
+  "initial_state": {
+    "status": "idle",
+    "pending_rule": "",
+    "requested_by": "",
+    "risk": "",
+    "reviewed_by": "",
+    "review_decision": "",
+    "active_rules": [],
+    "last_applied_rule": "",
+    "request_id": 0,
+    "requested_count": 0,
+    "applied_count": 0,
+    "rejected_count": 0,
+    "rollback_count": 0,
+    "audit_log": []
+  },
+  "actions": [
+    "request",
+    "review",
+    "apply",
+    "rollback"
+  ],
+  "rules": [
+    "A change is identified by an incrementing request_id and carries a rule text, a requester, and a declared risk level.",
+    "'request' opens a new change only when none is in flight (status is idle, applied, rejected, or rolled_back); otherwise it is a no-op.",
+    "'review' acts only on a 'requested' change: decision 'approve' -> approved, any other decision -> rejected (pending rule cleared).",
+    "'apply' takes effect only on an 'approved' change, adding its rule to active_rules and marking it the last_applied_rule for rollback.",
+    "'rollback' acts only on an 'applied' change, removing last_applied_rule from active_rules.",
+    "Separation of duties: no rule reaches 'applied' without passing through 'requested' then 'approved' review.",
+    "Every state change appends one line to the append-only audit_log."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    actor = action.get(\"agent\") or params.get(\"actor\") or \"unknown\"\n    s[\"active_rules\"] = list(s.get(\"active_rules\", []))\n    s[\"audit_log\"] = list(s.get(\"audit_log\", []))\n\n    def log(event):\n        s[\"audit_log\"] = s[\"audit_log\"] + [event]\n\n    status = s.get(\"status\", \"idle\")\n\n    if name == \"request\":\n        # A new request can only begin when no change is in flight.\n        if status in (\"idle\", \"applied\", \"rejected\", \"rolled_back\"):\n            rid = int(s.get(\"request_id\", 0)) + 1\n            rule = params.get(\"rule\") or s.get(\"pending_rule\") or (\n                \"allow tcp 0.0.0.0/0 -> 10.0.0.%d:443\" % rid)\n            s[\"request_id\"] = rid\n            s[\"status\"] = \"requested\"\n            s[\"pending_rule\"] = rule\n            s[\"requested_by\"] = params.get(\"requested_by\") or actor\n            s[\"risk\"] = params.get(\"risk\") or s.get(\"risk\") or \"unassessed\"\n            s[\"reviewed_by\"] = \"\"\n            s[\"review_decision\"] = \"\"\n            s[\"requested_count\"] = int(s.get(\"requested_count\", 0)) + 1\n            log(\"request#%d by %s: %s\" % (rid, s[\"requested_by\"], rule))\n        # else: a change is already requested/approved -> ignore (no-op)\n\n    elif name == \"review\":\n        # Only a requested (not yet reviewed) change can be reviewed.\n        if status == \"requested\":\n            decision = params.get(\"decision\") or \"approve\"\n            reviewer = params.get(\"reviewer\") or actor\n            s[\"reviewed_by\"] = reviewer\n            s[\"review_decision\"] = decision\n            if decision == \"approve\":\n                s[\"status\"] = \"approved\"\n                log(\"review#%d by %s: APPROVED\" % (s.get(\"request_id\", 0), reviewer))\n            else:\n                s[\"status\"] = \"rejected\"\n                s[\"rejected_count\"] = int(s.get(\"rejected_count\", 0)) + 1\n                log(\"review#%d by %s: REJECTED\" % (s.get(\"request_id\", 0), reviewer))\n                s[\"pending_rule\"] = \"\"\n\n    elif name == \"apply\":\n        # Only an approved change reaches the live firewall.\n        if status == \"approved\":\n            rule = s.get(\"pending_rule\", \"\")\n            if rule and rule not in s[\"active_rules\"]:\n                s[\"active_rules\"] = s[\"active_rules\"] + [rule]\n            s[\"last_applied_rule\"] = rule\n            s[\"status\"] = \"applied\"\n            s[\"applied_count\"] = int(s.get(\"applied_count\", 0)) + 1\n            log(\"apply#%d by %s: %s now LIVE\" % (s.get(\"request_id\", 0), actor, rule))\n\n    elif name == \"rollback\":\n        # Only an applied change can be undone, removing its rule from the firewall.\n        if status == \"applied\":\n            rule = s.get(\"last_applied_rule\", \"\")\n            s[\"active_rules\"] = [r for r in s[\"active_rules\"] if r != rule]\n            s[\"status\"] = \"rolled_back\"\n            s[\"rollback_count\"] = int(s.get(\"rollback_count\", 0)) + 1\n            log(\"rollback#%d by %s: %s removed\" % (s.get(\"request_id\", 0), actor, rule))\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_rule",
+        "requested_by",
+        "risk"
+      ],
+      "schema": {
+        "pending_rule": "str",
+        "requested_by": "str",
+        "risk": "str"
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else (\n        data.get(\"text\", \"\") if isinstance(data, dict) else str(data))\n    fields = {}\n    for line in text.splitlines():\n        if \":\" not in line:\n            continue\n        key, _, value = line.partition(\":\")\n        key = key.strip().lower()\n        value = value.strip()\n        if key in (\"rule\", \"requested_by\", \"risk\"):\n            fields[key] = value\n    out = {}\n    if \"rule\" in fields:\n        out[\"pending_rule\"] = fields[\"rule\"]\n    if \"requested_by\" in fields:\n        out[\"requested_by\"] = fields[\"requested_by\"]\n    if \"risk\" in fields:\n        out[\"risk\"] = fields[\"risk\"]\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "pending_rule",
+        "risk",
+        "active_rules",
+        "applied_count",
+        "rollback_count",
+        "audit_log"
+      ],
+      "report": "Firewall change [{status}] pending={pending_rule!r} risk={risk} | {applied_count} applied, {rollback_count} rolled back | live rules: {active_rules}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "controlled_changes",
+      "goal": "maximize the share of applied rules that were reviewed and approved"
+    },
+    {
+      "name": "minimize_rollbacks",
+      "goal": "minimize rollback_count (fewer bad changes reaching production)"
+    },
+    {
+      "name": "throughput",
+      "goal": "maximize applied_count of legitimately approved changes"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {
+      "request_id": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "requested_count": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "applied_count 0",
+            "request_id 0",
+            "requested_count 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "applied_count 0",
+            "request_id 1",
+            "requested_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "applied_count 0",
+            "request_id 1",
+            "requested_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "applied_count 1",
+            "request_id 1",
+            "requested_count 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "applied_count 1",
+            "request_id 2",
+            "requested_count 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "applied_count 1",
+            "request_id 1",
+            "requested_count 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "review, apply, rollback"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "review"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "request, apply, rollback"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "apply"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "request, review, rollback"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "request"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "rollback"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "review, apply"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,335 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "peak_pricing",
+  "description": "a time-of-use peak-pricing demand-shifting world; actions consume, shift, store",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a time-of-use peak-pricing demand-shifting world; actions consume, shift, store"
+  },
+  "state_schema": {
+    "hour": "int",
+    "prices": "list[float]",
+    "price": "float",
+    "peak": "bool",
+    "peak_threshold": "float",
+    "hourly_load": "float",
+    "demand": "float",
+    "battery": "float",
+    "battery_cap": "float",
+    "charge_rate": "float",
+    "served": "float",
+    "from_battery": "float",
+    "grid_kwh": "float",
+    "cost": "float",
+    "shifted": "float",
+    "stored": "float"
+  },
+  "initial_state": {
+    "hour": 0,
+    "prices": [
+      0.08,
+      0.08,
+      0.08,
+      0.08,
+      0.08,
+      0.08,
+      0.08,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.14,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.3,
+      0.14,
+      0.14,
+      0.14
+    ],
+    "price": 0.08,
+    "peak": false,
+    "peak_threshold": 0.2,
+    "hourly_load": 2.0,
+    "demand": 2.0,
+    "battery": 0.0,
+    "battery_cap": 10.0,
+    "charge_rate": 4.0,
+    "served": 0.0,
+    "from_battery": 0.0,
+    "grid_kwh": 0.0,
+    "cost": 0.0,
+    "shifted": 0.0,
+    "stored": 0.0
+  },
+  "actions": [
+    "consume",
+    "shift",
+    "store"
+  ],
+  "rules": [
+    "Each hour carries a time-of-use price from the 24-hour schedule; an hour is 'peak' when its price >= peak_threshold.",
+    "'consume' serves the waiting demand now: it drains the battery first (free at the margin), then buys any remainder from the grid at the current hour's price, and adds it all to 'served'.",
+    "'shift' defers the waiting demand to a later hour (adds to 'shifted'); nothing is bought and the demand carries forward.",
+    "'store' charges the battery from the grid at the current price, up to charge_rate and battery_cap; it banks energy but serves no demand.",
+    "Every action advances the clock one hour, after which a fresh hourly_load block is added to demand. Unknown actions are no-ops and do not advance the clock.",
+    "Conservation: the battery is only filled by 'store' and only drained by 'consume', so stored == from_battery + battery at all times."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    prices = [float(p) for p in (s.get(\"prices\") or [])]\n    span = len(prices) if prices else 24\n    hour = int(s.get(\"hour\", 0)) % span\n    thr = float(s.get(\"peak_threshold\", 0.0))\n\n    # current hour's price (derive defensively, e.g. right after a fresh paste)\n    price = prices[hour] if prices else float(s.get(\"price\", 0.0))\n    s[\"price\"] = round(price, 6)\n    s[\"peak\"] = bool(thr > 0 and price >= thr)\n\n    name = action.get(\"name\")\n    demand = float(s.get(\"demand\", 0.0))\n    battery = float(s.get(\"battery\", 0.0))\n    cap = float(s.get(\"battery_cap\", 0.0))\n    rate = float(s.get(\"charge_rate\", 0.0))\n\n    if name == \"consume\":\n        from_batt = min(battery, demand)\n        battery -= from_batt\n        from_grid = demand - from_batt\n        s[\"from_battery\"] = round(float(s.get(\"from_battery\", 0.0)) + from_batt, 6)\n        s[\"grid_kwh\"] = round(float(s.get(\"grid_kwh\", 0.0)) + from_grid, 6)\n        s[\"cost\"] = round(float(s.get(\"cost\", 0.0)) + from_grid * price, 6)\n        s[\"served\"] = round(float(s.get(\"served\", 0.0)) + demand, 6)\n        demand = 0.0\n    elif name == \"shift\":\n        s[\"shifted\"] = round(float(s.get(\"shifted\", 0.0)) + demand, 6)\n        # demand carries forward, unserved\n    elif name == \"store\":\n        amt = min(rate, max(0.0, cap - battery))      # never overcharge\n        battery += amt\n        s[\"stored\"] = round(float(s.get(\"stored\", 0.0)) + amt, 6)\n        s[\"grid_kwh\"] = round(float(s.get(\"grid_kwh\", 0.0)) + amt, 6)\n        s[\"cost\"] = round(float(s.get(\"cost\", 0.0)) + amt * price, 6)\n        # demand carries forward, unserved\n    else:\n        s[\"battery\"] = round(battery, 6)\n        return s                                       # unknown action: no-op\n\n    # advance one hour; a fresh block of flexible load arrives\n    hour = (hour + 1) % span\n    demand = round(demand + float(s.get(\"hourly_load\", 0.0)), 6)\n    new_price = prices[hour] if prices else price\n    s[\"hour\"] = hour\n    s[\"demand\"] = demand\n    s[\"battery\"] = round(battery, 6)\n    s[\"price\"] = round(new_price, 6)\n    s[\"peak\"] = bool(thr > 0 and new_price >= thr)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "prices"
+      ],
+      "schema": {},
+      "code": "\ndef perceive(data):\n    pairs = {}\n    flat = []\n    has_pair = False\n    for line in str(data).replace(',', '\\n').splitlines():\n        line = line.strip()\n        if not line:\n            continue\n        if ':' in line:\n            has_pair = True\n            h, _, p = line.partition(':')\n            try:\n                hi = int(float(h.strip()))\n                pv = float(p.strip())\n            except (ValueError, TypeError):\n                continue\n            if 0 <= hi < 24:\n                pairs[hi] = pv\n        else:\n            try:\n                flat.append(float(line))\n            except (ValueError, TypeError):\n                continue\n    baseline = 0.10\n    if has_pair:\n        prices = [round(pairs.get(h, baseline), 6) for h in range(24)]\n    elif flat:\n        prices = [round(flat[h] if h < len(flat) else flat[-1], 6) for h in range(24)]\n    else:\n        prices = [baseline] * 24\n    return {\"prices\": prices}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "hour",
+        "price",
+        "peak",
+        "demand",
+        "battery",
+        "served",
+        "cost",
+        "grid_kwh",
+        "shifted",
+        "stored"
+      ],
+      "report": "h{hour} ${price}/kWh peak={peak} | demand {demand} kWh, battery {battery} kWh | served {served}, cost ${cost} (grid {grid_kwh} kWh, shifted {shifted}, stored {stored})"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "minimize electricity cost",
+      "goal": "min cost"
+    },
+    {
+      "name": "serve the demand",
+      "goal": "max served"
+    },
+    {
+      "name": "dodge the peak with storage",
+      "goal": "max from_battery"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "store",
+    "series": {
+      "hour": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "price": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.14,
+        0.14,
+        0.14,
+        0.14,
+        0.14,
+        0.14
+      ],
+      "demand": [
+        2.0,
+        4.0,
+        6.0,
+        8.0,
+        10.0,
+        12.0,
+        14.0,
+        16.0,
+        18.0,
+        20.0,
+        22.0,
+        24.0,
+        26.0
+      ],
+      "battery": [
+        0.0,
+        4.0,
+        8.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "grid_kwh": [
+        0.0,
+        4.0,
+        8.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "cost": [
+        0.0,
+        0.32,
+        0.64,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8
+      ],
+      "stored": [
+        0.0,
+        4.0,
+        8.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "battery 0",
+            "cost 0",
+            "demand 2"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "battery 0",
+            "cost 0.16",
+            "demand 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "battery 0",
+            "cost 0",
+            "demand 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "battery 4",
+            "cost 0.32",
+            "demand 4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "battery 0",
+            "cost 0.32",
+            "demand 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "battery 0",
+            "cost 0.16",
+            "demand 4"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "consume"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "shift"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "store"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "consume"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "shift"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

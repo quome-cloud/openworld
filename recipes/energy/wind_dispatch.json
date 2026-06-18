@@ -1,0 +1,378 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "wind_dispatch",
+  "description": "a wind-generation dispatch world with forecasts; actions forecast, dispatch, curtail",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a wind-generation dispatch world with forecasts; actions forecast, dispatch, curtail"
+  },
+  "state_schema": {
+    "t": "int",
+    "seed": "int",
+    "wind_speed": "float",
+    "available_power": "float",
+    "capacity_mw": "float",
+    "grid_limit_mw": "float",
+    "demand_mw": "float",
+    "price": "float",
+    "forecast": "float",
+    "forecast_error": "float",
+    "dispatched_mw": "float",
+    "delivered_mw": "float",
+    "shortfall_mw": "float",
+    "curtailed_mw": "float",
+    "unmet_demand_mw": "float",
+    "revenue": "float",
+    "curtailment_loss": "float",
+    "penalty": "float"
+  },
+  "initial_state": {
+    "t": 0,
+    "seed": 12345,
+    "wind_speed": 9.0,
+    "available_power": 29.63,
+    "capacity_mw": 100.0,
+    "grid_limit_mw": 80.0,
+    "demand_mw": 70.0,
+    "price": 50.0,
+    "forecast": 0.0,
+    "forecast_error": 0.0,
+    "dispatched_mw": 0.0,
+    "delivered_mw": 0.0,
+    "shortfall_mw": 0.0,
+    "curtailed_mw": 0.0,
+    "unmet_demand_mw": 0.0,
+    "revenue": 0.0,
+    "curtailment_loss": 0.0,
+    "penalty": 0.0
+  },
+  "actions": [
+    "forecast",
+    "dispatch",
+    "curtail"
+  ],
+  "rules": [
+    "Wind speed evolves each interval by a bounded gust drawn from a seed threaded through state, so rollouts are deterministic and replayable.",
+    "Available power follows the turbine curve: zero below cut-in (3 m/s) or at/above cut-out (25 m/s), the rated capacity at/above 12 m/s, and a cubic ramp between cut-in and rated.",
+    "'forecast' predicts next-interval availability and leaves the standing commitment unchanged.",
+    "'dispatch' sets the grid commitment, capped by the grid limit; with no target it is sized to min(available, grid_limit, demand).",
+    "'curtail' reduces the commitment; with no amount it sheds back to the grid limit, otherwise 20% of the commitment.",
+    "Each interval settles: delivered = min(commitment, available); the excess commitment is a shortfall (penalised at 2x price) and the unused available wind is curtailed (lost revenue).",
+    "forecast_error records how far the prior forecast was from realized availability."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\", \"\")\n    params = action.get(\"params\") or {}\n\n    capacity = float(s.get(\"capacity_mw\", 100.0))\n    grid_limit = float(s.get(\"grid_limit_mw\", 80.0))\n    demand = float(s.get(\"demand_mw\", 70.0))\n    price = float(s.get(\"price\", 50.0))\n\n    # --- deterministic, replayable wind evolution (LCG threaded via seed) ---\n    seed = int(s.get(\"seed\", 1)) % (2 ** 31)\n    seed = (1103515245 * seed + 12345) % (2 ** 31)\n    shock = (seed / float(2 ** 31)) * 3.0 - 1.5          # gust in [-1.5, 1.5] m/s\n    ws = float(s.get(\"wind_speed\", 9.0)) + shock\n    ws = max(0.0, min(25.0, ws))\n    s[\"seed\"] = seed\n    s[\"wind_speed\"] = round(ws, 3)\n\n    # --- turbine power curve: cut-in 3, rated 12 (=capacity), cut-out 25 m/s ---\n    cut_in, rated, cut_out = 3.0, 12.0, 25.0\n    if ws < cut_in or ws >= cut_out:\n        avail = 0.0\n    elif ws >= rated:\n        avail = capacity\n    else:\n        avail = capacity * ((ws - cut_in) / (rated - cut_in)) ** 3\n    avail = round(avail, 3)\n    s[\"available_power\"] = avail\n\n    s[\"t\"] = int(s.get(\"t\", 0)) + 1\n\n    # --- score the prior forecast against what the wind actually delivered ---\n    prior_forecast = float(s.get(\"forecast\", 0.0))\n    s[\"forecast_error\"] = round(abs(prior_forecast - avail), 3)\n\n    dispatched = float(s.get(\"dispatched_mw\", 0.0))\n\n    if name == \"forecast\":\n        # persistence blended toward the long-run mean (~30% of capacity)\n        s[\"forecast\"] = round(0.7 * avail + 0.3 * (0.3 * capacity), 3)\n        # standing commitment is unchanged by forecasting\n    elif name == \"dispatch\":\n        target = params.get(\"target_mw\")\n        if target is None:\n            target = min(avail, grid_limit, demand)\n        dispatched = max(0.0, min(float(target), grid_limit))\n        s[\"dispatched_mw\"] = round(dispatched, 3)\n        s[\"forecast\"] = round(avail, 3)              # acting refreshes the baseline\n    elif name == \"curtail\":\n        amount = params.get(\"amount_mw\")\n        if amount is None:\n            # default: shed back to the grid limit, else 20% of the commitment\n            amount = max(dispatched - grid_limit, 0.2 * dispatched)\n        dispatched = max(0.0, dispatched - float(amount))\n        s[\"dispatched_mw\"] = round(dispatched, 3)\n    # any other / noop action leaves the standing commitment in place\n\n    dispatched = float(s.get(\"dispatched_mw\", 0.0))\n\n    # --- settle the interval ---\n    delivered = min(dispatched, avail)\n    shortfall = max(0.0, dispatched - avail)         # committed but wind fell short\n    curtailed = max(0.0, avail - dispatched)         # available wind left unused\n    s[\"delivered_mw\"] = round(delivered, 3)\n    s[\"shortfall_mw\"] = round(shortfall, 3)\n    s[\"curtailed_mw\"] = round(curtailed, 3)\n    s[\"unmet_demand_mw\"] = round(max(0.0, demand - delivered), 3)\n\n    s[\"revenue\"] = round(float(s.get(\"revenue\", 0.0)) + delivered * price, 3)\n    s[\"curtailment_loss\"] = round(\n        float(s.get(\"curtailment_loss\", 0.0)) + curtailed * price, 3)\n    s[\"penalty\"] = round(\n        float(s.get(\"penalty\", 0.0)) + shortfall * price * 2.0, 3)\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "wind_speed",
+        "demand_mw"
+      ],
+      "schema": {
+        "wind_speed": {
+          "type": "float",
+          "range": [
+            0.0,
+            25.0
+          ]
+        },
+        "demand_mw": {
+          "type": "float",
+          "range": [
+            0.0,
+            100.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    out = {}\n    for tok in text.replace(\",\", \" \").split():\n        if \"=\" not in tok:\n            continue\n        key, raw = tok.split(\"=\", 1)\n        key = key.strip()\n        if key not in (\"wind_speed\", \"demand_mw\"):\n            continue\n        try:\n            out[key] = float(raw)\n        except ValueError:\n            continue\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "t",
+        "wind_speed",
+        "available_power",
+        "forecast",
+        "forecast_error",
+        "dispatched_mw",
+        "delivered_mw",
+        "curtailed_mw",
+        "shortfall_mw",
+        "revenue",
+        "curtailment_loss",
+        "penalty"
+      ],
+      "report": "Interval {t}: wind {wind_speed} m/s -> {available_power} MW available (forecast {forecast}, err {forecast_error}). Committed {dispatched_mw} MW, delivered {delivered_mw}, curtailed {curtailed_mw}, shortfall {shortfall_mw}. Revenue ${revenue} | curtailment loss ${curtailment_loss} | penalty ${penalty}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "maximize_revenue",
+      "goal": "max"
+    },
+    {
+      "name": "minimize_curtailment",
+      "goal": "min"
+    },
+    {
+      "name": "minimize_shortfall",
+      "goal": "min"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "dispatch",
+    "series": {
+      "t": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "seed": [
+        12345.0,
+        1406932606.0,
+        654583775.0,
+        1449466924.0,
+        229283573.0,
+        1109335178.0,
+        1051550459.0,
+        1293799192.0,
+        794471793.0,
+        551188310.0,
+        803550167.0,
+        1772930244.0,
+        370913197.0
+      ],
+      "wind_speed": [
+        9.0,
+        9.465,
+        8.879,
+        9.404,
+        8.224,
+        8.274,
+        8.243,
+        8.55,
+        8.16,
+        7.43,
+        7.053,
+        8.03,
+        7.048
+      ],
+      "available_power": [
+        29.63,
+        37.074,
+        27.879,
+        36.025,
+        19.56,
+        20.12,
+        19.77,
+        23.456,
+        18.845,
+        11.926,
+        9.13,
+        17.455,
+        9.1
+      ],
+      "forecast": [
+        0.0,
+        37.074,
+        27.879,
+        36.025,
+        19.56,
+        20.12,
+        19.77,
+        23.456,
+        18.845,
+        11.926,
+        9.13,
+        17.455,
+        9.1
+      ],
+      "forecast_error": [
+        0.0,
+        37.074,
+        9.195,
+        8.146,
+        16.465,
+        0.56,
+        0.35,
+        3.686,
+        4.611,
+        6.919,
+        2.796,
+        8.325,
+        8.355
+      ],
+      "dispatched_mw": [
+        0.0,
+        37.074,
+        27.879,
+        36.025,
+        19.56,
+        20.12,
+        19.77,
+        23.456,
+        18.845,
+        11.926,
+        9.13,
+        17.455,
+        9.1
+      ],
+      "delivered_mw": [
+        0.0,
+        37.074,
+        27.879,
+        36.025,
+        19.56,
+        20.12,
+        19.77,
+        23.456,
+        18.845,
+        11.926,
+        9.13,
+        17.455,
+        9.1
+      ],
+      "unmet_demand_mw": [
+        0.0,
+        32.926,
+        42.121,
+        33.975,
+        50.44,
+        49.88,
+        50.23,
+        46.544,
+        51.155,
+        58.074,
+        60.87,
+        52.545,
+        60.9
+      ],
+      "revenue": [
+        0.0,
+        1853.7,
+        3247.65,
+        5048.9,
+        6026.9,
+        7032.9,
+        8021.4,
+        9194.2,
+        10136.45,
+        10732.75,
+        11189.25,
+        12062.0,
+        12517.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "available_power 29.63",
+            "curtailed_mw 0",
+            "curtailment_loss 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "available_power 37.074",
+            "curtailed_mw 37.074",
+            "curtailment_loss 1853.7"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "available_power 37.074",
+            "curtailed_mw 0",
+            "curtailment_loss 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "available_power 37.074",
+            "curtailed_mw 37.074",
+            "curtailment_loss 1853.7"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "available_power 27.879",
+            "curtailed_mw 27.879",
+            "curtailment_loss 3247.65"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "available_power 27.879",
+            "curtailed_mw 0",
+            "curtailment_loss 1853.7"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "forecast"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "dispatch"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "curtail"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "forecast"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "dispatch"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

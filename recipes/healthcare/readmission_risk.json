@@ -1,0 +1,272 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "readmission_risk",
+  "description": "a discharge-readiness world with readmission risk; actions discharge, schedule_followup, readmit",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a discharge-readiness world with readmission risk; actions discharge, schedule_followup, readmit"
+  },
+  "state_schema": {
+    "status": "str",
+    "day": "int",
+    "readiness": "int",
+    "readmission_risk": "float",
+    "followup_scheduled": "bool",
+    "length_of_stay": "int",
+    "days_home": "int",
+    "discharges": "int",
+    "readmissions": "int"
+  },
+  "initial_state": {
+    "status": "admitted",
+    "day": 0,
+    "readiness": 40,
+    "readmission_risk": 0.5,
+    "followup_scheduled": false,
+    "length_of_stay": 0,
+    "days_home": 0,
+    "discharges": 0,
+    "readmissions": 0
+  },
+  "actions": [
+    "discharge",
+    "schedule_followup",
+    "readmit"
+  ],
+  "rules": [
+    "Every step advances the clock by exactly one day.",
+    "While 'admitted', discharge-readiness rises by 10 per day (capped at 100); 'length_of_stay' counts ward days.",
+    "'discharge' is only valid for an admitted patient; it sends them home and sets readmission_risk = (100 - readiness)/100.",
+    "A scheduled follow-up multiplies readmission_risk by 0.6, rewarding continuity of care; it can be booked before or after discharge.",
+    "'readmit' is only valid for a discharged patient; it returns them to the ward, lowers readiness by 25, raises risk by 0.2, clears the follow-up, and increments the readmission count.",
+    "readmission_risk is always clamped to [0, 1]."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    status = s.get(\"status\", \"admitted\")\n\n    # one day elapses on every step\n    s[\"day\"] = s.get(\"day\", 0) + 1\n\n    # passive dynamics that depend only on where the patient is\n    if status == \"admitted\":\n        # recovery raises discharge-readiness, capped at fully ready\n        s[\"length_of_stay\"] = s.get(\"length_of_stay\", 0) + 1\n        s[\"readiness\"] = min(100, s.get(\"readiness\", 0) + 10)\n    elif status == \"discharged\":\n        s[\"days_home\"] = s.get(\"days_home\", 0) + 1\n\n    if name == \"discharge\":\n        # only an admitted patient can be discharged\n        if status == \"admitted\":\n            s[\"status\"] = \"discharged\"\n            s[\"discharges\"] = s.get(\"discharges\", 0) + 1\n            s[\"days_home\"] = 0\n            # the less ready at discharge, the higher the readmission risk\n            readiness = s.get(\"readiness\", 0)\n            risk = (100 - readiness) / 100.0\n            # a booked follow-up cushions the risk\n            if s.get(\"followup_scheduled\"):\n                risk = risk * 0.6\n            s[\"readmission_risk\"] = round(max(0.0, min(1.0, risk)), 3)\n\n    elif name == \"schedule_followup\":\n        # continuity of care: schedulable any time, drives risk down\n        s[\"followup_scheduled\"] = True\n        s[\"readmission_risk\"] = round(\n            max(0.0, min(1.0, s.get(\"readmission_risk\", 0.0) * 0.6)), 3)\n\n    elif name == \"readmit\":\n        # a discharged patient deteriorates and bounces back to the ward\n        if status == \"discharged\":\n            s[\"status\"] = \"admitted\"\n            s[\"readmissions\"] = s.get(\"readmissions\", 0) + 1\n            s[\"readiness\"] = max(0, s.get(\"readiness\", 0) - 25)\n            s[\"length_of_stay\"] = 0\n            s[\"days_home\"] = 0\n            s[\"followup_scheduled\"] = False\n            s[\"readmission_risk\"] = round(\n                min(1.0, s.get(\"readmission_risk\", 0.0) + 0.2), 3)\n\n    # any other action (incl. noop) simply lets the day pass\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "readiness",
+        "followup_scheduled"
+      ],
+      "schema": {
+        "readiness": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        },
+        "followup_scheduled": "bool"
+      },
+      "code": "\ndef perceive(data):\n    out = {}\n    for line in str(data).splitlines():\n        if \":\" not in line:\n            continue\n        key, _, val = line.partition(\":\")\n        key = key.strip().lower()\n        val = val.strip()\n        if key == \"readiness\":\n            try:\n                out[\"readiness\"] = max(0, min(100, int(val)))\n            except (ValueError, TypeError):\n                pass\n        elif key in (\"followup\", \"follow_up\", \"followup_scheduled\"):\n            out[\"followup_scheduled\"] = val.lower() in (\"yes\", \"true\", \"1\", \"scheduled\", \"booked\")\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "readiness",
+        "readmission_risk",
+        "followup_scheduled",
+        "length_of_stay",
+        "readmissions"
+      ],
+      "report": "Patient is {status} (day {day}); discharge-readiness {readiness}/100, readmission risk {readmission_risk}, follow-up scheduled: {followup_scheduled}. Length of stay {length_of_stay}d, prior readmissions {readmissions}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "avoid_readmission",
+      "goal": "minimize readmission_risk"
+    },
+    {
+      "name": "timely_discharge",
+      "goal": "minimize length_of_stay"
+    },
+    {
+      "name": "continuity_of_care",
+      "goal": "maximize followup_scheduled"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "discharge",
+    "series": {
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "readiness": [
+        40.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0
+      ],
+      "length_of_stay": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "days_home": [
+        0.0,
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0
+      ],
+      "discharges": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "day 0",
+            "days_home 0",
+            "discharges 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "day 1",
+            "days_home 0",
+            "discharges 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "day 1",
+            "days_home 0",
+            "discharges 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "day 1",
+            "days_home 0",
+            "discharges 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "day 2",
+            "days_home 1",
+            "discharges 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "day 2",
+            "days_home 1",
+            "discharges 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "discharge"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "schedule_followup"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "readmit"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "discharge"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "schedule_followup"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

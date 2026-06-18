@@ -42,6 +42,7 @@ EXPERIMENTS = [
     "e54_bounds", "e55_infogeom", "e56_transport", "e57_world_specs", "e58_brain", "e59_brain_arch",
     "e60_io_boundary", "e61_trained_wm_control", "e62_branch_gate",
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
+    "e68_prototyping_latency",
 ]
 
 
@@ -2293,6 +2294,13 @@ def numbers_tex(d):
         macro("TuningBudget", str(e09["budget_trials"])),
         macro("NumTasks", str(e05["summary"]["n_tasks"])),
         macro("NumExperiments", str(len(EXPERIMENTS))),
+        # E68 prototyping-latency benchmark (100 worlds built + timed by Claude Code)
+        macro("ProtoNumWorlds", str(d["e68_prototyping_latency"]["n_worlds"])),
+        macro("ProtoNumSectors", str(len(d["e68_prototyping_latency"]["sectors"]))),
+        macro("ProtoMedianMinutes", f"{d['e68_prototyping_latency']['median_minutes']:.1f}"),
+        macro("ProtoMeanMinutes", f"{d['e68_prototyping_latency']['mean_minutes']:.1f}"),
+        macro("ProtoMaxMinutes", f"{d['e68_prototyping_latency']['max_minutes']:.1f}"),
+        macro("ProtoValidationRate", pct(d["e68_prototyping_latency"]["validation_rate"])),
         # E65 MiniGrid head-to-head (trained vs verified on a shared benchmark)
         macro("MGOpenWorldPlan", str(d["e65_minigrid_bench"]["openworld"]["plan_length"])),
         macro("MGDreamerFirstSolve",
@@ -3250,6 +3258,25 @@ def table_minigrid_bench(e65):
     (TABLES / "minigrid_bench.tex").write_text("\n".join(lines) + "\n")
 
 
+def table_prototyping(e68):
+    """E68: per-sector prototyping-latency benchmark -- 100 worlds built + timed by
+    Claude Code (openworld build), one row per sector."""
+    nice = {"healthcare": "Healthcare", "financial": "Financial services",
+            "legal": "Legal", "cybersecurity": "Cybersecurity \\& IT ops",
+            "energy": "Energy \\& climate", "agentic": "Agentic-AI"}
+    lines = ["\\begin{tabular}{lccc}", "\\toprule",
+             "Sector & Worlds & Validated & Median build \\\\", "\\midrule"]
+    for sec, s in e68["by_sector"].items():
+        lines.append(f"{nice.get(sec, sec)} & {s['n']} & {s['validated']}/{s['n']} & "
+                     f"{s['median_minutes']:.1f} min \\\\")
+    lines += ["\\midrule",
+              f"\\textbf{{All}} & \\textbf{{{e68['n_worlds']}}} & "
+              f"\\textbf{{{e68['n_validated']}/{e68['n_worlds']}}} & "
+              f"\\textbf{{{e68['median_minutes']:.1f} min}} \\\\",
+              "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "prototyping.tex").write_text("\n".join(lines) + "\n")
+
+
 def fig_prototyping():
     """The framework legend figure: the showcase world's spec rendered as the
     perceive -> world -> emit -> act pipeline (generated from the real spec, so the
@@ -3325,6 +3352,7 @@ def main():
     fig_trained_wm_control(data["e61_trained_wm_control"])
     table_bakeoff(data["e63_world_model_bakeoff"])
     table_minigrid_bench(data["e65_minigrid_bench"])
+    table_prototyping(data["e68_prototyping_latency"])
     table_corporate_world(data["e48_corporate_world"])
     table_many_worlds(data["e46_many_worlds"])
     table_representations(data["e36_representations"])

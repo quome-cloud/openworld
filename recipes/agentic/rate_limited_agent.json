@@ -1,0 +1,285 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "rate_limited_agent",
+  "description": "an agent respecting API rate limits world; actions request, backoff, retry",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an agent respecting API rate limits world; actions request, backoff, retry"
+  },
+  "state_schema": {
+    "time": "int",
+    "capacity": "int",
+    "tokens": "int",
+    "refill_per_tick": "int",
+    "refill_interval": "int",
+    "max_backoff": "int",
+    "backoff": "int",
+    "cooldown": "int",
+    "pending": "int",
+    "completed": "int",
+    "throttled": "int",
+    "last_status": "str"
+  },
+  "initial_state": {
+    "time": 0,
+    "capacity": 5,
+    "tokens": 3,
+    "refill_per_tick": 1,
+    "refill_interval": 3,
+    "max_backoff": 8,
+    "backoff": 1,
+    "cooldown": 0,
+    "pending": 0,
+    "completed": 0,
+    "throttled": 0,
+    "last_status": "idle"
+  },
+  "actions": [
+    "request",
+    "backoff",
+    "retry"
+  ],
+  "rules": [
+    "The API is a token bucket of size `capacity`; every `refill_interval` steps it refills `refill_per_tick` tokens up to `capacity`, a sustained rate strictly below one request per step.",
+    "A `request` with tokens available spends one token and completes successfully, resetting `backoff` to 1.",
+    "A `request` with an empty bucket is rate limited (429): it increments `throttled`, queues the call in `pending`, and obliges a `backoff`.",
+    "A respectful agent never issues a `request` while `cooldown > 0`; doing so is `blocked` and accomplishes nothing.",
+    "`backoff` honors Retry-After: it arms `cooldown` for `backoff` ticks and then doubles `backoff`, capped at `max_backoff`.",
+    "`retry` re-drives one queued request once `cooldown` has elapsed and a token is free; if still limited it re-arms an exponential backoff."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n    cap = s[\"capacity\"]\n    # every step advances time; the bucket refills `refill_per_tick` tokens once\n    # every `refill_interval` steps (a sustained-rate limiter that is strictly\n    # slower than 1 request/step, so bursts genuinely drain it). Any outstanding\n    # cooldown (a respected Retry-After window) ticks down by one each step.\n    s[\"time\"] = s[\"time\"] + 1\n    if s[\"time\"] % s[\"refill_interval\"] == 0:\n        s[\"tokens\"] = min(cap, s[\"tokens\"] + s[\"refill_per_tick\"])\n    if s[\"cooldown\"] > 0:\n        s[\"cooldown\"] = s[\"cooldown\"] - 1\n\n    if name == \"request\":\n        if s[\"cooldown\"] > 0:\n            # agent is inside a backoff window: a polite agent does not call.\n            s[\"last_status\"] = \"blocked\"\n        elif s[\"tokens\"] >= 1:\n            s[\"tokens\"] = s[\"tokens\"] - 1\n            s[\"completed\"] = s[\"completed\"] + 1\n            s[\"backoff\"] = 1            # success resets exponential backoff\n            s[\"last_status\"] = \"ok\"\n        else:\n            # bucket empty -> 429; queue the call and require a backoff next.\n            s[\"throttled\"] = s[\"throttled\"] + 1\n            s[\"pending\"] = s[\"pending\"] + 1\n            s[\"last_status\"] = \"429\"\n\n    elif name == \"backoff\":\n        # honor Retry-After: wait `backoff` ticks, then double it (capped).\n        s[\"cooldown\"] = min(s[\"max_backoff\"], s[\"backoff\"])\n        s[\"backoff\"] = min(s[\"max_backoff\"], s[\"backoff\"] * 2)\n        s[\"last_status\"] = \"wait\"\n\n    elif name == \"retry\":\n        if s[\"pending\"] <= 0:\n            s[\"last_status\"] = \"idle\"          # nothing queued to retry\n        elif s[\"cooldown\"] > 0:\n            s[\"last_status\"] = \"wait\"          # still inside backoff window\n        elif s[\"tokens\"] >= 1:\n            s[\"tokens\"] = s[\"tokens\"] - 1\n            s[\"pending\"] = s[\"pending\"] - 1\n            s[\"completed\"] = s[\"completed\"] + 1\n            s[\"backoff\"] = 1                   # drained one from the queue\n            s[\"last_status\"] = \"ok\"\n        else:\n            # still rate limited: re-arm an (exponentially longer) backoff.\n            s[\"throttled\"] = s[\"throttled\"] + 1\n            s[\"cooldown\"] = min(s[\"max_backoff\"], s[\"backoff\"])\n            s[\"backoff\"] = min(s[\"max_backoff\"], s[\"backoff\"] * 2)\n            s[\"last_status\"] = \"429\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "tokens",
+        "cooldown",
+        "last_status"
+      ],
+      "schema": {
+        "tokens": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "cooldown": {
+          "type": "int",
+          "range": [
+            0,
+            100000
+          ]
+        },
+        "last_status": "str"
+      },
+      "code": "\ndef perceive(data):\n    status = int(data.get(\"status\", 200))\n    remaining = int(data.get(\"remaining\", 0))\n    retry_after = int(data.get(\"retry_after\", 0))\n    return {\n        \"tokens\": max(0, remaining),\n        \"cooldown\": max(0, retry_after),\n        \"last_status\": \"429\" if status == 429 else \"ok\",\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "time",
+        "completed",
+        "throttled",
+        "pending",
+        "tokens",
+        "cooldown",
+        "last_status"
+      ],
+      "report": "t={time}: completed={completed}, 429s={throttled}, pending={pending}, tokens={tokens}, cooldown={cooldown}, status={last_status}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "completed",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "throttled",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {
+      "time": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "tokens": [
+        3.0,
+        2.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pending": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        2.0,
+        3.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0
+      ],
+      "completed": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        4.0,
+        5.0,
+        5.0,
+        5.0,
+        6.0,
+        6.0,
+        6.0,
+        7.0
+      ],
+      "throttled": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        2.0,
+        3.0,
+        3.0,
+        4.0,
+        5.0,
+        5.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "backoff 1",
+            "completed 0",
+            "cooldown 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "backoff 1",
+            "completed 1",
+            "cooldown 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "backoff 2",
+            "completed 0",
+            "cooldown 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "backoff 1",
+            "completed 0",
+            "cooldown 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "backoff 1",
+            "completed 2",
+            "cooldown 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "backoff 2",
+            "completed 1",
+            "cooldown 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "backoff"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "retry"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "request"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "backoff"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

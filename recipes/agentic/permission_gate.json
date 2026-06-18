@@ -1,0 +1,217 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "permission_gate",
+  "description": "an agent permission-gated edit world; actions propose, approve, apply, deny",
+  "card": {
+    "version": "1.0",
+    "license": "MIT",
+    "authors": [],
+    "tags": [
+      "agent",
+      "permission-gate",
+      "workflow",
+      "leaf"
+    ],
+    "lineage": "build/permission_gate.py",
+    "metrics": {},
+    "description": "an agent permission-gated edit world; actions propose, approve, apply, deny"
+  },
+  "state_schema": {
+    "status": "str",
+    "pending_edit": "str",
+    "applied_content": "str",
+    "proposed": "int",
+    "approved": "int",
+    "applied": "int",
+    "denied": "int"
+  },
+  "initial_state": {
+    "status": "idle",
+    "pending_edit": "",
+    "applied_content": "",
+    "proposed": 0,
+    "approved": 0,
+    "applied": 0,
+    "denied": 0
+  },
+  "actions": [
+    "propose",
+    "approve",
+    "apply",
+    "deny"
+  ],
+  "rules": [
+    "One edit is in flight at a time; the gate tracks it via 'status' (idle, proposed, approved, applied, denied).",
+    "'propose' opens a pending edit, carrying its content from the action params, only when no edit is in flight (idle/applied/denied -> proposed).",
+    "'approve' grants permission; only a proposed edit may be approved (proposed -> approved).",
+    "'apply' commits the pending edit into applied_content, but is gated: it is permitted only after approval (approved -> applied). Applying an un-approved edit is a no-op -- the agent cannot bypass the gate.",
+    "'deny' rejects and discards an in-flight edit, committing nothing (proposed/approved -> denied).",
+    "proposed/approved/applied/denied are monotonic counters of each event."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    status = s[\"status\"]\n\n    if name == \"propose\":\n        # Open a new pending edit, but only when none is in flight. The proposed\n        # content rides in on the action params (defaults to a placeholder edit).\n        if status in (\"idle\", \"applied\", \"denied\"):\n            s[\"pending_edit\"] = str(params.get(\"content\", \"edit\"))\n            s[\"status\"] = \"proposed\"\n            s[\"proposed\"] = s[\"proposed\"] + 1\n\n    elif name == \"approve\":\n        # Grant permission. The gate only opens for an edit that was proposed.\n        if status == \"proposed\":\n            s[\"status\"] = \"approved\"\n            s[\"approved\"] = s[\"approved\"] + 1\n\n    elif name == \"apply\":\n        # Commit the edit to the document -- gated on a prior approval. Applying\n        # an un-approved edit changes nothing: the agent cannot bypass the gate.\n        if status == \"approved\":\n            s[\"applied_content\"] = s[\"pending_edit\"]\n            s[\"pending_edit\"] = \"\"\n            s[\"status\"] = \"applied\"\n            s[\"applied\"] = s[\"applied\"] + 1\n\n    elif name == \"deny\":\n        # Reject and discard an in-flight edit (whether merely proposed or even\n        # already approved). The pending content is dropped, never committed.\n        if status in (\"proposed\", \"approved\"):\n            s[\"pending_edit\"] = \"\"\n            s[\"status\"] = \"denied\"\n            s[\"denied\"] = s[\"denied\"] + 1\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "pending_edit",
+        "status"
+      ],
+      "schema": {
+        "pending_edit": "str",
+        "status": "str"
+      },
+      "code": "\ndef perceive(data):\n    # Intake an edit request pasted as text, e.g.:\n    #     edit: fix the typo in the header\n    # Surfaces it as a pending proposal the gate can then approve/apply/deny.\n    out = {}\n    for line in str(data).splitlines():\n        if ':' in line:\n            k, v = line.split(':', 1)\n            k = k.strip().lower(); v = v.strip()\n            if k in ('edit', 'content', 'proposal', 'propose'):\n                out['pending_edit'] = v\n                out['status'] = 'proposed'\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "applied_content",
+        "applied",
+        "denied"
+      ],
+      "report": "gate {status}: applied {applied}, denied {denied}; document=\"{applied_content}\""
+    }
+  ],
+  "objectives": [
+    {
+      "name": "ship approved edits",
+      "goal": "max applied"
+    },
+    {
+      "name": "let no unapproved edit through",
+      "goal": "min denied"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "propose",
+    "series": {
+      "proposed": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "applied 0",
+            "approved 0",
+            "denied 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "applied 0",
+            "approved 0",
+            "denied 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "applied 0",
+            "approved 1",
+            "denied 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "applied 0",
+            "approved 0",
+            "denied 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "applied 1",
+            "approved 1",
+            "denied 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "applied 0",
+            "approved 1",
+            "denied 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "propose"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "approve, apply, deny"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "approve"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "deny"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "propose, apply"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "apply"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "deny"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "propose, approve"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

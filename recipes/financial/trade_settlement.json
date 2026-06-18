@@ -1,0 +1,235 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "trade_settlement",
+  "description": "a T+1 trade-settlement lifecycle world; actions match, affirm, settle, fail",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a T+1 trade-settlement lifecycle world; actions match, affirm, settle, fail"
+  },
+  "state_schema": {
+    "status": "str",
+    "trade_date": "int",
+    "settlement_date": "int",
+    "current_day": "int",
+    "side": "str",
+    "quantity": "int",
+    "price": "float",
+    "cash_amount": "float",
+    "seller_inventory": "int",
+    "buyer_securities": "int",
+    "buyer_cash": "float",
+    "seller_cash": "float",
+    "matched": "bool",
+    "affirmed": "bool",
+    "settled": "bool",
+    "failed": "bool",
+    "fail_reason": "str"
+  },
+  "initial_state": {
+    "status": "executed",
+    "trade_date": 0,
+    "settlement_date": 1,
+    "current_day": 0,
+    "side": "buy",
+    "quantity": 1000,
+    "price": 50.0,
+    "cash_amount": 50000.0,
+    "seller_inventory": 1000,
+    "buyer_securities": 0,
+    "buyer_cash": 50000.0,
+    "seller_cash": 0.0,
+    "matched": false,
+    "affirmed": false,
+    "settled": false,
+    "failed": false,
+    "fail_reason": ""
+  },
+  "actions": [
+    "match",
+    "affirm",
+    "settle",
+    "fail"
+  ],
+  "rules": [
+    "A trade is born 'executed' on trade date T (current_day == trade_date == 0).",
+    "'match' moves an executed trade to 'matched' by reconciling counterparty economic details; it is a no-op from any other status.",
+    "'affirm' moves a matched trade to 'affirmed' and rolls the cycle forward to the settlement date (current_day := settlement_date), i.e. T+1.",
+    "'settle' is delivery-versus-payment: it is permitted only when the trade is affirmed and current_day >= settlement_date, and only if the seller holds enough securities and the buyer holds enough cash. On success the securities and cash legs move atomically and the trade becomes 'settled'.",
+    "If 'settle' is attempted but a leg cannot be delivered, the trade becomes 'failed' with fail_reason 'insufficient_securities' or 'insufficient_cash'.",
+    "'fail' explicitly marks a live (matched or affirmed) trade as 'failed' to settle, e.g. a short position or unmatched instruction.",
+    "'settled' and 'failed' are terminal: no action changes a trade once it reaches either."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    status = s.get(\"status\", \"executed\")\n    day = s.get(\"current_day\", 0)\n    sett_date = s.get(\"settlement_date\", 1)\n\n    # 'settled' and 'failed' are terminal -- the trade is off the books.\n    if status in (\"settled\", \"failed\"):\n        return s\n\n    if name == \"match\":\n        # Counterparties compare economic details on trade date. Only an\n        # executed (unmatched) trade can be matched.\n        if status == \"executed\":\n            s[\"status\"] = \"matched\"\n            s[\"matched\"] = True\n        return s\n\n    if name == \"affirm\":\n        # Both sides affirm the matched economics, then the cycle rolls\n        # overnight to the settlement date (T+1).\n        if status == \"matched\":\n            s[\"status\"] = \"affirmed\"\n            s[\"affirmed\"] = True\n            s[\"current_day\"] = sett_date\n        return s\n\n    if name == \"settle\":\n        # DvP settlement: only once affirmed, only on/after the settlement\n        # date, and only if BOTH legs can be delivered. The exchange is atomic.\n        if status == \"affirmed\" and day >= sett_date:\n            qty = s.get(\"quantity\", 0)\n            cash = s.get(\"cash_amount\", 0.0)\n            enough_securities = s.get(\"seller_inventory\", 0) >= qty\n            enough_cash = s.get(\"buyer_cash\", 0.0) >= cash\n            if enough_securities and enough_cash:\n                s[\"seller_inventory\"] = s.get(\"seller_inventory\", 0) - qty\n                s[\"buyer_securities\"] = s.get(\"buyer_securities\", 0) + qty\n                s[\"buyer_cash\"] = round(s.get(\"buyer_cash\", 0.0) - cash, 2)\n                s[\"seller_cash\"] = round(s.get(\"seller_cash\", 0.0) + cash, 2)\n                s[\"status\"] = \"settled\"\n                s[\"settled\"] = True\n            else:\n                # A leg cannot be delivered -> the settlement fails.\n                s[\"status\"] = \"failed\"\n                s[\"failed\"] = True\n                s[\"fail_reason\"] = (\"insufficient_securities\"\n                                    if not enough_securities\n                                    else \"insufficient_cash\")\n        return s\n\n    if name == \"fail\":\n        # An explicit settlement fail (short position, DK, late instruction)\n        # from any live, non-settled state.\n        if status in (\"matched\", \"affirmed\"):\n            s[\"status\"] = \"failed\"\n            s[\"failed\"] = True\n            if not s.get(\"fail_reason\"):\n                s[\"fail_reason\"] = params.get(\"reason\", \"settlement_fail\")\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "quantity",
+        "price",
+        "cash_amount"
+      ],
+      "schema": {
+        "quantity": {
+          "type": "int",
+          "range": [
+            0,
+            10000000
+          ]
+        },
+        "price": {
+          "type": "float",
+          "range": [
+            0.0,
+            1000000.0
+          ]
+        },
+        "cash_amount": "float"
+      },
+      "code": "\ndef perceive(data):\n    qty = int(data.get(\"quantity\", 0))\n    price = float(data.get(\"price\", 0.0))\n    return {\n        \"quantity\": qty,\n        \"price\": price,\n        \"cash_amount\": round(qty * price, 2),\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "current_day",
+        "settlement_date",
+        "quantity",
+        "cash_amount",
+        "fail_reason"
+      ],
+      "report": "Trade status: {status} (day {current_day} of T+{settlement_date}). {quantity} units @ cash {cash_amount}. {fail_reason}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "settled_on_time",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "settlement_fails",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "match",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "buyer_cash 50000",
+            "buyer_securities 0",
+            "current_day 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "buyer_cash 50000",
+            "buyer_securities 0",
+            "current_day 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "buyer_cash 50000",
+            "buyer_securities 0",
+            "current_day 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "buyer_cash 50000",
+            "buyer_securities 0",
+            "current_day 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "buyer_cash 0",
+            "buyer_securities 1000",
+            "current_day 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "buyer_cash 50000",
+            "buyer_securities 0",
+            "current_day 1"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "match"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "affirm, settle, fail"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "affirm"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "fail"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "match, settle"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "settle"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "fail"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "match, affirm"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

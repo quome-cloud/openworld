@@ -1,0 +1,258 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "contract_review",
+  "description": "a contract-review workflow world with clause flags; actions draft, redline, approve, sign",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a contract-review workflow world with clause flags; actions draft, redline, approve, sign"
+  },
+  "state_schema": {
+    "phase": "str",
+    "clauses": "dict",
+    "clauses_total": "int",
+    "flags_open": "int",
+    "draft_version": "int",
+    "redline_rounds": "int",
+    "approved": "bool",
+    "signed": "bool"
+  },
+  "initial_state": {
+    "phase": "blank",
+    "clauses": {},
+    "clauses_total": 0,
+    "flags_open": 0,
+    "draft_version": 0,
+    "redline_rounds": 0,
+    "approved": false,
+    "signed": false
+  },
+  "actions": [
+    "draft",
+    "redline",
+    "approve",
+    "sign"
+  ],
+  "rules": [
+    "A contract advances through phases blank -> drafted -> redlined -> approved -> signed.",
+    "'draft' creates a fresh draft (resetting flags, approval and signature) from any phase except 'signed'.",
+    "Drafting populates a fixed clause roster; risky clauses (liability, indemnity, termination) start flagged.",
+    "'redline' resolves exactly one open clause flag per pass and is only legal while drafted or redlined.",
+    "'approve' is only legal when the draft exists and no clause remains flagged (flags_open == 0).",
+    "'sign' is only legal once the contract has been approved.",
+    "Any action whose precondition is unmet is a no-op, leaving state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n\n    # Fixed clause roster for a fresh draft. True == flagged for review.\n    roster = [\n        [\"liability\", True],\n        [\"indemnity\", True],\n        [\"termination\", True],\n        [\"confidentiality\", False],\n        [\"payment\", False],\n    ]\n\n    phase = s.get(\"phase\", \"blank\")\n    clauses = dict(s.get(\"clauses\", {}))\n\n    if name == \"draft\":\n        # Produce a fresh draft from any not-yet-signed phase; resets flags.\n        if phase != \"signed\":\n            clauses = {c: flag for c, flag in roster}\n            s[\"clauses\"] = clauses\n            s[\"clauses_total\"] = len(clauses)\n            s[\"flags_open\"] = sum(1 for f in clauses.values() if f)\n            s[\"draft_version\"] = int(s.get(\"draft_version\", 0)) + 1\n            s[\"redline_rounds\"] = 0\n            s[\"approved\"] = False\n            s[\"signed\"] = False\n            s[\"phase\"] = \"drafted\"\n\n    elif name == \"redline\":\n        # Resolve the next open clause flag; one clause per redline pass.\n        if phase in (\"drafted\", \"redlined\"):\n            open_clauses = sorted(c for c in clauses if clauses[c])\n            if open_clauses:\n                clauses[open_clauses[0]] = False\n                s[\"clauses\"] = clauses\n                s[\"flags_open\"] = sum(1 for f in clauses.values() if f)\n                s[\"redline_rounds\"] = int(s.get(\"redline_rounds\", 0)) + 1\n                s[\"phase\"] = \"redlined\"\n\n    elif name == \"approve\":\n        # Approval gate: every clause must be resolved (no open flags).\n        if (phase in (\"drafted\", \"redlined\")\n                and int(s.get(\"clauses_total\", 0)) > 0\n                and int(s.get(\"flags_open\", 0)) == 0):\n            s[\"approved\"] = True\n            s[\"phase\"] = \"approved\"\n\n    elif name == \"sign\":\n        # Execution gate: only an approved contract may be signed.\n        if phase == \"approved\" and s.get(\"approved\"):\n            s[\"signed\"] = True\n            s[\"phase\"] = \"signed\"\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "clauses_total",
+        "flags_open"
+      ],
+      "schema": {
+        "clauses_total": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        },
+        "flags_open": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data)\n    fields = {}\n    for line in text.splitlines():\n        if \":\" in line:\n            k, v = line.split(\":\", 1)\n            fields[k.strip().lower()] = v.strip()\n    risky = fields.get(\"risky_clauses\", \"\")\n    flagged = [c for c in risky.replace(\",\", \" \").split() if c]\n    raw_total = fields.get(\"clauses_total\", \"\")\n    total = int(raw_total) if raw_total.isdigit() else max(len(flagged), 5)\n    flags = len(flagged)\n    if flags > total:\n        total = flags\n    return {\"clauses_total\": total, \"flags_open\": flags}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "flags_open",
+        "clauses_total",
+        "approved",
+        "signed"
+      ],
+      "report": "Contract review status: phase={phase}; {flags_open}/{clauses_total} clauses still flagged; approved={approved}; signed={signed}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "clear_redlines",
+      "goal": "minimize flags_open"
+    },
+    {
+      "name": "execute_contract",
+      "goal": "maximize signed"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "draft",
+    "series": {
+      "clauses_total": [
+        0.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ],
+      "flags_open": [
+        0.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0,
+        3.0
+      ],
+      "draft_version": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "clauses_total 0",
+            "draft_version 0",
+            "flags_open 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "clauses_total 5",
+            "draft_version 1",
+            "flags_open 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "clauses_total 5",
+            "draft_version 2",
+            "flags_open 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "clauses_total 5",
+            "draft_version 1",
+            "flags_open 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "clauses_total 5",
+            "draft_version 3",
+            "flags_open 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "clauses_total 5",
+            "draft_version 2",
+            "flags_open 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "draft"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "redline, approve, sign"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "draft"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "redline"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "approve, sign"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "draft"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "redline"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "approve, sign"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

@@ -1,0 +1,225 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "access_control",
+  "description": "an RBAC access-request state machine world; actions request, approve, grant, revoke",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an RBAC access-request state machine world; actions request, approve, grant, revoke"
+  },
+  "state_schema": {
+    "roles": "dict",
+    "assignments": "dict",
+    "request": "null",
+    "status": "str",
+    "default_user": "str",
+    "default_role": "str",
+    "default_approver": "str",
+    "history": "list"
+  },
+  "initial_state": {
+    "roles": {
+      "admin": [
+        "read",
+        "write",
+        "delete",
+        "approve"
+      ],
+      "manager": [
+        "read",
+        "write",
+        "approve"
+      ],
+      "editor": [
+        "read",
+        "write"
+      ],
+      "viewer": [
+        "read"
+      ]
+    },
+    "assignments": {
+      "carol": [
+        "manager"
+      ]
+    },
+    "request": null,
+    "status": "idle",
+    "default_user": "alice",
+    "default_role": "editor",
+    "default_approver": "carol",
+    "history": []
+  },
+  "actions": [
+    "request",
+    "approve",
+    "grant",
+    "revoke"
+  ],
+  "rules": [
+    "An access request follows the lifecycle idle -> requested -> approved -> granted -> revoked.",
+    "'request' opens a new request for a (user, role) only when no request is in flight (status idle, revoked, or denied), and the role must exist in the role catalogue.",
+    "'approve' succeeds only on a 'requested' request and only if the approver holds a role granting the 'approve' permission; otherwise the request is denied.",
+    "'grant' applies only to an 'approved' request and assigns the requested role to the requesting user.",
+    "'revoke' applies only to a 'granted' request and removes the assigned role from the user.",
+    "Every successful action appends an entry to the immutable history audit trail."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    # Copy the mutable structures so we never mutate the caller's state.\n    s[\"roles\"] = {r: list(perms) for r, perms in s.get(\"roles\", {}).items()}\n    s[\"assignments\"] = {u: list(rs) for u, rs in s.get(\"assignments\", {}).items()}\n    s[\"history\"] = list(s.get(\"history\", []))\n    req = dict(s[\"request\"]) if s.get(\"request\") else None\n\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n    actor = action.get(\"agent\") or params.get(\"actor\")\n    status = s.get(\"status\", \"idle\")\n    roles = s[\"roles\"]\n    assignments = s[\"assignments\"]\n\n    def holds_permission(user, permission):\n        for role in assignments.get(user, []):\n            if permission in roles.get(role, []):\n                return True\n        return False\n\n    if name == \"request\":\n        # Open a fresh request only when no request is in flight.\n        if status in (\"idle\", \"revoked\", \"denied\"):\n            user = params.get(\"user\", s.get(\"default_user\"))\n            role = params.get(\"role\", s.get(\"default_role\"))\n            if role in roles:\n                req = {\"user\": user, \"role\": role, \"approver\": None}\n                s[\"status\"] = \"requested\"\n                s[\"history\"].append(\"request: \" + str(user) + \" -> \" + str(role))\n            else:\n                s[\"history\"].append(\"reject-unknown-role: \" + str(role))\n\n    elif name == \"approve\":\n        # Only a holder of the \"approve\" permission may approve; RBAC check.\n        if status == \"requested\" and req is not None:\n            approver = actor or params.get(\"approver\", s.get(\"default_approver\"))\n            if holds_permission(approver, \"approve\"):\n                req[\"approver\"] = approver\n                s[\"status\"] = \"approved\"\n                s[\"history\"].append(\"approve: \" + str(approver))\n            else:\n                s[\"status\"] = \"denied\"\n                s[\"history\"].append(\"deny (no approve permission): \" + str(approver))\n\n    elif name == \"grant\":\n        # Materialize an approved request by assigning the role to the user.\n        if status == \"approved\" and req is not None:\n            user, role = req[\"user\"], req[\"role\"]\n            held = assignments.setdefault(user, [])\n            if role not in held:\n                held.append(role)\n            s[\"status\"] = \"granted\"\n            s[\"history\"].append(\"grant: \" + str(user) + \" -> \" + str(role))\n\n    elif name == \"revoke\":\n        # Withdraw a previously granted role; closes out the request.\n        if status == \"granted\" and req is not None:\n            user, role = req[\"user\"], req[\"role\"]\n            held = assignments.get(user, [])\n            if role in held:\n                held.remove(role)\n            s[\"status\"] = \"revoked\"\n            s[\"history\"].append(\"revoke: \" + str(user) + \" -> \" + str(role))\n\n    s[\"request\"] = req\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "req_user",
+        "req_role",
+        "status"
+      ],
+      "schema": {
+        "req_user": "str",
+        "req_role": "str",
+        "status": "str"
+      },
+      "code": "\ndef perceive(data):\n    user = str(data.get(\"user\", \"\")).strip()\n    role = str(data.get(\"role\", \"\")).strip()\n    return {\"req_user\": user, \"req_role\": role, \"status\": \"requested\"}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "status",
+        "request",
+        "assignments",
+        "history"
+      ],
+      "report": "Access request is '{status}'. Current request: {request}. Role assignments: {assignments}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "least_privilege",
+      "goal": "minimize roles assigned beyond what was approved"
+    },
+    {
+      "name": "approval_integrity",
+      "goal": "no role is granted without a prior valid approval"
+    },
+    {
+      "name": "auditability",
+      "goal": "maximize completeness of the history audit trail"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "s0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "s1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "s2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "s3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "s4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "s5"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "approve, grant, revoke"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "approve"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "request, grant, revoke"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "grant"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "request, approve, revoke"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "revoke"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "request, approve, grant"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "request"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "approve, grant, revoke"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

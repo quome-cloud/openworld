@@ -1,0 +1,244 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "compliance_gating",
+  "description": "a regulatory compliance-gating world that gates actions; actions request, check, approve, block",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a regulatory compliance-gating world that gates actions; actions request, check, approve, block"
+  },
+  "state_schema": {
+    "phase": "str",
+    "threshold": "int",
+    "current_risk": "int",
+    "checked": "bool",
+    "compliant": "bool",
+    "requested": "int",
+    "approved": "int",
+    "blocked": "int",
+    "audit": "list"
+  },
+  "initial_state": {
+    "phase": "idle",
+    "threshold": 50,
+    "current_risk": 0,
+    "checked": false,
+    "compliant": false,
+    "requested": 0,
+    "approved": 0,
+    "blocked": 0,
+    "audit": []
+  },
+  "actions": [
+    "request",
+    "check",
+    "approve",
+    "block"
+  ],
+  "rules": [
+    "An action must be 'request'ed before it can be 'check'ed, approved, or blocked.",
+    "'check' compares the request's risk to the threshold and records the verdict (compliant if risk <= threshold).",
+    "'approve' opens the gate only for a request that has been checked AND found compliant; otherwise it is a no-op.",
+    "'block' closes the gate on any checked request and is the way to stop a violation.",
+    "The gate handles one request at a time; an action issued out of turn leaves the state unchanged."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action[\"name\"] if isinstance(action, dict) else action\n    s[\"audit\"] = list(s.get(\"audit\", []))\n\n    def log(entry):\n        s[\"audit\"] = (s[\"audit\"] + [entry])[-8:]\n\n    phase = s.get(\"phase\", \"idle\")\n\n    if name == \"request\":\n        # Open a new request only when the gate is free.\n        if phase != \"idle\":\n            return s\n        n = s.get(\"requested\", 0) + 1\n        risk = (n * 37) % 100          # deterministic, varied risk per request\n        s[\"requested\"] = n\n        s[\"current_risk\"] = risk\n        s[\"phase\"] = \"requested\"\n        s[\"checked\"] = False\n        s[\"compliant\"] = False\n        log(\"request #%d risk=%d\" % (n, risk))\n        return s\n\n    if name == \"check\":\n        # Evaluate the pending request against the compliance threshold.\n        if phase != \"requested\":\n            return s\n        compliant = s.get(\"current_risk\", 0) <= s.get(\"threshold\", 50)\n        s[\"compliant\"] = bool(compliant)\n        s[\"checked\"] = True\n        s[\"phase\"] = \"checked\"\n        log(\"check risk=%d threshold=%d -> %s\"\n            % (s.get(\"current_risk\", 0), s.get(\"threshold\", 50),\n               \"compliant\" if compliant else \"violation\"))\n        return s\n\n    if name == \"approve\":\n        # The gate only opens for a checked, compliant request.\n        if phase != \"checked\" or not s.get(\"compliant\", False):\n            return s\n        s[\"approved\"] = s.get(\"approved\", 0) + 1\n        s[\"phase\"] = \"idle\"\n        s[\"checked\"] = False\n        s[\"current_risk\"] = 0\n        log(\"approved (total=%d)\" % s[\"approved\"])\n        return s\n\n    if name == \"block\":\n        # Close the gate on any checked request (compliant or not).\n        if phase != \"checked\":\n            return s\n        s[\"blocked\"] = s.get(\"blocked\", 0) + 1\n        s[\"phase\"] = \"idle\"\n        s[\"checked\"] = False\n        s[\"current_risk\"] = 0\n        log(\"blocked (total=%d)\" % s[\"blocked\"])\n        return s\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "current_risk"
+      ],
+      "schema": {
+        "current_risk": {
+          "type": "int",
+          "range": [
+            0,
+            100
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    risk = None\n    if isinstance(data, dict):\n        risk = data.get(\"risk\")\n    else:\n        text = str(data)\n        if \"risk\" in text:\n            tail = text.split(\"risk\", 1)[1]\n            digits = \"\"\n            for ch in tail:\n                if ch.isdigit():\n                    digits += ch\n                elif digits:\n                    break\n            if digits:\n                risk = int(digits)\n    if risk is None:\n        return {}\n    risk = max(0, min(100, int(risk)))\n    return {\"current_risk\": risk}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "phase",
+        "requested",
+        "approved",
+        "blocked",
+        "compliant"
+      ],
+      "report": "Compliance gate [{phase}] | requested={requested} approved={approved} blocked={blocked} last_verdict={compliant}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "approve_compliant",
+      "goal": "maximize approvals of compliant requests"
+    },
+    {
+      "name": "block_violations",
+      "goal": "block every non-compliant request"
+    },
+    {
+      "name": "no_improper_approvals",
+      "goal": "never approve a non-compliant request"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "request",
+    "series": {
+      "current_risk": [
+        0.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0,
+        37.0
+      ],
+      "requested": [
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "approved 0",
+            "blocked 0",
+            "current_risk 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "approved 0",
+            "blocked 0",
+            "current_risk 37"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "approved 0",
+            "blocked 0",
+            "current_risk 37"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "approved 1",
+            "blocked 0",
+            "current_risk 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "approved 0",
+            "blocked 1",
+            "current_risk 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "approved 1",
+            "blocked 0",
+            "current_risk 74"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "request"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "check, approve, block"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "check"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "request, approve, block"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "approve"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "block"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "request, check"
+        },
+        {
+          "src": 3,
+          "dst": 5,
+          "action": "request"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "check, approve, block"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

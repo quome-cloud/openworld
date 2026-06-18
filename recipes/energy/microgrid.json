@@ -1,0 +1,312 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "microgrid",
+  "description": "an islanded-microgrid management world; actions island, reconnect, balance",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an islanded-microgrid management world; actions island, reconnect, balance"
+  },
+  "state_schema": {
+    "mode": "str",
+    "grid_connected": "bool",
+    "frequency_hz": "float",
+    "solar_kw": "float",
+    "load_kw": "float",
+    "battery_soc": "float",
+    "battery_capacity_kwh": "float",
+    "battery_kw": "float",
+    "grid_import_kw": "float",
+    "unserved_kwh": "float",
+    "step": "int"
+  },
+  "initial_state": {
+    "mode": "grid-tied",
+    "grid_connected": true,
+    "frequency_hz": 60.0,
+    "solar_kw": 0.0,
+    "load_kw": 35.0,
+    "battery_soc": 55.0,
+    "battery_capacity_kwh": 200.0,
+    "battery_kw": 0.0,
+    "grid_import_kw": 35.0,
+    "unserved_kwh": 0.0,
+    "step": 0
+  },
+  "actions": [
+    "island",
+    "reconnect",
+    "balance"
+  ],
+  "rules": [
+    "While grid_connected, the main grid sources or sinks any imbalance and the bus frequency holds at 60.0 Hz.",
+    "While islanded, generation must equal load instantaneously; any surplus or deficit drives frequency_hz off 60 Hz (rising on surplus, drooping on deficit).",
+    "A deficit while islanded sheds load and accumulates in unserved_kwh; the grid never feeds an islanded bus.",
+    "balance dispatches the battery to close the gen/load gap, bounded by the 50 kW power limit and by battery_soc staying within 0-100%.",
+    "island opens the point-of-common-coupling breaker and zeroes grid_import_kw; reconnect closes it and re-stiffens the bus to 60 Hz.",
+    "Solar and load follow fixed diurnal profiles of the step count, so dynamics are deterministic and replayable."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\") if isinstance(action, dict) else action\n\n    cap = float(s.get(\"battery_capacity_kwh\", 200.0))  # usable battery energy (kWh)\n    max_batt = 50.0                                     # battery power limit (kW)\n    dt = 1.0                                            # hours advanced per step\n\n    # --- advance the environment along deterministic diurnal profiles ---\n    step = int(s.get(\"step\", 0)) + 1\n    s[\"step\"] = step\n    phase = step % 24\n    daylight = math.sin(math.pi * phase / 24.0)\n    s[\"solar_kw\"] = round(50.0 * (daylight if daylight > 0 else 0.0), 3)\n    s[\"load_kw\"] = round(35.0 + 12.0 * math.sin(math.pi * (phase - 8) / 12.0), 3)\n\n    solar = s[\"solar_kw\"]\n    load = s[\"load_kw\"]\n    soc = float(s.get(\"battery_soc\", 50.0))            # percent, 0..100\n\n    # battery power delivered to the bus: + = discharge (support), - = charge (absorb)\n    batt = 0.0\n\n    if name == \"island\":\n        s[\"grid_connected\"] = False\n        s[\"grid_import_kw\"] = 0.0\n    elif name == \"reconnect\":\n        s[\"grid_connected\"] = True\n    elif name == \"balance\":\n        gap = load - solar                              # + deficit, - surplus\n        desired = max(-max_batt, min(max_batt, gap))\n        avail_kwh = soc / 100.0 * cap                   # energy available to discharge\n        head_kwh = (100.0 - soc) / 100.0 * cap          # room left to charge\n        if desired > 0:                                 # discharge, capped by stored energy\n            desired = min(desired, avail_kwh / dt)\n        else:                                           # charge, capped by headroom\n            desired = max(desired, -head_kwh / dt)\n        batt = round(desired, 3)\n\n    connected = bool(s.get(\"grid_connected\", True))\n\n    # --- battery state-of-charge update ---\n    delivered_kwh = batt * dt                           # >0 removes stored energy\n    soc = soc - 100.0 * delivered_kwh / cap\n    soc = max(0.0, min(100.0, soc))\n    s[\"battery_soc\"] = round(soc, 3)\n    s[\"battery_kw\"] = batt\n\n    # --- power balance on the bus ---\n    bus_net = solar + batt - load                       # + surplus, - deficit\n    if connected:\n        # the main grid sources/sinks the imbalance and holds the bus at nominal\n        s[\"grid_import_kw\"] = round(-bus_net, 3)        # + import (deficit), - export (surplus)\n        s[\"frequency_hz\"] = 60.0\n        s[\"mode\"] = \"grid-tied\"\n    else:\n        # islanded: nothing else absorbs the imbalance, so frequency drifts\n        s[\"grid_import_kw\"] = 0.0\n        s[\"frequency_hz\"] = round(60.0 + 0.15 * bus_net, 3)\n        s[\"mode\"] = \"islanded\"\n        if bus_net < 0:                                 # unmet demand is shed\n            s[\"unserved_kwh\"] = round(float(s.get(\"unserved_kwh\", 0.0)) - bus_net * dt, 3)\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "solar_kw",
+        "load_kw",
+        "battery_soc",
+        "grid_connected"
+      ],
+      "schema": {
+        "solar_kw": {
+          "type": "float",
+          "range": [
+            0.0,
+            100.0
+          ]
+        },
+        "load_kw": {
+          "type": "float",
+          "range": [
+            0.0,
+            200.0
+          ]
+        },
+        "battery_soc": {
+          "type": "float",
+          "range": [
+            0.0,
+            100.0
+          ]
+        },
+        "grid_connected": "bool"
+      },
+      "code": "\ndef perceive(data):\n    return {\n        \"solar_kw\": float(data.get(\"pv_kw\", 0.0)),\n        \"load_kw\": float(data.get(\"demand_kw\", 0.0)),\n        \"battery_soc\": float(data.get(\"soc_pct\", 0.0)),\n        \"grid_connected\": bool(data.get(\"pcc_breaker_closed\", True)),\n    }\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "mode",
+        "frequency_hz",
+        "solar_kw",
+        "load_kw",
+        "battery_soc",
+        "battery_kw",
+        "grid_import_kw",
+        "unserved_kwh"
+      ],
+      "report": "Microgrid [{mode}] @ {frequency_hz} Hz | PV {solar_kw} kW, load {load_kw} kW | battery {battery_soc}% ({battery_kw} kW) | grid {grid_import_kw} kW | unserved {unserved_kwh} kWh"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "frequency_stability",
+      "goal": "keep frequency_hz as close to 60 Hz as possible",
+      "weight": 1.0
+    },
+    {
+      "name": "reliability",
+      "goal": "minimize unserved_kwh",
+      "weight": 1.0
+    },
+    {
+      "name": "reserve",
+      "goal": "keep battery_soc within a safe 20-90% band",
+      "weight": 0.5
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "balance",
+    "series": {
+      "solar_kw": [
+        0.0,
+        6.526,
+        12.941,
+        19.134,
+        25.0,
+        30.438,
+        35.355,
+        39.668,
+        43.301,
+        46.194,
+        48.296,
+        49.572,
+        50.0
+      ],
+      "load_kw": [
+        35.0,
+        23.409,
+        23.0,
+        23.409,
+        24.608,
+        26.515,
+        29.0,
+        31.894,
+        35.0,
+        38.106,
+        41.0,
+        43.485,
+        45.392
+      ],
+      "battery_soc": [
+        55.0,
+        46.559,
+        41.529,
+        39.392,
+        39.588,
+        41.55,
+        44.727,
+        48.614,
+        52.764,
+        56.808,
+        60.456,
+        63.5,
+        65.804
+      ],
+      "battery_kw": [
+        0.0,
+        16.883,
+        10.059,
+        4.275,
+        -0.392,
+        -3.923,
+        -6.355,
+        -7.774,
+        -8.301,
+        -8.088,
+        -7.296,
+        -6.087,
+        -4.608
+      ],
+      "grid_import_kw": [
+        35.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        0.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "step": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "battery_kw 0",
+            "battery_soc 55",
+            "frequency_hz 60"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "battery_kw 0",
+            "battery_soc 55",
+            "frequency_hz 57.468"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "battery_kw 0",
+            "battery_soc 55",
+            "frequency_hz 60"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "battery_kw 16.883",
+            "battery_soc 46.559",
+            "frequency_hz 60"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "battery_kw 0",
+            "battery_soc 55",
+            "frequency_hz 58.491"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "battery_kw 0",
+            "battery_soc 55",
+            "frequency_hz 60"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "island"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "reconnect"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "balance"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "island"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "reconnect"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

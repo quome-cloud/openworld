@@ -1,0 +1,205 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "mfa_enrollment",
+  "description": "an MFA enrollment and recovery world; actions enroll, challenge, recover, lock",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "an MFA enrollment and recovery world; actions enroll, challenge, recover, lock"
+  },
+  "state_schema": {
+    "enrolled": "bool",
+    "factor": "str",
+    "verified": "bool",
+    "locked": "bool",
+    "failed_attempts": "int",
+    "max_attempts": "int",
+    "recovery_codes": "int"
+  },
+  "initial_state": {
+    "enrolled": false,
+    "factor": "none",
+    "verified": false,
+    "locked": false,
+    "failed_attempts": 0,
+    "max_attempts": 3,
+    "recovery_codes": 0
+  },
+  "actions": [
+    "enroll",
+    "challenge",
+    "recover",
+    "lock"
+  ],
+  "rules": [
+    "enroll registers a factor only on an unlocked account with no factor yet; it issues recovery_codes (default 10) and leaves the session unverified.",
+    "challenge verifies the session on success and resets failed_attempts; on failure it increments failed_attempts and clears verified.",
+    "challenge is a no-op unless the account is enrolled and unlocked.",
+    "the account locks automatically once failed_attempts reaches max_attempts.",
+    "recover spends one recovery_code to unlock the account, reset failed_attempts, and re-verify the session; it requires a code to remain.",
+    "lock locks the account immediately and drops any verified session."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    locked = bool(s.get(\"locked\", False))\n    enrolled = bool(s.get(\"enrolled\", False))\n    max_attempts = int(s.get(\"max_attempts\", 3))\n\n    if name == \"enroll\":\n        # Only an unlocked account that has not yet enrolled can register a factor.\n        if not locked and not enrolled:\n            s[\"enrolled\"] = True\n            s[\"factor\"] = str(params.get(\"factor\", \"totp\"))\n            s[\"recovery_codes\"] = int(params.get(\"recovery_codes\", 10))\n            s[\"verified\"] = False\n            s[\"failed_attempts\"] = 0\n\n    elif name == \"challenge\":\n        # Present the enrolled factor; pass verifies, fail counts toward lockout.\n        if enrolled and not locked:\n            if bool(params.get(\"success\", True)):\n                s[\"verified\"] = True\n                s[\"failed_attempts\"] = 0\n            else:\n                attempts = int(s.get(\"failed_attempts\", 0)) + 1\n                s[\"failed_attempts\"] = attempts\n                s[\"verified\"] = False\n                if attempts >= max_attempts:\n                    s[\"locked\"] = True\n\n    elif name == \"recover\":\n        # Spend a one-time backup code to unlock and re-verify access.\n        if enrolled and int(s.get(\"recovery_codes\", 0)) > 0:\n            s[\"recovery_codes\"] = int(s[\"recovery_codes\"]) - 1\n            s[\"locked\"] = False\n            s[\"failed_attempts\"] = 0\n            s[\"verified\"] = True\n\n    elif name == \"lock\":\n        # Administratively lock the account; any verified session is dropped.\n        s[\"locked\"] = True\n        s[\"verified\"] = False\n\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "factor",
+        "enrolled",
+        "recovery_codes"
+      ],
+      "schema": {
+        "factor": "str",
+        "enrolled": "bool",
+        "recovery_codes": {
+          "type": "int",
+          "range": [
+            0,
+            20
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = data if isinstance(data, str) else str(data.get(\"text\", \"\"))\n    out = {}\n    for tok in text.replace(\",\", \" \").split():\n        if \"=\" not in tok:\n            continue\n        k, v = tok.split(\"=\", 1)\n        if k == \"factor\":\n            out[\"factor\"] = v\n            out[\"enrolled\"] = True\n        elif k == \"codes\":\n            try:\n                out[\"recovery_codes\"] = int(v)\n            except ValueError:\n                pass\n    return out\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "enrolled",
+        "factor",
+        "verified",
+        "locked",
+        "failed_attempts",
+        "recovery_codes"
+      ],
+      "report": "MFA status: enrolled={enrolled} factor={factor} verified={verified} locked={locked} failed_attempts={failed_attempts} recovery_codes={recovery_codes}"
+    }
+  ],
+  "objectives": [
+    {
+      "name": "verified_access",
+      "goal": "maximize"
+    },
+    {
+      "name": "account_lockouts",
+      "goal": "minimize"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "enroll",
+    "series": {
+      "recovery_codes": [
+        0.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "recovery_codes 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "recovery_codes 10"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "recovery_codes 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "recovery_codes 10"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "recovery_codes 9"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "recovery_codes 10"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "enroll"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "lock"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "challenge, recover"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "challenge"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "recover"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "lock"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "enroll"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

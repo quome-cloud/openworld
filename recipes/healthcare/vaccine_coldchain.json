@@ -1,0 +1,234 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "vaccine_coldchain",
+  "description": "a vaccine cold-chain world: temperature and stock; actions ship, store, discard on temperature excursion",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "a vaccine cold-chain world: temperature and stock; actions ship, store, discard on temperature excursion"
+  },
+  "state_schema": {
+    "temperature_c": "float",
+    "stock_doses": "int",
+    "shipped_doses": "int",
+    "discarded_doses": "int",
+    "excursion": "bool"
+  },
+  "initial_state": {
+    "temperature_c": 5.0,
+    "stock_doses": 50,
+    "shipped_doses": 0,
+    "discarded_doses": 0,
+    "excursion": false
+  },
+  "actions": [
+    "store",
+    "ship",
+    "discard"
+  ],
+  "rules": [
+    "The safe storage window is 2 C to 8 C; outside it the unit is in a temperature excursion.",
+    "store receives a 10-dose batch and runs refrigeration, relaxing the temperature toward the 5 C setpoint.",
+    "ship releases up to a 10-dose batch downstream, but only while the temperature is within the safe window.",
+    "Without active cooling (ship/discard) the temperature drifts warmer toward 22 C ambient by 1.5 C per step.",
+    "discard writes off all on-hand stock; it is the response to stock compromised by a temperature excursion.",
+    "Cumulative shipped and discarded dose counts never decrease; stock is never negative."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n\n    # --- cold-chain parameters (WHO 2-8 C window for most vaccines) ---\n    SETPOINT = 5.0       # refrigeration target, C\n    AMBIENT = 22.0       # room temperature the unit drifts toward when uncooled\n    SAFE_MIN = 2.0\n    SAFE_MAX = 8.0\n    WARM_RATE = 1.5      # passive warming per step without active cooling, C\n    COOL_GAIN = 0.5      # fraction of the gap to setpoint closed by refrigeration\n    BATCH = 10           # doses per store/ship batch\n\n    temp = float(s.get(\"temperature_c\", SETPOINT))\n    stock = int(s.get(\"stock_doses\", 0))\n    shipped = int(s.get(\"shipped_doses\", 0))\n    discarded = int(s.get(\"discarded_doses\", 0))\n\n    if name == \"store\":\n        # Receive a batch and run the cooler: temperature relaxes to setpoint.\n        stock = stock + BATCH\n        temp = temp + COOL_GAIN * (SETPOINT - temp)\n    elif name == \"ship\":\n        # Only ship sound stock: must be inside the safe window to release.\n        if SAFE_MIN <= temp <= SAFE_MAX:\n            n = min(BATCH, stock)\n            stock = stock - n\n            shipped = shipped + n\n        # Door open / no active cooling -> drift warmer toward ambient.\n        temp = min(AMBIENT, temp + WARM_RATE)\n    elif name == \"discard\":\n        # An excursion compromised the stock: write it all off.\n        discarded = discarded + stock\n        stock = 0\n        temp = min(AMBIENT, temp + WARM_RATE)\n    else:\n        # Unknown action: still subject to passive warming.\n        temp = min(AMBIENT, temp + WARM_RATE)\n\n    s[\"temperature_c\"] = round(temp, 3)\n    s[\"stock_doses\"] = stock\n    s[\"shipped_doses\"] = shipped\n    s[\"discarded_doses\"] = discarded\n    s[\"excursion\"] = bool(s[\"temperature_c\"] < SAFE_MIN or s[\"temperature_c\"] > SAFE_MAX)\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "temperature_c"
+      ],
+      "schema": {
+        "temperature_c": {
+          "type": "float",
+          "range": [
+            -40.0,
+            60.0
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data)\n    num = \"\"\n    seen_digit = False\n    for ch in text:\n        if ch.isdigit():\n            num += ch\n            seen_digit = True\n        elif ch in \".-\" and not (ch == \".\" and \".\" in num):\n            num += ch\n        elif seen_digit:\n            break\n    try:\n        value = float(num)\n    except (ValueError, TypeError):\n        return {}\n    return {\"temperature_c\": value}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "temperature_c",
+        "stock_doses",
+        "shipped_doses",
+        "discarded_doses",
+        "excursion"
+      ],
+      "report": "Cold-chain status: {temperature_c} C (excursion={excursion}); stock {stock_doses} doses, shipped {shipped_doses}, discarded {discarded_doses}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "doses_shipped",
+      "goal": "maximize",
+      "weight": 1.0
+    },
+    {
+      "name": "doses_discarded",
+      "goal": "minimize",
+      "weight": 1.0
+    },
+    {
+      "name": "time_in_excursion",
+      "goal": "minimize",
+      "weight": 1.0
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "discard",
+    "series": {
+      "temperature_c": [
+        5.0,
+        6.5,
+        8.0,
+        9.5,
+        11.0,
+        12.5,
+        14.0,
+        15.5,
+        17.0,
+        18.5,
+        20.0,
+        21.5,
+        22.0
+      ],
+      "stock_doses": [
+        50.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "discarded_doses": [
+        0.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "discarded_doses 0",
+            "shipped_doses 0",
+            "stock_doses 50"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "discarded_doses 0",
+            "shipped_doses 0",
+            "stock_doses 60"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "discarded_doses 0",
+            "shipped_doses 10",
+            "stock_doses 40"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "discarded_doses 50",
+            "shipped_doses 0",
+            "stock_doses 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "discarded_doses 0",
+            "shipped_doses 0",
+            "stock_doses 70"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "discarded_doses 0",
+            "shipped_doses 10",
+            "stock_doses 50"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "store"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "ship"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "discard"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "store"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "ship"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

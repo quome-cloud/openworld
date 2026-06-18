@@ -1,0 +1,248 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "case_docketing",
+  "description": "A court case-docketing world: a single matter advances on the docket as documents are filed, hearings scheduled, continuances granted, and a ruling issued -- all against deadlines that are missed if they pass unmet.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "A court case-docketing world: a single matter advances on the docket as documents are filed, hearings scheduled, continuances granted, and a ruling issued -- all against deadlines that are missed if they pass unmet."
+  },
+  "state_schema": {
+    "day": "int",
+    "status": "str",
+    "filings": "int",
+    "hearing_day": "null",
+    "continuances": "int",
+    "ruling": "null",
+    "missed_deadlines": "int",
+    "deadlines": "list[dict]",
+    "docket": "list"
+  },
+  "initial_state": {
+    "day": 0,
+    "status": "open",
+    "filings": 0,
+    "hearing_day": null,
+    "continuances": 0,
+    "ruling": null,
+    "missed_deadlines": 0,
+    "deadlines": [
+      {
+        "name": "answer",
+        "due": 30,
+        "met": false,
+        "overdue": false
+      }
+    ],
+    "docket": []
+  },
+  "actions": [
+    "file",
+    "schedule",
+    "continue",
+    "rule"
+  ],
+  "rules": [
+    "Each processed action advances the docket clock by exactly one day.",
+    "'file' records a document and satisfies the earliest still-open deadline.",
+    "'schedule' sets the hearing date and opens a 'pretrial_brief' deadline due seven days before the hearing.",
+    "'continue' grants a continuance, pushing the hearing and every unmet deadline later by the requested number of days.",
+    "'rule' issues the ruling and decides the case; once decided the matter is final and further actions leave the state unchanged.",
+    "A deadline is missed when its due date has passed while it remains unmet."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    name = action.get(\"name\")\n    params = action.get(\"params\") or {}\n\n    # nested structures must be copied so we never mutate the caller's state\n    s[\"deadlines\"] = [dict(d) for d in s.get(\"deadlines\", [])]\n    s[\"docket\"] = list(s.get(\"docket\", []))\n\n    day = s.get(\"day\", 0)\n\n    if name == \"file\":\n        # File a document; it satisfies the earliest still-open deadline.\n        doc = params.get(\"document\", \"document\")\n        s[\"filings\"] = s.get(\"filings\", 0) + 1\n        satisfied = None\n        for d in s[\"deadlines\"]:\n            if not d.get(\"met\"):\n                d[\"met\"] = True\n                satisfied = d.get(\"name\")\n                break\n        note = \"filed \" + str(doc)\n        if satisfied:\n            note += \" (meets '\" + str(satisfied) + \"' deadline)\"\n        s[\"docket\"].append(\"day \" + str(day) + \": \" + note)\n\n    elif name == \"schedule\":\n        # Set a hearing date and open a pre-hearing brief deadline 7 days prior.\n        in_days = params.get(\"in_days\", 14)\n        hearing = day + int(in_days)\n        s[\"hearing_day\"] = hearing\n        brief_due = max(day, hearing - 7)\n        if not any(d.get(\"name\") == \"pretrial_brief\" for d in s[\"deadlines\"]):\n            s[\"deadlines\"].append(\n                {\"name\": \"pretrial_brief\", \"due\": brief_due, \"met\": False})\n        s[\"docket\"].append(\n            \"day \" + str(day) + \": hearing scheduled for day \" + str(hearing))\n\n    elif name == \"continue\":\n        # Grant a continuance: push the hearing and every unmet deadline later.\n        by = int(params.get(\"by\", 14))\n        s[\"continuances\"] = s.get(\"continuances\", 0) + 1\n        if s.get(\"hearing_day\") is not None:\n            s[\"hearing_day\"] = s[\"hearing_day\"] + by\n        for d in s[\"deadlines\"]:\n            if not d.get(\"met\"):\n                d[\"due\"] = d.get(\"due\", day) + by\n        s[\"docket\"].append(\n            \"day \" + str(day) + \": continuance granted (+\" + str(by) + \" days)\")\n\n    elif name == \"rule\":\n        # Judge issues a ruling and the matter is decided. No-op once decided.\n        if s.get(\"status\") == \"open\":\n            ruling = params.get(\"ruling\", \"judgment entered\")\n            s[\"status\"] = \"decided\"\n            s[\"ruling\"] = str(ruling)\n            s[\"docket\"].append(\"day \" + str(day) + \": ruling -- \" + str(ruling))\n        else:\n            return s  # already decided: clock does not advance\n\n    else:\n        return s  # unrecognized action: no change\n\n    # The docket clock advances one day per processed item.\n    s[\"day\"] = day + 1\n\n    # Recount missed deadlines: unmet and past due as of the new day.\n    missed = 0\n    for d in s[\"deadlines\"]:\n        d[\"overdue\"] = (not d.get(\"met\")) and d.get(\"due\", 0) < s[\"day\"]\n        if d[\"overdue\"]:\n            missed += 1\n    s[\"missed_deadlines\"] = missed\n    return s\n"
+  },
+  "perception": [
+    {
+      "kind": "CodePerceptor",
+      "modality": "text",
+      "produces": [
+        "hearing_day"
+      ],
+      "schema": {
+        "hearing_day": {
+          "type": "int",
+          "range": [
+            0,
+            3650
+          ]
+        }
+      },
+      "code": "\ndef perceive(data):\n    text = str(data)\n    digits = \"\"\n    for ch in text:\n        if ch.isdigit():\n            digits += ch\n        elif digits:\n            break\n    return {\"hearing_day\": int(digits) if digits else 0}\n",
+      "func_name": "perceive"
+    }
+  ],
+  "emit": [
+    {
+      "modality": "report",
+      "fields": [
+        "day",
+        "status",
+        "filings",
+        "hearing_day",
+        "continuances",
+        "missed_deadlines",
+        "ruling"
+      ],
+      "report": "Docket status (day {day}): case is {status}; {filings} filing(s), {continuances} continuance(s); hearing on day {hearing_day}; {missed_deadlines} missed deadline(s); ruling: {ruling}."
+    }
+  ],
+  "objectives": [
+    {
+      "name": "timeliness",
+      "goal": "minimize missed_deadlines"
+    },
+    {
+      "name": "resolution",
+      "goal": "reach a ruling (status decided)"
+    },
+    {
+      "name": "efficiency",
+      "goal": "minimize continuances"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "schedule",
+    "series": {
+      "day": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "missed_deadlines": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "hearing_day": [
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0,
+        19.0,
+        20.0,
+        21.0,
+        22.0,
+        23.0,
+        24.0,
+        25.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "continuances 0",
+            "day 0",
+            "filings 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "continuances 0",
+            "day 1",
+            "filings 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "continuances 0",
+            "day 1",
+            "filings 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "continuances 1",
+            "day 1",
+            "filings 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "continuances 0",
+            "day 1",
+            "filings 0"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "continuances 0",
+            "day 2",
+            "filings 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "file"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "schedule"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "continue"
+        },
+        {
+          "src": 0,
+          "dst": 4,
+          "action": "rule"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "file"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

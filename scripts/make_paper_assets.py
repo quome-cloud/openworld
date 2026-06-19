@@ -1773,7 +1773,9 @@ def fig_representations(e36):
 
 
 def fig_complexity(e20):
-    fig, ax = plt.subplots(figsize=(5.6, 3.3))
+    # Taller than the other single-panel figures so the long rotated y-label
+    # ("Mean probe accuracy of synthesized dynamics") fits inside the canvas.
+    fig, ax = plt.subplots(figsize=(5.6, 4.2))
     summary = e20["summary"]
     xs = [s["n_rules"] for s in summary]
     ys = [s["mean_probe_accuracy"] for s in summary]

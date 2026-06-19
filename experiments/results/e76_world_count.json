@@ -1,0 +1,46 @@
+{
+  "task": "world-count scaling: held-out diagnostic accuracy vs number of TRAIN specialties traversed (hard diagnosis family); fine-tune target = 7B",
+  "model": "Qwen2.5-7B-Instruct",
+  "family": "hard (E75 params)",
+  "oracle": 0.69,
+  "n_test_specialties": 20,
+  "base": 0.4838,
+  "points": [
+    {
+      "n_worlds": 8,
+      "acc": 0.4325,
+      "gain": -0.0513
+    },
+    {
+      "n_worlds": 16,
+      "acc": 0.4225,
+      "gain": -0.0613
+    },
+    {
+      "n_worlds": 32,
+      "acc": 0.465,
+      "gain": -0.0188
+    },
+    {
+      "n_worlds": 64,
+      "acc": 0.4938,
+      "gain": 0.01
+    },
+    {
+      "n_worlds": 128,
+      "acc": 0.5475,
+      "gain": 0.0637
+    },
+    {
+      "n_worlds": 256,
+      "acc": 0.5563,
+      "gain": 0.0725
+    },
+    {
+      "n_worlds": 512,
+      "acc": 0.5887,
+      "gain": 0.1049
+    }
+  ],
+  "note": "few worlds hurt (overfit a narrow slice); gain rises monotonically from N32 onward and is still climbing at N512 (no plateau)."
+}

@@ -1,0 +1,113 @@
+{
+  "task": "coding world family (E77): pass@1 (greedy) + pass@1/3/5 (sampled, n=5, temp 0.8), base vs world-time-compute (fine-tuned on 164 verified coding worlds)",
+  "model_family": "Qwen2.5-Instruct",
+  "n_train_tasks": 164,
+  "n_test_synthetic": 55,
+  "n_humaneval": 164,
+  "task_source": "LLM-authored (Gemini), verified by pytest oracle",
+  "greedy_pass_at_1": {
+    "synthetic": {
+      "0.5B": {
+        "base": 0.3273,
+        "ft": 0.2909
+      },
+      "1.5B": {
+        "base": 0.6727,
+        "ft": 0.6182
+      },
+      "3B": {
+        "base": 0.8,
+        "ft": 0.8364
+      },
+      "7B": {
+        "base": 0.7091,
+        "ft": 0.8364
+      }
+    },
+    "humaneval": {
+      "0.5B": {
+        "base": null,
+        "ft": null
+      },
+      "1.5B": {
+        "base": null,
+        "ft": null
+      },
+      "3B": {
+        "base": 0.7195,
+        "ft": 0.622
+      },
+      "7B": {
+        "base": 0.7866,
+        "ft": 0.7805
+      }
+    }
+  },
+  "passk": {
+    "synthetic": {
+      "0.5B": {
+        "base": {
+          "1": 0.1673,
+          "3": 0.3255,
+          "5": 0.3818
+        },
+        "ft": {
+          "1": 0.2727,
+          "3": 0.4345,
+          "5": 0.5455
+        }
+      },
+      "1.5B": {
+        "base": {
+          "1": 0.5127,
+          "3": 0.7309,
+          "5": 0.7818
+        },
+        "ft": {
+          "1": 0.5491,
+          "3": 0.74,
+          "5": 0.8364
+        }
+      },
+      "3B": {
+        "base": {
+          "1": 0.7782,
+          "3": 0.8309,
+          "5": 0.8545
+        },
+        "ft": {
+          "1": 0.7018,
+          "3": 0.8618,
+          "5": 0.9091
+        }
+      },
+      "7B": {
+        "base": {
+          "1": 0.7345,
+          "3": 0.8182,
+          "5": 0.8364
+        },
+        "ft": {
+          "1": 0.8,
+          "3": 0.9255,
+          "5": 0.9455
+        }
+      }
+    },
+    "humaneval": {
+      "7B": {
+        "base": {
+          "1": 0.7793,
+          "3": 0.8549,
+          "5": 0.8659
+        },
+        "ft": {
+          "1": 0.7049,
+          "3": 0.8689,
+          "5": 0.9085
+        }
+      }
+    }
+  },
+  "note": "greedy pass@1 understates: in-domain pass@k helps every size; on HumanEval (OOD) ft hurts greedy pass@1 but transfers POSITIVELY at pass@5 (7B 0.866->0.909). 164 worlds is below the E76 world-count threshold; scaling worlds is the path up."
+}

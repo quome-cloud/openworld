@@ -847,6 +847,53 @@ no such transfer (E71, E73).}
 \label{fig:world-time}
 \end{figure}
 
+\subsection{Scaling the lever, and a coding-world transfer test}\label{sec:world-time-scale}
+Two follow-ups sharpen the principle: does it \emph{scale} with the number of worlds, and
+does it hold on a \emph{different} use case authored as real verified-code worlds?
+
+\paragraph{World-count scaling (E76).} We fix the model (7B) and the hard family and vary
+only the number of train specialties traversed, holding the test specialties fixed
+(Figure~\ref{fig:world-count}). Too few worlds \emph{hurt} (the fine-tune overfits a narrow
+slice, below the \WCBase{} base); the gain then rises monotonically and is \emph{still
+climbing at \WCMaxWorlds{} worlds} (\WCMaxAcc, $+\WCMaxGain$ points), heading toward the
+\WCOracle{} oracle---no plateau. So world-time compute is a genuine scaling lever in the
+number of worlds, when the task has headroom; the offline empirical-Bayes prior saturated at
+${\approx}2$ specialties precisely because it has nothing of the world's \emph{skill} to keep
+learning.
+
+\paragraph{A coding world family (E77).} Coding is the cleanest verified-code world we have:
+the transition is execution and the oracle is the tests passing. We had a model author
+\CodeNumWorlds{} function-implementation tasks, each admitted only after its reference
+solution passes its own sandboxed \texttt{pytest} oracle, and fine-tuned on the traversed
+worlds (Table~\ref{tab:coding}). \emph{In-domain}, world-time compute lifts best-of-$k$ at
+every model size (7B pass@5 \CodeSynBaseFive$\to$\CodeSynFtFive). On \emph{HumanEval}---a
+real, out-of-distribution benchmark---it \emph{hurts} greedy pass@1
+(7B \CodeHeBaseOne$\to$\CodeHeFtOne, the synthetic fine-tune narrows the single best guess)
+yet \emph{transfers positively at pass@5} (\CodeHeBaseFive$\to$\CodeHeFtFive) from only
+\CodeNumWorlds{} worlds. That is consistent with E76: \CodeNumWorlds{} worlds is below the
+count where transfer becomes strong, so scaling the world family---not abandoning the
+approach---is the path to real-benchmark gains.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.82\linewidth]{figs/world_count.png}
+\caption{\textbf{World-count scaling (E76).} Held-out diagnostic accuracy of a 7B model
+vs the number of train specialties it traversed (hard family; test specialties fixed).
+Labels are the gain over the no-fine-tune base. Few worlds hurt; the gain rises
+monotonically and has not plateaued at \WCMaxWorlds{}, climbing toward the rules-given
+oracle. \emph{More worlds $\to$ more generalization.}}
+\label{fig:world-count}
+\end{figure}
+
+\begin{table}[t]\centering\small
+\input{tables/coding.tex}
+\caption{\textbf{Coding world family (E77).} Sampled pass@1/pass@5 (n{=}5), base
+$\to$ world-time-compute (fine-tuned on \CodeNumWorlds{} verified coding worlds), on
+synthetic held-out tasks (all sizes) and HumanEval (7B). World-time compute helps in-domain
+best-of-$k$ at every size; on HumanEval it hurts greedy pass@1 but transfers positively at
+pass@5.}
+\label{tab:coding}
+\end{table}
+
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An

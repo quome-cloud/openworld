@@ -44,7 +44,7 @@ EXPERIMENTS = [
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
     "e67_cartpole_bench",
     "e68_prototyping_latency", "e68b_recipe_audit",
-    "e74_scaling",
+    "e74_scaling", "e76_world_count", "e77_coding",
 ]
 
 
@@ -2260,6 +2260,11 @@ def numbers_tex(d):
     e74d = load("e74_diagnosis")
     wt_small, wt_large = e74s["sizes"][0], e74s["sizes"][-1]
     wt_lc = e74d["learning_curve"]
+    wc = d["e76_world_count"]
+    wc_last = wc["points"][-1]
+    cod = d["e77_coding"]
+    cod_syn7 = cod["passk"]["synthetic"]["7B"]
+    cod_he7 = cod["passk"]["humaneval"]["7B"]
 
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
@@ -2317,6 +2322,20 @@ def numbers_tex(d):
         macro("WTFloor", pct(e74s["offline_floor"])),
         macro("WTMetaFewShot", pct(wt_lc["meta_acc"][0])),
         macro("WTScratchFewShot", pct(wt_lc["scratch_acc"][0])),
+        # E76 world-count scaling law
+        macro("WCBase", pct(wc["base"])),
+        macro("WCMaxWorlds", str(wc_last["n_worlds"])),
+        macro("WCMaxAcc", pct(wc_last["acc"])),
+        macro("WCMaxGain", f"{100 * wc_last['gain']:.0f}"),
+        macro("WCOracle", pct(wc["oracle"])),
+        # E77 coding worlds (sampled pass@k, 7B; base->ft)
+        macro("CodeSynBaseFive", pct(cod_syn7["base"]["5"])),
+        macro("CodeSynFtFive", pct(cod_syn7["ft"]["5"])),
+        macro("CodeHeBaseOne", pct(cod_he7["base"]["1"])),
+        macro("CodeHeFtOne", pct(cod_he7["ft"]["1"])),
+        macro("CodeHeBaseFive", pct(cod_he7["base"]["5"])),
+        macro("CodeHeFtFive", pct(cod_he7["ft"]["5"])),
+        macro("CodeNumWorlds", str(cod["n_train_tasks"])),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
@@ -3364,6 +3383,58 @@ def table_prototyping(e68, e68b):
     (TABLES / "prototyping.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_world_count(wc):
+    """E76: held-out accuracy vs number of train worlds traversed (hard family, 7B) -- the
+    world-count scaling law: more worlds -> more generalization, no plateau."""
+    pts = wc["points"]
+    x = [p["n_worlds"] for p in pts]
+    y = [p["acc"] for p in pts]
+    fig, ax = plt.subplots(figsize=(6.6, 4.2))
+    ax.set_xscale("log")
+    ax.axhline(wc["oracle"], ls="--", color=TEAL, lw=1.3)
+    ax.text(x[-1], wc["oracle"] + 0.004, "oracle (rules given)", ha="right", va="bottom", fontsize=8, color=TEAL)
+    ax.axhline(wc["base"], ls=":", color="#999999", lw=1.2)
+    ax.text(x[0], wc["base"] + 0.004, "base (no fine-tune)", ha="left", va="bottom", fontsize=8, color="#777777")
+    ax.fill_between(x, [wc["base"]] * len(x), y, where=[v >= wc["base"] for v in y],
+                    color=ORANGE, alpha=0.13)
+    ax.plot(x, y, "s-", color=ORANGE, lw=2.4, zorder=3)
+    for xi, p in zip(x, pts):
+        ax.annotate(f"{p['gain']:+.0%}".replace("%", ""), (xi, p["acc"] + 0.006),
+                    fontsize=7.5, ha="center", color="#9a4d00")
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(v) for v in x])
+    ax.minorticks_off()
+    ax.set_xlabel("number of train worlds traversed (specialties)")
+    ax.set_ylabel("held-out diagnostic accuracy")
+    ax.set_title("World-count scaling: more worlds → more generalization", fontsize=10.5)
+    ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "world_count.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def table_coding(cod):
+    """E77: coding worlds, sampled pass@1/pass@5, base -> world-time-compute, on synthetic
+    held-out (all sizes) and HumanEval (7B)."""
+    syn, he = cod["passk"]["synthetic"], cod["passk"]["humaneval"]
+
+    def arr(d, sz, tag, k):
+        v = d.get(sz, {}).get(tag, {})
+        return f"{v.get(str(k)):.2f}" if v.get(str(k)) is not None else "--"
+
+    lines = ["\\begin{tabular}{lcccc}", "\\toprule",
+             "Model & Synthetic p@1 & Synthetic p@5 & HumanEval p@1 & HumanEval p@5 \\\\",
+             "\\midrule"]
+    for sz in ["0.5B", "1.5B", "3B", "7B"]:
+        lines.append(
+            f"{sz} & {arr(syn, sz, 'base', 1)}$\\to${arr(syn, sz, 'ft', 1)} & "
+            f"{arr(syn, sz, 'base', 5)}$\\to${arr(syn, sz, 'ft', 5)} & "
+            f"{arr(he, sz, 'base', 1)}$\\to${arr(he, sz, 'ft', 1)} & "
+            f"{arr(he, sz, 'base', 5)}$\\to${arr(he, sz, 'ft', 5)} \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}"]
+    (TABLES / "coding.tex").write_text("\n".join(lines) + "\n")
+
+
 def fig_world_time_compute(scaling, diag):
     """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
     world models ('world-time compute'), against an offline prior-only floor and a
@@ -3529,6 +3600,8 @@ def main():
     fig_prototyping()
     data = {name: load(name) for name in EXPERIMENTS}
     fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
+    fig_world_count(data["e76_world_count"])
+    table_coding(data["e77_coding"])
     fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])

@@ -1338,7 +1338,7 @@ def fig_many_worlds(e46):
     mechanism couples w parameters (factor ~ d^w)."""
     scale = e46["scale"]
     coup = e46["coupling"]
-    fig, (ax, axc) = plt.subplots(1, 2, figsize=(8.0, 3.4))
+    fig, (ax, axc) = plt.subplots(1, 2, figsize=(8.0, 4.0))
 
     n = [r["n_worlds"] for r in scale]
     fct = [r["factored_ms"] for r in scale]
@@ -1353,7 +1353,8 @@ def fig_many_worlds(e46):
     ax.set_xlabel("World-space size (number of worlds)")
     ax.set_ylabel("Update + query time (ms)")
     ax.set_title("Exact version space, far past enumeration", fontsize=9.5, loc="left")
-    ax.legend(fontsize=8, loc="upper left")
+    ax.set_ylim(top=2e4)  # headroom so the "enumeration infeasible" note sits inside the axes
+    ax.legend(fontsize=8, loc="lower right")
 
     w = [r["w"] for r in coup]
     fsize = [r["factor_size"] for r in coup]
@@ -1370,6 +1371,7 @@ def fig_many_worlds(e46):
     fig.suptitle("A database for many worlds: factored, semiring-annotated store (E46)",
                  fontsize=10.5, x=0.02, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.subplots_adjust(top=0.87)  # fill the box, but leave a gap below the suptitle
     fig.savefig(FIGS / "many_worlds.png", dpi=200)
     plt.close(fig)
 

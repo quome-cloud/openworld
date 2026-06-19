@@ -455,7 +455,7 @@ def fig_emergent_economy(e44):
     a1.plot(c1["abundant_traj"], color=ORANGE, lw=2, label="abundant supply")
     a1.axhline(c1["scarce_supply_price"], color=BLUE, lw=0.8, ls=":")
     a1.axhline(c1["abundant_supply_price"], color=ORANGE, lw=0.8, ls=":")
-    a1.set_title("A. Price formation: scarcity sets the price", fontsize=9.5, loc="left")
+    a1.set_title("A. Price formation: scarcity sets the price", fontsize=9, loc="left")
     a1.set_xlabel("Tick"); a1.set_ylabel("Market price")
     a1.legend(fontsize=8, loc="center right")
 
@@ -463,7 +463,7 @@ def fig_emergent_economy(e44):
     a2.plot(c2["off_money_traj"], color=RED, lw=2, label="burn sink OFF (faucet only)")
     a2.plot(c2["on_money_traj"], color=TEAL, lw=2, label="burn sink ON")
     a2.set_yscale("log")
-    a2.set_title("B. Inflation: a sink curbs the money supply", fontsize=9.5, loc="left")
+    a2.set_title("B. Inflation: a sink curbs the money supply", fontsize=9, loc="left")
     a2.set_xlabel("Tick"); a2.set_ylabel("Money supply (log)")
     a2.legend(fontsize=8, loc="lower right")
 
@@ -471,10 +471,10 @@ def fig_emergent_economy(e44):
     a3.plot(c3["off_gini_traj"], color=RED, lw=2, label="redistribution OFF")
     a3.plot(c3["on_gini_traj"], color=TEAL, lw=2, label="redistribution ON")
     a3.set_title("C. Inequality emerges; redistribution flattens it",
-                 fontsize=9.5, loc="left")
+                 fontsize=9, loc="left")
     a3.set_xlabel("Tick"); a3.set_ylabel("Wealth Gini")
     a3.set_ylim(bottom=0)
-    a3.legend(fontsize=8, loc="center right")
+    a3.legend(fontsize=8, loc="upper right")
 
     # D: selfish vs cooperative dial (welfare + top-agent gold)
     groups = ["total\nwelfare", "richest\nagent"]
@@ -487,9 +487,10 @@ def fig_emergent_economy(e44):
     for i, (sv, cv) in enumerate(zip(selfish, coop)):
         a4.text(i - w / 2, sv, f"{sv:.0f}", ha="center", va="bottom", fontsize=7.5)
         a4.text(i + w / 2, cv, f"{cv:.0f}", ha="center", va="bottom", fontsize=7.5)
+    a4.set_ylim(top=max(max(selfish), max(coop)) * 1.12)  # headroom so value labels fit inside
     a4.set_xticks(list(x)); a4.set_xticklabels(groups, fontsize=8.5)
     a4.set_title("D. Dial: cooperation lifts the total, selfishness the top",
-                 fontsize=9.5, loc="left")
+                 fontsize=9, loc="left")
     a4.set_ylabel("Gold")
     a4.legend(fontsize=8, loc="upper right")
 

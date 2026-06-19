@@ -162,7 +162,11 @@ across \NumExperiments{} seed-fixed experiments, verified dynamics are exact on
 matches ground truth and beats planning through a hallucinating one; and on shared
 benchmarks (MiniGrid and continuous-control cartpole, the learned models' home turf) the
 $0$-shot verified model matches or beats a trained DreamerV3 and a frozen-perceptual
-V-JEPA-2, which need $10^4$--$10^5$ interactions or do not control at all. Objectives
+V-JEPA-2, which need $10^4$--$10^5$ interactions or do not control at all. The verified
+worlds are also \emph{training signal}: fine-tuning a model on trajectories traversed
+through many world models of a domain---\emph{world-time compute}---lifts its generalization
+to held-out worlds and \emph{scales with the number of worlds traversed} (still rising at
+\WCMaxWorlds), a training-time analogue of test-time compute. Objectives
 remain open, editable artifacts steerable by inference-time dials. \textbf{The scope is
 the symbolic-state regime}: where dynamics are writable, \openworld{} makes a
 \emph{correct} world model a minutes-scale prototype with zero training and no compounding
@@ -342,6 +346,13 @@ contributions are as follows:
   matches ground truth and beats planning through a hallucinating one, and on shared
   benchmarks (MiniGrid, continuous-control cartpole) the $0$-shot verified model
   matches or beats a trained DreamerV3 and a frozen-perceptual V-JEPA-2.
+  \item \textbf{World-time compute.} A verified world model is also \emph{training
+  signal}: fine-tuning a model on trajectories traversed through many world models of a
+  domain lifts its generalization to \emph{held-out} worlds, and the gain \emph{scales
+  with the number of worlds traversed} (still rising at \WCMaxWorlds, toward the
+  rules-given oracle)---a training-time analogue of test-time compute. Shown on a
+  diagnosis-specialty family and on a coding-world family whose gain transfers, at
+  best-of-$k$, to HumanEval (\CodeHeBaseFive$\to$\CodeHeFtFive).
   \item \textbf{The benchmark and protocol.} Three ground-truth-instrumented
   worlds, a \NumTasks-task program-repair benchmark (the coding world), and
   \NumExperiments{} seed-fixed experiments with paired statistical tests,
@@ -1923,7 +1934,11 @@ shifts where trained baselines collapse, rolls out orders of magnitude
 faster, plans \emph{as well as the ground truth itself} where planning
 through a hallucinating model is worse than no model, extends to stochastic
 dynamics with verified distributions, and flags its own synthesis errors by
-ensemble disagreement. Its boundary is equally measured: monolithic 7B
+ensemble disagreement. And beyond serving as a simulator to plan \emph{in}, the same
+verified worlds are training \emph{signal}: traversing many world models of a domain
+lifts a model's generalization to held-out worlds, scaling with the number of worlds
+traversed---\emph{world-time compute}, a training-time analogue of test-time compute.
+Its boundary is equally measured: monolithic 7B
 synthesis fails past roughly eight interacting rules. The world-model field's
 trajectory has been to scale parameters until hallucination is suppressed;
 these results argue for an orthogonal path---make the model a program, verify

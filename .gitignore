@@ -24,3 +24,7 @@ _template/
 datasets/openworld-market/predictions.jsonl
 datasets/openworld-market/daily.log
 gallery/preview.html
+
+# Local secrets (API keys) -- never commit
+.env
+.env.*

@@ -164,9 +164,13 @@ def fig_learned(e12):
         return [next(r[field] for r in rows
                      if r["model"] == model and r["k_transitions"] == k) for k in ks]
 
-    for ax, field, title in (
-        (axes[0], "probe_in_dist", "A. Branch-covering probes (in-distribution)"),
-        (axes[1], "probe_ood_10x", "B. The same probes at 10× scale (OOD)"),
+    # Both legends share a vertical anchor (same height); nudged above center so
+    # panel A's legend clears the MLP line. A stays left, B stays right.
+    for ax, field, title, leg_loc, leg_x in (
+        (axes[0], "probe_in_dist", "A. Branch-covering probes (in-distribution)",
+         "center left", 0.02),
+        (axes[1], "probe_ood_10x", "B. The same probes at 10× scale (OOD)",
+         "center right", 0.98),
     ):
         ax.plot(ks, series("mlp", field), "-o", color=PURPLE, label="MLP (trained)")
         ax.plot(ks, series("knn1", field), "-s", color=SLATE, label="1-NN (memorizer)")
@@ -180,7 +184,7 @@ def fig_learned(e12):
         ax.set_ylim(-0.05, 1.1)
         ax.set_title(title, fontsize=10, loc="left")
         ax.grid(alpha=0.25)
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=8, loc=leg_loc, bbox_to_anchor=(leg_x, 0.64))
     fig.tight_layout()
     fig.savefig(FIGS / "learned.png", dpi=200)
     plt.close(fig)

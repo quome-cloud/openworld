@@ -1,0 +1,831 @@
+{
+  "base": "Qwen/Qwen2.5-3B-Instruct",
+  "adapter": "c_ad_3B",
+  "source": "humaneval",
+  "n_tasks": 164,
+  "n_samples": 1,
+  "temperature": 0.8,
+  "pass_at_1": 0.622,
+  "per_task": [
+    {
+      "id": "HumanEval/0",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/1",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/2",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/3",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/4",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/5",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/6",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/7",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/8",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/9",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/10",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/11",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/12",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/13",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/14",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/15",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/16",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/17",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/18",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/19",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/20",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/21",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/22",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/23",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/24",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/25",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/26",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/27",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/28",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/29",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/30",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/31",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/32",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/33",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/34",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/35",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/36",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/37",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/38",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/39",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/40",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/41",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/42",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/43",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/44",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/45",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/46",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/47",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/48",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/49",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/50",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/51",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/52",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/53",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/54",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/55",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/56",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/57",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/58",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/59",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/60",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/61",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/62",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/63",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/64",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/65",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/66",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/67",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/68",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/69",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/70",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/71",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/72",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/73",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/74",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/75",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/76",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/77",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/78",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/79",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/80",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/81",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/82",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/83",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/84",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/85",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/86",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/87",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/88",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/89",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/90",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/91",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/92",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/93",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/94",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/95",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/96",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/97",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/98",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/99",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/100",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/101",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/102",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/103",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/104",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/105",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/106",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/107",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/108",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/109",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/110",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/111",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/112",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/113",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/114",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/115",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/116",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/117",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/118",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/119",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/120",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/121",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/122",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/123",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/124",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/125",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/126",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/127",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/128",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/129",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/130",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/131",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/132",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/133",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/134",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/135",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/136",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/137",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/138",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/139",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/140",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/141",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/142",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/143",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/144",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/145",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/146",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/147",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/148",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/149",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/150",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/151",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/152",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/153",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/154",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/155",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/156",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/157",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/158",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/159",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/160",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/161",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/162",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "HumanEval/163",
+      "c": 0,
+      "n": 1
+    }
+  ]
+}

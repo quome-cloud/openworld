@@ -1,0 +1,286 @@
+{
+  "base": "Qwen/Qwen2.5-7B-Instruct",
+  "adapter": "c_ad_7B",
+  "source": "synthetic",
+  "n_tasks": 55,
+  "n_samples": 1,
+  "temperature": 0.8,
+  "pass_at_1": 0.8364,
+  "per_task": [
+    {
+      "id": "flatten_nested_list_903",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_742",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "parse_key_value_string_676",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_555",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "is_prime_and_sum_digits",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "find_median_sorted_arrays_686",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "max_subarray_sum_circular",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "min_taps_to_water_garden",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "count_anagram_groups",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_clockwise_592",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_205",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_clockwise_461",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_948",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_975",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "count_word_frequencies_295",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_190",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_peak_elements_386",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_984",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_613",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_988",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "count_word_frequencies_619",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_252",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "is_prime_factorable",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_345",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_957",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_peak_elements_217",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_209",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_median_sorted_arrays_493",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_947",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_786",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "parse_key_value_string_942",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "sum_of_divisors_920",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "sum_of_divisors_202",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_378",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "parse_key_value_string_616",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_874",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "count_word_frequencies_220",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_peak_elements_399",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "merge_overlapping_intervals_499",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "count_unique_elements_in_lists",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_peak_elements_942",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_clockwise_127",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "sum_of_divisors_860",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_597",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "flatten_nested_list_181",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_405",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_clockwise_948",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "sum_of_divisors_317",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "sum_of_divisors_651",
+      "c": 0,
+      "n": 1
+    },
+    {
+      "id": "parse_key_value_string_804",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "rotate_matrix_clockwise_689",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_median_sorted_arrays_324",
+      "c": 1,
+      "n": 1
+    },
+    {
+      "id": "find_median_sorted_arrays_353",
+      "c": 1,
+      "n": 1
+    }
+  ]
+}

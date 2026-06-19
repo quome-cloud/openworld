@@ -46,7 +46,7 @@ def render(spec, path):
         ax.text(0.55, y + 0.18, MOD_ICON.get(mod, "?"), ha="center", va="center", fontsize=10,
                 color=INK, family="monospace",
                 bbox=dict(boxstyle="round,pad=0.25", fc="#eef2f7", ec=GRAY, lw=0.8))
-        _arrow(ax, 1.0, y + 0.18, 1.55, y + 0.18)
+        _arrow(ax, 0.9, y + 0.18, 1.45, y + 0.18)  # centered in the input->perceptor gap
         prod = ",".join(p.get("produces", []) or [p.get("kind", "")])[:18]
         _box(ax, 1.55, y, 1.9, 0.36, f"{p.get('kind','perceptor')}\n[{mod}] →{prod}", TEAL, fs=7.0)
         _arrow(ax, 3.45, y + 0.18, 4.05, 2.4, color=TEAL)
@@ -61,7 +61,7 @@ def render(spec, path):
         _box(ax, 4.35, cy, 2.2, 0.7, f"{nm}\n(transition: {kind})", BLUE, fs=8)
     if comp.get("bridges"):
         _arrow(ax, 5.45, cys[0], 5.45, cys[1] + 0.7, color=OCHRE, lw=1.6)
-        ax.text(5.75, 2.18, "bridge", fontsize=7, color=OCHRE)
+        ax.text(5.38, 2.4, "bridge", ha="right", va="center", fontsize=7, color=OCHRE)
     if comp.get("aggregators"):
         ax.text(5.45, 0.95, "▲ aggregator: " + ",".join(a.get("name", "") for a in comp["aggregators"]),
                 ha="center", fontsize=7, color=BLUE)

@@ -164,9 +164,13 @@ def fig_learned(e12):
         return [next(r[field] for r in rows
                      if r["model"] == model and r["k_transitions"] == k) for k in ks]
 
-    for ax, field, title in (
-        (axes[0], "probe_in_dist", "A. Branch-covering probes (in-distribution)"),
-        (axes[1], "probe_ood_10x", "B. The same probes at 10× scale (OOD)"),
+    # Both legends share a vertical anchor (same height); nudged above center so
+    # panel A's legend clears the MLP line. A stays left, B stays right.
+    for ax, field, title, leg_loc, leg_x in (
+        (axes[0], "probe_in_dist", "A. Branch-covering probes (in-distribution)",
+         "center left", 0.02),
+        (axes[1], "probe_ood_10x", "B. The same probes at 10× scale (OOD)",
+         "center right", 0.98),
     ):
         ax.plot(ks, series("mlp", field), "-o", color=PURPLE, label="MLP (trained)")
         ax.plot(ks, series("knn1", field), "-s", color=SLATE, label="1-NN (memorizer)")
@@ -180,7 +184,7 @@ def fig_learned(e12):
         ax.set_ylim(-0.05, 1.1)
         ax.set_title(title, fontsize=10, loc="left")
         ax.grid(alpha=0.25)
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=8, loc=leg_loc, bbox_to_anchor=(leg_x, 0.64))
     fig.tight_layout()
     fig.savefig(FIGS / "learned.png", dpi=200)
     plt.close(fig)
@@ -376,7 +380,7 @@ def fig_induction_scale(e38):
     # Add horizontal margin so the rightmost marker and its centered value
     # label sit fully inside the axes instead of running off the right edge.
     ax.set_xlim(-0.4, len(models) - 1 + 0.4)
-    ax.legend(fontsize=7.5, loc="center right")
+    ax.legend(fontsize=7.5, loc="center right", bbox_to_anchor=(0.98, 0.66))
     ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "induction_scale.png", dpi=200)
@@ -451,7 +455,7 @@ def fig_emergent_economy(e44):
     a1.plot(c1["abundant_traj"], color=ORANGE, lw=2, label="abundant supply")
     a1.axhline(c1["scarce_supply_price"], color=BLUE, lw=0.8, ls=":")
     a1.axhline(c1["abundant_supply_price"], color=ORANGE, lw=0.8, ls=":")
-    a1.set_title("A. Price formation: scarcity sets the price", fontsize=9.5, loc="left")
+    a1.set_title("A. Price formation: scarcity sets the price", fontsize=9, loc="left")
     a1.set_xlabel("Tick"); a1.set_ylabel("Market price")
     a1.legend(fontsize=8, loc="center right")
 
@@ -459,7 +463,7 @@ def fig_emergent_economy(e44):
     a2.plot(c2["off_money_traj"], color=RED, lw=2, label="burn sink OFF (faucet only)")
     a2.plot(c2["on_money_traj"], color=TEAL, lw=2, label="burn sink ON")
     a2.set_yscale("log")
-    a2.set_title("B. Inflation: a sink curbs the money supply", fontsize=9.5, loc="left")
+    a2.set_title("B. Inflation: a sink curbs the money supply", fontsize=9, loc="left")
     a2.set_xlabel("Tick"); a2.set_ylabel("Money supply (log)")
     a2.legend(fontsize=8, loc="lower right")
 
@@ -467,10 +471,10 @@ def fig_emergent_economy(e44):
     a3.plot(c3["off_gini_traj"], color=RED, lw=2, label="redistribution OFF")
     a3.plot(c3["on_gini_traj"], color=TEAL, lw=2, label="redistribution ON")
     a3.set_title("C. Inequality emerges; redistribution flattens it",
-                 fontsize=9.5, loc="left")
+                 fontsize=9, loc="left")
     a3.set_xlabel("Tick"); a3.set_ylabel("Wealth Gini")
     a3.set_ylim(bottom=0)
-    a3.legend(fontsize=8, loc="center right")
+    a3.legend(fontsize=8, loc="upper right")
 
     # D: selfish vs cooperative dial (welfare + top-agent gold)
     groups = ["total\nwelfare", "richest\nagent"]
@@ -483,9 +487,10 @@ def fig_emergent_economy(e44):
     for i, (sv, cv) in enumerate(zip(selfish, coop)):
         a4.text(i - w / 2, sv, f"{sv:.0f}", ha="center", va="bottom", fontsize=7.5)
         a4.text(i + w / 2, cv, f"{cv:.0f}", ha="center", va="bottom", fontsize=7.5)
+    a4.set_ylim(top=max(max(selfish), max(coop)) * 1.12)  # headroom so value labels fit inside
     a4.set_xticks(list(x)); a4.set_xticklabels(groups, fontsize=8.5)
     a4.set_title("D. Dial: cooperation lifts the total, selfishness the top",
-                 fontsize=9.5, loc="left")
+                 fontsize=9, loc="left")
     a4.set_ylabel("Gold")
     a4.legend(fontsize=8, loc="upper right")
 
@@ -1334,7 +1339,7 @@ def fig_many_worlds(e46):
     mechanism couples w parameters (factor ~ d^w)."""
     scale = e46["scale"]
     coup = e46["coupling"]
-    fig, (ax, axc) = plt.subplots(1, 2, figsize=(8.0, 3.4))
+    fig, (ax, axc) = plt.subplots(1, 2, figsize=(8.0, 4.0))
 
     n = [r["n_worlds"] for r in scale]
     fct = [r["factored_ms"] for r in scale]
@@ -1349,7 +1354,8 @@ def fig_many_worlds(e46):
     ax.set_xlabel("World-space size (number of worlds)")
     ax.set_ylabel("Update + query time (ms)")
     ax.set_title("Exact version space, far past enumeration", fontsize=9.5, loc="left")
-    ax.legend(fontsize=8, loc="upper left")
+    ax.set_ylim(top=2e4)  # headroom so the "enumeration infeasible" note sits inside the axes
+    ax.legend(fontsize=8, loc="lower right")
 
     w = [r["w"] for r in coup]
     fsize = [r["factor_size"] for r in coup]
@@ -1366,6 +1372,7 @@ def fig_many_worlds(e46):
     fig.suptitle("A database for many worlds: factored, semiring-annotated store (E46)",
                  fontsize=10.5, x=0.02, ha="left")
     fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.subplots_adjust(top=0.87)  # fill the box, but leave a gap below the suptitle
     fig.savefig(FIGS / "many_worlds.png", dpi=200)
     plt.close(fig)
 
@@ -1769,7 +1776,9 @@ def fig_representations(e36):
 
 
 def fig_complexity(e20):
-    fig, ax = plt.subplots(figsize=(5.6, 3.3))
+    # Taller than the other single-panel figures so the long rotated y-label
+    # ("Mean probe accuracy of synthesized dynamics") fits inside the canvas.
+    fig, ax = plt.subplots(figsize=(5.6, 4.2))
     summary = e20["summary"]
     xs = [s["n_rules"] for s in summary]
     ys = [s["mean_probe_accuracy"] for s in summary]
@@ -3463,18 +3472,21 @@ def fig_world_time_compute(scaling, diag):
     ax.text(x[-1], oracle + 0.006, "oracle (handed the rules)", ha="right", va="bottom",
             fontsize=8, color=TEAL)
     ax.axhline(floor, ls=":", color="#999999", lw=1.2)
-    ax.text(x[0], floor + 0.006, "prior-only floor", ha="left", va="bottom",
-            fontsize=8, color="#777777")
+    ax.annotate("prior-only floor", (x[0], floor), xytext=(11, 2),
+                textcoords="offset points", ha="left", va="bottom",
+                fontsize=8, color="#777777")
     for xi, b, f in zip(x, base, ft):
-        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2), fontsize=8.5, ha="center",
-                    va="center", color="#9a4d00", weight="bold")
+        # nudge the gain labels right of the error bars so they don't overlap them
+        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2),
+                    xytext=(6, 0), textcoords="offset points",
+                    fontsize=8.5, ha="left", va="center", color="#9a4d00", weight="bold")
     ax.set_xticks(x)
     ax.set_xticklabels(names)
     ax.minorticks_off()
     ax.set_xlabel("model size (Qwen2.5-Instruct, params)")
     ax.set_ylabel("held-out diagnostic accuracy")
     ax.set_ylim(min(floor, min(base)) - 0.04, 0.9)
-    ax.legend(loc="lower right", fontsize=8.5, frameon=False)
+    ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.13), fontsize=8.5)
     ax.set_title("World-time compute lifts generalization to held-out worlds\n"
                  "(largest for small models)", fontsize=10.5)
     ax.grid(True, axis="y", alpha=0.25)

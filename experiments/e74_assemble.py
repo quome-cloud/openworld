@@ -8,6 +8,7 @@ experiments/results/e74_scaling.json.
 """
 
 import json
+import random
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,20 +24,39 @@ SIZES = [("0.5B", 0.5, "0.5B", "bf16 LoRA"),
          ("32B", 32.0, "32B", "4-bit QLoRA")]
 
 
-def acc(tag, kind):
+def _read(tag, kind):
     f = ART / f"eval_{tag}_{kind}.json"
-    return json.loads(f.read_text())["accuracy"] if f.exists() else None
+    return json.loads(f.read_text()) if f.exists() else None
+
+
+def boot_ci(xs, n=5000, seed=0):
+    """Bootstrap 95% CI of the mean of xs (resampling with replacement)."""
+    rng = random.Random(seed)
+    k = len(xs)
+    means = sorted(sum(xs[rng.randrange(k)] for _ in range(k)) / k for _ in range(n))
+    return round(means[int(0.025 * n)], 4), round(means[int(0.975 * n)], 4)
 
 
 def main():
     diag = json.loads((ROOT / "experiments" / "results" / "e74_diagnosis.json").read_text())
     sizes = []
     for name, pb, tag, prec in SIZES:
-        b, f = acc(tag, "base"), acc(tag, "ft")
-        if b is None or f is None:
+        bj, fj = _read(tag, "base"), _read(tag, "ft")
+        if bj is None or fj is None:
             continue
-        sizes.append({"name": name, "params_b": pb, "base": b, "ft": f,
-                      "gain": round(f - b, 4), "precision": prec})
+        # bootstrap CIs over the held-out specialties (paired for the gain)
+        keys = sorted(bj["per_specialty_accuracy"])
+        bvals = [bj["per_specialty_accuracy"][k] for k in keys]
+        fvals = [fj["per_specialty_accuracy"][k] for k in keys]
+        gvals = [fv - bv for bv, fv in zip(bvals, fvals)]
+        b_lo, b_hi = boot_ci(bvals)
+        f_lo, f_hi = boot_ci(fvals)
+        g_lo, g_hi = boot_ci(gvals)
+        sizes.append({"name": name, "params_b": pb,
+                      "base": bj["accuracy"], "base_ci": [b_lo, b_hi],
+                      "ft": fj["accuracy"], "ft_ci": [f_lo, f_hi],
+                      "gain": round(fj["accuracy"] - bj["accuracy"], 4), "gain_ci": [g_lo, g_hi],
+                      "precision": prec})
     # n from any present eval file
     meta = {}
     for name, pb, tag, prec in SIZES:
@@ -59,7 +79,8 @@ def main():
     OUT.write_text(json.dumps(results, indent=2))
     print(f"[e74-assemble] {len(sizes)} sizes -> {OUT.name}")
     for s in sizes:
-        print(f"  {s['name']:>5}: base {s['base']:.3f} -> ft {s['ft']:.3f}  (+{s['gain']:.3f})  [{s['precision']}]")
+        print(f"  {s['name']:>5}: base {s['base']:.3f} -> ft {s['ft']:.3f}  "
+              f"gain +{s['gain']:.3f} CI[{s['gain_ci'][0]:+.3f},{s['gain_ci'][1]:+.3f}]  [{s['precision']}]")
 
 
 if __name__ == "__main__":

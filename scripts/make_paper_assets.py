@@ -380,7 +380,7 @@ def fig_induction_scale(e38):
     # Add horizontal margin so the rightmost marker and its centered value
     # label sit fully inside the axes instead of running off the right edge.
     ax.set_xlim(-0.4, len(models) - 1 + 0.4)
-    ax.legend(fontsize=7.5, loc="center right")
+    ax.legend(fontsize=7.5, loc="center right", bbox_to_anchor=(0.98, 0.66))
     ax.set_title("Induction from traces vs the rule-text anchor", fontsize=10, loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "induction_scale.png", dpi=200)

@@ -3400,18 +3400,21 @@ def fig_world_time_compute(scaling, diag):
     ax.text(x[-1], oracle + 0.006, "oracle (handed the rules)", ha="right", va="bottom",
             fontsize=8, color=TEAL)
     ax.axhline(floor, ls=":", color="#999999", lw=1.2)
-    ax.text(x[0], floor + 0.006, "prior-only floor", ha="left", va="bottom",
-            fontsize=8, color="#777777")
+    ax.annotate("prior-only floor", (x[0], floor), xytext=(11, 2),
+                textcoords="offset points", ha="left", va="bottom",
+                fontsize=8, color="#777777")
     for xi, b, f in zip(x, base, ft):
-        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2), fontsize=8.5, ha="center",
-                    va="center", color="#9a4d00", weight="bold")
+        # nudge the gain labels right of the error bars so they don't overlap them
+        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2),
+                    xytext=(6, 0), textcoords="offset points",
+                    fontsize=8.5, ha="left", va="center", color="#9a4d00", weight="bold")
     ax.set_xticks(x)
     ax.set_xticklabels(names)
     ax.minorticks_off()
     ax.set_xlabel("model size (Qwen2.5-Instruct, params)")
     ax.set_ylabel("held-out diagnostic accuracy")
     ax.set_ylim(min(floor, min(base)) - 0.04, 0.9)
-    ax.legend(loc="lower right", fontsize=8.5, frameon=False)
+    ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.13), fontsize=8.5)
     ax.set_title("World-time compute lifts generalization to held-out worlds\n"
                  "(largest for small models)", fontsize=10.5)
     ax.grid(True, axis="y", alpha=0.25)

@@ -3375,12 +3375,19 @@ def fig_world_time_compute(scaling, diag):
     names = [s["name"] for s in sizes]
     oracle, floor = scaling["offline_oracle"], scaling["offline_floor"]
 
+    def yerr(key):  # asymmetric 95% bootstrap CI half-widths
+        lo = [s[key][0] for s in sizes]
+        hi = [s[key][1] for s in sizes]
+        vals = base if key == "base_ci" else ft
+        return [[v - l for v, l in zip(vals, lo)], [h - v for v, h in zip(vals, hi)]]
+
     fig, ax = plt.subplots(figsize=(7.4, 4.4))
     ax.set_xscale("log")
-    ax.fill_between(x, base, ft, color=ORANGE, alpha=0.15, zorder=1)
-    ax.plot(x, base, "o-", color=SLATE, lw=2.0, zorder=3, label="base model (zero-shot)")
-    ax.plot(x, ft, "s-", color=ORANGE, lw=2.4, zorder=3,
-            label="+ world-time compute (fine-tuned on traversed worlds)")
+    ax.fill_between(x, base, ft, color=ORANGE, alpha=0.13, zorder=1)
+    ax.errorbar(x, base, yerr=yerr("base_ci"), fmt="o-", color=SLATE, lw=2.0, zorder=3,
+                capsize=3, elinewidth=1, label="base model (zero-shot)")
+    ax.errorbar(x, ft, yerr=yerr("ft_ci"), fmt="s-", color=ORANGE, lw=2.4, zorder=3,
+                capsize=3, elinewidth=1, label="+ world-time compute (fine-tuned on traversed worlds)")
     ax.axhline(oracle, ls="--", color=TEAL, lw=1.3)
     ax.text(x[-1], oracle + 0.006, "oracle (handed the rules)", ha="right", va="bottom",
             fontsize=8, color=TEAL)

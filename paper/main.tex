@@ -815,9 +815,13 @@ world-time compute lifts held-out accuracy at every model size---from \WTSmallBa
 \WTSmallFT{} at \WTSmallName{}, and from \WTLargeBase{} to \WTLargeFT{} at \WTLargeName{}---%
 moving the model toward the rules-given oracle on specialties it never trained on.
 \emph{(ii) It is a small-model multiplier:} the gain is largest where capability is
-scarcest ($+\WTSmallGain$ points at \WTSmallName{} versus $+\WTLargeGain$ at \WTLargeName),
-then plateaus rather than vanishing, so even capable models keep a few points. An offline
-analogue agrees---a learner that has distilled the family's structure diagnoses a held-out
+scarcest ($+\WTSmallGain$ points at \WTSmallName, bootstrap CI over held-out specialties
+well clear of zero) and \emph{shrinks} as larger models approach the rules-given ceiling---%
+by \WTLargeName{} the lift is only $+\WTLargeGain$ points and its CI includes zero, because
+the task is nearly saturated (oracle \WTOracle). Whether the gain re-emerges once capable
+models are given headroom---a deliberately harder world family---is a clean falsifiable
+follow-up we are running. An offline analogue confirms the distilled structure is a
+sample-efficiency win regardless: a learner that has seen the family diagnoses a held-out
 specialty from fewer cases than one learning from scratch (\WTMetaFewShot{} vs
 \WTScratchFewShot{} at a single case per disease).
 

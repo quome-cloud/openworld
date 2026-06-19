@@ -199,7 +199,10 @@ written as code: with \openworld{}, prototyping a \emph{verified} world
 model---perceive\,$\to$\,world\,$\to$\,emit\,$\to$\,act, served and shareable---is a
 minutes-scale, push-button activity (Section~\ref{sec:prototyping}), and the resulting
 artifact is exact and auditable by construction. We first situate this against the
-dominant learned paradigm, then establish that the fast prototypes are trustworthy.
+dominant learned paradigm, then establish that the fast prototypes are trustworthy, and
+finally show the verified worlds double as \emph{training signal}: traversing many of them
+scales a model's generalization to held-out worlds---\emph{world-time compute}
+(\S\ref{sec:world-time}), a training-time analogue of test-time compute.
 
 A world model is an agent's internal simulator: given a state and an action, it
 predicts the next state (and/or observation), letting the agent plan ``in

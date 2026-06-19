@@ -1,0 +1,229 @@
+{
+  "base": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": null,
+  "source": "synthetic",
+  "n_tasks": 55,
+  "pass_at_1": 0.6727,
+  "per_task": [
+    {
+      "id": "flatten_nested_list_903",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list_742",
+      "pass": true
+    },
+    {
+      "id": "parse_key_value_string_676",
+      "pass": false
+    },
+    {
+      "id": "flatten_nested_list_555",
+      "pass": true
+    },
+    {
+      "id": "is_prime_and_sum_digits",
+      "pass": true
+    },
+    {
+      "id": "find_median_sorted_arrays_686",
+      "pass": false
+    },
+    {
+      "id": "max_subarray_sum_circular",
+      "pass": false
+    },
+    {
+      "id": "min_taps_to_water_garden",
+      "pass": false
+    },
+    {
+      "id": "count_anagram_groups",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_clockwise_592",
+      "pass": false
+    },
+    {
+      "id": "merge_overlapping_intervals",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_205",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_clockwise_461",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list_948",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_975",
+      "pass": true
+    },
+    {
+      "id": "count_word_frequencies_295",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_190",
+      "pass": true
+    },
+    {
+      "id": "find_peak_elements_386",
+      "pass": false
+    },
+    {
+      "id": "merge_overlapping_intervals_984",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_613",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_988",
+      "pass": true
+    },
+    {
+      "id": "count_word_frequencies_619",
+      "pass": false
+    },
+    {
+      "id": "merge_overlapping_intervals_252",
+      "pass": true
+    },
+    {
+      "id": "is_prime_factorable",
+      "pass": false
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_345",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_957",
+      "pass": true
+    },
+    {
+      "id": "find_peak_elements_217",
+      "pass": false
+    },
+    {
+      "id": "flatten_nested_list_209",
+      "pass": true
+    },
+    {
+      "id": "find_median_sorted_arrays_493",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list_947",
+      "pass": true
+    },
+    {
+      "id": "merge_overlapping_intervals_786",
+      "pass": true
+    },
+    {
+      "id": "parse_key_value_string_942",
+      "pass": false
+    },
+    {
+      "id": "sum_of_divisors_920",
+      "pass": true
+    },
+    {
+      "id": "sum_of_divisors_202",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list_378",
+      "pass": true
+    },
+    {
+      "id": "parse_key_value_string_616",
+      "pass": false
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_874",
+      "pass": true
+    },
+    {
+      "id": "count_word_frequencies_220",
+      "pass": false
+    },
+    {
+      "id": "find_peak_elements_399",
+      "pass": false
+    },
+    {
+      "id": "merge_overlapping_intervals_499",
+      "pass": true
+    },
+    {
+      "id": "count_unique_elements_in_lists",
+      "pass": true
+    },
+    {
+      "id": "find_peak_elements_942",
+      "pass": false
+    },
+    {
+      "id": "rotate_matrix_clockwise_127",
+      "pass": false
+    },
+    {
+      "id": "sum_of_divisors_860",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_597",
+      "pass": true
+    },
+    {
+      "id": "flatten_nested_list_181",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_90_clockwise_405",
+      "pass": true
+    },
+    {
+      "id": "rotate_matrix_clockwise_948",
+      "pass": false
+    },
+    {
+      "id": "sum_of_divisors_317",
+      "pass": false
+    },
+    {
+      "id": "sum_of_divisors_651",
+      "pass": true
+    },
+    {
+      "id": "parse_key_value_string_804",
+      "pass": false
+    },
+    {
+      "id": "rotate_matrix_clockwise_689",
+      "pass": true
+    },
+    {
+      "id": "find_median_sorted_arrays_324",
+      "pass": true
+    },
+    {
+      "id": "find_median_sorted_arrays_353",
+      "pass": true
+    }
+  ]
+}

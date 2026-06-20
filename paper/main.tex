@@ -309,18 +309,21 @@ trajectories against written rubrics.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.97\linewidth]{figs/hero.png}
-\caption{\textbf{The paper in one figure.} \emph{A:} On a
+\caption{\textbf{The paper in one figure.} \emph{A (foundation):} On a
 ground-truth-instrumented world, dynamics synthesized and verified once as
 code (blue) match the oracle exactly at every depth of a \RolloutSteps-step
 rollout, while per-step LLM next-state prediction (orange)---a structural
 stand-in for learned neural dynamics---first diverges at step
-\LLMFirstDivergence{} on average and never completes an exact rollout.
-\emph{B:} The same synthesized program answers single-transition probes
-exactly at both nominal and $10\times$ out-of-distribution magnitudes
-(\CodeOODRate), while the learned-style engine is wrong on more than half of
-probes at \emph{both} scales. Programs encode rules, not statistics: the
-compounding-error failure mode of learned world models is eliminated by
-construction, at zero training cost.}
+\LLMFirstDivergence{} on average and never completes an exact rollout. Programs
+encode rules, not statistics, so the compounding-error failure mode of learned
+world models is eliminated by construction, at zero training cost. \emph{B
+(payoff):} what that exactness unlocks---\emph{world-time compute}. Fine-tuning
+an LLM on trajectories traversed through \WTNumTrainWorlds{} verified
+\emph{train} world models lifts held-out diagnostic accuracy on
+\WTNumTestWorlds{} \emph{unseen} worlds toward the rules-given oracle, with the
+largest gain for the smallest models ($+\WTSmallGain$ points at \WTSmallName,
+shrinking to $+\WTLargeGain$ at \WTLargeName)---a generalization lever that is
+strongest where capability is scarcest (E74, \S\ref{sec:world-time}).}
 \label{fig:hero}
 \end{figure}
 

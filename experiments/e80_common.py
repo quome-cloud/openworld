@@ -110,6 +110,10 @@ def main():
     cfg = mod.CONFIG
     worlds = mod.build_worlds()
     names = sorted(worlds)
+    if not names:
+        print(f"[e80/{args.domain}] ERROR: 0 worlds built (data load failed?) -- aborting.",
+              flush=True)
+        return
     print(f"[e80/{args.domain}] {len(names)} worlds; "
           f"sizes min/median/max "
           f"{min(len(worlds[n]['rows']) for n in names)}/"

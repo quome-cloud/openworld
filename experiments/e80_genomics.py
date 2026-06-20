@@ -41,15 +41,16 @@ CONFIG = {
 
 
 def build_worlds():
-    """Each ProteinGym substitution assay (protein) -> a world of single-mutation examples
-    labeled by the REAL measured effect. Keep assays with both classes and enough mutations."""
+    """Each ProteinGym substitution assay (one CSV = one protein) -> a world of single-mutation
+    examples labeled by the REAL measured effect (DMS_score_bin). CSVs unzipped under OW_PG_DIR
+    from the official ProteinGym v1.3 substitutions release. Keep assays with both classes and
+    enough single-substitution mutations."""
     worlds = {}
     for f in sorted(PG_DIR.glob("*.csv")):
         rows = load_assay(f)
-        labs = {r["label"] for r in rows}
-        if len(rows) >= 60 and len(labs) == 2:
+        if len(rows) >= 60 and len({r["completion"] for r in rows}) == 2:
             worlds[f.stem] = {"classes": ["tolerated", "deleterious"],
-                              "rows": [{"prompt": r["prompt"], "label": r["label"]} for r in rows]}
+                              "rows": [{"prompt": r["prompt"], "label": r["completion"]} for r in rows]}
     return worlds
 
 # --- amino-acid biochemical property tables (Kyte-Doolittle hydropathy, side-chain volume A^3,

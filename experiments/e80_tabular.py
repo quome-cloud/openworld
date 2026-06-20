@@ -10,18 +10,20 @@ Consumed by e80_common (build_worlds + CONFIG). Needs the `openml` package (inst
 """
 
 CONFIG = {
-    "ladder": [2, 4, 8, 16, 32],
-    "abl_n": 16,
+    "ladder": [2, 8, 32, 64, 128],
+    "abl_n": 48,
     "abl_noise": [0.0, 0.15, 0.30, 0.45, 0.60, 0.80, 1.0],
-    "cap": 100,            # rows per dataset-world
-    "n_test": 15,          # held-out datasets (strict)
+    "cap": 80,             # rows per dataset-world
+    "n_test": 40,          # held-out datasets (strict)
     "seeds": [0, 1],
     "base": "Qwen/Qwen2.5-0.5B-Instruct",
 }
 
 MAX_FEATURES = 30
 MAX_CLASSES = 12
-ROWS_FETCH = 400          # rows considered per dataset (subsample of large ones)
+ROWS_FETCH = 200          # rows considered per dataset
+MAX_WORLDS = 250          # build up to this many real tabular worlds
+MAX_CANDIDATES = 700      # OpenML datasets to attempt (many fail/dup -> skipped) (subsample of large ones)
 
 
 def _fmt(v):
@@ -32,18 +34,32 @@ def _fmt(v):
         return str(v)[:24]
 
 
+def _candidate_ids():
+    """Query OpenML for many real classification datasets (small/medium), not just CC18."""
+    import openml
+    df = openml.datasets.list_datasets(output_format="dataframe", status="active")
+    keep = df[(df.NumberOfClasses >= 2) & (df.NumberOfClasses <= MAX_CLASSES)
+              & (df.NumberOfFeatures >= 2) & (df.NumberOfFeatures <= MAX_FEATURES + 1)
+              & (df.NumberOfInstances >= 120) & (df.NumberOfInstances <= 20000)
+              & (df.NumberOfMissingValues == 0)]
+    keep = keep.sort_values("name").drop_duplicates("name")     # one version per dataset name
+    return list(dict.fromkeys(keep.did.astype(int).tolist()))[:MAX_CANDIDATES]
+
+
 def build_worlds():
     import openml
     worlds = {}
-    suite = openml.study.get_suite("OpenML-CC18")
-    for tid in suite.tasks:
+    for did in _candidate_ids():
+        if len(worlds) >= MAX_WORLDS:
+            break
         try:
-            task = openml.tasks.get_task(tid, download_data=False, download_qualities=False)
-            ds = openml.datasets.get_dataset(task.dataset_id, download_data=True,
-                                             download_qualities=False, download_features_meta_data=False)
+            ds = openml.datasets.get_dataset(did, download_data=True, download_qualities=False,
+                                             download_features_meta_data=False)
+            if not ds.default_target_attribute:
+                continue
             X, y, _, cols = ds.get_data(target=ds.default_target_attribute)
         except Exception as e:  # noqa: BLE001
-            print(f"  [tabular] skip task {tid}: {repr(e)[:80]}", flush=True)
+            print(f"  [tabular] skip did {did}: {repr(e)[:60]}", flush=True)
             continue
         if X is None or y is None or X.shape[1] > MAX_FEATURES:
             continue

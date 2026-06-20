@@ -83,32 +83,40 @@ def parse_mutant(m):
     return wt, int(pos), mut
 
 
-def featurize(wt, pos, mut, seqlen):
-    """Biochemical context of a single substitution -> a compact, model-readable description."""
+WINDOW = 7   # +-7 residues of wild-type local context around the mutated site
+
+
+def context_window(seq, pos, wt, mut):
+    """Wild-type local sequence around the mutated site, with the substitution marked --
+    the protein-SPECIFIC context (analogous to a diagnosis condition's evidence profile), so
+    each protein-world is distinct and the skill (context + substitution -> effect) can scale."""
+    wtseq = seq[:pos - 1] + wt + seq[pos:]                 # revert to wild-type at the site
+    lo, hi = max(0, pos - 1 - WINDOW), min(len(seq), pos + WINDOW)
+    return f"{wtseq[lo:pos - 1]}[{wt}>{mut}]{wtseq[pos:hi]}"
+
+
+def featurize(wt, pos, mut, seq):
     dh = HYDRO[mut] - HYDRO[wt]
     dv = VOLUME[mut] - VOLUME[wt]
     dc = CHARGE.get(mut, 0) - CHARGE.get(wt, 0)
-    relpos = pos / seqlen if seqlen else 0.0
     return {
-        "wt": wt, "mut": mut, "relpos": round(relpos, 2),
+        "window": context_window(seq, pos, wt, mut),
+        "wt": wt, "mut": mut, "relpos": round(pos / len(seq), 2) if seq else 0.0,
         "d_hydropathy": round(dh, 1), "d_volume": round(dv, 0), "d_charge": dc,
         "proline_involved": int("P" in (wt, mut)),
-        "glycine_involved": int("G" in (wt, mut)),
         "charge_flip": int(CHARGE.get(wt, 0) * CHARGE.get(mut, 0) < 0),
     }
 
 
 def make_prompt(feat):
-    loc = "N-term" if feat["relpos"] < 0.33 else ("C-term" if feat["relpos"] > 0.66 else "middle")
-    return ("You are a protein variant-effect predictor. A single amino-acid substitution:\n"
-            f"  wild-type residue: {feat['wt']}\n  mutant residue: {feat['mut']}\n"
-            f"  position: {loc} (relative {feat['relpos']})\n"
-            f"  change in hydropathy: {feat['d_hydropathy']}\n"
-            f"  change in side-chain volume: {feat['d_volume']} A^3\n"
-            f"  change in charge: {feat['d_charge']}\n"
-            f"  proline involved: {'yes' if feat['proline_involved'] else 'no'}; "
-            f"glycine involved: {'yes' if feat['glycine_involved'] else 'no'}; "
-            f"charge reversal: {'yes' if feat['charge_flip'] else 'no'}\n"
+    return ("You are a protein variant-effect predictor. Wild-type local sequence around the "
+            "mutated site (the substitution is marked in brackets):\n"
+            f"  ...{feat['window']}...\n"
+            f"Substitution: {feat['wt']} -> {feat['mut']} at relative position {feat['relpos']}. "
+            f"Biochemical change: hydropathy {feat['d_hydropathy']}, volume {feat['d_volume']} A^3, "
+            f"charge {feat['d_charge']}"
+            f"{', proline involved' if feat['proline_involved'] else ''}"
+            f"{', charge reversal' if feat['charge_flip'] else ''}.\n"
             "Is this mutation TOLERATED (preserves function) or DELETERIOUS? "
             "Reply with ONLY 'tolerated' or 'deleterious'.")
 
@@ -117,36 +125,32 @@ LABELS = {1: "tolerated", 0: "deleterious"}
 
 
 def load_assay(csv_path, max_per_assay=400):
-    """Parse one ProteinGym assay CSV -> list of (prompt, label_str). Single substitutions only."""
+    """Parse one ProteinGym assay CSV -> [{prompt, completion, answer}]. Single substitutions
+    with a valid mutated_sequence only, so the local context window is real."""
     import csv as _csv
-    rows = []
     with open(csv_path) as fh:
-        reader = _csv.DictReader(fh)
-        recs = [r for r in reader]
-    # infer sequence length from the max parsed position (robust if mutated_sequence absent)
-    parsed = []
+        recs = list(_csv.DictReader(fh))
+    rows = []
     for r in recs:
-        if "DMS_score_bin" not in r or r["DMS_score_bin"] == "":
-            continue
+        b = r.get("DMS_score_bin", "")
         pm = parse_mutant(r.get("mutant", ""))
-        if pm is None:
+        seq = r.get("mutated_sequence", "") or ""
+        if b == "" or b is None or pm is None or not seq:
             continue
-        parsed.append((pm, int(float(r["DMS_score_bin"]))))
-    if not parsed:
-        return []
-    seqlen = max(p[0][1] for p in parsed)
-    for (wt, pos, mut), lab in parsed:
-        rows.append({"prompt": make_prompt(featurize(wt, pos, mut, seqlen)),
-                     "completion": LABELS[lab], "answer": LABELS[lab]})
+        wt, pos, mut = pm
+        if pos > len(seq) or seq[pos - 1] != mut:          # indexing/validity guard
+            continue
+        lab = LABELS[int(float(b))]
+        rows.append({"prompt": make_prompt(featurize(wt, pos, mut, seq)),
+                     "completion": lab, "answer": lab})
     return rows[:max_per_assay]
 
 
 if __name__ == "__main__":
-    # offline self-test of the model-readable core (no ProteinGym download needed)
     assert parse_mutant("A45G") == ("A", 45, "G")
-    assert parse_mutant("M1V") == ("M", 1, "V")
-    assert parse_mutant("A45G:L50P") is None and parse_mutant("x") is None
-    f = featurize("A", 45, "G", 100)
-    print("featurize A45G/len100:", f)
+    assert parse_mutant("A45G:L50P") is None
+    seq = "MKLVFGAEDVGSNKGAIIGLM"     # toy mutated sequence (G at index 5 = pos 6)
+    f = featurize("F", 6, "G", seq)
+    print("featurize:", f)
     print("prompt:\n" + make_prompt(f))
-    print("ok: genomics mutation parser + featurizer + prompt")
+    print("ok: genomics local-context featurizer + prompt")

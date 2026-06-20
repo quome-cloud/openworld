@@ -47,7 +47,12 @@ def build_worlds():
     enough single-substitution mutations."""
     worlds = {}
     for f in sorted(PG_DIR.glob("*.csv")):
-        rows = load_assay(f)
+        if f.name.startswith("._"):          # skip macOS AppleDouble junk in archives
+            continue
+        try:
+            rows = load_assay(f)
+        except Exception:                    # noqa: BLE001 -- skip any unparseable file
+            continue
         if len(rows) >= 60 and len({r["completion"] for r in rows}) == 2:
             worlds[f.stem] = {"classes": ["tolerated", "deleterious"],
                               "rows": [{"prompt": r["prompt"], "label": r["completion"]} for r in rows]}

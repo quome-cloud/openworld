@@ -47,7 +47,7 @@ def finetune(base, data, seed, epochs):
     # large batch + no grad-accum: a 0.5B/1.5B LoRA barely touches a 40GB A100 at bs=8.
     sh([sys.executable, str(HERE / "e73_finetune.py"), "--base", base, "--data", str(data),
         "--out", str(adapter), "--epochs", str(epochs), "--seed", str(79 + seed),
-        "--batch", "64", "--grad_accum", "1"])
+        "--batch", "16", "--grad_accum", "1"])
     return adapter
 
 

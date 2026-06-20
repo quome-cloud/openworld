@@ -55,7 +55,7 @@ def finetune(base, data, seed, epochs):
         shutil.rmtree(a)
     sh([sys.executable, str(HERE / "e73_finetune.py"), "--base", base, "--data", str(data),
         "--out", str(a), "--epochs", str(epochs), "--seed", str(178 + seed),
-        "--batch", "64", "--grad_accum", "1"])
+        "--batch", "16", "--grad_accum", "1"])
     return a
 
 

@@ -1937,6 +1937,53 @@ def fig_diagnosis_world():
     plt.close(fig)
 
 
+def fig_noise_ablation(abl):
+    """E78b: held-out generalization vs TRAINING-LABEL corruption (verified-vs-noisy ablation,
+    fixed N=256). The verified world (0% corruption) sits at the top; accuracy declines
+    monotonically as the world's labels get more wrong, collapsing to ~base by full corruption
+    -- so label exactness, not task variety, is what world-time compute needs."""
+    raw = abl["raw"]
+    oracle, floor = abl["oracle_ceiling"], abl["prior_only_floor"]
+    levels = [("n00", 0), ("n15", 15), ("n30", 30), ("n45", 45),
+              ("n60", 60), ("n80", 80), ("n100", 100)]
+    xs, ys, npts = [], [], 0
+    fig, ax = plt.subplots(figsize=(6.6, 4.0))
+    for tag, pctv in levels:
+        vals = [v for v in raw.get(tag, {}).values() if v is not None]
+        if not vals:
+            continue
+        xs.append(pctv)
+        ys.append(sum(vals) / len(vals))
+        npts = max(npts, len(vals))
+        for v in vals:   # show the actual per-seed points (interim: few seeds -> CIs uninformative)
+            ax.plot(pctv, v, "o", color=ORANGE, alpha=0.35, markersize=4, zorder=2)
+    ax.plot(xs, ys, "-", color=ORANGE, lw=2.2, zorder=3,
+            label=f"mean over seeds (dots = per-seed, $\\leq${npts}/level)")
+    ax.plot(xs, ys, "o", color=ORANGE, markersize=6, zorder=4)
+    ax.axhline(oracle, ls="--", color=TEAL, lw=1.2)
+    ax.text(2, oracle - 0.028, "oracle (rules given)", ha="left", va="top",
+            fontsize=8, color=TEAL)
+    ax.axhline(floor, ls=":", color="#999999", lw=1.2)
+    ax.text(0, floor + 0.006, "prior-only floor", ha="left", va="bottom",
+            fontsize=8, color="#777777")
+    if xs:
+        ax.annotate("verified\n(exact labels)", (xs[0], ys[0]), xytext=(12, 8),
+                    textcoords="offset points", fontsize=8.5, color="#9a4d00", weight="bold")
+        ax.annotate("fully wrong\n$\\approx$ no gain", (xs[-1], ys[-1]), xytext=(-4, 14),
+                    textcoords="offset points", ha="right", fontsize=8, color="#9a4d00")
+    ax.set_xlabel("training-label corruption (%)")
+    ax.set_ylabel("held-out diagnostic accuracy")
+    ax.set_xticks([0, 15, 30, 45, 60, 80, 100])
+    ax.set_ylim(floor - 0.05, oracle + 0.05)
+    ax.set_title("Exact labels are the lever: held-out accuracy collapses as a world's\n"
+                 "training labels get more wrong (E78b, N=256)", fontsize=9.5)
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=8, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(FIGS / "noise_ablation.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_composition(e31):
     leaves = e31["per_step"][0]["leaves"]
     fig, ax = plt.subplots(figsize=(10, 6.1))
@@ -3089,6 +3136,25 @@ def numbers_tex(d):
         macro("DagHardSurvivorsNoisy", str(e64["hard_survivors_noisy"])),
         macro("DagSoftMinIdentified", f"{e64['soft_min_identified_truth']:.2f}"),
     ]
+
+    # E78b: verified-vs-noisy label ablation (dose-response). Interim: seeds still filling in.
+    abl78b = load("e78b_ablation")
+
+    def _ablmean(tag):
+        v = [x for x in abl78b["raw"].get(tag, {}).values() if x is not None]
+        return sum(v) / len(v) if v else float("nan")
+
+    _abl_nseeds = max((len([x for x in abl78b["raw"].get(t, {}).values() if x is not None])
+                       for t in abl78b["raw"]), default=0)
+    lines += [
+        macro("AblVerified", pct(_ablmean("n00"))),
+        macro("AblNoisyMid", pct(_ablmean("n60"))),
+        macro("AblNoisyFull", pct(_ablmean("n100"))),
+        macro("AblOracleHard", pct(abl78b["oracle_ceiling"])),
+        macro("AblFloorHard", pct(abl78b["prior_only_floor"])),
+        macro("AblWorlds", str(abl78b["config"]["N"])),
+        macro("AblSeeds", str(_abl_nseeds)),
+    ]
     (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
@@ -3691,6 +3757,7 @@ def main():
     fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
     fig_world_count(data["e76_world_count"])
     fig_diagnosis_world()
+    fig_noise_ablation(load("e78b_ablation"))
     table_coding(data["e77_coding"])
     fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])

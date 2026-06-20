@@ -11,12 +11,12 @@ EPOCHS="${3:-2}"
 DEST="$BUCKET/$RUN_ID"
 
 cd "$(dirname "$0")/.."
-python3 -m venv .venv-wtc && source .venv-wtc/bin/activate
+# The Deep Learning VM ships CUDA torch in its base python; install the SFT stack ON TOP of
+# it (a plain venv would not see the preinstalled, CUDA-matched torch).
 pip install -q --upgrade pip
-# torch is preinstalled on the Deep Learning VM image; add the SFT stack (same libs the
-# paper's E73/E74 runs used).
 pip install -q "transformers>=4.44,<5" "peft>=0.12" "trl>=0.12,<0.15" \
                "datasets>=2.20" "accelerate>=0.33" "bitsandbytes>=0.43" numpy
+python -c "import torch; print('[torch]', torch.__version__, 'cuda', torch.cuda.is_available())"
 
 nvidia-smi || echo "WARN: no GPU visible"
 cd experiments

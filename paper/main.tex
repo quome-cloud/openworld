@@ -840,7 +840,21 @@ but differ in their symptom\,$\to$\,disease structure. We hold out whole special
 world-level train/test split, as in supervised learning): fine-tune a model on traversed
 \emph{train} specialties, then measure diagnostic accuracy on \WTNumTestWorlds{}
 \emph{unseen} specialties (\WTNumCases{} cases), bracketed by a prior-only floor (\WTFloor)
-and an oracle handed the rules (\WTOracle).
+and an oracle handed the rules (\WTOracle). Figure~\ref{fig:diagnosis-world} walks through a
+single such world---a hidden-state POMDP the model learns to invert.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.98\linewidth]{figs/diagnosis_world.png}
+\caption{\textbf{Anatomy of one diagnosis world (E74--E79).} Each \emph{specialty} is a small
+hidden-state simulator: nature draws a hidden \emph{disease} from a prior, the world emits
+\emph{symptoms} from that disease's signature features (plus background noise), and the agent
+must invert the observation to name the disease. Because the world is \emph{verified code},
+the true disease is known, so the training label is \emph{exact}---a traversed world distils
+the right rule, not a hallucinated one. Each specialty is a different symptom\,$\to$\,disease
+map; training on many and testing on \emph{held-out} specialties forces the general skill
+(match symptoms to the best-explaining profile) rather than memorisation.}
+\label{fig:diagnosis-world}
+\end{figure}
 
 Two findings (Figure~\ref{fig:world-time}). \emph{(i) Generalization, not memorization:}
 world-time compute lifts held-out accuracy at every model size---from \WTSmallBase{} to

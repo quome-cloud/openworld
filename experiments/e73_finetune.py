@@ -10,6 +10,7 @@ GPU jobs in spare VRAM. The matching eval is e73_eval.py.
 """
 
 import argparse
+import inspect
 import json
 
 import torch
@@ -63,12 +64,22 @@ def main():
         r=16, lora_alpha=32, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
 
-    cfg = SFTConfig(
+    cfg_kwargs = dict(
         output_dir=args.out, num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch, gradient_accumulation_steps=args.grad_accum,
         learning_rate=2e-4, lr_scheduler_type="cosine", warmup_ratio=0.05,
         logging_steps=10, save_strategy="no", bf16=True, gradient_checkpointing=True,
-        max_length=1024, seed=args.seed, report_to=[], dataset_text_field="text")
+        seed=args.seed, report_to=[])
+    # trl renamed the max-sequence-length arg across versions (max_seq_length <-> max_length)
+    # and dataset_text_field is not accepted in every version; pass only what this trl supports.
+    _sft = inspect.signature(SFTConfig.__init__).parameters
+    if "max_length" in _sft:
+        cfg_kwargs["max_length"] = 1024
+    elif "max_seq_length" in _sft:
+        cfg_kwargs["max_seq_length"] = 1024
+    if "dataset_text_field" in _sft:
+        cfg_kwargs["dataset_text_field"] = "text"
+    cfg = SFTConfig(**cfg_kwargs)
 
     trainer = SFTTrainer(model=model, args=cfg, train_dataset=ds, peft_config=lora)
     trainer.train()

@@ -25,10 +25,15 @@ def main():
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--load_4bit", action="store_true", help="4-bit NF4 base (for 14B/32B)")
     ap.add_argument("--out", default="eval_dx.json")
+    ap.add_argument("--eval_batch", type=int, default=128,
+                    help="batched generation size (left-padded; greedy => same result as bs=1)")
     args = ap.parse_args()
 
     rows = [json.loads(l) for l in open(args.test) if l.strip()]
     tok = AutoTokenizer.from_pretrained(args.base)
+    if tok.pad_token is None:
+        tok.pad_token = tok.eos_token
+    tok.padding_side = "left"   # required for correct decoder-only batched generation
     if args.load_4bit:
         from transformers import BitsAndBytesConfig
         bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
@@ -43,21 +48,29 @@ def main():
         model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
 
+    def _parse(txt):
+        m = re.search(r"disease[_ ]?(\d+)", txt.lower())
+        return f"disease_{m.group(1)}" if m else (txt.strip().split()[0] if txt.strip() else "")
+
     @torch.no_grad()
-    def predict(prompt):
-        text = tok.apply_chat_template([{"role": "user", "content": prompt}],
-                                       tokenize=False, add_generation_prompt=True)
-        enc = tok(text, return_tensors="pt").to(model.device)
+    def predict_batch(prompts):
+        texts = [tok.apply_chat_template([{"role": "user", "content": p}],
+                                         tokenize=False, add_generation_prompt=True)
+                 for p in prompts]
+        enc = tok(texts, return_tensors="pt", padding=True).to(model.device)
         out = model.generate(**enc, max_new_tokens=8, do_sample=False,
                              pad_token_id=tok.eos_token_id)
-        txt = tok.decode(out[0, enc["input_ids"].shape[1]:], skip_special_tokens=True)
-        m = re.search(r"disease[_ ]?(\d+)", txt.lower())
-        return f"disease_{m.group(1)}" if m else txt.strip().split()[0] if txt.strip() else ""
+        gen = out[:, enc["input_ids"].shape[1]:]          # generated suffix only
+        return [_parse(tok.decode(g, skip_special_tokens=True)) for g in gen]
+
+    preds = []
+    for i in range(0, len(rows), args.eval_batch):
+        preds.extend(predict_batch([r["prompt"] for r in rows[i:i + args.eval_batch]]))
 
     correct = 0
     by_spec = defaultdict(lambda: [0, 0])
-    for r in rows:
-        ok = int(predict(r["prompt"]) == r["answer"])
+    for r, pred in zip(rows, preds):
+        ok = int(pred == r["answer"])
         correct += ok
         by_spec[r["specialty"]][0] += ok
         by_spec[r["specialty"]][1] += 1

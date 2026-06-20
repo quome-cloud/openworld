@@ -33,7 +33,7 @@ def eval_acc(base, test, adapter=None):
     TMP.mkdir(parents=True, exist_ok=True)
     out = TMP / "eval.json"
     cmd = [sys.executable, str(HERE / "e74_eval.py"), "--base", base,
-           "--test", str(test), "--out", str(out)]
+           "--test", str(test), "--out", str(out), "--eval_batch", "256"]
     if adapter:
         cmd += ["--adapter", str(adapter)]
     sh(cmd)
@@ -44,8 +44,10 @@ def finetune(base, data, seed, epochs):
     adapter = TMP / "adapter"
     if adapter.exists():
         shutil.rmtree(adapter)
+    # large batch + no grad-accum: a 0.5B/1.5B LoRA barely touches a 40GB A100 at bs=8.
     sh([sys.executable, str(HERE / "e73_finetune.py"), "--base", base, "--data", str(data),
-        "--out", str(adapter), "--epochs", str(epochs), "--seed", str(79 + seed)])
+        "--out", str(adapter), "--epochs", str(epochs), "--seed", str(79 + seed),
+        "--batch", "64", "--grad_accum", "1"])
     return adapter
 
 

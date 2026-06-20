@@ -1983,6 +1983,22 @@ E59's architecture lift follows arithmetically from a modeled fixed-capability
 backbone, and E60's routing gap over exact-key lookup is guaranteed by the
 comparison design (we add a fair lexical baseline and report the modest gap over
 it); both are flagged in situ as engineering demonstrations, not measured effects.
+(xiii) Porting to real data---representation and loading validity. Extending world-time
+compute beyond our parametric generators to real datasets (diagnosis on DDXPlus, tabular on
+OpenML, variant effect on ProteinGym deep-mutational-scanning assays) exposes two validity
+conditions that are easy to get wrong. First, the input representation must encode
+\emph{per-world} structure, not a single global rule: a first ProteinGym port that described
+each mutation only by isolated biochemical deltas (hydropathy/charge/volume change) made every
+assay-world look identical---held-out accuracy rose over base but did \emph{not} scale with the
+number of worlds, because one global rule learnable from two assays already saturated the gain.
+Restoring per-world context---the wild-type \emph{local sequence} around the mutated site, the
+analog of a diagnosis condition's evidence profile---makes each protein-world distinct and
+restores scaling headroom. A flat world-count curve can therefore reflect a representation that
+hides the between-world variation rather than a failure of the mechanism. Second, faithful
+\emph{data loading} is the dominant risk when adapting an external dataset: e.g.\ correctly
+recovering the wild-type sequence and the one-based mutation indexing from ProteinGym (which we
+verify on every assay) is a precondition for the labels to mean what the experiment claims. We
+treat both as the first checks any real-domain port must pass.
 
 % ============================================================================
 \section{Conclusion}

@@ -907,6 +907,31 @@ number of worlds, when the task has headroom; the offline empirical-Bayes prior 
 ${\approx}2$ specialties precisely because it has nothing of the world's \emph{skill} to keep
 learning.
 
+\paragraph{Exact labels are the lever (E78b).} Scaling shows \emph{more} worlds help; this
+ablation shows \emph{why verified} worlds are needed. Holding the world count fixed
+(\AblWorlds{} train specialties) and the patients, prompts, and example count identical, we
+vary only the \emph{training labels}: a fraction $p$ of each world's diagnoses is replaced by
+a confusable disease drawn from the posterior over the others---the structured error a
+non-verified or learned world model makes when its rules are slightly wrong. The held-out
+test labels stay exact. Held-out accuracy declines monotonically with corruption, from
+\AblVerified{} at $p{=}0$ (verified) down to \AblNoisyFull{} at $p{=}1$---a fully-wrong world
+yields \emph{no} generalization gain (back to the no-fine-tune base), with a smooth penalty in
+between (Figure~\ref{fig:noise-ablation}). So it is label \emph{exactness}, not task variety,
+that drives the effect---the property that separates world-time compute from domain
+randomization, and the reason the worlds must be \emph{verified} code. (Interim: \AblSeeds{}
+seeds per level; CIs tighten as the remaining seeds complete.)
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.7\linewidth]{figs/noise_ablation.png}
+\caption{\textbf{Exact labels are the lever (E78b).} Held-out diagnostic accuracy after
+fine-tuning on \AblWorlds{} worlds whose \emph{training} labels are corrupted at rate $p$
+(same worlds, patients, and prompts throughout; the test labels are always exact). Verified
+worlds ($p{=}0$) sit at the top; accuracy falls monotonically to the no-fine-tune base as the
+world becomes fully wrong ($p{=}1$). Label exactness---not task variety---is what world-time
+compute requires. \emph{Interim result: \AblSeeds{} seeds/level.}}
+\label{fig:noise-ablation}
+\end{figure}
+
 \paragraph{A coding world family (E77).} Coding is the cleanest verified-code world we have:
 the transition is execution and the oracle is the tests passing. We had a model author
 \CodeNumWorlds{} function-implementation tasks, each admitted only after its reference

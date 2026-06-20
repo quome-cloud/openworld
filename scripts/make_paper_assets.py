@@ -110,7 +110,11 @@ def ci_str(ci):
 
 
 # ---------------------------------------------------------------------------
-def fig_hero(e01, e10):
+def fig_hero(e01, scaling):
+    """The paper in one figure: A = verified code is exact (no compounding error, the
+    foundation); B = what that exactness unlocks -- world-time compute lifts an LLM's
+    generalization to held-out worlds (the payoff). Panel B is a compact teaser of
+    fig:world-time (E74); the full per-size detail lives in that figure."""
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
 
     ax = axes[0]
@@ -123,30 +127,40 @@ def fig_hero(e01, e10):
     ax.set_xlabel("Rollout depth (steps)")
     ax.set_ylabel("Exact state-match rate")
     ax.set_ylim(-0.05, 1.08)
-    ax.set_title("A. Compounding rollout error", fontsize=10, loc="left")
+    ax.set_title("A. Verified code is exact (no compounding error)", fontsize=10, loc="left")
     ax.legend(fontsize=8, loc="center right")
     ax.grid(alpha=0.25)
 
     ax = axes[1]
-    rows = e10["rows"]
-
-    def rate(engine, probes):
-        return next(r["exact_match_rate"] for r in rows
-                    if r["engine"] == engine and r["probes"] == probes)
-
-    groups = ["in_distribution", "scaled_10x"]
-    x = [0, 1]
-    width = 0.36
-    ax.bar([i - width / 2 for i in x], [rate("code_transition", g) for g in groups],
-           width, color=BLUE, label="Symbolic (ours)")
-    ax.bar([i + width / 2 for i in x], [rate("llm_transition", g) for g in groups],
-           width, color=ORANGE, label="LLM next-state")
-    ax.set_xticks(x)
-    ax.set_xticklabels(["In-distribution", "10× scaled (OOD)"])
-    ax.set_ylabel("Exact transition accuracy")
-    ax.set_ylim(0, 1.08)
-    ax.set_title("B. Out-of-distribution scale transfer", fontsize=10, loc="left")
-    ax.legend(fontsize=8)
+    sizes = scaling["sizes"]
+    xb = [s["params_b"] for s in sizes]
+    base = [s["base"] for s in sizes]
+    ft = [s["ft"] for s in sizes]
+    names = [s["name"] for s in sizes]
+    oracle = scaling["offline_oracle"]
+    ax.set_xscale("log")
+    ax.fill_between(xb, base, ft, color=ORANGE, alpha=0.13, zorder=1)
+    ax.plot(xb, base, "o-", color=SLATE, lw=1.8, markersize=3.5, zorder=3,
+            label="base LLM (zero-shot)")
+    ax.plot(xb, ft, "s-", color=ORANGE, lw=2.1, markersize=3.5, zorder=3,
+            label="+ world-time compute")
+    ax.axhline(oracle, ls="--", color=TEAL, lw=1.2)
+    ax.text(xb[-1], oracle + 0.008, "oracle (handed the rules)", ha="right", va="bottom",
+            fontsize=7.5, color=TEAL)
+    # label the extremes -> "largest lift for the smallest models"
+    for xi, b, f in [(xb[0], base[0], ft[0]), (xb[-1], base[-1], ft[-1])]:
+        ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2),
+                    xytext=(5, 0), textcoords="offset points",
+                    fontsize=9, ha="left", va="center", color="#9a4d00", weight="bold")
+    ax.set_xticks(xb)
+    ax.set_xticklabels(names, fontsize=8)
+    ax.minorticks_off()
+    ax.set_xlim(right=xb[-1] * 1.22)  # room for the rightmost gain label
+    ax.set_xlabel("Model size (Qwen2.5-Instruct, params)")
+    ax.set_ylabel("Held-out accuracy (unseen worlds)")
+    ax.set_ylim(min(base) - 0.05, 0.9)
+    ax.set_title("B. World-time compute lifts generalization", fontsize=10, loc="left")
+    ax.legend(fontsize=8, loc="lower right")
     ax.grid(alpha=0.25, axis="y")
 
     fig.tight_layout()
@@ -3614,7 +3628,7 @@ def main():
     fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
     fig_world_count(data["e76_world_count"])
     table_coding(data["e77_coding"])
-    fig_hero(data["e01_fidelity"], data["e10_ood_generalization"])
+    fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])
     fig_pareto(data["e08_morality_pareto"])

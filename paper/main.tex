@@ -918,8 +918,8 @@ test labels stay exact. Held-out accuracy declines monotonically with corruption
 yields \emph{no} generalization gain (back to the no-fine-tune base), with a smooth penalty in
 between (Figure~\ref{fig:noise-ablation}). So it is label \emph{exactness}, not task variety,
 that drives the effect---the property that separates world-time compute from domain
-randomization, and the reason the worlds must be \emph{verified} code. (Interim: \AblSeeds{}
-seeds per level; CIs tighten as the remaining seeds complete.)
+randomization, and the reason the worlds must be \emph{verified} code (\AblSeeds{} seeds per
+level; per-seed values shown in Figure~\ref{fig:noise-ablation}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.7\linewidth]{figs/noise_ablation.png}
@@ -928,7 +928,7 @@ fine-tuning on \AblWorlds{} worlds whose \emph{training} labels are corrupted at
 (same worlds, patients, and prompts throughout; the test labels are always exact). Verified
 worlds ($p{=}0$) sit at the top; accuracy falls monotonically to the no-fine-tune base as the
 world becomes fully wrong ($p{=}1$). Label exactness---not task variety---is what world-time
-compute requires. \emph{Interim result: \AblSeeds{} seeds/level.}}
+compute requires. Dots are per-seed values (\AblSeeds{} seeds/level).}
 \label{fig:noise-ablation}
 \end{figure}
 

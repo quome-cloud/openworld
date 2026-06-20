@@ -558,18 +558,17 @@ verdicts degrade to safe defaults. Judges plug into action selection
 score exists.
 
 \subsection{Implementation}
-Python ($\geq$3.9; the recommended/default runtime is 3.14). The core is
-\emph{zero-dependency} --- \texttt{import openworld} and everything it pulls in
-(state, transitions, composition, specs, cards, perception, memory) use only the
-standard library; numpy-backed analysis extras (wavelets, sheaf gluing, information
-geometry, optimal transport) load lazily and the optional serving/CLI layer
-(FastAPI, Uvicorn, Click, Rich) is never imported by the core. The codebase is
-$\sim$\LibLOC{} lines across \LibModules{} core modules with \LibTests{} unit-test
-functions (284 cases under parametrization, all passing) that run fully offline via
-a scripted mock backbone (a regression test asserts the core import stays
-stdlib-only). Released with worked examples, four
-domain tutorials, the three instrumented worlds, the \NumTasks-task coding
-benchmark, and every experiment script used here.
+Python ($\geq$3.9). The core is \emph{zero-dependency}: \texttt{import
+openworld} and everything it pulls in (state, transitions, composition, specs,
+cards, perception) uses only the standard library, while the numpy-backed
+analysis extras (wavelets, information geometry, optimal transport) load lazily
+and the optional Optuna tuner and serving/CLI layer are never imported by the
+core. The codebase is $\sim$\LibLOC{} lines across \LibModules{} core modules
+with \LibTests{} unit-test functions that run fully offline via a scripted mock
+backbone, and a regression test asserts the core import stays
+standard-library-only. Released with worked examples, four domain tutorials, the
+three instrumented worlds, the \NumTasks-task coding benchmark, and every
+experiment script used here.
 
 % ============================================================================
 OpenWorld also supports \emph{causal DAGs} as a world-specification modality---a DAG compiles to a verified structural causal model with built-in assumption testing, demonstrated on a social-determinants-of-health world (E64); see Appendix~\ref{sec:dag}.

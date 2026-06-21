@@ -53,6 +53,7 @@ def load_points():
         if not (RES / tf).exists():
             continue
         pw = _pw(json.load(open(RES / tf)))
+        ll = load_ll(dom)                      # zero-training likelihood features (clause 2)
         base, light, heavy = pw.get(base_arm, {}), pw.get("light", {}), pw.get("heavy", {})
         for w in heavy:
             if w not in base or w not in light:
@@ -64,9 +65,12 @@ def load_points():
                 continue
             head = 1.0 - b
             y = (h - b) / head                 # fraction of headroom captured
-            pts.append(dict(domain=dom, world=w, base=b,
-                            light_lift=l - b, heavy_lift=h - b,
-                            headroom=head, y=float(np.clip(y, -0.5, 1.0))))
+            p = dict(domain=dom, world=w, base=b,
+                     light_lift=l - b, heavy_lift=h - b,
+                     headroom=head, y=float(np.clip(y, -0.5, 1.0)))
+            if w in ll:
+                p.update(ll[w])                # ll_slope, ll_base, depth
+            pts.append(p)
     return pts
 
 
@@ -116,12 +120,24 @@ def main():
         d: _spearman([p["light_lift"] for p in pts if p["domain"] == d],
                      [p["heavy_lift"] for p in pts if p["domain"] == d]) for d in doms}
 
-    # candidate models, leave-one-domain-out (clause 1 + asymptote scale)
+    # CLAUSE 1: light probe predicts heavy asymptote (cheap probe), LODO
     out["models"] = {
         "light_only": fit_lodo(pts, ["light_lift"]),
         "light+base": fit_lodo(pts, ["light_lift", "base"]),
-        "light+headroom": fit_lodo(pts, ["light_lift", "headroom"]),
     }
+    # CLAUSE 2: predict the asymptote from ZERO-TRAINING likelihood signals (no probe at all)
+    pts_ll = [p for p in pts if "ll_slope" in p]
+    out["n_with_ll"] = len(pts_ll)
+    out["ll_domains"] = sorted({p["domain"] for p in pts_ll})
+    if len(pts_ll) >= 8 and len({p["domain"] for p in pts_ll}) >= 2:
+        s = np.array([p["ll_slope"] for p in pts_ll])
+        out["ll_slope_vs_y_spearman"] = _spearman(s, [p["y"] for p in pts_ll])
+        out["within_domain_ll_spearman"] = {
+            d: _spearman([p["ll_slope"] for p in pts_ll if p["domain"] == d],
+                         [p["y"] for p in pts_ll if p["domain"] == d])
+            for d in sorted({p["domain"] for p in pts_ll})}
+        out["models"]["ll_freeproxy"] = fit_lodo(pts_ll, ["ll_slope", "base"])
+        out["models"]["ll+depth"] = fit_lodo(pts_ll, ["ll_slope", "base", "depth"])
     (RES / "e80_law_fit.json").write_text(json.dumps(out, indent=2))
     print(json.dumps(out, indent=2))
 

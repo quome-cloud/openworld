@@ -86,39 +86,74 @@
         }
       }
     },
-    "light+headroom": {
+    "ll_freeproxy": {
       "features": [
-        "light_lift",
-        "headroom"
+        "ll_slope",
+        "base"
       ],
-      "lodo_r2": 0.447,
-      "lodo_spearman": 0.3604254595902253,
+      "lodo_r2": -0.485,
+      "lodo_spearman": -0.4679653815892997,
       "per_domain": {
         "arc": {
           "n": 39,
-          "spearman": 0.977327935222672,
-          "pred_mean": 0.031,
+          "spearman": 0.10121457489878542,
+          "pred_mean": 0.234,
           "actual_mean": 0.103
-        },
-        "bongard": {
-          "n": 179,
-          "spearman": 0.5472244889418952,
-          "pred_mean": 0.284,
-          "actual_mean": 0.115
         },
         "clrs": {
           "n": 29,
-          "spearman": 0.6172413793103447,
-          "pred_mean": 0.059,
+          "spearman": 0.40788177339901466,
+          "pred_mean": 0.297,
           "actual_mean": 0.086
         },
         "listfn": {
           "n": 56,
-          "spearman": 0.6967874231032127,
-          "pred_mean": 0.413,
+          "spearman": 0.027751196172248808,
+          "pred_mean": 0.058,
+          "actual_mean": 0.572
+        }
+      }
+    },
+    "ll+depth": {
+      "features": [
+        "ll_slope",
+        "base",
+        "depth"
+      ],
+      "lodo_r2": -0.532,
+      "lodo_spearman": -0.2713894571203776,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.18643724696356276,
+          "pred_mean": 0.13,
+          "actual_mean": 0.103
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.27684729064039404,
+          "pred_mean": 0.277,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.019822282980177717,
+          "pred_mean": 0.063,
           "actual_mean": 0.572
         }
       }
     }
+  },
+  "n_with_ll": 124,
+  "ll_domains": [
+    "arc",
+    "clrs",
+    "listfn"
+  ],
+  "ll_slope_vs_y_spearman": 0.35648780487804876,
+  "within_domain_ll_spearman": {
+    "arc": 0.10121457489878542,
+    "clrs": -0.13990147783251228,
+    "listfn": 0.16971975393028024
   }
 }

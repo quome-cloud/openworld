@@ -2301,6 +2301,14 @@ def numbers_tex(d):
     lf, clrs, bong = d["e80_text_listfn"], d["e80_text_clrs"], d["e80_bongard"]
     combo = load("e80_combo_search")
     combo_f = combo.get("found") or {}
+    try:
+        law = load("e80_law")
+    except FileNotFoundError:
+        law = {}
+
+    def _lawnum(key, fmt="{:.2f}"):
+        v = law.get(key)
+        return fmt.format(v) if isinstance(v, (int, float)) else "\\textit{(pending)}"
 
     def _arm(x, a):
         return x.get("arms", {}).get(a, {}).get("acc")
@@ -2424,6 +2432,10 @@ def numbers_tex(d):
         macro("ComboHeldout", f"{combo_f.get('held_out_competence', '--')}"),
         macro("ComboSeeds", str(combo.get("seeds_tried", "--"))),
         macro("ComboWorlds", ", ".join(combo_f.get("worlds", [])).replace("_", "\\_")),
+        # E80 predictive law (proxy fit; filled when e80_law.json exists)
+        macro("LawNWorlds", str(law.get("n_worlds", "\\textit{(pending)}"))),
+        macro("LawSlopeCorr", _lawnum("slope_vs_lift_corr")),
+        macro("LawLodoRtwo", _lawnum("lodo_overall_r2")),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),

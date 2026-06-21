@@ -58,6 +58,13 @@ def load_worlds():
     return flat
 
 
+# Competence is planner-normalised and CLIPPED to [-0.25, 1.25] (E71's metric): the raw ratio
+# divides by (g_plan - g_rand), which is near-zero for some worlds and explodes unclipped, so the
+# clip is what makes coherence robust. A found value at the 1.25 ceiling means "reaches/exceeds
+# planner-level competence", which is the honest claim.
+_comp = G.competence
+
+
 def train_q_multi(subset, max_a, episodes, seed):
     """A SHARED tabular Q over (target-bin x action-index), trained across all worlds in the
     subset (the abstract interface is shared; each world keeps its own binning)."""
@@ -89,7 +96,7 @@ def held_out_competence(subset, max_a, seed):
         q = train_q_multi(train, max_a, G.Q_EPISODES, seed + h)
         u = subset[h]
         g = G.eval_q(u["step"], u["s0"], u["acts"], u["target"], u["dir"], u["lohi"], q)
-        c = G.competence(g, u["g_rand"], u["g_plan"])
+        c = _comp(g, u["g_rand"], u["g_plan"])
         if c is not None:
             comps.append(c)
     return float(np.mean(comps)) if comps else None
@@ -111,7 +118,7 @@ def main():
             if i == j:
                 continue
             u = flat[j]
-            c = G.competence(G.eval_q(u["step"], u["s0"], u["acts"], u["target"], u["dir"],
+            c = _comp(G.eval_q(u["step"], u["s0"], u["acts"], u["target"], u["dir"],
                                       u["lohi"], flat[i]["q"]), u["g_rand"], u["g_plan"])
             if c is not None:
                 T[i, j] = c

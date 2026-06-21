@@ -2299,6 +2299,8 @@ def numbers_tex(d):
     arc_rungs = {int(k): v for k, v in arc_l.get("rung_acc", {}).items() if v is not None}
     arc_top_n = max(arc_rungs) if arc_rungs else None
     lf, clrs, bong = d["e80_text_listfn"], d["e80_text_clrs"], d["e80_bongard"]
+    combo = load("e80_combo_search")
+    combo_f = combo.get("found") or {}
 
     def _arm(x, a):
         return x.get("arms", {}).get(a, {}).get("acc")
@@ -2414,6 +2416,14 @@ def numbers_tex(d):
         macro("BongBase", pctn(_arm(bong, "prototype"))),
         macro("BongHeavy", pctn(_arm(bong, "heavy"))),
         macro("BongCorrupt", pctn(_arm(bong, "corrupt"))),
+        # E80 combinatorial world search (coherence-guided; find a generalizing subset)
+        macro("ComboNWorlds", str(combo.get("n_worlds", "--"))),
+        macro("ComboBaseline", f"{combo.get('random_baseline', 0):.2f}"),
+        macro("ComboSize", str(combo_f.get("size", "--"))),
+        macro("ComboNSectors", str(len(combo_f.get("sectors", [])))),
+        macro("ComboHeldout", f"{combo_f.get('held_out_competence', '--')}"),
+        macro("ComboSeeds", str(combo.get("seeds_tried", "--"))),
+        macro("ComboWorlds", ", ".join(combo_f.get("worlds", [])).replace("_", "\\_")),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),

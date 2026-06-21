@@ -1054,6 +1054,28 @@ latent concept must be induced from rich perception, not symbolic input.}
 \label{fig:worldtime-domains}
 \end{figure}
 
+\subsection{Finding generalizing world-combinations by search (E80)}\label{sec:combo-search}
+The \ProtoNumWorlds{} prototyped worlds (E68) are deliberately heterogeneous and globally do not
+transfer (E71): a policy learned on one is no better than random on another. But heterogeneity is
+a property of the \emph{set}, not of every \emph{subset}. So we ask a combinatorial question---is
+there a \emph{combination} of worlds that generalizes, and can the coherence proxy \emph{find}
+it? Brute force is hopeless ($2^{\ComboNWorlds}$ subsets over the \ComboNWorlds{} steerable
+worlds), so we use world$\to$world transfer competence as a cheap coherence signal, grow subsets
+greedily from the most-coherent seed pairs, and confirm each candidate by training a shared
+abstract policy on the subset \emph{minus one world} and evaluating the held-out member (a strict
+world-level holdout). Random subsets are the null control.
+
+The search succeeds on its \emph{first} coherence-ranked seed: a \ComboSize{}-world subset
+spanning \ComboNSectors{} different sectors (\texttt{\ComboWorlds}) generalizes at planner-level
+held-out competence (\ComboHeldout, clipped at the planner ceiling) versus \ComboBaseline{} for
+random subsets. The worlds are surface-unrelated---minimise risk, minimise cost, minimise a
+waitlist, maximise margin---but share an \emph{abstract control structure}, and that shared skill
+is what the proxy detects. Two consequences. First, ``domain'' is the wrong unit: generalization
+tracks shared \emph{structure}, which can cross sectors. Second, the coherence proxy is not only
+predictive but \emph{constructive}---it turns the NP-hard search for a generalizing world-family
+into a guided one and locates a family inside a set built to have none, while the random-subset
+control stays at the heterogeneous floor (the law's null, confirmed).
+
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An

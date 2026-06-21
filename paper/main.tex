@@ -1106,14 +1106,19 @@ The effect is regular enough across E80 to state as a \emph{law}. World-time com
 \textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
 whose asymptote $C$ is set by \textbf{identifiability $\times$ realizability $\times$ headroom}
 and which collapses to base without \textbf{exact labels}. We validate it as a conjunction of
-falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and two modalities.
+falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and three modalities
+(symbolic text, vision, and tabular).
 
 \paragraph{Clause 1 (scaling): a small probe predicts the asymptote---universally.} A light dose
 of world-time compute predicts the heavy-dose asymptote: within-domain Spearman is \LawWithinArc{}
-(ARC), \LawWithinListfn{} (List Functions), \LawWithinClrs{} (CLRS), and \LawWithinBongard{}
-(Bongard, vision). A \emph{leave-one-domain-out} fit---train the relation on three domains,
-predict the held-out one---reaches $R^2{=}\LawLodoRtwo{}$, and the \emph{simplest} model (light
-alone) beats adding parameters, the signature of a law rather than an overfit.
+(ARC), \LawWithinListfn{} (List Functions), \LawWithinClrs{} (CLRS), \LawWithinBongard{}
+(Bongard, vision), and \LawWithinTabular{} (tabular). A \emph{leave-one-domain-out} fit---train
+the relation on the other domains, predict the held-out one---reaches $R^2{=}\LawLodoRtwo{}$, and
+the \emph{simplest} model (light alone) beats adding parameters, the signature of a law rather
+than an overfit. The decisive check is \emph{out-of-sample}: the law fit on grids, lists,
+algorithms, and vision predicts per-world lift on a brand-new \textbf{tabular} domain it never
+saw, at Spearman $\LawTabOOS{}$---it forecasts an unseen modeling problem, not a curve fit to
+familiar ones.
 
 \paragraph{Clause 2 (no free lunch): the predictor must be a probe.} We tried to predict the
 asymptote from \emph{zero-training} signals (teacher-forced answer log-probability vs.\ number of

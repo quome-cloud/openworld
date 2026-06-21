@@ -2563,6 +2563,8 @@ def numbers_tex(d):
         macro("LawWithinListfn", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("listfn"))),
         macro("LawWithinClrs", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("clrs"))),
         macro("LawWithinBongard", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("bongard"))),
+        macro("LawWithinTabular", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("tabular"))),
+        macro("LawTabOOS", _pctnum((((lawfit.get("models", {}).get("light_only", {}) or {}).get("per_domain", {}) or {}).get("tabular", {}) or {}).get("spearman"))),
         # clause 2 (zero-training proxy) falsified: LODO of the ll model
         macro("LawFreeProxyRtwo", _pctnum((lawfit.get("models", {}).get("ll_freeproxy", {}) or {}).get("lodo_r2"))),
         # learner-invariance (non-neural symbolic synthesizer)

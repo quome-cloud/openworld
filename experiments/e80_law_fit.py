@@ -31,6 +31,22 @@ def _pw(d):
     return d.get("per_world") or d.get("per_task") or {}
 
 
+def load_ll(dom):
+    """Zero-training likelihood-identifiability features per world (clause 2), if measured:
+    ll_slope = answer log-prob gain from 0 to max demos; ll_base = zero-shot log-prob; depth."""
+    f = RES / f"e80_ll_{dom}.json"
+    if not f.exists():
+        return {}
+    out = {}
+    for w, r in json.load(open(f)).get("per_world", {}).items():
+        kll = r.get("kll", {})
+        kk = sorted(int(k) for k in kll)
+        if len(kk) >= 2:
+            out[w] = {"ll_slope": kll[str(kk[-1])] - kll[str(kk[0])],
+                      "ll_base": kll[str(kk[0])], "depth": r.get("depth", 0)}
+    return out
+
+
 def load_points():
     pts = []
     for dom, (tf, base_arm) in DOMAINS.items():

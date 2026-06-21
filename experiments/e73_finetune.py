@@ -29,6 +29,8 @@ def main():
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--grad_accum", type=int, default=2)
     ap.add_argument("--load_4bit", action="store_true", help="QLoRA: 4-bit NF4 base (for 14B/32B)")
+    ap.add_argument("--max_length", type=int, default=1024, help="SFT max sequence length")
+    ap.add_argument("--max_steps", type=int, default=-1, help="cap optimizer steps (>0 overrides epochs)")
     ap.add_argument("--seed", type=int, default=73)
     args = ap.parse_args()
 
@@ -70,13 +72,15 @@ def main():
         learning_rate=2e-4, lr_scheduler_type="cosine", warmup_ratio=0.05,
         logging_steps=10, save_strategy="no", bf16=True, gradient_checkpointing=True,
         seed=args.seed, report_to=[])
+    if args.max_steps and args.max_steps > 0:
+        cfg_kwargs["max_steps"] = args.max_steps
     # trl renamed the max-sequence-length arg across versions (max_seq_length <-> max_length)
     # and dataset_text_field is not accepted in every version; pass only what this trl supports.
     _sft = inspect.signature(SFTConfig.__init__).parameters
     if "max_length" in _sft:
-        cfg_kwargs["max_length"] = 1024
+        cfg_kwargs["max_length"] = args.max_length
     elif "max_seq_length" in _sft:
-        cfg_kwargs["max_seq_length"] = 1024
+        cfg_kwargs["max_seq_length"] = args.max_length
     if "dataset_text_field" in _sft:
         cfg_kwargs["dataset_text_field"] = "text"
     cfg = SFTConfig(**cfg_kwargs)

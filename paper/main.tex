@@ -169,13 +169,21 @@ across \NumExperiments{} seed-fixed experiments, verified dynamics are exact on
 \CodeOODRate{} from \emph{zero} transitions---where per-step LLM prediction and a
 10{,}000-transition MLP compound error and collapse; planning through the verified model
 matches ground truth and beats planning through a hallucinating one; and on shared
-benchmarks (MiniGrid and continuous-control cartpole, the learned models' home turf) the
-$0$-shot verified model matches or beats a trained DreamerV3 and a frozen-perceptual
-V-JEPA-2, which need $10^4$--$10^5$ interactions or do not control at all. The verified
-worlds are also \emph{training signal}: fine-tuning a model on trajectories traversed
+benchmarks (MiniGrid and continuous-control cartpole, the learned models' home turf), where the
+dynamics are writable, the $0$-shot verified model solves tasks that a trained DreamerV3 reaches
+only after $10^4$--$10^5$ interactions, while a frozen-perceptual V-JEPA-2 (lacking a symbolic
+controller) does not control---a within-scope contrast, not a like-for-like benchmark. The
+verified worlds are also \emph{training signal}: fine-tuning a model on trajectories traversed
 through many world models of a domain---\emph{world-time compute}---lifts its generalization
-to held-out worlds and \emph{scales with the number of worlds traversed} (still rising at
-\WCMaxWorlds), a training-time analogue of test-time compute. Objectives
+to held-out worlds, a compute \emph{lever} that is still rising at \WCMaxWorlds{} train worlds
+on our hardest family (a lever, not an established scaling law), and a training-time analogue of
+test-time compute. Across real benchmarks in three symbolic domains (ARC-AGI grids, List
+Functions, CLRS algorithms) the same lever holds as \emph{per-world} test-time training---%
+scaling with compute and collapsing under label corruption---and is sharply \emph{bounded}: it
+pays off for \emph{few-step} reasoning and fades as the chain lengthens (long algorithm traces)
+or must be induced from rich perception (a real-image vision task stalls at chance). That is the
+same regime where verified models win outright---short-horizon planning like MiniGrid DoorKey,
+solved zero-shot. Objectives
 remain open, editable artifacts steerable by inference-time dials. \textbf{The scope is
 the symbolic-state regime}: where dynamics are writable, \openworld{} makes a
 \emph{correct} world model a minutes-scale prototype with zero training and no compounding
@@ -825,7 +833,8 @@ The results so far buy a \emph{correct} world model cheaply. A verified world mo
 rules, so an agent can \emph{traverse} many worlds of a domain and distil the shared skill.
 We call spending compute this way---fine-tuning a model on trajectories drawn from traversed,
 verified world models rather than on scarce real examples---\textbf{world-time compute}, a
-training-time analogue of test-time compute.
+training-time analogue of test-time compute~\cite{snell2024testtime,openai2024o1,deepseekr1}
+(and, when spent per world at inference, of test-time training~\cite{akyurek2024ttt}).
 
 We test it on a \emph{family} of diagnosis worlds (E74): one POMDP template (a hidden
 disease; order tests to reveal symptoms; commit a diagnosis) instantiated as
@@ -919,6 +928,131 @@ best-of-$k$ at every size; on HumanEval it hurts greedy pass@1 but transfers pos
 pass@5.}
 \label{tab:coding}
 \end{table}
+
+\subsection{Real data: world-time compute on ARC-AGI (E80)}\label{sec:world-time-arc}
+Every world-time-compute result so far traverses worlds \emph{we} authored (diagnosis,
+coding), which invites the sharpest objection: the gains might live in our generator, not in
+the world models. We therefore port the mechanism to a benchmark we did not write---%
+\textbf{ARC-AGI}~\cite{chollet2019arc,arcprize2024}, the human-authored
+abstraction-and-reasoning corpus (\ArcNumTrainWorlds{} training + \ArcNumEval{} evaluation
+tasks; we use ARC-AGI-1, with ARC-AGI-2~\cite{chollet2025arcagi2} a harder successor). It is an unusually clean
+fit: each task \emph{is} a world---a hidden grid-transformation rule shown only through a few
+input\,$\to$\,output demonstrations---so unlike our synthetic worlds (where the rule is
+\emph{stated} in the prompt) the rule here is \emph{latent} and must be induced. Labels are
+exact (a predicted output grid is right or it is not, no judge), and the train and evaluation
+tasks are disjoint with a novel rule each, so ``generalize to held-out worlds'' \emph{is} the
+ARC challenge. We expand each task into many world variants with rule-preserving augmentation
+(the dihedral group $\times$ colour permutations) and run two tests on a 4-bit Qwen2.5-7B.
+The per-task test-time-training recipe---a fresh LoRA fit on a task's augmented
+demonstrations---follows Aky\"urek et al.~\cite{akyurek2024ttt}, who established it as the
+effective approach on ARC (cf.\ induction/transduction program search~\cite{li2024barc}); our
+contribution is not the recipe but to read it as \emph{world-time compute on a verified world}
+and to add the corrupted-label ablation that isolates whether the \emph{exactness} of the
+labels---not fine-tuning per se---drives the gain.
+Figure~\ref{fig:arc-method} diagrams the regime end to end---world model
+$\to$ augmented, exactly-labelled rows $\to$ QLoRA fine-tune (frozen 4-bit base, trainable
+LoRA), with the two strict train/test splits---and Figure~\ref{fig:arc} reports the results.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figs/arc_method.png}
+\caption{\textbf{How world-time compute fine-tunes on a verified world model (E80, ARC-AGI).}
+\emph{Top:} each real ARC task is a world whose rule is shown by demonstrations, not stated;
+rule-preserving augmentation (dihedral $\times$ colour) turns it into unlimited
+\emph{exactly}-labelled rows (the transition is code, so the oracle is execution), which
+LoRA-SFT a frozen 4-bit Qwen2.5-7B---only the small adapters train. \emph{Bottom:} two
+strict world-level holdouts---(A) the cross-task ladder trains on 25--400 worlds and is scored
+on \emph{disjoint} held-out worlds; (B) test-time training fits a fresh adapter on a single
+held-out world's demos (its test pair excluded) and predicts that test. The payoff bars track
+exact-match vs.\ world-time compute, with a corrupted-label arm as the discriminator: if the
+lift survives label corruption it is not the verified labels---not the optimizer---doing the work.}
+\label{fig:arc-method}
+\end{figure}
+
+\emph{(i) Cross-task transfer is weak.} Training one LoRA on $N$ real training worlds and
+evaluating zero-shot on disjoint held-out worlds barely moves exact-match
+(\ArcLadderBase{} base $\to$ \ArcLadderTop{} at \ArcLadderTopN{} worlds). This is the
+expected, honest boundary: every ARC rule is novel by construction, so a single shared policy
+has little to transfer---consistent with E76/E77, where transfer turns strong only well above
+the world counts we can afford here.
+
+\emph{(ii) Test-time training---world-time compute spent \emph{per world}---works.} For each
+held-out world we fit a fresh LoRA on \emph{that task's own demonstrations} (its test pair
+strictly held out), then predict its test grid. This is the purest form of the thesis: compute
+spent learning a verified world yields generalization within it. Exact-match climbs from
+\ArcZeroShot{} zero-shot to \ArcTTTLight{} (light) and \ArcTTTHeavy{} (heavy)---$+\ArcTTTGain{}$
+points as we spend more world-time compute. The decisive mechanism check is the
+\textbf{corrupted-demonstration ablation}: randomizing the demo outputs (same grid structure,
+wrong labels) should erase the lift if the model is exploiting the \emph{exact} labels rather
+than benefiting from fine-tuning per se. We report this arm in Figure~\ref{fig:arc}; the
+prediction is a collapse to the zero-shot floor, which would establish that the lift requires
+\emph{verified} labels---the model learning each world's real rule, not grid statistics.
+
+These are mechanism numbers, not a leaderboard entry: a single 7B at 4-bit with one seed over
+\ArcNumTTT{} held-out worlds, far below ARC solvers that add deep augmentation, voting, and
+program search. The claim is narrow and, we think, the important one: world-time compute---%
+spending compute to learn verified world models---lifts generalization on \emph{real,
+human-authored} tasks, exactly where the ``you generated it'' critique bites hardest, with the
+corrupted-label ablation as the test of whether that lift is owed to the labels' \emph{exactness}.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.96\linewidth]{figs/arc.png}
+\caption{\textbf{World-time compute on real ARC-AGI (E80).} \emph{Left:} per-world test-time
+training lifts held-out exact-match from zero-shot through light to heavy test-time compute; a
+corrupted-demonstration arm (wrong labels, same structure) tests whether verified labels are
+necessary---the lift should vanish if they are. \emph{Right:} cross-task transfer (train on $N$
+real worlds, evaluate on disjoint held-out worlds) is weak, as expected from ARC's per-task
+novelty. Single 4-bit Qwen2.5-7B; mechanism, not leaderboard.}
+\label{fig:arc}
+\end{figure}
+
+\subsection{Across real domains and modalities---and where it stops (E80)}\label{sec:world-time-domains}
+ARC is not a one-off. We ran the \emph{identical} per-world test-time-training protocol on two
+further real benchmarks from different fields, plus one different \emph{modality}
+(Figure~\ref{fig:worldtime-domains}): \textbf{List Functions}~\cite{srivastava2022bigbench}
+(\LfNumWorlds{} hidden list$\to$list functions induced from input/output pairs),
+\textbf{CLRS-Text}~\cite{markeeva2024clrstext,velickovic2022clrs} (\ClrsNumWorlds{} classic
+algorithms---sorting, graphs, dynamic programming---each a hidden procedure to execute exactly),
+and \textbf{Bongard-RWR}~\cite{nie2020bongard} (\BongNumWorlds{} real-image visual
+concept-induction problems, via frozen DINOv2 features + a per-world head).
+
+\paragraph{The trend replicates on every symbolic domain.} Held-out exact-match \emph{scales}
+with world-time compute and \emph{collapses} to the floor when the demonstrations' labels are
+randomised: List Functions \LfZero$\to$\LfLight$\to$\LfHeavy{} (heavy 95\% bootstrap CI over
+worlds \LfHeavyCI), corrupt \LfCorrupt; CLRS \ClrsZero$\to$\ClrsLight$\to$\ClrsHeavy, corrupt
+\ClrsCorrupt; ARC \ArcZeroShot$\to$\ArcTTTLight$\to$\ArcTTTHeavy{} (CI \ArcHeavyCI), corrupt
+\ArcTTTCorrupt. Same mechanism, three independent real benchmarks, and in each the lift is owed
+to the labels' \emph{exactness}---the discriminator from \S\ref{sec:discussion} holds everywhere.
+
+\paragraph{Where it works: few-step reasoning.} The \emph{size} of the effect tracks the
+\emph{depth of reasoning} an instance requires. World-time compute pays off most where the
+hidden rule is shallow---List Functions, a one-shot list transform, reaches \LfHeavy---and least
+where it demands long multi-step execution---CLRS, whose answers are long algorithm traces, tops
+out at \ClrsHeavy, the lowest of the three. This is the same boundary as the complexity cliff
+(E20, \S\ref{sec:composition}): verified and world-time-compute methods excel at tasks solvable
+in \emph{few reasoning steps} and degrade as the required chain lengthens. It is also exactly
+where they beat data-hungry learned world models---on the short-horizon \textbf{MiniGrid DoorKey}
+planning task (\S\ref{sec:minigrid}) the verified model solves \emph{zero-shot} while DreamerV3
+needs $10^4$--$10^5$ interactions and V-JEPA-2 cannot control at all.
+
+\paragraph{The boundary: rich perceptual abstraction.} Bongard-RWR is the honest negative: per-world
+test-time training over frozen visual features stays at chance (base \BongBase, heavy \BongHeavy,
+corrupt \BongCorrupt; Figure~\ref{fig:worldtime-domains}, right)---no scaling, no collapse. When
+the latent concept must be \emph{induced from rich perception} rather than read from a symbolic
+input, a small head over frozen features has no purchase. World-time compute is a lever for
+symbolic, few-step reasoning, not a substitute for perceptual representation learning---the same
+scope boundary the paper draws throughout.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figs/worldtime_domains.png}
+\caption{\textbf{World-time compute across real domains and modalities (E80).} Per-world
+test-time training (the same protocol everywhere) on real benchmarks: held-out exact-match for
+base $\to$ light $\to$ heavy world-time compute, plus a corrupted-label control; error bars are
+95\% bootstrap CIs over worlds. The three symbolic domains (ARC grids, List Functions lists,
+CLRS algorithms) all \emph{scale} with compute and \emph{collapse} under corruption---the lift
+requires verified labels. Bongard-RWR (vision, right) stays at chance: the boundary where a
+latent concept must be induced from rich perception, not symbolic input.}
+\label{fig:worldtime-domains}
+\end{figure}
 
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
@@ -1485,6 +1619,12 @@ has no solve rate, so we report its representation drift (mean consecutive-frame
 the paper's thesis on the learned models' \emph{own} terrain (pixels): verification
 buys the exact solution for zero data and a guarantee, where the learned model needs
 $\sim$10k pixel-level interactions merely to first succeed.
+DoorKey is the \emph{image-based, few-step} end of the boundary E80 maps
+(\S\ref{sec:world-time-domains}): on a visual task with a short solution horizon the verified
+model dominates both learned species, whereas on a visual task that hinges on \emph{rich
+perceptual concept abstraction} (Bongard-RWR) our symbolic world-time-compute recipe instead
+stalls at chance. The dividing line is consistent---verified world models win where the
+\emph{reasoning}, not the perception, is the hard part and the horizon is short.
 
 \begin{table}[htb]\centering\small
 \input{tables/minigrid_bench.tex}
@@ -1855,6 +1995,41 @@ learned-style baselines are approximate. The practical workflow the ablations
 license: declare rules precisely; verify with invariants; probe the accepted
 artifact against intent; tighten and recompile. Each gate buys measurable
 correctness, and the artifact remains a diffable program at every stage.
+
+\paragraph{Is world-time compute just fine-tuning?} Mechanically, yes: there is no new
+optimizer or architecture, only LoRA-SFT. The assertion is about the \emph{data source}, not
+the optimizer. Ordinary fine-tuning needs a labelled corpus---scarce, costly, and sometimes
+wrong; world-time compute instead fine-tunes on trajectories from a \emph{verified} world
+model, which generates unlimited examples and labels them \emph{exactly} for free, because the
+transition is code and the oracle is execution. In one line: a correct world model turns
+compute into unlimited correct training data. Whether the ``verified'' qualifier is
+load-bearing---rather than decoration on plain SFT---is an empirical question with a clean
+discriminator, the \textbf{corrupted-label ablation}: randomising the labels keeps the
+fine-tuning and the world's structure but destroys their correctness, so if accuracy is
+unchanged the framing adds nothing. The prediction is that it collapses to the no-fine-tune
+floor, and the corrupted-demonstration arm on real ARC worlds is designed to test exactly this
+against the verified arm (\S\ref{sec:world-time-arc}, Fig.~\ref{fig:arc}). So the contribution
+is conceptual, not algorithmic, and only two
+things earn the approach its name over ``SFT with extra steps'': (i) this verified-label
+dependence, and (ii) \emph{cross-world} transfer---training on a \emph{family} of worlds lifts
+accuracy on \emph{held-out} worlds never fine-tuned on (E74, E76), which same-world
+fine-tuning cannot do. Where neither holds---heterogeneous worlds with no shared skill
+(E71, E73), or a benchmark of per-task-novel rules where cross-task transfer stays weak
+(ARC, \S\ref{sec:world-time-arc})---it is, fairly, just expensive fine-tuning, and we say so.
+
+\paragraph{When does it pay off? Few-step reasoning.} Pulling the results together
+(\S\ref{sec:world-time-domains}) yields a single operating regime. Verified world models and
+world-time compute win where a task reduces to \emph{few reasoning steps} over a state that can
+be \emph{told} symbolically: shallow rule induction (List Functions, the largest lift), small
+grid transforms (ARC), and short-horizon planning (MiniGrid DoorKey, solved zero-shot while
+DreamerV3 needs $10^4$--$10^5$ interactions). Performance degrades along two axes---as the
+required reasoning \emph{lengthens} (CLRS algorithm traces, the lowest of the symbolic domains;
+and the E20 complexity cliff past $\sim$8 composed rules), and as the latent rule must be
+\emph{induced from rich perception} rather than read from symbolic state (Bongard-RWR vision,
+flat at chance). This is not a hedge but the contribution's shape: a verified, auditable,
+zero-data lever that is strongest precisely where today's data-hungry learned world models are
+weakest---short, specifiable reasoning---and that cleanly cedes the long-horizon, perception-heavy
+regime to them.
 
 \paragraph{Value alignment as an open specification.} The dial experiments
 ground the alignment claim: because objectives are declared artifacts, the

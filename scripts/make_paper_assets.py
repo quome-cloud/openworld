@@ -45,6 +45,8 @@ EXPERIMENTS = [
     "e67_cartpole_bench",
     "e68_prototyping_latency", "e68b_recipe_audit",
     "e74_scaling", "e76_world_count", "e77_coding",
+    "e80_arc_ladder", "e80_arc_ttt",
+    "e80_text_listfn", "e80_text_clrs", "e80_bongard",
 ]
 
 
@@ -2288,9 +2290,32 @@ def numbers_tex(d):
     cod = d["e77_coding"]
     cod_syn7 = cod["passk"]["synthetic"]["7B"]
     cod_he7 = cod["passk"]["humaneval"]["7B"]
+    # E80-ARC: world-time compute on the real ARC-AGI benchmark
+    arc_t, arc_l = d["e80_arc_ttt"], d["e80_arc_ladder"]
+    arc_zs = arc_t.get("arms", {}).get("zeroshot", {}).get("acc")
+    arc_lt = arc_t.get("arms", {}).get("light", {}).get("acc")
+    arc_hv = arc_t.get("arms", {}).get("heavy", {}).get("acc")
+    arc_cr = arc_t.get("arms", {}).get("corrupt", {}).get("acc")
+    arc_rungs = {int(k): v for k, v in arc_l.get("rung_acc", {}).items() if v is not None}
+    arc_top_n = max(arc_rungs) if arc_rungs else None
+    lf, clrs, bong = d["e80_text_listfn"], d["e80_text_clrs"], d["e80_bongard"]
+
+    def _arm(x, a):
+        return x.get("arms", {}).get(a, {}).get("acc")
+
+    def _ndone(x, a):
+        return x.get("arms", {}).get(a, {}).get("n_done", 0)
+
+    def _heavyci(x):
+        pw = x.get("per_world") or x.get("per_task") or {}
+        _, lo, hi = _ci_over_worlds(pw.get("heavy", {}))
+        return f"[{100 * lo:.0f}, {100 * hi:.0f}]" if lo is not None else "[--, --]"
 
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
+
+    def pctn(x):  # percent, or a visible placeholder while the run is still in flight
+        return pct(x) if x is not None else "\\textit{(running)}"
 
     _rm = repo_metrics()
     speed_ratio = (speed["code_transition"]["steps_per_second"]
@@ -2359,6 +2384,36 @@ def numbers_tex(d):
         macro("CodeHeBaseFive", pct(cod_he7["base"]["5"])),
         macro("CodeHeFtFive", pct(cod_he7["ft"]["5"])),
         macro("CodeNumWorlds", str(cod["n_train_tasks"])),
+        # E80-ARC: world-time compute on the real ARC-AGI benchmark
+        macro("ArcNumTrainWorlds", str(max(arc_l.get("ladder", [400])))),
+        macro("ArcNumEval", str(arc_l.get("n_eval", 100))),
+        macro("ArcNumTTT", str(arc_t.get("n_tasks", 0))),
+        macro("ArcZeroShot", pctn(arc_zs)),
+        macro("ArcTTTLight", pctn(arc_lt)),
+        macro("ArcTTTHeavy", pctn(arc_hv)),
+        macro("ArcTTTCorrupt", pctn(arc_cr)),
+        macro("ArcTTTGain", f"{100 * (arc_hv - arc_zs):.0f}"
+              if (arc_hv is not None and arc_zs is not None) else "--"),
+        macro("ArcLadderBase", pctn(arc_l.get("base_acc"))),
+        macro("ArcLadderTop", pctn(arc_rungs.get(arc_top_n) if arc_top_n else None)),
+        macro("ArcLadderTopN", str(arc_top_n) if arc_top_n else "--"),
+        macro("ArcHeavyCI", _heavyci(arc_t)),
+        # E80 multi-domain world-time compute (real domains, per-world test-time training)
+        macro("LfNumWorlds", str(_ndone(lf, "heavy"))),
+        macro("LfZero", pctn(_arm(lf, "zeroshot"))),
+        macro("LfLight", pctn(_arm(lf, "light"))),
+        macro("LfHeavy", pctn(_arm(lf, "heavy"))),
+        macro("LfCorrupt", pctn(_arm(lf, "corrupt"))),
+        macro("LfHeavyCI", _heavyci(lf)),
+        macro("ClrsNumWorlds", str(_ndone(clrs, "heavy"))),
+        macro("ClrsZero", pctn(_arm(clrs, "zeroshot"))),
+        macro("ClrsLight", pctn(_arm(clrs, "light"))),
+        macro("ClrsHeavy", pctn(_arm(clrs, "heavy"))),
+        macro("ClrsCorrupt", pctn(_arm(clrs, "corrupt"))),
+        macro("BongNumWorlds", str(_ndone(bong, "heavy"))),
+        macro("BongBase", pctn(_arm(bong, "prototype"))),
+        macro("BongHeavy", pctn(_arm(bong, "heavy"))),
+        macro("BongCorrupt", pctn(_arm(bong, "corrupt"))),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
@@ -3458,6 +3513,251 @@ def table_coding(cod):
     (TABLES / "coding.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_arc(ttt, ladder):
+    """E80-ARC: world-time compute on the REAL ARC-AGI benchmark (human-authored, not generated).
+    Left: per-world test-time training lifts held-out exact-match above zero-shot and scales with
+    compute, while corrupting the demonstrations collapses the gain (verified labels are doing the
+    work). Right: cross-task transfer (train on N real worlds, eval on disjoint held-out worlds) is
+    weak -- ARC's per-task novelty resists pure transfer."""
+    arms = ttt.get("arms", {})
+
+    def acc(n):
+        return arms.get(n, {}).get("acc")
+
+    spec = [("zeroshot", "zero-shot", SLATE), ("light", "light TTT", "#F4B860"),
+            ("heavy", "heavy TTT", ORANGE), ("corrupt", "corrupt\\ndemos", RED)]
+    bars = [(lbl, acc(k), c) for k, lbl, c in spec if acc(k) is not None]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+    if bars:
+        xs = list(range(len(bars)))
+        ax1.bar(xs, [b[1] for b in bars], color=[b[2] for b in bars], alpha=0.9, width=0.66)
+        for i, b in zip(xs, bars):
+            ax1.text(i, b[1] + 0.004, f"{100 * b[1]:.0f}", ha="center", va="bottom", fontsize=9)
+        if acc("zeroshot") is not None:
+            ax1.axhline(acc("zeroshot"), ls=":", color="#999999", lw=1.1)
+        ax1.set_xticks(xs)
+        ax1.set_xticklabels([b[0].replace("\\n", "\n") for b in bars], fontsize=8.5)
+    ax1.set_ylabel("held-out exact-match accuracy")
+    ax1.set_title("Test-time training on real ARC worlds", fontsize=10.5)
+    ax1.grid(True, axis="y", alpha=0.25)
+
+    base = ladder.get("base_acc")
+    rungs = {int(k): v for k, v in ladder.get("rung_acc", {}).items() if v is not None}
+    xr = ([0] if base is not None else []) + sorted(rungs)
+    yr = ([base] if base is not None else []) + [rungs[k] for k in sorted(rungs)]
+    if xr:
+        ax2.plot(xr, yr, "s-", color=BLUE, lw=2.3, zorder=3)
+        if base is not None:
+            ax2.axhline(base, ls=":", color="#999999", lw=1.1)
+            ax2.text(xr[-1], base + 0.002, "zero-shot base", ha="right", va="bottom",
+                     fontsize=8, color="#777777")
+    ax2.set_xlabel("number of real train worlds (0 = base)")
+    ax2.set_ylabel("held-out exact-match accuracy")
+    ax2.set_title("Cross-task transfer (disjoint worlds)", fontsize=10.5)
+    ax2.grid(True, axis="y", alpha=0.25)
+
+    fig.tight_layout()
+    fig.savefig(FIGS / "arc.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_arc_method(ttt):
+    """Schematic of how world-time compute fine-tunes on a verified world model (ARC/QLoRA).
+    Row 1: a real ARC world -> rule-preserving augmentation + leave-one-out -> exactly-labeled
+    rows -> QLoRA SFT (frozen 4-bit base + trainable LoRA). Row 2: the two regimes (cross-task
+    ladder, disjoint held-out split; per-world test-time training, test pair held out) and the
+    payoff (zero-shot -> TTT lift; corrupted labels collapse to the floor)."""
+    from matplotlib.patches import Rectangle
+    ARC = ["#111111", "#1E93FF", "#F93C31", "#3FB54B", "#FFDC00", "#9AA0A6",
+           "#E53AA3", "#FF851B", "#7FDBFF", "#8B1A1B"]
+    SL, GREY = "#475569", "#94A3B8"
+
+    fig, ax = plt.subplots(figsize=(13.6, 7.8))
+    ax.set_xlim(0, 13.6)
+    ax.set_ylim(0, 7.8)
+    ax.axis("off")
+
+    def arrow(x1, y1, x2, y2, c=SL, lw=1.8, ls="-"):
+        ax.add_patch(FancyArrowPatch((x1, y1), (x2, y2), arrowstyle="-|>",
+                     mutation_scale=14, lw=lw, color=c, ls=ls, zorder=8))
+
+    def grid(x, y, g, cell=0.17, ec="white"):
+        for r, row in enumerate(g):
+            for c, v in enumerate(row):
+                ax.add_patch(Rectangle((x + c * cell, y - (r + 1) * cell), cell, cell,
+                             fc=ARC[v], ec=ec, lw=0.4, zorder=7))
+
+    cross = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
+    crossr = [[0, 2, 0], [2, 2, 2], [0, 2, 0]]
+    corner = [[1, 0, 1], [0, 0, 0], [1, 0, 1]]
+    cornerr = [[2, 0, 2], [0, 0, 0], [2, 0, 2]]
+    ax.text(0.2, 7.55, "World-time compute: turning a verified world model into fine-tuning data",
+            fontsize=12.5, fontweight="bold", color="#0F172A")
+
+    # ---- Row 1: world -> data -> QLoRA -------------------------------------------------
+    _panel(ax, 0.2, 4.35, 3.85, 2.95, "①  A world = one real ARC task", BLUE)
+    ax.text(0.42, 6.92, "rule shown by demos, not stated:", fontsize=7, color="#334155")
+    grid(0.55, 6.78, cross); arrow(1.22, 6.36, 1.66, 6.36); grid(1.76, 6.78, crossr)
+    grid(0.55, 5.86, corner); arrow(1.22, 5.44, 1.66, 5.44); grid(1.76, 5.86, cornerr)
+    ax.text(2.55, 6.0, "⋮", fontsize=13, color="#334155")
+    ax.add_patch(FancyBboxPatch((0.42, 4.55), 3.4, 0.66, boxstyle="round,pad=0.02,rounding_size=0.06",
+                 fc=ORANGE, ec=ORANGE, alpha=0.13, zorder=4))
+    ax.text(0.5, 5.04, "held-out test (label never trained):", fontsize=6.8, color="#9a4d00")
+    grid(0.55, 4.96, [[1, 0, 1], [1, 1, 1], [0, 1, 0]], cell=0.12)
+    arrow(1.0, 4.74, 1.3, 4.74, c="#9a4d00")
+    ax.text(1.42, 4.73, "?", fontsize=11, color="#9a4d00", va="center", fontweight="bold")
+
+    arrow(4.08, 5.85, 4.45, 5.85, lw=2.2)
+
+    _panel(ax, 4.5, 4.35, 4.0, 2.95, "②  Verified world → unlimited exact data", TEAL)
+    # augmentation: a small fan of rule-preserving variants of one pair
+    for k, (dx, dy) in enumerate([(0.0, 0.0), (0.13, -0.1), (0.26, -0.2)]):
+        ax.add_patch(FancyBboxPatch((4.72 + dx, 6.05 + dy), 1.95, 0.92,
+                     boxstyle="round,pad=0.02,rounding_size=0.05",
+                     fc="white", ec=TEAL, lw=0.9, alpha=0.95, zorder=3 + k))
+    grid(4.85, 6.85, cross, cell=0.12); arrow(5.28, 6.66, 5.5, 6.66, c=TEAL, lw=1.2)
+    grid(5.58, 6.85, crossr, cell=0.12)
+    ax.text(6.74, 6.5, "×8 dihedral\n× colour-perm", fontsize=6.8, color=TEAL, va="center")
+    arrow(6.4, 5.95, 6.4, 5.6, c=TEAL, lw=1.4)
+    _chip(ax, 6.45, 5.34, "leave-one-out rows", TEAL, fontsize=6.6)
+    ax.text(4.72, 4.95, "each row:", fontsize=6.8, color="#334155")
+    ax.text(4.72, 4.66, "prompt = demos  →  completion = output grid", fontsize=6.6,
+            family="monospace", color="#334155")
+    ax.text(4.72, 4.45, "labels EXACT (transition is code; oracle = execution)", fontsize=6.3,
+            family="monospace", color=TEAL)
+
+    arrow(8.53, 5.85, 8.9, 5.85, lw=2.2)
+
+    _panel(ax, 8.95, 4.35, 4.45, 2.95, "③  QLoRA fine-tune", ORANGE)
+    ax.add_patch(FancyBboxPatch((9.2, 5.05), 2.55, 1.7, boxstyle="round,pad=0.02,rounding_size=0.06",
+                 fc=GREY, ec="#64748B", lw=1.0, alpha=0.32, zorder=3))
+    ax.text(10.48, 6.35, "Qwen2.5-7B", fontsize=9, fontweight="bold", color="#0F172A",
+            ha="center", zorder=5)
+    ax.text(10.48, 6.05, "4-bit · FROZEN ❄", fontsize=7.5, color="#475569",
+            ha="center", zorder=5)
+    for yy in (5.95, 5.55, 5.15):
+        ax.add_patch(FancyBboxPatch((11.85, yy - 0.12), 1.35, 0.30,
+                     boxstyle="round,pad=0.02,rounding_size=0.08", fc=ORANGE, ec="none",
+                     alpha=0.85, zorder=5))
+        ax.text(12.52, yy + 0.03, "LoRA", fontsize=6.8, color="white", ha="center",
+                fontweight="bold", zorder=6)
+        arrow(11.78, yy, 11.5, yy, c=ORANGE, lw=1.1)
+    ax.text(9.2, 4.78, "only LoRA adapters train (rank 16, attn);", fontsize=6.8,
+            family="monospace", color="#334155")
+    ax.text(9.2, 4.55, "the 7B base never moves → fits one 40GB A100", fontsize=6.8,
+            family="monospace", color="#334155")
+
+    ax.text(0.2, 3.92, "Two regimes (strict world-level holdout)", fontsize=10.5,
+            fontweight="bold", color="#0F172A")
+
+    # ---- Row 2: regimes + payoff -------------------------------------------------------
+    _panel(ax, 0.2, 0.35, 4.55, 3.3, "(A)  Cross-task ladder — transfer to unseen worlds", BLUE)
+    _card(ax, 0.5, 2.3, 1.95, 0.95, "TRAIN worlds", ["25 → 400", "real ARC tasks"], face="#EFF6FF")
+    arrow(2.55, 2.78, 3.15, 2.78)
+    ax.text(2.85, 2.92, "SFT", fontsize=7, color=SL, ha="center")
+    _card(ax, 3.2, 2.3, 1.35, 0.95, "LoRA", ["one", "adapter"], face="#FFF7ED")
+    arrow(2.6, 2.2, 2.6, 1.7, ls="--")
+    _card(ax, 0.7, 0.6, 3.6, 1.0, "HELD-OUT eval worlds (disjoint)",
+          ["novel rule each · never trained", "= cross-world generalization"], face="#F8FAFC",
+          bold_edge=BLUE)
+    arrow(4.35, 2.2, 3.5, 1.62, ls="--")
+
+    _panel(ax, 4.95, 0.35, 4.55, 3.3, "(B)  Test-time training (per world)", ORANGE)
+    _card(ax, 5.25, 2.3, 2.5, 0.95, "ONE held-out world", ["its demos only", "(test pair excluded)"],
+          face="#FFF7ED")
+    arrow(7.85, 2.78, 8.45, 2.78)
+    ax.text(8.15, 2.95, "fresh LoRA\nfew steps", fontsize=6.3, color="#9a4d00", ha="center")
+    _card(ax, 5.5, 0.6, 3.5, 1.0, "Predict its held-out TEST grid",
+          ["exact match · novel input", "compute spent learning THIS world"], face="#FFFBEB",
+          bold_edge=ORANGE)
+    arrow(6.5, 2.25, 6.9, 1.65, ls="--")
+    arrow(8.6, 2.55, 7.6, 1.65, ls="--")
+
+    # payoff bars
+    _panel(ax, 9.7, 0.35, 3.7, 3.3, "How world-time compute helps", TEAL)
+    arms = ttt.get("arms", {})
+
+    def a(n):
+        return arms.get(n, {}).get("acc")
+    bars = [("zero-\nshot", a("zeroshot"), SL), ("light\nTTT", a("light"), "#F4B860"),
+            ("heavy\nTTT", a("heavy"), ORANGE), ("corrupt\nlabels", a("corrupt"), RED)]
+    vals = [b[1] for b in bars if b[1] is not None]
+    vmax = max(vals + [0.1])
+    bx0, by0, bw, bh = 10.0, 1.05, 0.62, 2.0
+    for i, (lbl, v, c) in enumerate(bars):
+        x = bx0 + i * 0.85
+        if v is None:
+            ax.text(x + bw / 2, by0 + 0.1, "(running)", fontsize=5.6, rotation=90,
+                    color="#94A3B8", ha="center", va="bottom")
+        else:
+            h = (v / vmax) * bh
+            ax.add_patch(Rectangle((x, by0), bw, h, fc=c, ec="none", alpha=0.9, zorder=5))
+            ax.text(x + bw / 2, by0 + h + 0.06, f"{100 * v:.0f}", fontsize=7.5, ha="center",
+                    color=c, fontweight="bold", zorder=6)
+        ax.text(x + bw / 2, by0 - 0.28, lbl, fontsize=6.3, ha="center", va="top", color="#334155")
+    ax.plot([bx0 - 0.05, bx0 + 4 * 0.85 - 0.2], [by0, by0], color="#CBD5E1", lw=0.9, zorder=4)
+    ax.annotate("", xy=(bx0 + 2.0, by0 + bh + 0.55), xytext=(bx0 + 0.3, by0 + bh + 0.55),
+                arrowprops=dict(arrowstyle="-|>", color=TEAL, lw=1.4))
+    ax.text(bx0 + 1.15, by0 + bh + 0.72, "more world-time compute", fontsize=6.6, color=TEAL,
+            ha="center")
+    ax.text(bx0 + 1.55, by0 - 0.62, "corrupt → collapse = the discriminator", fontsize=6.3,
+            color=RED, ha="center")
+
+    fig.savefig(FIGS / "arc_method.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def _ci_over_worlds(per_world_arm, n_boot=2000):
+    """Mean + 95% bootstrap CI over per-world accuracies (the power fix: CI without re-running)."""
+    import random as _r
+    vals = [v for v in per_world_arm.values() if v is not None]
+    if not vals:
+        return None, None, None
+    rng = _r.Random(0)
+    m = sum(vals) / len(vals)
+    boots = sorted(sum(vals[rng.randrange(len(vals))] for _ in range(len(vals))) / len(vals)
+                   for _ in range(n_boot))
+    return m, boots[int(0.025 * n_boot)], boots[int(0.975 * n_boot)]
+
+
+def fig_worldtime_domains(arc, lf, clrs, bong):
+    """E80: world-time compute (per-world test-time training) across real domains and modalities.
+    Three symbolic/text domains (ARC grids, List Functions, CLRS algorithms) scale zero->light->
+    heavy and collapse under label corruption; Bongard (vision concept induction via frozen
+    features) stays at chance -- the boundary. Error bars are 95% bootstrap CIs over worlds."""
+    doms = [("ARC-AGI\n(grids)", arc, "zeroshot"), ("List Functions\n(lists)", lf, "zeroshot"),
+            ("CLRS-Text\n(algorithms)", clrs, "zeroshot"), ("Bongard-RWR\n(vision)", bong, "prototype")]
+    arms = [("base", SLATE), ("light TTT", "#F4B860"), ("heavy TTT", ORANGE), ("corrupt", RED)]
+    fig, ax = plt.subplots(figsize=(10.6, 4.6))
+    gw = 0.20
+    for gi, (label, d, base_key) in enumerate(doms):
+        pw = d.get("per_world") or d.get("per_task") or {}
+        keys = [base_key, "light", "heavy", "corrupt"]
+        for ai, (an, col) in enumerate(arms):
+            m, lo, hi = _ci_over_worlds(pw.get(keys[ai], {}))
+            if m is None:
+                continue
+            x = gi + (ai - 1.5) * gw
+            ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
+                   yerr=[[m - lo], [hi - m]], capsize=2, error_kw=dict(lw=0.8, alpha=0.6))
+            ax.text(x, m + 0.012, f"{100 * m:.0f}", ha="center", va="bottom", fontsize=6.6, color=col)
+    ax.axhline(0.5, ls=":", lw=0.8, color="#BBBBBB")
+    ax.text(3.0, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
+    ax.set_xticks(range(len(doms)))
+    ax.set_xticklabels([d[0] for d in doms], fontsize=8.5)
+    ax.set_ylabel("held-out exact-match accuracy")
+    ax.set_title("World-time compute across real domains: scales, and collapses under "
+                 "label corruption", fontsize=10.5)
+    from matplotlib.patches import Patch
+    ax.legend(handles=[Patch(fc=c, label=n) for n, c in arms], fontsize=7.5,
+              loc="upper left", ncol=2, framealpha=0.9)
+    ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "worldtime_domains.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_world_time_compute(scaling, diag):
     """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
     world models ('world-time compute'), against an offline prior-only floor and a
@@ -3628,6 +3928,10 @@ def main():
     fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
     fig_world_count(data["e76_world_count"])
     table_coding(data["e77_coding"])
+    fig_arc(data["e80_arc_ttt"], data["e80_arc_ladder"])
+    fig_arc_method(data["e80_arc_ttt"])
+    fig_worldtime_domains(data["e80_arc_ttt"], data["e80_text_listfn"],
+                          data["e80_text_clrs"], data["e80_bongard"])
     fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])

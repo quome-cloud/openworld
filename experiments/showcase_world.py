@@ -5,15 +5,17 @@ several modalities) -> child worlds + verified transitions -> composite (bridge 
 aggregator) -> emit -> act. Rendering its spec gives one diagram that names every part a
 user wires up when prototyping a code world model.
 
-  perception: JSON (structured), Code (key:value telemetry), Mock vision, Mock audio
+  perception: JSON (structured), Code (telemetry), Vision (image), Transcript (audio),
+              DAG (causal graph)
   worlds:     intake (tickets arrive)  +  ops (engineers resolve)
   composite:  a Bridge (hand off work intake->ops) + an Aggregator (open items)
   emit:       a verified CodeEmitter (status report) + a ToolEmitter (page on-call)
 """
 
 from openworld import (Aggregator, Bridge, CodeEmitter, CodePerceptor,
-                       CodeTransition, CompositeWorld, Dial, JSONPerceptor,
-                       MockPerceptor, Objective, ToolEmitter, ToolRegistry, World)
+                       CodeTransition, CompositeWorld, DAGPerceptor, Dial, JSONPerceptor,
+                       MockLLM, Objective, ToolEmitter, ToolRegistry, TranscriptPerceptor,
+                       VisionPerceptor, World)
 
 INTAKE_CODE = '''
 def transition(state, action):
@@ -85,17 +87,19 @@ def build_showcase_world():
         description="An incident-operations world: intake feeds ops via a verified bridge.",
         rules=["Namespaced child actions plus 'tick'; open_items aggregates the leaves."])
 
-    # perception boundary: four input modalities -> symbolic state
+    # perception boundary: one real perceptor per modality -> symbolic state. Structured
+    # text (JSON), runnable code (telemetry), image, audio, and a causal graph (DAG). This is
+    # an illustrative open set, not the full catalogue (Text/Regex/Mock perceptors omitted).
+    _llm = MockLLM()
     composite.perceptors = [
         JSONPerceptor(paths={"queue": "queue", "severity": "sev"},
                       schema={"queue": (int, (0, 99)), "severity": (int, (0, 5))},
                       modality="text"),
         CodePerceptor(code='def perceive(data):\n    return {"load": int(data.get("cpu_pct", 0)) // 25}',
                       produces=["load"], schema={"load": (int, (0, 4))}, modality="text"),
-        MockPerceptor(produces=["queue"], deltas=[{"queue": 1}],
-                      schema={"queue": (int, (0, 99))}, modality="image"),
-        MockPerceptor(produces=["severity"], deltas=[{"severity": 1}],
-                      schema={"severity": (int, (0, 5))}, modality="audio"),
+        VisionPerceptor(_llm, produces=["queue"], schema={"queue": (int, (0, 99))}),
+        TranscriptPerceptor(_llm, produces=["severity"], schema={"severity": (int, (0, 5))}),
+        DAGPerceptor(mode="schema"),
     ]
     # objectives + a tunable dial: steer between throughput and care at inference time
     composite.objectives = [

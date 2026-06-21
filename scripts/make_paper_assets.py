@@ -2411,14 +2411,27 @@ def numbers_tex(d):
     lf, clrs, bong = d["e80_text_listfn"], d["e80_text_clrs"], d["e80_bongard"]
     combo = load("e80_combo_search")
     combo_f = combo.get("found") or {}
-    try:
-        law = load("e80_law")
-    except FileNotFoundError:
-        law = {}
+    lawfit = load("e80_law_fit")
+    sym = load("e80_symbolic")
 
-    def _lawnum(key, fmt="{:.2f}"):
-        v = law.get(key)
+    def _pctnum(v, fmt="{:.2f}"):
         return fmt.format(v) if isinstance(v, (int, float)) else "\\textit{(pending)}"
+
+    def _n90(domkey, dom_base, dom_light, dom_heavy):
+        """Crude optimal-#worlds: fit acc(n)=base+(C-base)(1-e^-n/ns) to light(n=4),heavy(n=16)."""
+        import math as _m
+        gl, gh = dom_light - dom_base, dom_heavy - dom_base
+        if gh <= 1e-6 or gl <= 1e-6:
+            return "--"
+        target = gl / gh
+        best = (1.0, 9e9)
+        ns = 0.3
+        while ns < 80:
+            r = (1 - _m.exp(-4 / ns)) / (1 - _m.exp(-16 / ns))
+            if abs(r - target) < best[1]:
+                best = (ns, abs(r - target))
+            ns += 0.1
+        return f"{best[0] * _m.log(10):.0f}"
 
     def _arm(x, a):
         return x.get("arms", {}).get(a, {}).get("acc")
@@ -2542,10 +2555,24 @@ def numbers_tex(d):
         macro("ComboHeldout", f"{combo_f.get('held_out_competence', '--')}"),
         macro("ComboSeeds", str(combo.get("seeds_tried", "--"))),
         macro("ComboWorlds", ", ".join(combo_f.get("worlds", [])).replace("_", "\\_")),
-        # E80 predictive law (proxy fit; filled when e80_law.json exists)
-        macro("LawNWorlds", str(law.get("n_worlds", "\\textit{(pending)}"))),
-        macro("LawSlopeCorr", _lawnum("slope_vs_lift_corr")),
-        macro("LawLodoRtwo", _lawnum("lodo_overall_r2")),
+        # E80 predictive law: clause 1 (probe predicts asymptote), validated LODO
+        macro("LawNWorlds", str(lawfit.get("n_worlds", "--"))),
+        macro("LawNDomains", str(len(lawfit.get("domains", [])))),
+        macro("LawLodoRtwo", _pctnum((lawfit.get("models", {}).get("light_only", {}) or {}).get("lodo_r2"))),
+        macro("LawWithinArc", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("arc"))),
+        macro("LawWithinListfn", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("listfn"))),
+        macro("LawWithinClrs", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("clrs"))),
+        macro("LawWithinBongard", _pctnum((lawfit.get("within_domain_light_vs_heavy_spearman", {}) or {}).get("bongard"))),
+        # clause 2 (zero-training proxy) falsified: LODO of the ll model
+        macro("LawFreeProxyRtwo", _pctnum((lawfit.get("models", {}).get("ll_freeproxy", {}) or {}).get("lodo_r2"))),
+        # learner-invariance (non-neural symbolic synthesizer)
+        macro("SymScaleLo", _pctnum((sym.get("scaling_curve", {}) or {}).get(str(sym.get("budgets", [5])[0])))),
+        macro("SymScaleHi", _pctnum((sym.get("scaling_curve", {}) or {}).get(str(sym.get("budgets", [5000])[-1])))),
+        macro("SymCorrupt", _pctnum((sym.get("corrupt_curve", {}) or {}).get(str(sym.get("budgets", [5000])[-1])))),
+        # optimal number of worlds (N90 from the 3-point compute curve, per domain)
+        macro("WCListfn", _n90("listfn", _arm(lf, "zeroshot") or 0, _arm(lf, "light") or 0, _arm(lf, "heavy") or 0)),
+        macro("WCArc", _n90("arc", _arm(arc_t, "zeroshot") or 0, _arm(arc_t, "light") or 0, _arm(arc_t, "heavy") or 0)),
+        macro("WCClrs", _n90("clrs", _arm(clrs, "zeroshot") or 0, _arm(clrs, "light") or 0, _arm(clrs, "heavy") or 0)),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),

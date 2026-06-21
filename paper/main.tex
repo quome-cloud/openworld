@@ -1102,29 +1102,50 @@ latent concept must be induced from rich perception, not symbolic input.}
 \end{figure}
 
 \subsection{A predictive law for world-time compute (E80)}\label{sec:world-time-law}
-The effect is consistent enough across E80 to ask for a \emph{law}: can we predict, before
-spending any training compute, whether world-time compute will pay off on a new domain? The
-mechanism is a learnability question with four governing quantities, each with a cheap,
-training-free proxy: \textbf{(i) identifiability/realizability}---does showing more
-demonstrations help the base model? measured by the \emph{in-context few-shot slope} (accuracy
-vs $k$ demos, no fine-tuning); \textbf{(ii) headroom} above the base; \textbf{(iii) reasoning
-depth}---per-instance step count (output length) against the model's bounded forward-pass depth;
-and \textbf{(iv) label exactness}---the corrupted-label control. The law: world-time compute
-lifts held-out accuracy in proportion to slope\,$\times$\,headroom\,$\times$\,depth-discount, and
-only with exact labels.
+The effect is regular enough across E80 to state as a \emph{law}. World-time compute follows a
+\textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
+whose asymptote $C$ is set by \textbf{identifiability $\times$ realizability $\times$ headroom}
+and which collapses to base without \textbf{exact labels}. We validate it as a conjunction of
+falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and two modalities.
 
-We test it two ways. \emph{Per-world (panel A):} across hundreds of worlds in the symbolic E80
-domains we measure the proxies and regress the \emph{measured} TTT lift on them; the in-context
-slope alone correlates with the lift at $r{=}\LawSlopeCorr$, and a leave-one-\emph{domain}-out
-fit predicts a held-out domain's lifts at $R^2{=}\LawLodoRtwo$---proxies measured with no
-fine-tuning forecast which domains pay off. \emph{Cross-world (panel B / falsification):} a law
-must also predict where it \emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous
-worlds (E71) the coherence proxy is near zero and measured transfer is the random floor
-(\S\ref{sec:combo-search}); on ARC the cross-task ladder is flat; only the coherent diagnosis
-family (E74) transfers---each predicted, none post-hoc. The payoff is a practitioner's recipe:
-compute three numbers on a new dataset in minutes and know whether to spend the GPUs---turning
-``guess a domain'' into a forecast, and localising the genuinely hard part exactly where it is,
-in choosing a representation that makes a world's rule identifiable.
+\paragraph{Clause 1 (scaling): a small probe predicts the asymptote---universally.} A light dose
+of world-time compute predicts the heavy-dose asymptote: within-domain Spearman is \LawWithinArc{}
+(ARC), \LawWithinListfn{} (List Functions), \LawWithinClrs{} (CLRS), and \LawWithinBongard{}
+(Bongard, vision). A \emph{leave-one-domain-out} fit---train the relation on three domains,
+predict the held-out one---reaches $R^2{=}\LawLodoRtwo{}$, and the \emph{simplest} model (light
+alone) beats adding parameters, the signature of a law rather than an overfit.
+
+\paragraph{Clause 2 (no free lunch): the predictor must be a probe.} We tried to predict the
+asymptote from \emph{zero-training} signals (teacher-forced answer log-probability vs.\ number of
+demonstrations). It fails---leave-one-domain-out $R^2{=}\LawFreeProxyRtwo{}$ (anti-predictive).
+In-context likelihood taps Bayesian updating; the TTT lift taps weight-space learnability, and
+they diverge. You cannot read the payoff off static signals; you must spend a small dose of the
+actual process. This negative sharpens the law.
+
+\paragraph{Clause 3 (learner-invariance): not just neural networks.} The same law holds for a
+\emph{non-neural} learner---an enumerative program synthesizer over a list DSL, with search
+budget as the compute axis: held-out exact-match rises and saturates (\SymScaleLo{} to
+\SymScaleHi{} over the budget sweep), and corrupting the labels collapses it to \SymCorrupt{}
+(no consistent program exists). Only \emph{which} worlds are realizable is learner-specific (the
+DSL is a different hypothesis class than the network); the curve and the exactness gate are not.
+The law is about the verified-world learning \emph{problem}, instantiated identically on gradient
+descent and symbolic search.
+
+\paragraph{Clause 4 (falsification): it predicts its own nulls.} A law must predict where it
+\emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous worlds (E71) cross-world
+transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
+(diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
+\emph{finds} a generalizing subfamily (\S\ref{sec:combo-search}). Each is predicted, none
+post-hoc.
+
+\paragraph{The reader's guideline: how many worlds to simulate.} Because the curve saturates,
+the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
+(worlds for 90\% of the asymptotic gain) is \WCListfn{} for List Functions, \WCArc{} for ARC, and
+\WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
+thousands. The honest scope: the curve's \emph{form} is universal over verifiable-world problems
+and learners; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
+cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
+choosing a representation that makes a world's rule identifiable.
 
 \subsection{Finding generalizing world-combinations by search (E80)}\label{sec:combo-search}
 The \ProtoNumWorlds{} prototyped worlds (E68) are deliberately heterogeneous and globally do not

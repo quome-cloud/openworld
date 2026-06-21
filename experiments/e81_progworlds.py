@@ -134,5 +134,9 @@ if __name__ == "__main__":
     print("sub-worlds with reference solution:", sizes)
     if "--validate" in sys.argv:  # needs language runtimes (run on a box)
         n = 100
-        print(f"validating canonical solutions on {n} composites (needs runtimes)...")
-        print(json.dumps(validate(comp, n=n), indent=2))
+        print(f"validating canonical solutions on {n} composites (needs runtimes)...", flush=True)
+        rates = validate(comp, n=n)
+        out = {"experiment": "e81-validation", "n_composites": n, "languages": LANGS,
+               "per_language_pass_rate": rates}
+        (HERE / "results" / "e81_validation.json").write_text(json.dumps(out, indent=2))
+        print(json.dumps(rates, indent=2))

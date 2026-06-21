@@ -23,6 +23,7 @@ DOMAINS = {
     "clrs":    ("e80_text_clrs.json",   "zeroshot"),
     "arc":     ("e80_arc_ttt.json",     "zeroshot"),
     "bongard": ("e80_bongard.json",     "prototype"),
+    "tabular": ("e80_text_tabular.json", "zeroshot"),
 }
 EPS = 0.05
 

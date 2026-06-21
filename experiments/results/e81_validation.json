@@ -1,0 +1,38 @@
+{
+  "experiment": "e81-validation",
+  "n_composites": 100,
+  "languages": [
+    "python",
+    "cpp",
+    "java",
+    "js",
+    "go"
+  ],
+  "per_language_pass_rate": {
+    "python": {
+      "pass": 96,
+      "n": 100,
+      "rate": 0.96
+    },
+    "cpp": {
+      "pass": 98,
+      "n": 100,
+      "rate": 0.98
+    },
+    "java": {
+      "pass": 95,
+      "n": 100,
+      "rate": 0.95
+    },
+    "js": {
+      "pass": 94,
+      "n": 100,
+      "rate": 0.94
+    },
+    "go": {
+      "pass": 0,
+      "n": 100,
+      "rate": 0.0
+    }
+  }
+}

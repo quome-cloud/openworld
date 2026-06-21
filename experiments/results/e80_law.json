@@ -1,0 +1,488 @@
+{
+  "n_worlds": 89,
+  "domains": [
+    "clrs",
+    "listfn"
+  ],
+  "per_domain_n": {
+    "clrs": 29,
+    "listfn": 60
+  },
+  "r2_in_sample": 0.20685791127446929,
+  "slope_vs_lift_corr": 0.2573174730579456,
+  "slope_vs_lift_spearman": 0.3434286687095677,
+  "within_domain_spearman": {
+    "clrs": 0.5689655172413792,
+    "listfn": 0.09297026951931094
+  },
+  "within_domain_spearman_mean": 0.3309678933803451,
+  "beta": {
+    "intercept": 0.25198103369471053,
+    "slope": 0.011039673568856202,
+    "headroom": -0.07851688760804267,
+    "slope_x_headroom": 1.1956570359718472,
+    "neg_log_depth": 0.014139663827322544
+  },
+  "leave_one_domain_out": {
+    "clrs": {
+      "n": 29,
+      "pred_mean": 0.6709979564644509,
+      "actual_mean": 0.07758620689655173,
+      "corr": 0.4771027933264358
+    },
+    "listfn": {
+      "n": 60,
+      "pred_mean": -0.04861904374601854,
+      "actual_mean": 0.33958333333333335,
+      "corr": 0.4719056909636516
+    }
+  },
+  "lodo_overall_r2": -2.322861481503179,
+  "scatter": [
+    {
+      "domain": "listfn",
+      "actual": 0.875,
+      "pred": 0.047701821703137526
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.1540946962597556
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.375,
+      "pred": -0.23754601841090184
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.16070413848689424
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.06042792932654312
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.04108042985511562
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.375,
+      "pred": 0.031688747752914304
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": 0.031688747752914304
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.13024797959499346
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.01151050250601443
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.13202803685023126
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.08690901162897549
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.75,
+      "pred": -0.06042792932654312
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.0154723331620219
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.75,
+      "pred": -0.030973000976384835
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.05714260607747776
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": 0.0022338194027560487
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.12329529622864438
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.08200190434911736
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.09249589619753312
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": 0.003958746254935391
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.07498516534488697
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.12763708746492197
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.11148823162576571
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.05698815760732989
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": -0.07223123746911503
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.875,
+      "pred": 0.0022338194027560487
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": 0.05387089934673056
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.01573115575356504
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.028526193291267488
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.015301829692100838
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.08925421408647966
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": 0.022784546555949164
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.08449264115945998
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.375,
+      "pred": -0.01479290990457835
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": 0.019970633386209302
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": 0.013248305861598642
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.08179198034090507
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": -0.010399440583437697
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.875,
+      "pred": -0.049291831651816054
+    },
+    {
+      "domain": "listfn",
+      "actual": -0.125,
+      "pred": -0.09205553837847136
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": 0.0263021659908442
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.75,
+      "pred": -0.08200190434911736
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.09249589619753312
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.09161022417558451
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.875,
+      "pred": -0.04429861792195844
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": -0.013147810307959085
+    },
+    {
+      "domain": "listfn",
+      "actual": -0.375,
+      "pred": -0.08572909693707748
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": -0.01573115575356504
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.006184387385695739
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.375,
+      "pred": -0.00980174504087905
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.625,
+      "pred": 0.00154709395661487
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.75,
+      "pred": -0.003908096244779891
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.5,
+      "pred": 0.03019843884185927
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.0,
+      "pred": -0.1539970201051696
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.75,
+      "pred": 0.034317633295667505
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": 0.006130092253771091
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.125,
+      "pred": -0.16794396331060618
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.25,
+      "pred": -0.07838998915521131
+    },
+    {
+      "domain": "listfn",
+      "actual": 0.375,
+      "pred": 0.00154709395661487
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.5178811258186022
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.8436183604749391
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6355580507853171
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.625,
+      "pred": 0.7094998406214241
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.125,
+      "pred": 0.8463693213629129
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.3982205839561768
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.25,
+      "pred": 1.0809000978803232
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.25,
+      "pred": 0.8554354251454552
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.7638379761361012
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6728772695295628
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.663168749233302
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6659953537553567
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.125,
+      "pred": 0.7307883917541942
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.5441724241975443
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.7197244046512077
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.125,
+      "pred": 0.6624552505889125
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6079249835943783
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.2796921797446292
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6436530019314943
+    },
+    {
+      "domain": "clrs",
+      "actual": -0.125,
+      "pred": 0.23194324006770833
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.568365020634745
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.25,
+      "pred": 0.995317737335989
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6544182540207955
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6748925621676405
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.25,
+      "pred": 0.5428064277933078
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.6715213543714551
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.25,
+      "pred": 0.9356688939803149
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.0,
+      "pred": 0.7343094723409107
+    },
+    {
+      "domain": "clrs",
+      "actual": 0.125,
+      "pred": 0.6079249835943783
+    }
+  ]
+}

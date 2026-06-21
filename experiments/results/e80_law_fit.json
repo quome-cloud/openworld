@@ -1,0 +1,124 @@
+{
+  "n_worlds": 303,
+  "domains": [
+    "arc",
+    "bongard",
+    "clrs",
+    "listfn"
+  ],
+  "per_domain_n": {
+    "arc": 39,
+    "bongard": 179,
+    "clrs": 29,
+    "listfn": 56
+  },
+  "within_domain_light_vs_heavy_spearman": {
+    "arc": 0.977327935222672,
+    "bongard": 0.7695499340907664,
+    "clrs": 0.7275862068965516,
+    "listfn": 0.9045112781954888
+  },
+  "models": {
+    "light_only": {
+      "features": [
+        "light_lift"
+      ],
+      "lodo_r2": 0.537,
+      "lodo_spearman": 0.4128551535878579,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.977327935222672,
+          "pred_mean": 0.138,
+          "actual_mean": 0.103
+        },
+        "bongard": {
+          "n": 179,
+          "spearman": 0.7614587910363442,
+          "pred_mean": 0.165,
+          "actual_mean": 0.115
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.7098522167487682,
+          "pred_mean": 0.124,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.6059466848940535,
+          "pred_mean": 0.401,
+          "actual_mean": 0.572
+        }
+      }
+    },
+    "light+base": {
+      "features": [
+        "light_lift",
+        "base"
+      ],
+      "lodo_r2": 0.447,
+      "lodo_spearman": 0.3604254595902253,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.977327935222672,
+          "pred_mean": 0.031,
+          "actual_mean": 0.103
+        },
+        "bongard": {
+          "n": 179,
+          "spearman": 0.5472244889418952,
+          "pred_mean": 0.284,
+          "actual_mean": 0.115
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.6172413793103447,
+          "pred_mean": 0.059,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.6967874231032127,
+          "pred_mean": 0.413,
+          "actual_mean": 0.572
+        }
+      }
+    },
+    "light+headroom": {
+      "features": [
+        "light_lift",
+        "headroom"
+      ],
+      "lodo_r2": 0.447,
+      "lodo_spearman": 0.3604254595902253,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.977327935222672,
+          "pred_mean": 0.031,
+          "actual_mean": 0.103
+        },
+        "bongard": {
+          "n": 179,
+          "spearman": 0.5472244889418952,
+          "pred_mean": 0.284,
+          "actual_mean": 0.115
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.6172413793103447,
+          "pred_mean": 0.059,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.6967874231032127,
+          "pred_mean": 0.413,
+          "actual_mean": 0.572
+        }
+      }
+    }
+  }
+}

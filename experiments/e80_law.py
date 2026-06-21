@@ -65,6 +65,14 @@ def _r2(y, pred):
     return float(1 - ((y - pred) ** 2).sum() / max(1e-9, ((y - y.mean()) ** 2).sum()))
 
 
+def _spearman(a, b):
+    if len(a) < 3 or np.std(a) < 1e-9 or np.std(b) < 1e-9:
+        return None
+    ra = np.argsort(np.argsort(a))
+    rb = np.argsort(np.argsort(b))
+    return float(np.corrcoef(ra, rb)[0, 1])
+
+
 def main():
     pts = load_points()
     domains = sorted({p["domain"] for p in pts})
@@ -75,6 +83,14 @@ def main():
         beta, *_ = np.linalg.lstsq(X, y, rcond=None)
         out["r2_in_sample"] = _r2(y, X @ beta)
         out["slope_vs_lift_corr"] = float(np.corrcoef(s, y)[0, 1])
+        out["slope_vs_lift_spearman"] = _spearman(s, y)
+        # within-domain: does the slope rank worlds by lift INSIDE each domain?
+        wd = {}
+        for D in domains:
+            idx = [i for i, p in enumerate(pts) if p["domain"] == D]
+            wd[D] = _spearman(s[idx], y[idx])
+        out["within_domain_spearman"] = wd
+        out["within_domain_spearman_mean"] = float(np.mean([v for v in wd.values() if v is not None]))
         out["beta"] = {"intercept": float(beta[0]), "slope": float(beta[1]),
                        "headroom": float(beta[2]), "slope_x_headroom": float(beta[3]),
                        "neg_log_depth": float(beta[4])}

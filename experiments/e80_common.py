@@ -5,9 +5,11 @@ A domain module (e80_<domain>.py) exposes:
   CONFIG = {"ladder": [..N..], "abl_n": N, "abl_noise": [0.0,..,1.0], "cap": int,
             "n_test": int, "seeds": [..], "base": "Qwen/Qwen2.5-0.5B-Instruct"}
 
-We run two tests, reusing e73_finetune/e74_eval, on STRICTLY held-out worlds:
+We run three tests, reusing e73_finetune/e80_eval, on STRICTLY held-out worlds:
   (a) world-count ladder  -- does held-out accuracy rise with the number of train worlds?
-  (b) verified-vs-noisy label ablation -- does it collapse as the REAL labels are corrupted?
+  (b) matched-data control -- with TOTAL examples fixed, does accuracy still rise with #worlds?
+       (isolates world DIVERSITY from data QUANTITY -- the decisive test)
+  (c) verified-vs-noisy label ablation -- does it collapse as the REAL labels are corrupted?
 
 Partial results upload to GCS after every run. Usage on the box:
   python3 e80_common.py --domain genomics --bucket gs://openworld-bench/e80-genomics
@@ -77,7 +79,7 @@ def _finetune(base, data, seed, epochs):
 
 def _eval(base, test, adapter=None):
     out = TMP / "eval.json"
-    cmd = [sys.executable, str(HERE / "e74_eval.py"), "--base", base, "--test", str(test),
+    cmd = [sys.executable, str(HERE / "e80_eval.py"), "--base", base, "--test", str(test),
            "--out", str(out), "--eval_batch", "256"]
     if adapter:
         cmd += ["--adapter", str(adapter)]
@@ -131,10 +133,16 @@ def main():
     ladder = [n for n in cfg["ladder"] if n <= len(train_pool)]
     abl_n = min(cfg["abl_n"], len(train_pool))
 
+    # matched-data control: fix TOTAL train examples, vary #worlds (diversity vs quantity).
+    # Per-world rows must reach total/min(W); generators emit 800 rows/world so total<=1600 at W=2.
+    matched_total = cfg.get("matched_total", 1600)
+    matched_w = [w for w in cfg.get("matched_w", [2, 4, 8, 16, 32, 64]) if w <= len(train_pool)]
+
     res = {"domain": args.domain, "n_worlds": len(names), "n_test_worlds": n_test,
            "n_train_pool": len(train_pool), "config": {k: cfg[k] for k in
            ("ladder", "abl_n", "abl_noise", "cap", "seeds")},
-           "base_acc": None, "ladder_raw": {}, "ablation_raw": {}}
+           "matched_config": {"total": matched_total, "worlds": matched_w},
+           "base_acc": None, "ladder_raw": {}, "ablation_raw": {}, "matched_raw": {}}
     base = cfg["base"]
 
     def upload():
@@ -142,6 +150,7 @@ def main():
         # finalize summaries
         res["ladder"] = {str(n): _mean_ci(list(d.values())) for n, d in res["ladder_raw"].items()}
         res["ablation"] = {t: _mean_ci(list(d.values())) for t, d in res["ablation_raw"].items()}
+        res["matched"] = {str(w): _mean_ci(list(d.values())) for w, d in res["matched_raw"].items()}
         out.write_text(json.dumps(res, indent=2))
         if args.bucket:
             subprocess.run(["gcloud", "storage", "cp", str(out),
@@ -176,7 +185,28 @@ def main():
             res["ladder_raw"].setdefault(tag, {})[str(seed)] = acc
             upload()
 
-    # (b) verified-vs-noisy ablation at fixed world count
+    # (b) matched-data control: TOTAL examples fixed, #worlds varied (diversity vs quantity).
+    # If accuracy still rises with #worlds at equal total data, the gain is world DIVERSITY,
+    # not data quantity -- the decisive test that the ladder isn't just "more rows".
+    for seed in cfg["seeds"]:
+        rng = random.Random(500 + seed)
+        pool = train_pool[:]
+        rng.shuffle(pool)
+        for w in matched_w:
+            per = max(5, matched_total // w)
+            tag = str(w)
+            acc = None
+            try:
+                _write(TMP / "sft.jsonl",
+                       _emit_sft(worlds, pool[:w], per, random.Random(600 + seed)))
+                acc = _eval(base, test_file, _finetune(base, TMP / "sft.jsonl", seed, args.epochs))
+                print(f"[matched seed{seed} W={w} per={per} total~{per * w}] {acc}", flush=True)
+            except Exception as e:  # noqa: BLE001
+                print(f"[matched seed{seed} W={w}] FAILED {e}", flush=True)
+            res["matched_raw"].setdefault(tag, {})[str(seed)] = acc
+            upload()
+
+    # (c) verified-vs-noisy ablation at fixed world count
     for seed in cfg["seeds"]:
         rng = random.Random(300 + seed)
         pool = train_pool[:]
@@ -197,7 +227,8 @@ def main():
 
     upload()
     print(f"[e80/{args.domain}] done.\n", json.dumps({"base": res["base_acc"],
-          "ladder": res.get("ladder"), "ablation": res.get("ablation")}, indent=2), flush=True)
+          "ladder": res.get("ladder"), "matched": res.get("matched"),
+          "ablation": res.get("ablation")}, indent=2), flush=True)
 
 
 if __name__ == "__main__":

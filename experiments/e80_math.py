@@ -54,7 +54,7 @@ def build_worlds():
     for si, sc in enumerate(_schemas()):
         rng = np.random.RandomState(1000 + si)
         rows, answers = [], set()
-        for _ in range(CONFIG["cap"] * 3):
+        for _ in range(800):
             q, a = _instance(sc, rng)
             rows.append({"prompt": q, "label": a})
             answers.add(a)

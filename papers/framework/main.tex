@@ -411,59 +411,28 @@ follow declarable rules. This covers operational simulations (triage,
 negotiation, portfolios, sprints) and program repair, but not pixel-native
 domains; we return to this boundary in the limitations. The practitioner
 declares a world (state schema, actions, plain-language rules), and the
-framework must produce a faithful, fast, auditable simulator plus the
-machinery to steer and optimize behavior within it. The adversary here is not
-a security attacker but \emph{model error itself}: hallucinated transitions,
-silently wrong code, reward misspecification, and value drift.
+substrate must produce a faithful, fast, auditable simulator from it. The
+adversary here is not a security attacker but \emph{model error itself}:
+hallucinated transitions, silently wrong code, and value drift.
 
-\paragraph{A world model, formally.} An \openworld{} world model is a tuple
-\[
-  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
-\]
-where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
-JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
-discrete action set, $s_0 \in \mathcal{S}$ is a distinguished initial state, and
-the dynamics $\tau : \mathcal{S} \times \mathcal{A} \to \mathcal{S}$ is a
-\emph{deterministic program} returning the successor state (an action illegal in
-a state acts as a no-op, so $\tau$ is total). A stochastic world threads an
-explicit pseudo-random seed through the state, so $\tau$ stays a pure function
-and every rollout is replayable; \openworld{} thus models stochasticity as
-replayable seeded determinism rather than a transition kernel $\mathcal{S} \times
-\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $o_i : \mathcal{S} \times
-\mathcal{A} \times \mathcal{S} \to \mathbb{R}$ score a transition $(s, a, s')$,
-are combined as $\sum_i w_i o_i$, and are weighted by \emph{dials} $w_i$ (fixed
-or tunable); invariants $\mathcal{I}$ are predicates $\iota : \mathcal{S} \to
-\{\top, \bot\}$ required to hold on every state reachable from $s_0$ under $\tau$.
-The practitioner declares $(s_0, \mathcal{A}, R, \{(o_i, w_i)\}_i,
-\mathcal{I})$---an initial state, the actions, natural-language rules $R$,
-objectives with their dials, and invariants; the schema of $s_0$ induces
-$\mathcal{S}$, and the framework must \emph{produce} $\tau$ from $R$.
+\paragraph{The object we build.} Formally, an \openworld{} world model is a tuple
+$W = (\mathcal{S}, \mathcal{A}, s_0, \tau, \{(o_i, w_i)\}_i, \mathcal{I})$ of
+symbolic states, a discrete action set, an initial state, a \emph{deterministic
+transition program} $\tau$, weighted objectives, and invariants $\mathcal{I}$
+(stochasticity is modeled as replayable seeded determinism, so $\tau$ stays a
+pure function). The practitioner declares everything but $\tau$, which the
+substrate \emph{produces} from the natural-language rules by \emph{synthesis
+under verification}---an LLM proposes a program that is accepted only if it
+parses, executes in a sandbox respecting every invariant, and (optionally)
+survives a second-model critique. Because the accepted $\tau$ is then \emph{fixed
+code}, a rollout is computed by executing it, so it is exact at every depth with
+no compounding error---unlike a learned, per-step-resampled transition whose
+exactness decays as $(1-\epsilon)^t$. We give the full formal definition and the
+compounding-error analysis in the companion paper~\cite{openworld_wtc}; this
+paper takes the verified-code world model as its object and studies how to
+\emph{prototype, evaluate, and serve} it at scale---i.e.\ as a world computer.
 
-It produces $\tau$ by \emph{synthesis under verification}, not by learning. An
-LLM proposes a program $\hat\tau$ from $R$; $\hat\tau$ is accepted only if it
-(i)~parses with the required signature, (ii)~executes in a sandbox over a probe
-set $P \subseteq \mathcal{S} \times \mathcal{A}$ (in our implementation, each
-action applied at $s_0$) and satisfies every $\iota \in \mathcal{I}$ on the
-resulting states, and optionally (iii)~survives a second-model critique against
-$R$. Verification therefore certifies signature-conformance and
-invariant-consistency on $P$; it does \emph{not} certify $\hat\tau = \tau^\star$
-against a ground truth---it bounds and surfaces error rather than eliminating it.
-The accepted $\hat\tau$ is then \emph{fixed}: a depth-$t$ rollout $s_t =
-\hat\tau(\cdot, a_t) \circ \cdots \circ \hat\tau(\cdot, a_1)(s_0)$ is computed by
-executing code, so \emph{if} $\hat\tau = \tau^\star$ on the reachable set, it is
-exact at \emph{every} depth, bit-exactly. Contrast a learned or
-per-step-predicted transition $\tilde\tau$ resampled each step: writing
-$\epsilon = \Pr_{(s,a)\sim\pi}[\tilde\tau(s, a) \neq \tau^\star(s, a)]$ for its
-single-step error rate over states visited under a policy $\pi$, the probability
-that a full $t$-step rollout is exact is $\prod_{k<t}(1 - \epsilon_k) \approx
-(1 - \epsilon)^t$ under independent, constant-$\epsilon$ steps---and strictly
-lower once an early error pushes the rollout off-distribution, where $\epsilon$
-grows. A symbolic world fixes its error \emph{once}, at synthesis time, where it
-is systematic and auditable; a learned world risks a fresh error every step,
-where it compounds. This tuple, and that property, are what the rest of the paper
-measures.
-
-Table~\ref{tab:related} situates the approach against the principal
+Table~\ref{tab:related} situates the substrate against the principal
 world-model strategy families surveyed in the accompanying literature review.
 
 \begin{table}[htb]\centering\small

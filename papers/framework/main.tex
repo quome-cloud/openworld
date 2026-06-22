@@ -354,8 +354,10 @@ computer's cost, latency, and performance (Figure~\ref{fig:worldcomputer}):
 \begin{enumerate}
   \item \textbf{World computing and the world computer.} We frame a discipline: a \emph{world
   computer} is the combination of hardware and software that instantiates, verifies, composes,
-  and runs simulated worlds with verifiable dynamics; we build \openworld, a zero-dependency
-  software substrate for it.
+  and runs simulated worlds with verifiable dynamics. We make the abstraction precise---worlds are
+  closed under a verification-preserving \emph{composition algebra} (\S\ref{sec:algebra}: closure,
+  identity, associativity, and compositional verification)---and build \openworld, a
+  zero-dependency software substrate for it.
   \item \textbf{The substrate (framework).} A local LLM (or Claude Code) \emph{declares} a
   world---symbolic state, a verified \texttt{transition}, perceptors (the perceive boundary),
   composition (worlds within worlds), dial-steerable objectives, an emit/act boundary---which a
@@ -405,7 +407,7 @@ local models, the regime where learned world models are least accessible and tra
 approaches matter most.
 
 % ============================================================================
-\section{Problem Setting and Positioning}
+\section{Problem Setting and Positioning}\label{sec:problem}
 We target symbolic-state environments: worlds whose state is a
 JSON-serializable structure, whose action set is discrete, and whose dynamics
 follow declarable rules. This covers operational simulations (triage,
@@ -538,6 +540,43 @@ rubric)}---grade an episode 0--10 against a written rubric. Unparseable
 verdicts degrade to safe defaults. Judges plug into action selection
 (\S\ref{sec:judge-results}) and can serve as objectives where no programmatic
 score exists.
+
+\subsection{A composition algebra for worlds}\label{sec:algebra}
+What makes \openworld{} a \emph{world computer} rather than a collection of simulators is that
+worlds are closed under a verification-preserving composition algebra---worlds are the values, and
+composition is the operation that builds bigger worlds from smaller ones. Write $\mathcal{W}$ for
+the set of world models $W=(\mathcal{S},\mathcal{A},s_0,\tau,\{(o_i,w_i)\},\mathcal{I})$ defined in
+\S\ref{sec:problem}. Given children $\{W_k\}_{k=1}^{n}\subset\mathcal{W}$ under distinct namespace
+keys, \emph{bridges} $\mathcal{B}$ (each an ordinary transition over the two-slot state of a coupled
+pair, synthesized and verified by the \emph{same} gate as any transition), \emph{aggregators}
+$\mathcal{G}$ (pure functions of the children's states), and downward \emph{bindings}, composition
+produces $C=\mathrm{compose}(\{W_k\},\mathcal{B},\mathcal{G})$: a world whose state
+$\mathcal{S}_C=\prod_k \mathcal{S}_k$ (with a derived aggregate slot) nests each child's state under
+its key, whose actions $\mathcal{A}_C=\bigsqcup_k \mathcal{A}_k$ address children by namespace, and
+whose transition $\tau_C$ executes, in fixed order: (i)~downward bindings, (ii)~the addressed
+child's own $\tau_k$ on its slice (children run \emph{unmodified}), (iii)~the bridges, (iv)~a
+recompute of the aggregators; invariants lift as $\mathcal{I}_C=\bigcup_k\mathcal{I}_k\cup\mathcal{I}_{\mathcal{B}}$.
+
+\paragraph{Closure, identity, associativity.} $C\in\mathcal{W}$: \textrm{compose} returns a world,
+so its output can itself be a child of a further composition---worlds-of-worlds nest to arbitrary
+depth (the implementation makes \texttt{CompositeWorld} a subclass of \texttt{World}). A single-child
+composite with no bridges is the child up to its namespace wrapper, $\mathrm{compose}(\{W\})\cong W$
+(\emph{identity}); and because $\tau_C$ acts slice-wise with bridges local to the pair they couple,
+$\mathrm{compose}(\mathrm{compose}(W_1,W_2),W_3)\cong\mathrm{compose}(W_1,\mathrm{compose}(W_2,W_3))$
+up to renaming of namespace keys (\emph{associativity}). Composition is therefore a well-defined
+algebra on $\mathcal{W}$, not a one-off wrapper.
+
+\paragraph{Verification is compositional---and that is the point.} If every child $\tau_k$ and every
+bridge transition is accepted by the synthesis-under-verification gate, then $\tau_C$ is verified
+\emph{by construction}: it only ever invokes already-verified pieces, in the fixed order above, over
+disjoint namespace slices, so the whole needs no monolithic re-synthesis or re-verification.
+Composition thus turns an $n$-rule synthesis problem---which a single generator handles reliably
+only up to a small rule count before a \emph{complexity cliff}---into $n$ small, independently
+verified problems plus local bridges. This is the algebraic content behind the empirical result that
+\emph{composition defeats the cliff} (\S\ref{sec:composition}), and the spec serializes a composite
+recursively (\S\ref{sec:specs}), so the algebra is also the unit of sharing. A substrate with a
+closed, verification-preserving composition operator over a well-defined value type is what earns
+the name \emph{world computer}.
 
 \subsection{Implementation}
 Python ($\geq$3.9). The core is \emph{zero-dependency}: \texttt{import

@@ -161,9 +161,10 @@ world computer the way one benchmarks any computer---on \textbf{cost}, \textbf{l
 \textbf{performance}. \textbf{Prototyping (cost \& latency).} A world is \emph{declared} and its
 dynamics \emph{synthesized as code and verified before acceptance} (a plan--generate--verify
 relay over syntax, sandboxed behaviour, declared invariants, and an optional critic); on a
-\ProtoNumWorlds-world, six-sector benchmark an agent authors validated, servable worlds at a
-median of \ProtoMedianMinutes{} minutes each---on \emph{consumer hardware} with a local LLM
-backbone, no datacenter training---and once built, a verified world is plain code that rolls out
+\ProtoNumWorlds-world, six-sector benchmark an agent authors structurally-validated, servable
+worlds---well-formed and runnable, a \emph{conformance} rate, not certified rule-correctness---at a
+median of \ProtoMedianMinutes{} minutes each, on \emph{consumer hardware} with a local LLM
+backbone, no datacenter training; and once built, a verified world is plain code that rolls out
 at native speed (orders of magnitude faster than a per-step LLM, and inspectable). \textbf{Evaluation
 (performance \& trust).} We measure what makes a world trustworthy: validation and servability
 gates, exact-rollout fidelity with no compounding
@@ -721,13 +722,19 @@ and \emph{latency} (fast dynamics). \textbf{Fidelity:} across the three oracle w
 7B-synthesized dynamics are exact on \MultiCodeExact{} \RolloutSteps-step closed-loop rollouts
 (95\% CI \MultiCodeCI) and answer $10\times$ out-of-distribution probes at \CodeOODRate{}, with no
 compounding error---a single verified transition is reused at every step, so a depth-$t$ rollout
-stays bit-exact rather than accumulating per-step error. \textbf{Latency:} the same dynamics, as
-plain code, roll out at \CodeStepsPerSec{} steps/s against \LLMStepsPerSec{} steps/s for the
-per-step LLM next-state proxy (E04)---a runtime gap of $\sim$47{,}000$\times$, with the
-hand-written function oracle as the ceiling. The one-time synthesis cost (a few seconds,
-\S\ref{sec:proto-latency}) is therefore amortized over unlimited fast, exact rollouts: a world
-computer pays its error budget and its compute budget once, at build time
-(Figure~\ref{fig:worldcomputer}B).
+stays bit-exact rather than accumulating per-step error. We measure rule-level exactness only on
+the three instrumented oracle worlds; for the \ProtoNumWorlds{} prototyped worlds we measure
+conformance and executability, not fidelity to intent (\S\ref{sec:proto-latency}). \textbf{Latency:}
+the same dynamics, as plain code, roll out at \CodeStepsPerSec{} steps/s, a $\sim$47{,}000$\times$
+gap over the \LLMStepsPerSec{} steps/s of a \emph{per-step LLM} next-state proxy (E04). Two honest
+caveats keep this in proportion: the comparison is ``compiled code vs.\ an LLM call every step,''
+\emph{not} against a trained-then-compiled surrogate (which would be far faster than the LLM proxy,
+though still learned and error-prone), and the LLM arm is a small timing sample; and the
+hand-written function oracle is itself $\sim$16$\times$ faster than the synthesized code (the price
+of synthesis generality). The point is not the headline multiple but that a verified world, once
+built, runs at native code speed---fast and exact enough that rollout latency is never the
+bottleneck, with the one-time synthesis cost (a few seconds, \S\ref{sec:proto-latency}) amortized
+over unlimited rollouts (Figure~\ref{fig:worldcomputer}B).
 
 \subsection{Verification guardrails, measured}\label{sec:guardrails}
 \subsubsection{Verification-gate ablation: correctness gained per gate}\label{sec:abl1}
@@ -772,7 +779,9 @@ two off-by-one guards), the single-state gate's branch-level false-accept rate i
 \BranchSingleFA\%---it accepts every one. Re-running each action over just
 \BranchProbes{} branch-covering states (empty backlog, one outstanding bug, one unit
 of debt) drops the false-accept rate to \BranchCovFA\%, while the correct program
-still passes. The honest limit remains: a \emph{silent} correctness error
+still passes. With only \BranchFaults{} hand-built faults (as with the eight paired generations
+in E3) this is a \emph{mechanism demonstration}, not a calibrated rate---a generated mutation
+panel of dozens of faults would turn it into one, and is future work. The honest limit remains: a \emph{silent} correctness error
 (invariant-clean everywhere but numerically wrong) passes \emph{both} gates---no
 oracle-free gate can catch it, which is why we report exactness against ground-truth
 probes, not acceptance, as the measure of correctness. The branch-covering gate is

@@ -4112,7 +4112,7 @@ def fig_world_computer(e68, e04, e68b):
     ax.text(p90, top * 0.78, f" p90 {p90:.1f}", color=SLATE, fontsize=7.5)
     ax.set_xlabel("minutes to author + validate one world")
     ax.set_ylabel("worlds")
-    ax.set_title(f"A. Cost & latency: prototype\n{nw} worlds, {100 * val:.0f}% validated", fontsize=10)
+    ax.set_title(f"A. Cost & latency: prototype\n{nw} worlds, {100 * val:.0f}% conformant", fontsize=10)
     # B -- runtime throughput (log)
     order = ["function_oracle", "code_transition", "llm_transition"]
     lab = {"function_oracle": "function oracle", "code_transition": "verified code",
@@ -4130,7 +4130,7 @@ def fig_world_computer(e68, e04, e68b):
     ax2.set_title(f"B. Latency: run\nverified code {ratio:,.0f}x the LLM", fontsize=10)
     # C -- trust gates
     bv = [val, exe]
-    ax3.bar(["validate", "execute"], bv, color=[TEAL, ORANGE], alpha=0.9, width=0.62)
+    ax3.bar(["conform", "execute"], bv, color=[TEAL, ORANGE], alpha=0.9, width=0.62)
     for i, v in enumerate(bv):
         ax3.text(i, v + 0.015, f"{100 * v:.0f}%", ha="center", fontsize=9.5, fontweight="bold")
     ax3.set_ylim(0, 1.12)

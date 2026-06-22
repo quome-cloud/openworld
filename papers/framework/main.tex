@@ -161,10 +161,12 @@ world computer the way one benchmarks any computer---on \textbf{cost}, \textbf{l
 \textbf{performance}. \textbf{Prototyping (cost \& latency).} A world is \emph{declared} and its
 dynamics \emph{synthesized as code and verified before acceptance} (a plan--generate--verify
 relay over syntax, sandboxed behaviour, declared invariants, and an optional critic); on a
-\ProtoNumWorlds-world, six-sector benchmark an agent authors structurally-validated, servable
-worlds---well-formed and runnable, a \emph{conformance} rate, not certified rule-correctness---at a
-median of \ProtoMedianMinutes{} minutes each, on \emph{consumer hardware} with a local LLM
-backbone, no datacenter training; and once built, a verified world is plain code that rolls out
+\ProtoNumWorlds-world, six-sector benchmark an agent (Claude Code) authors structurally-validated,
+servable worlds---well-formed and runnable, a \emph{conformance} rate, not certified
+rule-correctness---at a median of \ProtoMedianMinutes{} minutes each. The substrate is
+zero-dependency, the worlds it builds run on \emph{consumer hardware}, and transition synthesis
+itself succeeds with local 7B--9B models (no training); only the authoring \emph{agent} is a
+frontier model. Once built, a verified world is plain code that rolls out
 at native speed (orders of magnitude faster than a per-step LLM, and inspectable). \textbf{Evaluation
 (performance \& trust).} We measure what makes a world trustworthy: validation and servability
 gates, exact-rollout fidelity with no compounding
@@ -334,8 +336,9 @@ trajectories against written rubrics.
 \includegraphics[width=0.99\linewidth]{figs/world_computer.png}
 \caption{\textbf{The world computer, benchmarked on cost, latency, and performance.}
 \emph{A (cost \& latency to prototype):} on a \ProtoNumWorlds-world, six-sector benchmark an
-agent authors a validated, servable world in a median of \ProtoMedianMinutes{} minutes (p90
-\ProtoPNinetyMinutes), on consumer hardware with a local LLM backbone. \emph{B (latency to
+agent (Claude Code) authors a structurally-conformant, servable world in a median of
+\ProtoMedianMinutes{} minutes (p90 \ProtoPNinetyMinutes); the substrate and the worlds it builds
+run on consumer hardware, and transition synthesis also succeeds with local 7B--9B models. \emph{B (latency to
 run):} once built, a verified world is plain code---it rolls out orders of magnitude faster
 than a per-step LLM next-state proxy (here $\sim$47{,}000$\times$), exactly and inspectably,
 with the hand-written function oracle as the ceiling. \emph{C (performance/trust):} the gates a
@@ -365,8 +368,9 @@ computer's cost, latency, and performance (Figure~\ref{fig:worldcomputer}):
   as a portable artifact.
   \item \textbf{Prototyping cost \& latency.} On a \ProtoNumWorlds-world benchmark across
   \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal, cybersecurity,
-  energy, agentic-AI), an agent authors every world at a median of \ProtoMedianMinutes{} minutes
-  (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes) on consumer hardware, with no datacenter
+  energy, agentic-AI), an agent (Claude Code) authors every world at a median of \ProtoMedianMinutes{} minutes
+  (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes); the substrate and the worlds run on consumer
+  hardware and transition synthesis works with local 7B--9B models (E2/E16), with no datacenter
   training; all \ProtoNumWorlds{} ship as runnable recipes (Figure~\ref{fig:world-atlas}).
   \item \textbf{Runtime latency.} Once built, a verified world is plain code: it rolls out at
   native speed---orders of magnitude faster than a per-step LLM next-state proxy---exactly and
@@ -747,7 +751,7 @@ specific to the stated Ollama snapshots and Q4\_K\_M quantization.
 % ============================================================================
 \section{Results}\label{sec:results}
 We benchmark the substrate as a world computer on the thesis's three axes. \emph{Cost and
-latency} to prototype were established in \S\ref{sec:proto-latency} (\ProtoNumWorlds{} validated
+latency} to prototype were established in \S\ref{sec:proto-latency} (\ProtoNumWorlds{} Claude-Code-authored, conformant
 worlds at a median of \ProtoMedianMinutes{} minutes, on consumer hardware). This section reports
 \emph{performance}---rollout fidelity and runtime latency (\S\ref{sec:perf})---and the
 \emph{evaluation and trust} machinery behind it: what each verification gate buys

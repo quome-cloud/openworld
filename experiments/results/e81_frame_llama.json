@@ -1,0 +1,32 @@
+{
+  "experiment": "e81-wtc-frame-invariance",
+  "base": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+  "langs": [
+    "python",
+    "cpp",
+    "java",
+    "js",
+    "go"
+  ],
+  "n_worlds": 20,
+  "ttt_steps": 60,
+  "arms": {
+    "zeroshot": 0.29,
+    "frame_ttt": 0.27,
+    "corrupt": 0.24
+  },
+  "per": {
+    "zeroshot": {
+      "pass": 29,
+      "n": 100
+    },
+    "frame_ttt": {
+      "pass": 27,
+      "n": 100
+    },
+    "corrupt": {
+      "pass": 24,
+      "n": 100
+    }
+  }
+}

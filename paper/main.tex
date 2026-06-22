@@ -1174,6 +1174,93 @@ predictive but \emph{constructive}---it turns the NP-hard search for a generaliz
 into a guided one and locates a family inside a set built to have none, while the random-subset
 control stays at the heterogeneous floor (the law's null, confirmed).
 
+\subsection{Composites with varying rules: language frames and the invariant principle (E81)}\label{sec:frame-invariance}
+Every world so far has one rule-set. But a single computational \emph{principle} can be expressed
+under many rule-sets, and world-time compute should recover the principle that is invariant across
+them---a reference-frame view of generalization. We make this concrete with programming: a
+\textbf{composite} world is one programming problem, and its \textbf{sub-worlds} are that problem
+realized in \FrameNLangs{} languages (\FrameLangs)---each a verified code world whose transition is
+that language's tests executing. A language is a \emph{frame}: the same principle in different
+coordinates. We build \FrameNWorlds{} such composites from HumanEval-X and ask whether traversing
+the other language-frames teaches the frame-invariant principle well enough to solve a
+\emph{held-out} frame. For each problem and target language we measure three arms: \emph{zero-shot}
+(the base model on the held-out frame), \emph{frame TTT} (\FrameTttSteps{} steps of QLoRA on the
+\emph{other} languages' prompt$\to$solution pairs for that same problem, then evaluate the held-out
+frame), and \emph{corrupt} (the same budget on \emph{mismatched}-language pairs---the exactness
+control). We run two open-weight bases of differing coding strength: Qwen2.5-Coder-7B (strong) and
+Llama-3.1-8B (weak).
+
+This is the clearest \emph{negative} in the paper, and we report it as a boundary
+(Figure~\ref{fig:frame-invariance}). Cross-frame transfer does not beat zero-shot on either base.
+The strong coder moves only \FrameQwenZero{}$\to$\FrameQwenTtt{} (within Wilson noise at $n{=}100$),
+and the \emph{weak} base, where the headroom hypothesis predicted the largest gain, instead
+\emph{drops} (\FrameLlamaZero{}$\to$\FrameLlamaTtt{}). The only structure that survives is a weak
+exactness ordering on the weak base---matched frames beat corrupted ones (\FrameLlamaTtt{} vs
+\FrameLlamaCorrupt)---but even matched frames fail to recover the zero-shot baseline. So unlike the
+diagnosis-world (E74) and ARC (E80) settings, where world-time compute lifts held-out accuracy,
+traversing the language-frames of one problem does \emph{not} teach a transferable principle: a
+held-out language behaves as its own skill, and a handful of TTT steps on sibling languages perturbs
+the model more than it informs it. The honest lesson is a limit on the reference-frame analogy---
+composites whose sub-worlds have genuinely different rule-sets (languages) are not automatically a
+single learnable frame, and exactness (matched $>$ corrupt) is necessary but far from sufficient for
+transfer. The clean positive on \emph{this} substrate comes not from cross-frame TTT but from the
+verified oracle used as a generator and backstop, which we isolate next (E82).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/frame_invariance.png}
+\caption{\textbf{Frame-invariance across programming-language frames is a negative (E81).} A
+composite world is one problem in \FrameNLangs{} languages; \emph{frame TTT} fine-tunes on the other
+languages and evaluates a held-out language ($n{=}100$ problem$\times$language holdouts per base).
+Cross-frame TTT does not beat zero-shot on either base---the strong coder is flat
+(\FrameQwenZero{}$\to$\FrameQwenTtt{}) and the weak base drops
+(\FrameLlamaZero{}$\to$\FrameLlamaTtt{}); only the matched~$>$~corrupt ordering on the weak base
+(\FrameLlamaTtt{} vs \FrameLlamaCorrupt) survives. We report this as a boundary of world-time
+compute. Error bars are Wilson 95\% intervals.}
+\label{fig:frame-invariance}
+\end{figure}
+
+\subsection{The hybrid loop: a verified world as generator and backstop (E82)}\label{sec:hybrid-loop}
+E81 shows that traversing frames for free transfer fails on code; the value of a verified world here
+is its \emph{exactness}, used directly. E82 isolates that, putting all three routes
+(Table~\ref{tab:routes}) in one open-weight, zero-human-label experiment on HumanEval-X Python, whose
+test suite is a perfect verifier. \emph{Route~1 (tool as generator):} sample from the base model and
+keep only test-passing solutions---exact training data with no labels (\HybridQwenPairs/\HybridNTrain{}
+kept for Qwen, \HybridLlamaPairs/\HybridNTrain{} for Llama). \emph{Route~2 (amortize):} QLoRA-tune on
+those verified solutions and re-measure pass@1. \emph{Route~3 (hybrid):} the amortized model
+generates, the tool verifies, and on failure it retries up to \HybridRetry{} times. We run the same
+two bases as E81 over \HybridNEval{} held-out problems (Figure~\ref{fig:hybrid-loop}).
+
+Three findings, one of them a caution. First, \textbf{amortization is not free}: self-distilling on
+verified solutions \emph{helps} the strong base (\HybridQwenBase{}$\to$\HybridQwenAmort{},
+\HybridQwenAmortDelta{} pts) but \emph{hurts} the weak one (\HybridLlamaBase{}$\to$\HybridLlamaAmort{},
+\HybridLlamaAmortDelta{} pts)---the weak model's bootstrap set is sparser and noisier, and tuning on
+it perturbs more than it teaches. So the naive ``smaller models gain more'' prediction is
+\emph{falsified} for pure test-time training on this task. Second, \textbf{the hybrid loop lifts
+both} above base (\HybridQwenHybridDelta{} pts for Qwen to \HybridQwenHybrid{};
+\HybridLlamaHybridDelta{} pts for Llama to \HybridLlamaHybrid{}): the verifier backstop recovers what
+amortization alone risks, and is the robustly-positive route regardless of base strength. Third, the
+headroom signal that \emph{does} survive is \textbf{verifier reliance}: the weak base calls the tool
+far more often inside the loop (\HybridLlamaCalls{} vs \HybridQwenCalls{} calls/problem). The
+practical reading maps onto the three routes: amortization (Route~2) pays off only when the base is
+strong enough to generate clean self-training data; the hybrid (Route~3) is the safe default; and a
+weaker model simply shifts more of the work onto the exact world. The exactness that E45 et al.\ buy,
+and that E81 found necessary-but-insufficient for transfer, is here \emph{sufficient}---when the world
+is used as an oracle rather than a curriculum.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.93\linewidth]{figs/hybrid_loop.png}
+\caption{\textbf{The hybrid loop with open weights and zero human labels (E82).} Left: held-out
+pass@1 on HumanEval-X Python for base $\to$ amortized (QLoRA on self-generated test-passing
+solutions) $\to$ hybrid (amortized model + verify-and-retry, up to \HybridRetry{}), with signed
+deltas vs.\ base. Amortization helps the strong base (\HybridQwenAmortDelta) but hurts the weak one
+(\HybridLlamaAmortDelta); the verifier backstop lifts both (\HybridQwenHybridDelta, \HybridLlamaHybridDelta).
+Right: the weak base leans on the verifier more (\HybridLlamaCalls{} vs \HybridQwenCalls{} calls per
+problem). Error bars are Wilson 95\% intervals over \HybridNEval{} problems.}
+\label{fig:hybrid-loop}
+\end{figure}
+
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An
@@ -1527,81 +1614,13 @@ rounds: \NumTasks{} tasks $\times$ 3 proposer seeds).}
 \label{tab:judge-controls}
 \end{table}
 
-\subsection{Steerability: the moral dial}\label{sec:robustness}
-E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
-(Figure~\ref{fig:pareto}). All \ParetoFrontierSize{} of \ParetoLambdas{}
-sweep points are Pareto-optimal, fairness is monotone in $\lambda$, and the
-Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---the
-``interior optimum'' behavior predicted by the tunable-morality literature,
-reproduced here with a dial that can be turned mid-simulation rather than a
-retrained model~\cite{spectrap2025,mas2025,stablevalue2026}.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.6\linewidth]{figs/pareto.png}
-\caption{\textbf{Tunable morality (E8).} The welfare--fairness frontier
-traced by sweeping the moral dial $\lambda$ on the commons world. Every point
-is Pareto-optimal; the Nash bargaining optimum is interior. Values are
-declared, weighted artifacts---moving along this frontier requires no
-retraining.}
-\label{fig:pareto}
-\end{figure}
-
-\subsection{The structure of the moral filter}\label{sec:moral-structure}
-A fourth review round, written from a moral philosopher's standpoint
-(\texttt{docs/review/}), pressed a charge the engineering rounds could not:
-the dial system is not a neutral container for ethics. Everything
-expressible as \texttt{Objective}+\texttt{Dial} reduces to
-$\sum_i w_i o_i$---act consequentialism with a linear social welfare
-function---so the ``morality dial'' selects points in one theory's parameter
-space, not among theories. Four experiments, enabled by a new
-\texttt{openworld.ethics} module (Rawlsian and lexicographic aggregators,
-deontological constraints as action vetoes, and a moral parliament),
-measure what that restriction costs and what lifting it buys.
-
-\paragraph{Aggregation is an ethical commitment (E24).} On a scarce commons
-where one agent harvests faster than the other, the utilitarian sum,
-Rawlsian maximin~\cite{rawls1971}, and leximin choose different operating
-points from the same outcome table: the sum is \emph{indifferent} between
-harvests of $(6,3)$ and $(5,4)$---both total 9---and so picks the unequal
-allocation arbitrarily, while maximin and leximin select the restraint level
-that lifts the worst-off from \AggUtilWorst{} to \AggMaximinWorst{} at zero
-total cost. Distribution-blindness is not a hypothetical defect of the
-weighted sum; it selects a different world even when an egalitarian free
-lunch exists.
-
-\paragraph{Side constraints cannot be simulated by weights (E25).} A myopic
-cost-weighted nurse becomes \emph{impermissible} at $\lambda > 1$: the
-weighting makes abandoning waiting critical patients optimal
-(\ViolationsDialOnly{} violations across the sweep, four deteriorations,
-outcomes collapsing to $-8$). A Nozickian side constraint~\cite{nozick1974}
----``never choose another action while a critical patient waits,'' enforced
-as a veto on the action set, not a penalty in the score---eliminates every
-violation at every $\lambda$, and here costs nothing in the dial's
-permissible region (\ConstraintOutcomeCost{} outcome points) while
-\emph{rescuing} the impermissible one. Penalties are just more
-utilitarianism; vetoes are a different kind of object, and the framework now
-has both.
-
-\paragraph{Moral uncertainty and the parliament (E26).} An operator who
-does not know the right theory should hedge rather than maximize within one
-theory~\cite{macaskill2020}. Delegates for utilitarian, Rawlsian, and
-deontological positions vote (credence-weighted Borda) over each action; on
-the triage shift, the parliament is never the strictly worst agent under
-\emph{any} theory's own lens---and notably it rescues the lone Rawlsian
-delegate from itself: pure one-step maximin lets critical patients
-deteriorate (worst-off welfare $-6$, two duty violations), while the
-parliament's mixed counsel reaches the same outcome as the best
-single-theory agents ($-3$, zero violations).
-
-\paragraph{Pluralism is visible in the judge (E27).} Grading the same
-twelve dial-swept trajectories under utilitarian, deontological, and
-care-ethics rubrics yields orderings that correlate only partially
-(pairwise Spearman \RubricPluralismRange; the deontological and care
-rubrics track the dial differently than the utilitarian one). Rubric
-framing is a value choice, not a wording choice---a quantitative
-counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
-caution for anyone deploying a single ``ethics rubric'' judge.
+\paragraph{Steerability and the structure of the moral filter.} Objectives and
+dials make values an explicit, inference-time artifact rather than a retrained
+weight, and a moral-philosophy review round shows the dial is not a neutral
+container for ethics---a weighted sum is one ethical theory, and aggregation,
+side constraints, moral uncertainty, and rubric pluralism each behave
+differently (E8, E24--E27). These are a secondary contribution and we report
+them in full in Appendix~\ref{app:moral-dial}.
 
 \subsection{Configuration search}\label{sec:external}
 E9 compares tuning strategies on the triage auto-configuration problem (two
@@ -2335,18 +2354,21 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E63 are introduced across the Results section in thematic
+The experiments E1--E82 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
-do not appear in the text, and the benchmark-scale repair suites E28--E29 are
-described in the Experimental Setup but their dedicated results section was cut.
+do not appear in the text; E28--E29 are described in the Experimental Setup but
+their dedicated results section was cut; and E66, E69--E73, E75, E78, and E79
+were not used (a superseded probe or a negative result excluded from the paper).
+The world-time-compute family E74--E82 (E80 spans several real-data domains and
+the predictive law) carries the central result.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{@{}r p{0.62\textwidth} l@{}}
-\caption{Index of experiments E1--E57. E14 and E53 are retired and do not
-appear in the text; E28--E29 are described in the Experimental Setup but their
-results section was cut.}\label{tab:experiment-index}\\
+\caption{Index of experiments E1--E82. E14, E53 retired and E66/E69--E73/E75/E78/E79
+unused (absent from the text); E28--E29 are described in the Experimental Setup but
+their results section was cut.}\label{tab:experiment-index}\\
 \toprule
 \textbf{E\#} & \textbf{Description} & \textbf{Where} \\
 \midrule
@@ -2423,6 +2445,21 @@ E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} 
 E61 & Verified code vs a trained world model, on control & Fig.~\ref{fig:trained-wm} \\
 E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
 E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
+E64 & Causal DAGs compile to verified structural causal models (SDOH) & App.~\ref{sec:dag} \\
+E65 & Cross-species on MiniGrid: verified code vs.\ DreamerV3 / V-JEPA-2 & \S\ref{sec:minigrid} \\
+E67 & Continuous control: cartpole-swingup vs.\ learned/perceptual models & \S\ref{sec:cartpole} \\
+E68 & Prototyping latency: \ProtoNumWorlds{} worlds across six sectors & \S\ref{sec:proto-latency} \\
+E68b & Recipe audit of the prototyped worlds (validation gate) & \S\ref{sec:proto-latency} \\
+E74 & World-time compute: held-out lift vs.\ model size (diagnosis family) & \S\ref{sec:world-time} \\
+E76 & World-count scaling of the world-time-compute lever & \S\ref{sec:world-time-scale} \\
+E77 & Coding-world transfer of world-time compute (pass@5) & \S\ref{sec:world-time-scale} \\
+E78b & Label-exactness ablation isolates the causal driver & \S\ref{sec:world-time-scale} \\
+E80 & Real-data world-time compute on ARC-AGI (per-world TTT + ladder) & \S\ref{sec:world-time-arc} \\
+E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \S\ref{sec:world-time-domains} \\
+E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
+E80 & Constructive search for generalizing world-combinations & \S\ref{sec:combo-search} \\
+E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
+E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 \end{longtable}
 \endgroup
 
@@ -2503,6 +2540,88 @@ LLM-judge coarseness~\cite{llmjudge2023}.
 
 \section{Additional experiments moved from the main text}\label{app:more}
 The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
+
+\subsection{Steerability and the structure of the moral filter (E8, E24--E27)}\label{app:moral-dial}
+Objectives and dials are a secondary contribution---they make values an editable,
+inference-time artifact---but they raise questions a world-models paper need not
+settle in its main text, so the steerability result and its moral-philosophy
+critique are collected here.
+
+\paragraph{Steerability: the moral dial.}\label{sec:robustness}
+E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
+(Figure~\ref{fig:pareto}). All \ParetoFrontierSize{} of \ParetoLambdas{}
+sweep points are Pareto-optimal, fairness is monotone in $\lambda$, and the
+Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---the
+``interior optimum'' behavior predicted by the tunable-morality literature,
+reproduced here with a dial that can be turned mid-simulation rather than a
+retrained model~\cite{spectrap2025,mas2025,stablevalue2026}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.6\linewidth]{figs/pareto.png}
+\caption{\textbf{Tunable morality (E8).} The welfare--fairness frontier
+traced by sweeping the moral dial $\lambda$ on the commons world. Every point
+is Pareto-optimal; the Nash bargaining optimum is interior. Values are
+declared, weighted artifacts---moving along this frontier requires no
+retraining.}
+\label{fig:pareto}
+\end{figure}
+
+\paragraph{The structure of the moral filter.}\label{sec:moral-structure}
+A fourth review round, written from a moral philosopher's standpoint
+(\texttt{docs/review/}), pressed a charge the engineering rounds could not:
+the dial system is not a neutral container for ethics. Everything
+expressible as \texttt{Objective}+\texttt{Dial} reduces to
+$\sum_i w_i o_i$---act consequentialism with a linear social welfare
+function---so the ``morality dial'' selects points in one theory's parameter
+space, not among theories. Four experiments, enabled by a new
+\texttt{openworld.ethics} module (Rawlsian and lexicographic aggregators,
+deontological constraints as action vetoes, and a moral parliament),
+measure what that restriction costs and what lifting it buys.
+
+\paragraph{Aggregation is an ethical commitment (E24).} On a scarce commons
+where one agent harvests faster than the other, the utilitarian sum,
+Rawlsian maximin~\cite{rawls1971}, and leximin choose different operating
+points from the same outcome table: the sum is \emph{indifferent} between
+harvests of $(6,3)$ and $(5,4)$---both total 9---and so picks the unequal
+allocation arbitrarily, while maximin and leximin select the restraint level
+that lifts the worst-off from \AggUtilWorst{} to \AggMaximinWorst{} at zero
+total cost. Distribution-blindness is not a hypothetical defect of the
+weighted sum; it selects a different world even when an egalitarian free
+lunch exists.
+
+\paragraph{Side constraints cannot be simulated by weights (E25).} A myopic
+cost-weighted nurse becomes \emph{impermissible} at $\lambda > 1$: the
+weighting makes abandoning waiting critical patients optimal
+(\ViolationsDialOnly{} violations across the sweep, four deteriorations,
+outcomes collapsing to $-8$). A Nozickian side constraint~\cite{nozick1974}
+---``never choose another action while a critical patient waits,'' enforced
+as a veto on the action set, not a penalty in the score---eliminates every
+violation at every $\lambda$, and here costs nothing in the dial's
+permissible region (\ConstraintOutcomeCost{} outcome points) while
+\emph{rescuing} the impermissible one. Penalties are just more
+utilitarianism; vetoes are a different kind of object, and the framework now
+has both.
+
+\paragraph{Moral uncertainty and the parliament (E26).} An operator who
+does not know the right theory should hedge rather than maximize within one
+theory~\cite{macaskill2020}. Delegates for utilitarian, Rawlsian, and
+deontological positions vote (credence-weighted Borda) over each action; on
+the triage shift, the parliament is never the strictly worst agent under
+\emph{any} theory's own lens---and notably it rescues the lone Rawlsian
+delegate from itself: pure one-step maximin lets critical patients
+deteriorate (worst-off welfare $-6$, two duty violations), while the
+parliament's mixed counsel reaches the same outcome as the best
+single-theory agents ($-3$, zero violations).
+
+\paragraph{Pluralism is visible in the judge (E27).} Grading the same
+twelve dial-swept trajectories under utilitarian, deontological, and
+care-ethics rubrics yields orderings that correlate only partially
+(pairwise Spearman \RubricPluralismRange; the deontological and care
+rubrics track the dial differently than the utilitarian one). Rubric
+framing is a value choice, not a wording choice---a quantitative
+counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
+caution for anyone deploying a single ``ethics rubric'' judge.
 
 \subsection{Atlas of the \ProtoNumWorlds{} prototyped worlds}\label{sec:world-atlas}
 Figure~\ref{fig:world-atlas} characterizes every world from the prototyping benchmark

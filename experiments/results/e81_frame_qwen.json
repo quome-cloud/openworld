@@ -1,0 +1,32 @@
+{
+  "experiment": "e81-wtc-frame-invariance",
+  "base": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "langs": [
+    "python",
+    "cpp",
+    "java",
+    "js",
+    "go"
+  ],
+  "n_worlds": 20,
+  "ttt_steps": 60,
+  "arms": {
+    "zeroshot": 0.28,
+    "frame_ttt": 0.3,
+    "corrupt": 0.3
+  },
+  "per": {
+    "zeroshot": {
+      "pass": 28,
+      "n": 100
+    },
+    "frame_ttt": {
+      "pass": 30,
+      "n": 100
+    },
+    "corrupt": {
+      "pass": 30,
+      "n": 100
+    }
+  }
+}

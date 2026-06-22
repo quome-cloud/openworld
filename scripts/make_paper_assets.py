@@ -47,6 +47,7 @@ EXPERIMENTS = [
     "e74_scaling", "e76_world_count", "e77_coding",
     "e80_arc_ladder", "e80_arc_ttt",
     "e80_text_listfn", "e80_text_clrs", "e80_bongard",
+    "e81_frame_qwen", "e82_hybrid_qwen",
 ]
 
 
@@ -2413,6 +2414,12 @@ def numbers_tex(d):
     combo_f = combo.get("found") or {}
     lawfit = load("e80_law_fit")
     sym = load("e80_symbolic")
+    # E81 frame-invariance: world-time compute across programming-language frames
+    fr_q = d["e81_frame_qwen"]
+    fr_l = load("e81_frame_llama")
+    # E82 hybrid loop: verified world as data generator + inference backstop
+    hy_q = d["e82_hybrid_qwen"]["results"]
+    hy_l = load("e82_hybrid_llama")["results"]
 
     def _pctnum(v, fmt="{:.2f}"):
         return fmt.format(v) if isinstance(v, (int, float)) else "\\textit{(pending)}"
@@ -2571,6 +2578,38 @@ def numbers_tex(d):
         macro("SymScaleLo", _pctnum((sym.get("scaling_curve", {}) or {}).get(str(sym.get("budgets", [5])[0])))),
         macro("SymScaleHi", _pctnum((sym.get("scaling_curve", {}) or {}).get(str(sym.get("budgets", [5000])[-1])))),
         macro("SymCorrupt", _pctnum((sym.get("corrupt_curve", {}) or {}).get(str(sym.get("budgets", [5000])[-1])))),
+        # E81 frame-invariance: world-time compute across programming-language frames
+        macro("FrameNWorlds", str(fr_q.get("n_worlds", "--"))),
+        macro("FrameNLangs", str(len(fr_q.get("langs", [])))),
+        macro("FrameLangs", ", ".join({"python": "Python", "cpp": "C++", "java": "Java",
+              "js": "JS", "go": "Go"}.get(l, l) for l in fr_q.get("langs", []))),
+        macro("FrameTttSteps", str(fr_q.get("ttt_steps", "--"))),
+        macro("FrameQwenZero", pct(fr_q["arms"]["zeroshot"])),
+        macro("FrameQwenTtt", pct(fr_q["arms"]["frame_ttt"])),
+        macro("FrameQwenCorrupt", pct(fr_q["arms"]["corrupt"])),
+        macro("FrameQwenLift", f"{100 * (fr_q['arms']['frame_ttt'] - fr_q['arms']['zeroshot']):.0f}"),
+        macro("FrameLlamaZero", pct(fr_l["arms"]["zeroshot"])),
+        macro("FrameLlamaTtt", pct(fr_l["arms"]["frame_ttt"])),
+        macro("FrameLlamaCorrupt", pct(fr_l["arms"]["corrupt"])),
+        macro("FrameLlamaLift", f"{100 * (fr_l['arms']['frame_ttt'] - fr_l['arms']['zeroshot']):.0f}"),
+        # E82 hybrid loop: amortization helps strong / hurts weak; verifier backstop lifts both
+        macro("HybridNTrain", str(d["e82_hybrid_qwen"].get("n_train", "--"))),
+        macro("HybridNEval", str(d["e82_hybrid_qwen"].get("n_eval", "--"))),
+        macro("HybridRetry", str(d["e82_hybrid_qwen"].get("r_hybrid", "--"))),
+        macro("HybridQwenPairs", str(hy_q.get("verified_pairs", "--"))),
+        macro("HybridQwenBase", pct(hy_q["base_pass1"])),
+        macro("HybridQwenAmort", pct(hy_q["amortized_pass1"])),
+        macro("HybridQwenHybrid", pct(hy_q["hybrid_pass"])),
+        macro("HybridQwenAmortDelta", f"{100 * (hy_q['amortized_pass1'] - hy_q['base_pass1']):+.0f}"),
+        macro("HybridQwenHybridDelta", f"{100 * (hy_q['hybrid_pass'] - hy_q['base_pass1']):+.0f}"),
+        macro("HybridQwenCalls", f"{hy_q['hybrid_avg_verifier_calls']:.2f}"),
+        macro("HybridLlamaPairs", str(hy_l.get("verified_pairs", "--"))),
+        macro("HybridLlamaBase", pct(hy_l["base_pass1"])),
+        macro("HybridLlamaAmort", pct(hy_l["amortized_pass1"])),
+        macro("HybridLlamaHybrid", pct(hy_l["hybrid_pass"])),
+        macro("HybridLlamaAmortDelta", f"{100 * (hy_l['amortized_pass1'] - hy_l['base_pass1']):+.0f}"),
+        macro("HybridLlamaHybridDelta", f"{100 * (hy_l['hybrid_pass'] - hy_l['base_pass1']):+.0f}"),
+        macro("HybridLlamaCalls", f"{hy_l['hybrid_avg_verifier_calls']:.2f}"),
         # optimal number of worlds (N90 from the 3-point compute curve, per domain)
         macro("WCListfn", _n90("listfn", _arm(lf, "zeroshot") or 0, _arm(lf, "light") or 0, _arm(lf, "heavy") or 0)),
         macro("WCArc", _n90("arc", _arm(arc_t, "zeroshot") or 0, _arm(arc_t, "light") or 0, _arm(arc_t, "heavy") or 0)),
@@ -3938,6 +3977,121 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
     plt.close(fig)
 
 
+def _wilson(p, n, z=1.96):
+    """Wilson 95% interval for a binomial proportion (n small-ish, p near 0/1)."""
+    if not n:
+        return (p, p)
+    d = 1 + z * z / n
+    c = p + z * z / (2 * n)
+    h = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5)
+    return ((c - h) / d, (c + h) / d)
+
+
+def fig_frame_invariance(qwen, llama):
+    """E81: a programming language is a reference FRAME; a problem realized in 5 languages
+    (Python/C++/Java/JS/Go) is one composite world. World-time compute across the other
+    language-frames (frame_ttt) should learn the frame-invariant principle and transfer to a
+    held-out frame; fine-tuning on mismatched frames (corrupt) is the exactness control. The
+    frame lift (frame_ttt - zeroshot) is larger for the weaker base -- the headroom prediction."""
+    groups = [("Qwen2.5-Coder-7B\n(strong base)", qwen), ("Llama-3.1-8B\n(weak base)", llama)]
+    arms = [("zero-shot", "zeroshot", SLATE), ("frame TTT", "frame_ttt", ORANGE),
+            ("corrupt", "corrupt", RED)]
+    fig, ax = plt.subplots(figsize=(7.4, 4.4))
+    gw = 0.24
+    for gi, (label, d) in enumerate(groups):
+        per = d.get("per", {})
+        arm_vals = d.get("arms", {})
+        for ai, (an, key, col) in enumerate(arms):
+            m = arm_vals.get(key)
+            if m is None:
+                continue
+            pn = per.get(key, {})
+            lo, hi = _wilson(m, pn.get("n", 0))
+            x = gi + (ai - 1) * gw
+            ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
+                   yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
+                   error_kw=dict(lw=0.8, alpha=0.6))
+            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+                    fontsize=7.5, color=col)
+        # annotate the frame-TTT delta vs zero-shot (signed: it is ~0 / negative here)
+        z, t = arm_vals.get("zeroshot"), arm_vals.get("frame_ttt")
+        if z is not None and t is not None:
+            top = max(arm_vals.values()) + 0.045
+            col = ORANGE if t >= z else RED
+            ax.annotate(f"{100 * (t - z):+.0f} vs zero-shot", xy=(gi, top), ha="center",
+                        fontsize=9, fontweight="bold", color=col)
+    ax.set_xticks(range(len(groups)))
+    ax.set_xticklabels([g[0] for g in groups], fontsize=9)
+    ax.set_ylabel("held-out language-frame pass rate")
+    ax.set_ylim(0, max(0.5, max(max(d.get("arms", {}).values()) for _, d in groups) + 0.1))
+    ax.set_title("Frame-invariance (E81): cross-language TTT gives no lift over zero-shot;\n"
+                 "only matched$>$corrupt (exactness) survives, on the weak base", fontsize=10.5)
+    from matplotlib.patches import Patch
+    ax.legend(handles=[Patch(fc=c, label=n) for n, _, c in arms], fontsize=8,
+              loc="upper right", framealpha=0.9)
+    ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "frame_invariance.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_hybrid_loop(qwen, llama):
+    """E82: a verified world as data generator AND inference backstop, zero human labels.
+    base -> amortized (QLoRA on self-generated test-passing solutions) -> hybrid (amortized model
+    + verify-and-retry). Amortization helps the strong base but HURTS the weak one (its bootstrap
+    data is too sparse); the hybrid loop lifts both; and the weak base leans on the verifier more."""
+    groups = [("Qwen2.5-Coder-7B\n(strong base)", qwen), ("Llama-3.1-8B\n(weak base)", llama)]
+    arms = [("base pass@1", "base_pass1", SLATE), ("amortized (TTT)", "amortized_pass1", ORANGE),
+            ("hybrid (+ verifier)", "hybrid_pass", TEAL)]
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10.4, 4.4), gridspec_kw={"width_ratios": [2.4, 1]})
+    gw = 0.26
+    for gi, (label, d) in enumerate(groups):
+        r = d.get("results", {})
+        n = d.get("n_eval", 40)
+        base = r.get("base_pass1")
+        for ai, (an, key, col) in enumerate(arms):
+            m = r.get(key)
+            if m is None:
+                continue
+            lo, hi = _wilson(m, n)
+            x = gi + (ai - 1) * gw
+            ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
+                   yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
+                   error_kw=dict(lw=0.8, alpha=0.6))
+            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+                    fontsize=7.5, color=col)
+            if key != "base_pass1" and base is not None:  # signed delta vs base
+                dlt = m - base
+                ax.text(x, 0.02, f"{100 * dlt:+.0f}", ha="center", va="bottom",
+                        fontsize=8, fontweight="bold", color=(TEAL if dlt >= 0 else RED))
+    ax.axhline(0, color="#999", lw=0.6)
+    ax.set_xticks(range(len(groups)))
+    ax.set_xticklabels([g[0] for g in groups], fontsize=9)
+    ax.set_ylabel("held-out pass@1 (HumanEval-X Python)")
+    ax.set_ylim(0, 1.0)
+    ax.set_title("The hybrid loop (E82): amortization helps the strong base, hurts the weak;\n"
+                 "the verifier backstop lifts both", fontsize=10)
+    from matplotlib.patches import Patch
+    ax.legend(handles=[Patch(fc=c, label=n) for n, _, c in arms], fontsize=8,
+              loc="upper right", framealpha=0.9)
+    ax.grid(True, axis="y", alpha=0.25)
+    # right panel: verifier reliance (avg tool calls in the hybrid loop)
+    calls = [d.get("results", {}).get("hybrid_avg_verifier_calls", 0) for _, d in groups]
+    cols = [SLATE, ORANGE]
+    ax2.bar([0, 1], calls, 0.6, color=cols, alpha=0.9)
+    for i, c in enumerate(calls):
+        ax2.text(i, c + 0.04, f"{c:.2f}", ha="center", va="bottom", fontsize=9, fontweight="bold")
+    ax2.set_xticks([0, 1])
+    ax2.set_xticklabels(["Qwen\n(strong)", "Llama\n(weak)"], fontsize=8.5)
+    ax2.set_ylabel("avg verifier calls / problem")
+    ax2.set_ylim(0, max(calls) + 0.7)
+    ax2.set_title("Weak base leans on\nthe verifier more", fontsize=9.5)
+    ax2.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "hybrid_loop.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_world_time_compute(scaling, diag):
     """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
     world models ('world-time compute'), against an offline prior-only floor and a
@@ -4114,6 +4268,8 @@ def main():
     fig_arc_method(data["e80_arc_ttt"])
     fig_worldtime_domains(data["e80_arc_ttt"], data["e80_text_listfn"],
                           data["e80_text_clrs"], data["e80_bongard"])
+    fig_frame_invariance(data["e81_frame_qwen"], load("e81_frame_llama"))
+    fig_hybrid_loop(data["e82_hybrid_qwen"], load("e82_hybrid_llama"))
     fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])

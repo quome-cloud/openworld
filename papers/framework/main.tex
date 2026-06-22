@@ -119,8 +119,8 @@
 
 \vspace{1.1em}
 \begin{center}
-  {\LARGE\bfseries \openworld: A Zero-Dependency Framework for Authoring,\\[2pt]
-   Verifying, Composing, and Serving Symbolic Code World Models\par}
+  {\LARGE\bfseries \openworld: World Computing---Prototyping and\\[2pt]
+   Evaluating Verified Code World Models on Consumer Hardware\par}
 
   \vspace{0.9em}
   {\large
@@ -150,34 +150,41 @@
 {\centering\large\bfseries Abstract\par}
 \smallskip
 \fontsize{9.5}{11.3}\selectfont
-A \emph{world model} is most useful when it is a \emph{shareable, inspectable, verifiable
-artifact}---not a black box of weights. We present \textbf{\openworld}, a zero-dependency
-Python framework that makes authoring, verifying, composing, serving, and sharing a
-\emph{symbolic code world model} a minutes-scale activity. A world is \emph{declared} and its
-dynamics are \emph{synthesized as code and verified before acceptance} (a plan--generate--verify
-relay over syntax, sandboxed behaviour, declared invariants, and an optional critic), so the
-result is an executable, auditable simulator rather than a learned approximation. On a
-\ProtoNumWorlds-world, six-sector benchmark, an agent authors validated worlds at a median of
-\ProtoMedianMinutes{} minutes each. The framework treats every component of a world model as a
-first-class, composable object: a recursive \texttt{CompositeWorld} algebra with verified
-bridges and aggregators (which we show defeats the monolithic-synthesis complexity cliff), a
-symmetric perceive$\to$world$\to$emit boundary that feeds messy real inputs into the verified
-core with zero added dynamics error, open \emph{objectives and inference-time dials} that make
-values an editable artifact (with the moral structure---aggregation, side constraints, moral
-uncertainty---represented rather than approximated), an \emph{agents-as-a-judge} selector, and a
-\emph{portable spec + model card} that round-trips losslessly so a world can be published and
-checked before it is trusted. We exercise the framework across a wide range of domains---from
-emergent economies and corporate org dynamics to relativity, trading, brain simulators, and
-optimal-transport drift detection---to show the expressiveness of declared, verified dynamics.
-\textbf{The scope is the symbolic-state regime}: where dynamics are writable, a correct world
-model is a zero-training prototype with no compounding error. A companion paper studies what
-these worlds \emph{enable} as training signal (\emph{world-time compute}). All code, the
+We introduce \textbf{world computing}: the discipline of building and operating \textbf{world
+computers}---the combination of hardware and software that instantiates, verifies, composes, and
+runs \emph{simulated worlds with verifiable dynamics}. Just as a general-purpose computer makes
+\emph{computation} a cheap, composable, inspectable commodity, a world computer aims to do the
+same for \emph{worlds}. We present \openworld{}, a zero-dependency software substrate for world
+computing, and study the two questions a new substrate must answer: how cheaply can worlds be
+\emph{prototyped}, and how well can they be \emph{evaluated}? We answer both by benchmarking the
+world computer the way one benchmarks any computer---on \textbf{cost}, \textbf{latency}, and
+\textbf{performance}. \textbf{Prototyping (cost \& latency).} A world is \emph{declared} and its
+dynamics \emph{synthesized as code and verified before acceptance} (a plan--generate--verify
+relay over syntax, sandboxed behaviour, declared invariants, and an optional critic); on a
+\ProtoNumWorlds-world, six-sector benchmark an agent authors validated, servable worlds at a
+median of \ProtoMedianMinutes{} minutes each---on \emph{consumer hardware} with a local LLM
+backbone, no datacenter training---and once built, a verified world is plain code that rolls out
+at native speed (orders of magnitude faster than a per-step LLM, and inspectable). \textbf{Evaluation
+(performance \& trust).} We measure what makes a world trustworthy: validation and servability
+gates, exact-rollout fidelity with no compounding
+error, compositional correctness (a recursive \texttt{CompositeWorld} algebra with verified
+bridges and aggregators that defeats the monolithic-synthesis complexity cliff), a symmetric
+perceive$\to$world$\to$emit boundary that adds zero dynamics error, open inference-time value
+dials, an \emph{agents-as-a-judge} selector, and \emph{portable specs + model cards} that
+round-trip losslessly so a world can be audited before it is trusted. We exercise the substrate
+across a wide range of domains---economies, corporate organizations, relativity, trading, brain
+simulators, optimal-transport drift detection---to show the expressiveness of declared, verified
+dynamics. \textbf{Scope:} the symbolic-state regime, where dynamics are writable; pixel-native
+domains remain the territory of learned models. What these worlds \emph{enable} as training
+signal---\emph{world-time compute}---is the subject of a companion paper; here the worlds, the
+hardware that runs them, and their evaluation are the object of study. All code, the
 \ProtoNumWorlds{} recipes, and this manuscript regenerate from one repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
-world models; code world models; neuro-symbolic AI; program synthesis; simulation frameworks;
-composition; value alignment; agents-as-a-judge; local LLMs.
+world computing; world computers; world models; code world models; program synthesis;
+simulation frameworks; prototyping; verification and evaluation; composition; agents-as-a-judge;
+local LLMs.
 
 \medskip
 \noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/jim-schwoebel/openworld}{\texttt{github.com/jim-schwoebel/openworld}}\\
@@ -190,25 +197,42 @@ composition; value alignment; agents-as-a-judge; local LLMs.
 
 % ============================================================================
 \section{Introduction}
-\textbf{Manufacturing experience.} A language model generalizes across a domain only after
-seeing many real, labeled examples of it---and in most domains that experience is scarce and
-costly. We study a way to manufacture it cheaply. When a domain's dynamics can be written as
-code, a single template instantiates into many \emph{world models}---simulators whose
-dynamics are executable, verifiable programs over symbolic state---each an inexhaustible
-generator of \emph{exactly}-labeled trajectories. Fine-tuning a model on trajectories
-traversed through many such worlds of a domain---\emph{world-time compute}
-(a training-time analogue of test-time compute, studied in the companion paper~\cite{openworld_wtc})---lifts its
-generalization to \emph{held-out} worlds it never trained on. Two things make this work, and
-the paper is organized around them. First, the worlds must not lie: a traversed world teaches
-the right rules only if its dynamics are correct, so we build them as \emph{verified code},
-not learned approximations---exact over long rollouts with no compounding error
-(Figure~\ref{fig:hero}A). Second, world-time compute needs \emph{many} worlds, which is
-practical only if each is cheap to build; the enabling artifact is \openworld{}, a
-zero-dependency framework that turns authoring a verified world model
-(perceive\,$\to$\,world\,$\to$\,emit\,$\to$\,act, served and shareable) into a minutes-scale,
-push-button activity (\S\ref{sec:prototyping}). PyTorch did not give deep learning new
-models; it made them fast to \emph{prototype}, and an explosion followed---world models have
-lacked that tool, and we use it here to manufacture training experience.
+\textbf{World computing.} A general-purpose computer is hardware and software for processing
+\emph{programs over data}; we propose the analogous discipline for processing \emph{worlds}.
+Define a \textbf{world computer} as the combination of hardware and software that instantiates,
+verifies, composes, and runs \emph{simulated worlds with verifiable dynamics}---worlds whose
+transition function is executable, checkable code rather than learned weights---and
+\textbf{world computing} as the study and practice of building and operating them. Where
+classical computing made \emph{computation} a cheap, composable, inspectable commodity, world
+computing aims to do the same for \emph{simulated worlds}: author a world in minutes, verify its
+dynamics before trusting them, compose worlds into larger worlds, serve them as live services,
+and share them as portable, auditable artifacts. This paper presents \openworld{}, a
+zero-dependency software substrate for world computing that turns authoring a verified world
+model (perceive\,$\to$\,world\,$\to$\,emit\,$\to$\,act, served and shareable) into a
+minutes-scale, push-button activity (\S\ref{sec:prototyping}) on consumer hardware. The unit it
+processes is a \emph{world model}: a simulator that, given a state and an action, predicts the
+next state, letting an agent plan ``in imagination'' rather than by trial~\cite{ha2018world}.
+
+\textbf{Why verified code.} A world computer's worlds must not lie: their value---for planning,
+for analysis, or as the training signal studied in the companion paper---depends on their
+dynamics being \emph{correct}. So \openworld{} builds dynamics as \emph{verified code},
+synthesized and then checked before acceptance, rather than as learned approximations: exact
+over long rollouts with no compounding error (Figure~\ref{fig:hero}A). PyTorch did not give deep
+learning new models; it made them fast to \emph{prototype}, and an explosion followed---world
+models have lacked that tool. One application we highlight is \emph{manufacturing training
+experience}: because a verified world labels trajectories exactly for free, fine-tuning on
+trajectories from many worlds of a domain (\emph{world-time compute}) lifts a model's
+generalization to held-out worlds, the subject of the companion paper~\cite{openworld_wtc}. But
+a world computer is useful whether or not one ever fine-tunes.
+
+\textbf{Evaluating a world computer.} A substrate is only as good as its measured economics, so
+we treat \openworld{} as a system to benchmark on the three axes one benchmarks any
+computer---\emph{cost} (compute and wall-clock to author and to run a world, on consumer
+hardware), \emph{latency} (time-to-first-validated-world, and per-step rollout time), and
+\emph{performance} (validation and servability rates, exact-rollout fidelity, and compositional
+correctness). The paper is organized around these: prototyping cost and latency
+(\S\ref{sec:prototyping}), then the components and evaluation that establish performance and
+trust, then a breadth of domain demonstrations that probe the substrate's expressiveness.
 
 A world model is an agent's internal simulator: given a state and an action, it
 predicts the next state (and/or observation), letting the agent plan ``in

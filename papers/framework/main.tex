@@ -660,37 +660,13 @@ deterioration events). Oracles are hand-written
 compared against them exactly, including on a fixed probe suite that
 exercises clamping, empty-queue, and interaction branches.
 
-\paragraph{The coding world.} Program repair is the flagship use case:
-well-known, objectively scored, and natively symbolic~\cite{humaneval2021}.
-Each of \NumTasks{} tasks is a buggy Python function plus a hidden test suite
-spanning classic defect archetypes (off-by-one ranges and binary-search
-bounds, inverted comparisons, missing normalization, wrong base cases,
-unsorted medians, order-destroying dedup, early imbalance, whitespace
-splitting, accumulator resets, integer-division truncation, overlapping
-counts, dropped final runs, and degenerate-input handling). The world's
-transition \emph{is} test execution: a submitted patch runs bit-exactly in a
-sandbox with a wall-clock alarm (a looping patch fails rather than hangs),
-and failing-test feedback enters the state for the next attempt.
-
-\paragraph{Benchmark-scale repair (E28--E29).} Beyond the single-function
-benchmark, two SWE-bench-style suites probe repair at module scale. Each
-instance carries a natural-language issue report (symptoms and a repro, never
-the fix), a buggy module (functions or a stateful class), two hidden suites
-(\texttt{fail\_to\_pass} exercising the defect, \texttt{pass\_to\_pass}
-guarding regressions), and an explicit world specification whose
-\texttt{submit\_patch} dynamics run both suites bit-exactly; solving requires
-zero failures in \emph{both}, so a fix that breaks a passing test does not
-count. The \emph{atomic} suite (E28, $n=\SweAtomicN$) plants one
-issue-described defect per instance; the \emph{staged} suite (E29,
-$n=\SweStagedN$) plants a second, latent defect that surfaces only as a new
-failing test once the issue-visible defect is fixed. Both run a paired
-ablation across the \texttt{qwen2.5} ladder (1.5B/3B/7B): the same model
-\emph{single-shot} (one completion from issue + module) versus \emph{in-world}
-(up to \SweBudget{} \texttt{submit\_patch} steps; the first prompt is
-identical to single-shot, and exact failing-test feedback enters from the
-second attempt onward). An expanded 20-instance atomic suite with additional
-regression traps ships in the repository
-(\texttt{datasets/openworld-repairbench/}).
+\paragraph{The coding world.} A second symbolic world---program repair---exercises the
+substrate's verification and judge machinery: each of \NumTasks{} tasks is a buggy Python
+function plus a hidden test suite over classic defect archetypes, and the world's transition
+\emph{is} test execution (a submitted patch runs bit-exactly in a sandbox with a wall-clock
+alarm, and failing-test feedback enters the state for the next attempt). It is the substrate
+that matters here, not a repair leaderboard; benchmark-scale (SWE-bench-style) repair suites
+ship in the repository (\texttt{datasets/openworld-repairbench/}).
 
 \paragraph{Composition, nesting, and changing rules (E30--E32).} Three
 experiments exercise \texttt{CompositeWorld}, a wrapper whose state nests its
@@ -725,31 +701,28 @@ Ollama on an Apple-silicon laptop: \texttt{qwen2.5:7b} (generator, judge,
 critic in E3), \texttt{qwen2.5:3b} (small generator in E2/E3),
 \texttt{qwen2.5:1.5b} (repair agent in E5/E6/E13/E17), and---for
 cross-family replication (E16)---\texttt{llama3.1:8b} (Meta) and
-\texttt{gemma2:9b} (Google). The trained baselines in E12/E19 are plain
-numpy models. No cloud APIs, no fine-tuning, and no training compute beyond
-the baselines' seconds-scale fitting.
+\texttt{gemma2:9b} (Google). No cloud APIs and no fine-tuning---consumer
+hardware throughout, which is the point: a world computer that runs where its
+users are.
 
-\paragraph{Baselines.} The learned-dynamics family is represented two ways.
-(i) \texttt{LLMTransition}: the same backbone predicting each next state
-directly from the same description and rules---sharing the symbolic engine's
-knowledge while exhibiting the per-step stochastic prediction structure of
-learned models. (ii) \emph{Trained} models (E12): a two-hidden-layer
-MLP and a 1-nearest-neighbor memorizer, each trained on $K \in \{100, 1000,
-10000\}$ environment transitions collected by a random policy---real learned
-dynamics with a measured sample-efficiency curve. We are explicit that
-neither is a trained Dreamer; laptop-scale reimplementation of the
-pixel-native family is infeasible, which is itself part of the comparison
-(DreamerV3-class systems require millions of environment
-steps~\cite{dreamerv3}).
+\paragraph{Baselines and latency.} For runtime, the comparator is
+\texttt{LLMTransition}: the same backbone predicting each next state directly
+from the same description and rules---sharing the symbolic engine's knowledge
+but with the per-step inference structure of a learned model. It serves as the
+\emph{latency} baseline (per-step rollout throughput, steps/s, E04) and the
+fidelity baseline (it accumulates error over a rollout). We do not reimplement
+the pixel-native learned family (DreamerV3-class systems require millions of
+environment steps~\cite{dreamerv3}); we compare against it on \emph{properties}
+(Table~\ref{tab:related}), not a laptop-scale retrain.
 
 \paragraph{Metrics and statistics.} Rate metrics carry 95\% Wilson confidence
 intervals. Dynamics fidelity uses exact-state match (every field equal),
-first-divergence step, and final-state $L^1$ error. Program repair reports
-pass@1 and pass@budget (4 attempts); the controlled selection comparison
-(E13) is a paired design on shared candidate sets with an exact two-sided
-McNemar test. Judge alignment uses Spearman rank correlation with permutation
-p-values (10{,}000 shuffles). Seeds are fixed in each script; every number in
-this paper regenerates via \texttt{python3 scripts/make\_paper\_assets.py}.
+first-divergence step, and final-state $L^1$ error; runtime latency is per-step
+rollout throughput (steps/s). The judge selection comparison (E13) is a paired
+design on shared candidate sets with an exact two-sided McNemar test, and judge
+alignment uses Spearman rank correlation with permutation p-values (10{,}000
+shuffles). Seeds are fixed in each script; every number in this paper
+regenerates via \texttt{python3 scripts/make\_paper\_assets.py}.
 
 \paragraph{Calibration, pilots, and internal review.} Design changes made
 after pilots are reported rather than hidden: (a) the verifier ablation (E3)
@@ -764,8 +737,30 @@ specific to the stated Ollama snapshots and Q4\_K\_M quantization.
 
 % ============================================================================
 \section{Results}\label{sec:results}
+We benchmark the substrate as a world computer on the thesis's three axes. \emph{Cost and
+latency} to prototype were established in \S\ref{sec:proto-latency} (\ProtoNumWorlds{} validated
+worlds at a median of \ProtoMedianMinutes{} minutes, on consumer hardware). This section reports
+\emph{performance}---rollout fidelity and runtime latency (\S\ref{sec:perf})---and the
+\emph{evaluation and trust} machinery behind it: what each verification gate buys
+(\S\ref{sec:guardrails}), judge-based selection (\S\ref{sec:judge-results}), composition
+defeating the complexity cliff (\S\ref{sec:composition}), and the perceive$\to$world$\to$emit
+boundary adding zero dynamics error (\S\ref{sec:perception}).
 
-\subsection{Supporting ablations}
+\subsection{Performance: rollout fidelity and runtime latency (E04, E11)}\label{sec:perf}
+The two runtime properties a world computer must deliver are \emph{fidelity} (correct dynamics)
+and \emph{latency} (fast dynamics). \textbf{Fidelity:} across the three oracle worlds, accepted
+7B-synthesized dynamics are exact on \MultiCodeExact{} \RolloutSteps-step closed-loop rollouts
+(95\% CI \MultiCodeCI) and answer $10\times$ out-of-distribution probes at \CodeOODRate{}, with no
+compounding error---a single verified transition is reused at every step, so a depth-$t$ rollout
+stays bit-exact rather than accumulating per-step error. \textbf{Latency:} the same dynamics, as
+plain code, roll out at \CodeStepsPerSec{} steps/s against \LLMStepsPerSec{} steps/s for the
+per-step LLM next-state proxy (E04)---a runtime gap of $\sim$47{,}000$\times$, with the
+hand-written function oracle as the ceiling. The one-time synthesis cost (a few seconds,
+\S\ref{sec:proto-latency}) is therefore amortized over unlimited fast, exact rollouts: a world
+computer pays its error budget and its compute budget once, at build time
+(Figure~\ref{fig:worldcomputer}B).
+
+\subsection{Verification guardrails, measured}\label{sec:guardrails}
 \subsubsection{Verification-gate ablation: correctness gained per gate}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,
 using the 3B generator at high temperature so that defective candidates
@@ -1089,9 +1084,8 @@ forecasts the day-\PercHorizon{} infected count \emph{exactly}, both
 in-distribution (\PercWorldIn) and at $10\times$ population scale
 (\PercWorldOod), where an end-to-end MLP given the same inputs scores
 \PercMlpIn{} in-distribution (\PercMlpInTol{} within $\pm2$) and \PercMlpOod{}
-out of distribution (Figure~\ref{fig:perception}A): learning a 14-step
-nonlinear outcome directly neither fits nor extrapolates, while rolling a
-declared model forward is exact at any scale. Crucially, the value survives
+out of distribution (Figure~\ref{fig:perception}A), while rolling the declared
+model forward is exact at any scale. Crucially, the value survives
 imperfect perception in a principled way. Because the dynamics add zero error,
 end-to-end forecast accuracy equals \emph{perception} accuracy
 (Figure~\ref{fig:perception}B): a perceptor right 75\% of the time yields 75\%

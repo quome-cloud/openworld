@@ -2151,6 +2151,38 @@ zero-data lever that is strongest precisely where today's data-hungry learned wo
 weakest---short, specifiable reasoning---and that cleanly cedes the long-horizon, perception-heavy
 regime to them.
 
+\paragraph{Three routes to use a world model.} A verified world model is a reusable artifact, and
+it is useful whether or not one ever fine-tunes; world-time compute is one of three ways to spend
+it (Table~\ref{tab:routes}). \emph{Route 1---as a tool:} serve the world and call it---plan
+through it, query exact next-states, or use it as a verifier (no training; exact, auditable;
+\S\ref{sec:planning}, \S\ref{sec:minigrid}). \emph{Route 2---per-world test-time training:}
+distil a single world's exactly-labelled trajectories into weights with QLoRA, amortising that
+world's skill for tool-free inference (\S\ref{sec:world-time-arc}). \emph{Route 3---world-time
+compute:} traverse a \emph{family} of verified worlds and fine-tune to generalise to held-out
+worlds (\S\ref{sec:world-time}, \S\ref{sec:world-time-law}). The \emph{hybrid} composes them: use
+the tool to \emph{generate} exact trajectories, training to \emph{internalise} them, and the
+exact tool as a fallback for high-stakes queries---the tool bootstraps the data, training
+amortises it, and exactness is recoverable on demand. This is also the cleanest reply to ``is it
+just fine-tuning?'': the artifact has value with zero training (Route 1); training is one way to
+spend it.
+
+\begin{table}[t]\centering\small
+\begin{tabular}{lcccc}
+\toprule
+Route & Exact? & Training & Tool at inference & Generalises to new worlds \\
+\midrule
+1.\ Tool & yes & none & yes & n/a (use any world) \\
+2.\ Per-world TTT & approx. & QLoRA, one world & no & within the world \\
+3.\ World-time compute & approx. & QLoRA, many worlds & no & yes (across the family) \\
+Hybrid & on fallback & QLoRA & only when unsure & yes, with exact backstop \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Three routes to use a verified world model}, plus the hybrid. Need
+exactness/audit $\to$ Route 1; amortise one world $\to$ Route 2; generalise a family $\to$
+Route 3; best of both $\to$ Hybrid.}
+\label{tab:routes}
+\end{table}
+
 \paragraph{Value alignment as an open specification.} The dial experiments
 ground the alignment claim: because objectives are declared artifacts, the
 welfare--fairness frontier is \emph{operational}---an operator moves along it

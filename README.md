@@ -73,6 +73,34 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 
 ---
 
+## 🧭 Three ways to use a world model — pick your path
+
+A verified world model is a reusable artifact, and it is useful **whether or not you ever fine-tune**. There are **three routes to spend it**, plus a hybrid that combines them.
+
+**Route 1 — Use it as a tool (no training).** Serve the world and call it: plan through it, query exact next-states, or use it as a verifier. Exact, auditable, zero training.
+```bash
+openworld serve specs/*.json --allow-code --open
+#  POST /step  /rollout  /predict  /run    ·    WS /live
+```
+*Pick this when* you have the world at inference and want exact, auditable answers or planning.
+
+**Route 2 — Distill one world into the model (test-time training).** Generate exactly-labeled trajectories from a single world and QLoRA-fine-tune on them, so that world's skill is amortized into weights (no tool needed at inference). → `experiments/e80_*_ttt.py`
+*Pick this when* you want one world's skill baked in for fast, tool-free inference.
+
+**Route 3 — Train across many worlds (*world-time compute*).** Traverse a *family* of verified worlds and fine-tune → generalize to **held-out** worlds you never trained on. → `experiments/e74_scaling.py`, `e76_world_count.py`, `e80_*`
+*Pick this when* you want a model that generalizes across a domain, not just one task.
+
+**Hybrid (the powerful one).** Use **Route 1** to *generate* exact trajectories (plan through the tool → verified data), **Route 2/3** to *internalize* them, and **fall back to the tool** for high-stakes queries. The tool bootstraps the data; training amortizes it; the tool stays the exact oracle.
+
+| | exact? | training | tool at inference | generalizes to new worlds |
+|---|---|---|---|---|
+| **1 · Tool** | ✅ exact | none | yes | n/a (use any world) |
+| **2 · Per-world TTT** | approximate | QLoRA, one world | no | within the world |
+| **3 · World-time compute** | approximate | QLoRA, many worlds | no | ✅ across the family |
+| **Hybrid** | ✅ on fallback | QLoRA | only when unsure | ✅ + exact backstop |
+
+> Decision line: need exactness/audit → **Route 1**; amortize one world → **Route 2**; generalize a family → **Route 3**; best of both → **Hybrid**.
+
 ## 📊 Empirical baselines
 
 Verified-code dynamics vs. learned / LLM dynamics on the framework's own benchmark

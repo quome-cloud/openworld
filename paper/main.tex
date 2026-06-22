@@ -167,7 +167,7 @@ collapse. Exact labels, rather than task variety alone, are what separates world
 compute from domain randomization---and a corrupted-label control confirms it.
 On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS algorithms) the
 same lever holds as \emph{per-world} test-time training---scaling with compute and
-collapsing under label corruption---and obeys a predictive law: the gain is largest for
+collapsing under label corruption---and obeys a predictive regularity: the gain is largest for
 \emph{few-step} reasoning and small/weak models, and fades for long reasoning chains, for
 tasks that must be induced from rich perception, and as a task saturates; cross-task
 transfer is weak where worlds share no skill.
@@ -387,9 +387,14 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
 \paragraph{Positioning in the field.} \openworld{} builds on the code-world-model
 program~\cite{worldcoder2024,cwmgames2025}---LLM-synthesized, verified code
 dynamics---but its contribution is what that machinery \emph{enables}: world-time compute,
-which turns many verified worlds into exactly-labeled training signal. This is distinct from
-domain randomization and procedural task generation, where experience comes from a single
-(often hand-coded or learned) simulator: here every world is independently synthesized and
+which turns many verified worlds into exactly-labeled training signal. Its closest relatives
+are the \emph{self-training} methods that retrain a model on its own verifier-filtered outputs
+(STaR~\cite{star2022}, ReST~\cite{rest2023,restem2024}, expert iteration~\cite{expertiteration2017},
+rejection-sampling fine-tuning~\cite{rft2023}, verifiable rewards~\cite{rlvr2024}); we differ in
+\emph{what} verifies (a full world model with dynamics, so the unit is a verified trajectory, not
+a checked answer) and in the \emph{generalization axis} (held-out worlds in a family). It is also
+distinct from domain randomization and procedural task generation, where experience comes from a
+single (often hand-coded or learned) simulator: here every world is independently synthesized and
 verified, and the open question we frame is whether that label \emph{exactness}, not task
 variety, drives the held-out gains. The supporting machinery extends the open-specification
 stance of the value-alignment literature~\cite{spectrap2025,mas2025} and judge-based
@@ -841,7 +846,14 @@ world-level train/test split, as in supervised learning): fine-tune a model on t
 \emph{train} specialties, then measure diagnostic accuracy on \WTNumTestWorlds{}
 \emph{unseen} specialties (\WTNumCases{} cases), bracketed by a prior-only floor (\WTFloor)
 and an oracle handed the rules (\WTOracle). Figure~\ref{fig:diagnosis-world} walks through a
-single such world---a hidden-state POMDP the model learns to invert.
+single such world---a hidden-state POMDP the model learns to invert. To be precise about what
+transfers: each test prompt \emph{states that specialty's profiles} (its rules) in context, and
+the base baseline is conditioned on the \emph{same} prompt---so the lift is not the fine-tuned
+model reading a table the baseline cannot (both see the rules), but fine-tuning teaching the
+model to \emph{apply} provided rules in a way that carries to symptom\,$\to$\,disease maps it
+never trained on. This is the in-context regime of test-time training, one rung more general
+(across rule-sets, not within one); internalising fully \emph{latent} dynamics is harder and we
+do not claim it here.
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.98\linewidth]{figs/diagnosis_world.png}
@@ -1091,21 +1103,23 @@ latent concept must be induced from rich perception, not symbolic input.}
 \label{fig:worldtime-domains}
 \end{figure}
 
-\subsection{A predictive law for world-time compute (E80)}\label{sec:world-time-law}
-The effect is regular enough across E80 to state as a \emph{law}. World-time compute follows a
+\subsection{A predictive regularity for world-time compute (E80)}\label{sec:world-time-law}
+The effect is regular enough across E80 to state as a \emph{predictive regularity}---we stop
+short of calling it a law, since it is fit over \LawNDomains{} domains with single-seed runs and
+one out-of-sample check, and the constants are learner-specific. World-time compute follows a
 \textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
-whose asymptote $C$ is set by \textbf{identifiability $\times$ realizability $\times$ headroom}
-and which collapses to base without \textbf{exact labels}. We validate it as a conjunction of
+whose asymptote $C$ tracks \textbf{identifiability $\times$ realizability $\times$ headroom}
+and which collapses to base without \textbf{exact labels}. We test it as a conjunction of
 falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and three modalities
-(symbolic text, vision, and tabular).
+(symbolic text, vision, and tabular); the \emph{form} is what travels, not point predictions.
 
 \paragraph{Clause 1 (scaling): a small probe predicts the asymptote---universally.} A light dose
 of world-time compute predicts the heavy-dose asymptote: within-domain Spearman is \LawWithinArc{}
 (ARC), \LawWithinListfn{} (List Functions), \LawWithinClrs{} (CLRS), \LawWithinBongard{}
 (Bongard, vision), and \LawWithinTabular{} (tabular). A \emph{leave-one-domain-out} fit---train
 the relation on the other domains, predict the held-out one---reaches $R^2{=}\LawLodoRtwo{}$, and
-the \emph{simplest} model (light alone) beats adding parameters, the signature of a law rather
-than an overfit. The decisive check is \emph{out-of-sample}: the law fit on grids, lists,
+the \emph{simplest} model (light alone) beats adding parameters, the signature of a real
+regularity rather than an overfit. The decisive check is \emph{out-of-sample}: the law fit on grids, lists,
 algorithms, and vision predicts per-world lift on a brand-new \textbf{tabular} domain it never
 saw, at Spearman $\LawTabOOS{}$---it forecasts an unseen modeling problem, not a curve fit to
 familiar ones.
@@ -1954,6 +1968,17 @@ accuracy on \emph{held-out} worlds never fine-tuned on (E74, E76), which same-wo
 fine-tuning cannot do. Where neither holds---heterogeneous worlds with no shared skill
 (E71, E73), or a benchmark of per-task-novel rules where cross-task transfer stays weak
 (ARC, \S\ref{sec:world-time-arc})---it is, fairly, just expensive fine-tuning, and we say so.
+This places world-time compute squarely in the \emph{self-training} lineage---%
+STaR~\cite{star2022}, ReST and ReST-EM~\cite{rest2023,restem2024}, expert
+iteration~\cite{expertiteration2017}, rejection-sampling fine-tuning~\cite{rft2023}, and
+learning from verifiable rewards~\cite{rlvr2024}---all of which retrain a model on its own
+outputs filtered by a correctness check. Two differences are the contribution, not the loop:
+the verifier is a \emph{full world model with dynamics}, so the training unit is a verified
+\emph{trajectory} (a state-action-next-state transition), not a checked final answer; and the
+target is a \emph{different generalization axis}---held-out \emph{worlds} in a family, rather
+than the same task improved in place. In those terms the corrupted-label ablation is precisely
+a verifier-reliability study: the failure mode (training on confidently-wrong self-labels) that
+self-training most fears, here ruled out by construction.
 
 \paragraph{When does it pay off? Few-step reasoning.} Pulling the results together
 (\S\ref{sec:world-time-domains}) yields a single operating regime. Verified world models and

@@ -1174,6 +1174,93 @@ predictive but \emph{constructive}---it turns the NP-hard search for a generaliz
 into a guided one and locates a family inside a set built to have none, while the random-subset
 control stays at the heterogeneous floor (the law's null, confirmed).
 
+\subsection{Composites with varying rules: language frames and the invariant principle (E81)}\label{sec:frame-invariance}
+Every world so far has one rule-set. But a single computational \emph{principle} can be expressed
+under many rule-sets, and world-time compute should recover the principle that is invariant across
+them---a reference-frame view of generalization. We make this concrete with programming: a
+\textbf{composite} world is one programming problem, and its \textbf{sub-worlds} are that problem
+realized in \FrameNLangs{} languages (\FrameLangs)---each a verified code world whose transition is
+that language's tests executing. A language is a \emph{frame}: the same principle in different
+coordinates. We build \FrameNWorlds{} such composites from HumanEval-X and ask whether traversing
+the other language-frames teaches the frame-invariant principle well enough to solve a
+\emph{held-out} frame. For each problem and target language we measure three arms: \emph{zero-shot}
+(the base model on the held-out frame), \emph{frame TTT} (\FrameTttSteps{} steps of QLoRA on the
+\emph{other} languages' prompt$\to$solution pairs for that same problem, then evaluate the held-out
+frame), and \emph{corrupt} (the same budget on \emph{mismatched}-language pairs---the exactness
+control). We run two open-weight bases of differing coding strength: Qwen2.5-Coder-7B (strong) and
+Llama-3.1-8B (weak).
+
+This is the clearest \emph{negative} in the paper, and we report it as a boundary
+(Figure~\ref{fig:frame-invariance}). Cross-frame transfer does not beat zero-shot on either base.
+The strong coder moves only \FrameQwenZero{}$\to$\FrameQwenTtt{} (within Wilson noise at $n{=}100$),
+and the \emph{weak} base, where the headroom hypothesis predicted the largest gain, instead
+\emph{drops} (\FrameLlamaZero{}$\to$\FrameLlamaTtt{}). The only structure that survives is a weak
+exactness ordering on the weak base---matched frames beat corrupted ones (\FrameLlamaTtt{} vs
+\FrameLlamaCorrupt)---but even matched frames fail to recover the zero-shot baseline. So unlike the
+diagnosis-world (E74) and ARC (E80) settings, where world-time compute lifts held-out accuracy,
+traversing the language-frames of one problem does \emph{not} teach a transferable principle: a
+held-out language behaves as its own skill, and a handful of TTT steps on sibling languages perturbs
+the model more than it informs it. The honest lesson is a limit on the reference-frame analogy---
+composites whose sub-worlds have genuinely different rule-sets (languages) are not automatically a
+single learnable frame, and exactness (matched $>$ corrupt) is necessary but far from sufficient for
+transfer. The clean positive on \emph{this} substrate comes not from cross-frame TTT but from the
+verified oracle used as a generator and backstop, which we isolate next (E82).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{figs/frame_invariance.png}
+\caption{\textbf{Frame-invariance across programming-language frames is a negative (E81).} A
+composite world is one problem in \FrameNLangs{} languages; \emph{frame TTT} fine-tunes on the other
+languages and evaluates a held-out language ($n{=}100$ problem$\times$language holdouts per base).
+Cross-frame TTT does not beat zero-shot on either base---the strong coder is flat
+(\FrameQwenZero{}$\to$\FrameQwenTtt{}) and the weak base drops
+(\FrameLlamaZero{}$\to$\FrameLlamaTtt{}); only the matched~$>$~corrupt ordering on the weak base
+(\FrameLlamaTtt{} vs \FrameLlamaCorrupt) survives. We report this as a boundary of world-time
+compute. Error bars are Wilson 95\% intervals.}
+\label{fig:frame-invariance}
+\end{figure}
+
+\subsection{The hybrid loop: a verified world as generator and backstop (E82)}\label{sec:hybrid-loop}
+E81 shows that traversing frames for free transfer fails on code; the value of a verified world here
+is its \emph{exactness}, used directly. E82 isolates that, putting all three routes
+(Table~\ref{tab:routes}) in one open-weight, zero-human-label experiment on HumanEval-X Python, whose
+test suite is a perfect verifier. \emph{Route~1 (tool as generator):} sample from the base model and
+keep only test-passing solutions---exact training data with no labels (\HybridQwenPairs/\HybridNTrain{}
+kept for Qwen, \HybridLlamaPairs/\HybridNTrain{} for Llama). \emph{Route~2 (amortize):} QLoRA-tune on
+those verified solutions and re-measure pass@1. \emph{Route~3 (hybrid):} the amortized model
+generates, the tool verifies, and on failure it retries up to \HybridRetry{} times. We run the same
+two bases as E81 over \HybridNEval{} held-out problems (Figure~\ref{fig:hybrid-loop}).
+
+Three findings, one of them a caution. First, \textbf{amortization is not free}: self-distilling on
+verified solutions \emph{helps} the strong base (\HybridQwenBase{}$\to$\HybridQwenAmort{},
+\HybridQwenAmortDelta{} pts) but \emph{hurts} the weak one (\HybridLlamaBase{}$\to$\HybridLlamaAmort{},
+\HybridLlamaAmortDelta{} pts)---the weak model's bootstrap set is sparser and noisier, and tuning on
+it perturbs more than it teaches. So the naive ``smaller models gain more'' prediction is
+\emph{falsified} for pure test-time training on this task. Second, \textbf{the hybrid loop lifts
+both} above base (\HybridQwenHybridDelta{} pts for Qwen to \HybridQwenHybrid{};
+\HybridLlamaHybridDelta{} pts for Llama to \HybridLlamaHybrid{}): the verifier backstop recovers what
+amortization alone risks, and is the robustly-positive route regardless of base strength. Third, the
+headroom signal that \emph{does} survive is \textbf{verifier reliance}: the weak base calls the tool
+far more often inside the loop (\HybridLlamaCalls{} vs \HybridQwenCalls{} calls/problem). The
+practical reading maps onto the three routes: amortization (Route~2) pays off only when the base is
+strong enough to generate clean self-training data; the hybrid (Route~3) is the safe default; and a
+weaker model simply shifts more of the work onto the exact world. The exactness that E45 et al.\ buy,
+and that E81 found necessary-but-insufficient for transfer, is here \emph{sufficient}---when the world
+is used as an oracle rather than a curriculum.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.93\linewidth]{figs/hybrid_loop.png}
+\caption{\textbf{The hybrid loop with open weights and zero human labels (E82).} Left: held-out
+pass@1 on HumanEval-X Python for base $\to$ amortized (QLoRA on self-generated test-passing
+solutions) $\to$ hybrid (amortized model + verify-and-retry, up to \HybridRetry{}), with signed
+deltas vs.\ base. Amortization helps the strong base (\HybridQwenAmortDelta) but hurts the weak one
+(\HybridLlamaAmortDelta); the verifier backstop lifts both (\HybridQwenHybridDelta, \HybridLlamaHybridDelta).
+Right: the weak base leans on the verifier more (\HybridLlamaCalls{} vs \HybridQwenCalls{} calls per
+problem). Error bars are Wilson 95\% intervals over \HybridNEval{} problems.}
+\label{fig:hybrid-loop}
+\end{figure}
+
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned
 baselines trained on environment transitions (Figure~\ref{fig:learned}). An

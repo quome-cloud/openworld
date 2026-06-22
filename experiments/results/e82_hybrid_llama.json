@@ -1,0 +1,16 @@
+{
+  "experiment": "e82-hybrid",
+  "base": "NousResearch/Meta-Llama-3.1-8B-Instruct",
+  "lang": "python",
+  "n_train": 80,
+  "n_eval": 40,
+  "k_boot": 8,
+  "r_hybrid": 5,
+  "results": {
+    "base_pass1": 0.575,
+    "verified_pairs": 66,
+    "amortized_pass1": 0.5,
+    "hybrid_pass": 0.65,
+    "hybrid_avg_verifier_calls": 2.65
+  }
+}

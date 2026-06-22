@@ -67,7 +67,16 @@ def assemble(lang, sw, body):
     if lang == "java":
         return f"{sw['declaration']}{body}\n{sw['test']}\n"
     if lang == "go":
-        return f"{sw.get('import','')}{sw['declaration']}{body}\n{sw.get('test_setup','')}{sw['test']}\n"
+        # merge test imports (test_setup) + solution imports (import) into ONE block under
+        # `package main`, then the function (declaration+body), then the test.
+        paths, seen = [], set()
+        for blk in (sw.get("test_setup", ""), sw.get("import", "")):
+            for p in re.findall(r'"([^"]+)"', blk):
+                if p not in seen:
+                    seen.add(p)
+                    paths.append(p)
+        hdr = "package main\n\nimport (\n" + "".join(f'\t"{p}"\n' for p in paths) + ")\n\n"
+        return f"{hdr}{sw['declaration']}{body}\n\n{sw['test']}\n"
     raise ValueError(lang)
 
 
@@ -92,8 +101,12 @@ def run_one(lang, program, timeout=20):
                     return False, "compile:" + c.stderr[-300:]
                 r = subprocess.run(["./m"], cwd=d, capture_output=True, timeout=timeout, text=True)
             elif lang == "go":
-                (d / "m_test.go").write_text(program)
-                r = subprocess.run(["go", "test", "./..."], cwd=d, capture_output=True,
+                (d / "solution_test.go").write_text(program)
+                subprocess.run(["go", "mod", "init", "m"], cwd=d, capture_output=True,
+                               timeout=timeout, text=True)
+                subprocess.run(["go", "mod", "tidy"], cwd=d, capture_output=True,
+                               timeout=120, text=True)   # resolve+cache testify (first call only)
+                r = subprocess.run(["go", "test"], cwd=d, capture_output=True,
                                    timeout=timeout, text=True)
             elif lang == "java":
                 (d / "Main.java").write_text(program)

@@ -162,32 +162,21 @@ with the largest gains where model capability is scarcest ($+\WTSmallGain$ point
 \WTSmallName). The labels can be trusted because the worlds are \emph{verified code}, not
 learned approximations: synthesized-then-checked dynamics are exact over
 \RolloutSteps-step rollouts and answer $10\times$ out-of-distribution probes exactly
-(\CodeOODRate), whereas per-step LLM prediction and a 10{,}000-transition MLP compound
-error and collapse---so traversal never distills a hallucinated rule. Exact labels, rather
-than task variety alone, are the property we argue separates world-time compute from domain
-randomization, and a corrupted-label control confirms it.
-On real, human-authored benchmarks across three symbolic domains (ARC-AGI grids, List
-Functions, CLRS algorithms) the same lever holds as \emph{per-world} test-time
-training---scaling with compute and collapsing under label corruption---and is sharply
-\emph{bounded}: it pays off for \emph{few-step} reasoning and fades as the chain lengthens
-(long algorithm traces) or must be induced from rich perception (a real-image vision task
-stalls at chance), the regime where verified models also win outright---short-horizon
-planning like MiniGrid DoorKey, solved zero-shot while a trained DreamerV3 needs
-$10^4$--$10^5$ interactions and a frozen-perceptual V-JEPA-2 does not control. We give a
-predictive law for \emph{when} it pays off, and report limits honestly: gains are strongest
-for small models and narrow as a task saturates, and cross-task transfer is weak where
-worlds share no skill.
-We deliver the
-machinery as \textbf{\openworld}, a zero-dependency Python framework that makes authoring,
-verifying, composing, serving, and sharing a code world model a minutes-scale
-activity---so assembling the \emph{many} worlds a domain needs is cheap (in a
-\ProtoNumWorlds-world, six-sector benchmark, a median of \ProtoMedianMinutes{} minutes per
-world). Objectives remain open, editable
-artifacts steerable by inference-time dials. \textbf{The scope is the symbolic-state
-regime}: where dynamics are writable, verified code makes a \emph{correct} world model a
-zero-training prototype with no compounding error; pixel-native domains remain the
-territory of learned models. All code, the \ProtoNumWorlds{} recipes, experiments, and this
-manuscript regenerate from one repository.
+(\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
+collapse. Exact labels, rather than task variety alone, are what separates world-time
+compute from domain randomization---and a corrupted-label control confirms it.
+On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS algorithms) the
+same lever holds as \emph{per-world} test-time training---scaling with compute and
+collapsing under label corruption---and obeys a predictive law: the gain is largest for
+\emph{few-step} reasoning and small/weak models, and fades for long reasoning chains, for
+tasks that must be induced from rich perception, and as a task saturates; cross-task
+transfer is weak where worlds share no skill.
+We deliver the machinery as \textbf{\openworld}, a zero-dependency Python framework that
+makes assembling the \emph{many} worlds a domain needs cheap. \textbf{The scope is the
+symbolic-state regime}: where dynamics are writable, verified code makes a \emph{correct}
+world model a zero-training prototype with no compounding error; pixel-native domains remain
+the territory of learned models. All code, the \ProtoNumWorlds{} recipes, experiments, and
+this manuscript regenerate from one repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -1029,10 +1018,11 @@ spent learning a verified world yields generalization within it. Exact-match cli
 \ArcZeroShot{} zero-shot to \ArcTTTLight{} (light) and \ArcTTTHeavy{} (heavy)---$+\ArcTTTGain{}$
 points as we spend more world-time compute. The decisive mechanism check is the
 \textbf{corrupted-demonstration ablation}: randomizing the demo outputs (same grid structure,
-wrong labels) should erase the lift if the model is exploiting the \emph{exact} labels rather
-than benefiting from fine-tuning per se. We report this arm in Figure~\ref{fig:arc}; the
-prediction is a collapse to the zero-shot floor, which would establish that the lift requires
-\emph{verified} labels---the model learning each world's real rule, not grid statistics.
+wrong labels) erases the lift if the model is exploiting the \emph{exact} labels rather than
+benefiting from fine-tuning per se. It does---the corrupt arm falls to \ArcTTTCorrupt{}
+(Figure~\ref{fig:arc}), at or below the \ArcZeroShot{} zero-shot floor, establishing that the
+lift requires \emph{verified} labels: the model learns each world's real rule, not grid
+statistics.
 
 These are mechanism numbers, not a leaderboard entry: a single 7B at 4-bit with one seed over
 \ArcNumTTT{} held-out worlds, far below ARC solvers that add deep augmentation, voting, and
@@ -1045,8 +1035,8 @@ corrupted-label ablation as the test of whether that lift is owed to the labels'
 \includegraphics[width=0.96\linewidth]{figs/arc.png}
 \caption{\textbf{World-time compute on real ARC-AGI (E80).} \emph{Left:} per-world test-time
 training lifts held-out exact-match from zero-shot through light to heavy test-time compute; a
-corrupted-demonstration arm (wrong labels, same structure) tests whether verified labels are
-necessary---the lift should vanish if they are. \emph{Right:} cross-task transfer (train on $N$
+corrupted-demonstration arm (wrong labels, same structure) shows verified labels are
+necessary---the lift vanishes under corruption (\ArcTTTCorrupt). \emph{Right:} cross-task transfer (train on $N$
 real worlds, evaluate on disjoint held-out worlds) is weak, as expected from ARC's per-task
 novelty. Single 4-bit Qwen2.5-7B; mechanism, not leaderboard.}
 \label{fig:arc}
@@ -1140,8 +1130,12 @@ descent and symbolic search.
 \emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous worlds (E71) cross-world
 transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
 (diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
-\emph{finds} a generalizing subfamily (\S\ref{sec:combo-search}). Each is predicted, none
-post-hoc.
+\emph{finds} a generalizing subfamily (\S\ref{sec:combo-search}). One null we did \emph{not}
+predict in advance and report as found, not forecast: cross-language-frame transfer (E81,
+\S\ref{sec:frame-invariance}) gives no lift, even though the exactness clause is consistent
+with it (matched frames beat corrupted). The lesson is the honest one---the law's \emph{form}
+holds where it was tested, but a held-out language is its own skill, outside the family
+structure the law scores.
 
 \paragraph{The reader's guideline: how many worlds to simulate.} Because the curve saturates,
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
@@ -1151,28 +1145,6 @@ thousands. The honest scope: the curve's \emph{form} is universal over verifiabl
 and learners; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
 cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
-
-\subsection{Finding generalizing world-combinations by search (E80)}\label{sec:combo-search}
-The \ProtoNumWorlds{} prototyped worlds (E68) are deliberately heterogeneous and globally do not
-transfer (E71): a policy learned on one is no better than random on another. But heterogeneity is
-a property of the \emph{set}, not of every \emph{subset}. So we ask a combinatorial question---is
-there a \emph{combination} of worlds that generalizes, and can the coherence proxy \emph{find}
-it? Brute force is hopeless ($2^{\ComboNWorlds}$ subsets over the \ComboNWorlds{} steerable
-worlds), so we use world$\to$world transfer competence as a cheap coherence signal, grow subsets
-greedily from the most-coherent seed pairs, and confirm each candidate by training a shared
-abstract policy on the subset \emph{minus one world} and evaluating the held-out member (a strict
-world-level holdout). Random subsets are the null control.
-
-The search succeeds on its \emph{first} coherence-ranked seed: a \ComboSize{}-world subset
-spanning \ComboNSectors{} different sectors (\texttt{\ComboWorlds}) generalizes at planner-level
-held-out competence (\ComboHeldout, clipped at the planner ceiling) versus \ComboBaseline{} for
-random subsets. The worlds are surface-unrelated---minimise risk, minimise cost, minimise a
-waitlist, maximise margin---but share an \emph{abstract control structure}, and that shared skill
-is what the proxy detects. Two consequences. First, ``domain'' is the wrong unit: generalization
-tracks shared \emph{structure}, which can cross sectors. Second, the coherence proxy is not only
-predictive but \emph{constructive}---it turns the NP-hard search for a generalizing world-family
-into a guided one and locates a family inside a set built to have none, while the random-subset
-control stays at the heterogeneous floor (the law's null, confirmed).
 
 \subsection{Composites with varying rules: language frames and the invariant principle (E81)}\label{sec:frame-invariance}
 Every world so far has one rule-set. But a single computational \emph{principle} can be expressed
@@ -1415,68 +1387,6 @@ slower and leaves \ActivePassiveUnresolved{}/\ActiveRules{} rules unresolved.}
 
 \paragraph{Further world models on the same primitives.} Beyond induction, the framework expresses many additional world models that showcase expressiveness rather than carry the central argument: a non-enumerable version-space database (E46), path integrals over learning trajectories (E49), next-token world models with exact length generalization (E45), composite corporate (E48) and startup-growth (E51) worlds, a tree-of-thoughts brain simulator with real persistent memory (E58, E59), and the full perceive$\to$world$\to$emit$\to$act boundary (E60). These are detailed in Appendix~\ref{app:more}.
 
-\subsubsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
-For world models to be shared the way trained models are, a world needs a
-\emph{portable, complete, lossless} serialization --- the unit a ``marketplace
-for world models'' would host. Sharing matters wherever a verified simulator
-outlives the session that built it: reusing an audited world across teams or
-agents, composing a third party's verified world into one's own, distributing a
-planning environment as a benchmark, or shipping a model card a consumer can
-check before trusting what a world claims. We define a JSON spec that captures every
-component of a world model (Figure~\ref{fig:world-specs}B): its name and
-metadata, state schema and concrete initial state, action set, the
-natural-language \emph{rules} (the declared contract), the verified dynamics (as
-executable code, recursively for composites), the \emph{perception} boundary
-(perceptors: modality, the state fields they produce, and a typed schema), the
-symmetric \emph{emit} boundary, objectives, and evaluation metrics. Composition
-is recursive, so a world-of-worlds (\S\ref{sec:composition}) serializes whole.
-
-The spec is lossless: \texttt{from\_spec(to\_spec(w),\,allow\_code=True)}
-reconstructs a runnable world whose rollout reproduces the original exactly. On
-\SpecsNumWorlds{} worlds spanning leaves and a two-level nested composite, all
-round-trip exactly and pass the publish-gate validator
-(Table~\ref{tab:worldspecs}, Figure~\ref{fig:world-specs}A). For untrusted
-downloads the embedded code is inert unless execution is explicitly opted into ---
-a trust gate, not a sandbox. From a spec the framework renders a self-contained
-SVG \emph{model card} (Figure~\ref{fig:world-card}): a leaf world is drawn as its
-actual state-transition automaton (computed by BFS from the initial state) with
-the perceive$\to$world$\to$emit boundary shown explicitly, and a composite as its
-recursively nested dataflow of child worlds, bridges, and aggregator roll-ups.
-The same spec also exports to Mermaid and to React Flow (a node/edge graph with
-nested parent groups) for interactive use, and a gallery contact sheet indexes a
-collection. The contribution is not a new result but an \emph{interface}: the
-paper's world models become publishable, inspectable, verifiable artifacts.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.95\linewidth]{figs/world_specs.png}
-\caption{\textbf{Portable world-model specs (E57).} \textbf{A:} every spec
-round-trips losslessly (exact rollout reproduction) at a few KB per world.
-\textbf{B:} the nine world-model components the spec captures, from state and
-rules to the perception/emit boundary, objectives, and metrics.}
-\label{fig:world-specs}
-\end{figure}
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.74\linewidth]{figs/world_card.png}
-\caption{\textbf{A generated model card} rendered from a world's spec (the triage
-world). The graph shows the state-transition automaton with the
-perceive$\to$world$\to$emit boundary (dashed sensor input, dashed output);
-side panels list the state schema, actions, dynamics, objectives, perception,
-emit, a sample rollout, metrics, and the declared rules. One self-contained SVG.}
-\label{fig:world-card}
-\end{figure}
-
-\begin{table}[htb]
-\centering
-\caption{\textbf{E57 spec round-trip} across \SpecsNumWorlds{} worlds (leaves and
-a nested composite): all validate and reconstruct exactly (\SpecsRoundTrip{}
-exact) at a few KB each.}
-\label{tab:worldspecs}
-\input{tables/world_specs}
-\end{table}
-
 \subsection{Supporting ablations}
 \subsubsection{Verification-gate ablation: correctness gained per gate}\label{sec:abl1}
 E3 ablates the acceptance regime over eight paired generations per condition,
@@ -1660,57 +1570,21 @@ in the ground-truth environment. Value function: shipped $-$ bugs $-$
 \label{tab:planning}
 \end{table}
 
-\subsection{Verified code vs a \emph{trained} world model, on downstream control (E61)}\label{sec:trained-wm}
-The comparisons so far pit verified code against an LLM next-state proxy; the
-fairer question a model-based-RL reader asks is how it fares against a world model
-\emph{trained} on environment transitions, judged on the only thing an agent cares
-about---task return. E61 answers it on the shared sprint task: the same depth-3
-planner plans inside each candidate world model but acts in the true environment,
-and we vary the number of transitions $K$ the model is trained on, over
-\TwmSeeds{} seeds (Figure~\ref{fig:trained-wm}). The result is decisive and,
-unlike E59/E60, fully deterministic and offline (numpy, no LLM). The verified code
-world model attains the optimal return \TwmVerified{} from \emph{zero} training
-transitions. A trained MLP world model needs $K{=}\TwmMaxK{}$ random-policy
-transitions just to reach \TwmBestTrained{} (a 1-NN model is comparable), still
-short of optimal (regret \TwmRegret), and is wildly sample-inefficient below that:
-at the smallest budget its mean return is \emph{negative} (\TwmMlpSmall), worse
-than random. Most tellingly, planning through a trained world model is \emph{worse
-than not planning}---it falls below the model-free reactive policy
-(\TwmReactive)---in \TwmHarm\% of runs, because lookahead drives the agent into
-states the model never saw and mispredicts. A verified program is not merely more
-accurate; it is the difference between planning that helps and planning that harms,
-at zero data cost.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.74\linewidth]{figs/trained_wm_control.png}
-\caption{\textbf{Verified code vs trained world models for control (E61).} Downstream
-return of a depth-3 planner planning inside each world model and acting in the true
-sprint environment, vs training transitions $K$ ($\TwmSeeds$ seeds, $\pm$SD).
-Verified code (\TwmVerified, teal) is optimal from zero data; trained MLP/1-NN
-models are sample-inefficient and, in the shaded band, planning through them
-underperforms the model-free reactive policy.}
-\label{fig:trained-wm}
-\end{figure}
-
-\subsection{A world-model bake-off: as many approaches as we can run (E63)}\label{sec:bakeoff}
-E61 compares one trained model class; E63 broadens the head-to-head to
-\BakeMethods{} world models we can execute locally, across \BakeDomains{} domains
-(sprint and triage), under one battery (Table~\ref{tab:bakeoff}). \textbf{What
-makes this a fair comparison---and how to check it}: every entry is a next-state
-predictor over the \emph{same} symbolic state, evaluated on the \emph{same} task
-with the \emph{same} training budget ($K{=}10{,}000$ transitions, 5 seeds), and the
-learned set spans the standard families of dynamics models---memorization (1-NN),
-a tabular model with nearest-neighbour backoff, linear least-squares, a
-Koopman/EDMD operator on a degree-2 lift, and a neural MLP. The result is uniform:
-the verified code world model is exact in- and out-of-distribution and rolls out
-bit-exactly in both domains from \emph{zero} transitions, plans optimally
-(return~\BakeCodeReturn) and runs at \BakeCodeSpeed{} steps/s; \emph{every} learned
-model collapses to \BakeLearnedOodMax{} exact accuracy at $10\times$ OOD in
-\emph{both} domains (memorizers ace in-distribution probes yet generalize no
-better), and planning through them lands at or below model-free control---some
-\emph{negative}. The LLM next-state proxy (numbers from E10/E11/E22) completes
-$0$ rollouts and scores $0$ on control.
+\subsection{Crossing species: verified vs.\ trained vs.\ perceptual world models (E63, E65, E67)}\label{sec:bakeoff}
+The comparisons so far pit verified code against an LLM next-state proxy; the fairer question a
+model-based-RL reader asks is how it fares against world models \emph{trained} on environment
+transitions, judged on the only thing an agent cares about---task return. We run the head-to-head
+across \BakeMethods{} world models we can execute locally, on \BakeDomains{} symbolic domains
+(sprint, triage) under one battery (Table~\ref{tab:bakeoff}): every entry is a next-state predictor
+over the \emph{same} state, task, and budget ($K{=}10{,}000$ transitions, 5 seeds), spanning the
+standard families---memorization (1-NN), a tabular model with nearest-neighbour backoff, linear
+least-squares, a Koopman/EDMD operator, and a neural MLP. The result is uniform: the verified code
+world model is exact in- and out-of-distribution, rolls out bit-exactly from \emph{zero} transitions,
+plans optimally (return~\BakeCodeReturn) at \BakeCodeSpeed{} steps/s, while \emph{every} learned
+model collapses to \BakeLearnedOodMax{} exact accuracy at $10\times$ OOD and plans at or below
+model-free control---some \emph{negative}, i.e.\ planning through a trained model is \emph{worse than
+not planning}, because lookahead drives the agent into states it never saw (E61 isolates this against
+a single trained MLP over \TwmSeeds{} seeds; the LLM proxy completes $0$ rollouts and scores $0$).
 
 \paragraph{Why not Dreamer, V-JEPA, Genie, Sora?} Those are a different
 \emph{species}: \emph{perceptual} world models that learn latent or pixel/video
@@ -1738,10 +1612,9 @@ compared on properties in Table~\ref{tab:related}.}
 \label{tab:bakeoff}
 \end{table}
 
-\subsection{Crossing species on a shared benchmark: trained vs.\ verified on MiniGrid (E65)}\label{sec:minigrid}
-The bake-off (E63) is deliberately \emph{within}-species and defers the cross-species
-comparison to properties (Table~\ref{tab:related}), because perceptual models cannot
-run on flat symbolic state. E65 closes that gap by moving to a benchmark where the
+\paragraph{A shared benchmark where the species can meet: MiniGrid (E65).}\label{sec:minigrid}
+The bake-off above is deliberately \emph{within}-species (perceptual models cannot
+run on flat symbolic state); E65 closes that gap by moving to a benchmark where the
 species \emph{can} meet: MiniGrid DoorKey-6x6. We express the task as a verified
 OpenWorld transition and validate it \emph{bit-for-bit} against the real Farama
 \texttt{minigrid} environment ($600/600$ steps; \texttt{bench/validate\_minigrid.py}),
@@ -1775,7 +1648,7 @@ representation-drift metric rather than a solve rate.}
 \label{tab:minigrid}
 \end{table}
 
-\subsection{Continuous control: cartpole-swingup, on the learned models' home turf (E67)}\label{sec:cartpole}
+\paragraph{Continuous control on the learned models' home turf: cartpole (E67).}\label{sec:cartpole}
 MiniGrid (E65) is a gridworld, which arguably favors symbolic models. E67 moves the same
 three-species contest to \emph{continuous control}---cartpole-swingup from $64\times64$
 pixels---where learned and perceptual world models are strongest, yet OpenWorld can still
@@ -1930,20 +1803,13 @@ actions plus one travel option per incident route.}
 \label{fig:traversal}
 \end{figure}
 
-The three mechanisms interact, and the interaction is where realism lives:
-rules change \emph{inside} a composition, and embodied agents respond by
-moving. E33 (Figure~\ref{fig:dynamic}) is a deterministic demonstration of
-that loop. Two economies share a toll route; a greedy policy agent works
-wherever its scoped view shows the best rate. When the home economy's
-\texttt{PhasedTransition} enters austerity at step \DynSwitchStep{} (work
-yields zero and the \emph{observed} rate collapses), the agent's next
-observation prices the change, and at step \DynTravelStep{} it pays the
-\DynToll-coin toll and re-locates. World GDP ends at \DynGdpWith{} with the
-route against \DynGdpStranded{} without it---a mobility gain of
-\DynMobilityGain. Composition provides somewhere to go, dynamic rules
-provide the reason, and traversal is how behavior adapts; remove any one
-channel (the stranded counterfactual removes the route) and the regime shock
-becomes a permanent flatline instead of a re-allocation.
+The three mechanisms interact: rules can change \emph{inside} a composition and embodied
+agents respond by moving. E33 (Figure~\ref{fig:dynamic}) demonstrates the loop
+deterministically---when a shared economy enters austerity via \texttt{PhasedTransition} at
+step \DynSwitchStep{} and the \emph{observed} rate collapses, a greedy agent prices the change
+from its next observation and pays the \DynToll-coin toll to relocate, turning a regime shock
+that would flatline GDP into a $+$\DynMobilityGain{} mobility gain. Composition supplies the
+destination, dynamic rules the reason, and traversal the response.
 
 \begin{figure}[htb]
 \centering
@@ -1970,31 +1836,15 @@ against its own rule text, so changing rules \emph{compose} with the E30
 result---adding a regime adds a phase, instead of multiplying the
 complexity of a single synthesis prompt.
 
-Finally, E34 puts the composite to work on the benchmark itself: a
-\emph{sprint world} whose twenty children are the OpenWorld-SWE-bench
-repair worlds, unmodified, with aggregators exposing open tasks and
-failing-test totals, and an allocation policy deciding which task receives
-each of \SprintBudget{} repair attempts (model, prompts, and sampling
-identical to the standard protocol). The standard fixed-budget protocol
-solves \SprintFixedSolved{}---the first model-ladder numbers for the
-expanded 20-instance suite---while consuming only \SprintFixedAttempts{}
-attempts (Figure~\ref{fig:sprint}). Reallocating the stranded budget raises
-nothing: round-robin over open tasks also ends at \SprintRRSolved, and a
-greedy closest-to-passing policy collapses to \SprintGreedySolved{} by
-sinking \SprintGreedyTarpit{} attempts into a single near-miss. Two
-mechanisms explain this, and both matter beyond this experiment. First,
-with the recipe's pinned sampling seed, a retry on an unchanged state is a
-verbatim replay---under pinned seeds, pass@$k$ quietly degenerates toward
-pass@1, a property of the evaluation protocol worth stating explicitly.
-Second, the pathology is not the seed's: with per-attempt seeds restoring
-retry diversity, round-robin still ends at \SprintRRJitterSolved{}
-and greedy still tarpits at \SprintGreedyJitterSolved{}---committing to the
-nearest-to-done task is structurally wrong when that task is
-capability-bound, because it never gets done. The composite's measurable
-value here is efficiency and observability---round-robin reaches the
-plateau in roughly a third fewer attempts than the fixed protocol, and the
-sprint dashboard shows \emph{where} attempts stop paying---not a higher
-ceiling. Allocation cannot buy what the model cannot produce.
+Finally, E34 puts the composite to work on the benchmark itself---a \emph{sprint world} whose
+twenty children are the OpenWorld-SWE-bench repair worlds, with an allocation policy spending
+\SprintBudget{} repair attempts (Figure~\ref{fig:sprint}). No policy beats the fixed protocol's
+ceiling (\SprintFixedSolved{} solved, the first model-ladder numbers for the expanded
+20-instance suite): round-robin matches it in roughly a third fewer attempts, while a greedy
+closest-to-passing policy tarpits on a single capability-bound task (\SprintGreedySolved), a
+pathology that persists even with per-attempt seeds restoring retry diversity. The composite's
+value is efficiency and observability, not a higher ceiling---allocation cannot buy what the
+model cannot produce.
 
 \begin{figure}[htb]
 \centering
@@ -2070,57 +1920,6 @@ perception does.}
 \label{fig:perception}
 \end{figure}
 
-\subsection{An emergent economy from composed verified rules (E44)}\label{sec:economy}
-The final experiment scales composition from belief-tracking to a small open
-world: \EconAgents{} agents that gather, sell, and accumulate gold over
-\EconTicks{} ticks, assembled entirely from separable verified rules and the
-framework's \texttt{CompositeWorld}/\texttt{Aggregator} machinery. Each agent is
-a real child world whose tick produces goods (with a concave capital term, so
-wealth begets output at diminishing returns); the macro quantities we report---
-money supply, market price, and the wealth Gini---are \emph{aggregators} derived
-from the leaves, so a headline number can never drift from the micro state. The
-market price, the gold faucet (sale revenue), the burn-tax sink, and
-redistribution are each their own toggleable rule. Two properties make this more
-than a simulator demo. First, the macro phenomena \emph{emerge}: nothing in the
-rules targets a price level, an inflation rate, or an inequality coefficient.
-Second---because every rule is a separate verified component---we read each
-phenomenon's cause as a clean counterfactual by switching one rule on or off,
-which a black-box economy cannot offer.
-
-Four phenomena emerge and each yields to its causal toggle
-(Figure~\ref{fig:economy}). \textbf{Price formation:} the market price converges
-to a level set by supply and demand, not scripted---scarcer supply clears at a
-higher price (\EconScarcePrice{} vs.\ \EconAbundantPrice{} when supply doubles).
-\textbf{Inflation:} with the burn sink off, gold only enters and the money
-supply chases a fixed stock of goods, inflating price at slope
-\EconInflOffSlope{}/tick; turning the verified tax sink on bends that to
-\EconInflOnSlope{}---inflation isolated to one rule. \textbf{Inequality:} under
-selfish accumulation the Gini climbs to \EconGiniOff{} as capital compounds;
-enabling the redistribution rule collapses it to \EconGiniOn{}. \textbf{The
-selfish--cooperative dial:} flipping agents from individual gold-maximization to
-welfare-sharing raises \emph{total} welfare by \EconCoopWelfareGain\% (\EconSelfishWelfare{}
-$\to$ \EconCoopWelfare{} gold)---because concave capital means an equal spread
-produces more---yet the single greediest selfish agent still ends richer than
-any cooperator (\EconSelfishMax{} vs.\ \EconCoopMax{} gold). This is the E08
-welfare--fairness Pareto tension of the moral dial (\S\ref{sec:robustness}),
-now \emph{emerging} from a composed verified economy rather than declared as a
-scalar reward, and every tick the books balance exactly: total gold moves only
-by the faucet inflow minus the sink outflow, asserted throughout the run.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.92\linewidth]{figs/emergent_economy.png}
-\caption{\textbf{Emergent economy from composed verified rules (E44).} Four
-macro phenomena, each isolated by toggling one verified rule. \textbf{A:} price
-converges to a supply-set level (scarcer supply $\Rightarrow$ higher price).
-\textbf{B:} money supply (log) inflates with the burn sink off; the sink curbs
-it. \textbf{C:} the wealth Gini rises under selfish accumulation; redistribution
-flattens it. \textbf{D:} cooperation raises total welfare while selfishness
-produces the single richest agent. Nothing in the rules targets these
-quantities; they emerge and are causally attributed by separable toggles.}
-\label{fig:economy}
-\end{figure}
-
 % ============================================================================
 \section{Discussion and Limitations}\label{sec:discussion}
 \paragraph{Interpretation.} The experiments quantify a structural trade.
@@ -2145,9 +1944,9 @@ compute into unlimited correct training data. Whether the ``verified'' qualifier
 load-bearing---rather than decoration on plain SFT---is an empirical question with a clean
 discriminator, the \textbf{corrupted-label ablation}: randomising the labels keeps the
 fine-tuning and the world's structure but destroys their correctness, so if accuracy is
-unchanged the framing adds nothing. The prediction is that it collapses to the no-fine-tune
-floor, and the corrupted-demonstration arm on real ARC worlds is designed to test exactly this
-against the verified arm (\S\ref{sec:world-time-arc}, Fig.~\ref{fig:arc}). So the contribution
+unchanged the framing adds nothing. It does collapse to the no-fine-tune floor: the
+corrupted-demonstration arm on real ARC worlds falls to \ArcTTTCorrupt{} against the verified
+arm (\S\ref{sec:world-time-arc}, Fig.~\ref{fig:arc}). So the contribution
 is conceptual, not algorithmic, and only two
 things earn the approach its name over ``SFT with extra steps'': (i) this verified-label
 dependence, and (ii) \emph{cross-world} transfer---training on a \emph{family} of worlds lifts
@@ -2181,9 +1980,7 @@ compute:} traverse a \emph{family} of verified worlds and fine-tune to generalis
 worlds (\S\ref{sec:world-time}, \S\ref{sec:world-time-law}). The \emph{hybrid} composes them: use
 the tool to \emph{generate} exact trajectories, training to \emph{internalise} them, and the
 exact tool as a fallback for high-stakes queries---the tool bootstraps the data, training
-amortises it, and exactness is recoverable on demand. This is also the cleanest reply to ``is it
-just fine-tuning?'': the artifact has value with zero training (Route 1); training is one way to
-spend it.
+amortises it, and exactness is recoverable on demand.
 
 \begin{table}[t]\centering\small
 \begin{tabular}{lcccc}
@@ -2220,14 +2017,6 @@ be---justifiability to those affected, in the contractualist's
 sense~\cite{scanlon1998}---is a question no architecture settles. The
 tuner's solving manifold is at best a crude contractualist surface: the set
 of configurations meeting every stakeholder's declared minimum.
-
-\paragraph{Relationship to HAARF.} For autonomous-agent governance frameworks
-such as HAARF~\cite{haarf2026}, these mechanisms map onto verification and
-auditability controls: dynamics as reviewable artifacts (code review of the
-simulator), declared invariants (pre-deployment safety constraints checked at
-synthesis time), dial settings logged per trajectory (value-configuration
-audit trails), and judge audits (second-model oversight with measured
-accuracy).
 
 \paragraph{Limitations.} (i) Scope: symbolic-state worlds; pixel-native
 domains remain the territory of learned models---the comparison here is
@@ -2284,34 +2073,19 @@ E59's architecture lift follows arithmetically from a modeled fixed-capability
 backbone, and E60's routing gap over exact-key lookup is guaranteed by the
 comparison design (we add a fair lexical baseline and report the modest gap over
 it); both are flagged in situ as engineering demonstrations, not measured effects.
-(xiii) Porting to real data---representation and loading validity. Extending world-time
-compute beyond our parametric generators to real datasets (diagnosis on DDXPlus, tabular on
-OpenML, variant effect on ProteinGym deep-mutational-scanning assays) exposes two validity
-conditions that are easy to get wrong. First, the input representation must encode
-\emph{per-world} structure, not a single global rule: a first ProteinGym port that described
-each mutation only by isolated biochemical deltas (hydropathy/charge/volume change) made every
-assay-world look identical---held-out accuracy rose over base but did \emph{not} scale with the
-number of worlds, because one global rule learnable from two assays already saturated the gain.
-Restoring per-world context---the wild-type \emph{local sequence} around the mutated site, the
-analog of a diagnosis condition's evidence profile---makes each protein-world distinct and
-restores scaling headroom. A flat world-count curve can therefore reflect a representation that
-hides the between-world variation rather than a failure of the mechanism. Second, faithful
-\emph{data loading} is the dominant risk when adapting an external dataset: e.g.\ correctly
-recovering the wild-type sequence and the one-based mutation indexing from ProteinGym (which we
-verify on every assay) is a precondition for the labels to mean what the experiment claims. We
-treat both as the first checks any real-domain port must pass.
+(xiii) Porting to real data surfaces two validity conditions: the input representation must
+encode \emph{per-world} structure (a ProteinGym port describing each mutation only by global
+biochemical deltas made every assay-world identical and flattened the world-count curve until
+per-world local-sequence context was restored), and faithful data loading---e.g.\ the wild-type
+sequence and one-based mutation indexing---is the dominant correctness risk. We treat both as the
+first checks any real-domain port must pass.
 
 % ============================================================================
 \section{Conclusion}
-A training-free symbolic world model---synthesized as code by a local model,
-verified before acceptance, steered by declared moral dials, optimized by an
-automated tuner, and assisted by an agent-as-a-judge---is bit-exact where
-learned-style dynamics compound error, transfers across $100\times$ scale
-shifts where trained baselines collapse, rolls out orders of magnitude
-faster, plans \emph{as well as the ground truth itself} where planning
-through a hallucinating model is worse than no model, extends to stochastic
-dynamics with verified distributions, and flags its own synthesis errors by
-ensemble disagreement. And beyond serving as a simulator to plan \emph{in}, the same
+A training-free symbolic world model---synthesized as code by a local model and verified
+before acceptance---is bit-exact where learned-style dynamics compound error, and plans
+\emph{as well as the ground truth itself} where planning through a hallucinating model is
+worse than no model. And beyond serving as a simulator to plan \emph{in}, the same
 verified worlds are training \emph{signal}: traversing many world models of a domain
 lifts a model's generalization to held-out worlds, scaling with the number of worlds
 traversed---\emph{world-time compute}, a training-time analogue of test-time compute.
@@ -2442,7 +2216,7 @@ E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:world
 E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
 E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
 E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} \\
-E61 & Verified code vs a trained world model, on control & Fig.~\ref{fig:trained-wm} \\
+E61 & Verified code vs a trained world model on control (absorbed into E63) & Tab.~\ref{tab:bakeoff} \\
 E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
 E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
 E64 & Causal DAGs compile to verified structural causal models (SDOH) & App.~\ref{sec:dag} \\
@@ -2541,6 +2315,68 @@ LLM-judge coarseness~\cite{llmjudge2023}.
 \section{Additional experiments moved from the main text}\label{app:more}
 The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
 
+\subsection{Portable world-model specs and model cards (E57)}\label{sec:specs}
+For world models to be shared the way trained models are, a world needs a
+\emph{portable, complete, lossless} serialization --- the unit a ``marketplace
+for world models'' would host. Sharing matters wherever a verified simulator
+outlives the session that built it: reusing an audited world across teams or
+agents, composing a third party's verified world into one's own, distributing a
+planning environment as a benchmark, or shipping a model card a consumer can
+check before trusting what a world claims. We define a JSON spec that captures every
+component of a world model (Figure~\ref{fig:world-specs}B): its name and
+metadata, state schema and concrete initial state, action set, the
+natural-language \emph{rules} (the declared contract), the verified dynamics (as
+executable code, recursively for composites), the \emph{perception} boundary
+(perceptors: modality, the state fields they produce, and a typed schema), the
+symmetric \emph{emit} boundary, objectives, and evaluation metrics. Composition
+is recursive, so a world-of-worlds (\S\ref{sec:composition}) serializes whole.
+
+The spec is lossless: \texttt{from\_spec(to\_spec(w),\,allow\_code=True)}
+reconstructs a runnable world whose rollout reproduces the original exactly. On
+\SpecsNumWorlds{} worlds spanning leaves and a two-level nested composite, all
+round-trip exactly and pass the publish-gate validator
+(Table~\ref{tab:worldspecs}, Figure~\ref{fig:world-specs}A). For untrusted
+downloads the embedded code is inert unless execution is explicitly opted into ---
+a trust gate, not a sandbox. From a spec the framework renders a self-contained
+SVG \emph{model card} (Figure~\ref{fig:world-card}): a leaf world is drawn as its
+actual state-transition automaton (computed by BFS from the initial state) with
+the perceive$\to$world$\to$emit boundary shown explicitly, and a composite as its
+recursively nested dataflow of child worlds, bridges, and aggregator roll-ups.
+The same spec also exports to Mermaid and to React Flow (a node/edge graph with
+nested parent groups) for interactive use, and a gallery contact sheet indexes a
+collection. The contribution is not a new result but an \emph{interface}: the
+paper's world models become publishable, inspectable, verifiable artifacts.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\linewidth]{figs/world_specs.png}
+\caption{\textbf{Portable world-model specs (E57).} \textbf{A:} every spec
+round-trips losslessly (exact rollout reproduction) at a few KB per world.
+\textbf{B:} the nine world-model components the spec captures, from state and
+rules to the perception/emit boundary, objectives, and metrics.}
+\label{fig:world-specs}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.74\linewidth]{figs/world_card.png}
+\caption{\textbf{A generated model card} rendered from a world's spec (the triage
+world). The graph shows the state-transition automaton with the
+perceive$\to$world$\to$emit boundary (dashed sensor input, dashed output);
+side panels list the state schema, actions, dynamics, objectives, perception,
+emit, a sample rollout, metrics, and the declared rules. One self-contained SVG.}
+\label{fig:world-card}
+\end{figure}
+
+\begin{table}[htb]
+\centering
+\caption{\textbf{E57 spec round-trip} across \SpecsNumWorlds{} worlds (leaves and
+a nested composite): all validate and reconstruct exactly (\SpecsRoundTrip{}
+exact) at a few KB each.}
+\label{tab:worldspecs}
+\input{tables/world_specs}
+\end{table}
+
 \subsection{Steerability and the structure of the moral filter (E8, E24--E27)}\label{app:moral-dial}
 Objectives and dials are a secondary contribution---they make values an editable,
 inference-time artifact---but they raise questions a world-models paper need not
@@ -2622,6 +2458,79 @@ rubrics track the dial differently than the utilitarian one). Rubric
 framing is a value choice, not a wording choice---a quantitative
 counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
 caution for anyone deploying a single ``ethics rubric'' judge.
+
+\subsection{An emergent economy from composed verified rules (E44)}\label{sec:economy}
+This study scales composition from belief-tracking to a small open
+world: \EconAgents{} agents that gather, sell, and accumulate gold over
+\EconTicks{} ticks, assembled entirely from separable verified rules and the
+framework's \texttt{CompositeWorld}/\texttt{Aggregator} machinery. Each agent is
+a real child world whose tick produces goods (with a concave capital term, so
+wealth begets output at diminishing returns); the macro quantities we report---
+money supply, market price, and the wealth Gini---are \emph{aggregators} derived
+from the leaves, so a headline number can never drift from the micro state. The
+market price, the gold faucet (sale revenue), the burn-tax sink, and
+redistribution are each their own toggleable rule. Two properties make this more
+than a simulator demo. First, the macro phenomena \emph{emerge}: nothing in the
+rules targets a price level, an inflation rate, or an inequality coefficient.
+Second---because every rule is a separate verified component---we read each
+phenomenon's cause as a clean counterfactual by switching one rule on or off,
+which a black-box economy cannot offer.
+
+Four phenomena emerge and each yields to its causal toggle
+(Figure~\ref{fig:economy}). \textbf{Price formation:} the market price converges
+to a level set by supply and demand, not scripted---scarcer supply clears at a
+higher price (\EconScarcePrice{} vs.\ \EconAbundantPrice{} when supply doubles).
+\textbf{Inflation:} with the burn sink off, gold only enters and the money
+supply chases a fixed stock of goods, inflating price at slope
+\EconInflOffSlope{}/tick; turning the verified tax sink on bends that to
+\EconInflOnSlope{}---inflation isolated to one rule. \textbf{Inequality:} under
+selfish accumulation the Gini climbs to \EconGiniOff{} as capital compounds;
+enabling the redistribution rule collapses it to \EconGiniOn{}. \textbf{The
+selfish--cooperative dial:} flipping agents from individual gold-maximization to
+welfare-sharing raises \emph{total} welfare by \EconCoopWelfareGain\% (\EconSelfishWelfare{}
+$\to$ \EconCoopWelfare{} gold)---because concave capital means an equal spread
+produces more---yet the single greediest selfish agent still ends richer than
+any cooperator (\EconSelfishMax{} vs.\ \EconCoopMax{} gold). This is the E08
+welfare--fairness Pareto tension of the moral dial (\S\ref{sec:robustness}),
+now \emph{emerging} from a composed verified economy rather than declared as a
+scalar reward, and every tick the books balance exactly: total gold moves only
+by the faucet inflow minus the sink outflow, asserted throughout the run.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.92\linewidth]{figs/emergent_economy.png}
+\caption{\textbf{Emergent economy from composed verified rules (E44).} Four
+macro phenomena, each isolated by toggling one verified rule. \textbf{A:} price
+converges to a supply-set level (scarcer supply $\Rightarrow$ higher price).
+\textbf{B:} money supply (log) inflates with the burn sink off; the sink curbs
+it. \textbf{C:} the wealth Gini rises under selfish accumulation; redistribution
+flattens it. \textbf{D:} cooperation raises total welfare while selfishness
+produces the single richest agent. Nothing in the rules targets these
+quantities; they emerge and are causally attributed by separable toggles.}
+\label{fig:economy}
+\end{figure}
+
+\subsection{Finding generalizing world-combinations by search (E80)}\label{sec:combo-search}
+The \ProtoNumWorlds{} prototyped worlds (E68) are deliberately heterogeneous and globally do not
+transfer (E71): a policy learned on one is no better than random on another. But heterogeneity is
+a property of the \emph{set}, not of every \emph{subset}. So we ask a combinatorial question---is
+there a \emph{combination} of worlds that generalizes, and can the coherence proxy \emph{find}
+it? Brute force is hopeless ($2^{\ComboNWorlds}$ subsets over the \ComboNWorlds{} steerable
+worlds), so we use world$\to$world transfer competence as a cheap coherence signal, grow subsets
+greedily from the most-coherent seed pairs, and confirm each candidate by training a shared
+abstract policy on the subset \emph{minus one world} and evaluating the held-out member (a strict
+world-level holdout). Random subsets are the null control.
+
+The search succeeds on its \emph{first} coherence-ranked seed: a \ComboSize{}-world subset
+spanning \ComboNSectors{} different sectors (\texttt{\ComboWorlds}) generalizes at planner-level
+held-out competence (\ComboHeldout, clipped at the planner ceiling) versus \ComboBaseline{} for
+random subsets. The worlds are surface-unrelated---minimise risk, minimise cost, minimise a
+waitlist, maximise margin---but share an \emph{abstract control structure}, and that shared skill
+is what the proxy detects. Two consequences. First, ``domain'' is the wrong unit: generalization
+tracks shared \emph{structure}, which can cross sectors. Second, the coherence proxy is not only
+predictive but \emph{constructive}---it turns the NP-hard search for a generalizing world-family
+into a guided one and locates a family inside a set built to have none, while the random-subset
+control stays at the heterogeneous floor (the law's null, confirmed).
 
 \subsection{Atlas of the \ProtoNumWorlds{} prototyped worlds}\label{sec:world-atlas}
 Figure~\ref{fig:world-atlas} characterizes every world from the prototyping benchmark

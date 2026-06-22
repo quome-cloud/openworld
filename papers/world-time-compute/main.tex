@@ -211,7 +211,7 @@ not learned approximations---exact over long rollouts with no compounding error
 practical only if each is cheap to build; the enabling artifact is \openworld{}, a
 zero-dependency framework that turns authoring a verified world model
 (perceive\,$\to$\,world\,$\to$\,emit\,$\to$\,act, served and shareable) into a minutes-scale,
-push-button activity (\S\ref{sec:prototyping}). PyTorch did not give deep learning new
+push-button activity (the companion framework paper~\cite{openworld_framework}). PyTorch did not give deep learning new
 models; it made them fast to \emph{prototype}, and an explosion followed---world models have
 lacked that tool, and we use it here to manufacture training experience.
 
@@ -277,7 +277,7 @@ world models. A verified code world model does not so much eliminate that gap as
 program reproduces them exactly, the agent's internal model and the (symbolic)
 environment are the same artifact, so the dynamics contribute \emph{no} rollout
 error---what error remains lives entirely in the \emph{specification} and in
-\emph{perception} (the symbol-grounding boundary, \S\ref{sec:perception}),
+\emph{perception} (the symbol-grounding boundary; see the companion framework paper~\cite{openworld_framework}),
 not in the transition. This is why the same \texttt{World} serves, without
 modification, both as the ground-truth environment and as the model an agent plans
 through in our planning experiments; it is also why this paper is scoped to
@@ -370,7 +370,7 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   round-tripping, servable) and \ProtoExecutableRate{} additionally clear a behavioral
   audit (load, random-rollout, state changes). These gates establish \emph{servability},
   not fidelity to intent; all \ProtoNumWorlds{} ship as runnable recipes
-  (Figure~\ref{fig:world-atlas}).
+  (companion framework paper~\cite{openworld_framework}).
   \item \textbf{Benchmarks, protocol, and reproducibility.} Three
   ground-truth-instrumented worlds, a \NumTasks-task program-repair benchmark (the coding
   world), and \NumExperiments{} seed-fixed experiments with paired statistical tests, all
@@ -920,7 +920,7 @@ to the labels' \emph{exactness}---the discriminator from \S\ref{sec:discussion} 
 hidden rule is shallow---List Functions, a one-shot list transform, reaches \LfHeavy---and least
 where it demands long multi-step execution---CLRS, whose answers are long algorithm traces, tops
 out at \ClrsHeavy, the lowest of the three. This is the same boundary as the complexity cliff
-(E20, \S\ref{sec:composition}): verified and world-time-compute methods excel at tasks solvable
+(E20; mitigated by composition in the companion framework paper~\cite{openworld_framework}): verified and world-time-compute methods excel at tasks solvable
 in \emph{few reasoning steps} and degrade as the required chain lengthens. It is also exactly
 where they beat data-hungry learned world models---on the short-horizon \textbf{MiniGrid DoorKey}
 planning task (\S\ref{sec:minigrid}) the verified model solves \emph{zero-shot} while DreamerV3
@@ -987,7 +987,7 @@ descent and symbolic search.
 \emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous worlds (E71) cross-world
 transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
 (diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
-\emph{finds} a generalizing subfamily (\S\ref{sec:combo-search}). One null we did \emph{not}
+\emph{finds} a generalizing subfamily (companion framework paper~\cite{openworld_framework}). One null we did \emph{not}
 predict in advance and report as found, not forecast: cross-language-frame transfer (E81,
 \S\ref{sec:frame-invariance}) gives no lift, even though the exactness clause is consistent
 with it (matched frames beat corrupted). The lesson is the honest one---the law's \emph{form}
@@ -1242,7 +1242,7 @@ slower and leaves \ActivePassiveUnresolved{}/\ActiveRules{} rules unresolved.}
 \label{fig:active-induction}
 \end{figure}
 
-\paragraph{Further world models on the same primitives.} Beyond induction, the framework expresses many additional world models that showcase expressiveness rather than carry the central argument: a non-enumerable version-space database (E46), path integrals over learning trajectories (E49), next-token world models with exact length generalization (E45), composite corporate (E48) and startup-growth (E51) worlds, a tree-of-thoughts brain simulator with real persistent memory (E58, E59), and the full perceive$\to$world$\to$emit$\to$act boundary (E60). These are detailed in Appendix~\ref{app:more}.
+\paragraph{Further world models on the same primitives.} Beyond induction, the framework expresses many additional world models that showcase expressiveness rather than carry the central argument: a non-enumerable version-space database (E46), path integrals over learning trajectories (E49), next-token world models with exact length generalization (E45), composite corporate (E48) and startup-growth (E51) worlds, a tree-of-thoughts brain simulator with real persistent memory (E58, E59), and the full perceive$\to$world$\to$emit$\to$act boundary (E60). These are the subject of the companion framework paper~\cite{openworld_framework}.
 
 \subsection{From fidelity to decisions: planning}\label{sec:planning}
 World models exist to improve decisions; E22 closes that chain
@@ -1366,7 +1366,7 @@ DreamerV3, learning a latent world model from pixels end to end, reaches reward
 frozen encoders) scores \CartVjepaSolve{} through \emph{every} controller we tried. That
 last result is the interesting one, and it is not what it first looks like: the frozen
 features encode the full state perfectly well; the failure is \emph{control}, not
-perception. We trace it in Appendix~\ref{sec:vjepa-control}.
+perception. We trace it in the companion framework paper~\cite{openworld_framework}.
 
 \begin{table}[htb]\centering\small
 \input{tables/cartpole.tex}
@@ -1523,7 +1523,7 @@ design, surfacing the manifold of value settings that solve a task rather
 than a single frozen compromise. Two qualifications, owed to the
 philosophical review. First, openness is only as wide as the expressible
 structures: a weighted sum is act consequentialism, and
-\S\ref{sec:moral-structure} shows that aggregator choice, side constraints,
+the companion framework paper~\cite{openworld_framework} shows that aggregator choice, side constraints,
 and theory uncertainty are distinct moral objects the framework must (and
 now does) represent rather than approximate with weights. Second, open
 specification \emph{manages} the specification trap~\cite{spectrap2025}
@@ -1674,72 +1674,29 @@ their results section was cut.}\label{tab:experiment-index}\\
 \endlastfoot
 E1 & Head-to-head symbolic vs.\ learned dynamics on the sprint world & Tab.~\ref{tab:main} \\
 E2 & Synthesis reliability: five compile attempts per world & Tab.~\ref{tab:synthesis-app} \\
-E3 & Verifier-gate ablation across four acceptance regimes & Fig.~\ref{fig:verifier} \\
 E4 & Head-to-head engine comparison, primary sprint result & Tab.~\ref{tab:main} \\
-E5 & Multi-attempt repair baseline, low-temperature 1.5B proposer & \S\ref{sec:judge-results} \\
-E6 & Feedback-driven repair retries recover nothing (local minimum) & \S\ref{sec:judge-results} \\
-E7 & Judge-as-objective: rubric scores track ground truth & \S\ref{sec:judge-results} \\
-E8 & Moral dial sweep traces the welfare--fairness Pareto frontier & Fig.~\ref{fig:pareto} \\
 E9 & Configuration-search strategies on triage auto-tuning & Tab.~\ref{tab:tuning-app} \\
 E10 & Head-to-head primary comparison, throughput and accuracy & Tab.~\ref{tab:main} \\
 E11 & Multi-world fidelity replication, eight scripts per world & Tab.~\ref{tab:fidelity} \\
 E12 & Trained MLP/1-NN baselines vs.\ the zero-transition program & Fig.~\ref{fig:learned} \\
-E13 & Controlled judge-selection comparison, paired McNemar test & Fig.~\ref{fig:judge} \\
 E14 & \emph{Retired (absorbed); not in text} & --- \\
-E15 & Paraphrased-rubric judge correlation, weaker and marginal & \S\ref{sec:judge-results} \\
 E16 & Cross-family synthesis replication (Llama, Gemma) & Tab.~\ref{tab:synthesis-app} \\
-E17 & Tripled-seed judge selection, pooled power analysis & Fig.~\ref{fig:judge} \\
 E18 & Filter-vs-repair decomposition of the verification gate & Tab.~\ref{tab:repair-app} \\
 E19 & Scale-ladder vs.\ a stronger learned baseline, OOD collapse & Tab.~\ref{tab:ladder-app} \\
 E20 & The complexity cliff: synthesis degrades past eight rules & Fig.~\ref{fig:complexity} \\
 E21 & Stochastic dynamics via seed-threaded verified synthesis & \S\ref{sec:boundaries} \\
 E22 & Planning: model-predictive lookahead through the program & Tab.~\ref{tab:planning} \\
 E23 & Oracle-free error detection by ensemble disagreement & \S\ref{sec:boundaries} \\
-E24 & Aggregation as ethical commitment: sum vs.\ maximin/leximin & \S\ref{sec:moral-structure} \\
-E25 & Side constraints (vetoes) cannot be simulated by weights & \S\ref{sec:moral-structure} \\
-E26 & Moral uncertainty: a credence-weighted moral parliament & \S\ref{sec:moral-structure} \\
-E27 & Pluralism visible across utilitarian/deontic/care rubrics & \S\ref{sec:moral-structure} \\
 E28 & \emph{Cut (setup only)}: atomic SWE-style repair suite & \S~Setup \\
 E29 & \emph{Cut (setup only)}: staged latent-defect repair suite & \S~Setup \\
-E30 & Composition defeats the cliff: monolithic vs.\ four children & Fig.~\ref{fig:compcliff} \\
-E31 & Three-level composite replayed against an independent oracle & Fig.~\ref{fig:composition} \\
-E32 & Changing rules via PhasedTransition across a regime switch & Tab.~\ref{tab:composition} \\
-E33 & Dynamic traversal: agents move when the rules change & Fig.~\ref{fig:dynamic} \\
-E34 & Sprint: budget allocation over twenty repair worlds & Fig.~\ref{fig:sprint} \\
-E35 & Sprint allocation across a model capability ladder & Fig.~\ref{fig:sprint-ladder} \\
-E36 & Composition yields better representations on factored worlds & Fig.~\ref{fig:representations} \\
 E37 & Equal-information induction: code beats learning OOD & Tab.~\ref{tab:induction} \\
 E38 & The induction ceiling is identifiability, not capability & Fig.~\ref{fig:induction-scale} \\
-E39 & Forecast accuracy equals perception accuracy (decomposition) & \S\ref{sec:perception} \\
-E40 & Perceive-then-forecast a multimodal SIR epidemic & Fig.~\ref{fig:perception} \\
-E41 & Adapting to sudden, unannounced rule changes & Fig.~\ref{fig:nonstationary} \\
-E42 & Agents traversing connected worlds with changing rules & Fig.~\ref{fig:agent-traversal} \\
 E43 & Active induction: acting closes the identifiability gap & Fig.~\ref{fig:active-induction} \\
-E44 & Emergent economy from composed verified rules & Fig.~\ref{fig:economy} \\
-E45 & Next-token world models: exact length generalization & Tab.~\ref{tab:next-token} \\
-E46 & Factored semiring store for a non-enumerable version space & Tab.~\ref{tab:many-worlds} \\
-E47 & Relativity as a verified model vs.\ atomic-clock data & Tab.~\ref{tab:relativity} \\
-E48 & Composite corporate world: individual/division/company goals & Tab.~\ref{tab:corporate} \\
-E49 & Path integrals over learning trajectories (curricula) & Tab.~\ref{tab:path-integral} \\
-E50 & Same-day trading world model, out-of-sample on real markets & Tab.~\ref{tab:trading} \\
-E51 & Startup growth world model: what drives a YC-style batch & Tab.~\ref{tab:startups} \\
-E52 & Wavelet denoising as a perceive$\to$world$\to$emit loop & Tab.~\ref{tab:denoise} \\
 E53 & \emph{Retired (sheaf section cut); not in text} & --- \\
-E54 & Abstract interpretation: sound, tight bounds on rollouts & Tab.~\ref{tab:bounds} \\
-E55 & Information geometry: identify the world by maximizing info & Tab.~\ref{tab:infogeom} \\
-E56 & Optimal transport: drift detection where KL saturates & Tab.~\ref{tab:transport} \\
-E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:worldspecs} \\
-E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
-E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
-E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} \\
 E61 & Verified code vs a trained world model on control (absorbed into E63) & Tab.~\ref{tab:bakeoff} \\
-E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
 E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
-E64 & Causal DAGs compile to verified structural causal models (SDOH) & App.~\ref{sec:dag} \\
 E65 & Cross-species on MiniGrid: verified code vs.\ DreamerV3 / V-JEPA-2 & \S\ref{sec:minigrid} \\
 E67 & Continuous control: cartpole-swingup vs.\ learned/perceptual models & \S\ref{sec:cartpole} \\
-E68 & Prototyping latency: \ProtoNumWorlds{} worlds across six sectors & \S\ref{sec:proto-latency} \\
-E68b & Recipe audit of the prototyped worlds (validation gate) & \S\ref{sec:proto-latency} \\
 E74 & World-time compute: held-out lift vs.\ model size (diagnosis family) & \S\ref{sec:world-time} \\
 E76 & World-count scaling of the world-time-compute lever & \S\ref{sec:world-time-scale} \\
 E77 & Coding-world transfer of world-time compute (pass@5) & \S\ref{sec:world-time-scale} \\
@@ -1747,7 +1704,6 @@ E78b & Label-exactness ablation isolates the causal driver & \S\ref{sec:world-ti
 E80 & Real-data world-time compute on ARC-AGI (per-world TTT + ladder) & \S\ref{sec:world-time-arc} \\
 E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \S\ref{sec:world-time-domains} \\
 E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
-E80 & Constructive search for generalizing world-combinations & \S\ref{sec:combo-search} \\
 E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
 E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 \end{longtable}

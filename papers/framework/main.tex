@@ -197,7 +197,7 @@ code, a single template instantiates into many \emph{world models}---simulators 
 dynamics are executable, verifiable programs over symbolic state---each an inexhaustible
 generator of \emph{exactly}-labeled trajectories. Fine-tuning a model on trajectories
 traversed through many such worlds of a domain---\emph{world-time compute}
-(\S\ref{sec:world-time}), a training-time analogue of test-time compute---lifts its
+(a training-time analogue of test-time compute, studied in the companion paper~\cite{openworld_wtc})---lifts its
 generalization to \emph{held-out} worlds it never trained on. Two things make this work, and
 the paper is organized around them. First, the worlds must not lie: a traversed world teaches
 the right rules only if its dynamics are correct, so we build them as \emph{verified code},
@@ -320,7 +320,7 @@ an LLM on trajectories traversed through \WTNumTrainWorlds{} verified
 \WTNumTestWorlds{} \emph{unseen} worlds toward the rules-given oracle, with the
 largest gain for the smallest models ($+\WTSmallGain$ points at \WTSmallName,
 shrinking to $+\WTLargeGain$ at \WTLargeName)---a generalization lever that is
-strongest where capability is scarcest (E74, \S\ref{sec:world-time}).}
+strongest where capability is scarcest (E74; companion paper~\cite{openworld_wtc}).}
 \label{fig:hero}
 \end{figure}
 
@@ -771,7 +771,7 @@ failures parse fine); the full behavioral gate (sandboxed smoke-runs +
 invariants + repair loop) lifts accuracy to \VerifierFullAcc, and adding the
 7B semantic critic reaches \VerifierCriticAcc---a $+0.24$ absolute gain over
 blind acceptance. Notably, no 3B generation achieved bit-exact dynamics under
-any regime (the 7B generator routinely does, \S\ref{sec:abl2}): verification
+any regime (the 7B generator routinely does): verification
 buys a large, measurable correctness margin, but cannot substitute for
 generator capability. Stated as the gate's \emph{false-accept rate} on branch
 behavior---the quantity the single-initial-state smoke-run cannot see---every
@@ -942,7 +942,7 @@ arrow is a \emph{binding} injecting a parent parameter into a child.}
 \label{fig:composition}
 \end{figure}
 
-E20 (\S\ref{sec:boundaries}, Figure~\ref{fig:complexity}) left monolithic
+E20 (the complexity cliff; companion paper~\cite{openworld_wtc}) left monolithic
 synthesis collapsing past $R{\approx}8$ coupled rules and named composition
 as the structural fix; E30 delivers it (Figure~\ref{fig:compcliff},
 Table~\ref{tab:composition}). The
@@ -1125,81 +1125,7 @@ license: declare rules precisely; verify with invariants; probe the accepted
 artifact against intent; tighten and recompile. Each gate buys measurable
 correctness, and the artifact remains a diffable program at every stage.
 
-\paragraph{Is world-time compute just fine-tuning?} Mechanically, yes: there is no new
-optimizer or architecture, only LoRA-SFT. The assertion is about the \emph{data source}, not
-the optimizer. Ordinary fine-tuning needs a labelled corpus---scarce, costly, and sometimes
-wrong; world-time compute instead fine-tunes on trajectories from a \emph{verified} world
-model, which generates unlimited examples and labels them \emph{exactly} for free, because the
-transition is code and the oracle is execution. In one line: a correct world model turns
-compute into unlimited correct training data. Whether the ``verified'' qualifier is
-load-bearing---rather than decoration on plain SFT---is an empirical question with a clean
-discriminator, the \textbf{corrupted-label ablation}: randomising the labels keeps the
-fine-tuning and the world's structure but destroys their correctness, so if accuracy is
-unchanged the framing adds nothing. It does collapse to the no-fine-tune floor: the
-corrupted-demonstration arm on real ARC worlds falls to \ArcTTTCorrupt{} against the verified
-arm (\S\ref{sec:world-time-arc}, Fig.~\ref{fig:arc}). So the contribution
-is conceptual, not algorithmic, and only two
-things earn the approach its name over ``SFT with extra steps'': (i) this verified-label
-dependence, and (ii) \emph{cross-world} transfer---training on a \emph{family} of worlds lifts
-accuracy on \emph{held-out} worlds never fine-tuned on (E74, E76), which same-world
-fine-tuning cannot do. Where neither holds---heterogeneous worlds with no shared skill
-(E71, E73), or a benchmark of per-task-novel rules where cross-task transfer stays weak
-(ARC, \S\ref{sec:world-time-arc})---it is, fairly, just expensive fine-tuning, and we say so.
-This places world-time compute squarely in the \emph{self-training} lineage---%
-STaR~\cite{star2022}, ReST and ReST-EM~\cite{rest2023,restem2024}, expert
-iteration~\cite{expertiteration2017}, rejection-sampling fine-tuning~\cite{rft2023}, and
-learning from verifiable rewards~\cite{rlvr2024}---all of which retrain a model on its own
-outputs filtered by a correctness check. Two differences are the contribution, not the loop:
-the verifier is a \emph{full world model with dynamics}, so the training unit is a verified
-\emph{trajectory} (a state-action-next-state transition), not a checked final answer; and the
-target is a \emph{different generalization axis}---held-out \emph{worlds} in a family, rather
-than the same task improved in place. In those terms the corrupted-label ablation is precisely
-a verifier-reliability study: the failure mode (training on confidently-wrong self-labels) that
-self-training most fears, here ruled out by construction.
-
-\paragraph{When does it pay off? Few-step reasoning.} Pulling the results together
-(\S\ref{sec:world-time-domains}) yields a single operating regime. Verified world models and
-world-time compute win where a task reduces to \emph{few reasoning steps} over a state that can
-be \emph{told} symbolically: shallow rule induction (List Functions, the largest lift), small
-grid transforms (ARC), and short-horizon planning (MiniGrid DoorKey, solved zero-shot while
-DreamerV3 needs $10^4$--$10^5$ interactions). Performance degrades along two axes---as the
-required reasoning \emph{lengthens} (CLRS algorithm traces, the lowest of the symbolic domains;
-and the E20 complexity cliff past $\sim$8 composed rules), and as the latent rule must be
-\emph{induced from rich perception} rather than read from symbolic state (Bongard-RWR vision,
-flat at chance). This is not a hedge but the contribution's shape: a verified, auditable,
-zero-data lever that is strongest precisely where today's data-hungry learned world models are
-weakest---short, specifiable reasoning---and that cleanly cedes the long-horizon, perception-heavy
-regime to them.
-
-\paragraph{Three routes to use a world model.} A verified world model is a reusable artifact, and
-it is useful whether or not one ever fine-tunes; world-time compute is one of three ways to spend
-it (Table~\ref{tab:routes}). \emph{Route 1---as a tool:} serve the world and call it---plan
-through it, query exact next-states, or use it as a verifier (no training; exact, auditable;
-\S\ref{sec:planning}, \S\ref{sec:minigrid}). \emph{Route 2---per-world test-time training:}
-distil a single world's exactly-labelled trajectories into weights with QLoRA, amortising that
-world's skill for tool-free inference (\S\ref{sec:world-time-arc}). \emph{Route 3---world-time
-compute:} traverse a \emph{family} of verified worlds and fine-tune to generalise to held-out
-worlds (\S\ref{sec:world-time}, \S\ref{sec:world-time-law}). The \emph{hybrid} composes them: use
-the tool to \emph{generate} exact trajectories, training to \emph{internalise} them, and the
-exact tool as a fallback for high-stakes queries---the tool bootstraps the data, training
-amortises it, and exactness is recoverable on demand.
-
-\begin{table}[t]\centering\small
-\begin{tabular}{lcccc}
-\toprule
-Route & Exact? & Training & Tool at inference & Generalises to new worlds \\
-\midrule
-1.\ Tool & yes & none & yes & n/a (use any world) \\
-2.\ Per-world TTT & approx. & QLoRA, one world & no & within the world \\
-3.\ World-time compute & approx. & QLoRA, many worlds & no & yes (across the family) \\
-Hybrid & on fallback & QLoRA & only when unsure & yes, with exact backstop \\
-\bottomrule
-\end{tabular}
-\caption{\textbf{Three routes to use a verified world model}, plus the hybrid. Need
-exactness/audit $\to$ Route 1; amortise one world $\to$ Route 2; generalise a family $\to$
-Route 3; best of both $\to$ Hybrid.}
-\label{tab:routes}
-\end{table}
+\paragraph{What these worlds enable: world-time compute.} Beyond serving as simulators to plan \emph{in}, verified worlds are also training \emph{signal}: because each world labels trajectories exactly for free, fine-tuning on trajectories from many worlds of a domain lifts an LLM's generalization to held-out worlds (\emph{world-time compute}). That result---its predictive regularity, its boundaries, and how it relates to self-training---is the subject of the companion paper~\cite{openworld_wtc}; here we only note that the framework's exact, composable worlds are what make it possible.
 
 \paragraph{Value alignment as an open specification.} The dial experiments
 ground the alignment claim: because objectives are declared artifacts, the
@@ -1358,18 +1284,13 @@ their results section was cut.}\label{tab:experiment-index}\\
 \endfoot
 \bottomrule
 \endlastfoot
-E1 & Head-to-head symbolic vs.\ learned dynamics on the sprint world & Tab.~\ref{tab:main} \\
 E2 & Synthesis reliability: five compile attempts per world & Tab.~\ref{tab:synthesis-app} \\
 E3 & Verifier-gate ablation across four acceptance regimes & Fig.~\ref{fig:verifier} \\
-E4 & Head-to-head engine comparison, primary sprint result & Tab.~\ref{tab:main} \\
 E5 & Multi-attempt repair baseline, low-temperature 1.5B proposer & \S\ref{sec:judge-results} \\
 E6 & Feedback-driven repair retries recover nothing (local minimum) & \S\ref{sec:judge-results} \\
 E7 & Judge-as-objective: rubric scores track ground truth & \S\ref{sec:judge-results} \\
 E8 & Moral dial sweep traces the welfare--fairness Pareto frontier & Fig.~\ref{fig:pareto} \\
 E9 & Configuration-search strategies on triage auto-tuning & Tab.~\ref{tab:tuning-app} \\
-E10 & Head-to-head primary comparison, throughput and accuracy & Tab.~\ref{tab:main} \\
-E11 & Multi-world fidelity replication, eight scripts per world & Tab.~\ref{tab:fidelity} \\
-E12 & Trained MLP/1-NN baselines vs.\ the zero-transition program & Fig.~\ref{fig:learned} \\
 E13 & Controlled judge-selection comparison, paired McNemar test & Fig.~\ref{fig:judge} \\
 E14 & \emph{Retired (absorbed); not in text} & --- \\
 E15 & Paraphrased-rubric judge correlation, weaker and marginal & \S\ref{sec:judge-results} \\
@@ -1377,10 +1298,6 @@ E16 & Cross-family synthesis replication (Llama, Gemma) & Tab.~\ref{tab:synthesi
 E17 & Tripled-seed judge selection, pooled power analysis & Fig.~\ref{fig:judge} \\
 E18 & Filter-vs-repair decomposition of the verification gate & Tab.~\ref{tab:repair-app} \\
 E19 & Scale-ladder vs.\ a stronger learned baseline, OOD collapse & Tab.~\ref{tab:ladder-app} \\
-E20 & The complexity cliff: synthesis degrades past eight rules & Fig.~\ref{fig:complexity} \\
-E21 & Stochastic dynamics via seed-threaded verified synthesis & \S\ref{sec:boundaries} \\
-E22 & Planning: model-predictive lookahead through the program & Tab.~\ref{tab:planning} \\
-E23 & Oracle-free error detection by ensemble disagreement & \S\ref{sec:boundaries} \\
 E24 & Aggregation as ethical commitment: sum vs.\ maximin/leximin & \S\ref{sec:moral-structure} \\
 E25 & Side constraints (vetoes) cannot be simulated by weights & \S\ref{sec:moral-structure} \\
 E26 & Moral uncertainty: a credence-weighted moral parliament & \S\ref{sec:moral-structure} \\
@@ -1394,13 +1311,10 @@ E33 & Dynamic traversal: agents move when the rules change & Fig.~\ref{fig:dynam
 E34 & Sprint: budget allocation over twenty repair worlds & Fig.~\ref{fig:sprint} \\
 E35 & Sprint allocation across a model capability ladder & Fig.~\ref{fig:sprint-ladder} \\
 E36 & Composition yields better representations on factored worlds & Fig.~\ref{fig:representations} \\
-E37 & Equal-information induction: code beats learning OOD & Tab.~\ref{tab:induction} \\
-E38 & The induction ceiling is identifiability, not capability & Fig.~\ref{fig:induction-scale} \\
 E39 & Forecast accuracy equals perception accuracy (decomposition) & \S\ref{sec:perception} \\
 E40 & Perceive-then-forecast a multimodal SIR epidemic & Fig.~\ref{fig:perception} \\
 E41 & Adapting to sudden, unannounced rule changes & Fig.~\ref{fig:nonstationary} \\
 E42 & Agents traversing connected worlds with changing rules & Fig.~\ref{fig:agent-traversal} \\
-E43 & Active induction: acting closes the identifiability gap & Fig.~\ref{fig:active-induction} \\
 E44 & Emergent economy from composed verified rules & Fig.~\ref{fig:economy} \\
 E45 & Next-token world models: exact length generalization & Tab.~\ref{tab:next-token} \\
 E46 & Factored semiring store for a non-enumerable version space & Tab.~\ref{tab:many-worlds} \\
@@ -1418,24 +1332,10 @@ E57 & Portable world-model specs and generated model cards & Tab.~\ref{tab:world
 E58 & Brain simulator: tree-of-thoughts ReAct with real memory & \S\ref{sec:brain} \\
 E59 & The brain around a frozen model (modeled backbone) & \S\ref{sec:brainarch} \\
 E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} \\
-E61 & Verified code vs a trained world model on control (absorbed into E63) & Tab.~\ref{tab:bakeoff} \\
 E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
-E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
-E64 & Causal DAGs compile to verified structural causal models (SDOH) & App.~\ref{sec:dag} \\
-E65 & Cross-species on MiniGrid: verified code vs.\ DreamerV3 / V-JEPA-2 & \S\ref{sec:minigrid} \\
-E67 & Continuous control: cartpole-swingup vs.\ learned/perceptual models & \S\ref{sec:cartpole} \\
 E68 & Prototyping latency: \ProtoNumWorlds{} worlds across six sectors & \S\ref{sec:proto-latency} \\
 E68b & Recipe audit of the prototyped worlds (validation gate) & \S\ref{sec:proto-latency} \\
-E74 & World-time compute: held-out lift vs.\ model size (diagnosis family) & \S\ref{sec:world-time} \\
-E76 & World-count scaling of the world-time-compute lever & \S\ref{sec:world-time-scale} \\
-E77 & Coding-world transfer of world-time compute (pass@5) & \S\ref{sec:world-time-scale} \\
-E78b & Label-exactness ablation isolates the causal driver & \S\ref{sec:world-time-scale} \\
-E80 & Real-data world-time compute on ARC-AGI (per-world TTT + ladder) & \S\ref{sec:world-time-arc} \\
-E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \S\ref{sec:world-time-domains} \\
-E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
 E80 & Constructive search for generalizing world-combinations & \S\ref{sec:combo-search} \\
-E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
-E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 \end{longtable}
 \endgroup
 
@@ -1476,7 +1376,7 @@ problem; ten seeds per strategy, \TuningBudget-trial budget.}
 \section{The synthesized dynamics artifact}\label{app:figs}
 A representative accepted sprint-world transition, synthesized by
 \texttt{qwen2.5:7b} and verified by the full gate---the artifact whose
-exactness underwrites Table~\ref{tab:main}:
+exactness underwrites the head-to-head results (companion paper~\cite{openworld_wtc}):
 
 \begin{tcolorbox}[policycard, cardcol=cardteal,
   title=Accepted \texttt{transition()} (verbatim)]
@@ -1758,7 +1658,7 @@ emit boundaries; none is composite. Generated from the per-world records.}
 \end{figure}
 
 \subsection{Why frozen perceptual world models don't control cartpole (E67)}\label{sec:vjepa-control}
-The cartpole head-to-head (Section~\ref{sec:cartpole}) gives the perceptual species its
+The cartpole head-to-head (companion paper~\cite{openworld_wtc}) gives the perceptual species its
 best shot and it still scores \CartVjepaSolve{}. Because that is a strong claim, we
 chased it down rather than assert it. Every way we tried to turn a frozen visual encoder
 into a swing-up controller failed: (i)~planning over a learned latent-dynamics model on
@@ -1823,7 +1723,7 @@ factor holds \ManyWorldsCoupleFactor{} entries versus \ManyWorldsCoupleIdeal{}
 for the separable ideal), degrading toward enumeration---the $\#$P-hardness of
 exact query evaluation, surfaced and measured rather than hidden. Together with
 E43 this is active inference over a world space too large to write down:
-\S\ref{sec:active-induction} chooses actions to shrink the set, E46 holds and
+active induction (companion paper~\cite{openworld_wtc}) chooses actions to shrink the set, E46 holds and
 queries it.
 
 \begin{figure}[htb]
@@ -2607,7 +2507,7 @@ world-dependent outcome, the right next experiment is the one whose outcome
 carries the most information about which world is true---the expected information
 gain (mutual information between outcome and world identity under the current
 posterior), the information-geometric / optimal-experiment criterion. This
-sharpens the active-induction story (\S\ref{sec:active-induction}) and the
+sharpens the active-induction story (companion paper~\cite{openworld_wtc}) and the
 many-worlds posterior (\S\ref{sec:many-worlds}): choose probes by information,
 update by Bayes. We compare it to random probing and to the count-based
 version-space heuristic on \InfoGeomWorlds{} candidate worlds and \InfoGeomProbes{}

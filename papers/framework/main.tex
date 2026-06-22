@@ -217,7 +217,8 @@ next state, letting an agent plan ``in imagination'' rather than by trial~\cite{
 for analysis, or as the training signal studied in the companion paper---depends on their
 dynamics being \emph{correct}. So \openworld{} builds dynamics as \emph{verified code},
 synthesized and then checked before acceptance, rather than as learned approximations: exact
-over long rollouts with no compounding error (Figure~\ref{fig:hero}A). PyTorch did not give deep
+over long rollouts with no compounding error and---being plain code---running orders of magnitude
+faster than a per-step LLM (Figure~\ref{fig:worldcomputer}B). PyTorch did not give deep
 learning new models; it made them fast to \emph{prototype}, and an explosion followed---world
 models have lacked that tool. One application we highlight is \emph{manufacturing training
 experience}: because a verified world labels trajectories exactly for free, fine-tuning on
@@ -327,96 +328,76 @@ strategies); and (iv) \emph{agents-as-a-judge}~\cite{agentasjudge2024,
 llmjudge2023}: an LLM judge that selects among candidate behaviors and grades
 trajectories against written rubrics.
 
-\begin{figure}[htb]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.97\linewidth]{figs/hero.png}
-\caption{\textbf{The paper in one figure.} \emph{A (foundation):} On a
-ground-truth-instrumented world, dynamics synthesized and verified once as
-code (blue) match the oracle exactly at every depth of a \RolloutSteps-step
-rollout, while per-step LLM next-state prediction (orange)---a structural
-stand-in for learned neural dynamics---first diverges at step
-\LLMFirstDivergence{} on average and never completes an exact rollout. Programs
-encode rules, not statistics, so the compounding-error failure mode of learned
-world models is eliminated by construction, at zero training cost. \emph{B
-(payoff):} what that exactness unlocks---\emph{world-time compute}. Fine-tuning
-an LLM on trajectories traversed through \WTNumTrainWorlds{} verified
-\emph{train} world models lifts held-out diagnostic accuracy on
-\WTNumTestWorlds{} \emph{unseen} worlds toward the rules-given oracle, with the
-largest gain for the smallest models ($+\WTSmallGain$ points at \WTSmallName,
-shrinking to $+\WTLargeGain$ at \WTLargeName)---a generalization lever that is
-strongest where capability is scarcest (E74; companion paper~\cite{openworld_wtc}).}
-\label{fig:hero}
+\includegraphics[width=0.99\linewidth]{figs/world_computer.png}
+\caption{\textbf{The world computer, benchmarked on cost, latency, and performance.}
+\emph{A (cost \& latency to prototype):} on a \ProtoNumWorlds-world, six-sector benchmark an
+agent authors a validated, servable world in a median of \ProtoMedianMinutes{} minutes (p90
+\ProtoPNinetyMinutes), on consumer hardware with a local LLM backbone. \emph{B (latency to
+run):} once built, a verified world is plain code---it rolls out orders of magnitude faster
+than a per-step LLM next-state proxy (here $\sim$47{,}000$\times$), exactly and inspectably,
+with the hand-written function oracle as the ceiling. \emph{C (performance/trust):} the gates a
+world must clear---\ProtoValidationRate{} validate structurally and \ProtoExecutableRate{} pass
+a behavioral execution audit. All numbers from E68/E04/E68b.}
+\label{fig:worldcomputer}
 \end{figure}
 
 A review of the world-model landscape reveals distinct strategy families with
 a recurring tension---fidelity and scale on one side; verifiability, sample
 efficiency, and steerability on the other (Table~\ref{tab:related}).
 
-\paragraph{Contributions.} Organized around the world-time-compute thesis above:
+\paragraph{Contributions.} This paper develops \emph{world computing}---building, evaluating,
+and serving verified world models as a first-class artifact---organized around a world
+computer's cost, latency, and performance (Figure~\ref{fig:worldcomputer}):
 \begin{enumerate}
-  \item \textbf{World-time compute (the finding).} A verified world model is
-  \emph{training signal}: fine-tuning an LLM on trajectories traversed through many world
-  models of a domain lifts its generalization to \emph{held-out} worlds it never trained
-  on---a training-time analogue of test-time compute. The gain is largest where capability
-  is scarcest ($+\WTSmallGain$ points at \WTSmallName, narrowing to $+\WTLargeGain$ at
-  \WTLargeName{} as the task saturates) and, on a coding-world family, transfers at
-  best-of-$k$ to HumanEval (\CodeHeBaseFive$\to$\CodeHeFtFive) while not improving greedy
-  pass@1. We argue \emph{exact} labels---not task variety alone---are what separates this
-  from domain randomization, and identify the control that isolates it.
-  \item \textbf{Why it must be verified code (the foundation).} Traversal is only safe if
-  the worlds do not lie. On three ground-truth-instrumented worlds, verified synthesized
-  dynamics are exact on \MultiCodeExact{} \RolloutSteps-step rollouts (95\% CI
-  \MultiCodeCI) and answer $10\times$ out-of-distribution probes at \CodeOODRate{} from
-  \emph{zero} transitions, whereas the LLM next-state proxy completes \MultiLLMExact{} and
-  a 10{,}000-transition MLP scores \MLPOODTenK{} out of distribution---so a traversed world
-  distills rules, not a hallucinated approximation. Where dynamics are writable, planning
-  through the verified model matches ground truth and beats planning through a
-  hallucinating one; on MiniGrid and cartpole it solves $0$-shot what a trained DreamerV3
-  and a frozen-perceptual V-JEPA-2 need $10^4$--$10^5$ interactions to learn---because,
-  handed the dynamics, it need not learn them (a scope property, not a contest).
-  \item \textbf{The framework that makes it cheap.} \openworld, a zero-dependency Python
-  framework that turns authoring a verified code world model into a minutes-scale,
-  push-button activity: a local LLM (or Claude Code) declares the spec---symbolic state, a
-  verified \texttt{transition}, perceptors (the perceive boundary), composition (worlds
-  within worlds), dial-steerable objectives, an emit/act boundary---which is checked,
-  served from one command, and shared as a portable artifact. This is what makes assembling
-  the \emph{many} worlds world-time compute needs practical.
-  \item \textbf{A prototyping benchmark for many worlds.} A \ProtoNumWorlds-world benchmark
-  across \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal,
-  cybersecurity, energy, agentic-AI) in which Claude Code built every world at a median of
-  \ProtoMedianMinutes{} minutes (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes):
-  \ProtoValidationRate{} pass a structural \texttt{validate\_spec} gate (well-formed,
-  round-tripping, servable) and \ProtoExecutableRate{} additionally clear a behavioral
-  audit (load, random-rollout, state changes). These gates establish \emph{servability},
-  not fidelity to intent; all \ProtoNumWorlds{} ship as runnable recipes
-  (Figure~\ref{fig:world-atlas}).
-  \item \textbf{Benchmarks, protocol, and reproducibility.} Three
-  ground-truth-instrumented worlds, a \NumTasks-task program-repair benchmark (the coding
-  world), and \NumExperiments{} seed-fixed experiments with paired statistical tests, all
-  regenerable from one repository.
-  \item \textbf{Measured guardrails (verification).} Verification is evaluated, not
-  assumed: ablations isolate what each gate buys ($+0.24$ absolute probe accuracy over
-  blind acceptance) and decompose the mechanism (the filter holds quality, the repair loop
-  converts \FilterAccept{} acceptance into \LoopAccept). Crucially, verification certifies
-  executable, invariant-respecting code, not rule-correctness: on the weak 3B generator the
-  full gate accepts every program yet \emph{none} is branch-exact (a 100\% branch-level
-  false-accept rate), so exactness reflects generator capability gated by cheap checks, not
-  the gate.
+  \item \textbf{World computing and the world computer.} We frame a discipline: a \emph{world
+  computer} is the combination of hardware and software that instantiates, verifies, composes,
+  and runs simulated worlds with verifiable dynamics; we build \openworld, a zero-dependency
+  software substrate for it.
+  \item \textbf{The substrate (framework).} A local LLM (or Claude Code) \emph{declares} a
+  world---symbolic state, a verified \texttt{transition}, perceptors (the perceive boundary),
+  composition (worlds within worlds), dial-steerable objectives, an emit/act boundary---which a
+  plan--generate--verify relay checks before acceptance, then serves from one command and shares
+  as a portable artifact.
+  \item \textbf{Prototyping cost \& latency.} On a \ProtoNumWorlds-world benchmark across
+  \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal, cybersecurity,
+  energy, agentic-AI), an agent authors every world at a median of \ProtoMedianMinutes{} minutes
+  (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes) on consumer hardware, with no datacenter
+  training; all \ProtoNumWorlds{} ship as runnable recipes (Figure~\ref{fig:world-atlas}).
+  \item \textbf{Runtime latency.} Once built, a verified world is plain code: it rolls out at
+  native speed---orders of magnitude faster than a per-step LLM next-state proxy---exactly and
+  inspectably (Figure~\ref{fig:worldcomputer}B), so the one-time synthesis cost is amortized over
+  unlimited fast, exact rollouts.
+  \item \textbf{Evaluation \& trust.} \ProtoValidationRate{} pass a structural
+  \texttt{validate\_spec} gate and \ProtoExecutableRate{} clear a behavioral audit; verified
+  synthesized dynamics are exact on \MultiCodeExact{} \RolloutSteps-step rollouts (95\% CI
+  \MultiCodeCI) and answer $10\times$ out-of-distribution probes at \CodeOODRate; composition is
+  verified compositionally and defeats the monolithic-synthesis complexity cliff; and the
+  perceive$\to$world$\to$emit boundary adds zero dynamics error. Verification is itself measured:
+  each gate's contribution is ablated ($+0.24$ probe accuracy over blind acceptance), and we are
+  explicit that it certifies executable, invariant-respecting code, \emph{not} rule-correctness
+  (on a weak 3B generator the gate accepts every program yet none is branch-exact---a 100\%
+  branch-level false-accept rate).
+  \item \textbf{Shareable, auditable worlds.} A portable spec plus a generated model card
+  round-trips losslessly, so a world can be published and checked before it is trusted.
+  \item \textbf{Breadth \& reproducibility.} We exercise the substrate across a wide range of
+  domains (economies, corporate organizations, relativity, trading, brain simulators, optimal
+  transport) and ship \NumExperiments{} seed-fixed experiments regenerable from one repository.
 \end{enumerate}
+What these worlds \emph{enable} as training signal---\emph{world-time compute}---is the subject
+of the companion paper~\cite{openworld_wtc}.
 
 \paragraph{Positioning in the field.} \openworld{} builds on the code-world-model
-program~\cite{worldcoder2024,cwmgames2025}---LLM-synthesized, verified code
-dynamics---but its contribution is what that machinery \emph{enables}: world-time compute,
-which turns many verified worlds into exactly-labeled training signal. Its closest relatives
-are the \emph{self-training} methods that retrain a model on its own verifier-filtered outputs
-(STaR~\cite{star2022}, ReST~\cite{rest2023,restem2024}, expert iteration~\cite{expertiteration2017},
-rejection-sampling fine-tuning~\cite{rft2023}, verifiable rewards~\cite{rlvr2024}); we differ in
-\emph{what} verifies (a full world model with dynamics, so the unit is a verified trajectory, not
-a checked answer) and in the \emph{generalization axis} (held-out worlds in a family). It is also
-distinct from domain randomization and procedural task generation, where experience comes from a
-single (often hand-coded or learned) simulator: here every world is independently synthesized and
-verified, and the open question we frame is whether that label \emph{exactness}, not task
-variety, drives the held-out gains. The supporting machinery extends the open-specification
+program~\cite{worldcoder2024,cwmgames2025}---LLM-synthesized, verified code dynamics---and turns
+it into a general-purpose \emph{substrate}: where prior code-world-model work hand-builds one
+simulator for one task, world computing makes authoring, verifying, composing, serving, and
+sharing verified worlds a routine, minutes-scale activity. It is complementary to, not in
+competition with, the perceptual/generative world-model species (Dreamer, MuZero, Genie, Sora,
+V-JEPA; Table~\ref{tab:related}), which learn pixel/latent dynamics from data: those win where
+dynamics must be \emph{learned} from perception, world computing where they can be \emph{written}.
+What such worlds \emph{enable} as training signal (\emph{world-time compute}) and how that relates
+to self-training is developed in the companion paper~\cite{openworld_wtc}. The supporting machinery extends the open-specification
 stance of the value-alignment literature~\cite{spectrap2025,mas2025} and judge-based
 behavior selection~\cite{agentasjudge2024}. We benchmark on consumer hardware with 7B/3B
 local models, the regime where learned world models are least accessible and training-free

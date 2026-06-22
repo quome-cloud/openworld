@@ -1,0 +1,188 @@
+{
+  "n_worlds": 333,
+  "domains": [
+    "arc",
+    "bongard",
+    "clrs",
+    "listfn",
+    "tabular"
+  ],
+  "per_domain_n": {
+    "arc": 39,
+    "bongard": 179,
+    "clrs": 29,
+    "listfn": 56,
+    "tabular": 30
+  },
+  "within_domain_light_vs_heavy_spearman": {
+    "arc": 0.977327935222672,
+    "bongard": 0.7695499340907664,
+    "clrs": 0.7275862068965516,
+    "listfn": 0.9045112781954888,
+    "tabular": 0.6315906562847609
+  },
+  "models": {
+    "light_only": {
+      "features": [
+        "light_lift"
+      ],
+      "lodo_r2": 0.505,
+      "lodo_spearman": 0.44089580526345556,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.977327935222672,
+          "pred_mean": 0.147,
+          "actual_mean": 0.103
+        },
+        "bongard": {
+          "n": 179,
+          "spearman": 0.7614587910363442,
+          "pred_mean": 0.182,
+          "actual_mean": 0.115
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.7098522167487682,
+          "pred_mean": 0.133,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.6059466848940535,
+          "pred_mean": 0.41,
+          "actual_mean": 0.572
+        },
+        "tabular": {
+          "n": 30,
+          "spearman": 0.5968854282536151,
+          "pred_mean": 0.1,
+          "actual_mean": 0.185
+        }
+      }
+    },
+    "light+base": {
+      "features": [
+        "light_lift",
+        "base"
+      ],
+      "lodo_r2": 0.494,
+      "lodo_spearman": 0.41753679225723095,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.977327935222672,
+          "pred_mean": 0.033,
+          "actual_mean": 0.103
+        },
+        "bongard": {
+          "n": 179,
+          "spearman": 0.5472244889418952,
+          "pred_mean": 0.239,
+          "actual_mean": 0.115
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.6172413793103447,
+          "pred_mean": 0.061,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.7095010252904991,
+          "pred_mean": 0.423,
+          "actual_mean": 0.572
+        },
+        "tabular": {
+          "n": 30,
+          "spearman": 0.5995550611790879,
+          "pred_mean": 0.154,
+          "actual_mean": 0.185
+        }
+      }
+    },
+    "ll_freeproxy": {
+      "features": [
+        "ll_slope",
+        "base"
+      ],
+      "lodo_r2": -0.379,
+      "lodo_spearman": -0.28601164806098395,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": -0.10121457489878542,
+          "pred_mean": 0.271,
+          "actual_mean": 0.103
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.2660098522167487,
+          "pred_mean": 0.278,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.3546138072453862,
+          "pred_mean": 0.143,
+          "actual_mean": 0.572
+        },
+        "tabular": {
+          "n": 30,
+          "spearman": 0.03670745272525028,
+          "pred_mean": 0.59,
+          "actual_mean": 0.185
+        }
+      }
+    },
+    "ll+depth": {
+      "features": [
+        "ll_slope",
+        "base",
+        "depth"
+      ],
+      "lodo_r2": -0.356,
+      "lodo_spearman": -0.13918036422780258,
+      "per_domain": {
+        "arc": {
+          "n": 39,
+          "spearman": 0.17246963562753037,
+          "pred_mean": 0.168,
+          "actual_mean": 0.103
+        },
+        "clrs": {
+          "n": 29,
+          "spearman": 0.11133004926108372,
+          "pred_mean": 0.246,
+          "actual_mean": 0.086
+        },
+        "listfn": {
+          "n": 56,
+          "spearman": 0.3427204374572796,
+          "pred_mean": 0.146,
+          "actual_mean": 0.572
+        },
+        "tabular": {
+          "n": 30,
+          "spearman": 0.04160177975528365,
+          "pred_mean": 0.583,
+          "actual_mean": 0.185
+        }
+      }
+    }
+  },
+  "n_with_ll": 154,
+  "ll_domains": [
+    "arc",
+    "clrs",
+    "listfn",
+    "tabular"
+  ],
+  "ll_slope_vs_y_spearman": 0.25110689437065153,
+  "within_domain_ll_spearman": {
+    "arc": 0.10121457489878542,
+    "clrs": -0.13990147783251228,
+    "listfn": 0.16971975393028024,
+    "tabular": 0.10656284760845385
+  }
+}

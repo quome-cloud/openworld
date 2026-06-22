@@ -1614,81 +1614,13 @@ rounds: \NumTasks{} tasks $\times$ 3 proposer seeds).}
 \label{tab:judge-controls}
 \end{table}
 
-\subsection{Steerability: the moral dial}\label{sec:robustness}
-E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
-(Figure~\ref{fig:pareto}). All \ParetoFrontierSize{} of \ParetoLambdas{}
-sweep points are Pareto-optimal, fairness is monotone in $\lambda$, and the
-Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---the
-``interior optimum'' behavior predicted by the tunable-morality literature,
-reproduced here with a dial that can be turned mid-simulation rather than a
-retrained model~\cite{spectrap2025,mas2025,stablevalue2026}.
-
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.6\linewidth]{figs/pareto.png}
-\caption{\textbf{Tunable morality (E8).} The welfare--fairness frontier
-traced by sweeping the moral dial $\lambda$ on the commons world. Every point
-is Pareto-optimal; the Nash bargaining optimum is interior. Values are
-declared, weighted artifacts---moving along this frontier requires no
-retraining.}
-\label{fig:pareto}
-\end{figure}
-
-\subsection{The structure of the moral filter}\label{sec:moral-structure}
-A fourth review round, written from a moral philosopher's standpoint
-(\texttt{docs/review/}), pressed a charge the engineering rounds could not:
-the dial system is not a neutral container for ethics. Everything
-expressible as \texttt{Objective}+\texttt{Dial} reduces to
-$\sum_i w_i o_i$---act consequentialism with a linear social welfare
-function---so the ``morality dial'' selects points in one theory's parameter
-space, not among theories. Four experiments, enabled by a new
-\texttt{openworld.ethics} module (Rawlsian and lexicographic aggregators,
-deontological constraints as action vetoes, and a moral parliament),
-measure what that restriction costs and what lifting it buys.
-
-\paragraph{Aggregation is an ethical commitment (E24).} On a scarce commons
-where one agent harvests faster than the other, the utilitarian sum,
-Rawlsian maximin~\cite{rawls1971}, and leximin choose different operating
-points from the same outcome table: the sum is \emph{indifferent} between
-harvests of $(6,3)$ and $(5,4)$---both total 9---and so picks the unequal
-allocation arbitrarily, while maximin and leximin select the restraint level
-that lifts the worst-off from \AggUtilWorst{} to \AggMaximinWorst{} at zero
-total cost. Distribution-blindness is not a hypothetical defect of the
-weighted sum; it selects a different world even when an egalitarian free
-lunch exists.
-
-\paragraph{Side constraints cannot be simulated by weights (E25).} A myopic
-cost-weighted nurse becomes \emph{impermissible} at $\lambda > 1$: the
-weighting makes abandoning waiting critical patients optimal
-(\ViolationsDialOnly{} violations across the sweep, four deteriorations,
-outcomes collapsing to $-8$). A Nozickian side constraint~\cite{nozick1974}
----``never choose another action while a critical patient waits,'' enforced
-as a veto on the action set, not a penalty in the score---eliminates every
-violation at every $\lambda$, and here costs nothing in the dial's
-permissible region (\ConstraintOutcomeCost{} outcome points) while
-\emph{rescuing} the impermissible one. Penalties are just more
-utilitarianism; vetoes are a different kind of object, and the framework now
-has both.
-
-\paragraph{Moral uncertainty and the parliament (E26).} An operator who
-does not know the right theory should hedge rather than maximize within one
-theory~\cite{macaskill2020}. Delegates for utilitarian, Rawlsian, and
-deontological positions vote (credence-weighted Borda) over each action; on
-the triage shift, the parliament is never the strictly worst agent under
-\emph{any} theory's own lens---and notably it rescues the lone Rawlsian
-delegate from itself: pure one-step maximin lets critical patients
-deteriorate (worst-off welfare $-6$, two duty violations), while the
-parliament's mixed counsel reaches the same outcome as the best
-single-theory agents ($-3$, zero violations).
-
-\paragraph{Pluralism is visible in the judge (E27).} Grading the same
-twelve dial-swept trajectories under utilitarian, deontological, and
-care-ethics rubrics yields orderings that correlate only partially
-(pairwise Spearman \RubricPluralismRange; the deontological and care
-rubrics track the dial differently than the utilitarian one). Rubric
-framing is a value choice, not a wording choice---a quantitative
-counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
-caution for anyone deploying a single ``ethics rubric'' judge.
+\paragraph{Steerability and the structure of the moral filter.} Objectives and
+dials make values an explicit, inference-time artifact rather than a retrained
+weight, and a moral-philosophy review round shows the dial is not a neutral
+container for ethics---a weighted sum is one ethical theory, and aggregation,
+side constraints, moral uncertainty, and rubric pluralism each behave
+differently (E8, E24--E27). These are a secondary contribution and we report
+them in full in Appendix~\ref{app:moral-dial}.
 
 \subsection{Configuration search}\label{sec:external}
 E9 compares tuning strategies on the triage auto-configuration problem (two
@@ -2422,18 +2354,21 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E63 are introduced across the Results section in thematic
+The experiments E1--E82 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
-do not appear in the text, and the benchmark-scale repair suites E28--E29 are
-described in the Experimental Setup but their dedicated results section was cut.
+do not appear in the text; E28--E29 are described in the Experimental Setup but
+their dedicated results section was cut; and E66, E69--E73, E75, E78, and E79
+were not used (a superseded probe or a negative result excluded from the paper).
+The world-time-compute family E74--E82 (E80 spans several real-data domains and
+the predictive law) carries the central result.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{@{}r p{0.62\textwidth} l@{}}
-\caption{Index of experiments E1--E57. E14 and E53 are retired and do not
-appear in the text; E28--E29 are described in the Experimental Setup but their
-results section was cut.}\label{tab:experiment-index}\\
+\caption{Index of experiments E1--E82. E14, E53 retired and E66/E69--E73/E75/E78/E79
+unused (absent from the text); E28--E29 are described in the Experimental Setup but
+their results section was cut.}\label{tab:experiment-index}\\
 \toprule
 \textbf{E\#} & \textbf{Description} & \textbf{Where} \\
 \midrule
@@ -2510,6 +2445,21 @@ E60 & The perceive$\to$world$\to$emit$\to$act boundary & \S\ref{sec:ioboundary} 
 E61 & Verified code vs a trained world model, on control & Fig.~\ref{fig:trained-wm} \\
 E62 & Branch-covering acceptance gate vs single-state smoke-run & \S\ref{sec:branch-gate} \\
 E63 & World-model bake-off: 6 runnable models $\times$ 2 domains & Tab.~\ref{tab:bakeoff} \\
+E64 & Causal DAGs compile to verified structural causal models (SDOH) & App.~\ref{sec:dag} \\
+E65 & Cross-species on MiniGrid: verified code vs.\ DreamerV3 / V-JEPA-2 & \S\ref{sec:minigrid} \\
+E67 & Continuous control: cartpole-swingup vs.\ learned/perceptual models & \S\ref{sec:cartpole} \\
+E68 & Prototyping latency: \ProtoNumWorlds{} worlds across six sectors & \S\ref{sec:proto-latency} \\
+E68b & Recipe audit of the prototyped worlds (validation gate) & \S\ref{sec:proto-latency} \\
+E74 & World-time compute: held-out lift vs.\ model size (diagnosis family) & \S\ref{sec:world-time} \\
+E76 & World-count scaling of the world-time-compute lever & \S\ref{sec:world-time-scale} \\
+E77 & Coding-world transfer of world-time compute (pass@5) & \S\ref{sec:world-time-scale} \\
+E78b & Label-exactness ablation isolates the causal driver & \S\ref{sec:world-time-scale} \\
+E80 & Real-data world-time compute on ARC-AGI (per-world TTT + ladder) & \S\ref{sec:world-time-arc} \\
+E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \S\ref{sec:world-time-domains} \\
+E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
+E80 & Constructive search for generalizing world-combinations & \S\ref{sec:combo-search} \\
+E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
+E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 \end{longtable}
 \endgroup
 
@@ -2590,6 +2540,88 @@ LLM-judge coarseness~\cite{llmjudge2023}.
 
 \section{Additional experiments moved from the main text}\label{app:more}
 The following world models and studies appeared in earlier drafts of the Results. They demonstrate the framework's breadth but are not required for the central argument, so they are collected here; their figures, tables, and numbers are unchanged.
+
+\subsection{Steerability and the structure of the moral filter (E8, E24--E27)}\label{app:moral-dial}
+Objectives and dials are a secondary contribution---they make values an editable,
+inference-time artifact---but they raise questions a world-models paper need not
+settle in its main text, so the steerability result and its moral-philosophy
+critique are collected here.
+
+\paragraph{Steerability: the moral dial.}\label{sec:robustness}
+E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
+(Figure~\ref{fig:pareto}). All \ParetoFrontierSize{} of \ParetoLambdas{}
+sweep points are Pareto-optimal, fairness is monotone in $\lambda$, and the
+Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---the
+``interior optimum'' behavior predicted by the tunable-morality literature,
+reproduced here with a dial that can be turned mid-simulation rather than a
+retrained model~\cite{spectrap2025,mas2025,stablevalue2026}.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.6\linewidth]{figs/pareto.png}
+\caption{\textbf{Tunable morality (E8).} The welfare--fairness frontier
+traced by sweeping the moral dial $\lambda$ on the commons world. Every point
+is Pareto-optimal; the Nash bargaining optimum is interior. Values are
+declared, weighted artifacts---moving along this frontier requires no
+retraining.}
+\label{fig:pareto}
+\end{figure}
+
+\paragraph{The structure of the moral filter.}\label{sec:moral-structure}
+A fourth review round, written from a moral philosopher's standpoint
+(\texttt{docs/review/}), pressed a charge the engineering rounds could not:
+the dial system is not a neutral container for ethics. Everything
+expressible as \texttt{Objective}+\texttt{Dial} reduces to
+$\sum_i w_i o_i$---act consequentialism with a linear social welfare
+function---so the ``morality dial'' selects points in one theory's parameter
+space, not among theories. Four experiments, enabled by a new
+\texttt{openworld.ethics} module (Rawlsian and lexicographic aggregators,
+deontological constraints as action vetoes, and a moral parliament),
+measure what that restriction costs and what lifting it buys.
+
+\paragraph{Aggregation is an ethical commitment (E24).} On a scarce commons
+where one agent harvests faster than the other, the utilitarian sum,
+Rawlsian maximin~\cite{rawls1971}, and leximin choose different operating
+points from the same outcome table: the sum is \emph{indifferent} between
+harvests of $(6,3)$ and $(5,4)$---both total 9---and so picks the unequal
+allocation arbitrarily, while maximin and leximin select the restraint level
+that lifts the worst-off from \AggUtilWorst{} to \AggMaximinWorst{} at zero
+total cost. Distribution-blindness is not a hypothetical defect of the
+weighted sum; it selects a different world even when an egalitarian free
+lunch exists.
+
+\paragraph{Side constraints cannot be simulated by weights (E25).} A myopic
+cost-weighted nurse becomes \emph{impermissible} at $\lambda > 1$: the
+weighting makes abandoning waiting critical patients optimal
+(\ViolationsDialOnly{} violations across the sweep, four deteriorations,
+outcomes collapsing to $-8$). A Nozickian side constraint~\cite{nozick1974}
+---``never choose another action while a critical patient waits,'' enforced
+as a veto on the action set, not a penalty in the score---eliminates every
+violation at every $\lambda$, and here costs nothing in the dial's
+permissible region (\ConstraintOutcomeCost{} outcome points) while
+\emph{rescuing} the impermissible one. Penalties are just more
+utilitarianism; vetoes are a different kind of object, and the framework now
+has both.
+
+\paragraph{Moral uncertainty and the parliament (E26).} An operator who
+does not know the right theory should hedge rather than maximize within one
+theory~\cite{macaskill2020}. Delegates for utilitarian, Rawlsian, and
+deontological positions vote (credence-weighted Borda) over each action; on
+the triage shift, the parliament is never the strictly worst agent under
+\emph{any} theory's own lens---and notably it rescues the lone Rawlsian
+delegate from itself: pure one-step maximin lets critical patients
+deteriorate (worst-off welfare $-6$, two duty violations), while the
+parliament's mixed counsel reaches the same outcome as the best
+single-theory agents ($-3$, zero violations).
+
+\paragraph{Pluralism is visible in the judge (E27).} Grading the same
+twelve dial-swept trajectories under utilitarian, deontological, and
+care-ethics rubrics yields orderings that correlate only partially
+(pairwise Spearman \RubricPluralismRange; the deontological and care
+rubrics track the dial differently than the utilitarian one). Rubric
+framing is a value choice, not a wording choice---a quantitative
+counterpart to Berlin's incommensurability claim~\cite{berlin1969} and a
+caution for anyone deploying a single ``ethics rubric'' judge.
 
 \subsection{Atlas of the \ProtoNumWorlds{} prototyped worlds}\label{sec:world-atlas}
 Figure~\ref{fig:world-atlas} characterizes every world from the prototyping benchmark

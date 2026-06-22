@@ -987,12 +987,18 @@ descent and symbolic search.
 \emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous worlds (E71) cross-world
 transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
 (diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
-\emph{finds} a generalizing subfamily (companion framework paper~\cite{openworld_framework}). One null we did \emph{not}
+\emph{finds} a generalizing subfamily (companion framework paper~\cite{openworld_framework}).
+A real-data probe of the same prediction (E83): training one adapter on 21 CLRS-Text algorithms
+and evaluating 8 held-out algorithms gives \emph{no} cross-world lift---held-out accuracy does
+not rise above zero-shot---exactly as expected for a set of algorithms (sorting, graph search,
+string matching) that share little skill. We report this as a \emph{weak} null, however: the
+7B base sits near the floor on these held-out algorithms, so the test has little headroom in
+either direction. One null we did \emph{not}
 predict in advance and report as found, not forecast: cross-language-frame transfer (E81,
 \S\ref{sec:frame-invariance}) gives no lift, even though the exactness clause is consistent
 with it (matched frames beat corrupted). The lesson is the honest one---the law's \emph{form}
-holds where it was tested, but a held-out language is its own skill, outside the family
-structure the law scores.
+holds where it was tested, but a held-out language (or a CLRS algorithm) is its own skill,
+outside the family structure the law scores.
 
 \paragraph{The reader's guideline: how many worlds to simulate.} Because the curve saturates,
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
@@ -1706,6 +1712,7 @@ E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \
 E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
 E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
 E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
+E83 & Real-data cross-world transfer on CLRS-Text (weak null) & \S\ref{sec:world-time-law} \\
 \end{longtable}
 \endgroup
 

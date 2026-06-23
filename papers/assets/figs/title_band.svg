@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 336" width="1680" height="336">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdfcf9"/><stop offset="1" stop-color="#eceef0"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#0891b2"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0 H0 V30" fill="none" stroke="#8aa0c2" stroke-width="0.7" opacity="0.18"/>
+    </pattern>
+    <filter id="sh" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#16202e" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="1680" height="336" fill="url(#bg)"/>
+  <rect width="1680" height="336" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1680" height="13" fill="url(#acc)"/>
+  <rect x="0" y="329" width="1680" height="7" fill="url(#acc)" opacity="0.85"/>
+  <g stroke="#1d4ed8" stroke-width="1.8" opacity="0.5" fill="none">
+    <path d="M30 46 L30 30 L46 30"/>
+    <path d="M1650 46 L1650 30 L1634 30"/>
+    <path d="M30 290 L30 306 L46 306"/>
+    <path d="M1650 290 L1650 306 L1634 306"/>
+  </g>
+
+  <path d="M286 286 L340 272 L394 280 L448 256 L502 266 L556 240 L610 250 L664 228 L718 236 L772 216 L826 224 L880 204 L934 212 L988 196" fill="none" stroke="#0891b2" stroke-width="2.0" opacity="0.28"/>
+
+    <g transform="translate(140,168)">
+    <rect x="-66.0" y="-66.0" width="132.0" height="132.0" rx="21.8" fill="#ffffff" stroke="#1d4ed8" stroke-width="5.94" filter="url(#sh)"/>
+    <rect x="-40.9" y="-40.9" width="81.8" height="81.8" rx="14.5" fill="none" stroke="#b45309" stroke-width="4.95"/>
+    <rect x="-17.2" y="-17.2" width="34.3" height="34.3" rx="7.9" fill="#0f766e"/>
+  </g>
+
+  <text x="280" y="160" font-family="Georgia,'Times New Roman','Iowan Old Style',Palatino,serif" font-size="88" font-weight="700" fill="#16202e" letter-spacing="-1.3">OpenWorld</text>
+  <rect x="285" y="186" width="330" height="5" rx="2.5" fill="url(#acc)"/>
+  <text x="287" y="230" font-family="'SFMono-Regular',Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="19" font-weight="700" fill="#5b6675" letter-spacing="2.8">VERIFIED CODE WORLD MODELS</text>
+  <text x="287" y="261" font-family="'SFMono-Regular',Menlo,Consolas,'DejaVu Sans Mono',monospace" font-size="16" font-weight="600" fill="#1d4ed8" letter-spacing="1.4">build &#183; optimize &#183; deploy</text>
+
+  <path d="M1334 168 H1366 M1442 168 H1472" stroke="#1d4ed8" stroke-width="2.2" stroke-dasharray="3 6" opacity="0.55" fill="none"/>
+    <g transform="translate(1276,168)" opacity="0.92">
+    <rect x="-50.0" y="-50.0" width="100.0" height="100.0" rx="16.5" fill="#ffffff" stroke="#1d4ed8" stroke-width="4.50"/>
+    <rect x="-31.0" y="-31.0" width="62.0" height="62.0" rx="11.0" fill="none" stroke="#b45309" stroke-width="3.75"/>
+    <rect x="-13.0" y="-13.0" width="26.0" height="26.0" rx="6.0" fill="#0f766e"/>
+  </g>
+  <g transform="translate(1396,168)" opacity="0.62">
+    <rect x="-38.0" y="-38.0" width="76.0" height="76.0" rx="12.5" fill="#ffffff" stroke="#1d4ed8" stroke-width="3.42"/>
+    <rect x="-23.6" y="-23.6" width="47.1" height="47.1" rx="8.4" fill="none" stroke="#b45309" stroke-width="2.85"/>
+    <rect x="-9.9" y="-9.9" width="19.8" height="19.8" rx="4.6" fill="#0f766e"/>
+  </g>
+  <g transform="translate(1500,168)" opacity="0.4">
+    <rect x="-28.0" y="-28.0" width="56.0" height="56.0" rx="9.2" fill="#ffffff" stroke="#1d4ed8" stroke-width="2.52"/>
+    <rect x="-17.4" y="-17.4" width="34.7" height="34.7" rx="6.2" fill="none" stroke="#b45309" stroke-width="2.10"/>
+    <rect x="-7.3" y="-7.3" width="14.6" height="14.6" rx="3.4" fill="#0f766e"/>
+  </g>
+</svg>

@@ -391,17 +391,19 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   the gate.
 \end{enumerate}
 
-\paragraph{Positioning in the field.} \openworld{} builds on the code-world-model
-program~\cite{worldcoder2024,cwmgames2025}---LLM-synthesized, verified code
-dynamics---but its contribution is what that machinery \emph{enables}: world-time compute,
+\paragraph{Positioning in the field.} \openworld{} builds on the \emph{programmatic} code-world-model
+program~\cite{worldcoder2024,gifmcts2024,poeworld2025,cwmgames2025}---LLM-synthesized, verified
+code dynamics, as distinct from \emph{neural} code world models that learn dynamics in
+weights~\cite{metacwm2025} and from LLM synthesis of symbolic world models via test-time
+scaling~\cite{ivml2025}---but its contribution is what that machinery \emph{enables}: world-time compute,
 which turns many verified worlds into exactly-labeled training signal. Its closest relatives
 are the \emph{self-training} methods that retrain a model on its own verifier-filtered outputs
 (STaR~\cite{star2022}, ReST~\cite{rest2023,restem2024}, expert iteration~\cite{expertiteration2017},
 rejection-sampling fine-tuning~\cite{rft2023}, verifiable rewards~\cite{rlvr2024}); we differ in
 \emph{what} verifies (a full world model with dynamics, so the unit is a verified trajectory, not
 a checked answer) and in the \emph{generalization axis} (held-out worlds in a family). It is also
-distinct from domain randomization and procedural task generation, where experience comes from a
-single (often hand-coded or learned) simulator: here every world is independently synthesized and
+distinct from domain randomization and procedural task generation~\cite{tobin2017dr,cobbe2020procgen,openended2021xland},
+where experience comes from a single (often hand-coded or learned) simulator: here every world is independently synthesized and
 verified, and the open question we frame is whether that label \emph{exactness}, not task
 variety, drives the held-out gains. The supporting machinery extends the open-specification
 stance of the value-alignment literature~\cite{spectrap2025,mas2025} and judge-based
@@ -1567,8 +1569,11 @@ solve rates should not be read as measurements of debugging skill---the
 world-model claims are unaffected, since the environment executes exactly
 regardless of what the agent has memorized. (iv) Synthesis replicates across
 three model families (E16), but the judge, critic, and repair-agent roles
-remain Qwen-only, and all experiments ran on one machine under the stated
-quantizations. (v) Judges: selection accuracy and order-consistency are
+remain Qwen-only. The synthesis, judge, and repair experiments run on one
+consumer machine under the stated quantizations; the fine-tuning experiments
+(E74, E78, E80--E83) instead run on a single cloud A100 (4-bit QLoRA for the 7B
+and larger models), which we state plainly so the consumer-hardware framing is
+not read as covering the training runs. (v) Judges: selection accuracy and order-consistency are
 measured but imperfect, the pooled selection margin is marginal
 ($p=\PooledMcNemarP$) and costs $\sim$4$\times$ inference, and rubric grading
 showed compression; judge verdicts should gate, not replace, programmatic
@@ -1597,7 +1602,12 @@ are exact-match against oracles and need no error bars, but several
 single-seed samples (e.g.\ the E1 divergence step, $n{=}3$, one world) without
 across-seed variance; we add the pooled multi-world view (E11) where it
 matters, but per-model probe accuracies should be read as estimates, not tight
-measurements. (xii) Two illustrative studies are true \emph{by construction}:
+measurements. This caveat extends to the headline world-time-compute results: the
+E74 model-size scaling is a single fine-tuning seed per size, and the real-data
+ARC/CLRS arms are single-seed at $n{\approx}30$--$40$ with CIs that touch the floor,
+so the size-trend and the weaker real-data domains should be read as exploratory;
+for ARC we additionally report a three-seed re-run of the verified-vs-corrupt gap
+(across-seed CIs). (xii) Two illustrative studies are true \emph{by construction}:
 E59's architecture lift follows arithmetically from a modeled fixed-capability
 backbone, and E60's routing gap over exact-key lookup is guaranteed by the
 comparison design (we add a fair lexical baseline and report the modest gap over
@@ -1608,6 +1618,10 @@ biochemical deltas made every assay-world identical and flattened the world-coun
 per-world local-sequence context was restored), and faithful data loading---e.g.\ the wild-type
 sequence and one-based mutation indexing---is the dominant correctness risk. We treat both as the
 first checks any real-domain port must pass.
+(xiv) The distinction we draw from self-training---that the training unit is a verified
+\emph{trajectory} $(s,a,s')$ rather than a checked final answer---is argued conceptually but not
+yet isolated experimentally; a head-to-head of fine-tuning on trajectories vs.\ on verified
+prompt$\to$answer pairs from the \emph{same} worlds is the cleanest test, and is future work.
 
 % ============================================================================
 \section{Conclusion}

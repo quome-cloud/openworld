@@ -343,56 +343,35 @@ A review of the world-model landscape reveals distinct strategy families with
 a recurring tension---fidelity and scale on one side; verifiability, sample
 efficiency, and steerability on the other (Table~\ref{tab:related}).
 
-\paragraph{Contributions.} Organized around the world-time-compute thesis above:
+\paragraph{Contributions.} Three, around the world-time-compute thesis:
 \begin{enumerate}
-  \item \textbf{World-time compute (the finding).} A verified world model is
-  \emph{training signal}: fine-tuning an LLM on trajectories traversed through many world
-  models of a domain lifts its generalization to \emph{held-out} worlds it never trained
-  on---a training-time analogue of test-time compute. The gain is largest where capability
-  is scarcest ($+\WTSmallGain$ points at \WTSmallName, narrowing to $+\WTLargeGain$ at
-  \WTLargeName{} as the task saturates) and, on a coding-world family, transfers at
-  best-of-$k$ to HumanEval (\CodeHeBaseFive$\to$\CodeHeFtFive) while not improving greedy
-  pass@1. We argue \emph{exact} labels---not task variety alone---are what separates this
-  from domain randomization, and identify the control that isolates it.
-  \item \textbf{Why it must be verified code (the foundation).} Traversal is only safe if
-  the worlds do not lie. On three ground-truth-instrumented worlds, verified synthesized
-  dynamics are exact on \MultiCodeExact{} \RolloutSteps-step rollouts (95\% CI
-  \MultiCodeCI) and answer $10\times$ out-of-distribution probes at \CodeOODRate{} from
-  \emph{zero} transitions, whereas the LLM next-state proxy completes \MultiLLMExact{} and
-  a 10{,}000-transition MLP scores \MLPOODTenK{} out of distribution---so a traversed world
-  distills rules, not a hallucinated approximation. Where dynamics are writable, planning
-  through the verified model matches ground truth and beats planning through a
-  hallucinating one; on MiniGrid and cartpole it solves $0$-shot what a trained DreamerV3
-  and a frozen-perceptual V-JEPA-2 need $10^4$--$10^5$ interactions to learn---because,
-  handed the dynamics, it need not learn them (a scope property, not a contest).
-  \item \textbf{The framework that makes it cheap.} \openworld, a zero-dependency Python
-  framework that turns authoring a verified code world model into a minutes-scale,
-  push-button activity: a local LLM (or Claude Code) declares the spec---symbolic state, a
-  verified \texttt{transition}, perceptors (the perceive boundary), composition (worlds
-  within worlds), dial-steerable objectives, an emit/act boundary---which is checked,
-  served from one command, and shared as a portable artifact. This is what makes assembling
-  the \emph{many} worlds world-time compute needs practical.
-  \item \textbf{A prototyping benchmark for many worlds.} A \ProtoNumWorlds-world benchmark
-  across \ProtoNumSectors{} regulated sectors (healthcare, financial services, legal,
-  cybersecurity, energy, agentic-AI) in which Claude Code built every world at a median of
-  \ProtoMedianMinutes{} minutes (p90 \ProtoPNinetyMinutes, max \ProtoMaxMinutes):
-  \ProtoValidationRate{} pass a structural \texttt{validate\_spec} gate (well-formed,
-  round-tripping, servable) and \ProtoExecutableRate{} additionally clear a behavioral
-  audit (load, random-rollout, state changes). These gates establish \emph{servability},
-  not fidelity to intent; all \ProtoNumWorlds{} ship as runnable recipes
-  (companion framework paper~\cite{openworld_framework}).
-  \item \textbf{Benchmarks, protocol, and reproducibility.} Three
-  ground-truth-instrumented worlds, a \NumTasks-task program-repair benchmark (the coding
-  world), and \NumExperiments{} seed-fixed experiments with paired statistical tests, all
-  regenerable from one repository.
-  \item \textbf{Measured guardrails (verification).} Verification is evaluated, not
-  assumed: ablations isolate what each gate buys ($+0.24$ absolute probe accuracy over
-  blind acceptance) and decompose the mechanism (the filter holds quality, the repair loop
-  converts \FilterAccept{} acceptance into \LoopAccept). Crucially, verification certifies
-  executable, invariant-respecting code, not rule-correctness: on the weak 3B generator the
-  full gate accepts every program yet \emph{none} is branch-exact (a 100\% branch-level
-  false-accept rate), so exactness reflects generator capability gated by cheap checks, not
-  the gate.
+  \item \textbf{World-time compute, with cross-world transfer on a real domain (the finding).}
+  A verified world model is \emph{training signal}: fine-tuning an LLM on trajectories traversed
+  through many world models of a domain lifts its generalization to \emph{held-out} worlds it
+  never trained on. The novel \emph{cross-world} axis---train on a family, generalize to unseen
+  worlds---holds on a real, human-authored domain (List Functions, E84): one adapter trained on
+  \CrossWorldNTrain{} disjoint worlds reaches \CrossWorldMean{} on \CrossWorldNEval{} held-out
+  worlds versus \CrossWorldCorrupt{} for a corrupted-label control---a \mbox{+\CrossWorldGap}-point
+  exactness-gated lift (CI \CrossWorldGapCI{}, \CrossWorldNSeeds{} seeds). On synthesized families
+  the gain is largest where capability is scarcest ($+\WTSmallGain$ at \WTSmallName, within noise
+  by \WTLargeName{} as the task saturates). A corrupted-label control shows \emph{exact} labels,
+  not task variety alone, are the lever---what separates this from domain randomization.
+  \item \textbf{Why it must be verified code (the foundation).} Traversal is safe only if the
+  worlds do not lie. On three ground-truth worlds, verified synthesized dynamics are exact on
+  \MultiCodeExact{} \RolloutSteps-step rollouts (95\% CI \MultiCodeCI) and answer $10\times$
+  out-of-distribution probes at \CodeOODRate{} from \emph{zero} transitions, whereas the LLM
+  next-state proxy completes \MultiLLMExact{} and a 10{,}000-transition MLP scores \MLPOODTenK{}
+  out of distribution. Verification is \emph{measured}, not assumed (each gate buys $+0.24$ probe
+  accuracy over blind acceptance) and certifies executable, invariant-respecting code, not
+  rule-correctness (on a weak 3B generator the gate accepts every program yet none is
+  branch-exact). Handed the dynamics, planning through the verified model beats planning through a
+  hallucinating one and solves $0$-shot what trained DreamerV3 / V-JEPA-2 need $10^4$--$10^5$
+  steps to learn (a scope property, not a contest; \S\ref{sec:bakeoff}).
+  \item \textbf{The substrate, and full reproducibility.} \openworld, a zero-dependency framework,
+  makes authoring and serving the \emph{many} verified worlds world-time compute needs a
+  minutes-scale activity; the framework, its \ProtoNumWorlds-world prototyping benchmark, and the
+  broader world zoo are the companion paper~\cite{openworld_framework}. All \NumExperiments{}
+  experiments are seed-fixed, use paired tests, and regenerate from one repository.
 \end{enumerate}
 
 \paragraph{Positioning in the field.} \openworld{} builds on the \emph{programmatic} code-world-model

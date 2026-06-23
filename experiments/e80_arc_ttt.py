@@ -33,6 +33,7 @@ N_TTT = 40            # held-out eval tasks given test-time training
 MAXLEN = 1536
 LEVELS = [("light", 4, 40), ("heavy", 16, 100)]   # (name, n_aug, train_steps)
 ABL = ("corrupt", 16, 100)
+SEED = 0  # set from --seed; varies LoRA init, shuffle, augmentation
 LORA = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM",
                   target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
 
@@ -60,7 +61,7 @@ def ttt_fit(model, tok, rows, steps, lr=1e-4, bs=2):
         return
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=lr)
-    rng = np.random.default_rng(0)
+    rng = np.random.default_rng(SEED)
     done = 0
     while done < steps:
         rng.shuffle(seqs)
@@ -102,7 +103,13 @@ def main():
     ap.add_argument("--data", required=True)
     ap.add_argument("--bucket", default="")
     ap.add_argument("--n", type=int, default=N_TTT)
+    ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
+    global SEED
+    SEED = args.seed
+    torch.manual_seed(SEED)
+    np.random.seed(SEED)
+    print(f"[arc-ttt] seed={SEED}", flush=True)
 
     ev = A.load_tasks(str(Path(args.data) / "evaluation"))
     ev_ids = [t for t in sorted(ev) if A.task_eval_example(ev[t]) is not None][:args.n]
@@ -126,11 +133,12 @@ def main():
             done = [h for h in hits.values() if h is not None]
             res["arms"][arm] = {"acc": round(sum(done) / len(done), 4) if done else None,
                                 "n_done": len(done)}
-        out = HERE / "results" / "e80_arc_ttt.json"
+        out = HERE / "results" / f"e80_arc_ttt_seed{SEED}.json"
+        res["seed"] = SEED
         out.write_text(json.dumps(res, indent=2))
         if args.bucket:
             subprocess.run(["gcloud", "storage", "cp", str(out),
-                            f"{args.bucket}/e80_arc_ttt.json"], check=False)
+                            f"{args.bucket}/e80_arc_ttt_seed{SEED}.json"], check=False)
 
     # zero-shot baseline (adapters disabled = raw base)
     res["per_task"]["zeroshot"] = {}
@@ -151,7 +159,7 @@ def main():
             try:
                 task = ev[tid]
                 rows = A.task_to_sft_rows(task, n_aug=n_aug,
-                                          rng=np.random.default_rng(hash(tid) % 2**32),
+                                          rng=np.random.default_rng((hash(tid) + SEED * 1000003) % 2**32),
                                           use_test=False, corrupt=corrupt)
                 reset_adapter(model)
                 ttt_fit(model, tok, rows, steps)

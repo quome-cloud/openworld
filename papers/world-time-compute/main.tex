@@ -164,9 +164,10 @@ instantiates into many \emph{world models}---simulators whose dynamics are execu
 verifiable programs over symbolic state---each an inexhaustible source of \emph{exactly}%
 -labeled trajectories. Fine-tuning an LLM on trajectories traversed through many such world
 models of a domain---which we call \textbf{world-time compute}, a training-time analogue of
-test-time compute---lifts its generalization to \emph{held-out} worlds it never trained on,
-with the largest gains where model capability is scarcest ($+\WTSmallGain$ points at
-\WTSmallName). The labels can be trusted because the worlds are \emph{verified code}, not
+test-time compute---lifts its generalization to \emph{held-out} worlds it never trained on (demonstrated on
+synthesized world families), with the largest gains where model capability is scarcest
+($+\WTSmallGain$ points at \WTSmallName; the largest model's lift is within noise, consistent
+with task saturation). The labels can be trusted because the worlds are \emph{verified code}, not
 learned approximations: synthesized-then-checked dynamics are exact over
 \RolloutSteps-step rollouts and answer $10\times$ out-of-distribution probes exactly
 (\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
@@ -174,7 +175,8 @@ collapse. Exact labels, rather than task variety alone, are what separates world
 compute from domain randomization---and a corrupted-label control confirms it.
 On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS algorithms) the
 same lever holds as \emph{per-world} test-time training---scaling with compute and
-collapsing under label corruption---and obeys a predictive regularity: the gain is largest for
+collapsing under label corruption---and follows a \emph{descriptive} regularity (a saturating
+curve, not a law): the gain is largest for
 \emph{few-step} reasoning and small/weak models, and fades for long reasoning chains, for
 tasks that must be induced from rich perception, and as a task saturates; cross-task
 transfer is weak where worlds share no skill.
@@ -950,26 +952,27 @@ latent concept must be induced from rich perception, not symbolic input.}
 \label{fig:worldtime-domains}
 \end{figure}
 
-\subsection{A predictive regularity for world-time compute (E80)}\label{sec:world-time-law}
-The effect is regular enough across E80 to state as a \emph{predictive regularity}---we stop
-short of calling it a law, since it is fit over \LawNDomains{} domains with single-seed runs and
-one out-of-sample check, and the constants are learner-specific. World-time compute follows a
+\subsection{A descriptive regularity for world-time compute (E80)}\label{sec:world-time-law}
+The effect is regular enough across E80 to summarize as a \emph{descriptive regularity}---not a
+predictive law. It is fit over \LawNDomains{} domains with single-seed runs and a single
+out-of-sample check, the constants are learner-specific, and the fit is sensitive to domain
+selection (a sibling fit over a different subset is anti-predictive). We report the \emph{shape}
+as a compact summary, not a forecast. World-time compute follows a
 \textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
 whose asymptote $C$ tracks \textbf{identifiability $\times$ realizability $\times$ headroom}
 and which collapses to base without \textbf{exact labels}. We test it as a conjunction of
 falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and three modalities
 (symbolic text, vision, and tabular); the \emph{form} is what travels, not point predictions.
 
-\paragraph{Clause 1 (scaling): a small probe predicts the asymptote---universally.} A light dose
+\paragraph{Clause 1 (scaling): a small probe predicts the asymptote.} A light dose
 of world-time compute predicts the heavy-dose asymptote: within-domain Spearman is \LawWithinArc{}
 (ARC), \LawWithinListfn{} (List Functions), \LawWithinClrs{} (CLRS), \LawWithinBongard{}
 (Bongard, vision), and \LawWithinTabular{} (tabular). A \emph{leave-one-domain-out} fit---train
 the relation on the other domains, predict the held-out one---reaches $R^2{=}\LawLodoRtwo{}$, and
-the \emph{simplest} model (light alone) beats adding parameters, the signature of a real
-regularity rather than an overfit. The decisive check is \emph{out-of-sample}: the law fit on grids, lists,
+the \emph{simplest} model (light alone) beats adding parameters, consistent with a real
+regularity rather than an overfit. A single out-of-sample check is consistent though not decisive: the fit on grids, lists,
 algorithms, and vision predicts per-world lift on a brand-new \textbf{tabular} domain it never
-saw, at Spearman $\LawTabOOS{}$---it forecasts an unseen modeling problem, not a curve fit to
-familiar ones.
+saw, at Spearman $\LawTabOOS{}$---one held-out modality, not a broad forecast.
 
 \paragraph{Clause 2 (no free lunch): the predictor must be a probe.} We tried to predict the
 asymptote from \emph{zero-training} signals (teacher-forced answer log-probability vs.\ number of
@@ -988,7 +991,7 @@ The law is about the verified-world learning \emph{problem}, instantiated identi
 descent and symbolic search.
 
 \paragraph{Clause 4 (falsification): it predicts its own nulls.} A law must predict where it
-\emph{fails}. On the \ProtoNumWorlds{} deliberately heterogeneous worlds (E71) cross-world
+\emph{fails}. On the \ComboNWorlds{} deliberately heterogeneous worlds (E71) cross-world
 transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
 (diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
 \emph{finds} a generalizing subfamily (companion framework paper~\cite{openworld_framework}).

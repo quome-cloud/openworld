@@ -957,7 +957,7 @@ prompts with randomized targets).
 \CrossWorldNTrain{} \emph{disjoint} List-Functions worlds generalizes to \CrossWorldNEval{}
 held-out worlds it never saw (\CrossWorldMean, 95\% CI \CrossWorldCI), while the same training
 with corrupted labels reaches only \CrossWorldCorrupt---a +\CrossWorldGap-point exactness-gated
-lift (CI \CrossWorldGapCI). This is the cross-world axis (Route~3), on data we did not generate,
+lift (CI \CrossWorldGapCI). This is the cross-world axis, on data we did not generate,
 that E83 (skill-disjoint algorithms) left open.}\label{fig:crossworld}
 \end{figure}
 
@@ -1310,109 +1310,41 @@ in the ground-truth environment. Value function: shipped $-$ bugs $-$
 \end{table}
 
 \subsection{Crossing species: verified vs.\ trained vs.\ perceptual world models (E63, E65, E67)}\label{sec:bakeoff}
-The comparisons so far pit verified code against an LLM next-state proxy; the fairer question a
-model-based-RL reader asks is how it fares against world models \emph{trained} on environment
-transitions, judged on the only thing an agent cares about---task return. We run the head-to-head
-across \BakeMethods{} world models we can execute locally, on \BakeDomains{} symbolic domains
-(sprint, triage) under one battery (Table~\ref{tab:bakeoff}): every entry is a next-state predictor
-over the \emph{same} state, task, and budget ($K{=}10{,}000$ transitions, 5 seeds), spanning the
-standard families---memorization (1-NN), a tabular model with nearest-neighbour backoff, linear
-least-squares, a Koopman/EDMD operator, and a neural MLP. The result is uniform: the verified code
-world model is exact in- and out-of-distribution, rolls out bit-exactly from \emph{zero} transitions,
-plans optimally (return~\BakeCodeReturn) at \BakeCodeSpeed{} steps/s, while \emph{every} learned
-model collapses to \BakeLearnedOodMax{} exact accuracy at $10\times$ OOD and plans at or below
-model-free control---some \emph{negative}, i.e.\ planning through a trained model is \emph{worse than
-not planning}, because lookahead drives the agent into states it never saw (E61 isolates this against
-a single trained MLP over \TwmSeeds{} seeds; the LLM proxy completes $0$ rollouts and scores $0$).
-
-\paragraph{Why not Dreamer, V-JEPA, Genie, Sora?} Those are a different
-\emph{species}: \emph{perceptual} world models that learn latent or pixel/video
-dynamics (DreamerV3~\cite{dreamerv3}, MuZero~\cite{muzero}, IRIS~\cite{iris2023},
-DIAMOND~\cite{diamond2024}, Genie~\cite{genie2024}, Sora~\cite{sora2024}, Fei-Fei
-Li's World Labs~\cite{worldlabs2025}, and the joint-embedding
-V-JEPA~\cite{vjepa2025}). They predict observations or embeddings, not a symbolic
-next state, and cannot run on these tasks without a learned perception stack, so a
-head-to-head would not be apples-to-apples; we compare them on \emph{properties}
-in Table~\ref{tab:related} ($\BakePerceptual$ such systems) rather than fabricate a
-shared number. This is the genus/species distinction drawn in the introduction:
-the bake-off is the within-species comparison; the related-work table is the
-cross-species one. The honest scope of E63 is the symbolic regime---orchard is
-excluded because its per-agent nested-dict state is not a flat vector for the
-learned baselines.
+The comparisons so far pit verified code against an LLM next-state proxy; a model-based-RL reader
+asks how it fares against world models \emph{trained} on transitions, judged on task return. Across
+\BakeMethods{} locally-runnable world models on \BakeDomains{} symbolic domains under one battery
+($K{=}10{,}000$ transitions, 5 seeds; Table~\ref{tab:bakeoff}), the result is uniform: the verified
+code model is exact in- and out-of-distribution, rolls out bit-exactly from \emph{zero} transitions,
+and plans optimally (return~\BakeCodeReturn) at \BakeCodeSpeed{} steps/s, while every learned model
+collapses to \BakeLearnedOodMax{} exact accuracy at $10\times$ OOD and plans at or below model-free
+control---sometimes \emph{negative} (planning through a trained model is worse than not planning, as
+lookahead drives the agent into unseen states; E61). Perceptual world
+models---DreamerV3~\cite{dreamerv3}, MuZero~\cite{muzero}, IRIS~\cite{iris2023},
+DIAMOND~\cite{diamond2024}, Genie~\cite{genie2024}, Sora~\cite{sora2024}, V-JEPA~\cite{vjepa2025}---are
+a different \emph{species} (they predict observations or embeddings, not symbolic state), so we
+compare them on \emph{properties} (Table~\ref{tab:related}), not a fabricated shared number.
 
 \begin{table}[htb]\centering\small
 \input{tables/bakeoff.tex}
-\caption{\textbf{World-model bake-off (E63).} Every world model we can run
-locally, on shared symbolic tasks; probe/rollout averaged over sprint and triage
-(5 seeds, $K{=}10{,}000$). $^\dagger$LLM rows from E10/E11/E22. Verified code is the
-only model exact, OOD-robust, optimal-for-control, auditable, \emph{and} zero-data.
-Perceptual world models (Dreamer/V-JEPA/Genie/Sora/$\ldots$) are a different species,
+\caption{\textbf{World-model bake-off (E63).} Every world model we can run locally on shared
+symbolic tasks (5 seeds, $K{=}10{,}000$). Verified code is the only model exact, OOD-robust,
+optimal-for-control, auditable, \emph{and} zero-data; perceptual models are a different species,
 compared on properties in Table~\ref{tab:related}.}
 \label{tab:bakeoff}
 \end{table}
 
-\paragraph{A shared benchmark where the species can meet: MiniGrid (E65).}\label{sec:minigrid}
-The bake-off above is deliberately \emph{within}-species (perceptual models cannot
-run on flat symbolic state); E65 closes that gap by moving to a benchmark where the
-species \emph{can} meet: MiniGrid DoorKey-6x6. We express the task as a verified
-OpenWorld transition and validate it \emph{bit-for-bit} against the real Farama
-\texttt{minigrid} environment ($600/600$ steps; \texttt{bench/validate\_minigrid.py}),
-so the learned and perceptual models consume the \emph{same} environment's rendered
-$48\times48$ pixels while OpenWorld plans over the verified code
-(Table~\ref{tab:minigrid}). OpenWorld solves the task \emph{zero-shot} with an optimal
-\MGOpenWorldPlan-step plan and no training data. DreamerV3~\cite{dreamerv3}, learning a
-latent world model from pixels on a dedicated A100, reaches the same
-\MGDreamerFinalSolve{} solve rate---but only after a first success at
-\MGDreamerFirstSolve{} environment steps and convergence over $\sim$50k.
-V-JEPA-2~\cite{vjepa2025} enters as the perceptual species: with no symbolic policy it
-has no solve rate, so we report its representation drift (mean consecutive-frame cosine
-\MGVjepaCosine) and mark it, honestly, as not directly comparable. The reading holds
-the paper's thesis on the learned models' \emph{own} terrain (pixels): verification
-buys the exact solution for zero data and a guarantee, where the learned model needs
-$\sim$10k pixel-level interactions merely to first succeed.
-DoorKey is the \emph{image-based, few-step} end of the boundary E80 maps
-(\S\ref{sec:world-time-domains}): on a visual task with a short solution horizon the verified
-model dominates both learned species, whereas on a visual task that hinges on \emph{rich
-perceptual concept abstraction} (Bongard-RWR) our symbolic world-time-compute recipe instead
-stalls at chance. The dividing line is consistent---verified world models win where the
-\emph{reasoning}, not the perception, is the hard part and the horizon is short.
-
-\begin{table}[htb]\centering\small
-\input{tables/minigrid_bench.tex}
-\caption{\textbf{Trained vs.\ verified on a shared benchmark (E65).} MiniGrid
-DoorKey-6x6, with OpenWorld's transition validated bit-for-bit against Farama
-\texttt{minigrid}; DreamerV3 (1 seed, A100) and V-JEPA-2 consume the same
-environment's rendered pixels. V-JEPA is perceptual (no symbolic policy), hence a
-representation-drift metric rather than a solve rate.}
-\label{tab:minigrid}
-\end{table}
-
-\paragraph{Continuous control on the learned models' home turf: cartpole (E67).}\label{sec:cartpole}
-MiniGrid (E65) is a gridworld, which arguably favors symbolic models. E67 moves the same
-three-species contest to \emph{continuous control}---cartpole-swingup from $64\times64$
-pixels---where learned and perceptual world models are strongest, yet OpenWorld can still
-write the dynamics (the standard cartpole equations of motion) as verified code, validated
-bit-identical against an independent reference. The picture holds, and sharpens
-(Table~\ref{tab:cartpole}). OpenWorld plans the swing-up with CEM-MPC and solves
-\CartOpenWorldSolve{} of episodes with \emph{zero} data (random control \CartRandomSolve).
-DreamerV3, learning a latent world model from pixels end to end, reaches reward
-\CartDreamerReward{}$\pm$\CartDreamerRewardSD{} and first swings up around
-\CartDreamerSteps{}$\pm$\CartDreamerStepsSD{} environment steps (mean$\pm$sd over
-\CartDreamerSeeds{} seeds)---about $5\times$ more sample-efficient than DreamerV2. The perceptual species (V-JEPA-2 and other
-frozen encoders) scores \CartVjepaSolve{} through \emph{every} controller we tried. That
-last result is the interesting one, and it is not what it first looks like: the frozen
-features encode the full state perfectly well; the failure is \emph{control}, not
-perception. We trace it in the companion framework paper~\cite{openworld_framework}.
-
-\begin{table}[htb]\centering\small
-\input{tables/cartpole.tex}
-\caption{\textbf{Cartpole-swingup head-to-head (E67).} Verified-code vs.\ end-to-end
-learned vs.\ frozen-perceptual world models on continuous control from pixels. OpenWorld's
-ODE is validated bit-identical to an independent reference; DreamerV3/V2 trained on a
-dedicated A100. Learned models report converged reward + sample efficiency; OpenWorld and
-the frozen-perceptual models report a swing-up solve rate.}
-\label{tab:cartpole}
-\end{table}
+\paragraph{Where the species can meet (E65 MiniGrid, E67 cartpole).}\label{sec:minigrid}\label{sec:cartpole}
+On benchmarks where learned models are strongest---image-based MiniGrid DoorKey and pixel
+cartpole-swingup, each with OpenWorld's transition validated bit-for-bit against the real
+environment---the picture holds on the learned models' own terrain. OpenWorld solves DoorKey
+zero-shot (a \MGOpenWorldPlan-step optimal plan, no data) where DreamerV3 needs $\sim$10k pixel
+interactions merely to first succeed; on cartpole it solves \CartOpenWorldSolve{} of episodes with
+zero data via CEM-MPC, while a frozen-perceptual V-JEPA-2 fails through every controller we tried (a
+\emph{control}, not perception, failure). These are scope properties, not contests---handed the
+dynamics, the verified model need not learn them; the full three-species tables are in the companion
+framework paper~\cite{openworld_framework}. The boundary is consistent: verified world models win
+where the \emph{reasoning}, not the perception, is hard and the horizon is short (DoorKey), and stall
+where rich perceptual abstraction is the task (Bongard-RWR, \S\ref{sec:world-time-domains}).
 
 \subsection{Scope boundaries and oracle-free verification}\label{sec:boundaries}
 Three round-3 experiments chart where the paradigm holds and what to do at
@@ -1692,7 +1624,7 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E82 are introduced across the Results section in thematic
+The experiments E1--E84 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
@@ -1704,7 +1636,7 @@ the descriptive regularity) carries the central result.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{@{}r p{0.62\textwidth} l@{}}
-\caption{Index of experiments E1--E82. E14, E53 retired and E66/E69--E73/E75/E78/E79
+\caption{Index of experiments E1--E84. E14, E53 retired and E66/E69--E73/E75/E78/E79
 unused (absent from the text); E28--E29 are described in the Experimental Setup but
 their results section was cut.}\label{tab:experiment-index}\\
 \toprule

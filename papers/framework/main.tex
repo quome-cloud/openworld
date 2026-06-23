@@ -117,39 +117,42 @@
   \raggedleft\itshape\large \monthyeartoday
 \end{minipage}
 
-\vspace{1.1em}
+\vspace{0.7em}
 \begin{center}
-  {\LARGE\bfseries \openworld: World Computing---Prototyping and\\[2pt]
-   Evaluating Verified Code World Models on Consumer Hardware\par}
+  {\LARGE\bfseries \openworld: World Computing\\[2pt]
+   Prototyping and Evaluating Verified Code World Models\par}
 
-  \vspace{0.9em}
+  \vspace{0.6em}
+  {\color{cardblue}\rule{0.5\textwidth}{0.9pt}}
+
+  \vspace{0.5em}
   {\large
-   James Schwoebel\textsuperscript{1,\,*}\quad
-   Ingrida Semenec, PhD\textsuperscript{1}\quad
-   Jenia Rousseva, PhD\textsuperscript{1}\quad
-   Marcos Ortiz, PhD\textsuperscript{1}\quad
-   Collin Overbay\textsuperscript{1}\quad
-   Manish Bhatt\textsuperscript{4,\,6}\quad
-   Rome Thorstenson\textsuperscript{3}\quad
+   James Schwoebel\textsuperscript{1,\,*}\\[1.5pt]
+   Ingrida Semenec, PhD\textsuperscript{1}\\[1.5pt]
+   Jenia Rousseva, PhD\textsuperscript{1}\\[1.5pt]
+   Marcos Ortiz, PhD\textsuperscript{1}\\[1.5pt]
+   Collin Overbay\textsuperscript{1}\\[1.5pt]
+   Manish Bhatt\textsuperscript{4,\,6}\\[1.5pt]
+   Rome Thorstenson\textsuperscript{3}\\[1.5pt]
    Martin G. Frasch, MD, PhD\textsuperscript{2,\,5}\par}
 
-  \vspace{0.7em}
+  \vspace{0.5em}
   {\small
    \textsuperscript{1}\,Quome, Inc.\quad
    \textsuperscript{2}\,University of Washington\quad
    \textsuperscript{3}\,Rafter Labs, Inc.\quad
    \textsuperscript{4}\,OWASP\quad
    \textsuperscript{5}\,Health Stream Analytics, LLC\quad
-   \textsuperscript{6}\,IEEE Computer Society\par}
+   \textsuperscript{6}\,IEEE Computer Society\quad\textsuperscript{*}\,Corresponding author\par}
 \end{center}
 
-\vspace{0.5em}
+\vspace{0.2em}
 \begin{tcolorbox}[breakable, enhanced jigsaw, colback=black!4, colframe=black!4,
-  arc=5pt, boxrule=0pt, left=16pt, right=16pt, top=10pt, bottom=10pt]
+  arc=5pt, boxrule=0pt, left=16pt, right=16pt, top=7pt, bottom=7pt]
 \setlength{\parskip}{0pt}
 {\centering\large\bfseries Abstract\par}
 \smallskip
-\fontsize{9.5}{11.3}\selectfont
+\fontsize{9.0}{10.6}\selectfont
 We introduce \textbf{world computing}: the discipline of building and operating \textbf{world
 computers}---the combination of hardware and software that instantiates, verifies, composes, and
 runs \emph{simulated worlds with verifiable dynamics}. Just as a general-purpose computer makes
@@ -176,28 +179,22 @@ perceive$\to$world$\to$emit boundary that adds zero dynamics error, open inferen
 dials, and \emph{portable specs + model cards} that
 round-trip losslessly so a world can be audited before it is trusted (a secondary
 \emph{agents-as-a-judge} selector is measured but only marginally helpful). We exercise the substrate
-across a wide range of domains---economies, corporate organizations, relativity, trading, brain
-simulators, optimal-transport drift detection---to show the expressiveness of declared, verified
-dynamics. \textbf{Scope:} the symbolic-state regime, where dynamics are writable; pixel-native
+across many domains---economies, relativity, trading, brain simulators, optimal-transport drift
+detection---to show its expressiveness. \textbf{Scope:} the symbolic-state regime, where dynamics are writable; pixel-native
 domains remain the territory of learned models. What these worlds \emph{enable} as training
 signal---\emph{world-time compute}---is the subject of a companion paper; here the worlds, the
 hardware that runs them, and their evaluation are the object of study. All code, the
 \ProtoNumWorlds{} recipes, and this manuscript regenerate from one repository.
 
-\medskip
+\smallskip
 \noindent\textbf{Keywords:}~%
-world computing; world computers; world models; code world models; program synthesis;
-simulation frameworks; prototyping; verification and evaluation; composition; agents-as-a-judge;
-local LLMs.
+world computing; world computers; code world models; program synthesis; verified simulation;
+prototyping; composition; local LLMs.
 
-\medskip
-\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/jim-schwoebel/openworld}{\texttt{github.com/jim-schwoebel/openworld}}\\
-\noindent\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:jim@quome.com}{jim@quome.com}
+\smallskip
+\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/jim-schwoebel/openworld}{\texttt{github.com/jim-schwoebel/openworld}}\quad\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:jim@quome.com}{jim@quome.com}
 \end{tcolorbox}
-
-\vspace{2pt}
-\noindent{\footnotesize \textsuperscript{*}\,Corresponding author.}
-\vspace{0.3em}
+\clearpage
 
 % ============================================================================
 \section{Introduction}

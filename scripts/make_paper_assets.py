@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).parent.parent
 RESULTS = ROOT / "experiments" / "results"
-FIGS = ROOT / "paper" / "figs"
-TABLES = ROOT / "paper" / "tables"
+FIGS = ROOT / "papers" / "assets" / "figs"
+TABLES = ROOT / "papers" / "assets" / "tables"
 import sys as _sys
 _sys.path.insert(0, str(ROOT / "experiments"))   # for showcase_world / showcase_figure
 
@@ -3300,7 +3300,7 @@ def numbers_tex(d):
         macro("AblWorlds", str(abl78b["config"]["N"])),
         macro("AblSeeds", str(_abl_nseeds)),
     ]
-    (ROOT / "paper" / "numbers.tex").write_text("\n".join(lines) + "\n")
+    (ROOT / "papers" / "assets" / "numbers.tex").write_text("\n".join(lines) + "\n")
 
 
 def fig_world_specs(e57):
@@ -4394,7 +4394,7 @@ def main():
     table_composition(data["e30_composition"], data["e32_regime_switch"])
     table_causal_assumptions(data["e64_causal_assumptions"])
     numbers_tex(data)
-    print("assets written to paper/figs, paper/tables, paper/numbers.tex")
+    print("assets written to papers/assets/{figs,tables,numbers.tex}")
 
 
 if __name__ == "__main__":

@@ -31,13 +31,14 @@ jobs:
         run: |
           python scripts/make_paper_assets.py
           python scripts/make_manifest.py
-          git diff --exit-code paper/numbers.tex paper/tables experiments/MANIFEST.md \
+          git diff --exit-code papers/assets/numbers.tex papers/assets/tables experiments/MANIFEST.md \
             || (echo "::error::regenerated assets differ from committed; run make_paper_assets.py + make_manifest.py and commit"; exit 1)
 
   paper-builds:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build PDF with tectonic
+      - name: Build PDFs with tectonic
         uses: WtfJoke/setup-tectonic@v3
-      - run: tectonic paper/main.tex
+      - run: tectonic papers/world-time-compute/main.tex
+      - run: tectonic papers/framework/main.tex

@@ -109,24 +109,24 @@
 
 % ============================================================================
 \thispagestyle{empty}
-\noindent{\color{cardblue!55}\rule{\textwidth}{0.6pt}}
-
-\vspace{0.7em}
 \noindent
-\begin{minipage}[c]{0.55\textwidth}
-  \raggedright\oldincludegraphics[height=1.05cm]{figs/quome.png}
+\begin{minipage}[c]{0.5\textwidth}
+  \raggedright\oldincludegraphics[height=0.8cm]{figs/quome.png}
 \end{minipage}\hfill
-\begin{minipage}[c]{0.4\textwidth}
-  \raggedleft\itshape\large \monthyeartoday
+\begin{minipage}[c]{0.5\textwidth}
+  \raggedleft\itshape \monthyeartoday
 \end{minipage}
 
-\vspace*{\fill}
+\vspace{0.7em}
+\noindent\oldincludegraphics[width=\textwidth]{figs/title_band.pdf}
+
+\vspace{0.9em}
 \begin{center}
-  {\LARGE\bfseries \openworld: World-Time Compute with\\[2pt]
+  {\LARGE\bfseries World-Time Compute with\\[2pt]
    Verified Code World Models\par}
 
-  \vspace{0.6em}
-  {\color{cardblue}\rule{0.4\textwidth}{1.3pt}}
+  \vspace{0.5em}
+  {\color{cardblue}\rule{0.3\textwidth}{1.2pt}}
 
   \vspace{0.8em}
   {\large
@@ -149,13 +149,14 @@
    \textsuperscript{6}\,IEEE Computer Society\quad\textsuperscript{*}\,Corresponding author\par}
 \end{center}
 
-\vspace{0.5em}
-\begin{tcolorbox}[breakable, enhanced jigsaw, colback=black!4, colframe=black!4,
-  arc=5pt, boxrule=0pt, left=16pt, right=16pt, top=10pt, bottom=10pt]
+\vspace{0.7em}
+\begin{tcolorbox}[breakable, enhanced, colback=white, colframe=black!12,
+  arc=3pt, boxrule=0.5pt, left=18pt, right=16pt, top=9pt, bottom=10pt,
+  borderline west={3pt}{0pt}{cardblue}, drop fuzzy shadow=black!18]
 \setlength{\parskip}{0pt}
-{\centering\large\bfseries Abstract\par}
+{\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
-\fontsize{9.5}{11.3}\selectfont
+\fontsize{9.3}{11.0}\selectfont
 Large language models generalize across a domain only after seeing many real, labeled
 examples of it, and in most domains that experience is scarce. We study a way to
 manufacture it cheaply. When a domain's dynamics can be written as code, one template
@@ -191,10 +192,9 @@ world models; code world models; neuro-symbolic AI; program synthesis;
 value alignment; agents-as-a-judge; local LLMs.
 
 \medskip
-\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/jim-schwoebel/openworld}{\texttt{github.com/jim-schwoebel/openworld}}\\
+\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/quome-cloud/openworld}{\texttt{github.com/quome-cloud/openworld}}\\
 \noindent\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:jim@quome.com}{jim@quome.com}
 \end{tcolorbox}
-\vspace*{\fill}
 \clearpage
 
 % ============================================================================
@@ -1638,7 +1638,7 @@ listed as an author, as such tools do not satisfy authorship criteria.
 \section*{Data and code availability}
 All code, the benchmark suite, experiment scripts, raw result JSON, and this
 manuscript's build are available at
-\href{https://github.com/jim-schwoebel/openworld}{\nolinkurl{github.com/jim-schwoebel/openworld}}.
+\href{https://github.com/quome-cloud/openworld}{\nolinkurl{github.com/quome-cloud/openworld}}.
 All data are synthetic; no human-subject or patient data were used.
 
 \section*{Author contributions}

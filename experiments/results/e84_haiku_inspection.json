@@ -1,0 +1,97 @@
+{
+  "00576224": {
+    "demo_0_input_shape": [
+      2,
+      2
+    ],
+    "demo_0_output_shape": [
+      6,
+      6
+    ],
+    "raw_response": "Looking at these examples, I need to analyze the transformation pattern:\n\n**Example 1 Analysis:**\n- Input: 2\u00d72 grid with values `86 / 64`\n- Output: 6\u00d76 grid\n\nThe output appears to be:\n```\n868686\n646464\n686868\n464646\n868686\n646464\n```\n\nLet me trace the pattern:\n- Rows 1,3,5: `868686` - this is `86` repeated 3 times horizontally\n- Rows 2,4,6: `646464` - this is `64` repeated 3 times horizontally\n- But rows are also repeating: row1=row3=row5, row2=row4=row6\n\nWait, let me reconsider. Looking more carefully:\n- The input is `86 / 64` (2 columns, 2 rows)\n- If I tile it 3\u00d73, I get a 6\u00d76 grid\n- Then rows appear in pattern: original row pattern repeats\n\nActually, simpler observation:\n- Input `86 / 64` when tiled 3\u00d73 gives exactly this output\n- This is `make_tile(3, 3)`\n\n**Example 2 Analysis:**\n- Input: 2\u00d72 grid `79 / 43`\n- Output: 6\u00d76 grid showing the same 3\u00d73 tiling pattern\n\nBoth examples show the same transformation: **tiling the 2\u00d72 input 3 times horizontally and 3 times vertically**.\n\nThe program is simply: `make_tile(3, 3)`\n\n```json\n[[\"make_tile(3, 3)\"]]\n```\n\nWait, let me format this correctly as the primitive requires. The format should be a string representation:\n\n```json\n[[\"tile_3_3\"]]\n```\n\nActually, looking at the primitive format, `make_tile(nr, nc)` should be represented as a parameterized primitive. Let me provide the answer:\n\n```json\n[[\"make_tile(3, 3)\"]]\n```",
+    "parsed_candidates": null,
+    "category": "d",
+    "category_detail": "JSON found but failed to parse",
+    "n_valid_names": 0,
+    "n_consistent": 0
+  },
+  "0607ce86": {
+    "demo_0_input_shape": [
+      23,
+      22
+    ],
+    "demo_0_output_shape": [
+      23,
+      22
+    ],
+    "raw_response": "Looking at the three examples, I need to identify the transformation pattern.\n\n**Analysis:**\n\n1. **Input dimensions**: All inputs are 23 rows \u00d7 22 columns\n2. **Output dimensions**: All outputs are 23 rows \u00d7 22 columns (same)\n3. **Pattern observation**: \n   - The outputs appear to be cleaner/regularized versions of the inputs\n   - There seem to be repeating tile patterns (roughly 7 rows \u00d7 10 columns each)\n   - Noise/anomalies in the input are removed\n   - The output shows a clean repetition of a canonical tile pattern\n\n4. **Detailed inspection**:\n   - Example 1: The input has a 7\u00d710 repeating pattern with noise scattered throughout. The output repeats this pattern cleanly 3 times (rows) with clean boundaries.\n   - Example 2: Similar structure - a 6\u00d710 pattern repeated, with the output showing clean repetitions\n   - Example 3: Same principle - extracting the core repeating pattern and tiling it cleanly\n\n5. **Transformation logic**:\n   - Extract the \"canonical\" repeating tile (appears to be roughly 6-7 rows \u00d7 10 columns based on structure)\n   - Remove noise/anomalies (cells that deviate from the pattern)\n   - Tile this clean pattern across the grid to fill the output\n   - Replace outliers/noise with the dominant pattern value at that location\n\nThe key insight: This appears to be a **pattern regularization** - finding the repeating tile structure and cleaning up noisy deviations while maintaining the tiling pattern.\n\nGiven the available primitives, the closest approach would be to identify that the output is a tiled repetition of a cleaned base pattern. However, there's no direct \"deduplicate noise\" or \"find repeating tile\" primitive.\n\nThe best approximation using available primitives would involve identifying and applying a systematic transformation. Looking more carefully, this seems like **removing/correcting noise to match a tiling pattern**.\n\n**Candidate programs:**\n\n```json\n[\n  [\"crop_to_content\"],\n  [\"invert_colors\", \"invert_colors\"],\n  [\"sort_rows\"],\n  [\"outline\"],\n  []\n]\n```\n\nActually, reconsidering -",
+    "parsed_candidates": [
+      [
+        "crop_to_content"
+      ],
+      [
+        "invert_colors",
+        "invert_colors"
+      ],
+      [
+        "sort_rows"
+      ],
+      [
+        "outline"
+      ],
+      []
+    ],
+    "category": "b",
+    "category_detail": "0/4 candidates consistent with demos (names all valid)",
+    "n_valid_names": 4,
+    "n_consistent": 0
+  },
+  "0e671a1a": {
+    "demo_0_input_shape": [
+      13,
+      13
+    ],
+    "demo_0_output_shape": [
+      13,
+      13
+    ],
+    "raw_response": "Looking at the examples, I need to understand the transformation pattern:\n\n1. Each input has 3 colored pixels (non-zero values): positions at (r1,c1), (r2,c2), (r3,c3)\n2. The output draws a rectangular bounding box using color 5:\n   - Horizontal lines connect the leftmost and rightmost columns\n   - Vertical lines connect the topmost and bottommost rows\n3. The original colored pixels remain in the output\n\nLet me trace Example 1:\n- Colors at: (2,1)=2, (6,10)=4, (11,3)=3\n- Bounding box: rows 2-11, cols 1-10\n- Horizontal lines at rows 2,6 (top and bottom): fill with 5 between cols 1-10\n- Vertical lines at cols 1,10 (left and right): fill with 5 between rows 2-11\n- Preserve original colors 2,3,4\n\nExample 2:\n- Colors at: (1,4)=3, (8,10)=2, (10,1)=4\n- Bounding box: rows 1-10, cols 1-10\n- Horizontal lines at rows 1,8,10; vertical at cols 1,4,10\n\nThis is a **rectangular outline/frame drawing** operation where:\n1. Find all non-zero pixels\n2. Get their bounding box\n3. Draw filled rectangle outline using color 5\n4. Preserve original colored pixels\n\nLooking at the DSL available, I don't have a direct primitive that draws rectangular boxes based on point locations. However, the pattern suggests:\n- We need to identify colored pixels and draw connections between them\n- Fill the bounding box with color 5 on the edges\n\nSince this isn't directly expressible with the given primitives, the closest approach would be to recognize this as a custom operation. But let me consider if there's a sequence that could approximate this...\n\nActually, this operation fundamentally requires identifying specific pixel locations and drawing custom patterns between them, which isn't directly supported by the available primitives.\n\nHowever, if I must provide candidates using only available primitives, none will correctly solve this. The transformation requires:\n1. Finding non",
+    "parsed_candidates": null,
+    "category": "e",
+    "category_detail": "No JSON list found in response",
+    "n_valid_names": 0,
+    "n_consistent": 0
+  },
+  "12422b43": {
+    "demo_0_input_shape": [
+      5,
+      5
+    ],
+    "demo_0_output_shape": [
+      5,
+      5
+    ],
+    "raw_response": "Let me analyze these examples to find the transformation pattern.\n\n**Observation 1:** The output is always larger than the input (more rows).\n\n**Observation 2:** Looking at each example:\n- Example 1: 5 rows \u2192 5 rows (stays same), but row 3 is duplicated/modified\n- Example 2: 8 rows \u2192 8 rows, rows 1-5 are input, rows 6-8 seem to be copies of rows 1-3\n- Example 3: 9 rows \u2192 9 rows, rows 1-5 are input, rows 6-9 appear to be repeating pattern from rows 1-4\n- Example 4: 13 rows \u2192 13 rows, rows 1-5 are input, rows 6-13 are repetitions of rows 1-4\n- Example 5: 7 rows \u2192 7 rows, rows 1-2 are input, rows 3-7 are all row 1 repeated\n\n**Pattern Discovery:**\nThe input has a \"content\" section (non-zero rows) and empty rows below. The transformation:\n1. Identifies the non-zero rows (the pattern)\n2. Copies this pattern downward repeatedly to fill the remaining empty space\n\nThis is essentially **gravity_down** behavior - it pulls the non-zero content down and repeats/fills the grid.\n\nLet me verify:\n- Example 1: Non-zero rows are 1-3. After applying gravity effects, the pattern gets repeated downward.\n- Example 5: Non-zero rows are 1-2 (row 1: \"506800\", row 2: \"008300\"). Then row 1 is repeated down for all remaining rows.\n\nActually, looking more carefully: it seems like we need to apply **gravity_up** first to consolidate content, then observe the pattern repeating downward to fill empty space.\n\nThe key insight: Apply gravity_up to move content to top, then the pattern cycles/repeats to fill the grid downward.\n\nLet me reconsider - this looks like the transformation is:\n1. Keep original content at top\n2. Repeat the pattern of non-zero rows cyclically downward to fill empty rows\n\nThis would require a custom",
+    "parsed_candidates": null,
+    "category": "e",
+    "category_detail": "No JSON list found in response",
+    "n_valid_names": 0,
+    "n_consistent": 0
+  },
+  "009d5c81": {
+    "demo_0_input_shape": [
+      14,
+      14
+    ],
+    "demo_0_output_shape": [
+      14,
+      14
+    ],
+    "raw_response": "Let me analyze these transformation examples step by step.\n\n**Observations:**\n\n1. In each example, there's a pattern in the upper part (mostly 8s and 0s) and a smaller pattern in the lower part (1s and 0s)\n2. The output shows the upper pattern transformed, with 8s replaced by a different color\n3. The lower pattern seems to act as a \"mask\" or \"selector\"\n\n**Detailed Analysis:**\n\nExample 1:\n- Upper pattern has 8s, lower has 1s forming a cross/plus shape\n- 8s become 2s in output\n- The lower pattern (1s) seems to indicate which pixels to transform\n\nExample 2:\n- Upper pattern has 8s in a rectangular grid, lower has 1s\n- 8s become 3s\n- The lower pattern seems to be a template\n\nExample 3:\n- Upper pattern has 8s, lower has 1s forming a cross\n- 8s become 2s\n\nExample 4:\n- Upper pattern has 8s, lower has 1s forming a cross/T shape\n- 8s become 7s\n\nExample 5:\n- Upper pattern has 8s, lower has 1s forming an L or cross shape\n- 8s become 3s\n\n**Key Pattern:**\nThe transformation appears to:\n1. Take the lower pattern (containing 1s) as a mask\n2. Count or identify the 1s pattern\n3. Replace all 8s with a color determined by the 1s pattern (likely counting the 1s: cross = 3 cells \u2192 3, etc.)\n4. Clear/remove the lower pattern from the output\n\nThe color mapping seems to be: count of 1s in lower pattern = replacement color for 8s.\n\nLet me verify: Example 1 has a cross (4 cells) \u2192 but 8\u21922. Let me recount the 1s:\n- Example 1: Has 5 ones (cross + center) \u2192 maps 8\u21922 (not 5)\n- This suggests it might be based on the shape type, not count.\n\nActually, looking more carefully: the transformation is simply **replacing all 8s with a specific color while erasing everything below a certain row (",
+    "parsed_candidates": null,
+    "category": "e",
+    "category_detail": "No JSON list found in response",
+    "n_valid_names": 0,
+    "n_consistent": 0
+  }
+}

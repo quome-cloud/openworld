@@ -61,11 +61,11 @@ def pct(x):
 
 def repo_metrics():
     """Count the live codebase so the Implementation paragraph can't drift.
-    Core = openworld/*.py minus the serve/CLI layer (serve, cli, _tmux), which is
-    the only place third-party deps (fastapi/uvicorn/click/rich) are allowed."""
+    Core = openworld/*.py minus the optional layers that import third-party deps: the serve/CLI
+    layer (serve, cli, _tmux: fastapi/uvicorn/click/rich) and the gymnasium adapter (gym_env)."""
     pkg = ROOT / "openworld"
-    serve_layer = {"serve.py", "cli.py", "_tmux.py"}
-    core = [p for p in sorted(pkg.glob("*.py")) if p.name not in serve_layer]
+    optional_layer = {"serve.py", "cli.py", "_tmux.py", "gym_env.py"}
+    core = [p for p in sorted(pkg.glob("*.py")) if p.name not in optional_layer]
     core_loc = sum(len(p.read_text().splitlines()) for p in core)
     tests = sorted((ROOT / "tests").glob("test_*.py"))
     test_fns = sum(t.read_text().count("def test_") for t in tests)

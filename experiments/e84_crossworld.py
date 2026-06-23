@@ -120,14 +120,20 @@ def main():
     ap.add_argument("--n_eval", type=int, default=8)
     ap.add_argument("--n_ctx", type=int, default=3)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--fixed_eval", action="store_true",
+                    help="hold the SAME eval worlds (from the end) across train sizes (for a scaling ladder)")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
     worlds = T.load_worlds(args.worlds, min_examples=args.n_pool + args.n_eval)
     names = sorted(worlds)
     random.Random(80 + args.seed).shuffle(names)
-    train_names = names[:args.n_train_worlds]
-    eval_names = names[args.n_train_worlds:args.n_train_worlds + args.n_eval_worlds]
+    if args.fixed_eval:
+        eval_names = names[-args.n_eval_worlds:]
+        train_names = names[:args.n_train_worlds]
+    else:
+        train_names = names[:args.n_train_worlds]
+        eval_names = names[args.n_train_worlds:args.n_train_worlds + args.n_eval_worlds]
     assert not (set(train_names) & set(eval_names)), "train/eval worlds must be disjoint"
     print(f"[crossworld/{args.domain}] seed={args.seed} train={len(train_names)} "
           f"eval={len(eval_names)} (disjoint)", flush=True)
@@ -167,11 +173,12 @@ def main():
         for arm, accs in res["per_world"].items():
             d = [a for a in accs.values() if a is not None]
             res["arms"][arm] = {"acc": round(sum(d) / len(d), 4) if d else None, "n_done": len(d)}
-        out = HERE / "results" / f"e84_crossworld_{args.domain}_seed{args.seed}.json"
+        _suf = f"_n{args.n_train_worlds}" if args.fixed_eval else ""
+        out = HERE / "results" / f"e84_crossworld_{args.domain}{_suf}_seed{args.seed}.json"
         out.write_text(json.dumps(res, indent=2))
         if args.bucket:
             subprocess.run(["gcloud", "storage", "cp", str(out),
-                            f"{args.bucket}/e84_crossworld_{args.domain}_seed{args.seed}.json"], check=False)
+                            f"{args.bucket}/e84_crossworld_{args.domain}{_suf}_seed{args.seed}.json"], check=False)
 
     # ARM 1: base (no adapter) -- the floor
     with model.disable_adapter():

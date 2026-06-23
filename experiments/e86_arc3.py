@@ -53,6 +53,24 @@ def collect(game_id, steps, seed):
     return trans, best, obs.win_levels
 
 
+def replay_determinism(game_id, steps, seed):
+    """Run the SAME action sequence twice from reset; fraction of steps with identical frames.
+    A clean determinism test (the code-world-model precondition) without needing state-setting."""
+    import random
+    arc = arc_agi.Arcade()
+    def episode():
+        env = arc.make(game_id); obs = env.reset(); rng = random.Random(seed)
+        avail = [a - 1 for a in obs.available_actions]; frames = [grid(obs).copy()]
+        for _ in range(steps):
+            obs = env.step(ACTS[rng.choice(avail)]); frames.append(grid(obs).copy())
+            if str(obs.state) != "GameState.NOT_FINISHED":
+                break
+        return frames
+    f1, f2 = episode(), episode()
+    n = min(len(f1), len(f2))
+    return (sum(np.array_equal(f1[i], f2[i]) for i in range(n)) / n, n) if n else (None, 0)
+
+
 def bg_of(g):
     v, c = np.unique(g, return_counts=True)
     return int(v[np.argmax(c)])
@@ -167,10 +185,12 @@ def main():
 
     trans, levels, win = collect(args.game, args.steps, args.seed)
     det, ndet = determinism(trans)
+    rdet, rn = replay_determinism(args.game, min(args.steps, 80), args.seed)
     chg = [len(deltas(t["frame"], t["next"])) for t in trans]
     res = {"game": args.game, "steps": args.steps, "transitions": len(trans),
            "baseline_levels": levels, "win_levels": win,
            "deterministic_frac": (round(det, 4) if det is not None else None), "repeat_pairs": ndet,
+           "replay_determinism": (round(rdet, 4) if rdet is not None else None), "replay_steps": rn,
            "mean_cells_changed": round(float(np.mean(chg)), 1),
            "copy_frame_exact": round(copy_baseline(trans), 4)}
     print(f"[e86/{args.game}] {len(trans)} transitions | baseline levels {levels}/{win} "

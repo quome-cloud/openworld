@@ -120,7 +120,7 @@
 \vspace{0.7em}
 \noindent\oldincludegraphics[width=\textwidth]{figs/title_band.pdf}
 
-\vspace{0.9em}
+\vspace{0.55em}
 \begin{center}
   {\LARGE\bfseries World-Time Compute with\\[2pt]
    Verified Code World Models\par}
@@ -128,7 +128,7 @@
   \vspace{0.5em}
   {\color{cardblue}\rule{0.3\textwidth}{1.2pt}}
 
-  \vspace{0.8em}
+  \vspace{0.55em}
   {\large
    \mbox{James Schwoebel\textsuperscript{1,\,*}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Ingrida Semenec, PhD\textsuperscript{1}}~\textcolor{cardblue!80}{\textbullet}
@@ -139,7 +139,7 @@
    \mbox{Rome Thorstenson\textsuperscript{3}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Martin G. Frasch, MD, PhD\textsuperscript{2,\,5}}\par}
 
-  \vspace{0.7em}
+  \vspace{0.5em}
   {\footnotesize\color{black!70}
    \textsuperscript{1}\,Quome, Inc.\quad
    \textsuperscript{2}\,University of Washington\quad
@@ -149,14 +149,14 @@
    \textsuperscript{6}\,IEEE Computer Society\quad\textsuperscript{*}\,Corresponding author\par}
 \end{center}
 
-\vspace{0.7em}
+\vspace{0.4em}
 \begin{tcolorbox}[breakable, enhanced, colback=white, colframe=black!12,
-  arc=3pt, boxrule=0.5pt, left=18pt, right=16pt, top=9pt, bottom=10pt,
+  arc=3pt, boxrule=0.5pt, left=18pt, right=16pt, top=7pt, bottom=7pt,
   borderline west={3pt}{0pt}{cardblue}, drop fuzzy shadow=black!18]
 \setlength{\parskip}{0pt}
 {\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
-\fontsize{9.3}{11.0}\selectfont
+\fontsize{9.0}{10.7}\selectfont
 Large language models generalize across a domain only after seeing many real, labeled
 examples of it, and in most domains that experience is scarce. We study a way to
 manufacture it cheaply. When a domain's dynamics can be written as code, one template
@@ -171,10 +171,9 @@ with task saturation). The labels can be trusted because the worlds are \emph{ve
 learned approximations: synthesized-then-checked dynamics are exact over
 \RolloutSteps-step rollouts and answer $10\times$ out-of-distribution probes exactly
 (\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
-collapse. What separates this from domain randomization is that each world is independently
-authored and individually verified---not parameter variation of one simulator---and a
-corrupted-label control shows it is label \emph{exactness}, not task variety, that drives the
-held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
+collapse. Unlike domain randomization (varying one simulator's parameters), each world is
+independently authored and verified; a corrupted-label control shows label \emph{exactness}, not
+task variety, drives the held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
 algorithms) the same lever holds as \emph{per-world} test-time training, scaling with compute
 and collapsing under label corruption. On a coherent real family (List Functions) the harder
 \emph{cross-world} form holds too: one adapter trained on \CrossWorldNTrain{} \emph{disjoint}
@@ -184,13 +183,11 @@ for a corrupted-label control (a \mbox{+\CrossWorldGap}-point exactness-gated li
 saturating curve, not a law): it is largest for \emph{few-step} reasoning and small/weak
 models, and fades for long reasoning chains, for tasks induced from rich perception, and as a
 task saturates; cross-task transfer is weak where worlds share no skill.
-The worlds are authored and served by \textbf{\openworld}, a zero-dependency Python framework
-that makes assembling the \emph{many} worlds a domain needs cheap; the framework itself---%
-declaration, the plan--generate--verify relay, composition, perception, and serving---is the
-subject of a companion paper. \textbf{The scope is the symbolic-state regime}: where dynamics
-are writable, verified code makes a \emph{correct} world model a zero-training prototype with no
-compounding error; pixel-native domains remain the territory of learned models. All code, the
-\ProtoNumWorlds{} recipes, experiments, and this manuscript regenerate from one repository.
+The worlds are authored and served by \textbf{\openworld}, a zero-dependency framework that makes
+assembling the \emph{many} worlds a domain needs cheap (the framework is a companion paper).
+\textbf{Scope: the symbolic-state regime}---where dynamics are writable, verified code makes a
+\emph{correct} world model a zero-training prototype; pixel-native domains remain the territory of
+learned models. All code, recipes, and this manuscript regenerate from one repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%

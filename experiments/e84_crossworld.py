@@ -144,12 +144,18 @@ def main():
     splits = {nm: T.split_world(worlds[nm], args.n_pool, args.n_eval, random.Random(hash(nm) % 2**32))
               for nm in eval_names}
 
-    def eval_arm():
+    def eval_arm(tag=None):
         accs = {}
+        samples = []
         for nm in eval_names:
             pool, qeval = splits[nm]
             cases = T.eval_cases(args.instruction, pool, qeval, args.n_ctx, random.Random(7))
             accs[nm] = world_acc(model, tok, cases)
+            if tag and len(samples) < 6 and cases:
+                p = predict(model, tok, cases[0]["prompt"])
+                samples.append({"world": nm, "pred": str(p)[:120], "gold": str(cases[0]["answer"])[:120]})
+        if tag:
+            res[f"{tag}_samples"] = samples
         return accs
 
     res = {"experiment": f"crossworld-{args.domain}", "base": BASE, "seed": args.seed,
@@ -169,7 +175,7 @@ def main():
 
     # ARM 1: base (no adapter) -- the floor
     with model.disable_adapter():
-        res["per_world"]["base"] = eval_arm()
+        res["per_world"]["base"] = eval_arm(tag="base")
         upload()
     print(f"[base] {res['arms']['base']}", flush=True)
 

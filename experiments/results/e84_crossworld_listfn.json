@@ -1,0 +1,60 @@
+{
+  "experiment": "crossworld-listfn",
+  "domain": "listfn",
+  "base_model": "Qwen/Qwen2.5-7B-Instruct",
+  "n_train_worlds": 128,
+  "n_eval_worlds": 60,
+  "n_seeds": 3,
+  "n_eval_total": 180,
+  "arms": {
+    "base": {
+      "mean": 0.0,
+      "seeds": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pooled_mean": 0.0,
+      "ci": [
+        0.0,
+        0.0
+      ]
+    },
+    "crossworld": {
+      "mean": 0.4009,
+      "seeds": [
+        0.4167,
+        0.4278,
+        0.3583
+      ],
+      "pooled_mean": 0.4009,
+      "ci": [
+        0.3509,
+        0.45
+      ]
+    },
+    "corrupt": {
+      "mean": 0.0648,
+      "seeds": [
+        0.0667,
+        0.0639,
+        0.0639
+      ],
+      "pooled_mean": 0.0648,
+      "ci": [
+        0.0389,
+        0.0954
+      ]
+    }
+  },
+  "gap_cw_minus_corrupt": {
+    "mean": 0.3361,
+    "ci": [
+      0.2861,
+      0.3861
+    ]
+  },
+  "gap_cw_minus_base": {
+    "mean": 0.4009
+  }
+}

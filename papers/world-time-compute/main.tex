@@ -176,7 +176,11 @@ authored and individually verified---not parameter variation of one simulator---
 corrupted-label control shows it is label \emph{exactness}, not task variety, that drives the
 held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
 algorithms) the same lever holds as \emph{per-world} test-time training, scaling with compute
-and collapsing under label corruption. The gain follows a \emph{descriptive} regularity (a
+and collapsing under label corruption. On a coherent real family (List Functions) the harder
+\emph{cross-world} form holds too: one adapter trained on \CrossWorldNTrain{} \emph{disjoint}
+worlds generalizes to held-out worlds it never saw at \CrossWorldMean{} versus \CrossWorldCorrupt{}
+for a corrupted-label control (a \mbox{+\CrossWorldGap}-point exactness-gated lift, CI
+\CrossWorldGapCI). The gain follows a \emph{descriptive} regularity (a
 saturating curve, not a law): it is largest for \emph{few-step} reasoning and small/weak
 models, and fades for long reasoning chains, for tasks induced from rich perception, and as a
 task saturates; cross-task transfer is weak where worlds share no skill.
@@ -956,6 +960,40 @@ latent concept must be induced from rich perception, not symbolic input.}
 \label{fig:worldtime-domains}
 \end{figure}
 
+\subsection{Cross-world transfer on a real, human-authored domain (E84)}\label{sec:crossworld}
+The real-data results above are \emph{per-world} test-time training---the established
+recipe~\cite{akyurek2024ttt}, not our contribution. The axis \openworld{} is built for is
+\emph{cross-world} generalization: train once on a family of verified worlds, then generalize to
+\emph{held-out} worlds. E83 found no such transfer across CLRS algorithms that share no skill;
+E84 tests the complementary prediction---that a \emph{coherent} family does transfer---on a real,
+human-authored domain (List Functions). We train one LoRA adapter on \CrossWorldNTrain{} disjoint
+held-in worlds, freeze it, and evaluate \CrossWorldNEval{} held-out worlds it never saw, zero-shot
+(\CrossWorldNSeeds{} seeds). Three arms share an identical eval: \textbf{base} (no adapter),
+\textbf{cross-world} (adapter trained with exact labels), and \textbf{corrupt} (the same held-in
+prompts with randomized targets).
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.6\linewidth]{figs/crossworld.png}
+\caption{\textbf{Cross-world transfer on a real domain (E84).} One adapter trained on
+\CrossWorldNTrain{} \emph{disjoint} List-Functions worlds generalizes to \CrossWorldNEval{}
+held-out worlds it never saw (\CrossWorldMean, 95\% CI \CrossWorldCI), while the same training
+with corrupted labels reaches only \CrossWorldCorrupt---a +\CrossWorldGap-point exactness-gated
+lift (CI \CrossWorldGapCI). This is the cross-world axis (Route~3), on data we did not generate,
+that E83 (skill-disjoint algorithms) left open.}\label{fig:crossworld}
+\end{figure}
+
+The cross-world adapter reaches \CrossWorldMean{} (95\% CI \CrossWorldCI) on worlds it never
+trained on, versus \CrossWorldCorrupt{} (\CrossWorldCorruptCI) for the corrupted-label control---a
+\textbf{+\CrossWorldGap-point} exactness-gated cross-world lift (CI \CrossWorldGapCI{}, excluding
+zero), stable across seeds (\CrossWorldSeeds{}; Figure~\ref{fig:crossworld}). The instruction-tuned
+base scores \CrossWorldBase{} by exact match because it answers verbosely (chain-of-thought prose,
+not a bare list); the corrupt control absorbs exactly that format effect---it learns the output
+format from the same prompts yet, lacking correct rules, gains only \CrossWorldCorrupt{}. The gap
+between cross-world and corrupt is therefore \emph{rule-induction transferring across worlds}, not
+formatting: an adapter that learned to infer list-function rules from one set of worlds infers
+\emph{new} rules in worlds it never saw. This is the novel axis---world-time compute as cross-world
+generalization---demonstrated on a real, human-authored domain, the result E83 left open.
+
 \subsection{A descriptive regularity for world-time compute (E80)}\label{sec:world-time-law}
 The effect is regular enough across E80 to summarize as a \emph{descriptive regularity}---not a
 predictive law. It is fit over \LawNDomains{} domains with single-seed runs and a single
@@ -983,21 +1021,23 @@ asymptote from \emph{zero-training} signals (teacher-forced answer log-probabili
 demonstrations). It fails---leave-one-domain-out $R^2{=}\LawFreeProxyRtwo{}$ (anti-predictive).
 In-context likelihood taps Bayesian updating; the TTT lift taps weight-space learnability, and
 they diverge. You cannot read the payoff off static signals; you must spend a small dose of the
-actual process. This negative sharpens the law.
+actual process. This negative sharpens the regularity.
 
-\paragraph{Clause 3 (learner-invariance): not just neural networks.} The same law holds for a
+\paragraph{Clause 3 (learner-invariance): not just neural networks.} The same regularity holds for a
 \emph{non-neural} learner---an enumerative program synthesizer over a list DSL, with search
 budget as the compute axis: held-out exact-match rises and saturates (\SymScaleLo{} to
 \SymScaleHi{} over the budget sweep), and corrupting the labels collapses it to \SymCorrupt{}
 (no consistent program exists). Only \emph{which} worlds are realizable is learner-specific (the
 DSL is a different hypothesis class than the network); the curve and the exactness gate are not.
-The law is about the verified-world learning \emph{problem}, instantiated identically on gradient
+The regularity is about the verified-world learning \emph{problem}, instantiated identically on gradient
 descent and symbolic search.
 
-\paragraph{Clause 4 (falsification): it predicts its own nulls.} A law must predict where it
+\paragraph{Clause 4 (falsification): it predicts its own nulls.} A regularity worth the name must predict where it
 \emph{fails}. On the \ComboNWorlds{} deliberately heterogeneous worlds (E71) cross-world
 transfer is the random floor; on ARC the cross-task ladder is flat; only coherent families
-(diagnosis, E74) transfer---and inside the heterogeneous set a coherence-guided search still
+transfer---diagnosis (E74) and, on a real human-authored domain, List Functions
+(E84, \S\ref{sec:crossworld}, a \mbox{+\CrossWorldGap}-point exactness-gated cross-world
+lift)---and inside the heterogeneous set a coherence-guided search still
 \emph{finds} a generalizing subfamily (companion framework paper~\cite{openworld_framework}).
 A real-data probe of the same prediction (E83): training one adapter on 21 CLRS-Text algorithms
 and evaluating 8 held-out algorithms gives \emph{no} cross-world lift---held-out accuracy does
@@ -1007,9 +1047,9 @@ string matching) that share little skill. We report this as a \emph{weak} null, 
 either direction. One null we did \emph{not}
 predict in advance and report as found, not forecast: cross-language-frame transfer (E81,
 \S\ref{sec:frame-invariance}) gives no lift, even though the exactness clause is consistent
-with it (matched frames beat corrupted). The lesson is the honest one---the law's \emph{form}
+with it (matched frames beat corrupted). The lesson is the honest one---the regularity's \emph{form}
 holds where it was tested, but a held-out language (or a CLRS algorithm) is its own skill,
-outside the family structure the law scores.
+outside the family structure the regularity scores.
 
 \paragraph{The reader's guideline: how many worlds to simulate.} Because the curve saturates,
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
@@ -1681,7 +1721,7 @@ do not appear in the text; E28--E29 are described in the Experimental Setup but
 their dedicated results section was cut; and E66, E69--E73, E75, E78, and E79
 were not used (a superseded probe or a negative result excluded from the paper).
 The world-time-compute family E74--E82 (E80 spans several real-data domains and
-the predictive law) carries the central result.
+the descriptive regularity) carries the central result.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{@{}r p{0.62\textwidth} l@{}}

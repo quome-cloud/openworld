@@ -1,0 +1,62 @@
+{
+  "experiment": "e84_arc_synthesis",
+  "n_tasks": 40,
+  "baselines": {
+    "zeroshot": 0.025,
+    "heavy_ttt": 0.1,
+    "corrupt_ttt": 0.025
+  },
+  "budgets": [
+    10,
+    50,
+    200,
+    800,
+    3000,
+    10000
+  ],
+  "arms": {
+    "enum_corrupt": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "enum_best": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    }
+  },
+  "per_task": {},
+  "scaling_curve": {
+    "10": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "50": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "200": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "800": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "3000": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    },
+    "10000": {
+      "acc": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.0
+    }
+  }
+}

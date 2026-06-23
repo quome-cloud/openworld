@@ -125,22 +125,27 @@ def task_acc_enumerative(task, budget, corrupt=False, rng=None):
 
 # ---- (b) LLM-abductive proposer --------------------------------------------------------
 
-LLM_SYSTEM = """You are a program synthesis assistant. Given ARC-AGI grid transformation demos,
-write Python expressions using ONLY these DSL primitives to describe the transformation rule.
+_LLM_SYSTEM_BASE = """You are a program synthesis assistant. Given ARC-AGI grid transformation demos,
+write programs using ONLY the exact DSL primitive names listed below to describe the transformation rule.
 
-Available primitives (all take a grid and return a grid):
+IMPORTANT: use ONLY the exact string keys listed — do NOT invent variant spellings.
+
+Pure primitives (always available):
 rotate_90, rotate_180, rotate_270, flip_lr, flip_ud, transpose, antitranspose,
 gravity_down, gravity_up, gravity_right, gravity_left, crop_to_content,
-mirror_h, mirror_v, invert_colors, outline, sort_rows,
-make_recolor(from_c, to_c), make_translate(dr, dc), make_tile(nr, nc)
+mirror_h, mirror_v, invert_colors, outline, sort_rows
 
-A "program" is a Python list of primitive names (strings) to apply in order, e.g.:
+Parameterized primitives (task-specific, listed in the user message for each task):
+These have exact names like recolor_0_to_1, translate_+1_+0, tile_2x3 — use ONLY the names given.
+
+A "program" is a JSON list of primitive name strings applied left-to-right, e.g.:
 ["rotate_90", "flip_lr"]
-or with parameterized ones:
-["recolor_0_to_1", "rotate_90"]
+["recolor_1_to_2", "rotate_90"]
 
-Respond with a JSON list of candidate programs (each program is a list of strings).
-Give at most 5 candidates. Think step by step about what transforms input -> output.
+Respond with ONLY a JSON array of candidate programs (each is a list of strings), NO other text:
+[[\"prim1\", \"prim2\"], [\"prim3\"], ...]
+
+Give at most 5 candidates. If you cannot express the transformation with the given primitives, return [].
 """
 
 
@@ -148,36 +153,42 @@ def format_grid(g):
     return "\n".join("".join(str(c) for c in row) for row in g)
 
 
-def demos_to_prompt(demos):
+def demos_to_prompt(demos, param_keys=None):
+    """Build user prompt. param_keys lists available parameterized primitive names for this task."""
     lines = ["Look at these grid transformation examples:"]
     for i, (inp, out) in enumerate(demos):
         lines.append(f"\nExample {i + 1}:")
         lines.append(f"Input:\n{format_grid(inp)}")
         lines.append(f"Output:\n{format_grid(out)}")
-    lines.append("\nWhat DSL program (list of primitives) transforms input -> output?")
-    lines.append("Return JSON: [[\"prim1\", \"prim2\", ...], ...]  (list of candidate programs)")
+    if param_keys:
+        lines.append(f"\nAvailable parameterized primitives for this task: {', '.join(sorted(param_keys))}")
+    lines.append("\nReturn ONLY a JSON array of candidate programs. Use exact primitive names only.")
     return "\n".join(lines)
 
 
-def call_llm_proposer(demos, model="claude-haiku-4-5-20251001"):
+def call_llm_proposer(demos, model="claude-haiku-4-5-20251001", param_keys=None):
     """Ask the LLM to propose candidate DSL programs. Returns list of program name-lists."""
     try:
         import anthropic
+        import re as _re
         client = anthropic.Anthropic()
         msg = client.messages.create(
             model=model,
-            max_tokens=512,
-            system=LLM_SYSTEM,
-            messages=[{"role": "user", "content": demos_to_prompt(demos)}]
+            max_tokens=1024,
+            system=_LLM_SYSTEM_BASE,
+            messages=[{"role": "user", "content": demos_to_prompt(demos, param_keys)}]
         )
         text = msg.content[0].text.strip()
-        # Extract JSON from response
-        import re
-        m = re.search(r'\[.*\]', text, re.DOTALL)
-        if m:
-            candidates = json.loads(m.group())
-            if isinstance(candidates, list):
-                return candidates
+        # Extract outermost [...] block — handles extra reasoning text
+        start = text.find("[")
+        end = text.rfind("]")
+        if start != -1 and end > start:
+            try:
+                candidates = json.loads(text[start:end + 1])
+                if isinstance(candidates, list):
+                    return candidates
+            except json.JSONDecodeError:
+                pass
     except Exception as e:
         print(f"  [llm-proposer] failed: {e}", flush=True)
     return []
@@ -193,7 +204,8 @@ def task_acc_abductive(task, all_prims, corrupt=False, rng=None, model="claude-h
         (rng or random.Random()).shuffle(outs)
         demos = [(i, o) for (i, _), o in zip(demos, outs)]
 
-    candidates = call_llm_proposer(demos, model=model)
+    param_keys = [k for k in all_prims if k not in PURE_PRIMS]
+    candidates = call_llm_proposer(demos, model=model, param_keys=param_keys)
 
     # Build programs from candidate name lists
     for candidate in candidates:

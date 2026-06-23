@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional
 
 try:
     from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-    from fastapi.responses import HTMLResponse, JSONResponse, Response
+    from fastapi.responses import HTMLResponse, Response
     from pydantic import BaseModel
 except ImportError as exc:  # pragma: no cover
     raise ImportError(
@@ -458,7 +458,10 @@ def serve_app(specs, allow_code: bool = False,
     @app.get("/worlds/{name}/view", response_class=HTMLResponse)
     def view(name: str):
         _spec(name)
-        return _VIEW_HTML.replace("__NAME__", name).replace("__TITLE__", title)
+        return (_VIEW_HTML
+                .replace("__NAMEJS__", json.dumps(name))
+                .replace("__NAME__", html.escape(name))
+                .replace("__TITLE__", html.escape(title)))
 
     return app
 
@@ -584,7 +587,7 @@ import {createRoot} from 'https://esm.sh/react-dom@18/client';
 import ReactFlow,{Background,Controls,Handle,Position} from 'https://esm.sh/reactflow@11?deps=react@18,react-dom@18';
 import htm from 'https://esm.sh/htm';
 const html=htm.bind(React.createElement);
-const NAME="__NAME__";
+const NAME=__NAMEJS__;
 const api=(p,b)=>fetch(p,b?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)}:undefined).then(r=>r.json());
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 const H0={opacity:0,border:0,minWidth:0,minHeight:0};
@@ -667,7 +670,7 @@ createRoot(document.getElementById('root')).render(html`<${App}/>`);
 </script>
 <script>
 (function(){
-  var NAME="__NAME__", base=location.origin;
+  var NAME=__NAMEJS__, base=location.origin;
   var modal=document.getElementById('apimodal');
   function sample(info){
     var p=(info.perception||[])[0];

@@ -13,7 +13,7 @@ Two uses:
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Optional, Sequence
 
 from .llm import BaseLLM
 from .parsing import extract_json

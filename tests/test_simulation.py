@@ -11,7 +11,6 @@ from openworld import (
     Objective,
     Simulation,
     World,
-    WorldState,
     sweep,
 )
 

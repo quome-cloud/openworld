@@ -37,6 +37,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "httpx>=0.23"]
+# Lint/type gate (pinned for reproducible CI results).
+lint = ["ruff==0.15.18", "mypy==2.1.0"]
 optuna = ["optuna>=3"]
 # numpy is NOT a core dependency: the numpy-backed analysis extras (wavelets,
 # sheaf gluing, information geometry, optimal transport) import it lazily, so
@@ -55,5 +57,38 @@ openworld = "openworld.cli:main"
 [tool.setuptools.packages.find]
 include = ["openworld*"]
 
+[tool.setuptools.package-data]
+openworld = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.ruff.lint]
+# Start with the high-signal rules (real bugs: undefined names, unused
+# imports/vars, syntax errors). Style rules (E7xx, line length) can be added later.
+select = ["F", "E9"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+
+# Modules not yet type-clean are excluded so the gate enforces the clean ones and
+# fails on regressions there. Shrink this list over time, don't grow it.
+[[tool.mypy.overrides]]
+module = [
+    "openworld.intervals",
+    "openworld.llm",
+    "openworld.agent",
+    "openworld.world",
+    "openworld.compose",
+    "openworld.spec",
+    "openworld.card",
+    "openworld.sheaf",
+    "openworld.gym_env",
+    "openworld.tune",
+]
+ignore_errors = true

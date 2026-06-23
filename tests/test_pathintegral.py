@@ -1,9 +1,8 @@
 """Tests for the path-integral over learning trajectories."""
 
-import math
 
 from openworld import Skill, TrajectorySpace
-from openworld.pathintegral import COUNTING, LOG, TROPICAL
+from openworld.pathintegral import LOG
 
 
 def simple_space():

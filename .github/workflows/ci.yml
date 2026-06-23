@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test-and-assets:
+  lint-type-assets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,17 +15,20 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Install (core + dev + pinned analysis stack)
+      - name: Install (core + dev + lint + pinned analysis stack)
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]" -r experiments/requirements.lock
+          pip install -e ".[dev,lint]" -r experiments/requirements.lock
+
+      - name: Lint (ruff)
+        run: python -m ruff check openworld/ tests/
+
+      - name: Type-check (mypy)
+        run: python -m mypy openworld/
 
       - name: Core import is stdlib-only
         run: |
           python -c "import sys, openworld; leaked=[m for m in ('numpy','fastapi','uvicorn','click','rich') if m in sys.modules]; assert not leaked, leaked; print('core import clean')"
-
-      - name: Test suite (offline, MockLLM)
-        run: python -m pytest tests/ -q
 
       - name: Paper numbers do not drift from committed results
         run: |
@@ -33,6 +36,27 @@ jobs:
           python scripts/make_manifest.py
           git diff --exit-code papers/assets/numbers.tex papers/assets/tables experiments/MANIFEST.md \
             || (echo "::error::regenerated assets differ from committed; run make_paper_assets.py + make_manifest.py and commit"; exit 1)
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install (core + dev + analysis extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,experiments]"
+
+      - name: Test suite (offline, MockLLM)
+        run: python -m pytest tests/ -q
 
   paper-builds:
     runs-on: ubuntu-latest

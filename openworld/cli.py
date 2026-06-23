@@ -25,7 +25,7 @@ from rich.table import Table
 
 from . import _tmux
 from .card import render_card
-from .spec import from_spec, spec_to_json, to_spec, validate_spec
+from .spec import from_spec, spec_to_json, validate_spec
 
 console = Console()
 
@@ -291,7 +291,7 @@ def build(description, name):
         problems = validate_spec(s)
         console.print(f"validate: {'[green]ok[/green]' if not problems else problems}")
         try:
-            w1, w2 = from_spec(s, allow_code=True), from_spec(s, allow_code=True)
+            from_spec(s, allow_code=True)  # raises if not reconstructable
             console.print("[green]round-trip: reconstructable[/green]")
         except Exception as e:
             console.print(f"[yellow]round-trip note: {e}[/yellow]")

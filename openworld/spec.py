@@ -23,13 +23,12 @@ Zero-dependency: standard library only.
 
 from __future__ import annotations
 
-import copy
 import inspect
 import json
 import textwrap
 from typing import Any, Dict, List, Optional
 
-from .compose import (AGG_KEY, AGENTS_KEY, Aggregator, Binding, Bridge,
+from .compose import (AGG_KEY, Aggregator, Binding, Bridge,
                       CompositeTransition, CompositeWorld, Route)
 from .sandbox import SandboxError, load_transition_code
 from .state import Action, WorldState

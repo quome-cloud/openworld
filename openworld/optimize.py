@@ -41,12 +41,12 @@ class SweepResult:
                 for name, up in zip(objectives, maximize)
             )
 
+        signed_points = [signed(point) for point in self.points]
         frontier = []
-        for point in self.points:
-            p = signed(point)
+        for point, p in zip(self.points, signed_points):
             dominated = any(
                 all(q[i] >= p[i] for i in range(len(p))) and q != p
-                for q in (signed(other) for other in self.points)
+                for q in signed_points
             )
             if not dominated:
                 frontier.append(point)

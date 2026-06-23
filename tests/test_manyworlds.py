@@ -4,7 +4,6 @@ force exactly, and the store must scale past where enumeration can go."""
 from itertools import product
 
 from openworld import BOOLEAN, COUNTING, Mechanism, WorldStore
-from openworld.manyworlds import PROBABILITY
 
 
 # A small sprint-style candidate family parameterizing the dynamics.
@@ -36,7 +35,6 @@ TRUE = {"ship_debt": 1, "k": 4, "fix": 2, "refactor": 2}
 
 
 def true_step(state, action):
-    mechs = {m.observable: m for m in sprint_mechanisms()}
     s = dict(state)
     for m in sprint_mechanisms():
         v = m.fn(state, action, TRUE)

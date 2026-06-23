@@ -5,7 +5,6 @@ from openworld.compose import (
     AGENTS_KEY,
     AGG_KEY,
     Aggregator,
-    Bridge,
     CompositeWorld,
     Route,
     CompositeTransition,  # noqa: F401 - imported to assert it stays public

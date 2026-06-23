@@ -10,6 +10,8 @@ in a real embedding function.
 
 from __future__ import annotations
 
+import heapq
+
 import math
 from typing import Any, Callable, List, Optional, Tuple
 
@@ -61,9 +63,10 @@ class MemoryStore:
     def recall(self, query: str, k: int = 1) -> List[Tuple[str, Any, float]]:
         """Top-k (cue, value, score) by similarity to `query`."""
         qv = self._vec(query)
-        scored = sorted(((self._sim(qv, v), cue, val) for cue, val, v in self._items),
-                        key=lambda t: t[0], reverse=True)
-        return [(cue, val, round(s, 4)) for s, cue, val in scored[:k]]
+        scored = heapq.nlargest(
+            k, ((self._sim(qv, v), cue, val) for cue, val, v in self._items),
+            key=lambda t: t[0])
+        return [(cue, val, round(s, 4)) for s, cue, val in scored]
 
     def exact(self, cue: str) -> Any:
         for c, val, _ in self._items:

@@ -23,7 +23,7 @@ a local Ollama backbone. These rules override default behavior.
   commit and had to be re-PR'd.)
 - The human merges PRs quickly, so **finish and push a change before it's merged**,
   and when several changes touch the same file (`openworld/serve.py`,
-  `paper/main.tex`), do them **one at a time**: open, wait for merge, branch off
+  `papers/*/main.tex`, `papers/assets/*`), do them **one at a time**: open, wait for merge, branch off
   updated `main`. After a merge you can confirm with
   `git merge-base --is-ancestor <sha> origin/main`.
 - Concurrent cloud agents share this remote: **`git fetch` before pushing**, and
@@ -33,13 +33,17 @@ a local Ollama backbone. These rules override default behavior.
 ## Paper assets
 
 - **All paper numbers/figures/tables come from `scripts/make_paper_assets.py`**,
-  which reads `experiments/results/*.json` and writes `paper/numbers.tex`,
-  `paper/figs/*`, `paper/tables/*`. **Never hand-edit `paper/numbers.tex`.**
+  which reads `experiments/results/*.json` and writes `papers/assets/numbers.tex`,
+  `papers/assets/figs/*`, `papers/assets/tables/*`. **Never hand-edit
+  `papers/assets/numbers.tex`.** The two papers (`papers/world-time-compute/`,
+  `papers/framework/`) symlink `figs/tables/numbers.tex/refs.bib/sections` →
+  `../assets/`, so the one pipeline is the single source of truth for both.
 - A new experiment ENN adds: its results JSON, an entry in `EXPERIMENTS`, a
   `fig_*`/`table_*` function + its call in `main()`, macros before the
   `numbers.tex` write, and a `\NumExperiments` bump (it is a count).
-- Regenerate (`python scripts/make_paper_assets.py`) then compile with
-  `tectonic main.tex` from `paper/` (no system latex). Check for undefined refs.
+- Regenerate (`python scripts/make_paper_assets.py`) then compile each paper with
+  `tectonic main.tex` from its `papers/<name>/` dir (no system latex). Check for
+  undefined refs.
 - **LaTeX control-sequence names are letters only — no digits** (`\LadderQwenSmall`,
   not `\ScaleQwen7`), or you get "Missing \begin{document}".
 

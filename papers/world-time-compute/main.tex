@@ -171,15 +171,15 @@ with task saturation). The labels can be trusted because the worlds are \emph{ve
 learned approximations: synthesized-then-checked dynamics are exact over
 \RolloutSteps-step rollouts and answer $10\times$ out-of-distribution probes exactly
 (\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
-collapse. Exact labels, rather than task variety alone, are what separates world-time
-compute from domain randomization---and a corrupted-label control confirms it.
-On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS algorithms) the
-same lever holds as \emph{per-world} test-time training---scaling with compute and
-collapsing under label corruption---and follows a \emph{descriptive} regularity (a saturating
-curve, not a law): the gain is largest for
-\emph{few-step} reasoning and small/weak models, and fades for long reasoning chains, for
-tasks that must be induced from rich perception, and as a task saturates; cross-task
-transfer is weak where worlds share no skill.
+collapse. What separates this from domain randomization is that each world is independently
+authored and individually verified---not parameter variation of one simulator---and a
+corrupted-label control shows it is label \emph{exactness}, not task variety, that drives the
+held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
+algorithms) the same lever holds as \emph{per-world} test-time training, scaling with compute
+and collapsing under label corruption. The gain follows a \emph{descriptive} regularity (a
+saturating curve, not a law): it is largest for \emph{few-step} reasoning and small/weak
+models, and fades for long reasoning chains, for tasks induced from rich perception, and as a
+task saturates; cross-task transfer is weak where worlds share no skill.
 The worlds are authored and served by \textbf{\openworld}, a zero-dependency Python framework
 that makes assembling the \emph{many} worlds a domain needs cheap; the framework itself---%
 declaration, the plan--generate--verify relay, composition, perception, and serving---is the
@@ -488,6 +488,8 @@ Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale com
 Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
 V-JEPA~\cite{vjepa2025} & joint-embedding video prediction in latent space & perceptual; latent, unauditable; trained \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
+Meta CWM~\cite{metacwm2025} & \emph{neural} code world model (32B, dynamics learned in weights) & not auditable code; frontier-scale training \\
+IVML~\cite{ivml2025} & LLM-synthesized symbolic world models via test-time scaling & per-task synthesis; not a reusable substrate \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
 NeSyS~\cite{nesys2026} & symbolic rules constrain neural logits & still requires fine-tuning data \\
@@ -1013,8 +1015,8 @@ outside the family structure the law scores.
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
 (worlds for 90\% of the asymptotic gain) is \WCListfn{} for List Functions, \WCArc{} for ARC, and
 \WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
-thousands. The honest scope: the curve's \emph{form} is universal over verifiable-world problems
-and learners; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
+thousands. The honest scope: the curve's \emph{form} appears to recur across the verifiable-world problems
+and learners we tested; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
 cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
 
@@ -1730,7 +1732,7 @@ E77 & Coding-world transfer of world-time compute (pass@5) & \S\ref{sec:world-ti
 E78b & Label-exactness ablation isolates the causal driver & \S\ref{sec:world-time-scale} \\
 E80 & Real-data world-time compute on ARC-AGI (per-world TTT + ladder) & \S\ref{sec:world-time-arc} \\
 E80 & Replication across List Functions, CLRS, Bongard-RWR (vision boundary) & \S\ref{sec:world-time-domains} \\
-E80 & A predictive law: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
+E80 & A descriptive regularity: LODO fit, tabular out-of-sample, learner-invariance & \S\ref{sec:world-time-law} \\
 E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
 E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 E83 & Real-data cross-world transfer on CLRS-Text (weak null) & \S\ref{sec:world-time-law} \\

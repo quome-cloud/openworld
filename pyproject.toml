@@ -42,6 +42,9 @@ optuna = ["optuna>=3"]
 # sheaf gluing, information geometry, optimal transport) import it lazily, so
 # `import openworld` stays stdlib-only. Install this extra to use those modules.
 analysis = ["numpy>=1.24"]
+# Gymnasium adapter (openworld.gym_env.OpenWorldEnv): wrap a verified World as a gym.Env for
+# existing planners / RL libraries. Optional; the core stays stdlib-only.
+gym = ["gymnasium>=0.29", "numpy>=1.24"]
 # Reproduce the paper: run the experiment scripts and regenerate every
 # figure/table/number via scripts/make_paper_assets.py.
 experiments = ["numpy>=1.24", "matplotlib>=3.6"]

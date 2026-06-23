@@ -61,11 +61,11 @@ def pct(x):
 
 def repo_metrics():
     """Count the live codebase so the Implementation paragraph can't drift.
-    Core = openworld/*.py minus the serve/CLI layer (serve, cli, _tmux), which is
-    the only place third-party deps (fastapi/uvicorn/click/rich) are allowed."""
+    Core = openworld/*.py minus the optional layers that import third-party deps: the serve/CLI
+    layer (serve, cli, _tmux: fastapi/uvicorn/click/rich) and the gymnasium adapter (gym_env)."""
     pkg = ROOT / "openworld"
-    serve_layer = {"serve.py", "cli.py", "_tmux.py"}
-    core = [p for p in sorted(pkg.glob("*.py")) if p.name not in serve_layer]
+    optional_layer = {"serve.py", "cli.py", "_tmux.py", "gym_env.py"}
+    core = [p for p in sorted(pkg.glob("*.py")) if p.name not in optional_layer]
     core_loc = sum(len(p.read_text().splitlines()) for p in core)
     tests = sorted((ROOT / "tests").glob("test_*.py"))
     test_fns = sum(t.read_text().count("def test_") for t in tests)
@@ -4092,6 +4092,56 @@ def fig_hybrid_loop(qwen, llama):
     plt.close(fig)
 
 
+def fig_world_computer(e68, e04, e68b):
+    """Hero for the world-computing paper: benchmark the world computer on cost, latency, and
+    performance. A: prototyping cost/latency (per-world authoring minutes, all validated).
+    B: runtime throughput (verified code vs the LLM per-step proxy, log steps/s). C: trust
+    (validation + behavioral-executable rates). All numbers from E68/E04/E68b."""
+    mins = [w["minutes"] for w in e68["worlds"] if w.get("minutes") is not None]
+    med, p90, nw, val = e68["median_minutes"], e68["p90_minutes"], e68["n_worlds"], e68["validation_rate"]
+    sp = {e["engine"]: e["steps_per_second"] for e in e04["engines"]}
+    exe = e68b["behavioral_executable_rate"]
+    fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(12.6, 3.8),
+                                       gridspec_kw={"width_ratios": [1.25, 1.2, 0.62]})
+    # A -- prototyping cost & latency
+    ax.hist(mins, bins=16, color=TEAL, alpha=0.85, edgecolor="white", linewidth=0.4)
+    top = ax.get_ylim()[1]
+    ax.axvline(med, color=ORANGE, lw=1.8)
+    ax.axvline(p90, color=SLATE, lw=1.1, ls="--")
+    ax.text(med, top * 0.93, f" median {med:.1f} min", color=ORANGE, fontsize=8, fontweight="bold")
+    ax.text(p90, top * 0.78, f" p90 {p90:.1f}", color=SLATE, fontsize=7.5)
+    ax.set_xlabel("minutes to author + validate one world")
+    ax.set_ylabel("worlds")
+    ax.set_title(f"A. Cost & latency: prototype\n{nw} worlds, {100 * val:.0f}% conformant", fontsize=10)
+    # B -- runtime throughput (log)
+    order = ["function_oracle", "code_transition", "llm_transition"]
+    lab = {"function_oracle": "function oracle", "code_transition": "verified code",
+           "llm_transition": "LLM per-step"}
+    col = {"function_oracle": SLATE, "code_transition": TEAL, "llm_transition": RED}
+    vals = [sp[k] for k in order]
+    ax2.barh(range(len(order)), vals, color=[col[k] for k in order], alpha=0.9, log=True)
+    ax2.set_yticks(range(len(order)))
+    ax2.set_yticklabels([lab[k] for k in order], fontsize=8.5)
+    for i, v in enumerate(vals):
+        ax2.text(v * 1.4, i, (f"{v:,.0f}/s" if v >= 1 else f"{v:.2f}/s"), va="center", fontsize=7.5)
+    ratio = sp["code_transition"] / sp["llm_transition"]
+    ax2.set_xlim(0.1, sp["function_oracle"] * 12)
+    ax2.set_xlabel("rollout steps / second (log)")
+    ax2.set_title(f"B. Latency: run\nverified code {ratio:,.0f}x the LLM", fontsize=10)
+    # C -- trust gates
+    bv = [val, exe]
+    ax3.bar(["conform", "execute"], bv, color=[TEAL, ORANGE], alpha=0.9, width=0.62)
+    for i, v in enumerate(bv):
+        ax3.text(i, v + 0.015, f"{100 * v:.0f}%", ha="center", fontsize=9.5, fontweight="bold")
+    ax3.set_ylim(0, 1.12)
+    ax3.set_ylabel("rate")
+    ax3.set_title("C. Performance:\ntrust gates", fontsize=10)
+    fig.suptitle("The world computer, benchmarked: cost, latency, performance", fontsize=12.5, y=1.05)
+    fig.tight_layout()
+    fig.savefig(FIGS / "world_computer.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_world_time_compute(scaling, diag):
     """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
     world models ('world-time compute'), against an offline prior-only floor and a
@@ -4269,6 +4319,8 @@ def main():
     fig_worldtime_domains(data["e80_arc_ttt"], data["e80_text_listfn"],
                           data["e80_text_clrs"], data["e80_bongard"])
     fig_frame_invariance(data["e81_frame_qwen"], load("e81_frame_llama"))
+    fig_world_computer(data["e68_prototyping_latency"], data["e04_rollout_speed"],
+                       data["e68b_recipe_audit"])
     fig_hybrid_loop(data["e82_hybrid_qwen"], load("e82_hybrid_llama"))
     fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])

@@ -1,0 +1,77 @@
+{
+  "experiment": "e83-clrs-crossworld",
+  "base": "Qwen/Qwen2.5-7B-Instruct",
+  "n_train_algorithms": 21,
+  "n_holdout_algorithms": 8,
+  "holdout": [
+    "bfs",
+    "dfs",
+    "floyd_warshall",
+    "graham_scan",
+    "lcs_length",
+    "naive_string_matcher",
+    "quickselect",
+    "strongly_connected_components"
+  ],
+  "train_algorithms": [
+    "activity_selector",
+    "articulation_points",
+    "bellman_ford",
+    "binary_search",
+    "bubble_sort",
+    "dag_shortest_paths",
+    "dijkstra",
+    "find_maximum_subarray_kadane",
+    "heapsort",
+    "insertion_sort",
+    "jarvis_march",
+    "kmp_matcher",
+    "matrix_chain_order",
+    "minimum",
+    "mst_kruskal",
+    "mst_prim",
+    "optimal_bst",
+    "quicksort",
+    "segments_intersect",
+    "task_scheduling",
+    "topological_sort"
+  ],
+  "rows_per_world": 30,
+  "steps": 250,
+  "arms": {
+    "zeroshot": 0.0156,
+    "crossworld": 0.0
+  },
+  "per_world": {
+    "zeroshot": {
+      "bfs": 0.0,
+      "dfs": 0.0,
+      "floyd_warshall": 0.0,
+      "graham_scan": 0.0,
+      "lcs_length": 0.125,
+      "naive_string_matcher": 0.0,
+      "quickselect": 0.0,
+      "strongly_connected_components": 0.0
+    },
+    "crossworld": {
+      "bfs": 0.0,
+      "dfs": 0.0,
+      "floyd_warshall": 0.0,
+      "graham_scan": 0.0,
+      "lcs_length": 0.0,
+      "naive_string_matcher": 0.0,
+      "quickselect": 0.0,
+      "strongly_connected_components": 0.0
+    }
+  },
+  "ci": {
+    "zeroshot": [
+      0.0,
+      0.0469
+    ],
+    "crossworld": [
+      0.0,
+      0.0
+    ]
+  }
+}

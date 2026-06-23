@@ -19,6 +19,6 @@ INSTR="Infer the hidden rule mapping each input list to its output, then produce
 for S in 0 1 2; do
   echo "=== crossworld listfn seed $S ($(date -u +%H:%M:%S)) ==="
   python3 e84_crossworld.py --worlds data/listfn_worlds.jsonl --domain listfn \
-    --instruction "$INSTR" --bucket "$DEST" --seed "$S" || echo "seed $S FAILED"
+    --instruction "$INSTR" --bucket "$DEST" --seed "$S" --steps 350 --n_eval 6 || echo "seed $S FAILED"
 done
 echo "[run_crossworld] done -> $DEST/e84_crossworld_listfn_seed{0,1,2}.json"

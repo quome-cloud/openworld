@@ -1,0 +1,16 @@
+{
+  "game": "ka59",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 0.1429,
+  "repeat_pairs": 7,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 13.4,
+  "copy_frame_exact": 0.1233,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.1067,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Define the changes based on the action\n    changes = {\n        1: [[63, 62, 0]],\n        2: [\n            [30, 12, 1], [30, 13, 1], [30, 14, 1],\n            [31, 12, 1], [31, 13, 1], [31, 14, 1],\n            [32, 12, 4], [32, 13, 4], [32, 14, 4],\n            [33, 12, 14], [33, 13, 14], [33, 14, 14],\n            [34, 12, 14], [34, 13, 0], [34, 14, 14],\n            [35, 12, 14], [35, 13, 14], [35, 14, 14]\n        ],\n        3: [\n            [30, 12, 14], [30, 13, 14], [30, 14, 14],\n            [30, 15, 1], [30, 16, 1], [30, 17, 1],\n            [31, 12, 14], [31, 13, 0], [31, 14, 14],\n            [31, 15, 1], [31, 16, 1], [31, 17, 1],\n            [32, 12, 14], [32, 13, 14], [32, 14, 14],\n            [32, 15, 4], [32, 16, 1], [32, 17, 1],\n            [63, 45, 0]\n        ],\n        4: [\n            [30, 18, 1], [30, 19, 1], [30, 20, 1],\n            [30, 21, 14], [30, 22, 14], [30, 23, 14],\n            [31, 18, 1], [31, 19, 1], [31, 20, 1],\n            [31, 21, 14], [31, 22, 0], [31, 23, 14],\n            [32, 18, 1], [32, 19, 1], [32, 20, 1],\n            [32, 21, 14], [32, 22, 14], [32, 23, 14],\n            [63, 63, 0]\n        ],\n        6: [[63, 57, 0]]\n    }\n    \n    # Apply the changes to the frame\n    if action in changes:\n        for row, col, new_color in changes[action]:\n            frame[row, col] = new_color\n    \n    return frame"
+}

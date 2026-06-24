@@ -1,0 +1,16 @@
+{
+  "game": "r11l",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 240,
+  "replay_determinism": 1.0,
+  "replay_steps": 61,
+  "mean_cells_changed": 1.1,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.0267,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    if action == 6:\n        # For action 6, change the first column up to the row equal to the current frame's non-background value in the first column\n        for i in range(64):\n            if frame[i, 0] != 5:\n                frame[:i+1, 0] = 5\n    return frame"
+}

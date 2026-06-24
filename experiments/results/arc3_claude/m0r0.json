@@ -1,0 +1,16 @@
+{
+  "game": "m0r0",
+  "steps": 200,
+  "transitions": 169,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.7347,
+  "repeat_pairs": 49,
+  "replay_determinism": 1.0,
+  "replay_steps": 21,
+  "mean_cells_changed": 65.0,
+  "copy_frame_exact": 0.1953,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.4884,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    H, W = out.shape\n    BG = 5\n    OBJ = 10\n    mask = (frame == OBJ)\n\n    # connected components (4-conn) of object cells -> each is a 5x5 bar\n    seen = np.zeros_like(mask, dtype=bool)\n    comps = []\n    for (r0, c0) in zip(*np.where(mask)):\n        if seen[r0, c0]:\n            continue\n        stack = [(r0, c0)]\n        seen[r0, c0] = True\n        comp = []\n        while stack:\n            r, c = stack.pop()\n            comp.append((r, c))\n            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                nr, nc = r + dr, c + dc\n                if 0 <= nr < H and 0 <= nc < W and mask[nr, nc] and not seen[nr, nc]:\n                    seen[nr, nc] = True\n                    stack.append((nr, nc))\n        comps.append(comp)\n\n    old_cells = set()\n    new_cells = set()\n    for comp in comps:\n        center = sum(c for _, c in comp) / len(comp)\n        if action == 1:\n            dr, dc = -5, 0          # up\n        elif action == 2:\n            dr, dc = 5, 0           # down\n        elif action == 3:\n            dr, dc = 0, (-5 if center < 31.5 else 5)   # spread\n        elif action == 4:\n            dr, dc = 0, (5 if center < 31.5 else -5)   # contract\n        else:\n            dr, dc = 0, 0           # no-op / unknown\n        old_cells.update(comp)\n        for (r, c) in comp:\n            nr, nc = r + dr, c + dc\n            if 0 <= nr < H and 0 <= nc < W:\n                new_cells.add((nr, nc))\n\n    for (r, c) in old_cells - new_cells:\n        out[r, c] = BG\n    for (r, c) in new_cells:\n        out[r, c] = OBJ\n\n    return out"
+}

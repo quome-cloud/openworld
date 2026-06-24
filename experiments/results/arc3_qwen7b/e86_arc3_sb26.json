@@ -1,0 +1,16 @@
+{
+  "game": "sb26",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 158,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.3,
+  "copy_frame_exact": 0.6633,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.7333,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 5:\n        for row, col, new_color in [[53, 63, 3], [53, 62, 3]]:\n            next_frame[row, col] = new_color\n    return next_frame"
+}

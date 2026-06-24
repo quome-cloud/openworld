@@ -1,0 +1,16 @@
+{
+  "game": "sp80",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 1,
+  "win_levels": 6,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 19,
+  "replay_determinism": 1.0,
+  "replay_steps": 21,
+  "mean_cells_changed": 61.4,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.0,
+  "code": null
+}

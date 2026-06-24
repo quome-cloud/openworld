@@ -1,0 +1,16 @@
+{
+  "game": "lp85",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 299,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.0,
+  "copy_frame_exact": 1.0,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 1.0,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Since the transitions for action 6 do not change any cells,\n    # we can simply return the original frame.\n    if action == 6:\n        return frame\n    \n    # For other actions, we would need more information to implement the rule.\n    # However, based on the given data, this is the best prediction we can make.\n    return frame"
+}

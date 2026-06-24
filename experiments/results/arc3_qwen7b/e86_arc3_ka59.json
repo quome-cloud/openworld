@@ -1,0 +1,16 @@
+{
+  "game": "ka59",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 0.1429,
+  "repeat_pairs": 7,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 13.4,
+  "copy_frame_exact": 0.1233,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0933,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 4:\n        for row, col, new_color in [[30, 18, 1], [30, 19, 1], [30, 20, 1], [30, 21, 14], [30, 22, 14], [30, 23, 14], \n                                    [31, 18, 1], [31, 19, 1], [31, 20, 1], [31, 21, 14], [31, 22, 0], [31, 23, 14], \n                                    [32, 18, 1], [32, 19, 1], [32, 20, 1], [32, 21, 14], [32, 22, 14], [32, 23, 14]]:\n            next_frame[row, col] = new_color\n    elif action == 1:\n        next_frame[63, 62] = 0\n    elif action == 3:\n        for row, col, new_color in [[30, 21, 14], [30, 22, 14], [30, 23, 14], [30, 24, 1], [30, 25, 1], [30, 26, 1], \n                                    [31, 21, 14], [31, 22, 0], [31, 23, 14], [31, 24, 1], [31, 25, 1], [31, 26, 1], \n                                    [32, 21, 14], [32, 22, 14], [32, 23, 14], [32, 24, 1], [32, 25, 1], [32, 26, 1], \n                                    [63, 61, 0]]:\n            next_frame[row, col] = new_color\n    elif action == 6:\n        next_frame[63, 57] = 0\n    elif action == 2:\n        for row, col, new_color in [[30, 21, 1], [30, 22, 1], [30, 23, 1], \n                                    [31, 21, 1], [31, 22, 1], [31, 23, 1], \n                                    [32, 21, 1], [32, 22, 1], [32, 23, 1], \n                                    [33, 21, 14], [33, 22, 14], [33, 23, 14], \n                                    [34, 21, 14], [34, 22, 0], [34, 23, 14], \n                                    [35, 21, 14], [35, 22, 14], [35, 23, 14]]:\n            next_frame[row, col] = new_color\n    return next_frame"
+}

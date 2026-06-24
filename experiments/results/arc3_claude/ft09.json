@@ -1,0 +1,16 @@
+{
+  "game": "ft09",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 199,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.0,
+  "copy_frame_exact": 1.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 1.0,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Every observed transition (action 6) left the grid unchanged,\n    # so the verified rule is the identity map.\n    return np.array(frame, copy=True)"
+}

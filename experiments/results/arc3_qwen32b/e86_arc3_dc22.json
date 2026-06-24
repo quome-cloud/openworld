@@ -1,0 +1,16 @@
+{
+  "game": "dc22",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.4138,
+  "repeat_pairs": 29,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 4.9,
+  "copy_frame_exact": 0.2133,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.2267,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Define the changes for each action\n    action_changes = {\n        1: [[38, 12, 14], [38, 13, 14], [39, 12, 14], [39, 13, 14], [40, 12, 2], [40, 13, 2], [41, 12, 2], [41, 13, 2]],\n        2: [[38, 10, 2], [38, 11, 2], [39, 10, 2], [39, 11, 2], [40, 10, 14], [40, 11, 14], [41, 10, 14], [41, 11, 14]],\n        3: [[38, 10, 14], [38, 11, 14], [38, 12, 2], [38, 13, 2], [39, 10, 14], [39, 11, 14], [39, 12, 2], [39, 13, 2]],\n        4: [[40, 10, 2], [40, 11, 2], [40, 12, 14], [40, 13, 14], [41, 10, 2], [41, 11, 2], [41, 12, 14], [41, 13, 14]],\n        6: []\n    }\n    \n    # Special cases for action 4 with additional changes\n    if action == 4:\n        special_changes = {\n            (63, 0): 3,\n            (63, 3): 3,\n            (63, 4): 3\n        }\n        if tuple([63, len(action_changes[1]) - 5]) in special_changes:\n            action_changes[4].append([63, len(action_changes[1]) - 5, special_changes[tuple([63, len(action_changes[1]) - 5])]])\n    \n    # Special cases for action 6 with additional changes\n    if action == 6:\n        special_changes = {\n            (63, 2): 3,\n            (63, 5): 3\n        }\n        if tuple([63, len(action_changes[1]) - 4]) in special_changes:\n            action_changes[6].append([63, len(action_changes[1]) - 4, special_changes[tuple([63, len(action_changes[1]) - 4])]])\n    \n    # Apply the changes to the frame\n    if action in action_changes:\n        for change in action_changes[action]:\n            row, col, new_color = change\n            frame[row, col] = new_color\n    \n    return frame"
+}

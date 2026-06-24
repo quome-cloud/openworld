@@ -1,0 +1,16 @@
+{
+  "game": "ls20",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 1,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 37.2,
+  "copy_frame_exact": 0.025,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.26,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    H, W = out.shape\n\n    # --- locate the 5x5 marker: rows[0:2]==12, rows[2:5]==9 ---\n    pos = None\n    for r, c in np.argwhere(out == 12):\n        if r + 5 <= H and c + 5 <= W:\n            blk = out[r:r+5, c:c+5]\n            if np.all(blk[0:2] == 12) and np.all(blk[2:5] == 9):\n                pos = (int(r), int(c))\n                break\n\n    # --- move the marker, leaving a color-3 trail ---\n    deltas = {1: (-5, 0), 2: (5, 0), 3: (0, -5), 4: (0, 5)}\n    if pos is not None and action in deltas:\n        r, c = pos\n        dr, dc = deltas[action]\n        nr, nc = r + dr, c + dc\n        if 0 <= nr and nr + 5 <= H and 0 <= nc and nc + 5 <= W:\n            dest = out[nr:nr+5, nc:nc+5]\n            if np.all((dest == 4) | (dest == 3)):  # passable: bg or trail\n                out[r:r+5, c:c+5] = 3              # leave trail\n                out[nr:nr+2, nc:nc+5] = 12         # marker head\n                out[nr+2:nr+5, nc:nc+5] = 9        # marker body\n\n    # --- advance the 2-row step counter at rows 61-62 ---\n    threes = np.where(out[61] == 3)[0]\n    nextc = (int(threes.max()) + 1) if threes.size > 0 else 0\n    if nextc < W:\n        out[61, nextc] = 3\n        out[62, nextc] = 3\n\n    return out"
+}

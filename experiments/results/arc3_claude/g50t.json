@@ -1,0 +1,16 @@
+{
+  "game": "g50t",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 0.3636,
+  "repeat_pairs": 11,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 34.8,
+  "copy_frame_exact": 0.22,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.26,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    H, W = out.shape\n\n    # Locate the 9-colored cursor block in the play area (below the top palette)\n    ys, xs = np.where(out == 9)\n    keep = ys >= 8\n    ys, xs = ys[keep], xs[keep]\n    if len(ys) == 0:\n        return out  # nothing to move (e.g. action 1)\n\n    r0, c0 = int(ys.min()), int(xs.min())\n\n    # Capture the exact shape mask inside the 5x5 footprint (preserves the hole)\n    mask = np.zeros((5, 5), dtype=bool)\n    for y, x in zip(ys, xs):\n        if r0 <= y <= r0 + 4 and c0 <= x <= c0 + 4:\n            mask[y - r0, x - c0] = True\n\n    # Destination based on action\n    dr = dc = 0\n    if action == 4:        # right\n        dc = 6\n    elif action in (3, 5): # left\n        dc = -6\n    elif action == 2:      # drop down\n        dr = 6\n    else:                  # action 1 / unknown -> identity\n        return out\n\n    nr, nc = r0 + dr, c0 + dc\n    if nr < 0 or nc < 0 or nr + 4 >= H or nc + 4 >= W:\n        return out  # destination off-grid -> no move\n\n    # Vacate old footprint -> 5, paint new footprint -> 9 (hole untouched)\n    for i in range(5):\n        for j in range(5):\n            if mask[i, j]:\n                out[r0 + i, c0 + j] = 5\n                out[nr + i, nc + j] = 9\n    return out"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "lf52",
+  "steps": 200,
+  "transitions": 161,
+  "baseline_levels": 0,
+  "win_levels": 10,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 105,
+  "replay_determinism": 1.0,
+  "replay_steps": 5,
+  "mean_cells_changed": 1.0,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 1.0,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = np.array(frame).copy()\n    # column to fill = number of cells in row 0 already set to color 1\n    k = int(np.count_nonzero(out[0] == 1))\n    if k < out.shape[1]:\n        out[0, k] = 1\n    return out"
+}

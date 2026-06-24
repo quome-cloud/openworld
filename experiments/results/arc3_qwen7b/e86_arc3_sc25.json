@@ -1,0 +1,16 @@
+{
+  "game": "sc25",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.6875,
+  "repeat_pairs": 32,
+  "replay_determinism": 1.0,
+  "replay_steps": 69,
+  "mean_cells_changed": 15.5,
+  "copy_frame_exact": 0.2667,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.1733,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    \n    if action == 1:\n        for row in range(64):\n            next_frame[row, 62:64] = 0\n    \n    elif action == 3:\n        for row in range(19, 23):\n            for col in range(35, 39):\n                if next_frame[row, col] != 2:\n                    next_frame[row, col] = 9\n            for col in range(41, 43):\n                if next_frame[row, col] != 2:\n                    next_frame[row, col] = 10\n    \n    elif action == 6:\n        pass  # No changes for action 6\n    \n    return next_frame"
+}

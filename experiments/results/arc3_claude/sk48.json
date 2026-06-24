@@ -1,0 +1,16 @@
+{
+  "game": "sk48",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 0.4667,
+  "repeat_pairs": 15,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 41.5,
+  "copy_frame_exact": 0.27,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.3,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    H, W = out.shape\n\n    TOP = np.array([2, 1, 1, 2, 1, 1])\n    BOT = np.array([1, 1, 2, 1, 1, 2])\n\n    def is_all4(r, c):\n        return (out[r:r+2, c:c+6] == 4).all()\n\n    def is_pattern(r, c):\n        return np.array_equal(out[r, c:c+6], TOP) and np.array_equal(out[r+1, c:c+6], BOT)\n\n    def stamp_pattern(r, c):\n        out[r, c:c+6] = TOP\n        out[r+1, c:c+6] = BOT\n\n    def stamp_4(r, c):\n        out[r:r+2, c:c+6] = 4\n\n    if action == 6:\n        return out\n\n    if action == 4:\n        # Convert an existing all-4 block to the 2/1 fill (toggle on);\n        # prefer the rightmost such block (the active head).\n        best = None\n        for r in range(H - 1):\n            for c in range(W - 5):\n                if is_all4(r, c):\n                    # require it to be a bounded 2x6 head (left/right not extending 4s)\n                    left_ok = c == 0 or (out[r, c-1] != 4 and out[r+1, c-1] != 4)\n                    right_ok = c + 6 >= W or (out[r, c+6] != 4 and out[r+1, c+6] != 4)\n                    if left_ok and right_ok:\n                        if best is None or c > best[1]:\n                            best = (r, c)\n        if best is not None:\n            stamp_pattern(*best)\n            return out\n        # Otherwise advance: place a new fill 6 cols right of the rightmost fill.\n        best = None\n        for r in range(H - 1):\n            for c in range(W - 5):\n                if is_pattern(r, c):\n                    if best is None or c > best[1]:\n                        best = (r, c)\n        if best is not None and best[1] + 12 <= W:\n            stamp_pattern(best[0], best[1] + 6)\n        return out\n\n    if action == 3:\n        # Convert a 2/1 fill block back to all-4 (toggle off); rightmost head.\n        best = None\n        for r in range(H - 1):\n            for c in range(W - 5):\n                if is_pattern(r, c):\n                    if best is None or c > best[1]:\n                        best = (r, c)\n        if best is not None:\n            stamp_4(*best)\n        # Advance the counter at row 53 leftward (drop a 3 left of the leftmost 3).\n        threes = np.where(out[53] == 3)[0]\n        if threes.size:\n            nc = threes.min() - 1\n        else:\n            nc = W - 1\n        if 0 <= nc < W:\n            out[53, nc] = 3\n        return out\n\n    # actions 1, 2 and any others: complex history-dependent stamp \u2014 leave unchanged.\n    return out"
+}

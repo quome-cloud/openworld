@@ -1,0 +1,16 @@
+{
+  "game": "su15",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 298,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.0,
+  "copy_frame_exact": 1.0,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 1.0,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Based on the provided transitions, it seems that actions 6 and 7 do not change any cells.\n    # Therefore, the next frame is the same as the current frame for these actions.\n    return frame.copy()"
+}

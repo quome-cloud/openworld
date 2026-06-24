@@ -1,0 +1,16 @@
+{
+  "game": "wa30",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 0.5,
+  "repeat_pairs": 6,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 25.4,
+  "copy_frame_exact": 0.15,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.62,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    # --- locate the moving block (color 14 body + color 0 head) ---\n    # Background is 1. The block is the only 14/0 cluster on the grid.\n    body = (frame == 14)\n    if body.any():\n        rs, cs = np.where(body)\n        # head (0) cells immediately bordering the body belong to the block\n        head_mask = (frame == 0)\n        r0b, r1b = rs.min(), rs.max()\n        c0b, c1b = cs.min(), cs.max()\n        # full 4x4 block bbox = body bbox extended by the adjacent 0-head line\n        hr, hc = np.where(head_mask)\n        sel = (hr >= r0b - 1) & (hr <= r1b + 1) & (hc >= c0b - 1) & (hc <= c1b + 1)\n        if sel.any():\n            r0 = min(r0b, hr[sel].min()); r1 = max(r1b, hr[sel].max())\n            c0 = min(c0b, hc[sel].min()); c1 = max(c1b, hc[sel].max())\n        else:\n            r0, r1, c0, c1 = r0b, r1b, c0b, c1b\n\n        h = r1 - r0 + 1\n        w = c1 - c0 + 1\n\n        dr = dc = 0\n        head = None\n        if action == 4:      # move right, head on right edge\n            dc = w; head = 'right'\n        elif action == 3:    # move left, head on left edge\n            dc = -w; head = 'left'\n        elif action == 1:    # move up, head on top edge\n            dr = -h; head = 'up'\n        elif action == 2:    # move down, head on bottom edge\n            dr = h; head = 'down'\n\n        if head is not None:\n            nr0, nr1 = r0 + dr, r1 + dr\n            nc0, nc1 = c0 + dc, c1 + dc\n            if 0 <= nr0 and nr1 < 64 and 0 <= nc0 and nc1 < 64:\n                out[r0:r1 + 1, c0:c1 + 1] = 1          # clear old position\n                out[nr0:nr1 + 1, nc0:nc1 + 1] = 14     # body\n                if head == 'right':\n                    out[nr0:nr1 + 1, nc1] = 0\n                elif head == 'left':\n                    out[nr0:nr1 + 1, nc0] = 0\n                elif head == 'up':\n                    out[nr0, nc0:nc1 + 1] = 0\n                elif head == 'down':\n                    out[nr1, nc0:nc1 + 1] = 0\n\n    # --- action 5: advance the step counter in the bottom row (fills leftward) ---\n    if action == 5:\n        row = out[63]\n        fours = np.where(row == 4)[0]\n        col = (fours.min() - 1) if len(fours) else 63\n        if col >= 0:\n            out[63, col] = 4\n\n    return out"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "cd82",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.0,
+  "repeat_pairs": 9,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 65.6,
+  "copy_frame_exact": 0.255,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.44,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Deterministic, verifiable rule from the transitions: row 63 is a move\n    # counter; each step consumes (sets to background) the rightmost colored\n    # marker in that row. The larger shape edits in rows ~24-56 are\n    # frame-dependent and only partially observed, so they are left unchanged\n    # rather than guessed (a single wrong cell breaks the exact match anyway).\n    out = np.array(frame, copy=True)\n    bg = 5\n    bottom = out[63]\n    marked = np.where(bottom != bg)[0]\n    if marked.size:\n        out[63, marked[-1]] = bg\n    return out"
+}

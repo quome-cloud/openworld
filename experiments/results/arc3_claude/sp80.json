@@ -1,0 +1,16 @@
+{
+  "game": "sp80",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 13,
+  "replay_determinism": 1.0,
+  "replay_steps": 21,
+  "mean_cells_changed": 60.2,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.58,
+  "code": "def predict(frame, action):\n    out = np.array(frame).copy()\n    BG, FG = 12, 9\n    moves = {1: (-4, 0), 2: (4, 0), 3: (0, -20), 4: (0, 20), 5: (0, 0)}\n\n    # --- moving color-9 object: rigid translation, vacated cells -> background ---\n    dr, dc = moves.get(int(action), (0, 0))\n    if dr or dc:\n        rows, cols = np.where(frame == FG)\n        out[rows, cols] = BG                      # clear old positions\n        nr, nc = rows + dr, cols + dc\n        ok = (nr >= 0) & (nr < 64) & (nc >= 0) & (nc < 64)\n        out[nr[ok], nc[ok]] = FG                  # paint translated positions\n\n    # --- top-row countdown bar: zero the next 2 full cells from the right frontier ---\n    r0 = out[0]\n    c = 63\n    while c >= 0 and r0[c] == 0:\n        c -= 1\n    if c >= 0:\n        out[0, c] = 0\n        if c - 1 >= 0:\n            out[0, c - 1] = 0\n\n    return out"
+}

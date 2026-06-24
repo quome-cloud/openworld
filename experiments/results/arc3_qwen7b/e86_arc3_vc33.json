@@ -1,0 +1,16 @@
+{
+  "game": "vc33",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 250,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 1.3,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0133,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 6:\n        for row, col, new_color in [\n            [0, 63, 4], [0, 61, 4], [0, 62, 4],\n            [0, 60, 4], [0, 59, 4], [0, 58, 4],\n            [0, 56, 4], [0, 57, 4],\n            [0, 55, 4], [0, 54, 4],\n            [0, 52, 4], [0, 53, 4],\n            [0, 51, 4], [0, 50, 4], [0, 49, 4]\n        ]:\n            next_frame[row, col] = new_color\n    return next_frame"
+}

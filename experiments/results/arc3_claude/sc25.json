@@ -1,0 +1,16 @@
+{
+  "game": "sc25",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.8125,
+  "repeat_pairs": 16,
+  "replay_determinism": 1.0,
+  "replay_steps": 69,
+  "mean_cells_changed": 15.4,
+  "copy_frame_exact": 0.285,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.42,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    # --- Shape region: rows 19-22, cols 35-42 (8 wide) set fully by the action ---\n    # Derived from the transitions (each non-no-op action overwrites the whole block):\n    #   a1: piece right, upper=9 / lower=10\n    #   a2: piece left,  upper=10 / lower=9\n    #   a3: piece left,  horizontal [9,9,10,10|2...]\n    #   a4: piece right, horizontal [2...|10,10,9,9]\n    patterns = {\n        1: [[2, 2, 2, 2, 9, 9, 9, 9],\n            [2, 2, 2, 2, 9, 9, 9, 9],\n            [2, 2, 2, 2, 10, 10, 10, 10],\n            [2, 2, 2, 2, 10, 10, 10, 10]],\n        2: [[10, 10, 10, 10, 2, 2, 2, 2],\n            [10, 10, 10, 10, 2, 2, 2, 2],\n            [9, 9, 9, 9, 2, 2, 2, 2],\n            [9, 9, 9, 9, 2, 2, 2, 2]],\n        3: [[9, 9, 10, 10, 2, 2, 2, 2]] * 4,\n        4: [[2, 2, 2, 2, 10, 10, 9, 9]] * 4,\n    }\n\n    if action in patterns:\n        out[19:23, 35:43] = np.array(patterns[action], dtype=out.dtype)\n\n        # --- Step counter on the right edge (cols 62-63): advance 2 rows ---\n        # Counter fills downward in color 0 from the top, 2 rows per real action.\n        k = 0\n        while k < 64 and out[k, 63] == 0:\n            k += 1\n        if k + 1 < 64:\n            out[k, 62] = 0\n            out[k, 63] = 0\n            out[k + 1, 62] = 0\n            out[k + 1, 63] = 0\n\n    return out"
+}

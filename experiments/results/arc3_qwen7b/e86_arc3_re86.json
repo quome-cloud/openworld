@@ -1,0 +1,16 @@
+{
+  "game": "re86",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 1,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 41.7,
+  "copy_frame_exact": 0.0033,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0133,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    \n    if action == 1:\n        for row in range(29, 32):\n            for col in range(42, 45):\n                next_frame[row, col] = 9\n        for row in range(42, 45):\n            for col in range(29, 32):\n                next_frame[row, col] = 9\n        next_frame[15, 18] = 0\n    elif action == 2:\n        for row in range(29, 32):\n            for col in range(39, 42):\n                next_frame[row, col] = 5\n        next_frame[18, 18] = 11\n        next_frame[27, 18] = 5\n        next_frame[28, 18] = 5\n        next_frame[29, 18] = 5\n        next_frame[63, 47] = 1\n    elif action == 3:\n        for row in range(16, 19):\n            for col in range(24, 27):\n                next_frame[row, col] = 11\n        next_frame[16, 27] = 5\n        next_frame[17, 27] = 5\n        next_frame[18, 27] = 5\n        next_frame[19, 27] = 5\n        next_frame[20, 27] = 5\n        next_frame[21, 27] = 5\n        next_frame[22, 27] = 5\n        next_frame[23, 27] = 5\n        next_frame[24, 27] = 5\n        next_frame[25, 27] = 5\n        next_frame[26, 27] = 5\n        next_frame[27, 13] = 11\n        next_frame[27, 14] = 11\n        next_frame[27, 15] = 11\n        next_frame[27, 27] = 0\n        next_frame[28, 27] = 11\n        next_frame[29, 27] = 11\n        next_frame[30, 27] = 11\n        next_frame[31, 27] = 11\n        next_frame[32, 27] = 11\n        next_frame[33, 27] = 11\n        next_frame[34, 27] = 11\n        next_frame[35, 27] = 11\n        next_frame[36, 27] = 11\n        next_frame[37, 27] = 11\n        next_frame[38, 27] = 11\n        next_frame[63, 59] = 1\n    elif action == 4:\n        for row in range(32, 40):\n            for col in range(36, 40):\n                next_frame[row, col] = 5\n        for row in range(32, 40):\n            for col in range(39, 43):\n                next_frame[row, col] = 9\n        next_frame[45, 23] = 5\n        next_frame[45, 24] = 5\n        next_frame[45, 25] = 5\n        next_frame[45, 36] = 9\n        next_frame[45, 39] = 0\n        next_frame[45, 50] = 9\n        next_frame[45, 51] = 9\n        next_frame[45, 52] = 9\n    elif action == 5:\n        for row in range(27, 28):\n            for col in range(24, 27):\n                next_frame[row, col] = 11\n        next_frame[42, 39] = 0\n        next_frame[63, 57] = 1\n    \n    return next_frame"
+}

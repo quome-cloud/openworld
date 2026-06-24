@@ -149,6 +149,14 @@ def ollama(model, prompt, host="http://localhost:11434", num_ctx=8192, timeout=6
         return json.loads(r.read())["response"]
 
 
+def claude_cli(prompt, timeout=300):
+    """Synthesize via Claude (headless `claude -p`) -- the frontier synthesizer OpenWorld actually
+    uses (openworld build/optimize). No GPU needed."""
+    import subprocess
+    r = subprocess.run(["claude", "-p", prompt], capture_output=True, text=True, timeout=timeout)
+    return r.stdout
+
+
 def extract_code(text):
     m = re.search(r"```(?:python)?\s*(.*?)```", text, re.S)
     return m.group(1).strip() if m else text.strip()
@@ -180,6 +188,7 @@ def main():
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--ollama", default="", help="ollama model id for synthesis (else baselines only)")
+    ap.add_argument("--claude", action="store_true", help="synthesize with Claude (claude -p) instead of ollama")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -196,9 +205,13 @@ def main():
     print(f"[e86/{args.game}] {len(trans)} transitions | baseline levels {levels}/{win} "
           f"| copy-frame exact {res['copy_frame_exact']}", flush=True)
 
-    if args.ollama:
-        acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
-        res["synth_model"] = args.ollama
+    if args.claude or args.ollama:
+        if args.claude:
+            acc, code = synthesize(trans, claude_cli)
+            res["synth_model"] = "claude-cli"
+        else:
+            acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
+            res["synth_model"] = args.ollama
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)

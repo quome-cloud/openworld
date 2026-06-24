@@ -43,7 +43,13 @@ def collect(game_id, steps, seed):
     trans, best = [], obs.levels_completed
     for _ in range(steps):
         ai = rng.choice(avail)
-        nobs = env.step(ACTS[ai])
+        try:
+            nobs = env.step(ACTS[ai])
+        except Exception:  # noqa: BLE001 -- some games' step can throw internally
+            nobs = None
+        if nobs is None or getattr(nobs, "frame", None) is None:  # game returned a bad frame -> reset
+            obs = env.reset(); g = grid(obs); avail = [a - 1 for a in obs.available_actions]
+            continue
         ng = grid(nobs)
         trans.append({"frame": g.tolist(), "action": ai + 1, "next": ng.tolist()})
         best = max(best, nobs.levels_completed)
@@ -62,7 +68,13 @@ def replay_determinism(game_id, steps, seed):
         env = arc.make(game_id); obs = env.reset(); rng = random.Random(seed)
         avail = [a - 1 for a in obs.available_actions]; frames = [grid(obs).copy()]
         for _ in range(steps):
-            obs = env.step(ACTS[rng.choice(avail)]); frames.append(grid(obs).copy())
+            try:
+                obs = env.step(ACTS[rng.choice(avail)])
+            except Exception:  # noqa: BLE001
+                break
+            if obs is None or getattr(obs, "frame", None) is None:
+                break
+            frames.append(grid(obs).copy())
             if str(obs.state) != "GameState.NOT_FINISHED":
                 break
         return frames

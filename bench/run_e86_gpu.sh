@@ -27,6 +27,9 @@ cd experiments && mkdir -p results
 GAMES=$(python -c "import arc_agi; print(' '.join(sorted({(e if isinstance(e,str) else getattr(e,'game_id',str(e))).split('-')[0] for e in arc_agi.Arcade().available_environments})))")
 echo "[e86] testing $(echo $GAMES | wc -w) games: $GAMES"
 for gid in $GAMES; do
+  if gcloud storage ls "$DEST/e86_arc3_${gid}.json" >/dev/null 2>&1; then
+    echo "=== $gid already in GCS, skipping (resume) ==="; continue
+  fi
   echo "=== e86 synth $gid model=$MODEL ($(date -u +%H:%M:%S)) ==="
   python e86_arc3.py --game "$gid" --steps 300 --ollama "$MODEL" \
     && gcloud storage cp "results/e86_arc3_${gid}.json" "$DEST/" 2>/dev/null || echo "$gid failed"

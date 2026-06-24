@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs ON a GPU box: E86 ARC-AGI-3 verified-code synthesis.
-# The arc-agi toolkit needs Python >=3.11 (uses typing.Self) but the DL VM ships 3.10, so we run
+# The arc-agi toolkit needs Python >=3.12 (arc-agi 0.9.9 + arcengine require it) but the DL VM ships 3.10, so we run
 # it in a uv-managed 3.11 venv. The code model is served by OLLAMA over HTTP (no CUDA torch needed
 # in the venv -- Ollama uses the GPU directly).
 # Usage (on box): bash bench/run_e86_gpu.sh gs://openworld-bench e86-arc3-synth qwen2.5-coder:32b
@@ -18,7 +18,7 @@ nvidia-smi || echo "WARN: no GPU"
 # 2) Python 3.11 venv via uv for arc-agi (Self import needs >=3.11)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
-uv venv --python 3.11 /tmp/arc311
+uv venv --python 3.12 /tmp/arc311
 source /tmp/arc311/bin/activate
 uv pip install "arc-agi==0.9.9" numpy
 python -c "import sys,arc_agi; print('[arc-agi] py', sys.version.split()[0])"

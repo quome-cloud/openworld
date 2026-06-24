@@ -87,6 +87,7 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--rounds", type=int, default=8)
     ap.add_argument("--backend", default="claude", help="claude | ollama:<model>")
+    ap.add_argument("--piecewise", action="store_true", help="emphasize explicit if/elif exception handling")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -108,6 +109,12 @@ def main():
     train, val, test = trans[:a], trans[a:b], trans[b:]
     print(f"[e86b/{tag}/{args.game}] train {len(train)} val {len(val)} test {len(test)}", flush=True)
 
+    global TASK
+    if args.piecewise:
+        TASK += ("\n\nThe rule is almost certainly PIECEWISE. Do NOT force one uniform "
+                 "transformation -- write explicit if/elif branches for special cases "
+                 "(collisions, walls, board edges, special tiles, blocked moves). For every "
+                 "failing case you see, add a dedicated conditional branch that handles it.")
     _, code = refine(train, val, gen_fn, rounds=args.rounds)
     test_fid, _ = E.verify_code(code, test) if code else (0.0, None)
     res = {"game": args.game, "method": tag, "backend": args.backend,

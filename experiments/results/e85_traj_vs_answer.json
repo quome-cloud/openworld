@@ -1,0 +1,37 @@
+{
+  "experiment": "traj-vs-answer",
+  "n_seeds": 3,
+  "h_train": 3,
+  "by_horizon": {
+    "h3": {
+      "answer_mean": 0.5806,
+      "trajectory_mean": 0.6972,
+      "gap_traj_minus_answer": 0.1167,
+      "answer_seeds": [
+        0.575,
+        0.592,
+        0.575
+      ],
+      "trajectory_seeds": [
+        0.7,
+        0.775,
+        0.617
+      ]
+    },
+    "h6": {
+      "answer_mean": 0.7486,
+      "trajectory_mean": 0.6764,
+      "gap_traj_minus_answer": -0.0722,
+      "answer_seeds": [
+        0.7,
+        0.8,
+        0.746
+      ],
+      "trajectory_seeds": [
+        0.658,
+        0.775,
+        0.596
+      ]
+    }
+  }
+}

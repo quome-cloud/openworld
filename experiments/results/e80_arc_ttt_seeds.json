@@ -1,0 +1,34 @@
+{
+  "experiment": "arc-ttt-seeds",
+  "n_seeds": 2,
+  "arms": {
+    "zeroshot": {
+      "mean": 0.025,
+      "seeds": [
+        0.025,
+        0.025
+      ]
+    },
+    "light": {
+      "mean": 0.025,
+      "seeds": [
+        0.025,
+        0.025
+      ]
+    },
+    "heavy": {
+      "mean": 0.1125,
+      "seeds": [
+        0.1,
+        0.125
+      ]
+    },
+    "corrupt": {
+      "mean": 0.0419,
+      "seeds": [
+        0.025,
+        0.0588
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "experiment": "traj-vs-answer",
+  "base": "Qwen/Qwen2.5-7B-Instruct",
+  "seed": 2,
+  "n_train_worlds": 100,
+  "n_eval_worlds": 40,
+  "h_train": 3,
+  "h_tests": [
+    3,
+    6
+  ],
+  "results": {
+    "h3": {
+      "answer": 0.575,
+      "trajectory": 0.6166666666666667
+    },
+    "h6": {
+      "answer": 0.7458333333333333,
+      "trajectory": 0.5958333333333333
+    }
+  }
+}

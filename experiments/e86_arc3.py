@@ -217,6 +217,14 @@ def main():
     args = ap.parse_args()
 
     trans, levels, win = collect(args.game, args.steps, args.seed)
+    if not trans:  # random play never produced a valid step -- record + exclude, don't crash
+        res = {"game": args.game, "steps": args.steps, "transitions": 0, "verified_exact": None,
+               "note": "no valid transitions (random actions never produced a good step); excluded",
+               "baseline_levels": levels, "win_levels": win}
+        out = Path(args.out) if args.out else HERE / "results" / f"e86_arc3_{args.game}.json"
+        out.write_text(json.dumps(res, indent=2))
+        print(f"[e86/{args.game}] 0 transitions -> excluded", flush=True)
+        return
     det, ndet = determinism(trans)
     rdet, rn = replay_determinism(args.game, min(args.steps, 80), args.seed)
     chg = [len(deltas(t["frame"], t["next"])) for t in trans]

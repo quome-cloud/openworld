@@ -106,6 +106,7 @@
 \newcommand{\openworld}{\textsc{OpenWorld}}
 
 \newcommand{\NumArcGames}{25}
+\input{arc3_numbers.tex}
 
 \begin{document}
 
@@ -168,9 +169,15 @@ empirically---on the public game \texttt{ls20}, observed dynamics are \emph{dete
 (every repeated state--action pair yields an identical next frame across hundreds of transitions),
 so the dynamics are writable as exact code; states are dense ($\sim$1{,}500 of 4{,}096 cells
 non-background) but per-step changes are sparse ($\sim$50 cells), which a code model handles
-natively while a token-level learner cannot. \emph{[Results in progress: this manuscript reports
-the recipe, the determinism precondition, and the agent; quantitative level-completion vs.\ random
-and learned-model baselines across the \NumArcGames{} public games are being measured.]}
+natively while a token-level learner cannot. Across the \NumArcGames{} public games, the
+precondition is \emph{universal} (determinism \ArcDeterminismAll{} on every game), and synthesizing
+with a \emph{frontier} model recovers verified dynamics: on the \ArcNReal{} real-dynamics games the
+synthesized code reaches \ArcClaudeFid{} mean held-out exact-match, beating the copy-frame baseline
+on \ArcClaudeBeatsCopy/\ArcNReal{} and a local code model (qwen-32B, \ArcQwenThirtyTwoFid; Claude
+wins \ArcClaudeBeatsQwen/\ArcRealForQwen), with \ArcNNearPerfect{} \emph{near-perfect} ($\geq$90\%)
+world models. \textbf{Synthesizer capability is decisive.} Solving (level completion) remains the
+open frontier---0 levels, as for frontier agents---so the contribution is that ARC-AGI-3 dynamics
+are recoverable as \emph{verified code}, not that the games are solved.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -216,13 +223,48 @@ in \openworld{}).
 sequences (BFS / CEM-style lookahead) for trajectories that advance the level counter or reach the
 win state---planning ``in imagination'' through exact code, at native speed.
 
-\section{Preliminary findings}
-On \texttt{ls20}: (1) \textbf{integration} works end-to-end (local play, no API key); (2)
-\textbf{determinism} is exact---$1.00$ of repeated state--action pairs reproduce the next frame;
-(3) \textbf{baselines} (random and a change-seeking heuristic) complete $0$ of the game's levels in
-a $400$-step budget, confirming headroom; (4) states are dense ($\sim$1{,}500 non-background cells)
-but per-step deltas are small ($\sim$50 cells), which motivates the code-synthesis representation
-over token-level frame prediction. Full results across games are in progress.
+\section{Results: verified-code fidelity (E86)}
+We run the explore$\to$synthesize$\to$verify pipeline on all \NumArcGames{} public games with three
+synthesizers: a local code model at two sizes (qwen2.5-coder 7B, 32B) and a frontier model
+(Claude). Fidelity is \emph{held-out transition exact-match}: the fraction of unseen
+$(\text{frame},\text{action})$ pairs whose \emph{entire} next $64\times64$ frame the synthesized
+\texttt{predict} reproduces exactly. We report on the \ArcNReal{} \emph{real-dynamics} games---%
+excluding \ArcNTrivial{} games where random actions trigger no state change (so ``predict
+no-change'' trivially scores $1.0$) and \ArcNExcluded{} game (\texttt{tn36}) where random play never
+produced a valid step.
+
+\paragraph{The precondition is universal.} Replay-determinism is \ArcDeterminismAll{} on every
+game: identical action sequences from reset reproduce identical frames. ARC-AGI-3 dynamics are
+deterministic and therefore writable as exact code---the wager holds across the board.
+
+\paragraph{A frontier synthesizer recovers verified dynamics.} Claude's synthesized code reaches
+\ArcClaudeFid{} mean held-out exact-match on the real-dynamics games, beating the copy-frame
+baseline on \ArcClaudeBeatsCopy/\ArcNReal{} games (mean lift \ArcClaudeLift{}), with
+\ArcNNearPerfect{} \emph{near-perfect} ($\geq$90\%) world models---i.e.\ code that essentially
+\emph{is} the game's transition function. This includes dense games (40--75 changed cells/step)
+where a copy baseline is near-zero.
+
+\paragraph{Synthesizer capability is decisive.} The local code model captures almost nothing
+(qwen-32B \ArcQwenThirtyTwoFid, qwen-7B \ArcQwenSevenFid{} mean), and Claude beats qwen-32B on
+\ArcClaudeBeatsQwen/\ArcRealForQwen{} games (Figure~\ref{fig:arc3fid}). The bottleneck is not
+determinism or verification but \emph{generation}: the same recipe with a stronger writer crosses
+from ``below the trivial baseline'' to ``recovers the dynamics.''
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.96\linewidth]{figs/arc3_fidelity.png}
+\caption{\textbf{E86 verified-code fidelity on ARC-AGI-3 (\ArcNReal{} real-dynamics games).}
+\emph{Left:} mean held-out exact-match by synthesizer---qwen-7B $\approx$ qwen-32B $\ll$ Claude.
+\emph{Right:} per-game Claude vs.\ qwen-32B; points above the diagonal are games where Claude's
+synthesized code is the better world model.}\label{fig:arc3fid}
+\end{figure}
+
+\paragraph{Honest limits.} (i) \textbf{Solving is unsolved}: $0$ levels completed by any
+arm---fidelity is not yet a solution, and ARC-AGI-3 remains hard (frontier agents also score near
+zero). (ii) The densest game (\texttt{cn04}, $\sim$174 changed cells/step) defeats even Claude
+(fidelity $0$). (iii) On one game (\texttt{tr87}) qwen edged Claude. (iv) Fidelity is single-step;
+planning through these models (compounding error) is E87. These bound the claim to what we measured:
+\emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---a foundation
+for, not yet a demonstration of, solving.
 
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the

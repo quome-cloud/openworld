@@ -29,6 +29,7 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 import e80_text_world as T
+from _adapter_ckpt import load_or_train
 
 HERE = Path(__file__).resolve().parent
 BASE = "Qwen/Qwen2.5-7B-Instruct"
@@ -191,8 +192,8 @@ def main():
                             args.n_ctx, random.Random(1000 + args.seed), corrupt=False)
     print(f"[crossworld] training on {len(rows)} pooled rows from {len(train_names)} held-in worlds",
           flush=True)
-    reset_adapter(model)
-    fit(model, tok, rows, args.steps, seed=args.seed)
+    load_or_train(model, f"e84_{args.domain}_s{args.seed}_n{args.n_train_worlds}_cw", args.bucket,
+                  reset_adapter, lambda: fit(model, tok, rows, args.steps, seed=args.seed))
     res["per_world"]["crossworld"] = eval_arm()
     upload()
     print(f"[crossworld] {res['arms']['crossworld']}", flush=True)
@@ -200,8 +201,8 @@ def main():
     # ARM 3: corrupt -- adapter trained on held-in worlds with CORRUPTED labels (control)
     rows_c = build_train_rows(worlds, train_names, args.instruction, args.rows_per_world,
                               args.n_ctx, random.Random(2000 + args.seed), corrupt=True)
-    reset_adapter(model)
-    fit(model, tok, rows_c, args.steps, seed=args.seed)
+    load_or_train(model, f"e84_{args.domain}_s{args.seed}_n{args.n_train_worlds}_corrupt", args.bucket,
+                  reset_adapter, lambda: fit(model, tok, rows_c, args.steps, seed=args.seed))
     res["per_world"]["corrupt"] = eval_arm()
     upload()
     print(f"[corrupt] {res['arms']['corrupt']}", flush=True)

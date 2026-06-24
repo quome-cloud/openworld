@@ -30,6 +30,7 @@ try:  # heavy GPU deps -- guarded so the pure world logic is importable/testable
     import torch
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from _adapter_ckpt import load_or_train
     LORA = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM",
                       target_modules=["q_proj", "k_proj", "v_proj", "o_proj"])
 except ImportError:
@@ -266,8 +267,8 @@ def main():
     rows_a = train_rows(worlds, train_names, args.h_train, args.rows_per_world, args.n_ctx,
                         random.Random(1000 + args.seed))
     print(f"[answer] training on {len(rows_a)} rows", flush=True)
-    reset_adapter(model)
-    fit(model, tok, rows_a, args.steps, seed=args.seed)
+    load_or_train(model, f"e85_s{args.seed}_answer", args.bucket, reset_adapter,
+                  lambda: fit(model, tok, rows_a, args.steps, seed=args.seed))
     for h in h_tests:
         acc = eval_answer(model, tok, worlds, eval_names, h, args.n_ctx, args.n_q,
                           random.Random(7 + h))
@@ -279,8 +280,8 @@ def main():
     rows_t = train_rows(worlds, train_names, 1, args.rows_per_world, args.n_ctx,
                         random.Random(2000 + args.seed))
     print(f"[traj] training on {len(rows_t)} rows", flush=True)
-    reset_adapter(model)
-    fit(model, tok, rows_t, args.steps, seed=args.seed)
+    load_or_train(model, f"e85_s{args.seed}_traj", args.bucket, reset_adapter,
+                  lambda: fit(model, tok, rows_t, args.steps, seed=args.seed))
     for h in h_tests:
         acc = eval_traj(model, tok, worlds, eval_names, h, args.n_ctx, args.n_q,
                         random.Random(7 + h))

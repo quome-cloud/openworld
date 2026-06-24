@@ -20,7 +20,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 uv venv --python 3.11 /tmp/arc311
 source /tmp/arc311/bin/activate
-uv pip install arc-agi numpy
+uv pip install "arc-agi==0.9.9" numpy
 python -c "import sys,arc_agi; print('[arc-agi] py', sys.version.split()[0])"
 
 cd experiments && mkdir -p results

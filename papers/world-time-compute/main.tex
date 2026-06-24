@@ -970,6 +970,19 @@ formatting: an adapter that learned to infer list-function rules from one set of
 \emph{new} rules in worlds it never saw. This is the novel axis---world-time compute as cross-world
 generalization---demonstrated on a real, human-authored domain, the result E83 left open.
 
+\paragraph{It scales with worlds traversed.} The cross-world lift grows with the number of
+held-in worlds---from \CrossWorldLadderLo{} at \CrossWorldLadderLoN{} worlds to
+\CrossWorldLadderHi{} by 64, then saturating---while the corrupted-label control stays flat
+(Figure~\ref{fig:crossworld_ladder}): a saturating scaling curve for the novel axis, on real data.
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.56\linewidth]{figs/crossworld_ladder.png}
+\caption{\textbf{Cross-world transfer scales with \#worlds (E84, List Functions).} Held-out
+accuracy rises with the number of disjoint held-in worlds traversed
+(\CrossWorldLadderLo$\to$\CrossWorldLadderHi) and saturates; the corrupted-label control stays
+flat. More verified worlds $\to$ more transfer.}\label{fig:crossworld_ladder}
+\end{figure}
+
 \subsection{A descriptive regularity for world-time compute (E80)}\label{sec:world-time-law}
 The effect is regular enough across E80 to summarize as a \emph{descriptive regularity}---not a
 predictive law. It is fit over \LawNDomains{} domains with single-seed runs and a single
@@ -1436,6 +1449,17 @@ than the same task improved in place. In those terms the corrupted-label ablatio
 a verifier-reliability study: the failure mode (training on confidently-wrong self-labels) that
 self-training most fears, here ruled out by construction.
 
+\paragraph{The trajectory unit, measured (E85).} We test the first difference---unit is a
+\emph{trajectory} $(s,a,s')$, not an answer---directly, on synthetic iterated worlds: one
+cross-world adapter trained on verified single-step transitions vs.\ another on
+$(s_0\!\to\!\text{final})$ answer pairs from the \emph{same} worlds (\TrajNSeeds{} seeds). At the
+trained horizon the trajectory unit wins (\TrajTrainTraj{} vs.\ \TrajTrainAnswer{} for the answer
+unit, $+\TrajTrainGap$ points)---the unit, not the loop, carries the signal. Rolled out to a
+horizon \emph{longer} than trained, the answer unit catches up (\TrajLongAnswer{} vs.\
+\TrajLongTraj)---the model's per-step predictions compound, the very error mode verified
+\emph{code} avoids. The trajectory is the better training signal; composing it at inference
+reintroduces compounding on the learned side.
+
 \paragraph{When does it pay off? Few-step reasoning.} Pulling the results together
 (\S\ref{sec:world-time-domains}) yields a single operating regime. Verified world models and
 world-time compute win where a task reduces to \emph{few reasoning steps} over a state that can
@@ -1556,8 +1580,9 @@ measurements. This caveat extends to the headline world-time-compute results: th
 E74 model-size scaling is a single fine-tuning seed per size, and the real-data
 ARC/CLRS arms are single-seed at $n{\approx}30$--$40$ with CIs that touch the floor,
 so the size-trend and the weaker real-data domains should be read as exploratory;
-for ARC we additionally report a three-seed re-run of the verified-vs-corrupt gap
-(across-seed CIs). (xii) Two illustrative studies are true \emph{by construction}:
+for ARC we report a \ArcSeedsN-seed re-run---heavy \ArcHeavySeedMean{} (seeds
+\ArcHeavySeedList) vs.\ corrupt \ArcCorruptSeedMean---so the verified-vs-corrupt gap holds across
+seeds, though absolute scores remain mechanism-scale. (xii) Two illustrative studies are true \emph{by construction}:
 E59's architecture lift follows arithmetically from a modeled fixed-capability
 backbone, and E60's routing gap over exact-key lookup is guaranteed by the
 comparison design (we add a fair lexical baseline and report the modest gap over
@@ -1568,10 +1593,9 @@ biochemical deltas made every assay-world identical and flattened the world-coun
 per-world local-sequence context was restored), and faithful data loading---e.g.\ the wild-type
 sequence and one-based mutation indexing---is the dominant correctness risk. We treat both as the
 first checks any real-domain port must pass.
-(xiv) The distinction we draw from self-training---that the training unit is a verified
-\emph{trajectory} $(s,a,s')$ rather than a checked final answer---is argued conceptually but not
-yet isolated experimentally; a head-to-head of fine-tuning on trajectories vs.\ on verified
-prompt$\to$answer pairs from the \emph{same} worlds is the cleanest test, and is future work.
+(xiv) The trajectory-vs-answer distinction is isolated in E85 (above) on synthetic iterated
+worlds; porting that head-to-head to a multi-step \emph{real} domain (where trajectory and answer
+diverge most) remains future work.
 
 % ============================================================================
 \section{Conclusion}

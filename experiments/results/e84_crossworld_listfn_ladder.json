@@ -1,0 +1,30 @@
+{
+  "experiment": "crossworld-ladder",
+  "domain": "listfn",
+  "points": [
+    {
+      "n_train": 16,
+      "crossworld": 0.2917,
+      "corrupt": 0.0694,
+      "base": 0.0
+    },
+    {
+      "n_train": 32,
+      "crossworld": 0.4389,
+      "corrupt": 0.0778,
+      "base": 0.0
+    },
+    {
+      "n_train": 64,
+      "crossworld": 0.4889,
+      "corrupt": 0.0889,
+      "base": 0.0
+    },
+    {
+      "n_train": 128,
+      "crossworld": 0.4583,
+      "corrupt": 0.1,
+      "base": 0.0
+    }
+  ]
+}

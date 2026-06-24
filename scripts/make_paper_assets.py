@@ -48,7 +48,7 @@ EXPERIMENTS = [
     "e80_arc_ladder", "e80_arc_ttt",
     "e80_text_listfn", "e80_text_clrs", "e80_bongard",
     "e81_frame_qwen", "e82_hybrid_qwen",
-    "e84_crossworld_listfn",
+    "e84_crossworld_listfn", "e85_traj_vs_answer",
 ]
 
 
@@ -2029,6 +2029,33 @@ def fig_crossworld(e84):
     plt.close(fig)
 
 
+def fig_crossworld_ladder(ladder):
+    """E84 scaling ladder: cross-world transfer vs. number of held-in worlds (List Functions),
+    with the corrupted-label control flat -- transfer grows with worlds traversed, on real data."""
+    pts = ladder["points"]
+    ns = [p["n_train"] for p in pts]
+    cw = [p["crossworld"] for p in pts]
+    co = [p["corrupt"] for p in pts]
+    fig, ax = plt.subplots(figsize=(5.6, 3.6))
+    ax.plot(ns, cw, "o-", color=BLUE, lw=2.2, label="cross-world (exact labels)")
+    ax.plot(ns, co, "s--", color=ORANGE, lw=1.6, label="corrupt-label control")
+    for x, y in zip(ns, cw):
+        ax.annotate(f"{100 * y:.0f}%", (x, y), textcoords="offset points", xytext=(0, 7),
+                    ha="center", fontsize=8, color=BLUE)
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(ns)
+    ax.set_xticklabels([str(n) for n in ns])
+    ax.set_xlabel("held-in worlds traversed")
+    ax.set_ylabel("held-out world accuracy")
+    ax.set_ylim(0, max(cw) + 0.13)
+    ax.set_title("Cross-world transfer scales with #worlds (List Functions, E84)", fontsize=9.5)
+    ax.grid(alpha=0.25)
+    ax.legend(fontsize=8, loc="center right")
+    fig.tight_layout()
+    fig.savefig(FIGS / "crossworld_ladder.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_composition(e31):
     leaves = e31["per_step"][0]["leaves"]
     fig, ax = plt.subplots(figsize=(10, 6.1))
@@ -2464,6 +2491,9 @@ def numbers_tex(d):
     hy_l = load("e82_hybrid_llama")["results"]
     # E84 cross-world transfer: the NOVEL axis on a real coherent family (List Functions)
     cw84 = d["e84_crossworld_listfn"]
+    cwlad = load("e84_crossworld_listfn_ladder")
+    arcs = load("e80_arc_ttt_seeds")
+    e85 = d["e85_traj_vs_answer"]
     _cipct = lambda ci: f"[{100 * ci[0]:.0f}, {100 * ci[1]:.0f}]"
 
     def _pctnum(v, fmt="{:.2f}"):
@@ -2595,6 +2625,23 @@ def numbers_tex(d):
         macro("CrossWorldGap", f"{100 * cw84['gap_cw_minus_corrupt']['mean']:.0f}"),
         macro("CrossWorldGapCI", _cipct(cw84["gap_cw_minus_corrupt"]["ci"])),
         macro("CrossWorldSeeds", ", ".join(pctn(x) for x in cw84["arms"]["crossworld"]["seeds"])),
+        # E84 cross-world scaling ladder (transfer grows with #worlds)
+        macro("CrossWorldLadderLo", pctn(cwlad["points"][0]["crossworld"])),
+        macro("CrossWorldLadderHi", pctn(max(p["crossworld"] for p in cwlad["points"]))),
+        macro("CrossWorldLadderLoN", str(cwlad["points"][0]["n_train"])),
+        # ARC across-seed replication (verified-vs-corrupt gap)
+        macro("ArcSeedsN", str(arcs["n_seeds"])),
+        macro("ArcHeavySeedMean", pctn(arcs["arms"]["heavy"]["mean"])),
+        macro("ArcHeavySeedList", ", ".join(pctn(x) for x in arcs["arms"]["heavy"]["seeds"])),
+        macro("ArcCorruptSeedMean", pctn(arcs["arms"]["corrupt"]["mean"])),
+        # E85 trajectory-vs-answer (the (s,a,s') unit, measured)
+        macro("TrajTrainHorizon", str(e85["h_train"])),
+        macro("TrajNSeeds", str(e85["n_seeds"])),
+        macro("TrajTrainTraj", pctn(e85["by_horizon"]["h3"]["trajectory_mean"])),
+        macro("TrajTrainAnswer", pctn(e85["by_horizon"]["h3"]["answer_mean"])),
+        macro("TrajTrainGap", f"{100 * e85['by_horizon']['h3']['gap_traj_minus_answer']:.0f}"),
+        macro("TrajLongTraj", pctn(e85["by_horizon"]["h6"]["trajectory_mean"])),
+        macro("TrajLongAnswer", pctn(e85["by_horizon"]["h6"]["answer_mean"])),
         # E80 multi-domain world-time compute (real domains, per-world test-time training)
         macro("LfNumWorlds", str(_ndone(lf, "heavy"))),
         macro("LfZero", pctn(_arm(lf, "zeroshot"))),
@@ -4371,6 +4418,7 @@ def main():
     fig_diagnosis_world()
     fig_noise_ablation(load("e78b_ablation"))
     fig_crossworld(data["e84_crossworld_listfn"])
+    fig_crossworld_ladder(load("e84_crossworld_listfn_ladder"))
     table_coding(data["e77_coding"])
     fig_arc(data["e80_arc_ttt"], data["e80_arc_ladder"])
     fig_arc_method(data["e80_arc_ttt"])

@@ -161,7 +161,7 @@ def ollama(model, prompt, host="http://localhost:11434", num_ctx=8192, timeout=6
         return json.loads(r.read())["response"]
 
 
-def claude_cli(prompt, timeout=300):
+def claude_cli(prompt, timeout=600):
     """Synthesize via Claude (headless `claude -p`) -- the frontier synthesizer OpenWorld actually
     uses (openworld build/optimize). No GPU needed."""
     import subprocess
@@ -174,15 +174,27 @@ def extract_code(text):
     return m.group(1).strip() if m else text.strip()
 
 
+def _demo_str(t, cap=80):
+    """Compact demo: cap the changed-cell list so dense games don't blow up the prompt/timeout.
+    (Verification still uses FULL held-out frames -- this only bounds what the synthesizer sees.)"""
+    d = deltas(t["frame"], t["next"])
+    body = str(d[:cap]) + (f" ...(+{len(d) - cap} more cells)" if len(d) > cap else "")
+    return f"action {t['action']} -> {body}"
+
+
 def synthesize(trans, llm_fn, rounds=4, n_demo=12):
     train, held = trans[: len(trans) * 3 // 4], trans[len(trans) * 3 // 4:]
     bg = bg_of(np.asarray(train[0]["frame"]))
     best = (0.0, None)
     feedback = ""
     for _ in range(rounds):
-        ex = "\n".join(f"action {t['action']} -> {deltas(t['frame'], t['next'])}" for t in train[:n_demo])
+        ex = "\n".join(_demo_str(t) for t in train[:n_demo])
         prompt = PROMPT.format(bg=bg, examples=ex) + feedback
-        code = extract_code(llm_fn(prompt))
+        try:
+            code = extract_code(llm_fn(prompt))
+        except Exception as e:  # noqa: BLE001 -- timeout/error -> miss this round, keep best so far
+            print(f"[synth] llm call failed ({type(e).__name__}); keeping best", flush=True)
+            continue
         acc, errs = verify_code(code, held)
         if acc > best[0]:
             best = (acc, code)

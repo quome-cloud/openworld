@@ -8,6 +8,9 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 R=Path("experiments/results"); FIG=Path("papers/arc-3/figs"); FIG.mkdir(parents=True,exist_ok=True)
+def agent_solved():
+    import glob, os
+    return {os.path.basename(f)[:-5] for f in glob.glob("experiments/results/agent_solves/*.json")}
 def load(name):
     p=R/f"{name}.json"
     return json.load(open(p)) if p.exists() else {}
@@ -27,6 +30,7 @@ STRATS=[
     ("Bayes subworld\n+semiring (E104)",  solved_set("e104_bayesian_subworld")),
     ("Graph explore\n(E107)",             solved_set("e107_graph_explore")),
     ("Multi-Perception\nConsensus (E112)",solved_set("e112_arc_simulator")),
+    ("Live coding agent\n(E115, OpenWorld)", agent_solved()),
 ]
 ALL=["ar25","bp35","cd82","cn04","dc22","ft09","g50t","ka59","lf52","lp85","ls20","m0r0","r11l",
      "re86","s5i5","sb26","sc25","sk48","sp80","su15","tn36","tr87","tu93","vc33","wa30"]
@@ -42,10 +46,10 @@ plt.figure(figsize=(8,4.2))
 colors=["#9aa7b3"]*(len(STRATS)-1)+["#2e8b57"]   # winner in green
 b=plt.bar(range(len(STRATS)), counts, color=colors, edgecolor="#33414f")
 for i,c in enumerate(counts): plt.text(i, c+0.15, str(c), ha="center", fontsize=11, fontweight="bold")
-plt.axhline(len(union), ls="--", c="#c2410c", lw=1); plt.text(len(STRATS)-1.4, len(union)+0.15, f"union={len(union)}", color="#c2410c", fontsize=9)
+plt.axhline(len(union), ls="--", c="#c2410c", lw=1.2); plt.text(0.1, len(union)+0.3, f"union = {len(union)}/25", color="#c2410c", fontsize=10, fontweight="bold")
 plt.xticks(range(len(STRATS)), labels, fontsize=7.5)
-plt.ylabel("ARC-AGI-3 games solved (≥1 level)"); plt.ylim(0,max(counts)+2)
-plt.title("Multi-perception synthesis solves the most games", fontsize=12, fontweight="bold")
+plt.ylabel("ARC-AGI-3 games solved (≥1 level)"); plt.ylim(0,26)
+plt.title("A live OpenWorld coding agent cracks the walls (union 23/25)", fontsize=12, fontweight="bold")
 plt.tight_layout(); plt.savefig(FIG/"arc3_strategy_bar.png", dpi=140); plt.close()
 
 # ---- Fig 2: strategy x game heatmap ----

@@ -1,35 +1,62 @@
 {
-  "search_solves": [
+  "union_solved": [
     "ar25",
     "cd82",
+    "cn04",
+    "dc22",
+    "ft09",
+    "g50t",
+    "ka59",
+    "lf52",
+    "lp85",
     "ls20",
+    "m0r0",
+    "re86",
+    "s5i5",
+    "sb26",
+    "sc25",
     "sk48",
     "sp80",
-    "tu93"
-  ],
-  "n_search": 6,
-  "model_based_solves": [
-    "cd82"
-  ],
-  "n_model_based": 1,
-  "total_unique": [
-    "ar25",
-    "cd82",
-    "ls20",
-    "sk48",
-    "sp80",
+    "su15",
+    "tn36",
     "tr87",
-    "tu93"
+    "tu93",
+    "vc33",
+    "wa30"
   ],
-  "note": "search=E99 interact-biased real-env search+replay; model_based=E101 predict-MPC through code world model; graph_explore=E107 deterministic state-graph frontier exploration (paper #2 method in OpenWorld). tr87 is NEW from graph exploration (73k states).",
-  "graph_explore_solves": [
+  "n_union": 23,
+  "live_coding_agent": [
+    "dc22",
+    "ft09",
+    "g50t",
+    "ka59",
+    "lp85",
+    "re86",
+    "sb26",
+    "sc25",
+    "su15",
+    "tn36",
+    "tr87",
+    "tu93",
+    "wa30"
+  ],
+  "n_agent": 13,
+  "multi_perception_consensus": [
     "ar25",
     "cd82",
+    "cn04",
+    "lf52",
     "ls20",
+    "m0r0",
+    "s5i5",
     "sk48",
     "sp80",
-    "tr87"
+    "vc33"
   ],
-  "n_graph_explore": 6,
-  "n_total_unique": 7
+  "n_e112": 10,
+  "unsolved": [
+    "bp35",
+    "r11l"
+  ],
+  "note": "union of >=1-level verified solves across all strategies. ft09 is a FULL game (6 levels) via the live coding agent; most agent solves are 1 level. Full-game (all-levels) completion is future work (chaining is hard)."
 }

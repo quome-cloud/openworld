@@ -1,0 +1,11 @@
+{
+  "seq": 6,
+  "run_id": "e89_20260625_001",
+  "task_hash": "sha256:6e3f2a10d657976434e8036a7b6809e334c186e895b9290c5294cb1be2808ff1",
+  "dm_request_id": "M56500",
+  "dm_reply_id": "M56531",
+  "n_candidates": 3,
+  "n_verified": 0,
+  "prediction": null,
+  "acc": 0
+}

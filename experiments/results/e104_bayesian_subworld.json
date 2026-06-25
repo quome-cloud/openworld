@@ -1,0 +1,57 @@
+{
+  "solved": [],
+  "n": 0,
+  "results": {
+    "s5i5": {
+      "game": "s5i5",
+      "verified": false,
+      "model_fidelity": 1.0,
+      "n_procedures": 40,
+      "sub_goals": [
+        "drain3",
+        "fill3",
+        "drain4",
+        "fill4",
+        "clear2",
+        "clear3",
+        "clear4",
+        "clear11",
+        "clear13",
+        "clear14"
+      ]
+    },
+    "r11l": {
+      "game": "r11l",
+      "verified": false,
+      "model_fidelity": 0.9306,
+      "n_procedures": 40,
+      "sub_goals": [
+        "drain0",
+        "fill0",
+        "clear0",
+        "clear1",
+        "clear2",
+        "clear3",
+        "clear6",
+        "clear15"
+      ]
+    },
+    "vc33": {
+      "game": "vc33",
+      "verified": false,
+      "model_fidelity": 0.8333,
+      "n_procedures": 40,
+      "sub_goals": [
+        "drain4",
+        "fill4",
+        "drain7",
+        "fill7",
+        "clear4",
+        "clear5",
+        "clear7",
+        "clear9",
+        "clear11"
+      ]
+    }
+  }
+}

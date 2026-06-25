@@ -130,3 +130,33 @@ fidelity-1.0 model and 20 candidate goals.** Interpretation (this RULES OUT a hy
 Remaining genuinely-different directions: (i) **composite objectives** (sub-goal sequences -- a much
 larger discovery search); (ii) **visual perception** (render + Claude vision for semantic/pattern goal
 hypotheses the atomic templates miss). Both harder; may not crack it -- this is the frontier.
+
+## E103 — end-to-end Claude-driven hypothesis embedding (the full ultrathink): honest NEGATIVE + a deep finding
+Claude GENERATES the goal-hypothesis space (vs E102's hand-coded templates): rich, compositional,
+geometric, relational hypotheses, closed-loop refined over 3 rounds, each pursued via goal-conditioned
+MPC through the (perfect/near-perfect) code world model. Examples Claude proposed for s5i5 across
+rounds: drain_then_clear, steps_eq_boxcount, boundary_to_centroid, mirror_symmetry, boxes_identical,
+drainhalf_then_sym. Result on high-fidelity walled games (s5i5 fid1.0, r11l 0.93, vc33 0.83): 0 solved.
+**Deep finding:** the failure isn't poor hypotheses -- they're sophisticated. It's REPRESENTATIONAL:
+the win is scored as goal_score(FRAME) (a state-configuration), but many ARC-3 wins are a PROCEDURE /
+protocol (a specific action sequence/timing), NOT a reachable frame-configuration. A state-score can't
+express a procedure, so MPC optimizes the wrong thing -- which is exactly why brute search (E99) finds
+some wins (it stumbles into the procedure) while hypothesis-driven planning (E102/E103) cannot. The
+frontier is goal-as-procedure, not goal-as-state; hypotheses over TRAJECTORIES (much larger) is the
+open direction.
+
+## E104 — Bayesian subworld + semiring procedure-search: honest NEGATIVE (completes the trilogy)
+Procedure-aware (ordered sub-goal sequences over subworlds), hierarchical execution, TROPICAL-semiring
+planning through the code world model, Bayesian-ordered hypothesis search. Result on s5i5/r11l/vc33
+(incl. fid-1.0 s5i5): **0/3**. (Segments often terminate into game-overs -- pursuing an extremize
+sub-goal drives the agent into losing states, itself evidence the win isn't a simple extremize-then-X.)
+
+### The rigorous conclusion (three independent principled attacks)
+- E102 atomic core-knowledge goals: 0/9
+- E103 Claude-generated rich/compositional hypotheses, closed-loop: 0/3
+- E104 procedure-aware Bayesian subworld + semiring planning: 0/3
+None crack the walled games **even with perfect world models**. The goal-inference wall resists the
+entire structured-goal-discovery + verified-world-model + Bayesian/semiring toolkit. The win
+conditions are opaque in a way these methods cannot reach -- consistent with frontier agents at ~1.5%.
+The one qualitatively-untried lever: **pure visual reasoning** (Claude vision on official-rendered
+frames), which is the only representation we haven't fed the model.

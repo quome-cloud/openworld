@@ -20,47 +20,38 @@ ACTS=[GameAction.ACTION1,GameAction.ACTION2,GameAction.ACTION3,GameAction.ACTION
 
 def grid(o):
     a=np.asarray(o.frame); return (a[-1] if a.ndim==3 else a).reshape(64,64)
-def sig(f):                                   # object-graph signature = state identity (segmentation)
-    objs,_=G.objects(f)
-    return tuple(sorted((o["color"],o["size"],int(o["centroid"][0])//3,int(o["centroid"][1])//3) for o in objs))
+def sig(f):                                   # exact state identity: full-frame hash (fast + accurate)
+    return hash(np.asarray(f).tobytes())
 def all_games():
     logging.disable(logging.CRITICAL)
     with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
         envs=arc_agi.Arcade().available_environments
     return sorted({(e if isinstance(e,str) else getattr(e,"game_id",str(e))).split("-")[0] for e in envs})
 
-def explore(game, budget, max_depth=140):
-    arc=arc_agi.Arcade(); env=arc.make(game); o=env.reset(); avail=list(o.available_actions); win=o.win_levels
-    s0=sig(grid(o))
-    paths={s0:[]}; untested={s0:list(avail)}; salience={s0:0}
-    frontier=deque([s0]); best=o.levels_completed; solution=None; steps=0
-    def replay(path):
-        e=arc.make(game); ob=e.reset()
-        for a in path:
-            ob=e.step(ACTS[a-1])
-            if ob is None or getattr(ob,"frame",None) is None: return None,e
-        return ob,e
-    while frontier and steps<budget:
-        # salience-guided pick: shallowest, then highest recent change
-        frontier=deque(sorted(frontier, key=lambda s:(len(paths[s]), -salience.get(s,0))))
-        s=frontier[0]
-        if not untested.get(s): frontier.popleft(); continue
-        if len(paths[s])>=max_depth: untested[s]=[]; frontier.popleft(); continue
-        a=untested[s].pop(0)
-        ob,e=replay(paths[s])
-        if ob is None: continue
-        before=grid(ob); base=ob.levels_completed
-        nob=e.step(ACTS[a-1]); steps+=1
-        if nob is None or getattr(nob,"frame",None) is None: continue
-        nf=grid(nob); ns=sig(nf); lvl=nob.levels_completed
-        chg=int((before!=nf).sum())
-        if lvl>best:                                   # LEVEL COMPLETED via this (state,action)
-            best=lvl; solution=paths[s]+[a]
-        if ns not in paths and str(nob.state)=="GameState.NOT_FINISHED" and lvl==base:
-            paths[ns]=paths[s]+[a]; untested[ns]=list(nob.available_actions); salience[ns]=chg; frontier.append(ns)
-        elif lvl>base and ns not in paths:             # advanced a level -> keep exploring the new level
-            paths[ns]=paths[s]+[a]; untested[ns]=list(nob.available_actions); salience[ns]=chg; frontier.append(ns)
-    return {"game":game,"best_levels":int(best),"win_levels":int(win),"states":len(paths),"steps":steps,
+def explore(game, budget, max_steps=400):
+    """Frontier-biased forward rollouts: at each state prefer an UNTESTED (state,action) pair (the
+    graph frontier); reset on episode end. Systematic coverage of the deterministic state graph
+    without O(n^2) replay-navigation. Captures the winning action sequence on a level-completion."""
+    import random as _r
+    arc=arc_agi.Arcade(); env=arc.make(game); o=env.reset(); win=o.win_levels; base0=o.levels_completed
+    tested={}                      # state sig -> set of actions already tried from it
+    best=base0; solution=None; steps=0; rng=_r.Random(0); n_states=set()
+    while steps<budget:
+        o=env.reset(); g=grid(o); avail=list(o.available_actions); lvl=o.levels_completed; seq=[]; depth=0
+        while depth<max_steps and steps<budget:
+            s=sig(g); n_states.add(s); ts=tested.setdefault(s,set())
+            untried=[a for a in avail if a not in ts]
+            inter=[x for x in avail if x>=5]
+            a = rng.choice(untried) if untried else (rng.choice(inter) if inter and rng.random()<0.4 else rng.choice(avail))  # FRONTIER + interact bias
+            ts.add(a)
+            nob=env.step(ACTS[a-1]); steps+=1; depth+=1
+            if nob is None or getattr(nob,"frame",None) is None: break
+            seq.append(a); nf=grid(nob); lv=nob.levels_completed
+            if lv>best:                                # LEVEL COMPLETED -> capture sequence
+                best=lv; solution=list(seq)
+            if str(nob.state)!="GameState.NOT_FINISHED": break
+            g=nf; lvl=lv
+    return {"game":game,"best_levels":int(best),"win_levels":int(win),"states":len(n_states),"steps":steps,
             "solution":solution,"verified":solution is not None}
 
 def verify(game, seq):

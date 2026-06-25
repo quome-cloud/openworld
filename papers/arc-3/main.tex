@@ -611,4 +611,120 @@ replay-verify deterministically against the live games; all numbers and figures 
 \texttt{bench/verify\_arc3\_solves.sh}, replays every saved winning sequence against the live games
 and confirms all \ArcNSolved{} complete a level.
 
+\clearpage
+\appendix
+\section{Primer: what is a ``world'' in a world model?}
+\label{app:primer}
+Readers often ask what a ``world'' is, and how a \emph{world model} differs from the world. They are
+the \emph{same kind of object} (Fig.~\ref{fig:anatomy}). A \textbf{world} is an environment described
+by five parts: a \emph{state} $s$, a set of \emph{actions} $a$, a \emph{transition} $s'=T(s,a)$ (how
+the state changes), a \emph{perception} boundary (observation $\to$ state), and a \emph{reward/emit}
+boundary (state $\to$ outcomes/outputs). A \textbf{world model} is simply a \texttt{World} object that
+\emph{mirrors} an environment-world with the same five parts; \emph{modeling} means building a
+\texttt{World} whose transition reproduces the environment's (here, exactly, as verified code). So
+``the model of a world is itself a world,'' and worlds \emph{nest}---a \texttt{CompositeWorld} contains
+sub-\texttt{World}s (e.g.\ a movement subworld and a counter subworld): the ``world in a world.''
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_anatomy.png}
+\caption{\textbf{Anatomy of a world model.} The environment (the game) is a world; our model is a
+\texttt{World} with the same anatomy---perception $\to$ state $\to$ transition, with actions and
+reward---and worlds nest (\texttt{CompositeWorld}). Bottom: the concrete ARC-AGI-3 mapping.}
+\label{fig:anatomy}
+\end{figure}
+
+In OpenWorld a \texttt{World} is first-class. For ARC-AGI-3 the mapping is concrete: state $=$ the
+status-masked $64\times64$ grid; actions $=$ \texttt{ACTION1--7} (directional) or
+\texttt{ACTION6}$(x,y)$ (click); transition $=$ a verified \texttt{predict(frame,action)}
+(\texttt{CodeTransition}); perceptor $=$ the masked-frame / object-graph reader; reward $=$
+\texttt{levels\_completed} (or an induced \texttt{CodeObjective}). Our \emph{discovered} world model is
+the explored $(s,a)\!\to\!s'$ table wrapped as a \texttt{FunctionTransition}; \texttt{to\_spec} renders
+its reachable-state graph as the viewable ``map.''
+
+\begin{lstlisting}[style=housespecyaml, language=Python, caption={The discovered \texttt{ka59} world model is an ordinary \texttt{World}.}]
+import openworld as O
+# the explored (state, action) -> next-state table IS the dynamics
+table = {...}   # masked-frame sig -> {action -> next sig}, gathered by exploration
+def step(state, action):
+    return {"sig": table.get(state["sig"], {}).get(action.name, state["sig"])}
+world = O.World(name="arc3-map-ka59",
+                initial_state={"sig": s0}, actions=actions,
+                transition=O.FunctionTransition(step))
+spec = O.to_spec(world)        # spec["preview"]["graph"] is the reachable-state MAP
+O.render_card(world, "ka59.svg")   # the atlas card; serve it at /view
+\end{lstlisting}
+
+\section{OpenWorld primitives used here}
+\label{app:glossary}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+Primitive & What it is & Role here \\
+\midrule
+\texttt{World} & state $+$ actions $+$ transition $+$ perception $+$ reward & every game and every model is one \\
+\texttt{CodeTransition} & verified dynamics as sandboxed code & the synthesized \texttt{predict()} \\
+\texttt{FunctionTransition} & dynamics as a Python function & wraps the discovered $(s,a)\!\to\!s'$ table \\
+\texttt{ConsensusTransition} & combine members by select / vote & multi-perception hard-voting \\
+\texttt{CodeObjective}/\texttt{induce\_reward} & verified reward as code & goal-discovery attempts; level-up reward \\
+\texttt{Perceptor}/\texttt{VisionPerceptor} & observation $\to$ symbolic state & masked-frame state; visual goal hypotheses \\
+\texttt{to\_spec}/\texttt{render\_card} & serialize a World, render its graph & the viewable atlas ``map'' \\
+\texttt{CompositeWorld} & a World of sub-Worlds & the ``world in a world'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Per-game results}
+\label{app:pergame}
+\begin{center}\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+game & win levels & random & our best & router tier \\
+\midrule
+\texttt{ar25} & 8 & 2 & 1 & cheap \\
+\texttt{bp35} & 9 & 0 & 1 & agent \\
+\texttt{cd82} & 6 & 2 & 1 & cheap \\
+\texttt{cn04} & 6 & 1 & 1 & cheap \\
+\texttt{dc22} & 6 & 0 & 1 & agent \\
+\texttt{ft09} & 6 & 2 & 6 & agent \\
+\texttt{g50t} & 7 & 0 & 1 & agent \\
+\texttt{ka59} & 7 & 0 & 1 & agent \\
+\texttt{lf52} & 10 & 0 & 1 & cheap \\
+\texttt{lp85} & 8 & 1 & 1 & agent \\
+\texttt{ls20} & 7 & 1 & 1 & cheap \\
+\texttt{m0r0} & 6 & 1 & 1 & cheap \\
+\texttt{r11l} & 6 & 1 & 6 & agent \\
+\texttt{re86} & 8 & 0 & 1 & agent \\
+\texttt{s5i5} & 8 & 0 & 1 & cheap \\
+\texttt{sb26} & 8 & 0 & 1 & agent \\
+\texttt{sc25} & 6 & 0 & 1 & agent \\
+\texttt{sk48} & 8 & 1 & 1 & cheap \\
+\texttt{sp80} & 6 & 2 & 1 & cheap \\
+\texttt{su15} & 9 & 0 & 1 & agent \\
+\texttt{tn36} & 7 & 0 & 1 & agent \\
+\texttt{tr87} & 6 & 0 & 1 & cheap \\
+\texttt{tu93} & 9 & 0 & 1 & cheap \\
+\texttt{vc33} & 7 & 1 & 1 & cheap \\
+\texttt{wa30} & 9 & 0 & 1 & agent \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent ``our best'' is the deepest level any method completed (replay-verified); ``router tier'' is
+which solver the cascade dispatches to. Random reaches $\geq$1 level on $11/25$; our best is strictly
+above random on $16/25$ (the $14$ games random never reaches, plus \texttt{ft09} and \texttt{r11l}
+where we go deeper). On \texttt{ar25}/\texttt{cd82}/\texttt{sp80} random chains to level~2 while our
+non-chaining solvers stop at level~1---an honest loss.
+
+\section{The live coding agent: harness and protocol}
+\label{app:agent}
+The live coding agent is Claude Code (\texttt{claude -p}, one agentic session per game, no repeated
+sampling) given a fixed harness and an unbounded \emph{offline} budget under the deterministic env.
+\textbf{Leakage:} the prompt supplies only the harness API and the generic recipe---it does \emph{not}
+contain the win condition, which the agent must infer. \textbf{Harness:} \texttt{Game(gid)} exposes
+\texttt{reset()}, \texttt{step(a)} / \texttt{step(6,x,y)}, and \texttt{frame/levels/win/avail};
+success is any increase in \texttt{levels}; determinism lets the agent search offline then replay-verify.
+The agent writes/edits Python (explore $\to$ synthesize a \texttt{predict()} world model $\to$ reason
+the goal $\to$ plan $\to$ replay-verify) and saves the winning action list to \texttt{solved.json};
+we then re-verify it independently against the live game. Full launcher: \texttt{scripts/run\_arc\_agent.sh}.
+
 \end{document}

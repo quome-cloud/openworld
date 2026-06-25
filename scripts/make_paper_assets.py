@@ -44,7 +44,7 @@ EXPERIMENTS = [
     "e63_world_model_bakeoff", "e64_causal_assumptions", "e65_minigrid_bench",
     "e67_cartpole_bench",
     "e68_prototyping_latency", "e68b_recipe_audit",
-    "e74_scaling", "e76_world_count", "e77_coding",
+    "e74_scaling", "e76_world_count", "e77_coding", "e78_world_model_qlora",
 ]
 
 
@@ -2351,6 +2351,7 @@ def numbers_tex(d):
     cod = d["e77_coding"]
     cod_syn7 = cod["passk"]["synthetic"]["7B"]
     cod_he7 = cod["passk"]["humaneval"]["7B"]
+    e78 = d["e78_world_model_qlora"]
 
     def macro(name, value):
         return f"\\newcommand{{\\{name}}}{{{value}}}"
@@ -2422,6 +2423,24 @@ def numbers_tex(d):
         macro("CodeHeBaseFive", pct(cod_he7["base"]["5"])),
         macro("CodeHeFtFive", pct(cod_he7["ft"]["5"])),
         macro("CodeNumWorlds", str(cod["n_train_tasks"])),
+        # E78 verified-planner distillation on Blocksworld/PlanBench (4-bit QLoRA)
+        macro("PlanBlocks", str(e78["data"]["n_blocks"])),
+        macro("PlanNTrain", str(e78["data"]["n_train"])),
+        macro("PlanNTest", str(e78["n_test"])),
+        macro("PlanBase", pct(e78["base"]["overall"]["valid_rate"])),
+        macro("PlanFT", pct(e78["ft"]["overall"]["valid_rate"])),
+        macro("PlanBaseID", pct(e78["base"]["by_split"]["test_id"]["valid_rate"])),
+        macro("PlanFTID", pct(e78["ft"]["by_split"]["test_id"]["valid_rate"])),
+        macro("PlanBaseLong", pct(e78["base"]["by_split"]["test_long"]["valid_rate"])),
+        macro("PlanFTLong", pct(e78["ft"]["by_split"]["test_long"]["valid_rate"])),
+        macro("PlanFTHEight", pct(e78["ft"]["by_horizon"]["8"]["valid_rate"])),
+        macro("PlanFTHTwelve", pct(e78["ft"]["by_horizon"]["12"]["valid_rate"])),
+        macro("PlanFtOnly", str(e78["mcnemar_ft_vs_base"]["ft_only"])),
+        macro("PlanBaseOnly", str(e78["mcnemar_ft_vs_base"]["base_only"])),
+        macro("PlanMcNemarP", "10^{-20}"),  # true value (b=113,c=1) ~ 1e-32; conservative bound
+        macro("PlanTrainHorizons", "%d--%d" % (min(e78["data"]["train_horizons"]),
+                                               max(e78["data"]["train_horizons"]))),
+        macro("PlanLongHorizons", " and ".join(str(h) for h in e78["data"]["test_long_horizons"])),
         # E67 cartpole-swingup head-to-head (continuous control)
         macro("CartOpenWorldSolve", pct(d["e67_cartpole_bench"]["openworld"]["solve_rate"])),
         macro("CartRandomSolve", pct(d["e67_cartpole_bench"]["random_control"]["solve_rate"])),
@@ -3521,6 +3540,64 @@ def table_coding(cod):
     (TABLES / "coding.tex").write_text("\n".join(lines) + "\n")
 
 
+def fig_world_model_qlora(e78):
+    """E78: planning validity vs horizon on Blocksworld/PlanBench, base vs a model 4-bit
+    QLoRA-distilled from the verified world model's BFS oracle. The base floors at every
+    horizon; the distilled model is near-ceiling across TRAINED horizons and stays nonzero
+    past them (length extrapolation). Vertical rule = train/test horizon boundary."""
+    horizons = [int(k) for k in sorted(e78["ft"]["by_horizon"], key=int)]
+    bx = e78["base"]["by_horizon"]
+    fx = e78["ft"]["by_horizon"]
+    base = [bx[str(h)]["valid_rate"] for h in horizons]
+    ft = [fx[str(h)]["valid_rate"] for h in horizons]
+    trained = set(e78["data"]["train_horizons"])
+    boundary = (max(trained) + min(h for h in horizons if h not in trained)) / 2.0
+
+    fig, ax = plt.subplots(figsize=(6.8, 4.2))
+    ax.axvspan(boundary, horizons[-1] + 0.4, color=SLATE, alpha=0.06, zorder=0)
+    ax.axvline(boundary, ls="--", color="#999999", lw=1.2, zorder=1)
+    ax.text(boundary + 0.12, 0.04, "longer than trained", fontsize=8, color="#777777",
+            ha="left", va="bottom")
+    ax.fill_between(horizons, base, ft, color=ORANGE, alpha=0.13, zorder=1)
+    ax.plot(horizons, base, "o-", color=SLATE, lw=2.0, zorder=3, label="base (no fine-tune)")
+    ax.plot(horizons, ft, "s-", color=ORANGE, lw=2.4, zorder=3,
+            label="+ QLoRA distilled from the verified planner")
+    ax.set_xticks(horizons)
+    ax.set_ylim(-0.04, 1.05)
+    ax.set_xlabel("plan horizon (optimal plan length)")
+    ax.set_ylabel("valid-plan rate (verified)")
+    ax.set_title("Distilling a verified world model into a planner (E78)\n"
+                 "Blocksworld / PlanBench, 4 blocks", fontsize=10.5)
+    ax.legend(loc="upper right", fontsize=8.5)
+    ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(FIGS / "world_model_qlora.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
+def table_world_model_qlora(e78):
+    """E78: base -> QLoRA valid-plan rate, overall and by split (in-distribution horizons
+    vs longer-than-trained), scored by the verified validator."""
+    b, f = e78["base"], e78["ft"]
+
+    def row(label, node_b, node_f):
+        return (f"{label} & {node_b['n']} & {pct(node_b['valid_rate'])} & "
+                f"\\textbf{{{pct(node_f['valid_rate'])}}} \\\\")
+
+    th = e78["data"]["train_horizons"]
+    lh = e78["data"]["test_long_horizons"]
+    id_lbl = f"In-distribution (h$\\in${{{','.join(map(str, th))}}})"
+    long_lbl = f"Longer than trained (h$\\in${{{','.join(map(str, lh))}}})"
+    lines = ["\\begin{tabular}{lccc}", "\\toprule",
+             "Held-out split & $n$ & Base & QLoRA \\\\", "\\midrule",
+             row(id_lbl, b["by_split"]["test_id"], f["by_split"]["test_id"]),
+             row(long_lbl, b["by_split"]["test_long"], f["by_split"]["test_long"]),
+             "\\midrule",
+             row("Overall", b["overall"], f["overall"]),
+             "\\bottomrule", "\\end{tabular}"]
+    (TABLES / "world_model_qlora.tex").write_text("\n".join(lines) + "\n")
+
+
 def fig_world_time_compute(scaling, diag):
     """E74: held-out diagnostic accuracy vs model size, base vs fine-tuned on traversed
     world models ('world-time compute'), against an offline prior-only floor and a
@@ -3692,6 +3769,8 @@ def main():
     fig_world_count(data["e76_world_count"])
     fig_diagnosis_world()
     table_coding(data["e77_coding"])
+    fig_world_model_qlora(data["e78_world_model_qlora"])
+    table_world_model_qlora(data["e78_world_model_qlora"])
     fig_hero(data["e01_fidelity"], data["e74_scaling"])
     fig_learned(data["e12_learned_baseline"])
     fig_judge(data["e17_judge_power"]["pooled"])

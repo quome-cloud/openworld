@@ -62,6 +62,10 @@
 \definecolor{cardblue}{HTML}{1D4ED8}
 \definecolor{cardpurple}{HTML}{6D28D9}
 \definecolor{cardteal}{HTML}{0F766E}
+% Review markup: under-review additions are shown in blue. To ship, redefine to {#1}
+% (\renewcommand{\rev}[1]{#1}) or strip the \rev wrappers.
+\definecolor{revblue}{HTML}{1D4ED8}
+\newcommand{\rev}[1]{{\color{revblue}#1}}
 \tcbset{
   cardcol/.store in=\cardcol, cardcol=cardblue,
   policycard/.style={
@@ -939,6 +943,62 @@ best-of-$k$ at every size; on HumanEval it hurts greedy pass@1 but transfers pos
 pass@5.}
 \label{tab:coding}
 \end{table}
+
+% >>>>>>>>>>>>>>>>>>>>  E78 ADDED (under review; blue text = new)  >>>>>>>>>>>>>>>>>>>>
+\subsection{\texorpdfstring{\rev{From runtime tool to teacher: distilling a verified world model to plan (E78)}}{From runtime tool to teacher: distilling a verified world model to plan (E78)}}\label{sec:planbench}
+\rev{World-time compute (\S\ref{sec:world-time}) treats a verified world model as something to
+\emph{traverse} for training signal. We close the results with its sharpest test: a task LLMs
+are \emph{known} to fail. Blocksworld---the canonical planning benchmark of
+PlanBench~\cite{valmeekam2023planbench}---asks for a sequence of pick/stack/unstack actions that
+turns an initial block configuration into a goal one, every action legal and the goal actually
+reached. We author the dynamics once as a single verified-code transition (the same kind of
+artifact used throughout this paper), which then plays three training-free roles: its
+breadth-first oracle \emph{labels} optimal plans, and its validator \emph{scores} every
+generated plan (valid $=$ all actions legal \emph{and} goal reached). A base \PlanBlocks-block
+model floors, as PlanBench reports---\PlanBase{} valid overall under greedy decoding---and a
+runtime ``simulate-and-revise'' tool over the model's \emph{own} next-state predictions does not
+rescue it: it cannot use feedback it cannot trust.}
+
+\rev{\paragraph{The verified world model as a teacher.} We instead distil the oracle into the
+model. We label \PlanNTrain{} instances at horizons \PlanTrainHorizons{} (the horizon is the
+optimal plan length) with the verified BFS plan and fine-tune the \emph{same} Qwen2.5-7B with
+4-bit QLoRA. On \PlanNTest{} held-out instances scored by the verified validator
+(Figure~\ref{fig:planbench}, Table~\ref{tab:planbench}), in-distribution validity rises from
+\PlanBaseID{} to \PlanFTID{} (paired McNemar: \PlanFtOnly{} instances flip base$\to$valid against
+\PlanBaseOnly{} the other way, $p<\PlanMcNemarP$). The model does not call the tool at
+inference---it has internalised the planning the world model makes possible.}
+
+\rev{\paragraph{A learned procedure, not lookup.} The decisive test is the held-out horizons
+\PlanLongHorizons{}, \emph{longer than anything trained on}. There the base scores
+\PlanBaseLong{}; the distilled model scores \PlanFTLong{}, with validity decaying gracefully as
+the horizon grows past the training range (\PlanFTHEight{} at the longest trained horizon down to
+\PlanFTHTwelve{} at horizon~12). Nonzero success beyond the training horizon, and a smooth decay
+rather than a cliff, is the signature of a learned \emph{procedure} rather than memorised
+instances---and it is the same compounding-horizon axis on which the base model (and
+uninternalised tool use) collapses. The verified world model is thus useful not only at inference
+(\S\ref{sec:planning}) but as a free, exact \emph{teacher}: it manufactures perfectly-labelled
+curricula and grades them, turning a model that cannot plan into one that mostly can.}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.78\linewidth]{figs/world_model_qlora.png}
+\caption{\rev{\textbf{Distilling a verified world model into a planner (E78).} Valid-plan rate
+(verified) vs.\ plan horizon on Blocksworld/PlanBench (\PlanBlocks{} blocks). The base model
+floors at every horizon; the QLoRA model distilled from the world model's BFS oracle is
+near-ceiling across the trained horizons \PlanTrainHorizons{} and stays nonzero past them
+(shaded: longer than trained), decaying gracefully---evidence of a learned procedure, not
+lookup.}}
+\label{fig:planbench}
+\end{figure}
+
+\begin{table}[t]\centering\small
+\input{tables/world_model_qlora.tex}
+\caption{\rev{\textbf{Verified-planner distillation (E78).} Valid-plan rate, base $\to$ 4-bit
+QLoRA, on held-out Blocksworld instances scored by the verified validator: in-distribution
+horizons, longer-than-trained horizons, and overall ($n{=}\PlanNTest{}$). Same base model
+(Qwen2.5-7B); the only difference is the LoRA adapter distilled from the verified planner.}}
+\label{tab:planbench}
+\end{table}
+% <<<<<<<<<<<<<<<<<<<<  END E78 ADDED  <<<<<<<<<<<<<<<<<<<<
 
 \subsection{Against trained dynamics}\label{sec:learned}
 The LLM next-state engine is a structural proxy; E12 adds real learned

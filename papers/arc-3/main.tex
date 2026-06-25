@@ -117,7 +117,8 @@
   \raggedright\oldincludegraphics[height=0.8cm]{figs/quome.png}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.5\textwidth}
-  \raggedleft\itshape \monthyeartoday
+  \raggedleft\oldincludegraphics[height=1.05cm]{figs/openworld_logo.png}\\[3pt]
+  {\itshape\footnotesize \monthyeartoday}
 \end{minipage}
 
 \vspace{1.0em}
@@ -195,7 +196,7 @@ world models.
 
 % ============================================================================
 \section{Introduction}
-\textbf{The interactive frontier.} ARC-AGI-1 and -2 measure abstraction from static
+\textbf{The interactive frontier.} ARC-AGI-3~\cite{arcagi3_report} is the latest in the series. ARC-AGI-1 and -2 measure abstraction from static
 input--output grids; ARC-AGI-3 moves to \emph{interactive} environments where the rules and goals
 are revealed only through action. This rewards four capabilities the prior benchmarks do not
 isolate---exploration, dynamics \emph{modeling}, goal-setting, and planning---and it is hard:
@@ -217,6 +218,40 @@ union; and \textbf{(iv)~a two-tier hybrid perceptual solver}---multi-perception 
 reachable games, escalated to a live coding agent (the executable-world-model SOTA recipe, reproduced
 in OpenWorld) for the procedural walls. We do \emph{not} claim a leaderboard result: $2/25$ full games
 vs.\ the $15/25$ state of the art.
+
+\textbf{Prior art.} ARC-AGI-3~\cite{arcagi3_report} exposes a wide gap: frontier LLM agents score
+under $1\%$, while purpose-built systems do far better (Table~\ref{tab:priorart}). The state of the
+art, \emph{baseline1}~\cite{baseline1_ewm}, has a coding agent construct an \emph{executable} Python
+world model with verifiers and an MDL simplicity bias---the recipe our live coding agent reproduces in
+OpenWorld with Claude. \emph{DreamTeam}~\cite{dreamteam_workspace} casts the external workspace
+(prompts, files, code) as the trainable substrate; the training-free \emph{Graph
+Explorer}~\cite{graphexplore_arc3} maps each game as a directed state graph with status-bar masking and
+salience-tiered clicks (its frame-processing directly informs our perceptors);
+\emph{StochasticGoose}~\cite{stochasticgoose} predicts frame-change with a CNN. Harness-adaptation
+work~\cite{harness_adapt} and the ARC Prize technical reports~\cite{arcprize2025_report} round out the
+landscape. Our contribution is orthogonal to all of these: not a new top score, but a
+\emph{diagnosis} (goal-as-procedure) and a \emph{map} of which method class solves what.
+
+\begin{table}[t]
+\centering\small
+\caption{Prior art on ARC-AGI-3 (public set). RHAE = relative human action efficiency; metrics differ
+across systems, so figures are not directly comparable (full \emph{games} vs.\ \emph{levels} vs.\
+$\geq$1-level). Frontier-agent and SOTA figures as reported in the cited works and the leaderboard.}
+\label{tab:priorart}
+\begin{tabular}{@{}L{3.2cm}L{6.0cm}L{5.1cm}@{}}
+\toprule
+System & Approach & Reported result \\
+\midrule
+Frontier LLM agents & direct agent (GPT-5.4, Gemini 3.1, Opus 4.6) & $<0.4\%$~\cite{arcagi3_report} \\
+\emph{baseline1}~\cite{baseline1_ewm} & executable world models (GPT-5.5) & \textbf{15/25 full games}, $58\%$ RHAE \\
+Graph Explorer~\cite{graphexplore_arc3} & training-free graph search & 30/52 \emph{levels} (6 games) \\
+DreamTeam~\cite{dreamteam_workspace} & workspace optimization (multi-agent) & $38.4\%$ RHAE \\
+StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6\%$ RHAE \\
+\midrule
+\textbf{This paper} & hybrid perceptual $+$ live coding agent (Claude); offline, replay-verified & $2/25$ full; $25/25$ $\geq$1-level ($14/25$ above random) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{The ARC-AGI-3 setting}
 Each game presents a $64\times64$ grid of $16$ colors; the agent issues discrete actions and
@@ -533,8 +568,8 @@ compositionality cliff---so apart from \texttt{ft09}/\texttt{r11l}, multi-level 
 a fair comparison to full-game leaderboard scores would require chaining every level.
 
 \paragraph{Comparison to the state of the art, stated precisely.} Ours and the leaderboard's metrics
-differ, so we are unambiguous. The SOTA executable-world-model agent (baseline1, GPT-5.5) completes
-\textbf{15/25 \emph{full} games} (mean per-game RHAE $\approx$58\%); the graph-explorer reports
+differ, so we are unambiguous. The SOTA executable-world-model agent (baseline1~\cite{baseline1_ewm}, GPT-5.5) completes
+\textbf{15/25 \emph{full} games} (mean per-game RHAE $\approx$58\%); the graph-explorer~\cite{graphexplore_arc3} reports
 \textbf{30/52 \emph{levels}}. Our headline---\textbf{25/25}---is the union of \textbf{$\geq$1-level}
 verified solves across our strategy stack, with the \emph{live coding agent at 15/25 on its own}; of
 these, \textbf{two are full games} (\texttt{ft09}, \texttt{r11l}). We therefore do \textbf{not} claim
@@ -658,7 +693,7 @@ O.render_card(world, "ka59.svg")   # the atlas card; serve it at /view
 \section{OpenWorld primitives used here}
 \label{app:glossary}
 \begin{center}\small
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}L{3.1cm}L{5.6cm}L{5.6cm}@{}}
 \toprule
 Primitive & What it is & Role here \\
 \midrule
@@ -666,9 +701,9 @@ Primitive & What it is & Role here \\
 \texttt{CodeTransition} & verified dynamics as sandboxed code & the synthesized \texttt{predict()} \\
 \texttt{FunctionTransition} & dynamics as a Python function & wraps the discovered $(s,a)\!\to\!s'$ table \\
 \texttt{ConsensusTransition} & combine members by select / vote & multi-perception hard-voting \\
-\texttt{CodeObjective}/\texttt{induce\_reward} & verified reward as code & goal-discovery attempts; level-up reward \\
-\texttt{Perceptor}/\texttt{VisionPerceptor} & observation $\to$ symbolic state & masked-frame state; visual goal hypotheses \\
-\texttt{to\_spec}/\texttt{render\_card} & serialize a World, render its graph & the viewable atlas ``map'' \\
+\texttt{CodeObjective} / \texttt{induce\_reward} & verified reward as code, induced from examples & goal-discovery attempts; level-up reward \\
+\texttt{Perceptor} / \texttt{VisionPerceptor} & observation $\to$ symbolic state & masked-frame state; visual goal hypotheses \\
+\texttt{to\_spec} / \texttt{render\_card} & serialize a World, render its graph & the viewable atlas ``map'' \\
 \texttt{CompositeWorld} & a World of sub-Worlds & the ``world in a world'' \\
 \bottomrule
 \end{tabular}
@@ -726,5 +761,8 @@ success is any increase in \texttt{levels}; determinism lets the agent search of
 The agent writes/edits Python (explore $\to$ synthesize a \texttt{predict()} world model $\to$ reason
 the goal $\to$ plan $\to$ replay-verify) and saves the winning action list to \texttt{solved.json};
 we then re-verify it independently against the live game. Full launcher: \texttt{scripts/run\_arc\_agent.sh}.
+
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}

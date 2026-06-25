@@ -28,3 +28,8 @@ gallery/preview.html
 # Local secrets (API keys) -- never commit
 .env
 .env.*
+
+# arc-agi downloaded game caches (not source)
+environment_files/
+experiments/environment_files/
+.claude/scheduled_tasks.lock

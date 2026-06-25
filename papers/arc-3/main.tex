@@ -331,8 +331,43 @@ solve that beats random: at a matched \ArcSolveLen-step budget the verified solu
 verified action \emph{sequence}, not a reverse-engineered win \emph{rule} -- the goal-inference wall
 (\S\ref{sec:solvewall} effectively) holds for the harder levels. Modeling is solved; intent is not.
 
+\paragraph{Scaling to more games (E99): \ArcNSolved{} solved.} The sp80 win fired on an
+\emph{interact} action, which a uniform sweep under-weights. An interact-biased, multi-seed reward
+search (capture $\to$ deterministic replay-verify) per game raises the count from $1$ to
+\textbf{\ArcNSolved{}/25 verified level-1 solves}: \ArcSolvedList{} (winning sequences
+\ArcSeqLenRange{} actions, all saved and replay-verified). A solve counts only if its captured
+sequence reproduces the completion deterministically. One of these (\texttt{cd82}) is additionally
+solved \emph{through the synthesized code world model} (E101: predict-lookahead MPC to navigate the
+typed agent), and the verified-reward induction (E97/E98) recognizes the win on \texttt{sp80} with
+acc $1.0$ from the agent's \emph{own} synthesized objective.
+
+\paragraph{What the remaining $\sim$19 expose, and what does \emph{not} crack them.}
+No reward is found on the rest even at $25\text{k}\times4$-seed interact-biased search: their wins are
+not \emph{reachable}, they must be \emph{understood}. The principled attack---a core-knowledge
+perceptor generating candidate-goal \texttt{CodeObjective}s, each pursued by planning \emph{through}
+the code world model (E102)---solves \textbf{0/9}, even with a fidelity-$1.0$ model and 20 candidate
+goals. This rules out the hypothesis that the walls are \emph{atomic} core-knowledge goals
+(reach/cover/collect/extremize a perceived object); the goals are \emph{compositional} or depend on
+structure beyond the typed-object representation. We therefore frame the contribution honestly as a
+\emph{search-vs-reasoning gap}: directed search reproducibly completes \ArcNSolved{} level-1s where a
+frontier-agent metric sits near $1.5\%$, exposing that the benchmark's hardness for agents is
+\emph{goal discovery}, not reachability---\textbf{not} an agent state-of-the-art claim, which would
+require running under the leaderboard's live-agent protocol.
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
-ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit.
+ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each
+experiment is a self-contained script under \texttt{experiments/}: synthesis (\texttt{e86\_arc3.py},
+\texttt{e86b\_agentic.py}), planning/controllability (\texttt{e87\_arc3\_plan.py}), the solving
+pipeline---reward capture (\texttt{e93\_capture\_reward.py}), deterministic replay-verify
+(\texttt{e93b\_replay\_solve.py}), directed-vs-random (\texttt{e93d\_directed\_vs\_random.py}), and the
+\ArcNSolved-game interact-biased sweep (\texttt{e99\_solve\_sweep.py})---the world-model-driven solver
+(\texttt{e101\_model\_solver.py}), and the goal-discovery attack (\texttt{e102\_goal\_search.py}). The
+foundational primitives are in the zero-dependency core: \texttt{CodeObjective}/\texttt{induce\_reward}
+(\texttt{openworld/reward.py}), \texttt{ConsensusTransition} (\texttt{consensus.py}), and
+\texttt{make\_typed\_perceptor} (\texttt{perceive.py}). \textbf{The verified winning action sequences
+for all \ArcNSolved{} solves are saved in \texttt{experiments/results/e99\_deep\_sweep.json}} and
+replay-verify deterministically against the live games; all numbers and figures regenerate via
+\texttt{scripts/make\_arc3\_assets.py}.
 
 \end{document}

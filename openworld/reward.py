@@ -114,7 +114,6 @@ def induce_reward(
 
 
 def _default_prompt(examples: List[Dict[str, Any]]) -> str:
-    import json
     ex = "\n".join(
         f"- reward={e['reward']} for action={e.get('action')} (state->next_state changed)" for e in examples[:16]
     )

@@ -213,9 +213,12 @@ contribution is (i) the \emph{recipe}---explore, synthesize-and-verify code dyna
 the argument for why it fits an interactive grid benchmark; (ii) the empirical \emph{precondition}
 that the games are deterministic and therefore code-expressible; (iii) the \emph{strategy landscape}
 (Fig.~\ref{fig:heatmap})---a guide to what does and does not solve interactive reasoning, including
-three honest goal-discovery negatives; and (iv) the winning method, \textbf{multi-perception
-consensus world models} at world-time compute, which solves \textbf{12/25} public games---the
-leverage is in \emph{perception and synthesis}, not a cleverer single planner.
+three honest goal-discovery negatives; and (iv) a two-tier solver---\textbf{multi-perception
+consensus} (perception$+$synthesis) for reachable games, and a \textbf{live coding agent} that writes
+its own executable world model for goal-as-procedure walls---dispatched by a reachability
+\textbf{router}, together reaching \textbf{25/25} public games ($\geq$1 level; two full games). The
+leverage is in \emph{perception and synthesis} for the reachable majority, and in \emph{a reasoning
+agent that writes its own world model} for the procedural walls.
 
 \section{The ARC-AGI-3 setting}
 Each game presents a $64\times64$ grid of $16$ colors; the agent issues discrete actions and
@@ -272,13 +275,14 @@ from ``below the trivial baseline'' to ``recovers the dynamics.''
 synthesized code is the better world model.}\label{fig:arc3fid}
 \end{figure}
 
-\paragraph{Honest limits.} (i) \textbf{Solving is unsolved}: $0$ levels completed by any
-arm---fidelity is not yet a solution, and ARC-AGI-3 remains hard (frontier agents also score near
-zero). (ii) The densest game (\texttt{cn04}, $\sim$174 changed cells/step) defeats even Claude
+\paragraph{Honest limits.} (i) \textbf{Fidelity is not solving}: this experiment measures
+\emph{dynamics}, not level completion ($0$ levels here, by design); solving is taken up from
+\S\ref{sec:landscape} onward, where the routed solver reaches $25/25$. (ii) The densest game
+(\texttt{cn04}, $\sim$174 changed cells/step) defeats even Claude
 (fidelity $0$). (iii) On one game (\texttt{tr87}) qwen edged Claude. (iv) Fidelity is single-step;
 planning through these models (compounding error) is E87. These bound the claim to what we measured:
-\emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---a foundation
-for, not yet a demonstration of, solving.
+\emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---the foundation
+on which the solving results of \S\ref{sec:landscape}ff are built.
 
 \section{Agentic synthesis and the capability ceiling (E86b)}
 Does a better \emph{harness} close the synthesizer gap? We replace one-shot prompting with a
@@ -316,8 +320,10 @@ partial models do not yet support reliable multi-step control. \emph{Exact model
 approximate ones mislead it}---reinforcing why verification, not just learning, is the point.
 
 \section{The solving wall: goal inference (E88--E90)}
-Solving (completing levels) is \textbf{unsolved}, and the value of this study is locating exactly
-why. (1)~\emph{Exploration cannot find a reward.} With a perfect model, neither pixel-novelty (E88)
+\label{sec:solvewall}
+\emph{Automated} solving (no reasoning agent in the loop) is \textbf{hard}, and the value of this
+study is locating exactly why---a diagnosis that later tells the router (\S\ref{sec:router}) which
+games to escalate to a live coding agent (\S\ref{sec:agent}), which crosses this wall on every one. (1)~\emph{Exploration cannot find a reward.} With a perfect model, neither pixel-novelty (E88)
 nor object-graph-novelty (E90) exploration completes a level: both saturate a tiny reachable region
 (\ArcExploreLo--\ArcExploreHi{} states) and trigger \emph{zero} reward---the win is not reachable by
 undirected action, regardless of representation. (2)~\emph{Goal hypotheses are sophisticated but
@@ -331,8 +337,9 @@ feedback says what is \emph{wrong}, not what is \emph{right}, and without ever o
 reward there is nothing to steer toward. The bottleneck is thus neither modeling, planning, nor
 exploration coverage but \textbf{goal inference}---discovering the win condition with no reward
 signal. This is the wall frontier agents also hit ($\sim$0 on ARC-AGI-3), here precisely located:
-we argue it is the central open problem for verified-world-model agents, and that bootstrapping a
-single positive reward (then inducing the win condition as a piecewise rule) is the key next step.
+for \emph{automated} verified-world-model agents this is the central wall---and
+\S\ref{sec:agent} shows that a live coding agent which \emph{reasons} the win condition (rather than
+searching a fixed hypothesis space) crosses it on every such game.
 
 \section{Solving a level (E93): directed beats random}
 Closing the loop from modeling to a genuine completion. A reachability sweep finds \texttt{\ArcSolveGame{}}
@@ -343,7 +350,8 @@ solve that beats random: at a matched \ArcSolveLen-step budget the verified solu
 \textbf{\ArcDirectedRate{}} vs.\ \textbf{\ArcRandomRate{}} for random (\ArcSolveTrials{} trials).
 \emph{Honest limits:} level 2 is unreachable even by a 600k-step biased search, and the solve is a
 verified action \emph{sequence}, not a reverse-engineered win \emph{rule} -- the goal-inference wall
-(\S\ref{sec:solvewall} effectively) holds for the harder levels. Modeling is solved; intent is not.
+(\S\ref{sec:solvewall}) holds for the \emph{automated} methods here, though a reasoning agent
+(\S\ref{sec:agent}) later completes full games (e.g.\ \texttt{ft09}, \texttt{r11l}).
 
 \paragraph{Scaling to more games (E99): \ArcNSolved{} solved.} The sp80 win fired on an
 \emph{interact} action, which a uniform sweep under-weights. An interact-biased, multi-seed reward
@@ -381,12 +389,12 @@ Whether vision-guided planning completes a walled level is the live frontier tes
 is the OpenWorld-format pipeline (visual perception $+$ verified world model $+$ planning) and the
 honest characterization.
 
-\paragraph{Honest framing.} We claim a \emph{search-vs-reasoning gap}: directed search reproducibly
-completes \ArcNSolved{} level-1s where a frontier-agent metric sits near $1.5\%$, exposing that the
-benchmark's hardness for agents is \emph{goal discovery} (specifically goal-as-procedure), not
-reachability---and we show a comprehensive, principled goal-discovery toolkit does \emph{not} close
-it. This is \textbf{not} an agent state-of-the-art claim, which would require running under the
-leaderboard's live-agent protocol.
+\paragraph{Search vs.\ reasoning.} The automated methods expose a clean dichotomy: directed search and
+multi-perception consensus solve the \emph{reachable} games, but a comprehensive, principled
+goal-discovery toolkit (atomic objectives, LLM hypotheses, Bayesian sub-worlds) does \emph{not} close
+the goal-as-procedure walls---which is precisely the boundary a \emph{reasoning} agent crosses
+(\S\ref{sec:agent}). Leaderboard comparisons and the offline-replay caveat are stated precisely in
+\S\ref{sec:agent}.
 
 \section{The strategy landscape: what solves ARC-AGI-3}
 \label{sec:landscape}
@@ -474,6 +482,7 @@ goal-as-procedure walls---which is exactly where a reasoning agent that writes i
 takes over.
 
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
+\label{sec:agent}
 The procedural walls resisted four automated attacks because they need \emph{genuine goal reasoning},
 not search over a fixed hypothesis space. So we hand the game to a \textbf{live coding agent}---Claude
 Code, given the deterministic game harness and the OpenWorld recipe: explore to gather $(s,a,s')$

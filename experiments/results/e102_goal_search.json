@@ -1,0 +1,145 @@
+{
+  "solved": [],
+  "n": 0,
+  "results": {
+    "dc22": {
+      "game": "dc22",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.3333,
+      "n_candidates": 16,
+      "roles": {
+        "0": "agent",
+        "2": "agent",
+        "3": "agent",
+        "5": "wall",
+        "8": "target",
+        "9": "target",
+        "11": "target",
+        "13": "target",
+        "14": "agent"
+      }
+    },
+    "g50t": {
+      "game": "g50t",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.2778,
+      "n_candidates": 8,
+      "roles": {
+        "1": "agent",
+        "2": "target",
+        "5": "agent",
+        "8": "target",
+        "9": "agent"
+      }
+    },
+    "ka59": {
+      "game": "ka59",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.4861,
+      "n_candidates": 8,
+      "roles": {
+        "0": "agent",
+        "1": "agent",
+        "4": "agent",
+        "5": "target",
+        "14": "agent",
+        "15": "target"
+      }
+    },
+    "r11l": {
+      "game": "r11l",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.9306,
+      "n_candidates": 19,
+      "roles": {
+        "0": "counter",
+        "1": "target",
+        "2": "target",
+        "3": "target",
+        "6": "target",
+        "15": "target"
+      }
+    },
+    "re86": {
+      "game": "re86",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.5,
+      "n_candidates": 4,
+      "roles": {
+        "0": "counter",
+        "1": "agent",
+        "4": "agent",
+        "9": "agent",
+        "11": "agent",
+        "15": "agent"
+      }
+    },
+    "s5i5": {
+      "game": "s5i5",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 1.0,
+      "n_candidates": 20,
+      "roles": {
+        "2": "target",
+        "3": "counter",
+        "4": "counter",
+        "11": "target",
+        "13": "target",
+        "14": "target"
+      }
+    },
+    "sc25": {
+      "game": "sc25",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.4861,
+      "n_candidates": 8,
+      "roles": {
+        "0": "agent",
+        "2": "agent",
+        "3": "target",
+        "9": "agent",
+        "10": "agent",
+        "14": "agent",
+        "15": "target"
+      }
+    },
+    "vc33": {
+      "game": "vc33",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.8333,
+      "n_candidates": 17,
+      "roles": {
+        "0": "wall",
+        "4": "counter",
+        "5": "target",
+        "7": "timer",
+        "9": "target",
+        "11": "target"
+      }
+    },
+    "wa30": {
+      "game": "wa30",
+      "verified": false,
+      "level": 0,
+      "model_fidelity": 0.5556,
+      "n_candidates": 12,
+      "roles": {
+        "0": "agent",
+        "2": "target",
+        "3": "target",
+        "4": "agent",
+        "7": "agent",
+        "9": "target",
+        "14": "agent"
+      }
+    }
+  }
+}

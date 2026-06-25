@@ -117,11 +117,13 @@
   \raggedright\oldincludegraphics[height=0.8cm]{figs/quome.png}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.5\textwidth}
-  \raggedleft\oldincludegraphics[height=1.05cm]{figs/openworld_logo.png}\\[3pt]
-  {\itshape\footnotesize \monthyeartoday}
+  \raggedleft\itshape \monthyeartoday
 \end{minipage}
 
-\vspace{1.0em}
+\vspace{0.7em}
+\noindent\oldincludegraphics[width=\textwidth]{figs/title_band.pdf}
+
+\vspace{0.55em}
 \begin{center}
   {\LARGE\bfseries Hybrid Perceptual World Models:\\[2pt]
    World-Time Compute for Interactive Reasoning (ARC-AGI-3)\par}
@@ -218,6 +220,24 @@ union; and \textbf{(iv)~a two-tier hybrid perceptual solver}---multi-perception 
 reachable games, escalated to a live coding agent (the executable-world-model SOTA recipe, reproduced
 in OpenWorld) for the procedural walls. We do \emph{not} claim a leaderboard result: $2/25$ full games
 vs.\ the $15/25$ state of the art.
+
+\paragraph{Two numbers, read carefully ($25/25$ vs.\ $2/25$).} ARC-AGI-3 games have \emph{multiple}
+levels ($6$--$10$ each), so ``solved'' is ambiguous. We report \emph{both} ways of counting, because
+they feel like opposite stories and the gap between them \emph{is} the paper's subject:
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item \textbf{$\geq$1-level reachability $=25/25$.} We complete \emph{at least one} level of every
+public game. \emph{What it shows:} a win is \emph{reachable} at all. \emph{Why it is weak:} level~1 is
+often a tutorial; our solves are \emph{offline} with \emph{unbounded resets}, so random play alone
+already clears $11/25$ (we beat random on $14/25$); and it says nothing about later levels. Easy to
+over-read---we lead with it only because no prior single method reports it.
+\item \textbf{Full-game completion $=2/25$.} We complete \emph{every} level of a game (only
+\texttt{ft09}, \texttt{r11l}). \emph{What it shows:} the metric the leaderboard and prior work use
+(SOTA $=15/25$~\cite{baseline1_ewm}). \emph{Why it is hard:} later levels layer mechanics (a
+``compositionality cliff''), and chaining them needs the multi-step \emph{goal composition} our
+methods do not yet do.
+\end{itemize}
+\noindent In one line: \emph{reachability is nearly free; completion is the real problem}---and our
+diagnosis explains the gap, because the later-level wins are goal-as-procedure (\S\ref{sec:solvewall}).
 
 \textbf{Prior art.} ARC-AGI-3~\cite{arcagi3_report} exposes a wide gap: frontier LLM agents score
 under $1\%$, while purpose-built systems do far better (Table~\ref{tab:priorart}). The state of the

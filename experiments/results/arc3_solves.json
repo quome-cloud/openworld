@@ -1,25 +1,24 @@
 {
-  "verified_solves": {
-    "sk48": {
-      "level": 1,
-      "seq_len": 309,
-      "verified": true
-    },
-    "sp80": {
-      "level": 1,
-      "seq_len": 18,
-      "verified": true
-    },
-    "ar25": {
-      "level": 1,
-      "seq_len": 85,
-      "verified": true
-    },
-    "cd82": {
-      "level": 1,
-      "seq_len": 17,
-      "verified": true
-    }
-  },
-  "n": 4
+  "search_solves": [
+    "ar25",
+    "cd82",
+    "ls20",
+    "sk48",
+    "sp80",
+    "tu93"
+  ],
+  "n_search": 6,
+  "model_based_solves": [
+    "cd82"
+  ],
+  "n_model_based": 1,
+  "total_unique": [
+    "ar25",
+    "cd82",
+    "ls20",
+    "sk48",
+    "sp80",
+    "tu93"
+  ],
+  "note": "search = E99 interact-biased real-env search+replay; model_based = E101 predict-lookahead MPC through the synthesized code world model"
 }

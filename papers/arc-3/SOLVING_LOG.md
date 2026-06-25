@@ -106,3 +106,14 @@ interact-biased (0.45) reward search per game + deterministic replay-verify.
   unlocked sk48 where uniform search found nothing.
 - 23 games: no reward in 12k interact-biased steps -> need deeper/multi-seed search or goal-directed
   methods. Deep multi-seed sweep (25k x 4 seeds) running.
+
+## Final solve tally (toward all 25)
+- **Search (E99, interact-biased real-env search + replay-verify): 6/25 level-1 solves** --
+  ar25, cd82, ls20, sk48, sp80, tu93. (NOT world-model-driven: pure env search.)
+- **Model-based (E101, predict-lookahead MPC THROUGH the synthesized code world model + typed
+  perception + verified-reward recognition): cd82 solved world-model-driven** (proof the code world
+  model can drive a solve; slow MPC, sweeping the rest in background).
+- **~19 games remain walled:** no reward found by 25k x 4-seed interact-biased search -> the win needs
+  goal *understanding*, not reachability. This is the genuine frontier (cf. leaderboard top ~1.5%).
+- Honest split: directed *search* establishes reachability (6); the *world model* drives solving where
+  navigation is the bottleneck (cd82); goal-inference remains the wall for the rest.

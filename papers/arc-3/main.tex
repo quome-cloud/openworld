@@ -414,7 +414,22 @@ into a win while goal-conditioned planning never does.
 
 \section{Multi-perception consensus world models (the winning method)}
 The method that moves the needle perceives each game through \emph{multiple modalities} and
-synthesizes their discovered world models by consensus---all in the \openworld{} structure.
+synthesizes their discovered world models by consensus---all in the \openworld{} structure
+(Fig.~\ref{fig:arch}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_architecture.png}
+\caption{\textbf{How the multi-perception consensus world model works.} OpenWorld primitives are
+shaded teal. A \texttt{Perceptor} masks the status bar and emits a masked-frame state (and
+pixel-inferred click targets). Each action \emph{modality}---directional and click---drives its own
+discovered \texttt{World} map (a \texttt{FunctionTransition} over the explored
+$(s,a)\!\to\!s'$ table, built at \emph{world-time compute}); a \texttt{ConsensusTransition}
+synthesizes them by hard-voting/selecting the best-fidelity modality. Planning through the consensus
+World reaches level completion; \texttt{to\_spec} renders the discovered graph as a viewable atlas
+map. Reward is \texttt{levels\_completed} or an induced \texttt{CodeObjective}.}
+\label{fig:arch}
+\end{figure}
 
 \textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
 (\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are

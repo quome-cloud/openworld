@@ -41,3 +41,12 @@ sandbox**, and wrap as an `openworld.World` (like `minigrid_world.py`). E93 solv
   the agent need not be "docked" — the win is an accumulated/interaction condition, not pure position.
 - **E92's 150-step budget was below the ~291-step win horizon** -> it couldn't complete a level
   regardless of strategy. Fix: raise budget to ~500 steps (turns 50 x plan 10) + interact-aware play.
+
+## ✅ SOLVED — sp80 level 1 (reproducible)
+- **18-action sequence completes sp80 level 1:** `[5,2,6,3,2,2,2,6,4,4,6,6,5,4,1,4,6,5]`.
+- Verified by deterministic replay (E93b), reproduced independently (`SOLVED=True`, level reached at
+  step 17). This is an actual ARC-AGI-3 level completion.
+- Method: reward-capture (E93) found a winning episode; deterministic replay confirms it.
+- **E93c (chain solver, directed, beats random):** locks each level's solution and searches forward
+  for the next (never losing progress) — aiming to chain level 2, 3, … (random only ever reached
+  level 1). Running.

@@ -44,7 +44,7 @@ def capture(game, budget, seed):
             rewards.append({"step": step, "action": a, "level_to": nl,
                             "diff": GR.graph_diff(g, ng),
                             "objs_before": GR.graph_repr(g), "objs_after": GR.graph_repr(ng),
-                            "recent_actions": [r for r in recent[-12:]]})
+                            "full_prefix": list(recent) + [a], "recent_actions": recent[-12:]})
             print(f"[e93/{game}] REWARD at step {step}: action {a} -> level {nl} | diff {rewards[-1]['diff']}", flush=True)
             if len(rewards) >= 3:
                 break

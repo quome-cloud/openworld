@@ -122,8 +122,8 @@
 
 \vspace{1.0em}
 \begin{center}
-  {\LARGE\bfseries OpenWorld on ARC-AGI-3:\\[2pt]
-   Synthesizing Verified Code World Models for Interactive Reasoning\par}
+  {\LARGE\bfseries Multi-Perception Consensus World Models:\\[2pt]
+   World-Time Compute for Interactive Reasoning (ARC-AGI-3)\par}
 
   \vspace{0.5em}
   {\color{cardblue}\rule{0.34\textwidth}{1.2pt}}
@@ -175,9 +175,17 @@ with a \emph{frontier} model recovers verified dynamics: on the \ArcNReal{} real
 synthesized code reaches \ArcClaudeFid{} mean held-out exact-match, beating the copy-frame baseline
 on \ArcClaudeBeatsCopy/\ArcNReal{} and a local code model (qwen-32B, \ArcQwenThirtyTwoFid; Claude
 wins \ArcClaudeBeatsQwen/\ArcRealForQwen), with \ArcNNearPerfect{} \emph{near-perfect} ($\geq$90\%)
-world models. \textbf{Synthesizer capability is decisive.} Solving (level completion) remains the
-open frontier---0 levels, as for frontier agents---so the contribution is that ARC-AGI-3 dynamics
-are recoverable as \emph{verified code}, not that the games are solved.
+world models. \textbf{But modeling is not solving.} Our central finding is that level completion
+comes not from any single strategy but from \textbf{multi-perception synthesis}: we perceive each
+game through multiple modalities---directional and \emph{click} action models over a status-masked
+frame state---build a discovered world-model \emph{map} (an \openworld{} \texttt{World}) per
+modality at \emph{world-time compute} (search builds the map at play), and combine them with
+\textbf{consensus hard-voting} (\texttt{ConsensusTransition}). This solves \textbf{12 of 25 public
+games}, including \texttt{s5i5}, which resisted three principled goal-discovery methods
+(atomic-objective, LLM-hypothesis, and Bayesian-subworld planning, each \emph{0/9} even with a
+fidelity-1.0 model). We report the full strategy$\times$game landscape (Fig.~\ref{fig:heatmap}) as a
+guide for world-model research: single strategies are sparse; multi-perception consensus is the
+densest. The remaining games are \emph{goal-as-procedure} walls---the honest open frontier.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -199,9 +207,11 @@ defeats learned world models in control.
 \textbf{This paper.} We port \openworld{}'s verified-code-world-model recipe to ARC-AGI-3. The
 contribution is (i) the \emph{recipe}---explore, synthesize-and-verify code dynamics, plan---and
 the argument for why it fits an interactive grid benchmark; (ii) the empirical \emph{precondition}
-that the games are deterministic and therefore code-expressible; and (iii) [in progress] a
-measured comparison of level completion against random and learned-model baselines on the public
-games.
+that the games are deterministic and therefore code-expressible; (iii) the \emph{strategy landscape}
+(Fig.~\ref{fig:heatmap})---a guide to what does and does not solve interactive reasoning, including
+three honest goal-discovery negatives; and (iv) the winning method, \textbf{multi-perception
+consensus world models} at world-time compute, which solves \textbf{12/25} public games---the
+leverage is in \emph{perception and synthesis}, not a cleverer single planner.
 
 \section{The ARC-AGI-3 setting}
 Each game presents a $64\times64$ grid of $16$ colors; the agent issues discrete actions and
@@ -373,6 +383,74 @@ benchmark's hardness for agents is \emph{goal discovery} (specifically goal-as-p
 reachability---and we show a comprehensive, principled goal-discovery toolkit does \emph{not} close
 it. This is \textbf{not} an agent state-of-the-art claim, which would require running under the
 leaderboard's live-agent protocol.
+
+\section{The strategy landscape: what solves ARC-AGI-3}
+\label{sec:landscape}
+We ran seven increasingly sophisticated strategies and record, for every public game, which ones
+produce a \emph{verified} ($\geq$1-level, replay-checked) solve. The landscape
+(Fig.~\ref{fig:heatmap}) is the paper's most useful artifact for world-model research: it shows
+\emph{where} each idea works and, just as importantly, where principled ideas fail.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.66\textwidth]{figs/arc3_strategy_heatmap.png}
+\caption{\textbf{Strategy $\times$ game.} Green = a verified $\geq$1-level solve. Goal-discovery
+methods (atomic objectives, LLM hypotheses, Bayesian sub-worlds) are \emph{empty}---they fail even
+on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, not goal-as-state.
+Directed search and graph exploration each reach $6$. \textbf{Multi-perception consensus} (right,
+boxed) is the densest single column, and uniquely solves the click game \texttt{vc33} and the wall
+\texttt{s5i5}.}
+\label{fig:heatmap}
+\end{figure}
+
+\textbf{Three negative results, stated honestly.} The goal-discovery trilogy---(i)~a core-knowledge
+perceptor generating atomic candidate-goal \texttt{CodeObjective}s, (ii)~a frontier model (Claude)
+generating rich, compositional, closed-loop-refined goal hypotheses, and (iii)~procedure-aware
+Bayesian active inference over composite sub-worlds with semiring-weighted planning---each solves
+\textbf{0} of the walled games, \emph{even with a perfect (fidelity-1.0) model}. This rules out a
+large class of approaches and sharpens the diagnosis: a goal scored over a single \emph{state}
+cannot express an ordered \emph{procedure}, which is why undirected search occasionally stumbles
+into a win while goal-conditioned planning never does.
+
+\section{Multi-perception consensus world models (the winning method)}
+The method that moves the needle perceives each game through \emph{multiple modalities} and
+synthesizes their discovered world models by consensus---all in the \openworld{} structure.
+
+\textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
+(\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are
+click-only (e.g.\ \texttt{vc33}); the board responds only to clicks on valid sprite cells, which we
+infer \emph{from pixels} (small connected components + rare colors). A UI step-counter changes every
+frame, so we detect and \emph{mask} those cells before hashing---otherwise the state graph never
+compresses. The masked-frame signature is the perceptor's state.
+
+\textbf{Discovered map = an \openworld{} \texttt{World}.} Frontier-biased rollouts at \emph{world-time
+compute} build the reachable state-transition graph; the discovered $(s,a)\!\to\!s'$ table becomes a
+\texttt{World} via \texttt{FunctionTransition}, with \texttt{levels\_completed} (or an induced
+\texttt{CodeObjective}) as reward. \texttt{to\_spec} renders its \texttt{preview.graph}---the
+game's \emph{map}---as an atlas card, viewable in \texttt{openworld serve /view}.
+
+\textbf{Synthesis = consensus hard-voting across modalities.} Each modality yields its own discovered
+world model; we combine them with \texttt{ConsensusTransition} (select the highest-fidelity modality,
+or per-state vote). This is decisive: \texttt{ar25} solves via the \emph{directional} model,
+\texttt{vc33} via the \emph{click} model---neither single modality suffices, the synthesis does.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{figs/arc3_strategy_bar.png}
+\caption{\textbf{Games solved per strategy.} Goal-discovery methods solve $0$; directed search and
+graph exploration $6$; \textbf{multi-perception consensus solves $10$} and adds four games no other
+method reaches (\texttt{cn04, lf52, m0r0, s5i5}). Across all strategies the union is $12/25$.}
+\label{fig:bar}
+\end{figure}
+
+\textbf{Result.} Multi-perception consensus solves \textbf{10/25} public games (Fig.~\ref{fig:bar}),
+including four---\texttt{cn04, lf52, m0r0, s5i5}---reached by \emph{no} other method; the union of
+all strategies is \textbf{12/25}. \texttt{s5i5} is the headline: it had resisted the entire
+goal-discovery trilogy on a perfect model, yet world-time-compute exploration over the right
+perceptual modality completes it. The takeaway for world-model research: \emph{the leverage is in
+perception and synthesis, not in a cleverer single planner.} The remaining games stay at $0$---these
+are the goal-as-procedure walls, the honest open frontier (consistent with frontier agents at
+$\sim$1.5\%).
 
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the

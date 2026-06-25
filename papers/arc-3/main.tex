@@ -155,52 +155,37 @@
 {\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
 \fontsize{9.3}{11.0}\selectfont
-\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent is
-dropped into an unfamiliar grid game, must discover the rules \emph{by acting}, and reach goals
-over many steps---testing exploration, \emph{modeling}, goal-setting, and planning. Frontier
-agents score near zero. We argue this is precisely the regime where a \emph{world computer}
-should win, and give the \openworld{} recipe: \textbf{explore} a game to gather verified
-$(s,a,s')$ transitions, \textbf{synthesize} the game's dynamics as \emph{verified code}
-(an LLM writes a \texttt{predict(frame, action)} function, accepted only after it exact-matches
-held-out transitions), and \textbf{plan} through the verified model to reach goals. The wager is
-the same one that powers symbolic code world models elsewhere: a \emph{correct} code model is
-exact and admits search, where a learned next-frame model compounds error. A precondition holds
-empirically---on the public game \texttt{ls20}, observed dynamics are \emph{deterministic}
-(every repeated state--action pair yields an identical next frame across hundreds of transitions),
-so the dynamics are writable as exact code; states are dense ($\sim$1{,}500 of 4{,}096 cells
-non-background) but per-step changes are sparse ($\sim$50 cells), which a code model handles
-natively while a token-level learner cannot. Across the \NumArcGames{} public games, the
-precondition is \emph{universal} (determinism \ArcDeterminismAll{} on every game), and synthesizing
-with a \emph{frontier} model recovers verified dynamics: on the \ArcNReal{} real-dynamics games the
-synthesized code reaches \ArcClaudeFid{} mean held-out exact-match, beating the copy-frame baseline
-on \ArcClaudeBeatsCopy/\ArcNReal{} and a local code model (qwen-32B, \ArcQwenThirtyTwoFid; Claude
-wins \ArcClaudeBeatsQwen/\ArcRealForQwen), with \ArcNNearPerfect{} \emph{near-perfect} ($\geq$90\%)
-world models. \textbf{But modeling is not solving.} Our central finding is that level completion comes
-not from any single strategy but from a \textbf{hybrid perceptual world model}---multiple perceptual
-modalities, fused for the games where it suffices and \emph{escalated to a reasoning agent} where it
-does not. Concretely, the fusion is \textbf{multi-perception synthesis}: we perceive each game through
-multiple modalities---directional and \emph{click} action models over a status-masked frame
-state---build a discovered world-model \emph{map} (an \openworld{} \texttt{World}) per modality at
-\emph{world-time compute} (search builds the map at play), and combine them with \textbf{consensus
-hard-voting} (\texttt{ConsensusTransition}). Consensus solves \textbf{10/25}, and together with
-directed search the automated methods reach \textbf{12/25}---including \texttt{s5i5}, which resisted
-three principled goal-discovery methods
-(atomic-objective, LLM-hypothesis, and Bayesian-subworld planning, each \emph{0/9} even with a
-fidelity-1.0 model). The remaining games are \emph{goal-as-procedure} walls---and we crack them with
-a \textbf{live coding agent} (Claude Code that builds an executable world model and \emph{reasons} the
-win condition, the SOTA recipe expressed in OpenWorld): it solves \textbf{15/25} on its own and lifts
-the union to \textbf{25/25} games---every public game reaches $\geq$1 level (verified by replay; \texttt{ft09} and \texttt{r11l} full six-level games), where four
-automated goal-discovery methods solved \emph{zero}. We report the full strategy$\times$game landscape
-(Fig.~\ref{fig:heatmap}) as a guide for world-model research: the leverage is \emph{perception and
-synthesis}, and---for the procedural goals---\emph{a reasoning agent that writes its own world model}.
-\textbf{Scope, stated up front:} our $25/25$ is \emph{$\geq$1-level} reachability, and all solves are
-\emph{offline and replay-verified}, exploiting determinism and unbounded resets---under which random
-play alone already reaches $\geq$1 level on $\mathbf{11/25}$, so the distinctive result is the
-\textbf{14/25 games random cannot reach} (all nine procedural walls among them). This is \emph{not}
-the leaderboard's live-agent/RHAE protocol. On full-game completion (the metric the field reports) we
-reach only \textbf{2/25} versus the \textbf{15/25} state of the art; we do not claim full-game SOTA.
-The contributions are the strategy landscape, the goal-as-procedure diagnosis, and that the
-executable-world-model recipe reproduces in OpenWorld---not a leaderboard result.
+\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped
+into an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
+frontier agents score near zero. We study what a verified-world-model approach can and cannot do here,
+and our central contribution is a \textbf{diagnosis}: the bottleneck is not modeling but \emph{goal
+discovery}, and specifically ARC-AGI-3 wins are \textbf{goal-as-procedure}, not goal-as-state.
+
+\emph{(1)~Modeling is largely solved.} All \NumArcGames{} public games are replay-deterministic
+(\ArcDeterminismAll{}), so their dynamics are exactly code-expressible; a frontier synthesizer (Claude)
+writes verified \texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
+on the real-dynamics games (vs.\ \ArcQwenThirtyTwoFid{} for a local model), with \ArcNNearPerfect{}
+near-perfect ($\geq$90\%) models. \emph{(2)~The wall.} Despite these models, \textbf{four principled
+goal-discovery methods}---atomic objectives, frontier-LLM hypotheses, Bayesian sub-world planning, and
+typed navigation---solve \emph{zero} of the hard games, several \emph{even on a fidelity-1.0 model}:
+a goal scored over a single \emph{state} cannot express an ordered \emph{procedure}, which is why
+undirected search occasionally stumbles into a win while goal-conditioned planning never does.
+\emph{(3)~What works, and how much.} A strategy$\times$game landscape (Fig.~\ref{fig:heatmap}) maps
+the regimes: directed search and \textbf{multi-perception consensus} (per-modality discovered
+\texttt{World} maps combined by \texttt{ConsensusTransition}) solve the \emph{reachable} games
+(consensus $10/25$), while the procedural walls yield only to a \textbf{live coding agent} that writes
+its own executable world model and \emph{reasons} the goal---the executable-world-model SOTA recipe,
+reproduced in OpenWorld with Claude. Together this two-tier \emph{hybrid perceptual world model}
+reaches $\geq$1 level on all \NumArcGames{} games.
+
+\textbf{We report this honestly.} Solves are \emph{offline} with \emph{unbounded resets}; under that
+protocol random play alone reaches $\geq$1 level on \textbf{11/25}, so the distinctive figure is
+\textbf{14/25 above random} (all nine procedural walls among them), and one ``solve'' (\texttt{lp85})
+is no better than random. Only \textbf{2} games are completed in full, versus the \textbf{15/25}
+full-game state of the art---we claim a diagnosis and a landscape, \emph{not} a leaderboard result.
+\textbf{Contributions:} the goal-as-procedure diagnosis (four methods, $0$ on perfect models); the
+strategy landscape as a research guide; an honest above-random measure; and an OpenWorld reproduction
+of the executable-world-model recipe.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -219,17 +204,19 @@ an agent that can recover the game's dynamics \emph{exactly} can then plan optim
 agent that only learns an approximate next-frame predictor inherits the compounding error that
 defeats learned world models in control.
 
-\textbf{This paper.} We port \openworld{}'s verified-code-world-model recipe to ARC-AGI-3. The
-contribution is (i) the \emph{recipe}---explore, synthesize-and-verify code dynamics, plan---and
-the argument for why it fits an interactive grid benchmark; (ii) the empirical \emph{precondition}
-that the games are deterministic and therefore code-expressible; (iii) the \emph{strategy landscape}
-(Fig.~\ref{fig:heatmap})---a guide to what does and does not solve interactive reasoning, including
-three honest goal-discovery negatives; and (iv) a two-tier solver---\textbf{multi-perception
-consensus} (perception$+$synthesis) for reachable games, and a \textbf{live coding agent} that writes
-its own executable world model for goal-as-procedure walls---dispatched by a reachability
-\textbf{router}, together reaching \textbf{25/25} public games ($\geq$1 level; two full games). The
-leverage is in \emph{perception and synthesis} for the reachable majority, and in \emph{a reasoning
-agent that writes its own world model} for the procedural walls.
+\textbf{This paper.} We port \openworld{}'s verified-code-world-model recipe to ARC-AGI-3 and use it
+to \emph{diagnose} the benchmark. Our contributions, in order of importance: \textbf{(i)~the
+goal-as-procedure diagnosis}---four principled goal-discovery methods (atomic objectives, frontier-LLM
+hypotheses, Bayesian sub-worlds, typed navigation) solve \emph{zero} hard games, several even on a
+fidelity-$1.0$ model, because a goal scored over a single \emph{state} cannot express an ordered
+\emph{procedure}; \textbf{(ii)~the strategy landscape} (Fig.~\ref{fig:heatmap})---a guide to what does
+and does not solve interactive reasoning, with the negatives as first-class results; \textbf{(iii)~an
+honest above-random measure}---under the offline unbounded-reset protocol random play reaches
+$\geq$1 level on $11/25$, so we report \textbf{$14/25$ above random} rather than the inflated $\geq$1-level
+union; and \textbf{(iv)~a two-tier hybrid perceptual solver}---multi-perception consensus for
+reachable games, escalated to a live coding agent (the executable-world-model SOTA recipe, reproduced
+in OpenWorld) for the procedural walls. We do \emph{not} claim a leaderboard result: $2/25$ full games
+vs.\ the $15/25$ state of the art.
 
 \section{The ARC-AGI-3 setting}
 Each game presents a $64\times64$ grid of $16$ colors; the agent issues discrete actions and
@@ -389,16 +376,12 @@ ordered protocol), which a goal-score over a single state cannot express, so pla
 wrong target (this is precisely why undirected \emph{search} stumbles into some wins while
 goal-conditioned \emph{planning} finds none).
 
-\paragraph{The one qualitatively-different lever: a visual perceptor (E106).} Every method above fed
-the model text/structured state. In OpenWorld form we instead render each frame in the official
-palette and perceive it with a genuine \texttt{VisionPerceptor} (Claude-vision wrapped as a
-\texttt{BaseLLM}), feeding a \texttt{World} (the code world model as a \texttt{FunctionTransition}).
-This is the one representation that recovers \emph{semantic, gestalt} goal hypotheses the structured
-methods cannot---e.g.\ for \texttt{ka59} it reads ``two rooms joined by a corridor, a purple
-door/barrier, a green agent, a target square'' and infers ``cross the door to reach the target.''
-Whether vision-guided planning completes a walled level is the live frontier test; the contribution
-is the OpenWorld-format pipeline (visual perception $+$ verified world model $+$ planning) and the
-honest characterization.
+\paragraph{A visual perceptor foreshadows the fix (E106).} Rendered in the official palette and read
+by a \texttt{VisionPerceptor} (Claude-vision), the frames yield \emph{semantic} goal hypotheses the
+structured methods miss---e.g.\ \texttt{ka59} as ``two rooms joined by a corridor, a purple door, a
+green agent, a target: cross the door.'' We did not turn this into a solver, but it points to the
+resolution: the procedural walls need a \emph{reasoning} reader of the game, realized in
+\S\ref{sec:agent} as a live coding agent. (We note this as a bridge, not a result.)
 
 \paragraph{Search vs.\ reasoning.} The automated methods expose a clean dichotomy: directed search and
 multi-perception consensus solve the \emph{reachable} games, but a comprehensive, principled
@@ -462,16 +445,22 @@ infer \emph{from pixels} (small connected components + rare colors). A UI step-c
 frame, so we detect and \emph{mask} those cells before hashing---otherwise the state graph never
 compresses. The masked-frame signature is the perceptor's state.
 
-\textbf{Discovered map = an \openworld{} \texttt{World}.} Frontier-biased rollouts at \emph{world-time
-compute} build the reachable state-transition graph; the discovered $(s,a)\!\to\!s'$ table becomes a
-\texttt{World} via \texttt{FunctionTransition}, with \texttt{levels\_completed} (or an induced
-\texttt{CodeObjective}) as reward. \texttt{to\_spec} renders its \texttt{preview.graph}---the
+\textbf{Discovered map = an \openworld{} \texttt{World}.} Frontier-biased rollouts build the reachable
+state-transition graph at \emph{world-time compute}---by which we mean inference-time search that
+\emph{constructs the world model during play} (test-time compute spent building the model and its map,
+not sampling outputs). The discovered $(s,a)\!\to\!s'$ table becomes a \texttt{World} via
+\texttt{FunctionTransition}, with \texttt{levels\_completed} (or an induced \texttt{CodeObjective}) as
+reward. \texttt{to\_spec} renders its \texttt{preview.graph}---the
 game's \emph{map}---as an atlas card, viewable in \texttt{openworld serve /view}.
 
 \textbf{Synthesis = consensus hard-voting across modalities.} Each modality yields its own discovered
 world model; we combine them with \texttt{ConsensusTransition} (select the highest-fidelity modality,
-or per-state vote). This is decisive: \texttt{ar25} solves via the \emph{directional} model,
-\texttt{vc33} via the \emph{click} model---neither single modality suffices, the synthesis does.
+or per-state vote). \emph{Ablation:} of the $10$ games this tier solves, the directional modality
+accounts for $7$ and click for $3$---neither single modality reaches all $10$, so combining modalities
+adds coverage (\texttt{ar25} needs directional, \texttt{vc33} click). We are candid that this is a
+\emph{selection across views}, not a deep mechanism: its value is breadth, and the genuinely
+surprising case (\texttt{s5i5}, solved here after defeating the goal-discovery trilogy on a perfect
+model) is the one worth studying further.
 
 \begin{figure}[t]
 \centering
@@ -525,14 +514,16 @@ differ, so we are unambiguous. The SOTA executable-world-model agent (baseline1,
 verified solves across our strategy stack, with the \emph{live coding agent at 15/25 on its own}; of
 these, \textbf{two are full games} (\texttt{ft09}, \texttt{r11l}). We therefore do \textbf{not} claim
 to beat SOTA on full-game completion---there we have 2, they have 15. We claim something narrower and
-useful: (i) \emph{$\geq$1-level reachability on all 25 public games}, which no prior single method
-reports; (ii) that the executable-world-model recipe \emph{reproduces in OpenWorld with a different
-agent} (Claude)---independent corroboration of the SOTA approach; and (iii) a \emph{mapped strategy
-landscape} (Fig.~\ref{fig:heatmap}) showing which method class solves what. Two honesty notes: our
-solves are \emph{offline and replay-verified} (exploiting determinism and unbounded resets), so they
-are \emph{not} scored under the leaderboard's live-agent protocol or its action-efficiency penalty
-(RHAE)---a leaderboard-comparable number would require running under those rules; and full-game
-completion (chaining every level under budget) is the honest remaining gap.
+useful: (i) \emph{$\geq$1 level on all 25 public games}, of which \textbf{14 are above a random
+baseline} (\S\ref{sec:baseline}); (ii) the goal-as-procedure diagnosis and the strategy landscape; and
+(iii) that the executable-world-model recipe \emph{reproduces in OpenWorld with a different agent}
+(Claude)---independent corroboration of the SOTA approach. Three honesty notes: our solves are
+\emph{offline and replay-verified} (exploiting determinism and unbounded resets), \emph{not} scored
+under the leaderboard's live-agent protocol or its action-efficiency penalty (RHAE); full-game
+completion is the remaining gap; and on \emph{engine and cost} we use Claude (the session model) as
+both synthesizer and live agent, where baseline1 uses GPT-5.5 at $\sim$\$350/run---we did not meter
+cost, but the live agent runs a single agentic coding session per game (no repeated sampling), so a
+same-engine, cost-matched, live-protocol comparison is the needed next experiment.
 
 \section{A random-play baseline: what the protocol gives for free}
 \label{sec:baseline}

@@ -592,6 +592,28 @@ recursively (\S\ref{sec:specs}), so the algebra is also the unit of sharing. A s
 closed, verification-preserving composition operator over a well-defined value type is what earns
 the name \emph{world computer}.
 
+\subsection{Verified reward induction: the objective as a first-class artifact}\label{sec:reward-induction}
+The relay synthesizes and verifies the \emph{dynamics} as code, but a world model is only half of an
+agent: the \emph{objective} has so far been \emph{declared} (a hand-written scoring function), not
+\emph{discovered}. For interactive problems where the goal itself is unknown---an agent dropped into
+an unfamiliar game must infer what counts as success---we make the objective symmetric to the
+transition: a \emph{verified reward as code}. A \texttt{CodeObjective} carries a sandboxed
+\texttt{reward(state, action, next\_state)} (a scalar; a goal predicate is just a $0/1$ reward) that
+runs in the same pure-Python sandbox as \texttt{CodeTransition}, and \texttt{induce\_reward}
+synthesizes it from observed reward transitions, accepting it only when it \emph{exact-matches}
+held-out rewards---the same plan--generate--verify gate, now applied to the objective rather than the
+dynamics. This closes the loop: verified \emph{perception} (\S\ref{sec:perception}) $+$ verified
+\emph{dynamics} $+$ verified \emph{reward} $+$ planning, with every component synthesized and
+exact-match verified. It is the foundational primitive that interactive benchmarks such as ARC-AGI-3
+demand, where the central difficulty is \emph{goal discovery}, not dynamics (companion work): once a
+single positive reward is observed, the win condition is induced as verified code and becomes
+plannable. Three further foundational extensions follow the same symmetry and are in progress:
+\emph{typed-object perceptors} (roles---agent, target, counter---so goals are expressed over
+structure, not pixels), a \emph{consensus world} (an aggregator over several independently
+synthesized world models---average or select, trading single-model error for committee accuracy), and
+\emph{composite objectives} (the composition algebra applied to goals, decomposing a win into
+verified sub-goals).
+
 \subsection{Implementation}
 Python ($\geq$3.9). The core is \emph{zero-dependency}: \texttt{import
 openworld} and everything it pulls in (state, transitions, composition, specs,

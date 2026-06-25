@@ -1,0 +1,22 @@
+{
+  "run_id": "test_roundtrip",
+  "track": "E89",
+  "eval_split": "synthetic",
+  "start_ts": "2026-06-25T21:56:13.582428Z",
+  "end_ts": "2026-06-25T21:56:13.582428Z",
+  "n_tasks": 1,
+  "n_calls": 1,
+  "n_solved": 1,
+  "pct_solved": 100.0,
+  "total_tokens_est_in": 88,
+  "total_tokens_est_out": 72,
+  "contamination_boundary_proof": "demo pairs only; task_hash = sha256(demos_json + test_input_json)",
+  "synthesizer_agent": "A004",
+  "harness_agent": "A003",
+  "model_id": "claude-sonnet-4-6",
+  "hyperparams": {
+    "n_candidates": 8,
+    "sandbox_timeout": 10,
+    "burst_limit": 30
+  }
+}

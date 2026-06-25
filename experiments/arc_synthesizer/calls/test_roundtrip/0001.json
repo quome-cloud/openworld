@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-06-25T21:56:13.582428Z",
+  "run_id": "test_roundtrip",
+  "seq": 1,
+  "track": "E89",
+  "task_hash": "sha256:875fa6920a4ab00d749d9e388b68d45f22b45a5e00ebe5f435500891ca69e018",
+  "agent_id": "A004",
+  "model_id": "claude-sonnet-4-6",
+  "demo_pairs_serialized": "[{\"input\": [[1, 2, 3]], \"output\": [[3, 2, 1]]}, {\"input\": [[4, 5, 6], [7, 8, 9]], \"output\": [[6, 5, 4], [9, 8, 7]]}]",
+  "test_input_serialized": "[[0, 1, 2, 3]]",
+  "candidates_raw": [
+    "def transform(grid):\n    return [row[::-1] for row in grid]",
+    "def transform(grid):\n    return [list(reversed(row)) for row in grid]",
+    "def transform(grid):\n    result = []\n    for row in grid:\n        result.append(row[::-1])\n    return result"
+  ],
+  "candidates_verified": [
+    "def transform(grid):\n    return [row[::-1] for row in grid]",
+    "def transform(grid):\n    return [list(reversed(row)) for row in grid]",
+    "def transform(grid):\n    result = []\n    for row in grid:\n        result.append(row[::-1])\n    return result"
+  ],
+  "verify_result": {
+    "n_candidates_received": 3,
+    "n_candidates_verified": 3,
+    "passed": true,
+    "acc": 1.0
+  },
+  "tokens_est_in": 88,
+  "tokens_est_out": 72,
+  "latency_ms": 278,
+  "dm_msg_id_request": "M56486",
+  "dm_msg_id_reply": "M56487",
+  "status": "ok"
+}

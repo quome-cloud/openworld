@@ -117,3 +117,16 @@ interact-biased (0.45) reward search per game + deterministic replay-verify.
   goal *understanding*, not reachability. This is the genuine frontier (cf. leaderboard top ~1.5%).
 - Honest split: directed *search* establishes reachability (6); the *world model* drives solving where
   navigation is the bottleneck (cd82); goal-inference remains the wall for the rest.
+
+## E102 — core-knowledge goal-discovery (the principled attack): honest NEGATIVE
+Generated candidate-goal CodeObjectives (reach/cover/collect/extremize over typed roles) and planned
+to each THROUGH the code world model (MPC), per game. **0/9 walled games solved -- even s5i5 with a
+fidelity-1.0 model and 20 candidate goals.** Interpretation (this RULES OUT a hypothesis):
+- The walled games' win conditions are **NOT atomic core-knowledge configurations** (reaching/covering/
+  collecting/extremizing a perceived object). Achieving those candidate configs never triggers reward.
+- So the goals are **compositional** (multi-step sub-goal sequences) and/or depend on structure our
+  typed perceptor + atomic-relation space doesn't capture (precise patterns, timing, hidden state).
+- This sharpens *why* these are walls (consistent with ARC resisting simple priors; SOTA ~1.5%).
+Remaining genuinely-different directions: (i) **composite objectives** (sub-goal sequences -- a much
+larger discovery search); (ii) **visual perception** (render + Claude vision for semantic/pattern goal
+hypotheses the atomic templates miss). Both harder; may not crack it -- this is the frontier.

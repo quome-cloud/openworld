@@ -118,3 +118,40 @@ if __name__ == "__main__":
     print(graph_repr(a))
     print("diff:", graph_diff(a, b))
     sys.exit(0)
+
+
+def infer_typed_objects(transitions, bg=None):
+    """Typed perceptor: infer object ROLES from observed dynamics (the perceive->world boundary).
+    agent = moves under actions; timer/counter = changes ~every step (timer if near top); wall =
+    large/static; target = the rest. Lets goals be expressed over structure, not pixels."""
+    from collections import defaultdict
+    if bg is None:
+        bg = bg_of(np.asarray(transitions[0]["frame"]))
+    moves = defaultdict(int); changes = defaultdict(int); sizes = defaultdict(list); rows = defaultdict(list)
+    n = len(transitions)
+    for t in transitions:
+        a, b = np.asarray(t["frame"]), np.asarray(t["next"])
+        for c in range(16):
+            if c != bg and ((a == c) != (b == c)).any():
+                changes[c] += 1
+        for m in graph_diff(a, b)["moved"]:
+            moves[m["color"]] += 1
+        for o in objects(a, bg)[0]:
+            sizes[o["color"]].append(o["size"]); rows[o["color"]].append(o["centroid"][0])
+    roles = {}
+    for c in set(list(sizes) + list(changes)):
+        if c == bg:
+            continue
+        mv, ch = moves.get(c, 0), changes.get(c, 0)
+        sz = int(np.median(sizes[c])) if sizes.get(c) else 0
+        rr = float(np.median(rows[c])) if rows.get(c) else 32.0
+        if ch > n * 0.9:  # changes essentially every step -> a timer/counter bar (its fill looks like motion)
+            role = "timer" if rr < 8 else "counter"
+        elif mv > n * 0.05:
+            role = "agent"
+        elif sz >= 200:
+            role = "wall"
+        else:
+            role = "target"
+        roles[c] = {"role": role, "size": sz, "moves": mv, "change_freq": round(ch / n, 2)}
+    return roles

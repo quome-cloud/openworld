@@ -1,0 +1,25 @@
+{
+  "verified_solves": {
+    "sk48": {
+      "level": 1,
+      "seq_len": 309,
+      "verified": true
+    },
+    "sp80": {
+      "level": 1,
+      "seq_len": 18,
+      "verified": true
+    },
+    "ar25": {
+      "level": 1,
+      "seq_len": 85,
+      "verified": true
+    },
+    "cd82": {
+      "level": 1,
+      "seq_len": 17,
+      "verified": true
+    }
+  },
+  "n": 4
+}

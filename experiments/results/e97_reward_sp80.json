@@ -1,0 +1,8 @@
+{
+  "game": "sp80",
+  "examples": 228,
+  "positive": 6,
+  "induced_reward_verified_acc": 1.0,
+  "is_code_objective": true,
+  "reward_code": "def reward(state, action, next_state):  # state['frame'],next_state['frame'] are 64x64 lists of ints\n    # A level-completion reloads the board: a large fraction of the 64x64=4096\n    # cells change at once. Normal moves change only a handful (observed max 162).\n    # Level completions changed 1168. Threshold at 500 cleanly separates the two.\n    a = state['frame']\n    b = next_state['frame']\n    changed = 0\n    for r in range(64):\n        ar = a[r]\n        br = b[r]\n        for c in range(64):\n            if ar[c] != br[c]:\n                changed += 1\n    return 1.0 if changed >= 500 else 0.0"
+}

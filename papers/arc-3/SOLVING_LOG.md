@@ -78,3 +78,14 @@ in imagination, executed in real env: **best 1/6, level 2 NOT reached.** The CWM
 generation efficient (far more configs than blind search), but level 2's win is opaque/rare and not
 recoverable this way -> level 2 is a hard wall (consistent with E93c). Next: ensemble (E95) to raise
 model fidelity, which should improve planning where fidelity (not goal-opacity) is the limiter.
+
+## Foundational add — verified reward induction (framework primitive)
+Added `openworld.CodeObjective` + `induce_reward` to the CORE (zero-dep, sandbox-run, 102 tests pass):
+a reward/goal as VERIFIED sandboxed code, induced + exact-match-verified from observed rewards --
+symmetric to CodeTransition. Documented in the framework paper (sec:reward-induction).
+- **E97 (apply to sp80):** induced a verified level-completion reward, **held-out acc = 1.000**
+  (228 examples, 6 positive). The win condition is now a first-class verified artifact -- the agent
+  can RECOGNIZE a goal-state, the missing pillar for goal-directed solving.
+- **E95 ensemble (honest, partial):** per-cell majority HURTS on ka59 (0.13 vs best-single 0.27);
+  naive voting over weak correlated code models is worse than selection -> switch combiner to
+  verification-based SELECTION (choose, don't average). Other games pending.

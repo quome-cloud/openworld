@@ -1,6 +1,8 @@
 {
+  "n_union": 25,
   "union_solved": [
     "ar25",
+    "bp35",
     "cd82",
     "cn04",
     "dc22",
@@ -25,8 +27,10 @@
     "vc33",
     "wa30"
   ],
-  "n_union": 24,
+  "unsolved": [],
+  "n_agent": 15,
   "live_coding_agent": [
+    "bp35",
     "dc22",
     "ft09",
     "g50t",
@@ -42,7 +46,7 @@
     "tu93",
     "wa30"
   ],
-  "n_agent": 14,
+  "n_consensus": 10,
   "multi_perception_consensus": [
     "ar25",
     "cd82",
@@ -55,19 +59,10 @@
     "sp80",
     "vc33"
   ],
-  "n_e112": 10,
-  "unsolved": [
-    "bp35"
+  "n_full_games": 2,
+  "full_games": [
+    "ft09",
+    "r11l"
   ],
-  "note": "union of >=1-level verified solves across all strategies. ft09 is a FULL game (6 levels) via the live coding agent; most agent solves are 1 level. Full-game (all-levels) completion is future work (chaining is hard).",
-  "full_game_or_multilevel": [
-    [
-      "ft09",
-      6
-    ],
-    [
-      "r11l",
-      6
-    ]
-  ]
+  "note": "union of >=1-level REPLAY-VERIFIED solves under an offline protocol (determinism + unbounded resets), NOT the live-agent/RHAE leaderboard protocol. full_games = all levels completed."
 }

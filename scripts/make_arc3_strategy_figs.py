@@ -8,6 +8,11 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 R=Path("experiments/results"); FIG=Path("papers/arc-3/figs"); FIG.mkdir(parents=True,exist_ok=True)
+def random_solved():
+    import json,os
+    p="experiments/results/e117_random_baseline.json"
+    if not os.path.exists(p): return set()
+    d=json.load(open(p)); return set(d.get("random_geq1_level",[]))
 def agent_solved():
     import glob, os
     return {os.path.basename(f)[:-5] for f in glob.glob("experiments/results/agent_solves/*.json")}
@@ -23,6 +28,7 @@ def solved_set(name, key="solved"):
 
 # strategies in narrative order; last = the winning multi-perception consensus
 STRATS=[
+    ("Random play\n(baseline)",            random_solved()),
     ("Interact search\n(E99)",            solved_set("e99_deep_sweep")),
     ("Model-based MPC\n(E101)",           {"cd82"}),
     ("Atomic goals\n(E102)",              solved_set("e102_goal_search")),
@@ -49,7 +55,7 @@ for i,c in enumerate(counts): plt.text(i, c+0.15, str(c), ha="center", fontsize=
 plt.axhline(len(union), ls="--", c="#c2410c", lw=1.2); plt.text(0.1, len(union)+0.3, f"union = {len(union)}/25", color="#c2410c", fontsize=10, fontweight="bold")
 plt.xticks(range(len(STRATS)), labels, fontsize=7.5)
 plt.ylabel("ARC-AGI-3 games solved (≥1 level)"); plt.ylim(0,26)
-plt.title("A live OpenWorld coding agent cracks the walls (union 23/25)", fontsize=12, fontweight="bold")
+plt.title(f"A live coding agent cracks the walls (union {len(union)}/25)", fontsize=12, fontweight="bold")
 plt.tight_layout(); plt.savefig(FIG/"arc3_strategy_bar.png", dpi=140); plt.close()
 
 # ---- Fig 2: strategy x game heatmap ----

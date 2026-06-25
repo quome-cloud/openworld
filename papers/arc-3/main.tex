@@ -341,18 +341,38 @@ solved \emph{through the synthesized code world model} (E101: predict-lookahead 
 typed agent), and the verified-reward induction (E97/E98) recognizes the win on \texttt{sp80} with
 acc $1.0$ from the agent's \emph{own} synthesized objective.
 
-\paragraph{What the remaining $\sim$19 expose, and what does \emph{not} crack them.}
+\paragraph{What the remaining $\sim$19 expose: a trilogy of goal-discovery negatives.}
 No reward is found on the rest even at $25\text{k}\times4$-seed interact-biased search: their wins are
-not \emph{reachable}, they must be \emph{understood}. The principled attack---a core-knowledge
-perceptor generating candidate-goal \texttt{CodeObjective}s, each pursued by planning \emph{through}
-the code world model (E102)---solves \textbf{0/9}, even with a fidelity-$1.0$ model and 20 candidate
-goals. This rules out the hypothesis that the walls are \emph{atomic} core-knowledge goals
-(reach/cover/collect/extremize a perceived object); the goals are \emph{compositional} or depend on
-structure beyond the typed-object representation. We therefore frame the contribution honestly as a
-\emph{search-vs-reasoning gap}: directed search reproducibly completes \ArcNSolved{} level-1s where a
-frontier-agent metric sits near $1.5\%$, exposing that the benchmark's hardness for agents is
-\emph{goal discovery}, not reachability---\textbf{not} an agent state-of-the-art claim, which would
-require running under the leaderboard's live-agent protocol.
+not \emph{reachable}, they must be \emph{understood}. We ran three increasingly sophisticated,
+principled attacks---all planning \emph{through} the code world model---and report them honestly:
+(i)~\textbf{E102}, a core-knowledge perceptor generating atomic candidate-goal \texttt{CodeObjective}s
+(reach/cover/collect/extremize): \textbf{0/9}; (ii)~\textbf{E103}, a frontier model (Claude)
+\emph{generating} rich, \emph{compositional}, closed-loop-refined goal hypotheses: \textbf{0/3};
+(iii)~\textbf{E104}, procedure-aware Bayesian active inference over composite \emph{subworlds} with
+TROPICAL-semiring hierarchical planning: \textbf{0/3}. None succeed \emph{even with a fidelity-$1.0$
+model}. The trilogy yields a sharp diagnosis: the walls are \textbf{not} atomic goals, and the
+failure is \emph{representational}---many ARC-AGI-3 wins are a \textbf{goal-as-procedure} (a specific
+ordered protocol), which a goal-score over a single state cannot express, so planning optimizes the
+wrong target (this is precisely why undirected \emph{search} stumbles into some wins while
+goal-conditioned \emph{planning} finds none).
+
+\paragraph{The one qualitatively-different lever: a visual perceptor (E106).} Every method above fed
+the model text/structured state. In OpenWorld form we instead render each frame in the official
+palette and perceive it with a genuine \texttt{VisionPerceptor} (Claude-vision wrapped as a
+\texttt{BaseLLM}), feeding a \texttt{World} (the code world model as a \texttt{FunctionTransition}).
+This is the one representation that recovers \emph{semantic, gestalt} goal hypotheses the structured
+methods cannot---e.g.\ for \texttt{ka59} it reads ``two rooms joined by a corridor, a purple
+door/barrier, a green agent, a target square'' and infers ``cross the door to reach the target.''
+Whether vision-guided planning completes a walled level is the live frontier test; the contribution
+is the OpenWorld-format pipeline (visual perception $+$ verified world model $+$ planning) and the
+honest characterization.
+
+\paragraph{Honest framing.} We claim a \emph{search-vs-reasoning gap}: directed search reproducibly
+completes \ArcNSolved{} level-1s where a frontier-agent metric sits near $1.5\%$, exposing that the
+benchmark's hardness for agents is \emph{goal discovery} (specifically goal-as-procedure), not
+reachability---and we show a comprehensive, principled goal-discovery toolkit does \emph{not} close
+it. This is \textbf{not} an agent state-of-the-art claim, which would require running under the
+leaderboard's live-agent protocol.
 
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the

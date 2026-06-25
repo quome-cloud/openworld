@@ -71,3 +71,10 @@ with free state-restoration + backtracking** in imagination -> diverse candidate
 best in the real env (synthesize->plan->verify). E94: collect L2 transitions -> synthesize L2 model
 -> BFS over object-configs in the model -> execute candidates in real env.
 - Result: _(running)_
+
+### E94 result (code world model for level 2) — honest negative
+Synthesized a level-2 model (fidelity 0.44), tree-searched **1374 distinct-config candidate plans**
+in imagination, executed in real env: **best 1/6, level 2 NOT reached.** The CWM made candidate
+generation efficient (far more configs than blind search), but level 2's win is opaque/rare and not
+recoverable this way -> level 2 is a hard wall (consistent with E93c). Next: ensemble (E95) to raise
+model fidelity, which should improve planning where fidelity (not goal-opacity) is the limiter.

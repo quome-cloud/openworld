@@ -1,0 +1,8 @@
+{
+  "game": "sp80",
+  "level2_transitions": 400,
+  "level2_model_fidelity": 0.44,
+  "win_levels": 6,
+  "best_levels": 1,
+  "reached_level2": false
+}

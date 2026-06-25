@@ -549,3 +549,42 @@ class VisionPerceptor(Perceptor):
     def perceive(self, observation: Observation) -> Dict[str, Any]:
         return _extract_fields(self.llm, self.prompt_hint, self.produces,
                                self.system, images=[image_to_b64(observation.data)])
+
+
+def make_typed_perceptor(role_map, modality="image", func_name="perceive"):
+    """Build a CodePerceptor that turns a grid (list-of-lists of ints) into ROLE-TYPED objects,
+    completing the perception side of the verified loop. `role_map` (color->role, e.g. inferred once
+    from dynamics) is baked into pure-Python sandbox code: segment connected color components, label
+    each by role, emit {objects:[{role,color,size,centroid,bbox}]}. No imports/numpy -> round-trips
+    through a spec and runs server-side with no LLM, exactly like CodeTransition/CodeObjective."""
+    code = (
+        "def perceive(data):\n"
+        f"    ROLES = {dict(role_map)!r}\n"
+        "    g = data\n"
+        "    H = len(g); W = len(g[0]) if H else 0\n"
+        "    cnt = {}\n"
+        "    for row in g:\n"
+        "        for v in row:\n"
+        "            cnt[v] = cnt.get(v, 0) + 1\n"
+        "    bg = max(cnt, key=lambda k: cnt[k]) if cnt else 0\n"
+        "    seen = [[False] * W for _ in range(H)]\n"
+        "    objs = []\n"
+        "    for r in range(H):\n"
+        "        for c in range(W):\n"
+        "            if seen[r][c] or g[r][c] == bg:\n"
+        "                continue\n"
+        "            color = g[r][c]; stack = [(r, c)]; seen[r][c] = True; cells = []\n"
+        "            while stack:\n"
+        "                y, x = stack.pop(); cells.append((y, x))\n"
+        "                for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n"
+        "                    ny, nx = y + dy, x + dx\n"
+        "                    if 0 <= ny < H and 0 <= nx < W and not seen[ny][nx] and g[ny][nx] == color:\n"
+        "                        seen[ny][nx] = True; stack.append((ny, nx))\n"
+        "            ys = [p[0] for p in cells]; xs = [p[1] for p in cells]\n"
+        "            objs.append({'role': ROLES.get(color, 'object'), 'color': color, 'size': len(cells),\n"
+        "                         'centroid': [round(sum(ys) / len(ys), 1), round(sum(xs) / len(xs), 1)],\n"
+        "                         'bbox': [min(ys), min(xs), max(ys), max(xs)]})\n"
+        "    objs.sort(key=lambda o: -o['size'])\n"
+        "    return {'objects': objs}\n"
+    )
+    return CodePerceptor(code, produces=["objects"], modality=modality, func_name=func_name)

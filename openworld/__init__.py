@@ -50,7 +50,7 @@ from .perceive import (
     JSONPerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
     PerceptionGate, Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter,
     ToolRegistry, TranscriptPerceptor, VisionPerceptor, image_to_b64,
-    sample_frames,
+    make_typed_perceptor, sample_frames,
 )
 from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
@@ -154,6 +154,7 @@ __all__ = [
     "PerceptionError",
     "MockPerceptor",
     "CodePerceptor",
+    "make_typed_perceptor",
     "JSONPerceptor",
     "RegexPerceptor",
     "LLMEmitter",

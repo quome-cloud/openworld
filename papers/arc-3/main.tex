@@ -224,6 +224,19 @@ receives the next frame, a game state (in-progress / win / over), and a level co
 the \NumArcGames{} public games locally through the official \texttt{arc-agi} toolkit
 (a Gym-like \texttt{reset}/\texttt{step} interface) and score with its scorecards. We treat each
 game as a \emph{world}: a deterministic transition function over the symbolic grid state.
+Fig.~\ref{fig:example} shows one game (\texttt{ka59}) and a verified solution end-to-end, to ground
+what follows.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_example_ka59.png}
+\caption{\textbf{A worked example (\texttt{ka59}).} (a)~The rendered initial frame: two rooms joined
+by a corridor, a purple door, a green agent, target squares. (b)~The agent walks to the door with
+directional actions. (c)~A single click at $(43,31)$ operates the door and the level completes---a
+\emph{hybrid} (navigate $+$ click) solution. Actions are either directional (1--5,7) or a coordinate
+click (\texttt{ACTION6}); the win here is an ordered \emph{procedure}, not a reachable single state.}
+\label{fig:example}
+\end{figure}
 
 \section{The recipe: explore, synthesize-and-verify, plan}
 \paragraph{Explore.} A budgeted policy (random, then change-seeking) gathers $(s,a,s')$
@@ -319,6 +332,18 @@ approximate ones mislead it}---reinforcing why verification, not just learning, 
 
 \section{The solving wall: goal inference (E88--E90)}
 \label{sec:solvewall}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{figs/arc3_goal_as_procedure.png}
+\caption{\textbf{The diagnosis: goal-as-state vs.\ goal-as-procedure.} Left: methods that optimize a
+score over a single \emph{state} (MPC, atomic objectives, LLM/Bayesian goal hypotheses) climb to the
+wrong configuration. Right: the win is a specific ordered \emph{procedure} (A$\to$B$\to$C), which no
+single-state score ranks---so undirected search occasionally stumbles into it while goal-conditioned
+planning never does. This is why four principled goal-discovery methods solve $0$ hard games even on
+fidelity-$1.0$ models.}
+\label{fig:procedure}
+\end{figure}
 \emph{Automated} solving (no reasoning agent in the loop) is \textbf{hard}, and the value of this
 study is locating exactly why---a diagnosis that later tells the router (\S\ref{sec:router}) which
 games to escalate to a live coding agent (\S\ref{sec:agent}), which crosses this wall on every one. (1)~\emph{Exploration cannot find a reward.} With a perfect model, neither pixel-novelty (E88)
@@ -527,6 +552,18 @@ same-engine, cost-matched, live-protocol comparison is the needed next experimen
 
 \section{A random-play baseline: what the protocol gives for free}
 \label{sec:baseline}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_above_random.png}
+\caption{\textbf{Levels reached: random baseline vs.\ our best method, per game.} Green = we beat
+random; orange = we tie or trail it. Random (unbounded resets) already reaches $\geq$1 level on
+$11/25$ and even chains to level~2 on \texttt{ar25, cd82, sp80} (where our non-chaining solvers stop
+at level~1). Our distinctive value is the $14$ games random never reaches (the procedural walls) and
+the two where we go strictly deeper (\texttt{ft09}~6 vs.~2, \texttt{r11l}~6 vs.~1): $16/25$ strictly
+above random.}
+\label{fig:aboverandom}
+\end{figure}
 Because every solve here is \emph{offline} with \emph{unbounded resets}, we must ask how much the
 \emph{protocol}---not the method---contributes. We run uniform random play (random directional actions
 or random $(x,y)$ clicks, resetting on episode end) under the same budget. \textbf{Random reaches

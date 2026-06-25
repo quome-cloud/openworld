@@ -122,7 +122,7 @@
 
 \vspace{1.0em}
 \begin{center}
-  {\LARGE\bfseries Multi-Perception Consensus World Models:\\[2pt]
+  {\LARGE\bfseries Hybrid Perceptual World Models:\\[2pt]
    World-Time Compute for Interactive Reasoning (ARC-AGI-3)\par}
 
   \vspace{0.5em}
@@ -175,12 +175,14 @@ with a \emph{frontier} model recovers verified dynamics: on the \ArcNReal{} real
 synthesized code reaches \ArcClaudeFid{} mean held-out exact-match, beating the copy-frame baseline
 on \ArcClaudeBeatsCopy/\ArcNReal{} and a local code model (qwen-32B, \ArcQwenThirtyTwoFid; Claude
 wins \ArcClaudeBeatsQwen/\ArcRealForQwen), with \ArcNNearPerfect{} \emph{near-perfect} ($\geq$90\%)
-world models. \textbf{But modeling is not solving.} Our central finding is that level completion
-comes not from any single strategy but from \textbf{multi-perception synthesis}: we perceive each
-game through multiple modalities---directional and \emph{click} action models over a status-masked
-frame state---build a discovered world-model \emph{map} (an \openworld{} \texttt{World}) per
-modality at \emph{world-time compute} (search builds the map at play), and combine them with
-\textbf{consensus hard-voting} (\texttt{ConsensusTransition}). This solves \textbf{12 of 25 public
+world models. \textbf{But modeling is not solving.} Our central finding is that level completion comes
+not from any single strategy but from a \textbf{hybrid perceptual world model}---multiple perceptual
+modalities, fused for the games where it suffices and \emph{escalated to a reasoning agent} where it
+does not. Concretely, the fusion is \textbf{multi-perception synthesis}: we perceive each game through
+multiple modalities---directional and \emph{click} action models over a status-masked frame
+state---build a discovered world-model \emph{map} (an \openworld{} \texttt{World}) per modality at
+\emph{world-time compute} (search builds the map at play), and combine them with \textbf{consensus
+hard-voting} (\texttt{ConsensusTransition}). This solves \textbf{12 of 25 public
 games}, including \texttt{s5i5}, which resisted three principled goal-discovery methods
 (atomic-objective, LLM-hypothesis, and Bayesian-subworld planning, each \emph{0/9} even with a
 fidelity-1.0 model). The remaining games are \emph{goal-as-procedure} walls---and we crack them with

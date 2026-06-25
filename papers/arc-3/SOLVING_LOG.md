@@ -63,3 +63,11 @@ sandbox**, and wrap as an `openworld.World` (like `minigrid_world.py`). E93 solv
   condition is too opaque to reason out, so the solve came from capture+verify, not goal inference.
 - **Takeaway:** a verified, reproducible solution beats random at matched budget; the bottleneck
   remains goal inference for the harder levels.
+
+### E94 — code world model for level 2 (per user: use the CWM more)
+Honest: the level-1 solve used capture+replay, NOT the code world model. For level 2 (unreachable by
+blind real-env search, which is forward-only + resets to L1), the CWM's real value is **tree search
+with free state-restoration + backtracking** in imagination -> diverse candidate plans -> verify the
+best in the real env (synthesize->plan->verify). E94: collect L2 transitions -> synthesize L2 model
+-> BFS over object-configs in the model -> execute candidates in real env.
+- Result: _(running)_

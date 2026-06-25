@@ -33,3 +33,4 @@ gallery/preview.html
 environment_files/
 experiments/environment_files/
 .claude/scheduled_tasks.lock
+scratch_arc/

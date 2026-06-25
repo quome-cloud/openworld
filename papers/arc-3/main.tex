@@ -185,8 +185,8 @@ games}, including \texttt{s5i5}, which resisted three principled goal-discovery 
 (atomic-objective, LLM-hypothesis, and Bayesian-subworld planning, each \emph{0/9} even with a
 fidelity-1.0 model). The remaining games are \emph{goal-as-procedure} walls---and we crack them with
 a \textbf{live coding agent} (Claude Code that builds an executable world model and \emph{reasons} the
-win condition, the SOTA recipe expressed in OpenWorld): it solves \textbf{13/25} on its own and lifts
-the union to \textbf{23/25} games (verified by replay; \texttt{ft09} and \texttt{r11l} full six-level games), where four
+win condition, the SOTA recipe expressed in OpenWorld): it solves \textbf{15/25} on its own and lifts
+the union to \textbf{25/25} games---every public game reaches $\geq$1 level (verified by replay; \texttt{ft09} and \texttt{r11l} full six-level games), where four
 automated goal-discovery methods solved \emph{zero}. We report the full strategy$\times$game landscape
 (Fig.~\ref{fig:heatmap}) as a guide for world-model research: the leverage is \emph{perception and
 synthesis}, and---for the procedural goals---\emph{a reasoning agent that writes its own world model}.
@@ -404,7 +404,7 @@ on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, no
 Directed search and graph exploration each reach $6$; multi-perception consensus reaches $10$
 (uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). The \textbf{live coding agent} (right,
 boxed) lights up the procedural walls no other method touches---\texttt{dc22, ft09, g50t, ka59, lp85,
-re86, sb26, sc25, su15, tn36, wa30}---lifting the union to $24/25$ (only \texttt{bp35} remains).}
+re86, sb26, sc25, su15, tn36, wa30, bp35}---lifting the union to $\mathbf{25/25}$ ($\geq$1 level on every game).}
 \label{fig:heatmap}
 \end{figure}
 
@@ -460,7 +460,7 @@ or per-state vote). This is decisive: \texttt{ar25} solves via the \emph{directi
 \caption{\textbf{Games solved per strategy.} Goal-discovery methods solve $0$; directed search and
 graph exploration $6$; multi-perception consensus $10$ (adding \texttt{cn04, lf52, m0r0, s5i5}); the
 \textbf{live coding agent} solves $13$ and cracks the procedural walls. Across all strategies the
-union is \textbf{24/25}.}
+union is \textbf{25/25}.}
 \label{fig:bar}
 \end{figure}
 
@@ -482,15 +482,31 @@ raises \texttt{levels\_completed}, plan through the model, and replay-verify. Th
 ``executable world models'' SOTA method expressed in OpenWorld terms (a synthesized
 \texttt{CodeTransition} plus a reasoned \texttt{CodeObjective}), with a reasoning model in the loop.
 
-\textbf{Result.} The agent solves \textbf{13/25} games on its own---including every wall the automated
+\textbf{Result.} The agent solves \textbf{15/25} games on its own---including every wall the automated
 methods missed (\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36, wa30})---and
-lifts the \emph{union across all strategies to 24/25} (only \texttt{bp35} remains).
+lifts the \emph{union across all strategies to 25/25}---$\geq$1 level on every public game.
 Every solution is independently replay-verified against the live game; \texttt{ft09} and \texttt{r11l} are complete six-level games. Tellingly, the agent's solutions are often \emph{hybrid}---e.g.\ \texttt{ka59} mixes
 directional navigation with a single click to operate a door---a goal structure no fixed hypothesis
 space expressed. \emph{Honest scope:} most agent solves complete one level (the $\geq$1-level union
 metric); full-game completion (all levels) is harder---our automated chaining stalls at the
 compositionality cliff---so apart from \texttt{ft09}/\texttt{r11l}, multi-level completion is the next frontier, and
 a fair comparison to full-game leaderboard scores would require chaining every level.
+
+\paragraph{Comparison to the state of the art, stated precisely.} Ours and the leaderboard's metrics
+differ, so we are unambiguous. The SOTA executable-world-model agent (baseline1, GPT-5.5) completes
+\textbf{15/25 \emph{full} games} (mean per-game RHAE $\approx$58\%); the graph-explorer reports
+\textbf{30/52 \emph{levels}}. Our headline---\textbf{25/25}---is the union of \textbf{$\geq$1-level}
+verified solves across our strategy stack, with the \emph{live coding agent at 15/25 on its own}; of
+these, \textbf{two are full games} (\texttt{ft09}, \texttt{r11l}). We therefore do \textbf{not} claim
+to beat SOTA on full-game completion---there we have 2, they have 15. We claim something narrower and
+useful: (i) \emph{$\geq$1-level reachability on all 25 public games}, which no prior single method
+reports; (ii) that the executable-world-model recipe \emph{reproduces in OpenWorld with a different
+agent} (Claude)---independent corroboration of the SOTA approach; and (iii) a \emph{mapped strategy
+landscape} (Fig.~\ref{fig:heatmap}) showing which method class solves what. Two honesty notes: our
+solves are \emph{offline and replay-verified} (exploiting determinism and unbounded resets), so they
+are \emph{not} scored under the leaderboard's live-agent protocol or its action-efficiency penalty
+(RHAE)---a leaderboard-comparable number would require running under those rules; and full-game
+completion (chaining every level under budget) is the honest remaining gap.
 
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the

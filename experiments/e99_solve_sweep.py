@@ -52,12 +52,16 @@ def search(game, budget, bias, seed):
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--budget",type=int,default=12000); ap.add_argument("--bias",type=float,default=0.45)
-    ap.add_argument("--seed",type=int,default=0); ap.add_argument("--out",default="results/e99_solve_sweep.json"); a=ap.parse_args()
+    ap.add_argument("--seed",type=int,default=0); ap.add_argument("--seeds",type=int,default=1); ap.add_argument("--out",default="results/e99_solve_sweep.json"); a=ap.parse_args()
     games=all_games(); print(f"[e99] sweeping {len(games)} games (budget {a.budget}, interact-bias {a.bias})",flush=True)
     res={}
     for g in games:
-        try: r=search(g, a.budget, a.bias, a.seed)
-        except Exception as e: r={"error":str(e)[:80],"verified":False}
+        r={"level":0,"verified":False}
+        for sd in range(a.seeds):
+            try: rr=search(g, a.budget, a.bias, a.seed+sd)
+            except Exception as e: rr={"error":str(e)[:80],"verified":False}
+            if rr.get("verified") or rr.get("level",0)>r.get("level",0): r=rr
+            if r.get("verified"): break
         res[g]=r
         tag="SOLVED" if r.get("verified") else ("reward(unverified)" if r.get("level",0)>0 else "no reward")
         print(f"  {g}: {tag} level={r.get('level',0)} seq_len={r.get('seq_len','-')}",flush=True)

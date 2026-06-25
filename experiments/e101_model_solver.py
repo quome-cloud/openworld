@@ -17,7 +17,7 @@ import arc_agi
 from arcengine import GameAction
 import arc3_graph as G
 ACTS=[GameAction.ACTION1,GameAction.ACTION2,GameAction.ACTION3,GameAction.ACTION4,GameAction.ACTION5,GameAction.ACTION6,GameAction.ACTION7]
-MODELS={Path(f).stem:f for f in glob.glob("experiments/results/arc3_e86b_claude/*.json")}
+MODELS={Path(f).stem:f for f in glob.glob(str(Path(__file__).resolve().parent/"results"/"arc3_e86b_claude"/"*.json"))}
 
 def grid(o):
     a=np.asarray(o.frame); return (a[-1] if a.ndim==3 else a).reshape(64,64)

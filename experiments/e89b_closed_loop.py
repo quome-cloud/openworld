@@ -16,6 +16,7 @@ import arc_agi
 from arcengine import GameAction
 
 import e86_arc3 as E
+import arc3_graph as GR
 
 HERE = Path(__file__).resolve().parent
 ACTS = [GameAction.ACTION1, GameAction.ACTION2, GameAction.ACTION3, GameAction.ACTION4,
@@ -78,8 +79,15 @@ def history_block(history):
     return s
 
 
-def claude_goal(dyn, fa, fb, n, history):
-    prompt = BASE.format(dyn=dyn, a=render(fa), b=render(fb), n=n) + history_block(history) + ASK
+def claude_goal(dyn, fa, fb, n, history, graph=False):
+    prompt = BASE.format(dyn=dyn, a=render(fa), b=render(fb), n=n)
+    if graph:
+        prompt += (f"\n\nOBJECT-GRAPH VIEW (reason about goals relationally over these objects):\n"
+                   f"STATE A:\n{GR.graph_repr(fa)}\nSTATE B:\n{GR.graph_repr(fb)}\n"
+                   f"relational change A->B: {GR.graph_diff(fa, fb)}\n"
+                   f"Express goal_score over object relations (e.g. minimize distance between the "
+                   f"movable object and a target object, or maximize covered target cells).")
+    prompt += history_block(history) + ASK
     code = E.extract_code(E.claude_cli(prompt, timeout=600))
     ns = {"np": np, "numpy": np}
     try:
@@ -139,6 +147,7 @@ def main():
     ap.add_argument("--rounds", type=int, default=5)
     ap.add_argument("--budget", type=int, default=400)
     ap.add_argument("--depth", type=int, default=4)
+    ap.add_argument("--graph", action="store_true", help="give Claude the object-graph view for relational goals")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="")
     args = ap.parse_args()
@@ -154,7 +163,7 @@ def main():
 
     history = []; best_levels = 0; solved = False
     for r in range(args.rounds):
-        goal_fn, code = claude_goal(dyn, fa, fb, len(avail), history)
+        goal_fn, code = claude_goal(dyn, fa, fb, len(avail), history, graph=args.graph)
         out = run_episode(args.game, predict, goal_fn, args.budget, args.depth, args.seed)
         best_levels = max(best_levels, out["levels"])
         print(f"[e89b/{args.game}] round {r}: levels={out['levels']} game-overs={out['terminations']} "

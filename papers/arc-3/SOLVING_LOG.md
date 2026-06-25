@@ -34,3 +34,10 @@ sandbox**, and wrap as an `openworld.World` (like `minigrid_world.py`). E93 solv
 - E92c: brute-force / systematic short-sequence search in the real env to grab any level-1 reward
   on the easiest game, then induce the win-rule (E88b piecewise) and plan the rest.
 - E92d: subgoal decomposition over the object graph (key→door→exit style).
+
+### Findings (E93 capture + sweep)
+- **sp80 is the ONLY game with a reward reachable by undirected play** (14 others: 0 in 4000 steps).
+- sp80's level-1 win fires on **action 5** (interact/submit) after ~**291 steps** of mixed actions;
+  the agent need not be "docked" — the win is an accumulated/interaction condition, not pure position.
+- **E92's 150-step budget was below the ~291-step win horizon** -> it couldn't complete a level
+  regardless of strategy. Fix: raise budget to ~500 steps (turns 50 x plan 10) + interact-aware play.

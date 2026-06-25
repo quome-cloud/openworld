@@ -1,0 +1,9 @@
+{
+  "game": "sp80",
+  "method": "agentic-qwen3-coder:30b",
+  "backend": "ollama:qwen3-coder:30b",
+  "verified_exact": 0.0,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": null
+}

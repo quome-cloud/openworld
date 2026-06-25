@@ -1,0 +1,12 @@
+{
+  "game": "vc33",
+  "fidelity": 0.8333,
+  "win_levels": 7,
+  "budget": 3000,
+  "levels_graph_novelty": 0,
+  "levels_pixel_novelty": 0,
+  "levels_random": 0,
+  "graph_configs_seen": 50,
+  "pixel_states_seen": 50,
+  "first_reward": false
+}

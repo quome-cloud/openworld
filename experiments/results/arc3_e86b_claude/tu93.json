@@ -1,0 +1,9 @@
+{
+  "game": "tu93",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.5417,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    # --- Avatar: 3x3 block (body=9, direction marker=4) in one of two slots ---\n    # left slot  = rows 15-17, cols 15-17   (faces left:  marker at [16,15])\n    # right slot = rows 15-17, cols 21-23   (faces right: marker at [16,23])\n    def active(r0, c0):\n        blk = out[r0:r0+3, c0:c0+3]\n        return bool(np.any(blk == 9) or np.any(blk == 4))\n\n    left_active = active(15, 15)\n    right_active = active(15, 21)\n\n    if action == 3:        # move to LEFT slot (only if coming from right slot)\n        if right_active and not left_active:\n            out[15:18, 21:24] = 0\n            out[15:18, 15:18] = 9\n            out[16, 15] = 4\n    elif action == 4:      # move to RIGHT slot (only if coming from left slot)\n        if left_active and not right_active:\n            out[15:18, 15:18] = 0\n            out[15:18, 21:24] = 9\n            out[16, 23] = 4\n    # actions 1 and 2 do not modify the avatar (no-op when already in slot)\n\n    # --- Bar at row 63: remove the rightmost color-6 cell ---\n    bar_idx = np.where(out[63] == 6)[0]\n    if bar_idx.size > 0:\n        out[63, bar_idx[-1]] = 0\n\n    return out"
+}

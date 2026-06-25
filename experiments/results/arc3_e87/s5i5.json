@@ -1,0 +1,15 @@
+{
+  "game": "s5i5",
+  "e86_fidelity": 0.78,
+  "controllability": {
+    "n_tasks": 15,
+    "plan_found_frac": 1.0,
+    "plan_reach_frac": 1.0,
+    "random_reach_frac": 1.0
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 8
+  }
+}

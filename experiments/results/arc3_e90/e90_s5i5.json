@@ -1,0 +1,12 @@
+{
+  "game": "s5i5",
+  "fidelity": 1.0,
+  "win_levels": 8,
+  "budget": 3000,
+  "levels_graph_novelty": 0,
+  "levels_pixel_novelty": 0,
+  "levels_random": 0,
+  "graph_configs_seen": 50,
+  "pixel_states_seen": 50,
+  "first_reward": false
+}

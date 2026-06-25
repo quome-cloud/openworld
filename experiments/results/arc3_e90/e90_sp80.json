@@ -1,0 +1,12 @@
+{
+  "game": "sp80",
+  "fidelity": 0.8472,
+  "win_levels": 6,
+  "budget": 3000,
+  "levels_graph_novelty": 0,
+  "levels_pixel_novelty": 0,
+  "levels_random": 1,
+  "graph_configs_seen": 138,
+  "pixel_states_seen": 138,
+  "first_reward": false
+}

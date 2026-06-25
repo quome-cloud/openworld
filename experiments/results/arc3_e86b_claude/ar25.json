@@ -1,0 +1,9 @@
+{
+  "game": "ar25",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.2361,
+  "copy_frame_exact": 0.2361,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    BG = 9\n\n    # Move counter: column 63 fills top-down with color 5 on every action\n    # that \"counts\" (observed: actions 1,3,4,5 advance it; action 7 does not).\n    if action != 7:\n        col = out[:, 63]\n        empty = np.where(col == BG)[0]\n        if empty.size > 0:\n            out[empty[0], 63] = 5\n\n    return out"
+}

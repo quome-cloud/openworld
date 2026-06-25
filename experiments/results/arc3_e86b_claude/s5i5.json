@@ -1,0 +1,9 @@
+{
+  "game": "s5i5",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 1.0,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    if action != 6:               # s5i5 only exposes ACTION6\n        return out\n    M = 50                        # level StepCounter (max steps); bar = round(64*steps/M)\n    row = out[63]\n    # render_interface overwrites all of row 63: x < idx -> 3, x >= idx -> 4\n    idx = int(np.count_nonzero(row == 3))          # current boundary = count of color-3 cells\n    s = int(round(idx * M / 64.0))                 # recover current_steps from boundary\n    s_next = max(0, s - 1)                          # ACTION6 decrements current_steps by 1\n    idx_next = int(round(64.0 * s_next / M))        # new boundary\n    out[63, :idx_next] = 3\n    out[63, idx_next:] = 4\n    return out"
+}

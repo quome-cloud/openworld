@@ -1,0 +1,15 @@
+{
+  "game": "sb26",
+  "e86_fidelity": 1.0,
+  "controllability": {
+    "n_tasks": 13,
+    "plan_found_frac": 1.0,
+    "plan_reach_frac": 1.0,
+    "random_reach_frac": 0.231
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 8
+  }
+}

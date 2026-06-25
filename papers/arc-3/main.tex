@@ -266,6 +266,60 @@ planning through these models (compounding error) is E87. These bound the claim 
 \emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---a foundation
 for, not yet a demonstration of, solving.
 
+\section{Agentic synthesis and the capability ceiling (E86b)}
+Does a better \emph{harness} close the synthesizer gap? We replace one-shot prompting with a
+verifier-in-the-loop (generate $\to$ run the code $\to$ read the exact failing cells $\to$ revise),
+run \emph{identically} for qwen-30B and Claude across \ArcAgenticN{} games (Table~\ref{tab:arc2x2}).
+The agentic loop lifts Claude (\ArcOneShotClaudeB$\,\to\,$\ArcAgenticClaude, helping
+\ArcAgenticHelped/\ArcAgenticN{} games---e.g.\ pushing \texttt{s5i5} to a \emph{perfect} model) but
+does \textbf{nothing} for qwen-30B (\ArcOneShotQwenB$\,\to\,$\ArcAgenticQwen). The harness is
+\textbf{capability-gated}: it helps a model that can already reason about \emph{why} its code failed,
+and \emph{widens} the gap rather than closing it. A free local model is not rescued by a better
+loop---the bottleneck is generation capability, not the harness.
+
+\begin{table}[t]\centering
+\caption{\textbf{The 2$\times$2 (verified-code fidelity, \ArcAgenticN{} games).} Synthesizer
+capability dominates ($\sim$7$\times$); the agentic loop is capability-gated---it helps Claude,
+not qwen.}\label{tab:arc2x2}
+\begin{tabular}{lcc}
+\hline
+synthesizer & one-shot & agentic loop \\
+\hline
+qwen-30B & \ArcOneShotQwenB & \ArcAgenticQwen \\
+Claude & \ArcOneShotClaudeB & \ArcAgenticClaude \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Planning through the model (E87)}
+A verified model is only useful if you can \emph{search} it. We test \textbf{controllability}: sample
+a reachable target (a short random action sequence from reset), plan a sequence \emph{through the
+verified code} to reach it, then execute in the real environment. On a perfect model (\texttt{sb26},
+fidelity $1.0$) planning reaches the target \ArcCtrlPlan{} of the time vs.\ \ArcCtrlRand{} for
+random---the model is plannable. But success is \textbf{fidelity-gated}: below fidelity $1$ the plan,
+correct \emph{in the model}, diverges in reality as single-step error compounds over the horizon, so
+partial models do not yet support reliable multi-step control. \emph{Exact models admit search;
+approximate ones mislead it}---reinforcing why verification, not just learning, is the point.
+
+\section{The solving wall: goal inference (E88--E90)}
+Solving (completing levels) is \textbf{unsolved}, and the value of this study is locating exactly
+why. (1)~\emph{Exploration cannot find a reward.} With a perfect model, neither pixel-novelty (E88)
+nor object-graph-novelty (E90) exploration completes a level: both saturate a tiny reachable region
+(\ArcExploreLo--\ArcExploreHi{} states) and trigger \emph{zero} reward---the win is not reachable by
+undirected action, regardless of representation. (2)~\emph{Goal hypotheses are sophisticated but
+unverifiable.} Shown the dynamics and sample frames, Claude infers coherent goals (for \texttt{sp80}
+it identifies the movable block, the target receptacles, and explicitly ignores the timer), yet
+one-shot they are guesses---on \texttt{s5i5} it mistakes a countdown \emph{timer} for the objective
+and optimizes toward losing. (3)~\emph{Closing the loop is not enough.} Feeding real-env feedback
+(E89b: ``optimizing that goal ended the game with $0$ wins'') still fails to solve (\texttt{s5i5}
+$0/8$; the only level reached, \texttt{sp80}'s first, is trivially reachable by random too): negative
+feedback says what is \emph{wrong}, not what is \emph{right}, and without ever observing one positive
+reward there is nothing to steer toward. The bottleneck is thus neither modeling, planning, nor
+exploration coverage but \textbf{goal inference}---discovering the win condition with no reward
+signal. This is the wall frontier agents also hit ($\sim$0 on ARC-AGI-3), here precisely located:
+we argue it is the central open problem for verified-world-model agents, and that bootstrapping a
+single positive reward (then inducing the win condition as a piecewise rule) is the key next step.
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit.

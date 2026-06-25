@@ -1,0 +1,9 @@
+{
+  "game": "ls20",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.1111,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    # --- always-advance move counter at rows 61-62 ---\n    bar = np.where(out[61] == 3)[0]\n    nextcol = (bar.max() + 1) if bar.size else 13\n    if 0 <= nextcol < 64:\n        out[61, nextcol] = 3\n        out[62, nextcol] = 3\n\n    # --- locate the 5x5 player object via its color-12 cap (top 2 rows) ---\n    twelves = np.argwhere(frame == 12)\n    if twelves.size == 0:\n        return out\n    r0 = int(twelves[:, 0].min())\n    c0 = int(twelves[:, 1].min())\n    h = w = 5  # object is exactly 5x5\n\n    # confirm a full object footprint exists\n    if r0 + h > 64 or c0 + w > 64:\n        return out\n\n    dr, dc = 0, 0\n    if action == 1:   dr = -h   # up\n    elif action == 2: dr = h    # down\n    elif action == 3: dc = -w   # left\n    elif action == 4: dc = w    # right\n    else:\n        return out\n\n    nr0, nc0 = r0 + dr, c0 + dc\n    # in-bounds?\n    if nr0 < 0 or nc0 < 0 or nr0 + h > 64 or nc0 + w > 64:\n        return out\n\n    # destination must be entirely open track (color 3); no overlap since step == size\n    dest = frame[nr0:nr0 + h, nc0:nc0 + w]\n    if not np.all(dest == 3):\n        return out\n\n    # vacate old footprint -> 3, stamp object at new location\n    out[r0:r0 + h, c0:c0 + w] = 3\n    block = np.empty((h, w), dtype=out.dtype)\n    block[0:2, :] = 12\n    block[2:5, :] = 9\n    out[nr0:nr0 + h, nc0:nc0 + w] = block\n\n    return out"
+}

@@ -1,0 +1,10 @@
+{
+  "game": "s5i5",
+  "model_fidelity": 1.0,
+  "win_levels": 8,
+  "budget": 1500,
+  "levels_hybrid": 0,
+  "levels_random": 0,
+  "solved": false,
+  "goal_code": "import numpy as np\n\ndef goal_score(frame):  # frame: (64,64) int; HIGHER = closer to completing a level\n    # The level's only lever is ACTION6, which drains the bottom-row StepCounter bar:\n    # render_interface paints row 63 as color-3 (x < boundary) then color-4 (x >= boundary),\n    # boundary = round(64 * current_steps / 50). Each ACTION6 decrements current_steps,\n    # shrinking the 3-region and growing the 4-region. The only goal configuration the agent\n    # can reach is steps == 0  ->  bar fully drained (row 63 all color-4).\n    bar = frame[63]\n    drained = int(np.count_nonzero(bar == 4))   # cells already counted down (grow toward 64)\n    remaining = int(np.count_nonzero(bar == 3))  # steps left to drain (shrink toward 0)\n    # Reward emptying the bar; normalize to ~[0,1] over the 64-cell bar.\n    return (drained - remaining) / 64.0"
+}

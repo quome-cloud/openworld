@@ -1,0 +1,10 @@
+{
+  "game": "sp80",
+  "model_fidelity": 0.8472,
+  "win_levels": 6,
+  "budget": 1500,
+  "levels_hybrid": 0,
+  "levels_random": 1,
+  "solved": false,
+  "goal_code": "import numpy as np\n\ndef goal_score(frame):\n    # Inferred objective\n    # -----------------\n    # The only agent-controllable object is the 4-tall color-9 block (actions\n    # 1-4 slide it up/down/left/right by 4 cells; the row-0 color-14 bar is just\n    # a per-step time/move budget that drains automatically -- NOT a goal, so we\n    # never reward consuming it).\n    #\n    # Between the two sample states the *only* controllable change is the 9-block\n    # sliding DOWN, toward the color-11 \"staple\" receptacles parked along the\n    # bottom of the board. The block (cols 12-31, center ~21.5) is horizontally\n    # centered on the left receptacle (cols 16-27) -- so the level is completed by\n    # docking/landing the movable block onto the target structure. As the block\n    # descends onto it, the target cells get overpainted with 9.\n    #\n    # Reward = pull the block toward the nearest target cell (far-field gradient\n    # that points the planner straight down), plus a small bonus for target cells\n    # already covered (near-field, breaks ties as it lands). Higher == closer.\n\n    f = np.asarray(frame)\n\n    pr, pc = np.where(f == 9)    # movable block\n    tr, tc = np.where(f == 11)   # target receptacles\n\n    # Level solved: targets covered/consumed (or block fully merged in).\n    if tr.size == 0 or pr.size == 0:\n        return 1e6\n\n    p_row, p_col = pr.mean(), pc.mean()\n\n    # Primary: shrink distance from the block to the nearest target cell.\n    nearest = np.hypot(tr - p_row, tc - p_col).min()\n\n    # Secondary: fewer remaining target cells == more of the dock already filled.\n    covered = -0.01 * tc.size\n\n    return -float(nearest) + covered"
+}

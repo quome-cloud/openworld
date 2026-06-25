@@ -44,6 +44,12 @@ Recent turns (your action plan -> what changed -> level gained):
 Your running notes / goal hypothesis from before:
 {notes}
 
+IMPORTANT: not all actions move objects. Movement actions (often 1-4) reposition things, but other
+actions (often 5, 6, 7) typically INTERACT / SUBMIT / trigger game events -- and completing a level
+usually REQUIRES an interact action, not just moving. Early on, probe EVERY available action once to
+learn its effect; then, when objects look arranged/aligned, try the interact actions to complete the
+level. Do not just repeat movement.
+
 Think step by step about what completes a level, using what changed last turn as evidence. Then output EXACTLY:
 PLAN: <comma-separated action integers, 1 to {planmax} of them>
 NOTES: <one updated hypothesis about the goal + what each action seems to do, to remember next turn>"""

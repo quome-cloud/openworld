@@ -21,6 +21,11 @@ import numpy as np
 import arc_agi, arc3_graph as G
 from arcengine import GameAction
 import openworld as O
+try:
+    from tqdm import tqdm
+except Exception:
+    def tqdm(x=None,**k):
+        return x if x is not None else None
 from openworld.transition import FunctionTransition
 SIMPLE={1:GameAction.ACTION1,2:GameAction.ACTION2,3:GameAction.ACTION3,4:GameAction.ACTION4,5:GameAction.ACTION5,7:GameAction.ACTION7}
 MAPS=Path("/Users/jim/Desktop/openworld/papers/arc-3/maps")
@@ -74,10 +79,12 @@ def solve_game(game, mode, budget=150000, max_depth=400, seed=0):
     import random as _r
     arc=arc_agi.Arcade(); ENV=arc.make(game); o=ENV.reset(); avail=list(o.available_actions); win=o.win_levels; base=o.levels_completed
     mask,bg=detect_mask(ENV,avail)
-    def sig(g): gg=g.copy(); gg[mask]=0; return hash(gg.tobytes())
+    keep=(~mask).reshape(-1)                          # unmasked cells (status bar excluded)
+    def sig(g): return hash(g.reshape(-1)[keep].tobytes())   # fast: no full-frame copy
     s0=sig(g_of(ENV.reset()))
-    rng=_r.Random(seed); tested={}; table={}; best=base; best_path=[]; steps=0; acache={}
-    while steps<budget:
+    rng=_r.Random(seed); tested={}; table={}; best=base; best_path=[]; steps=0; acache={}; STATE_CAP=40000
+    bar=tqdm(total=budget, desc=f"{game}:{mode}", unit="step", leave=False, ncols=80)
+    while steps<budget and best<win and len(tested)<STATE_CAP:
         ob=ENV.reset(); g=g_of(ob); seq=[]; d=0
         while d<max_depth and steps<budget:
             s=sig(g)
@@ -92,6 +99,8 @@ def solve_game(game, mode, budget=150000, max_depth=400, seed=0):
             if no.levels_completed>best: best=no.levels_completed; best_path=list(seq)
             if str(no.state)!="GameState.NOT_FINISHED": break
             g=ng
+        if hasattr(bar,"update"): bar.update(steps-bar.n); bar.set_postfix(best=best, states=len(tested))
+    if hasattr(bar,"close"): bar.close()
     return {"avail":avail,"win":win,"base":base,"level":best,"full":best_path,"steps":steps,"table":table,"s0":s0,"click":6 in avail}
 
 def build_world(game, table, s0):
@@ -133,8 +142,8 @@ def verify(game, full):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument("--games",default=""); ap.add_argument("--budget",type=int,default=150000); ap.add_argument("--out",default="results/e112_arc_simulator.json"); a=ap.parse_args()
     games=a.games.split(",") if a.games else all_games()
-    print(f"[e112] OpenWorld ARC-3 simulator on {len(games)} games (budget {a.budget}/level)",flush=True); res={}
-    for g in games:
+    print(f"[e112] OpenWorld ARC-3 simulator on {len(games)} games (budget {a.budget})",flush=True); res={}
+    for gi,g in enumerate(tqdm(games, desc='games', ncols=80)):
         try:
             avail0=list(arc_agi.Arcade().make(g).reset().available_actions)
             modes=(["click"] if avail0==[6] else (["dir"] if 6 not in avail0 else ["dir","click"]))

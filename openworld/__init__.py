@@ -33,6 +33,7 @@ from .memory import MemoryStore
 from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
+from .reward import CodeObjective, induce_reward, verify_reward
 from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
 from .intervals import Affine, Interval
 # numpy-backed extras (wavelets/sheaf/infogeom/transport) are imported lazily via
@@ -140,6 +141,9 @@ __all__ = [
     "to_reactflow",
     "Objective",
     "ObjectiveSuite",
+    "CodeObjective",
+    "induce_reward",
+    "verify_reward",
     "OllamaConnectionError",
     "OllamaLLM",
     "Observation",

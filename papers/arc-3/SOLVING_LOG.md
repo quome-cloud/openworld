@@ -20,6 +20,15 @@ Perception = object-graph view + history; Claude proposes a short plan + an evol
 execute in real env; feed back level deltas. Prioritize games where level-1 is reachable (sp80).
 - Result: _(running)_
 
+### arc3_world / E93 — repo-native code world model in the loop (per user direction)
+Use code world models *as defined in the repo* (World + CodeTransition), not a raw function. Finding:
+the repo sandbox is **pure-Python** (whitelist math/random, no imports/numpy), so we synthesize the
+dynamics as a numpy-free `transition(state, action)` over the frame-as-list, **verify it in the
+sandbox**, and wrap as an `openworld.World` (like `minigrid_world.py`). E93 solver then plans via
+`w.transition.step` (lookahead in the verified model) + Claude reasoning + real-env reward.
+- `arc3_world.py`: synthesize + sandbox-verify + build World. Running on s5i5.
+- Result: _(running)_
+
 ### Candidate next strategies (if E92 stalls)
 - E92b: vision — render frames as images, use Claude's multimodal reasoning for the goal.
 - E92c: brute-force / systematic short-sequence search in the real env to grab any level-1 reward

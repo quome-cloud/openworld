@@ -30,14 +30,17 @@ BEFORE the asserts so a failed self-check never loses the run.
 from __future__ import annotations
 
 import argparse
+import os
 import random
 
 import blocksworld as bw
 from common import GENERATOR_MODEL, mcnemar_p, save_results, wilson_ci
 
-HORIZONS = [2, 4, 6, 8, 10, 12]
+# Defaults are the real experiment; env overrides let a compute harness shrink scope for a
+# cost-metering smoke without changing default behavior (offline self-checks are unaffected).
+HORIZONS = [int(x) for x in os.environ.get("E78_HORIZONS", "2,4,6,8,10,12").split(",")]
 N_BLOCKS = 4
-N_PER_BUCKET = 25
+N_PER_BUCKET = int(os.environ.get("E78_N_PER_BUCKET", "25"))
 MAX_ROUNDS = 4          # tool-use rounds for A1/A2
 
 
@@ -56,7 +59,9 @@ def parse_plan(text):
         name = line[:line.index("(")].strip()
         if name not in bw.ACTIONS:
             continue
-        args = [a for a in line[line.index("(") + 1:line.index(")")].replace(" ", "").split(",") if a]
+        # strip surrounding quotes/space per-arg: models write pickup('d') / unstack("d","b")
+        args = [a.strip().strip("'\"`") for a in line[line.index("(") + 1:line.index(")")].split(",")]
+        args = [a for a in args if a]
         if name in ("pickup", "putdown") and len(args) == 1:
             plan.append((name, {"x": args[0]}))
         elif name in ("stack", "unstack") and len(args) == 2:
@@ -64,14 +69,21 @@ def parse_plan(text):
     return plan
 
 
+def _fmt_action(n, p):
+    return f"{n}({p['x']})" if n in ("pickup", "putdown") else f"{n}({p['x']}, {p['y']})"
+
+
 def _plan_text(plan):
-    def fmt(n, p):
-        return f"{n}({p['x']})" if n in ("pickup", "putdown") else f"{n}({p['x']}, {p['y']})"
-    return "PLAN:\n" + "\n".join(fmt(n, p) for n, p in plan)
+    return "PLAN:\n" + "\n".join(_fmt_action(n, p) for n, p in plan)
 
 
 def build_prompt(init, goal, history):
     lines = [bw.DESCRIPTION, "Actions: pickup(x), putdown(x), stack(x,y), unstack(x,y).",
+             "Rules: " + " ".join(bw.RULES),
+             "pickup(x) is for a block on the table; for a block sitting on another block use "
+             "unstack(x, y). on={'d': 'b'} means d is on b, so remove it with unstack(d, b).",
+             "Block names are single bare letters, e.g. unstack(d, b) then putdown(d). "
+             "'table' is not a block; putdown(x) already puts x on the table.",
              f"Initial: on={init['on']} table={sorted(init['table'])} holding={init['holding']}",
              f"Goal: on={goal.get('on', {})} table={sorted(goal.get('table', []))}"]
     for i, (plan, fb) in enumerate(history):
@@ -95,7 +107,7 @@ def feedback(rollout):
     fi = rollout["first_illegal"]
     if fi:
         n, p = fi["action"]
-        return f"action {fi['index'] + 1} {n}({p}) is illegal: {fi['reason']}"
+        return f"action {fi['index'] + 1} {_fmt_action(n, p)} is illegal: {fi['reason']}"
     if not rollout["reached"]:
         return f"all actions ran but the goal is not reached; resulting state: {_fmt_state(rollout['final_state'])}"
     return "valid"
@@ -190,7 +202,10 @@ def live_propose_and_sim(model):
     from openworld.transition import LLMTransition
     from openworld import Action, WorldState
     from common import require_ollama
-    llm = require_ollama(model, temperature=0.0, options={"num_ctx": 8192})
+    # A revise loop needs stochastic retries: at temperature 0 the model regenerates the SAME
+    # plan given the same feedback, so A1/A2 can never actually revise. Default to exploring.
+    temperature = float(os.environ.get("E78_TEMPERATURE", "0.7"))
+    llm = require_ollama(model, temperature=temperature, options={"num_ctx": 8192})
     sim = LLMTransition(llm, bw.DESCRIPTION, bw.RULES)
 
     def propose(prompt):

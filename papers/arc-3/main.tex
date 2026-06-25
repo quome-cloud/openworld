@@ -368,6 +368,8 @@ foundational primitives are in the zero-dependency core: \texttt{CodeObjective}/
 \texttt{make\_typed\_perceptor} (\texttt{perceive.py}). \textbf{The verified winning action sequences
 for all \ArcNSolved{} solves are saved in \texttt{experiments/results/e99\_deep\_sweep.json}} and
 replay-verify deterministically against the live games; all numbers and figures regenerate via
-\texttt{scripts/make\_arc3\_assets.py}.
+\texttt{scripts/make\_arc3\_assets.py}. A one-command check,
+\texttt{bench/verify\_arc3\_solves.sh}, replays every saved winning sequence against the live games
+and confirms all \ArcNSolved{} complete a level.
 
 \end{document}

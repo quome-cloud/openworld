@@ -1,0 +1,7 @@
+{
+  "game": "sp80",
+  "loop_closure_acc": 1.0,
+  "loop_steps": 18,
+  "verified_reward_recognizes_win": true,
+  "level2_reward_fired": false
+}

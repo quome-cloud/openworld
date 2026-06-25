@@ -89,3 +89,12 @@ symmetric to CodeTransition. Documented in the framework paper (sec:reward-induc
 - **E95 ensemble (honest, partial):** per-cell majority HURTS on ka59 (0.13 vs best-single 0.27);
   naive voting over weak correlated code models is worse than selection -> switch combiner to
   verification-based SELECTION (choose, don't average). Other games pending.
+
+## Verified-loop closure + foundational primitives (a/b/c)
+- **(a/c) ConsensusTransition** (core): committee of world models, verification-based SELECT (default)
+  or VOTE -- "average or choose from multiple worlds" as a primitive. E95 showed averaging weak code
+  models hurts, so SELECT is the right default. Zero-dep, tests pass.
+- **(b) E98 goal-recognizing solver:** the agent recognizes the level-1 win via its OWN induced
+  verified reward (E97 CodeObjective) -- **loop-closure acc 1.0 (18/18 steps)** vs env truth. The full
+  verified loop (synthesized dynamics + synthesized reward) is closed. Level-2 reward did not fire in
+  1500 attempts -> L2 remains the wall (recognition != reachability).

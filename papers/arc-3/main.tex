@@ -186,7 +186,7 @@ games}, including \texttt{s5i5}, which resisted three principled goal-discovery 
 fidelity-1.0 model). The remaining games are \emph{goal-as-procedure} walls---and we crack them with
 a \textbf{live coding agent} (Claude Code that builds an executable world model and \emph{reasons} the
 win condition, the SOTA recipe expressed in OpenWorld): it solves \textbf{13/25} on its own and lifts
-the union to \textbf{23/25} games (verified by replay; \texttt{ft09} a full six-level game), where four
+the union to \textbf{23/25} games (verified by replay; \texttt{ft09} and \texttt{r11l} full six-level games), where four
 automated goal-discovery methods solved \emph{zero}. We report the full strategy$\times$game landscape
 (Fig.~\ref{fig:heatmap}) as a guide for world-model research: the leverage is \emph{perception and
 synthesis}, and---for the procedural goals---\emph{a reasoning agent that writes its own world model}.
@@ -404,7 +404,7 @@ on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, no
 Directed search and graph exploration each reach $6$; multi-perception consensus reaches $10$
 (uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). The \textbf{live coding agent} (right,
 boxed) lights up the procedural walls no other method touches---\texttt{dc22, ft09, g50t, ka59, lp85,
-re86, sb26, sc25, su15, tn36, wa30}---lifting the union to $23/25$ (only \texttt{bp35, r11l} remain).}
+re86, sb26, sc25, su15, tn36, wa30}---lifting the union to $24/25$ (only \texttt{bp35} remains).}
 \label{fig:heatmap}
 \end{figure}
 
@@ -460,7 +460,7 @@ or per-state vote). This is decisive: \texttt{ar25} solves via the \emph{directi
 \caption{\textbf{Games solved per strategy.} Goal-discovery methods solve $0$; directed search and
 graph exploration $6$; multi-perception consensus $10$ (adding \texttt{cn04, lf52, m0r0, s5i5}); the
 \textbf{live coding agent} solves $13$ and cracks the procedural walls. Across all strategies the
-union is \textbf{23/25}.}
+union is \textbf{24/25}.}
 \label{fig:bar}
 \end{figure}
 
@@ -484,13 +484,12 @@ raises \texttt{levels\_completed}, plan through the model, and replay-verify. Th
 
 \textbf{Result.} The agent solves \textbf{13/25} games on its own---including every wall the automated
 methods missed (\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36, wa30})---and
-lifts the \emph{union across all strategies to 23/25} (only \texttt{bp35} and \texttt{r11l} remain).
-Every solution is independently replay-verified against the live game; \texttt{ft09} is a complete
-six-level game. Tellingly, the agent's solutions are often \emph{hybrid}---e.g.\ \texttt{ka59} mixes
+lifts the \emph{union across all strategies to 24/25} (only \texttt{bp35} remains).
+Every solution is independently replay-verified against the live game; \texttt{ft09} and \texttt{r11l} are complete six-level games. Tellingly, the agent's solutions are often \emph{hybrid}---e.g.\ \texttt{ka59} mixes
 directional navigation with a single click to operate a door---a goal structure no fixed hypothesis
 space expressed. \emph{Honest scope:} most agent solves complete one level (the $\geq$1-level union
 metric); full-game completion (all levels) is harder---our automated chaining stalls at the
-compositionality cliff---so apart from \texttt{ft09}, multi-level completion is the next frontier, and
+compositionality cliff---so apart from \texttt{ft09}/\texttt{r11l}, multi-level completion is the next frontier, and
 a fair comparison to full-game leaderboard scores would require chaining every level.
 
 \section{Reproducibility}

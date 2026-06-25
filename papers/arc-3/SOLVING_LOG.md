@@ -98,3 +98,11 @@ symmetric to CodeTransition. Documented in the framework paper (sec:reward-induc
   verified reward (E97 CodeObjective) -- **loop-closure acc 1.0 (18/18 steps)** vs env truth. The full
   verified loop (synthesized dynamics + synthesized reward) is closed. Level-2 reward did not fire in
   1500 attempts -> L2 remains the wall (recognition != reachability).
+
+## E99 — apply the toolkit to ALL games (interact-biased reward search + replay-verify)
+The sp80 win needed an INTERACT action (5); the uniform E93 sweep under-weighted those. E99 runs an
+interact-biased (0.45) reward search per game + deterministic replay-verify.
+- **2/25 SOLVED (verified): sp80 (L1, 18 actions) + sk48 (L1, 309 actions, NEW).** Interact-bias
+  unlocked sk48 where uniform search found nothing.
+- 23 games: no reward in 12k interact-biased steps -> need deeper/multi-seed search or goal-directed
+  methods. Deep multi-seed sweep (25k x 4 seeds) running.

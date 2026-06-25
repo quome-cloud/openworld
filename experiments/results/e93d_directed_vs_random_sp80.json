@@ -1,0 +1,8 @@
+{
+  "game": "sp80",
+  "budget_steps": 18,
+  "directed_solve_rate": 1.0,
+  "random_solve_rate": 0.0933,
+  "trials": 300,
+  "directed_beats_random": true
+}

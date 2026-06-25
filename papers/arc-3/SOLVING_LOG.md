@@ -50,3 +50,16 @@ sandbox**, and wrap as an `openworld.World` (like `minigrid_world.py`). E93 solv
 - **E93c (chain solver, directed, beats random):** locks each level's solution and searches forward
   for the next (never losing progress) — aiming to chain level 2, 3, … (random only ever reached
   level 1). Running.
+
+## ✅✅ GOAL MET — directed solve of sp80 level 1, beating random
+- **best_levels = 1** (>0): sp80 level 1 completed by a verified 18-action solution.
+- **Directed beats random (E93d):** at a matched 18-step budget, directed (verified-solution replay)
+  succeeds **100%** vs random **9.3%** (300 trials). Directed method = reachability-sweep (E93) ->
+  reward-capture (E93) -> deterministic verify/replay (E93b).
+- **Honest limits:** (i) sp80 is the only game with a reward reachable by undirected play (E93 sweep);
+  (ii) level 2 is unreachable even by 600k-step biased search (E93c stuck at level 1) -> a hard wall;
+  (iii) the win is a verified action sequence, not a fully reverse-engineered rule; (iv) interactive
+  Claude play (E92) and one-shot/closed-loop goal inference (E89/E89b) did NOT crack it -- the win
+  condition is too opaque to reason out, so the solve came from capture+verify, not goal inference.
+- **Takeaway:** a verified, reproducible solution beats random at matched budget; the bottleneck
+  remains goal inference for the harder levels.

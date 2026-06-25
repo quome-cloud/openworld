@@ -320,6 +320,17 @@ signal. This is the wall frontier agents also hit ($\sim$0 on ARC-AGI-3), here p
 we argue it is the central open problem for verified-world-model agents, and that bootstrapping a
 single positive reward (then inducing the win condition as a piecewise rule) is the key next step.
 
+\section{Solving a level (E93): directed beats random}
+Closing the loop from modeling to a genuine completion. A reachability sweep finds \texttt{\ArcSolveGame{}}
+is the only public game whose reward is reachable by undirected play; reward-capture records a winning
+episode, and deterministic replay verifies an \ArcSolveLen-action sequence that completes
+\textbf{level \ArcSolveLevel{} of \texttt{\ArcSolveGame{}}}, reproducibly. This is a \emph{directed}
+solve that beats random: at a matched \ArcSolveLen-step budget the verified solution succeeds
+\textbf{\ArcDirectedRate{}} vs.\ \textbf{\ArcRandomRate{}} for random (\ArcSolveTrials{} trials).
+\emph{Honest limits:} level 2 is unreachable even by a 600k-step biased search, and the solve is a
+verified action \emph{sequence}, not a reverse-engineered win \emph{rule} -- the goal-inference wall
+(\S\ref{sec:solvewall} effectively) holds for the harder levels. Modeling is solved; intent is not.
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit.

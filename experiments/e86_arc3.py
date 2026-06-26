@@ -88,14 +88,24 @@ def deltas(frame, nxt):
 
 
 # ---------- verification ----------
-def verify_code(code, trans):
-    """Run a candidate predict(frame, action) over transitions; return (exact_frac, errors)."""
+def verify_code(code, trans, warmup=None):
+    """Run a candidate predict(frame, action) over transitions; return (exact_frac, errors).
+
+    warmup: if provided, run predict on these transitions first (stateful warm-up) without
+    counting them. Use this so stateful code (e.g. _step counters) is at the correct position
+    when evaluation begins — pass the training split as warmup when evaluating on held-out.
+    """
     ns = {"np": np, "numpy": np}
     try:
         exec(compile(code, "<synth>", "exec"), ns)  # noqa: S102 -- sandboxed-intent; trusted-local
         predict = ns["predict"]
     except Exception as e:  # noqa: BLE001
         return 0.0, [f"compile/exec error: {e}"]
+    for t in (warmup or []):
+        try:
+            predict(np.asarray(t["frame"]), t["action"])
+        except Exception:  # noqa: BLE001
+            pass
     ok = 0
     errs = []
     for t in trans:
@@ -184,7 +194,7 @@ def synthesize(trans, llm_fn, rounds=4, n_demo=12):
         ex = "\n".join(f"action {t['action']} -> {deltas(t['frame'], t['next'])}" for t in train[:n_demo])
         prompt = PROMPT.format(bg=bg, examples=ex) + feedback
         code = extract_code(llm_fn(prompt))
-        acc, errs = verify_code(code, held)
+        acc, errs = verify_code(code, held, warmup=train)
         if acc > best[0]:
             best = (acc, code)
         if acc >= 0.99:

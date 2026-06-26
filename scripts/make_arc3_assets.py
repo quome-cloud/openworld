@@ -329,6 +329,16 @@ def main():
                         + f"\\newcommand{{\\ArcRhaeN}}{{{rh['n_scored']}}}\n")
         print("appended RHAE macros")
 
+    # ---- E121 OpenWorld round-trip (each solve re-verified through a World) ----
+    ow = jload("arc3_openworld_roundtrip.json")
+    if ow:
+        n_indexed = sum(1 for v in ow["games"].values() if v.get("indexed_fallback"))
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcOWVerified}}{{{ow['n_pass']}}}\n"
+                        + f"\\newcommand{{\\ArcOWTotal}}{{{ow['n_total']}}}\n"
+                        + f"\\newcommand{{\\ArcOWIndexed}}{{{n_indexed}}}\n")
+        print(f"appended OpenWorld round-trip macros ({ow['n_pass']}/{ow['n_total']})")
+
     # figure: capability ladder (mean fidelity bars) + per-game Claude-vs-qwen32B scatter
     import matplotlib
     matplotlib.use("Agg")

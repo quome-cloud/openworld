@@ -310,11 +310,15 @@ this \textbf{surpasses the prior executable-world-model state of the art of
 \textbf{Every solve is a verified, serveable artifact---and that is the invitation.} Each game's
 solver is an \openworld{} \texttt{World}: a masked-frame perceptor maps pixels to symbolic state, a
 \texttt{FunctionTransition} over the learned dynamics is the model, and \texttt{levels\_completed} (or
-an induced \texttt{CodeObjective}) is the reward. Each serializes to a spec, renders the
-self-contained atlas card in Fig.~\ref{fig:arc3gallery}, and runs live under
-\texttt{openworld serve}. The entire result---\ArcUnionGames{} games, every verified solution, the
-simulators, and the cards---downloads, re-runs, and serves from one \textbf{zero-dependency} repo. The
-recipe is reusable, not a one-off score: clone it, serve a world, and build the next solver.
+an induced \texttt{CodeObjective}) is the reward. \textbf{We verify this end-to-end:} for every game we
+build the \texttt{World} from the discovered masked-frame state graph and \emph{replay the banked
+solution through it} (\texttt{world.step} per action)---all \textbf{\ArcOWVerified/\ArcOWTotal}
+reproduce their verified level count \emph{through the OpenWorld world}, and every world serializes to a
+valid spec and renders the atlas card in Fig.~\ref{fig:arc3gallery} (one game needs trajectory-indexed
+state where status-bar masking is too coarse). So the solves are not merely \emph{checked} against the
+engine---they \emph{run inside the framework}, and each downloads, re-runs, and serves from one
+\textbf{zero-dependency} repo under \texttt{openworld serve}. The recipe is reusable, not a one-off
+score: clone it, serve a world, and build the next solver.
 
 \textbf{Read honestly---and note the cost.} Solves are \emph{offline}, with \emph{unbounded resets} and
 deterministic replay-verification; we report full-game \emph{completion}, not the leaderboard's live

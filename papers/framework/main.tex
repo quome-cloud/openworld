@@ -167,7 +167,7 @@ computing, and study the two questions a new substrate must answer: how cheaply 
 world computer the way one benchmarks any computer---on \textbf{cost}, \textbf{latency}, and
 \textbf{performance}. \textbf{Prototyping (cost \& latency).} A world is \emph{declared} and its
 dynamics \emph{synthesized as code and verified before acceptance} (a plan--generate--verify
-relay over syntax, sandboxed behaviour, declared invariants, and an optional critic); on a
+relay over syntax, sandboxed behavior, declared invariants, and an optional critic); on a
 \ProtoNumWorlds-world, six-sector benchmark an agent (Claude Code) authors structurally-validated,
 servable worlds---well-formed and runnable, a \emph{conformance} rate, not certified
 rule-correctness---at a median of \ProtoMedianMinutes{} minutes each. The substrate is
@@ -240,12 +240,10 @@ correctness). The paper is organized around these: prototyping cost and latency
 (\S\ref{sec:prototyping}), then the components and evaluation that establish performance and
 trust, then a breadth of domain demonstrations that probe the substrate's expressiveness.
 
-A world model is an agent's internal simulator: given a state and an action, it
-predicts the next state (and/or observation), letting the agent plan ``in
-imagination'' rather than by trial in the world~\cite{ha2018world}. That
-\emph{genus} is shared across the field; research programs diverge on \emph{how the
-model represents state and how it is obtained}, and the term today names two largely
-disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
+This \emph{genus}---an agent's internal simulator, run forward to plan ``in
+imagination'' rather than by trial---is shared across the field; research programs
+diverge on \emph{how the model represents state and how it is obtained}, and the
+term today names two largely disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
 generative}: a neural network learned from large amounts of data whose state is a
 continuous latent---or pixels, video, or a 3D scene---and whose output is a
 \emph{generated observation}. It runs from the V--M--C triad of Ha and
@@ -254,11 +252,11 @@ family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
 autoregressive token models such as IRIS~\cite{iris2023} and
 $\Delta$-IRIS~\cite{deltairis2024}, and diffusion dynamics in
 DIAMOND~\cite{diamond2024}, joint-embedding predictive video models that
-forecast in representation space such as V-JEPA~\cite{vjepa2025}; and, most
-prominently in recent generative AI, to interactive generative environments and
-``spatial intelligence''---internet-scale video and 3D world generators such as
-Genie~\cite{genie2024}, video-generation-as-simulator (Sora)~\cite{sora2024}, and
-Fei-Fei Li's World Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
+forecast in representation space such as V-JEPA~\cite{vjepa2025}. Most
+prominently in recent generative AI, the species now reaches interactive generative
+environments and ``spatial intelligence''---internet-scale video and 3D world
+generators such as Genie~\cite{genie2024}, video-generation-as-simulator
+(Sora)~\cite{sora2024}, and Fei-Fei Li's World Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
 costs: they are \emph{data-hungry} (millions of environment steps, or
 internet-scale video), \emph{compounding} (every learned transition adds error
 that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
@@ -1672,8 +1670,8 @@ world-level holdout). Random subsets are the null control.
 The search succeeds on its \emph{first} coherence-ranked seed: a \ComboSize{}-world subset
 spanning \ComboNSectors{} different sectors (\texttt{\ComboWorlds}) generalizes at planner-level
 held-out competence (\ComboHeldout, clipped at the planner ceiling) versus \ComboBaseline{} for
-random subsets. The worlds are surface-unrelated---minimise risk, minimise cost, minimise a
-waitlist, maximise margin---but share an \emph{abstract control structure}, and that shared skill
+random subsets. The worlds are surface-unrelated---minimize risk, minimize cost, minimize a
+waitlist, maximize margin---but share an \emph{abstract control structure}, and that shared skill
 is what the proxy detects. Two consequences. First, ``domain'' is the wrong unit: generalization
 tracks shared \emph{structure}, which can cross sectors. Second, the coherence proxy is not only
 predictive but \emph{constructive}---it turns the NP-hard search for a generalizing world-family
@@ -1860,7 +1858,7 @@ E45 lands the same thesis on the LLM field's native task---next-token
 prediction---and its native failure, length generalization on algorithmic
 sequences. The framing is ``synthesize the rule, don't \emph{be} the rule'': the
 \emph{same} local model (qwen3-coder:30b), given short solved examples, is used two
-ways---asked to predict the next character directly, and asked to synthesise a
+ways---asked to predict the next character directly, and asked to synthesize a
 verified program (a world model of the sequence's generator) that is then run.
 We use \NextTokTasks{} deterministic tasks whose next character needs memory a
 fixed window cannot hold: \texttt{parity} (running XOR), \texttt{dyck}
@@ -1877,7 +1875,7 @@ learned alternative decays with length: the $n$-gram (\NextTokNgramOod{} OOD) an
 the fixed-window MLP (\NextTokMlpOod{}) cannot represent unbounded-memory rules,
 and the \emph{same} 30B predicting directly---good in-distribution
 (\NextTokDirectIn)---falls to \NextTokDirectOod{} out of distribution: the
-canonical transformer length-generalization failure, with the synthesise-a-program
+canonical transformer length-generalization failure, with the synthesize-a-program
 mode of the identical model as the remedy.
 
 This applies where the next-token process has exact structure---code, formal
@@ -1892,8 +1890,8 @@ rather than predict tokens directly.
 accuracy vs.\ sequence length (mean over tasks). The induced symbolic program
 stays exact past the training lengths; the $n$-gram, the fixed-window MLP, and the
 \emph{same} LLM predicting directly all decay. \textbf{Right:} mean
-out-of-distribution accuracy by method. Same model, two modes: synthesising a
-verified program length-generalises where predicting tokens directly does not.}
+out-of-distribution accuracy by method. Same model, two modes: synthesizing a
+verified program length-generalizes where predicting tokens directly does not.}
 \label{fig:next-token}
 \end{figure}
 
@@ -1901,7 +1899,7 @@ verified program length-generalises where predicting tokens directly does not.}
 \centering
 \caption{\textbf{E45 next-token length generalization.} Per-task next-character
 exact accuracy, in-distribution (lengths $\le\NextTokTrainLen$) and OOD (out to
-\NextTokMaxLen). Only the synthesised symbolic program is exact OOD.}
+\NextTokMaxLen). Only the synthesized symbolic program is exact OOD.}
 \label{tab:next-token}
 \input{tables/next_token}
 \end{table}

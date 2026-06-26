@@ -104,11 +104,14 @@ def main():
     log(f"START routed sweep: {len(GAMES)} games | pool={POOL} per-agent={PER_AGENT_S}s rounds={ROUNDS} "
         f"| model={MODEL} effort={EFFORT}")
 
-    # ---- Phase 1: cheap tier (fast, all games) ----
-    log("Phase 1 (cheap pixel-search, source-free by audit) over all games")
-    venv("run_cheap_tier.py", *GAMES, timeout=1800)
-    finalize_and_bank()
-    commit("cheap")
+    # ---- Phase 1: cheap tier (fast, all games) ---- (skip on resume via SKIP_CHEAP=1)
+    if os.environ.get("SKIP_CHEAP") == "1":
+        log("Phase 1 (cheap) SKIPPED (resume)")
+    else:
+        log("Phase 1 (cheap pixel-search, source-free by audit) over all games")
+        venv("run_cheap_tier.py", *GAMES, timeout=1800)
+        finalize_and_bank()
+        commit("cheap")
 
     # ---- Phase 2: agent rounds on not-fully-solved games ----
     for r in range(ROUNDS):

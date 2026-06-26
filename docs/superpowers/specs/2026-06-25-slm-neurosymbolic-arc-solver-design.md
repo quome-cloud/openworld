@@ -58,6 +58,17 @@ no reliable 2D indexing). `perceive.py` converts each frame to **compact JSON**:
 - status-bar **masking**: cells changing on >0.95 of probe steps are zeroed
   before hashing (the e107/e111 trick; keep τ high to avoid collapsing signal)
 
+**Representation is a verifier-selected knob, not a constant (Gemini review #1).**
+"Never show the grid" is a *text-LLM* constraint, not a law — object-JSON destroys
+adjacency/symmetry/containment that a vision encoder reads natively. We have
+vision-capable SLMs on the box (`gemma3:27b`, `llama3.2-vision`, gemma4), so run a
+**representation ablation**: render the masked frame as a small PNG and feed it to a
+vision SLM vs the object-JSON to a text SLM, and (per our own harness law) **let the
+executable grader pick** the representation per game/slot. Honest prior: the
+combined-paper multimodal arm showed *no lift on systematic perception errors* — so
+vision is not free, which is the argument *for* measuring it rather than assuming
+either way.
+
 ## 4. Components (isolated, independently testable units)
 
 ### 4.1 `perceive.py` (deterministic — no SLM)
@@ -146,6 +157,8 @@ sign/shape of every claim; deterministic seeds.
   `phi3.5:3.8b`, `qwen2.5:7b`, `qwen2.5:3b`
 - thinking: `qwen3:8b`, `qwen3:4b` (need 4k+ output budget)
 - tiny (routing/extraction): `qwen2.5:1.5b`, `qwen2.5:0.5b`
+- **vision (for the representation ablation):** `llama3.2-vision`, gemma4 if
+  multimodal; `gemma3:27b` sits in the ceiling row but doubles as the vision probe.
 - **coder gap — pull:** `qwen2.5-coder:7b` (and `:3b`); optionally `codegemma:7b`
   (a Gemma-family coder). No small coder is installed today; this is the most
   important pull for an SLM-codegen study.
@@ -164,9 +177,17 @@ gap is a silent accuracy cliff):**
 - Qwen3 **thinking**: `temp 0.6, top_p 0.95, top_k 20` — **never greedy** (temp 0
   loops in thinking mode).
 - Qwen3 **non-thinking**: `temp 0.7, top_p 0.8, top_k 20`.
+- **Gemma 2/3/4** (Gemini review #3 — defaults are nearly opposite Qwen's):
+  `temp ≈ 1.0, top_k 64, top_p 0.95`, and strict `<start_of_turn>` template. Running
+  Gemma at Qwen's `temp 0.7, top_k 20` *under*-samples its diversity and kneecaps the
+  best-of-N-across-models win.
+- **Llama 3.x / Phi-3.5**: their own published defaults — pin each.
 - All: generous **output** `max_tokens` (thinking 4k+ or it returns nothing
   mid-thought); **never** `repeat_penalty ≥ 1.3` (breaks generation — matches the
-  combined-paper decoding cliff). Pin per family in a config table, not by Ollama default.
+  combined-paper decoding cliff).
+
+**Pin decoding + chat template per family for *every* model in the pool**, not just
+Qwen — mismatched sampling is a silent, per-family accuracy cliff.
 
 ## 6. Honest reporting
 
@@ -189,9 +210,22 @@ tokenizer/training). Add one sentence ruling out ARC-AGI-3 pretraining contamina
   budget** — else "SLM helped" might just be "more search."
 - **Abstention curve:** coverage vs precision of each SLM slot (the 0.75→0.97
   mechanism, measured here).
-- **Held-out game:** ≥1 game the harness is never tuned against (guards against
-  overfitting to the known 25 solutions).
+- **Wilson 95% CIs on every rung (Gemini review #5):** n=25 is tiny and per-game is
+  ~Bernoulli — report intervals and **do not** claim a 21→22 "win" that sits inside
+  the CI.
+- **Hidden held-out:** a **fresh game id never inspected** by the harness author (the
+  ARC-Prize semi-private discipline), not merely "untuned" — the only number that
+  supports a generalization claim.
+- **Family-level contamination check (Gemini review #5):** state whether ARC-AGI-3
+  mechanics / public write-ups could be in pretraining, and which models are at risk
+  (esp. the newer `gemma4`, `qwen3.6`).
 - replay-verify every banked solution; `save_results` before asserts.
+
+**Few-shot is a model-conditioned knob (Gemini review #4), not a flat "no":** off for
+≤3B (1–2 shots distract small models), but run a **many-shot** retrieval ablation for
+the vision/ceiling/long-context models (Google's many-shot ICL turns the curve
+positive with hundreds of exemplars). Tie the history/ledger strategy to each model's
+**usable** context — compress for small Qwen, expand for long-context models.
 
 ## 7. Error handling / budgets / decoding
 
@@ -215,6 +249,15 @@ decoding lets us lower N, cutting total calls.
   working end-to-end on a couple of SLMs. Prove abstention + diversity-voting +
   replay-verify chain works.
 - **Phase 2:** expand to all 25 + the model sweep + the ceiling row.
+- **Phase 3 — distillation (Gemini review #2, the lever that *mints* a working SLM):**
+  the harness is a **verified-trace generator** — every solved game yields
+  `(state → subgoal → macro → success)` traces. **LoRA fine-tune a small Gemma** on
+  the search-verified traces (the box already runs `*-poisoned-lora` models, proving
+  the LoRA workflow), then re-run the *same* harness with the distilled model and
+  measure the lift. This converts an inference-time prior into weights and directly
+  answers "is there an SLM that *works*" — distillation is how you make one. Reframes
+  the headline from "structure substitutes for parameters" to "structure generates the
+  data that *buys* parameters."
 - **Expectation (honest):** wins on search-tractable + retrieval-matched games;
   honest losses on deep, novel-mechanic games (e.g. wa30's 657 actions). Report the
   boundary, don't tune to a number.

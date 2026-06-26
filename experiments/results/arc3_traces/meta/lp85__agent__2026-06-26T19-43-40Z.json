@@ -1,14 +1,14 @@
 {
- "run_id": "lf52__agent__2026-06-26T11-33-27Z",
- "game": "lf52",
+ "run_id": "lp85__agent__2026-06-26T19-43-40Z",
+ "game": "lp85",
  "tier": "agent",
  "method": "live-coding-agent-sandbox",
  "source_free": true,
  "fairness": "by-construction (process-isolated SandboxGame)",
- "audit_dir": "scratch_arc/sb_lf52",
+ "audit_dir": "scratch_arc/sb_lp85",
  "audit_mode": "strict",
- "started_at": "2026-06-26T11:33:27Z",
- "ended_at": "2026-06-26T11:54:30Z",
+ "started_at": "2026-06-26T19:43:41Z",
+ "ended_at": "2026-06-26T20:27:03Z",
  "exit_code": 0,
  "model_config": {
   "requested_model": "claude-opus-4-8",
@@ -19,65 +19,63 @@
   "fast_mode_state": "off",
   "permission_mode": "bypassPermissions"
  },
- "prompt_file": "prompts/lf52__agent__2026-06-26T11-33-27Z.md",
+ "prompt_file": "prompts/lp85__agent__2026-06-26T19-43-40Z.md",
  "prompt": {
   "chars": 1914,
   "lines": 30,
-  "sha256": "34d0b99d4ec76607706b551391ad44e66f33f3825ca49182484f09a830121f63",
+  "sha256": "691685d8356f99ad6801334b41dbcd4925d9ccc7c709ad4e30085fe74c84ab0d",
   "approx_tokens": 478
  },
- "solution_file": "solutions/lf52__agent__2026-06-26T11-33-27Z.json",
- "transcript_file": "transcripts/lf52__agent__2026-06-26T11-33-27Z.jsonl",
- "transcript_sha256": "33f83d44ab1977aa4aa68095932724145313f412bcfbdf0ef8266faba4ea73fa",
+ "solution_file": "solutions/lp85__agent__2026-06-26T19-43-40Z.json",
+ "transcript_file": "transcripts/lp85__agent__2026-06-26T19-43-40Z.jsonl",
+ "transcript_sha256": "788b500b552b662c115563bb87acc85daa324f20f0e549bfae65acecadd4c368",
  "transcript": {
-  "session_id": "d0f564df-e20c-4a76-8d27-208d8f2ec0de",
-  "num_turns": 50,
-  "n_messages": 708,
-  "n_tool_calls": 49,
+  "session_id": "41918c0c-b013-41ae-82c6-965f98eead5a",
+  "num_turns": 93,
+  "n_messages": 1045,
+  "n_tool_calls": 92,
   "tool_calls_by_name": {
-   "Bash": 46,
-   "Edit": 2,
-   "Read": 1
+   "Bash": 65,
+   "Edit": 23,
+   "Read": 3,
+   "Write": 1
   },
-  "n_text_blocks": 43,
-  "n_thinking_blocks": 45,
-  "n_user_msgs": 49,
-  "cost_usd": 5.134433,
-  "cost_usd_estimated": null,
-  "cost_basis": "result_block",
-  "pricing_assumed": null,
+  "n_text_blocks": 55,
+  "n_thinking_blocks": 62,
+  "n_user_msgs": 92,
+  "cost_usd": 11.445887500000003,
   "tokens": {
-   "input": 7000,
-   "output": 72861,
-   "cache_creation": 121432,
-   "cache_read": 4127176,
-   "total": 4328469,
+   "input": 14737,
+   "output": 125249,
+   "cache_creation": 198187,
+   "cache_read": 12518215,
+   "total": 12856388,
    "source": "result_block"
   },
   "usage": {
-   "input_tokens": 7000,
-   "cache_creation_input_tokens": 121432,
-   "cache_read_input_tokens": 4127176,
-   "output_tokens": 72861,
+   "input_tokens": 14737,
+   "cache_creation_input_tokens": 198187,
+   "cache_read_input_tokens": 12518215,
+   "output_tokens": 125249,
    "server_tool_use": {
     "web_search_requests": 0,
     "web_fetch_requests": 0
    },
    "service_tier": "standard",
    "cache_creation": {
-    "ephemeral_1h_input_tokens": 121432,
+    "ephemeral_1h_input_tokens": 198187,
     "ephemeral_5m_input_tokens": 0
    },
    "inference_geo": "not_available",
    "iterations": [
     {
      "input_tokens": 131,
-     "output_tokens": 813,
-     "cache_read_input_tokens": 134570,
-     "cache_creation_input_tokens": 1019,
+     "output_tokens": 876,
+     "cache_read_input_tokens": 210781,
+     "cache_creation_input_tokens": 1563,
      "cache_creation": {
       "ephemeral_5m_input_tokens": 0,
-      "ephemeral_1h_input_tokens": 1019
+      "ephemeral_1h_input_tokens": 1563
      },
      "type": "message"
     }
@@ -86,9 +84,9 @@
   },
   "is_error": false,
   "api_error_status": null,
-  "duration_ms": 1262526,
-  "duration_api_ms": 1054139,
-  "ttft_ms": 4932
+  "duration_ms": 2601547,
+  "duration_api_ms": 1818650,
+  "ttft_ms": 2840
  },
  "host": {
   "hostname": "Mac.lan",
@@ -98,7 +96,7 @@
   "python": "3.9.18"
  },
  "git": {
-  "commit": "f884a8b775c2b02d908d789f067ed503ced9ede3",
+  "commit": "73ef35a587e6b4be320260e7540092b19692cb43",
   "branch": "arc3-runner-fix",
   "dirty": true,
   "remote": "https://github.com/quome-cloud/openworld.git"

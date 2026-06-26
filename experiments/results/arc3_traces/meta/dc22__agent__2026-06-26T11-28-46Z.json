@@ -129,5 +129,7 @@
   "actions": "directional 1-5,7 + click ACTION6(x,y)"
  },
  "dataset_version": "1.0",
- "outcome": null
+ "outcome": null,
+ "memory_tainted": true,
+ "memory_tainted_reason": "agent loaded source-derived memory note (purged 2026-06-26); excluded from fair source-free count"
 }

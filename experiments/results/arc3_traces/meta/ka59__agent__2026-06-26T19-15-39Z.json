@@ -1,14 +1,14 @@
 {
- "run_id": "lf52__agent__2026-06-26T11-33-27Z",
- "game": "lf52",
+ "run_id": "ka59__agent__2026-06-26T19-15-39Z",
+ "game": "ka59",
  "tier": "agent",
  "method": "live-coding-agent-sandbox",
  "source_free": true,
  "fairness": "by-construction (process-isolated SandboxGame)",
- "audit_dir": "scratch_arc/sb_lf52",
+ "audit_dir": "scratch_arc/sb_ka59",
  "audit_mode": "strict",
- "started_at": "2026-06-26T11:33:27Z",
- "ended_at": "2026-06-26T11:54:30Z",
+ "started_at": "2026-06-26T19:15:39Z",
+ "ended_at": "2026-06-26T20:17:36Z",
  "exit_code": 0,
  "model_config": {
   "requested_model": "claude-opus-4-8",
@@ -19,65 +19,63 @@
   "fast_mode_state": "off",
   "permission_mode": "bypassPermissions"
  },
- "prompt_file": "prompts/lf52__agent__2026-06-26T11-33-27Z.md",
+ "prompt_file": "prompts/ka59__agent__2026-06-26T19-15-39Z.md",
  "prompt": {
   "chars": 1914,
   "lines": 30,
-  "sha256": "34d0b99d4ec76607706b551391ad44e66f33f3825ca49182484f09a830121f63",
+  "sha256": "cedd1f14e10298854871e6bbf4b23e066c42b43a37c8bf3a2e33002e25f3fcb6",
   "approx_tokens": 478
  },
- "solution_file": "solutions/lf52__agent__2026-06-26T11-33-27Z.json",
- "transcript_file": "transcripts/lf52__agent__2026-06-26T11-33-27Z.jsonl",
- "transcript_sha256": "33f83d44ab1977aa4aa68095932724145313f412bcfbdf0ef8266faba4ea73fa",
+ "solution_file": "solutions/ka59__agent__2026-06-26T19-15-39Z.json",
+ "transcript_file": "transcripts/ka59__agent__2026-06-26T19-15-39Z.jsonl",
+ "transcript_sha256": "749cfcbf18a4e1caf36bc3744bc84a4970a76bc40d51500e801547a67880e7a2",
  "transcript": {
-  "session_id": "d0f564df-e20c-4a76-8d27-208d8f2ec0de",
-  "num_turns": 50,
-  "n_messages": 708,
-  "n_tool_calls": 49,
+  "session_id": "f802734d-a6ba-4e00-8928-28878393f073",
+  "num_turns": 88,
+  "n_messages": 2096,
+  "n_tool_calls": 87,
   "tool_calls_by_name": {
-   "Bash": 46,
-   "Edit": 2,
+   "Bash": 82,
+   "Write": 1,
+   "Edit": 3,
    "Read": 1
   },
-  "n_text_blocks": 43,
-  "n_thinking_blocks": 45,
-  "n_user_msgs": 49,
-  "cost_usd": 5.134433,
-  "cost_usd_estimated": null,
-  "cost_basis": "result_block",
-  "pricing_assumed": null,
+  "n_text_blocks": 79,
+  "n_thinking_blocks": 85,
+  "n_user_msgs": 87,
+  "cost_usd": 17.08938549999999,
   "tokens": {
-   "input": 7000,
-   "output": 72861,
-   "cache_creation": 121432,
-   "cache_read": 4127176,
-   "total": 4328469,
+   "input": 7979,
+   "output": 246805,
+   "cache_creation": 309897,
+   "cache_read": 15560791,
+   "total": 16125472,
    "source": "result_block"
   },
   "usage": {
-   "input_tokens": 7000,
-   "cache_creation_input_tokens": 121432,
-   "cache_read_input_tokens": 4127176,
-   "output_tokens": 72861,
+   "input_tokens": 7979,
+   "cache_creation_input_tokens": 309897,
+   "cache_read_input_tokens": 15560791,
+   "output_tokens": 246805,
    "server_tool_use": {
     "web_search_requests": 0,
     "web_fetch_requests": 0
    },
    "service_tier": "standard",
    "cache_creation": {
-    "ephemeral_1h_input_tokens": 121432,
+    "ephemeral_1h_input_tokens": 309897,
     "ephemeral_5m_input_tokens": 0
    },
    "inference_geo": "not_available",
    "iterations": [
     {
-     "input_tokens": 131,
-     "output_tokens": 813,
-     "cache_read_input_tokens": 134570,
-     "cache_creation_input_tokens": 1019,
+     "input_tokens": 2,
+     "output_tokens": 1280,
+     "cache_read_input_tokens": 322128,
+     "cache_creation_input_tokens": 1926,
      "cache_creation": {
       "ephemeral_5m_input_tokens": 0,
-      "ephemeral_1h_input_tokens": 1019
+      "ephemeral_1h_input_tokens": 1926
      },
      "type": "message"
     }
@@ -86,9 +84,9 @@
   },
   "is_error": false,
   "api_error_status": null,
-  "duration_ms": 1262526,
-  "duration_api_ms": 1054139,
-  "ttft_ms": 4932
+  "duration_ms": 3716629,
+  "duration_api_ms": 3378045,
+  "ttft_ms": 3362
  },
  "host": {
   "hostname": "Mac.lan",
@@ -98,7 +96,7 @@
   "python": "3.9.18"
  },
  "git": {
-  "commit": "f884a8b775c2b02d908d789f067ed503ced9ede3",
+  "commit": "73ef35a587e6b4be320260e7540092b19692cb43",
   "branch": "arc3-runner-fix",
   "dirty": true,
   "remote": "https://github.com/quome-cloud/openworld.git"
@@ -127,7 +125,5 @@
   "actions": "directional 1-5,7 + click ACTION6(x,y)"
  },
  "dataset_version": "1.0",
- "outcome": null,
- "memory_tainted": true,
- "memory_tainted_reason": "agent loaded source-derived memory note (purged 2026-06-26); excluded from fair source-free count"
+ "outcome": null
 }

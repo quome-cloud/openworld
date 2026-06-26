@@ -34,6 +34,8 @@ def load_runs():
 def bankable(r):
     o = r.get("outcome") or {}
     rt = o.get("openworld_roundtrip") or {}
+    if r.get("memory_tainted"):                 # used source-derived memory -> not a fair solve
+        return False
     return bool(o.get("audit", {}).get("clean") and rt.get("pass") and o.get("levels", 0) > 0)
 
 

@@ -7,10 +7,13 @@ End-to-end pipeline:
   4. Verify each candidate with warmup on train (handles stateful _step=[] functions)
   5. If best ≥ 0.99: run BFS via model, then EXECUTE in real Arcade env
   6. Only print "BANK" if levels_completed > 0 after real env execution
+  7. If best < 0.99: write a refinement DM body (--refine-out) showing failure cases
 
 Usage:
   python3 e87_prism_verify.py --game ar25 --dm /path/to/prism_reply.md
   python3 e87_prism_verify.py --game cn04 --steps 245 --dm /path/to/prism_reply.md
+  # After first round fails, auto-generate refinement DM:
+  python3 e87_prism_verify.py --game ar25 --dm reply1.md --refine-out /tmp/ar25_refine.md
 """
 import argparse
 import collections
@@ -75,6 +78,57 @@ def bfs_levels_completed(predict_fn, init_frame, available_actions, max_steps=80
     return None, None
 
 
+def build_refinement_dm(game_id, best_code, errs, best_frac, n_held):
+    """Build a Prism DM body for multi-round refinement.
+
+    Shows the best candidate's code + the failure transitions it got wrong,
+    asks Prism to return 2-4 refined candidates that fix those cases.
+    """
+    from e86_arc3 import deltas
+
+    failure_lines = []
+    for t in errs[:8]:  # cap at 8 failure examples
+        if "exc" in t:
+            failure_lines.append(f"  EXCEPTION: {t['exc']!r} on action={t.get('action')}")
+        else:
+            frame = np.asarray(t["frame"])
+            nxt = np.asarray(t["next"])
+            d = deltas(frame, nxt)
+            failure_lines.append(f"  action {t['action']} → expected delta: {d[:20]}")
+
+    failures_block = "\n".join(failure_lines)
+    return f"""# ARC-SYNTH refinement request — game: {game_id}
+
+## Context
+
+Previous synthesis round: best candidate exact-match = **{best_frac:.4f}** on {n_held} held-out transitions.
+**Not yet ≥0.99.** Please refine.
+
+## Best candidate so far
+
+```python
+{best_code}
+```
+
+## Failure cases (transitions the best candidate got wrong)
+
+```
+{failures_block}
+```
+
+## Request
+
+Please return **2-4 refined Python candidates** that fix the failure cases above.
+Focus on the specific patterns you see in the delta mismatches.
+Each candidate should use a different fix strategy.
+Same function signature: `def predict(frame: np.ndarray, action: int) -> np.ndarray`
+
+Label them C1_refine, C2_refine, etc.
+
+— Forge (A003)
+"""
+
+
 def execute_seq_in_env(game_id, seq, available_actions):
     """Execute action sequence in real Arcade env from fresh reset.
     Returns (levels_completed, steps_executed).
@@ -113,6 +167,8 @@ def main():
     ap.add_argument("--steps", type=int, default=300, help="Transition collection budget")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="", help="Optional path to write JSON summary")
+    ap.add_argument("--refine-out", default="", dest="refine_out",
+                    help="If best < 0.99, write refinement DM body to this path")
     args = ap.parse_args()
 
     body_text = Path(args.dm).read_text()
@@ -196,6 +252,12 @@ def main():
             print("[prism-verify] BFS exhausted without finding level-transition candidate")
     else:
         print(f"[prism-verify] best={best_frac:.4f} < 0.99 — no BFS (needs refinement)")
+        if args.refine_out and best_code:
+            # Re-verify best candidate to collect failure cases for refinement DM
+            _, errs = verify_code(best_code, held, warmup=train)
+            dm_body = build_refinement_dm(args.game, best_code, errs, best_frac, len(held))
+            Path(args.refine_out).write_text(dm_body)
+            print(f"[prism-verify] refinement DM body written → {args.refine_out}")
 
     summary = {
         "game": args.game,

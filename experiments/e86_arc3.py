@@ -149,14 +149,17 @@ def ollama(model, prompt, host="http://localhost:11434", num_ctx=8192, timeout=6
         return json.loads(r.read())["response"]
 
 
-def anthropic_llm(model, prompt):
+def anthropic_llm(model, prompt, api_key=None, usage_log=None):
     import anthropic
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(api_key=api_key)
     msg = client.messages.create(
         model=model,
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
+    if usage_log is not None:
+        usage_log.append({"input_tokens": msg.usage.input_tokens,
+                          "output_tokens": msg.usage.output_tokens})
     return msg.content[0].text
 
 
@@ -191,7 +194,8 @@ def main():
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--ollama", default="", help="ollama model id for synthesis (else baselines only)")
-    ap.add_argument("--anthropic", default="", help="anthropic model id for synthesis (e.g. claude-haiku-4-5-20251001)")
+    ap.add_argument("--anthropic", default="", help="anthropic model id for synthesis (e.g. claude-sonnet-4-6)")
+    ap.add_argument("--api-key", default="", dest="api_key", help="Anthropic API key (else env ANTHROPIC_API_KEY)")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -216,13 +220,21 @@ def main():
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)
 
     if args.anthropic:
-        acc, code = synthesize(trans, lambda p: anthropic_llm(args.anthropic, p))
+        api_key = args.api_key or None
+        usage_log = []
+        acc, code = synthesize(trans, lambda p: anthropic_llm(args.anthropic, p, api_key=api_key, usage_log=usage_log))
         res["synth_model"] = args.anthropic
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
+        res["usage"] = usage_log
+        res["total_input_tokens"] = sum(u["input_tokens"] for u in usage_log)
+        res["total_output_tokens"] = sum(u["output_tokens"] for u in usage_log)
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)
+        print(f"[e86/{args.game}] token usage: {res['total_input_tokens']} in / {res['total_output_tokens']} out", flush=True)
 
-    out = Path(args.out) if args.out else HERE / "results" / f"e86_arc3_{args.game}.json"
+    model_slug = args.anthropic.replace(":", "-").replace("/", "-") if args.anthropic else (args.ollama.replace(":", "-") if args.ollama else "")
+    default_stem = f"e86_arc3_{args.game}_{model_slug}" if model_slug else f"e86_arc3_{args.game}"
+    out = Path(args.out) if args.out else HERE / "results" / f"{default_stem}.json"
     out.write_text(json.dumps(res, indent=2))
     print("wrote", out)
 

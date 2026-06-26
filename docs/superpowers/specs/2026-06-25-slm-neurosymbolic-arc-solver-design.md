@@ -69,6 +69,21 @@ combined-paper multimodal arm showed *no lift on systematic perception errors* �
 vision is not free, which is the argument *for* measuring it rather than assuming
 either way.
 
+## 3.5 OpenWorld binding (not a separate tool — SLM-only)
+
+E119 is built *inside* the framework, not as an island script:
+- **Every model goes through `openworld.BaseLLM`.** The proposer takes a `BaseLLM`,
+  so an SLM (`OllamaLLM`) and the test double (`MockLLM`) are interchangeable. **This
+  experiment is SLM-only — no Anthropic/Claude backbone is added or used**; Claude's
+  21/25 is only a cited reference number, never run here.
+- **The solved solver is emitted as an `openworld.World`** (CLAUDE.md "build solvers
+  as OpenWorld"): masked-frame perceptor → state, `FunctionTransition` over the
+  learned transition table → dynamics, induced `CodeObjective`/`induce_reward` →
+  reward. It round-trips via `to_spec`/`from_spec` and is viewable in
+  `openworld serve /view`; the discovered state-graph is its `preview.graph`.
+- Voting/consensus over parallel representations uses the framework's
+  `ConsensusTransition(mode="vote")` where it fits.
+
 ## 4. Components (isolated, independently testable units)
 
 ### 4.1 `perceive.py` (deterministic — no SLM)

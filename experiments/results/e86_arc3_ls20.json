@@ -1,0 +1,13 @@
+{
+  "game": "ls20",
+  "steps": 100,
+  "transitions": 100,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": null,
+  "repeat_pairs": 0,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 41.5,
+  "copy_frame_exact": 0.0
+}

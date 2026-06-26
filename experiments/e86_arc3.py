@@ -149,6 +149,17 @@ def ollama(model, prompt, host="http://localhost:11434", num_ctx=8192, timeout=6
         return json.loads(r.read())["response"]
 
 
+def anthropic_llm(model, prompt):
+    import anthropic
+    client = anthropic.Anthropic()
+    msg = client.messages.create(
+        model=model,
+        max_tokens=4096,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return msg.content[0].text
+
+
 def extract_code(text):
     m = re.search(r"```(?:python)?\s*(.*?)```", text, re.S)
     return m.group(1).strip() if m else text.strip()
@@ -180,6 +191,7 @@ def main():
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--ollama", default="", help="ollama model id for synthesis (else baselines only)")
+    ap.add_argument("--anthropic", default="", help="anthropic model id for synthesis (e.g. claude-haiku-4-5-20251001)")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -199,6 +211,13 @@ def main():
     if args.ollama:
         acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
         res["synth_model"] = args.ollama
+        res["verified_exact"] = round(acc, 4)
+        res["code"] = code
+        print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)
+
+    if args.anthropic:
+        acc, code = synthesize(trans, lambda p: anthropic_llm(args.anthropic, p))
+        res["synth_model"] = args.anthropic
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)

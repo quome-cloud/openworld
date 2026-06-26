@@ -400,7 +400,7 @@ of the companion paper~\cite{openworld_wtc}.
 \paragraph{Positioning in the field.} Two methodologies build \emph{code} world models. The
 \emph{neural} route trains the simulator \emph{into weights}---Meta FAIR's CWM~\cite{metacwm2025}
 mid-trains a 32B model on Python-execution and Docker-container traces, then applies multi-task
-RL, at a cost of weeks on multi-H100 infrastructure ($\sim$160\,GB VRAM)---yielding a powerful but
+RL, at datacenter scale ($2{,}048$ H100s in pretraining)---yielding a powerful but
 opaque, GPU-bound simulator whose dynamics are not runnable code. The \emph{programmatic} route
 instead has an LLM \emph{write} the dynamics as a verified program (WorldCoder, GIF-MCTS,
 PoE-World~\cite{worldcoder2024,gifmcts2024,poeworld2025}); generation takes seconds-to-minutes and
@@ -465,7 +465,7 @@ Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale com
 Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
 V-JEPA~\cite{vjepa2025} & joint-embedding video prediction in latent space & perceptual; latent, unauditable; trained \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
-CWM (Meta FAIR)~\cite{metacwm2025} & 32B LLM with code-execution dynamics \emph{trained into weights} (mid-training on execution/Docker traces + RL) & weeks of multi-H100 training ($\sim$160\,GB VRAM); dynamics in opaque weights, not runnable code \\
+CWM (Meta FAIR)~\cite{metacwm2025} & 32B LLM with code-execution dynamics \emph{trained into weights} (mid-training on execution/Docker traces + RL) & datacenter-scale multi-H100 pretraining ($2{,}048$ H100s); dynamics in opaque weights, not runnable code \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-\emph{synthesized} code dynamics (per environment) & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
 NeSyS~\cite{nesys2026} & symbolic rules constrain neural logits & still requires fine-tuning data \\
@@ -1534,10 +1534,11 @@ critique are collected here.
 E8 sweeps the moral weight $\lambda \in [0,1]$ on the commons world
 (Figure~\ref{fig:pareto}). All \ParetoFrontierSize{} of \ParetoLambdas{}
 sweep points are Pareto-optimal, fairness is monotone in $\lambda$, and the
-Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---the
-``interior optimum'' behavior predicted by the tunable-morality literature,
-reproduced here with a dial that can be turned mid-simulation rather than a
-retrained model~\cite{spectrap2025,mas2025,stablevalue2026}.
+Nash bargaining point sits strictly interior at $\lambda=\NashLambda$---an
+interior optimum that no extreme setting of the dial attains, reached here
+with a dial that can be turned mid-simulation rather than a retrained model,
+operationalizing the open-specification response to the insufficiency of
+static value alignment~\cite{spectrap2025}.
 
 \begin{figure}[htb]
 \centering
@@ -1637,7 +1638,7 @@ selfish--cooperative dial:} flipping agents from individual gold-maximization to
 welfare-sharing raises \emph{total} welfare by \EconCoopWelfareGain\% (\EconSelfishWelfare{}
 $\to$ \EconCoopWelfare{} gold)---because concave capital means an equal spread
 produces more---yet the single greediest selfish agent still ends richer than
-any cooperator (\EconSelfishMax{} vs.\ \EconCoopMax{} gold). This is the E08
+any cooperator (\EconSelfishMax{} vs.\ \EconCoopMax{} gold). This is the E8
 welfare--fairness Pareto tension of the moral dial (\S\ref{sec:robustness}),
 now \emph{emerging} from a composed verified economy rather than declared as a
 scalar reward, and every tick the books balance exactly: total gold moves only
@@ -1926,7 +1927,7 @@ Four agent-level results. \emph{Individual vs collective}: as a selfishness dial
 turns agents from company-aligned to promotion-chasing, company growth falls from
 \CorpAlignedGrowth\% to \CorpSelfishGrowth\% while the promotion Gini rises from
 \CorpAlignedGini{} to \CorpSelfishGini---local optimization concentrates rewards
-and starves the aggregate (the E44/E08 Pareto on an org chart). \emph{Value-of-
+and starves the aggregate (the E44/E8 Pareto on an org chart). \emph{Value-of-
 action}: optimizing each level's decision in turn, the CEO's portfolio
 reallocation is the dominant lever ($+\CorpCeoPct\%$ company growth) over a
 director's ($+\CorpDirPct\%$) and an IC's ($+\CorpIcPct\%$)---leverage lives at
@@ -2414,7 +2415,7 @@ the same-day entry---buy at the open (capture the intraday segment, close→open
 $\to$ open→close) or at the close (capture the overnight segment). Each ticker is
 a world with verified, auditable estimators of P(up) per segment; selection is a
 many-worlds pick of the highest expected move; timing is the open/close choice.
-The value here is not alpha---it is \emph{rigor}: an exact, auditable model and an
+The value here is not alpha---it is \emph{rigor}: an exact, auditable model and a
 walk-forward, no-lookahead, after-cost backtest that makes overfitting
 visible, where a black-box predictor would hide it.
 
@@ -2456,7 +2457,7 @@ no lookahead). The after-cost strategy does not beat SPY risk-adjusted.}
 \input{tables/trading}
 \end{table}
 
-\subsection{Wavelet denoising as a perception$\to$world$\to$emit loop (E52)}\label{sec:denoise}
+\subsection{Wavelet denoising as a perceive$\to$world$\to$emit loop (E52)}\label{sec:denoise}
 A wavelet denoiser is a clean instance of the perception boundary: a noisy
 continuous signal is mapped to a \emph{sparse symbolic state} (the few
 significant wavelet coefficients --- real structure separated from dense noise),

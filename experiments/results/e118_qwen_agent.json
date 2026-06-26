@@ -1,0 +1,13 @@
+{
+  "model": "qwen2.5:3b",
+  "results": {
+    "vc33": {
+      "game": "vc33",
+      "model": "qwen2.5:3b",
+      "best_levels": 0,
+      "win": 0,
+      "rounds": 2,
+      "log": "/Users/jim/Desktop/openworld/experiments/results/qwen_agent_logs/vc33.jsonl"
+    }
+  }
+}

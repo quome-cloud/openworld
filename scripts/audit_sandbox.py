@@ -5,20 +5,29 @@
 """
 import sys, os, glob, re
 
-TAINT = re.compile(r"environment_files|inspect\.getsource|spec_from_file_location|"
-                   r"importlib\.util\.spec_from_file_location|import\s+arc_agi|from\s+arc_agi")
+# The integrity invariant: a solver may ACT on the env, but must never read the game's SOURCE.
+# SOURCE_READ = reading <game>.py (the cheat); ENGINE_IMPORT = importing arc_agi (legitimate acting).
+SOURCE_READ = re.compile(r"environment_files|inspect\.getsource|spec_from_file_location|"
+                         r"importlib\.util\.spec_from_file_location")
+ENGINE_IMPORT = re.compile(r"import\s+arc_agi|from\s+arc_agi")
 
 
-def audit(wd):
+def audit(wd, mode="strict"):
+    """Audit a working dir for SOURCE access.
+    mode="strict"  (open-ended AGENT tier): no source reads AND no arc_agi import -- the agent must act
+                   only through the process-isolated SandboxGame pipe (fair by construction).
+    mode="source_only" (fixed CHEAP solver tier): no source reads; importing arc_agi to STEP the env is
+                   allowed -- the algorithm is statically verifiable to consume only frames (fair by audit).
+    """
     findings = []
-    # 1) no game source physically present in the agent dir
+    # 1) no game source physically present in the working dir (both modes)
     src = [p for p in glob.glob(os.path.join(wd, "**", "*.py"), recursive=True)
            if "environment_files" in p]
     if src:
         findings.append(f"game source present: {src[:3]}")
     if os.path.isdir(os.path.join(wd, "environment_files")):
         findings.append("environment_files/ dir present")
-    # 2) no agent script reads source / imports the engine
+    # 2) no script reads source (both modes); arc_agi import forbidden only in strict mode
     for p in glob.glob(os.path.join(wd, "*.py")):
         if os.path.basename(p) == "arc3_sandbox.py":
             continue                                   # the sanctioned client harness
@@ -26,8 +35,27 @@ def audit(wd):
             txt = open(p, errors="ignore").read()
         except Exception:
             continue
-        for m in set(TAINT.findall(txt)):
-            findings.append(f"{os.path.basename(p)}: references '{m}'")
+        for m in set(SOURCE_READ.findall(txt)):
+            findings.append(f"{os.path.basename(p)}: SOURCE-READ '{m}'")
+        if mode == "strict":
+            for m in set(ENGINE_IMPORT.findall(txt)):
+                findings.append(f"{os.path.basename(p)}: engine import '{m.strip()}' (agent must use SandboxGame)")
+    return findings
+
+
+def audit_files(paths, mode="source_only"):
+    """Audit specific script files (e.g. the fixed cheap solvers) for SOURCE reads. Returns findings."""
+    findings = []
+    for p in paths:
+        try:
+            txt = open(p, errors="ignore").read()
+        except Exception:
+            continue
+        for m in set(SOURCE_READ.findall(txt)):
+            findings.append(f"{os.path.basename(p)}: SOURCE-READ '{m}'")
+        if mode == "strict":
+            for m in set(ENGINE_IMPORT.findall(txt)):
+                findings.append(f"{os.path.basename(p)}: engine import '{m.strip()}'")
     return findings
 
 

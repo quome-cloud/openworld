@@ -1,16 +1,25 @@
 #!/usr/bin/env bash
-# SOURCE-FREE full-game solver: Claude Code solves an ARC-AGI-3 game through the process-isolated
-# SandboxGame client only. The agent's working dir has NO game source and its python cannot import
-# arc_agi -> fair by construction. Usage: run_arc_agent_sandbox.sh <game>
-set -uo pipefail
+# SOURCE-FREE full-game solver (AGENT tier), with full dataset capture.
+# Claude Code solves an ARC-AGI-3 game through the process-isolated SandboxGame client only. The agent's
+# working dir has NO game source and its python cannot import arc_agi -> fair by construction. Every run is
+# captured (prompt + structured transcript + timestamps + pinned model/effort) into the arc3_traces dataset.
+#
+#   Usage: run_arc_agent_sandbox.sh <game> [tier]
+#   Env:   MODEL (default claude-opus-4-8), EFFORT (default high), FALLBACK_MODEL (optional)
+set -o pipefail   # NOT -u: macOS bash 3.2 errors on empty-array expansion under nounset
 GAME="$1"
+TIER="${2:-agent}"
 ROOT="/Users/jim/Desktop/openworld"
 AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"   # has numpy, CANNOT import arc_agi
+CLAUDE="/Users/jim/.local/bin/claude"
+MODEL="${MODEL:-claude-opus-4-8}"                          # pinned for artifact isolation
+EFFORT="${EFFORT:-high}"
+FALLBACK_MODEL="${FALLBACK_MODEL:-}"
 WD="$ROOT/scratch_arc/sb_$GAME"
-mkdir -p "$WD"
+TRACES="$ROOT/experiments/results/arc3_traces"
+mkdir -p "$WD" "$TRACES/prompts" "$TRACES/transcripts" "$TRACES/meta" "$TRACES/solutions"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"             # the ONLY harness the agent gets (no source)
-# best-keeper: seed from the deepest known source-free solution if we have one
-[ -f "$WD/solved_best.json" ] && cp "$WD/solved_best.json" "$WD/solved.json"
+[ -f "$WD/solved_best.json" ] && cp "$WD/solved_best.json" "$WD/solved.json"   # best-keeper seed
 
 cat > "$WD/TASK.md" <<TASK
 You must FULLY solve the interactive ARC-AGI-3 game **$GAME** -- complete EVERY level -- using ONLY
@@ -44,6 +53,59 @@ DO NOT attempt to read the game source, import arc_agi, or build an env yourself
 and every run is AUDITED for source access; a tainted run is discarded. Solve it the fair way.
 TASK
 
+# --- dataset capture: run id, prompt, timestamps, transcript, meta sidecar ---
+RID=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import capture_lib as c; print(c.run_id('$GAME','$TIER'))")
+PROMPT_FILE="$TRACES/prompts/$RID.md"
+TRANSCRIPT="$TRACES/transcripts/$RID.jsonl"
+cp "$WD/TASK.md" "$PROMPT_FILE"
+STARTED=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import capture_lib as c; print(c.iso_now())")
+
 cd "$WD"
-claude -p "$(cat TASK.md)" --dangerously-skip-permissions > "$WD/agent.log" 2>&1
-echo "sandbox agent finished for $GAME"
+if [ -n "$FALLBACK_MODEL" ]; then
+  "$CLAUDE" -p "$(cat TASK.md)" --model "$MODEL" --effort "$EFFORT" --fallback-model "$FALLBACK_MODEL" \
+    --output-format stream-json --verbose --dangerously-skip-permissions > "$TRANSCRIPT" 2> "$WD/agent.err"
+else
+  "$CLAUDE" -p "$(cat TASK.md)" --model "$MODEL" --effort "$EFFORT" \
+    --output-format stream-json --verbose --dangerously-skip-permissions > "$TRANSCRIPT" 2> "$WD/agent.err"
+fi
+RC=$?
+ENDED=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import capture_lib as c; print(c.iso_now())")
+
+# snapshot THIS run's produced solution trace (immutable per-run record; archive holds only the latest best)
+[ -f "$WD/solved.json" ] && cp "$WD/solved.json" "$TRACES/solutions/$RID.json"
+
+# write the meta sidecar (the finalizer merges it with the verified outcome later)
+"$AGENT_PY" - "$GAME" "$TIER" "$RID" "$MODEL" "$EFFORT" "$FALLBACK_MODEL" "$STARTED" "$ENDED" "$RC" "$PROMPT_FILE" "$TRANSCRIPT" <<'PY'
+import sys, json
+sys.path.insert(0, "/Users/jim/Desktop/openworld/scripts")
+import capture_lib as c
+game, tier, rid, model, effort, fb, started, ended, rc, pf, tr = sys.argv[1:13]
+summ = c.summarize_transcript(tr)
+prompt_text = open(pf, errors="ignore").read()
+rec = {
+  "run_id": rid, "game": game, "tier": tier, "method": "live-coding-agent-sandbox",
+  "source_free": True, "fairness": "by-construction (process-isolated SandboxGame)",
+  "audit_dir": f"scratch_arc/sb_{game}", "audit_mode": "strict",
+  "started_at": started, "ended_at": ended, "exit_code": int(rc),
+  "model_config": c.model_config(requested_model=model, effort=effort,
+                                 fallback_model=(fb or None), summary=summ),
+  "prompt_file": f"prompts/{rid}.md", "prompt": c.prompt_stats(prompt_text),
+  "solution_file": f"solutions/{rid}.json",
+  "transcript_file": f"transcripts/{rid}.jsonl", "transcript_sha256": c.sha256_file(tr),
+  "transcript": {k: summ.get(k) for k in ("session_id","num_turns","n_messages","n_tool_calls",
+                 "tool_calls_by_name","n_text_blocks","n_thinking_blocks","n_user_msgs","cost_usd",
+                 "tokens","usage","is_error","api_error_status","duration_ms","duration_api_ms","ttft_ms")},
+  "host": c.host_info(), "git": c.git_info(),
+  "pipeline": c.file_provenance([
+    "/Users/jim/Desktop/openworld/scripts/run_arc_agent_sandbox.sh",
+    "/Users/jim/Desktop/openworld/experiments/arc3_sandbox.py",
+    "/Users/jim/Desktop/openworld/scripts/audit_sandbox.py"]),
+  "benchmark": c.BENCHMARK, "dataset_version": c.DATASET_VERSION,
+  "outcome": None,   # filled by the OpenWorld-verified banker/finalizer
+}
+c.write_meta(rid, rec)
+print(f"[capture] meta written for {rid}: model={summ.get('model')} effort={effort} "
+      f"turns={summ.get('num_turns')} tools={summ.get('n_tool_calls')} cost=${summ.get('cost_usd')}")
+PY
+
+echo "sandbox agent finished for $GAME (rid=$RID, rc=$RC)"

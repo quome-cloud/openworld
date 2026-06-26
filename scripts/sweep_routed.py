@@ -1,0 +1,149 @@
+"""Overnight ROUTED source-free sweep -- the hybrid-world-models pipeline (E116 made real + source-free).
+
+Phase 1 (CHEAP, fast): a fixed pixel-only frontier search (E107) attempts every game source-free
+                       (fairness BY AUDIT). Captured as deterministic run records.
+Phase 2 (AGENT, deep): every game the cheap tier did NOT fully solve is routed to the live coding agent in
+                       the process-isolated sandbox (fairness BY CONSTRUCTION), best-keeper across rounds.
+                       Pinned model/effort; full prompt+transcript captured.
+
+After every batch: finalize_traces (verified outcomes -> runs.jsonl) + bank_from_runs (deepest verified per
+game -> archive, tier-tagged). Local commit per phase/round; NO push (the human reviews + pushes).
+
+Plain python3 (stdlib). Banker/finalizer/cheap run under the arc venv (need arc_agi + openworld).
+    python3 scripts/sweep_routed.py
+"""
+import subprocess, time, os, sys, json, signal
+from pathlib import Path
+
+ROOT = Path("/Users/jim/Desktop/openworld")
+ARC_VENV = ("/private/tmp/claude-501/-Users-jim-Desktop-openworld/"
+            "71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python")
+RUNNER = str(ROOT / "scripts" / "run_arc_agent_sandbox.sh")
+ARCH = ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree.json"
+LOGDIR = ROOT / "scratch_arc"
+TRACES = ROOT / "experiments" / "results" / "arc3_traces"
+
+GAMES = ["ar25", "bp35", "cd82", "cn04", "dc22", "ft09", "g50t", "ka59", "lf52", "lp85", "ls20", "m0r0",
+         "r11l", "re86", "s5i5", "sb26", "sc25", "sk48", "sp80", "su15", "tn36", "tr87", "tu93", "vc33",
+         "wa30"]
+
+POOL = int(os.environ.get("POOL", "4"))
+PER_AGENT_S = int(os.environ.get("PER_AGENT_S", "2700"))     # 45 min wall-clock per agent per round
+ROUNDS = int(os.environ.get("ROUNDS", "4"))
+MODEL = os.environ.get("MODEL", "claude-opus-4-8")
+EFFORT = os.environ.get("EFFORT", "high")
+
+
+def log(m):
+    print(f"[routed {time.strftime('%H:%M:%S')}] {m}", flush=True)
+
+
+def venv(script, *args, timeout=1800):
+    try:
+        r = subprocess.run([ARC_VENV, str(ROOT / "scripts" / script), *args], cwd=str(ROOT),
+                           capture_output=True, text=True, timeout=timeout)
+        for ln in (r.stdout or "").splitlines():
+            if any(tag in ln for tag in ("[finalize]", "[bank]", "[cheap]")):
+                log(ln.strip())
+        if r.returncode != 0:
+            log(f"{script} rc={r.returncode}: {(r.stderr or '')[-300:]}")
+    except Exception as ex:
+        log(f"{script} error: {ex}")
+
+
+def finalize_and_bank():
+    venv("finalize_traces.py")
+    venv("bank_from_runs.py")
+
+
+def fully_solved(g):
+    if not ARCH.exists():
+        return False
+    try:
+        v = json.loads(ARCH.read_text()).get("per_game", {}).get(g)
+        return bool(v and v.get("win") and v["levels"] >= v["win"])
+    except Exception:
+        return False
+
+
+def launch_agent(g):
+    out = open(LOGDIR / f"sb_{g}_sweep.out", "a")
+    env = dict(os.environ, MODEL=MODEL, EFFORT=EFFORT)
+    return subprocess.Popen(["bash", RUNNER, g, "agent"], cwd=str(ROOT), env=env,
+                            stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+
+
+def kill_tree(p):
+    try:
+        os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+    except Exception:
+        pass
+
+
+def commit(tag):
+    a = json.loads(ARCH.read_text()) if ARCH.exists() else {}
+    by_tier = a.get("by_tier", {})
+    msg = (f"Routed source-free sweep [{tag}]: {a.get('n_full_games', 0)} full, "
+           f"{a.get('total_levels', 0)}/{a.get('total_possible', 0)} levels "
+           f"(cheap+agent; audit-clean + OpenWorld-World-verified).\n\n"
+           f"by tier: { {k: len(v) for k, v in by_tier.items()} }. Every banked solve is a captured, "
+           "timestamped run in arc3_traces/runs.jsonl (prompt+transcript+model/effort metadata), "
+           "replay-verified and round-tripped through an OpenWorld World. No push (human reviews).\n\n"
+           "Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>")
+    subprocess.run(["git", "-C", str(ROOT), "add", str(ARCH),
+                    "experiments/results/arc3_traces/runs.jsonl",
+                    "experiments/results/arc3_traces/meta",
+                    "experiments/results/arc3_traces/prompts",
+                    "experiments/results/arc3_traces/solutions",
+                    "scripts/"], check=False)
+    subprocess.run(["git", "-C", str(ROOT), "commit", "-q", "-m", msg], check=False)
+    log(f"committed [{tag}] (local, not pushed)")
+
+
+def main():
+    log(f"START routed sweep: {len(GAMES)} games | pool={POOL} per-agent={PER_AGENT_S}s rounds={ROUNDS} "
+        f"| model={MODEL} effort={EFFORT}")
+
+    # ---- Phase 1: cheap tier (fast, all games) ----
+    log("Phase 1 (cheap pixel-search, source-free by audit) over all games")
+    venv("run_cheap_tier.py", *GAMES, timeout=1800)
+    finalize_and_bank()
+    commit("cheap")
+
+    # ---- Phase 2: agent rounds on not-fully-solved games ----
+    for r in range(ROUNDS):
+        queue = [g for g in GAMES if not fully_solved(g)]
+        log(f"round {r}: {len(queue)} games not fully solved -> agent: {queue}")
+        if not queue:
+            log("all games fully solved; stopping early")
+            break
+        running = {}
+        qi = 0
+        while qi < len(queue) or running:
+            while len(running) < POOL and qi < len(queue):
+                g = queue[qi]; qi += 1
+                running[g] = (launch_agent(g), time.time())
+                log(f"launch agent {g}  ({len(running)} active, {len(queue) - qi} queued)")
+            time.sleep(20)
+            done = []
+            for g, (p, st) in running.items():
+                if p.poll() is not None:
+                    done.append((g, "exited"))
+                elif time.time() - st > PER_AGENT_S:
+                    kill_tree(p); done.append((g, "timeout"))
+            for g, why in done:
+                del running[g]
+                log(f"agent {g} {why}")
+                finalize_and_bank()
+        commit(f"round{r}")
+
+    finalize_and_bank()
+    commit("final")
+    a = json.loads(ARCH.read_text()) if ARCH.exists() else {}
+    log(f"DONE: {a.get('n_full_games', 0)} full games, "
+        f"{a.get('total_levels', 0)}/{a.get('total_possible', 0)} levels; "
+        f"by tier { {k: len(v) for k, v in a.get('by_tier', {}).items()} }")
+
+
+if __name__ == "__main__":
+    main()

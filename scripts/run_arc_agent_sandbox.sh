@@ -79,13 +79,20 @@ ENDED=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import c
 import sys, json
 sys.path.insert(0, "/Users/jim/Desktop/openworld/scripts")
 import capture_lib as c
+from audit_sandbox import audit_knowledge
 game, tier, rid, model, effort, fb, started, ended, rc, pf, tr = sys.argv[1:13]
 summ = c.summarize_transcript(tr)
 prompt_text = open(pf, errors="ignore").read()
+# knowledge audit: were the agent's loaded memory notes / CLAUDE.md free of source-DERIVED content?
+mem_dir = "/Users/jim/.claude/projects/-Users-jim-Desktop-openworld/memory"
+kfind = audit_knowledge(memory_dir=mem_dir, claude_md="/Users/jim/Desktop/openworld/CLAUDE.md")
 rec = {
   "run_id": rid, "game": game, "tier": tier, "method": "live-coding-agent-sandbox",
   "source_free": True, "fairness": "by-construction (process-isolated SandboxGame)",
   "audit_dir": f"scratch_arc/sb_{game}", "audit_mode": "strict",
+  "knowledge_audit": {"clean": (kfind == []), "findings": kfind,
+                      "scanned": ["memory/*.md", "CLAUDE.md"]},
+  "memory_tainted": (kfind != []),
   "started_at": started, "ended_at": ended, "exit_code": int(rc),
   "model_config": c.model_config(requested_model=model, effort=effort,
                                  fallback_model=(fb or None), summary=summ),

@@ -100,9 +100,30 @@ def commit(tag):
     log(f"committed [{tag}] (local, not pushed)")
 
 
+def preflight_knowledge_audit():
+    """Before any run, verify the agent's loaded knowledge (memory notes + CLAUDE.md) is free of
+    source-DERIVED content. Warn loudly if not -- those runs will be flagged memory_tainted and excluded
+    from the fair count, so a contaminated memory state should be cleaned before trusting the sweep."""
+    try:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        from audit_sandbox import audit_knowledge
+        mem = "/Users/jim/.claude/projects/-Users-jim-Desktop-openworld/memory"
+        f = audit_knowledge(memory_dir=mem, claude_md=str(ROOT / "CLAUDE.md"))
+        if f:
+            log("!!! KNOWLEDGE AUDIT TAINTED — source-derived content in memory/CLAUDE.md; runs will be "
+                "flagged memory_tainted and EXCLUDED from the fair count. Clean these first:")
+            for x in f[:12]:
+                log(f"    - {x}")
+        else:
+            log("knowledge audit CLEAN (memory + CLAUDE.md free of source-derived content)")
+    except Exception as ex:
+        log(f"knowledge audit error (non-fatal): {ex}")
+
+
 def main():
     log(f"START routed sweep: {len(GAMES)} games | pool={POOL} per-agent={PER_AGENT_S}s rounds={ROUNDS} "
         f"| model={MODEL} effort={EFFORT}")
+    preflight_knowledge_audit()
 
     # ---- Phase 1: cheap tier (fast, all games) ---- (skip on resume via SKIP_CHEAP=1)
     if os.environ.get("SKIP_CHEAP") == "1":

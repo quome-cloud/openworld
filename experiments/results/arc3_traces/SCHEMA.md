@@ -63,6 +63,15 @@ One JSON object per line = one **run** (one method's attempt at one game). Field
 | `benchmark` | obj | `{name: ARC-AGI-3, grid: 64x64, colors: 16, actions}`. |
 | `dataset_version` | str | Schema/dataset version. |
 
+## Source-free integrity
+| Field | Type | Meaning |
+|-------|------|---------|
+| `source_free` | bool | The protocol (always true). |
+| `fairness` | str | `by-construction` (agent sandbox) or `by-audit` (fixed solver). |
+| `knowledge_audit` | obj | `{clean, findings, scanned}` — scan of the agent's loaded **memory notes + CLAUDE.md** for source-*derived* content (e.g. `environment_files`, a `<gameid>.py` reference, "source-derived/faithful", "read … source"). Computed per run, so memory/CLAUDE.md contamination is self-detecting, not caught only by manual review. |
+| `memory_tainted` | bool | True if `knowledge_audit` found source-derived knowledge (or a run was manually flagged). **`bank_from_runs` excludes these from the fair count.** Kept in the dataset for transparency rather than deleted. |
+| `memory_tainted_reason` | str | Present when manually flagged (e.g. the 2026-06-26 source-derived-note purge). |
+
 ## Outcome (independently recomputed)
 `outcome`:
 | Field | Type | Meaning |

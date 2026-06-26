@@ -43,6 +43,43 @@ def audit(wd, mode="strict"):
     return findings
 
 
+# Source-DERIVED knowledge: content in memory notes / CLAUDE.md extracted from a game's source (a
+# laundered answer key). PRECISE signals only -- must NOT false-positive on legit project scripts
+# (serve.py, card.py, solver files) or openworld's own `inspect.getsource` spec serialization, or
+# ENGINE/harness notes (`arcengine`, `_game.full_reset()`). The decisive signals: the game-source dir,
+# loading a specific game's <gameid>.py, or explicit "source-derived/faithful / read ... source" labels.
+_GAME_IDS = ("ar25|bp35|cd82|cn04|dc22|ft09|g50t|ka59|lf52|lp85|ls20|m0r0|r11l|re86|s5i5|sb26|sc25|"
+             "sk48|sp80|su15|tn36|tr87|tu93|vc33|wa30")
+KNOWLEDGE_TAINT = re.compile(
+    r"environment_files|spec_from_file_location|source-derived|source-faithful|"
+    rf"(?:{_GAME_IDS})\.py\b|read (?:the |env )?(?:game )?source", re.IGNORECASE)
+
+
+def audit_knowledge(memory_dir=None, claude_md=None):
+    """Scan the agent's loaded KNOWLEDGE sources (auto memory notes + CLAUDE.md) for source-DERIVED content.
+    Returns a list of findings; [] means no laundered-source knowledge is in scope. This makes the
+    memory/CLAUDE.md contamination self-detecting on every run instead of relying on manual review."""
+    findings = []
+    targets = []
+    if memory_dir and os.path.isdir(memory_dir):
+        targets += [p for p in glob.glob(os.path.join(memory_dir, "*.md"))
+                    if os.path.basename(p) != "MEMORY.md"]
+    if claude_md and os.path.isfile(claude_md):
+        targets.append(claude_md)
+    for p in targets:
+        try:
+            txt = open(p, errors="ignore").read()
+        except Exception:
+            continue
+        # ignore the explicit source-free RULE line in CLAUDE.md (it names the patterns to forbid)
+        hits = set(m.group(0) for m in KNOWLEDGE_TAINT.finditer(txt)
+                   if "never read" not in txt[max(0, m.start() - 60):m.start()].lower()
+                   and "do not" not in txt[max(0, m.start() - 40):m.start()].lower())
+        for h in sorted(hits):
+            findings.append(f"{os.path.basename(p)}: source-derived knowledge '{h}'")
+    return findings
+
+
 def audit_files(paths, mode="source_only"):
     """Audit specific script files (e.g. the fixed cheap solvers) for SOURCE reads. Returns findings."""
     findings = []
@@ -60,6 +97,19 @@ def audit_files(paths, mode="source_only"):
 
 
 if __name__ == "__main__":
+    # `audit_sandbox.py --knowledge` audits the agent's loaded memory + CLAUDE.md for source-derived
+    # content; `audit_sandbox.py <dir>` audits a working dir for source reads.
+    if len(sys.argv) >= 2 and sys.argv[1] == "--knowledge":
+        mem = "/Users/jim/.claude/projects/-Users-jim-Desktop-openworld/memory"
+        cmd = "/Users/jim/Desktop/openworld/CLAUDE.md"
+        findings = audit_knowledge(memory_dir=mem, claude_md=cmd)
+        if findings:
+            print("TAINTED (memory + CLAUDE.md): source-derived knowledge present:")
+            for f in findings:
+                print("  -", f)
+            sys.exit(1)
+        print("CLEAN (memory + CLAUDE.md): no source-derived knowledge detected")
+        sys.exit(0)
     wd = sys.argv[1]
     findings = audit(wd)
     if findings:

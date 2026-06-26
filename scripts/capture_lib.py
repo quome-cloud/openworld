@@ -98,6 +98,16 @@ def summarize_transcript(jsonl_path):
             out["session_id"] = out["session_id"] or o.get("session_id")
         elif t == "assistant":
             msg = o.get("message", {})
+            u = msg.get("usage") or {}
+            if u:                                              # aggregate per-message usage (each = 1 API call)
+                a = out.setdefault("_agg_usage", {"input_tokens": 0, "output_tokens": 0,
+                                                  "cache_creation_input_tokens": 0,
+                                                  "cache_read_input_tokens": 0, "n_calls": 0})
+                a["input_tokens"] += u.get("input_tokens", 0) or 0
+                a["output_tokens"] += u.get("output_tokens", 0) or 0
+                a["cache_creation_input_tokens"] += u.get("cache_creation_input_tokens", 0) or 0
+                a["cache_read_input_tokens"] += u.get("cache_read_input_tokens", 0) or 0
+                a["n_calls"] += 1
             for blk in (msg.get("content") or []):
                 if isinstance(blk, dict) and blk.get("type") == "tool_use":
                     out["n_tool_calls"] += 1
@@ -122,16 +132,43 @@ def summarize_transcript(jsonl_path):
             out["result_text"] = str(o.get("result"))[:2000] if o.get("result") is not None else None
             out["session_id"] = out["session_id"] or o.get("session_id")
     out.setdefault("tool_calls_by_name", {})
-    # flatten token usage for easy dataset columns
+    # Token usage: prefer the authoritative result-block usage; else reconstruct from per-message usage
+    # (for runs cut mid-stream that never emitted a result block). Always record the source.
     u = out.get("usage") or {}
+    agg = out.pop("_agg_usage", None)
+    if u:
+        src = "result_block"; tu = u
+    elif agg:
+        src = "reconstructed_from_messages"; tu = agg
+        out["usage"] = agg
+    else:
+        src = "none"; tu = {}
     out["tokens"] = {
-        "input": u.get("input_tokens"), "output": u.get("output_tokens"),
-        "cache_creation": u.get("cache_creation_input_tokens"),
-        "cache_read": u.get("cache_read_input_tokens"),
-        "total": (None if not u else sum(v for k, v in u.items()
+        "input": tu.get("input_tokens"), "output": tu.get("output_tokens"),
+        "cache_creation": tu.get("cache_creation_input_tokens"),
+        "cache_read": tu.get("cache_read_input_tokens"),
+        "total": (None if not tu else sum(v for k, v in tu.items()
                   if k.endswith("_tokens") and isinstance(v, int))),
+        "source": src,
     }
+    # Cost: authoritative if the result block reported it; else estimate from tokens at recorded rates.
+    out["cost_basis"] = "result_block" if out.get("cost_usd") is not None else (
+        "estimated_from_tokens" if tu else "unknown")
+    if out.get("cost_usd") is None and tu:
+        r = PRICING_OPUS_PER_MTOK
+        out["cost_usd_estimated"] = round(
+            (tu.get("input_tokens", 0) * r["input"]
+             + tu.get("output_tokens", 0) * r["output"]
+             + tu.get("cache_creation_input_tokens", 0) * r["cache_write"]
+             + tu.get("cache_read_input_tokens", 0) * r["cache_read"]) / 1_000_000, 4)
+        out["pricing_assumed"] = r
     return out
+
+
+# Assumed Anthropic Opus pricing (USD per million tokens) for ESTIMATED costs on runs that lack an
+# authoritative result block. Recorded in the record so estimates are transparent and correctable.
+PRICING_OPUS_PER_MTOK = {"model": "claude-opus-4-x", "input": 15.0, "output": 75.0,
+                         "cache_write": 18.75, "cache_read": 1.5}
 
 
 # ----- provenance / environment / stats helpers (maximal metadata for the dataset) -----

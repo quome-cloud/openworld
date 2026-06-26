@@ -43,14 +43,30 @@
   "n_thinking_blocks": 9,
   "n_user_msgs": 15,
   "cost_usd": null,
-  "tokens": {
-   "input": null,
-   "output": null,
-   "cache_creation": null,
-   "cache_read": null,
-   "total": null
+  "cost_usd_estimated": 3.4789,
+  "cost_basis": "estimated_from_tokens",
+  "pricing_assumed": {
+   "model": "claude-opus-4-x",
+   "input": 15.0,
+   "output": 75.0,
+   "cache_write": 18.75,
+   "cache_read": 1.5
   },
-  "usage": null,
+  "tokens": {
+   "input": 12243,
+   "output": 478,
+   "cache_creation": 83259,
+   "cache_read": 1132195,
+   "total": 1228175,
+   "source": "reconstructed_from_messages"
+  },
+  "usage": {
+   "input_tokens": 12243,
+   "output_tokens": 478,
+   "cache_creation_input_tokens": 83259,
+   "cache_read_input_tokens": 1132195,
+   "n_calls": 28
+  },
   "is_error": null,
   "api_error_status": null,
   "duration_ms": null,

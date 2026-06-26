@@ -39,12 +39,16 @@
   "n_thinking_blocks": null,
   "n_user_msgs": null,
   "cost_usd": 0,
+  "cost_usd_estimated": null,
+  "cost_basis": "result_block",
+  "pricing_assumed": null,
   "tokens": {
    "input": 0,
    "output": 0,
    "cache_creation": 0,
    "cache_read": 0,
-   "total": 0
+   "total": 0,
+   "source": "result_block"
   },
   "usage": {
    "input_tokens": 0,

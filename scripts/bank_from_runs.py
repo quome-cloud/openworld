@@ -16,6 +16,14 @@ import capture_lib as c
 
 ARCH = ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree.json"
 
+# Canonical win_levels per game (all 25) -> the denominator is the FULL 183 levels, NOT just started
+# games, so source-free X/183 is comparable to the source-assisted 177/183.
+WIN_LEVELS = {"ar25": 8, "bp35": 9, "cd82": 6, "cn04": 6, "dc22": 6, "ft09": 6, "g50t": 7, "ka59": 7,
+              "lf52": 10, "lp85": 8, "ls20": 7, "m0r0": 6, "r11l": 6, "re86": 8, "s5i5": 8, "sb26": 8,
+              "sc25": 6, "sk48": 8, "sp80": 6, "su15": 9, "tn36": 7, "tr87": 6, "tu93": 9, "vc33": 7,
+              "wa30": 9}
+TOTAL_POSSIBLE = sum(WIN_LEVELS.values())   # 183
+
 
 def load_runs():
     if not c.RUNS.exists():
@@ -58,12 +66,17 @@ def main():
         wd.mkdir(parents=True, exist_ok=True)
         (wd / "solved_best.json").write_text(json.dumps(
             {"game": g, "actions": o["actions"], "levels": o["levels"], "win": o["win"]}))
+    # include ALL 25 games (zero-progress games shown as 0/canonical-win) so the denominator is honest
+    for g, win in WIN_LEVELS.items():
+        arch["per_game"].setdefault(g, {"levels": 0, "win": win, "tier": None})
+        if not arch["per_game"][g].get("win"):
+            arch["per_game"][g]["win"] = win
     arch["full_games"] = sorted(g for g, v in arch["per_game"].items()
                                 if v.get("win") and v["levels"] >= v["win"])
     arch["n_full_games"] = len(arch["full_games"])
     arch["total_levels"] = sum(v["levels"] for v in arch["per_game"].values())
-    arch["total_possible"] = sum(v.get("win", 0) for v in arch["per_game"].values())
-    arch["n_games_started"] = len(arch["per_game"])
+    arch["total_possible"] = TOTAL_POSSIBLE                  # 183 across all 25 games (canonical)
+    arch["n_games_started"] = sum(1 for v in arch["per_game"].values() if v["levels"] > 0)
     arch["by_tier"] = {}
     for g, v in arch["per_game"].items():
         arch["by_tier"].setdefault(v["tier"], []).append(g)

@@ -41,12 +41,16 @@
   "n_thinking_blocks": 31,
   "n_user_msgs": 32,
   "cost_usd": 5.389951999999999,
+  "cost_usd_estimated": null,
+  "cost_basis": "result_block",
+  "pricing_assumed": null,
   "tokens": {
    "input": 6643,
    "output": 102639,
    "cache_creation": 142362,
    "cache_read": 2734284,
-   "total": 2985928
+   "total": 2985928,
+   "source": "result_block"
   },
   "usage": {
    "input_tokens": 6643,

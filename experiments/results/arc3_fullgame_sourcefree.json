@@ -102,6 +102,31 @@
    "levels": 3,
    "win": 9,
    "tier": "agent"
+  },
+  "r11l": {
+   "levels": 0,
+   "win": 6,
+   "tier": null
+  },
+  "s5i5": {
+   "levels": 0,
+   "win": 8,
+   "tier": null
+  },
+  "sc25": {
+   "levels": 0,
+   "win": 6,
+   "tier": null
+  },
+  "sk48": {
+   "levels": 0,
+   "win": 8,
+   "tier": null
+  },
+  "tr87": {
+   "levels": 0,
+   "win": 6,
+   "tier": null
   }
  },
  "solutions": {
@@ -9837,7 +9862,7 @@
  ],
  "n_full_games": 6,
  "total_levels": 82,
- "total_possible": 149,
+ "total_possible": 183,
  "n_games_started": 20,
  "by_tier": {
   "agent": [
@@ -9863,7 +9888,14 @@
   ],
   "cheap": [
    "ls20"
+  ],
+  "null": [
+   "r11l",
+   "s5i5",
+   "sc25",
+   "sk48",
+   "tr87"
   ]
  },
- "updated_at": "2026-06-26T18:41:20Z"
+ "updated_at": "2026-06-26T19:58:13Z"
 }

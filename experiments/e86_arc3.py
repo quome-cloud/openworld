@@ -44,6 +44,8 @@ def collect(game_id, steps, seed):
     for _ in range(steps):
         ai = rng.choice(avail)
         nobs = env.step(ACTS[ai])
+        if nobs is None:  # some games crash internally; skip bad actions
+            continue
         ng = grid(nobs)
         trans.append({"frame": g.tolist(), "action": ai + 1, "next": ng.tolist()})
         best = max(best, nobs.levels_completed)
@@ -62,7 +64,10 @@ def replay_determinism(game_id, steps, seed):
         env = arc.make(game_id); obs = env.reset(); rng = random.Random(seed)
         avail = [a - 1 for a in obs.available_actions]; frames = [grid(obs).copy()]
         for _ in range(steps):
-            obs = env.step(ACTS[rng.choice(avail)]); frames.append(grid(obs).copy())
+            nobs = env.step(ACTS[rng.choice(avail)])
+            if nobs is None:
+                continue
+            obs = nobs; frames.append(grid(obs).copy())
             if str(obs.state) != "GameState.NOT_FINISHED":
                 break
         return frames
@@ -122,6 +127,8 @@ def determinism(trans):
 
 def copy_baseline(trans):
     """'next == frame' baseline (a learned model's easiest guess)."""
+    if not trans:
+        return None
     return sum(np.array_equal(np.asarray(t["frame"]), np.asarray(t["next"])) for t in trans) / len(trans)
 
 
@@ -207,8 +214,9 @@ def main():
            "baseline_levels": levels, "win_levels": win,
            "deterministic_frac": (round(det, 4) if det is not None else None), "repeat_pairs": ndet,
            "replay_determinism": (round(rdet, 4) if rdet is not None else None), "replay_steps": rn,
-           "mean_cells_changed": round(float(np.mean(chg)), 1),
-           "copy_frame_exact": round(copy_baseline(trans), 4)}
+           "mean_cells_changed": (round(float(np.mean(chg)), 1) if chg else None),
+           "copy_frame_exact": (round(copy_baseline(trans), 4) if trans else None),
+           "skip_reason": ("all_actions_fail" if not trans else None)}
     print(f"[e86/{args.game}] {len(trans)} transitions | baseline levels {levels}/{win} "
           f"| copy-frame exact {res['copy_frame_exact']}", flush=True)
 

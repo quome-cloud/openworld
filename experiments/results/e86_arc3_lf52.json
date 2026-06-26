@@ -1,0 +1,13 @@
+{
+  "game": "lf52",
+  "steps": 300,
+  "transitions": 250,
+  "baseline_levels": 0,
+  "win_levels": 10,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 24,
+  "replay_determinism": 1.0,
+  "replay_steps": 64,
+  "mean_cells_changed": 1.0,
+  "copy_frame_exact": 0.0
+}

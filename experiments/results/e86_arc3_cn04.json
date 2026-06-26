@@ -1,0 +1,13 @@
+{
+  "game": "cn04",
+  "steps": 300,
+  "transitions": 245,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.25,
+  "repeat_pairs": 4,
+  "replay_determinism": 1.0,
+  "replay_steps": 66,
+  "mean_cells_changed": 164.8,
+  "copy_frame_exact": 0.0449
+}

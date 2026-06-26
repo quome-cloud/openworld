@@ -1,0 +1,14 @@
+{
+  "game": "tn36",
+  "steps": 300,
+  "transitions": 0,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": null,
+  "repeat_pairs": 0,
+  "replay_determinism": 1.0,
+  "replay_steps": 1,
+  "mean_cells_changed": null,
+  "copy_frame_exact": null,
+  "skip_reason": "all_actions_fail"
+}

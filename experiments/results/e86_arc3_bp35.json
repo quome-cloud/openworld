@@ -1,0 +1,13 @@
+{
+  "game": "bp35",
+  "steps": 300,
+  "transitions": 237,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 0.2917,
+  "repeat_pairs": 48,
+  "replay_determinism": 1.0,
+  "replay_steps": 48,
+  "mean_cells_changed": 92.5,
+  "copy_frame_exact": 0.2658
+}

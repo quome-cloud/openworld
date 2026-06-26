@@ -1,0 +1,13 @@
+{
+  "game": "m0r0",
+  "steps": 300,
+  "transitions": 245,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.25,
+  "repeat_pairs": 4,
+  "replay_determinism": 1.0,
+  "replay_steps": 70,
+  "mean_cells_changed": 55.7,
+  "copy_frame_exact": 0.1714
+}

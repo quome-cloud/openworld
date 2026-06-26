@@ -50,7 +50,11 @@ The SLM **never sees a 64×64 grid** (4k digit-tokens, lossy number tokenization
 no reliable 2D indexing). `perceive.py` converts each frame to **compact JSON**:
 
 - object list via `arc3_graph.objects`: `{id, color, bbox, centroid, size}`
-- frame→frame **deltas** (which objects appeared/moved/changed)
+- **relational, not absolute** (Qwen review): positions expressed relative to the
+  agent ("red 2-left of agent"); the arbitrary 0–15 color indices mapped to stable
+  symbolic tokens (they're meaningless integers to the model).
+- transitions fed as explicit **before→after contrastive diffs**, never two raw
+  frames — the model learns dynamics from the diff, not by re-deriving it.
 - status-bar **masking**: cells changing on >0.95 of probe steps are zeroed
   before hashing (the e107/e111 trick; keep τ high to avoid collapsing signal)
 
@@ -66,18 +70,46 @@ no reliable 2D indexing). `perceive.py` converts each frame to **compact JSON**:
 - Testable on recorded frames with no env/LLM.
 
 ### 4.2 `slm.py` — proposer with abstention (the model layer)
-Each slot: route to model(s) → best-of-N sample → **execution-grade** each
-candidate → **abstain unless ≥ τ agree** → return winner or `ABSTAIN`.
 
-| slot | proposes | executable grader | on abstain/fail |
-|---|---|---|---|
-| `interactive_cells` | clickable/agent object ids | do those clicks change the board (vs no-op)? | use full pixel-candidate set |
-| `rule(action)` | **object-level** transition rule (NOT frame→frame) | reproduces observed object deltas on held-out transitions | search uses env directly |
-| `subgoal` | **tool-call schema**, enum predicate `{reach(color), align(a,b), count(color)==k,…}` | predicate satisfiable on observed frames | BFS runs unguided |
-| `macro` | short action template when search stalls | replay raises progress toward subgoal | continue plain search |
+**Where the SLM earns its keep (Qwen review — concentrate, don't spread).** The
+deterministic probe already *observes* which clicks change the board and which
+object moves under each action, so `interactive_cells` and `rule` are **env-oracled
+— the SLM adds near-zero value there and is demoted to an opt-in ablation only.**
+The SLM's real leverage is the one thing the env does *not* hand you: the **goal /
+subgoal prior** on goal-as-*procedure* games (E102/103/104 died precisely because
+the win is a procedure, not a visible state-score) where search is otherwise
+intractable. Pour the budget into `subgoal`/`macro`.
 
-Rules: best-of-N is across **diverse models**; **adaptive stop** once agree;
-**no self-repair**; **no model-judge**; generous `max_tokens`; thinking models 4k+.
+Each slot: route → best-of-N → **execution-grade** → **abstain unless candidates
+agree ≥ τ** → return winner or `ABSTAIN`.
+
+| slot | owner | proposes | executable grader | on abstain/fail |
+|---|---|---|---|---|
+| `interactive_cells` | **deterministic** (SLM = ablation) | clickable/agent ids | clicks change board vs no-op? | full pixel-candidate set |
+| `rule(action)` | **deterministic** (SLM = ablation) | object-level transition rule | reproduces observed deltas on held-out? | search uses env directly |
+| **`subgoal`** | **SLM (primary)** | predicate `{reach(color), align(a,b), count(color)==k,…}` | satisfiable on observed frames | BFS runs unguided |
+| **`macro`** | **SLM (primary)** | short action template when search stalls | replay raises progress toward subgoal | continue plain search |
+
+**Abstention is behavioral, not textual (Qwen review #3).** Two predicates/rules
+can differ in text yet be identical in effect (and vice-versa). Cluster the N
+candidates by **observed behavior** — same cells selected / same frames accepted on
+the probe set — and vote by **cluster mass**; abstain if no cluster clears τ.
+**Calibrate τ per slot** against held-out probe transitions (the τ that buys
+precision ≈0.97 differs by slot and model).
+
+**Native scaffolds (Qwen review #4):** structured outputs use **grammar-constrained
+decoding** (GBNF) on the predicate schema — small Qwen tool-calling is too fragile
+to trust raw JSON, and a grammar lets us *lower* N. Any retained code slot uses
+**FIM / skeleton-completion** (a function with a hole), Qwen-Coder's pretrained
+mode, not free generation.
+
+Rules: best-of-N across **diverse models**; **adaptive stop** once a cluster clears
+τ; **no self-repair**; **no model-judge**.
+
+**Per-slot thinking mode (Qwen review #2):** thinking is a *slot* property, not a
+model property. **On** for `subgoal`/`macro` (Qwen3-4B-thinking can beat a 9B
+non-thinking on reasoning), **off** for any structured/grammar output (thinking
+derails tool formatting and triples latency). Toggle via `enable_thinking`/`/no_think`.
 
 ### 4.3 `planner.py` (deterministic — the solver)
 - candidate actions = directional ∪ pixel click-targets, **ordered** by
@@ -126,6 +158,16 @@ best-of-N draws across the diverse set.
 `qwen3-coder:30b` (A3B MoE), `gemma3:27b`, `qwen3.6`. Used only to chart how much
 raw size buys on the *same* harness — never reported as an "SLM" result.
 
+**Pinned decoding (Qwen review #2 — Ollama stock ≠ Qwen's published defaults; the
+gap is a silent accuracy cliff):**
+- Qwen2.5 / Qwen2.5-Coder: `temp 0.7, top_p 0.8, top_k 20, repeat_penalty 1.05`.
+- Qwen3 **thinking**: `temp 0.6, top_p 0.95, top_k 20` — **never greedy** (temp 0
+  loops in thinking mode).
+- Qwen3 **non-thinking**: `temp 0.7, top_p 0.8, top_k 20`.
+- All: generous **output** `max_tokens` (thinking 4k+ or it returns nothing
+  mid-thought); **never** `repeat_penalty ≥ 1.3` (breaks generation — matches the
+  combined-paper decoding cliff). Pin per family in a config table, not by Ollama default.
+
 ## 6. Honest reporting
 
 **Rungs (per game, full-game = `levels==win`):**
@@ -134,6 +176,13 @@ raw size buys on the *same* harness — never reported as an "SLM" result.
 2. **single-SLM-in-loop** — best single SLM.
 3. **SLM-set-in-loop** — diverse best-of-N + abstention (the headline system).
 4. **ceiling** — 27–30B on the same harness; and Claude 21/25 cited as reference.
+
+**Headline = a capability-substitution curve (Qwen review #6).** Hold the harness
+fixed and walk **one family's parameter ladder** — `qwen2.5: 0.5b → 1.5b → 3b → 7b`
+(+ `coder-7b`) → ceiling — plotting solve-rate. This isolates *how much harness
+structure substitutes for parameters*, the actually-interesting result. Cross-family
+models belong in the **diversity-voting pool, not on the x-axis** (confounded by
+tokenizer/training). Add one sentence ruling out ARC-AGI-3 pretraining contamination.
 
 **Beyond a single number:**
 - **Pareto vs compute:** solve-rate vs **env-step budget** AND vs **LLM-token
@@ -151,6 +200,13 @@ raw size buys on the *same* harness — never reported as an "SLM" result.
   **output** `max_tokens` generous; thinking models 4k+; stock repetition penalty.
 - per-level depth/node/wallclock caps; masking + dedup bound the state space.
 - `arc.make(game)` once per game, then `reset()` + replay (never in a loop).
+
+**One-box throughput (Qwen review #5 — or the sweep takes days for the wrong
+reasons):** Ollama **reloads weights on every model switch** (tens of seconds), so
+run **model-outer, games-inner** (all games for model A, then B) — never interleave
+models. Pin **quantization** (Q4_K_M default; Q8 only for the ceiling row) and a
+**concurrency cap** sized to VRAM so best-of-N doesn't thrash. Grammar-constrained
+decoding lets us lower N, cutting total calls.
 
 ## 8. Phasing & scope
 

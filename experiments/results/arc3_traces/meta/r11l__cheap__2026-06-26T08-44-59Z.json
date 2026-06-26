@@ -1,0 +1,69 @@
+{
+ "run_id": "r11l__cheap__2026-06-26T08-44-59Z",
+ "game": "r11l",
+ "tier": "cheap",
+ "method": "e107-graph-explore (frontier pixel search)",
+ "source_free": true,
+ "fairness": "by-audit (fixed solver reads only frames)",
+ "audit_files": [
+  "experiments/e107_graph_explore.py",
+  "experiments/arc3_graph.py"
+ ],
+ "audit_mode": "source_only",
+ "started_at": "2026-06-26T08:44:52Z",
+ "ended_at": "2026-06-26T08:44:59Z",
+ "exit_code": 0,
+ "model_config": {
+  "requested_model": null,
+  "resolved_model": null,
+  "effort": null,
+  "note": "deterministic algorithm; no LLM"
+ },
+ "params": {
+  "solver": "e107.explore",
+  "budget": 30000,
+  "max_steps": 400,
+  "seed": 0
+ },
+ "solution_file": "solutions/r11l__cheap__2026-06-26T08-44-59Z.json",
+ "prompt_file": null,
+ "transcript_file": null,
+ "host": {
+  "hostname": "Mac.lan",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "system": "Darwin",
+  "machine": "arm64",
+  "python": "3.14.6"
+ },
+ "git": {
+  "commit": "cde4828b6f970011c15b584972fa2837751e5dad",
+  "branch": "arc3-runner-fix",
+  "dirty": true,
+  "remote": "https://github.com/quome-cloud/openworld.git"
+ },
+ "pipeline": {
+  "e107_graph_explore.py": {
+   "sha256": "6900dd7ca3fb0ac5e0273b52277f246a90bd0f537ba9e7fa65abd1ab990d02d3",
+   "bytes": 4742,
+   "mtime": "2026-06-25T08:26:13Z"
+  },
+  "arc3_graph.py": {
+   "sha256": "bce5a09c1ad1073ff0d6c2ad5256ea9e9fc4b0f9062aac57c69d52605e37e16b",
+   "bytes": 6658,
+   "mtime": "2026-06-25T06:19:45Z"
+  },
+  "run_cheap_tier.py": {
+   "sha256": "298e0a7d2238a31f9bcc7a3c6bf41a0f333d43355ff7bb55ea9f707d0d02536f",
+   "bytes": 3409,
+   "mtime": "2026-06-26T08:32:37Z"
+  }
+ },
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "dataset_version": "1.0",
+ "outcome": null
+}

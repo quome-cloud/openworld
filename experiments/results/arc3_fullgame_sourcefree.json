@@ -7,6 +7,11 @@
    "levels": 7,
    "win": 7,
    "tier": "agent"
+  },
+  "ls20": {
+   "levels": 1,
+   "win": 7,
+   "tier": "cheap"
   }
  },
  "solutions": {
@@ -878,6 +883,227 @@
    [
     3
    ]
+  ],
+  "ls20": [
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    3
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    2
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    4
+   ],
+   [
+    3
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ]
   ]
  },
  "roundtrip": {
@@ -891,6 +1117,17 @@
    "n_states": 290,
    "n_transitions": 289,
    "pass": true
+  },
+  "ls20": {
+   "depth_real": 1,
+   "depth_through_world": 1,
+   "misses": 0,
+   "spec_valid": true,
+   "card_renders": true,
+   "indexed_fallback": false,
+   "n_states": 73,
+   "n_transitions": 73,
+   "pass": true
   }
  },
  "provenance": {
@@ -901,19 +1138,30 @@
    "model": "claude-opus-4-8",
    "effort": "high",
    "fairness": "by-construction (process-isolated SandboxGame)"
+  },
+  "ls20": {
+   "run_id": "ls20__cheap__2026-06-26T08-44-42Z",
+   "tier": "cheap",
+   "method": "e107-graph-explore (frontier pixel search)",
+   "model": null,
+   "effort": null,
+   "fairness": "by-audit (fixed solver reads only frames)"
   }
  },
  "full_games": [
   "g50t"
  ],
  "n_full_games": 1,
- "total_levels": 7,
- "total_possible": 7,
- "n_games_started": 1,
+ "total_levels": 8,
+ "total_possible": 14,
+ "n_games_started": 2,
  "by_tier": {
   "agent": [
    "g50t"
+  ],
+  "cheap": [
+   "ls20"
   ]
  },
- "updated_at": "2026-06-26T08:38:48Z"
+ "updated_at": "2026-06-26T08:51:09Z"
 }

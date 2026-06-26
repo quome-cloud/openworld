@@ -1,0 +1,24 @@
+{
+  "experiment": "E87",
+  "game": "vc33",
+  "candidate": "PAIRS",
+  "candidate_source": "Forge_A003_derived_from_Prism_M56651_diagnosis",
+  "model": "position-based pair fill: PAIRS={2,7,11,16,21,25,30,34,39,43,48,53,57,62}",
+  "steps_collected": 300,
+  "n_transitions": 300,
+  "n_train": 225,
+  "n_held": 75,
+  "seed": 0,
+  "verify_full_acc": 1.0,
+  "verify_full_n": 300,
+  "verify_held_acc": 1.0,
+  "verify_held_n": 75,
+  "warmup_used": true,
+  "prism_candidates_best": {
+    "candidate": 5,
+    "label": "always_1_cell",
+    "acc_held": 0.72
+  },
+  "note": "Prism's color-based hypothesis failed (all row-0 cells color 7). True rule: 2-cell fill at fixed positions PAIRS. 216 one-cell / 84 two-cell splits exactly.",
+  "code": "import numpy as np\nPAIRS = {2, 7, 11, 16, 21, 25, 30, 34, 39, 43, 48, 53, 57, 62}\ndef predict(frame: np.ndarray, action: int) -> np.ndarray:\n    result = frame.copy()\n    row0 = frame[0, :]\n    unfilled = np.where(row0 != 4)[0]\n    if len(unfilled) == 0: return result\n    C = int(unfilled.max())\n    if C in PAIRS and C > 0:\n        result[0, C] = 4\n        result[0, C-1] = 4\n    else:\n        result[0, C] = 4\n    return result"
+}

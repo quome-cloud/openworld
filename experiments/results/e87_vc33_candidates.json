@@ -1,0 +1,56 @@
+{
+  "experiment": "E87",
+  "game": "vc33",
+  "candidate_source": "Prism_M56651",
+  "n_transitions": 300,
+  "n_train": 225,
+  "n_held": 75,
+  "seed": 0,
+  "candidates": [
+    {
+      "candidate": 1,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 2,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 3,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 4,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 5,
+      "acc_full": 0.72,
+      "acc_held": 0.72
+    },
+    {
+      "candidate": 6,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 7,
+      "acc_full": 0.3,
+      "acc_held": 0.3067
+    },
+    {
+      "candidate": 8,
+      "acc_full": 0.0,
+      "acc_held": 0.0
+    }
+  ],
+  "best_candidate": {
+    "candidate": 5,
+    "acc_full": 0.72,
+    "acc_held": 0.72
+  }
+}

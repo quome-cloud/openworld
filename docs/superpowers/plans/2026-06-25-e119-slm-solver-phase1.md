@@ -30,6 +30,7 @@
 - `experiments/e119/abstain.py` — `best_of_n` behavioral voting + τ-gate. (model-agnostic)
 - `experiments/e119/slm.py` — per-family decoding config, predicate schema + grader, `propose_subgoal`. (uses abstain)
 - `experiments/e119/solve.py` — per-game orchestration, banking, JSONL logging.
+- `experiments/e119/world.py` — emit a solved game as an `openworld.World` (+ `to_spec`).
 - `experiments/e119_slm_solver.py` — experiment entry (rungs, `save_results`, asserts).
 - `tests/conftest.py` — put `experiments/` on `sys.path` so tests can `import e119.*`.
 - `tests/test_e119_perceive.py`, `tests/test_e119_planner.py`, `tests/test_e119_abstain.py`, `tests/test_e119_slm.py`, `tests/test_e119_solve.py`.
@@ -47,10 +48,16 @@
 - `slm.llm_options(model, thinking=False) -> dict`
 - `slm.compile_predicate(pred: dict) -> "Callable[[np.ndarray], bool]"`
 - `slm.satisfiable(pred, frames) -> bool`
-- `slm.propose_subgoal(llm, obj_json, frames, n=6, tau=0.5) -> dict | None`
+- `slm.propose_subgoal(llm, obj_json, frames, n=6, tau=0.5) -> dict | None`  # `llm` is an `openworld.BaseLLM`
 - `solve.solve_game(game, llm=None, mode="search", budget=None, logdir=None) -> dict`
+- `world.solver_world(result, transitions) -> "openworld.World"`  # emit the solved game as a World
 
 Action encoding everywhere: a directional action is `(a,)` with `a in {1,2,3,4,5,7}`; a click is `(6, x, y)`.
+
+**OpenWorld binding (SLM-only — Global):** the proposer takes an `openworld.BaseLLM`,
+so `OllamaLLM` (SLMs) and `MockLLM` (tests) are interchangeable; **no Anthropic/Claude
+backbone is added or used**. The solved solver is emitted as an `openworld.World`
+(Task 8) per CLAUDE.md "build solvers as OpenWorld".
 
 ---
 
@@ -570,8 +577,8 @@ git commit -m "feat(e119): behavioral best-of-N abstention gate"
 - Produces: `slm.llm_options`, `slm.compile_predicate`, `slm.satisfiable`, `slm.propose_subgoal`.
 - Predicate JSON: `{"type": "reach", "color": int}` | `{"type": "count", "color": int, "op": "==", "k": int}` | `{"type": "align", "a": int, "b": int}`.
 - `compile_predicate(pred) -> fn(frame)->bool`. `satisfiable(pred, frames)` = True if some frame satisfies it.
-- `propose_subgoal(llm, obj_json, frames, n=6, tau=0.5)`: `llm` has `.ask(prompt)->str`; samples N predicates, behavior = `(pred satisfiable on frames, canonical pred tuple)`, abstains via `best_of_n`. Returns a predicate dict or `None`.
-- A `StubLLM` in the test supplies canned JSON responses (no network).
+- `propose_subgoal(llm, obj_json, frames, n=6, tau=0.5)`: `llm` is an `openworld.BaseLLM` (uses `.ask(prompt)->str`); samples N predicates, behavior = `(pred satisfiable on frames, canonical pred tuple)`, abstains via `best_of_n`. Returns a predicate dict or `None`.
+- Tests use `openworld.MockLLM(responses)` (the framework's scripted `BaseLLM`), not a bespoke stub — this is the OpenWorld binding.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -579,11 +586,7 @@ git commit -m "feat(e119): behavioral best-of-N abstention gate"
 ```python
 import json, numpy as np
 from e119 import slm
-
-
-class StubLLM:
-    def __init__(self, replies): self._r = list(replies)
-    def ask(self, prompt, **kw): return self._r.pop(0)
+from openworld import MockLLM   # framework's scripted BaseLLM — bind to OpenWorld, no bespoke stub
 
 
 def test_llm_options_pins_gemma_differently_from_qwen():
@@ -606,7 +609,7 @@ def test_propose_subgoal_votes_and_returns_predicate():
     frames[0][2, 2] = 5
     oj = {"objects": [{"id": 0, "color": 5}], "relations": []}
     replies = [json.dumps({"type": "reach", "color": 5})] * 4
-    llm = StubLLM(replies)
+    llm = MockLLM(replies)
     pred = slm.propose_subgoal(llm, oj, frames, n=4, tau=0.5)
     assert pred == {"type": "reach", "color": 5}
 
@@ -615,7 +618,7 @@ def test_propose_subgoal_abstains_on_disagreement():
     frames = [np.zeros((64, 64), int)]
     oj = {"objects": [], "relations": []}
     replies = [json.dumps({"type": "reach", "color": c}) for c in (1, 2, 3, 4)]
-    llm = StubLLM(replies)
+    llm = MockLLM(replies)
     pred = slm.propose_subgoal(llm, oj, frames, n=4, tau=0.6)
     assert pred is None
 ```
@@ -1013,19 +1016,128 @@ git commit -m "feat(e119): experiment entry with search/slm rungs + save_results
 
 ---
 
+### Task 8: emit the solved solver as an `openworld.World` (the framework binding)
+
+**Files:**
+- Create: `experiments/e119/world.py`
+- Test: `tests/test_e119_world.py`
+
+**Interfaces:**
+- Consumes: `openworld.World`, `openworld.FunctionTransition`, `openworld.CodeObjective`, `openworld.to_spec`.
+- Produces: `world.action_name(act) -> str`, `world.solver_world(game_name, chain) -> openworld.World`.
+- `chain` is the solved path as a list of `{"key": str, "action": tuple, "next_key": str, "levels": int}` (hex state keys from `perceive.state_key`, in order). The World's `FunctionTransition` looks up the learned table; its `CodeObjective` rewards a level-up. This satisfies CLAUDE.md "build solvers as OpenWorld"; the closure over the table is flagged `lossy` by `to_spec` in Phase 1 (lossless `CodeTransition` is Phase 2).
+
+- [ ] **Step 1: Write the failing test**
+
+`tests/test_e119_world.py`:
+```python
+from e119 import world
+import openworld as O
+
+
+def _chain():
+    # 2-step solved path; the second step raises levels 0 -> 1.
+    return [
+        {"key": "aa", "action": (7,), "next_key": "bb", "levels": 0},
+        {"key": "bb", "action": (6, 60, 32), "next_key": "cc", "levels": 1},
+    ]
+
+
+def test_action_name_encodes_directional_and_click():
+    assert world.action_name((7,)) == "a7"
+    assert world.action_name((6, 60, 32)) == "click_60_32"
+
+
+def test_solver_world_rollout_follows_the_learned_table():
+    w = world.solver_world("tn36", _chain())
+    assert isinstance(w, O.World)
+    s0 = w.initial_state
+    s1 = w.transition.step(s0, O.Action("a7", agent="solver"))
+    assert s1["key"] == "bb"
+    s2 = w.transition.step(s1, O.Action("click_60_32", agent="solver"))
+    assert s2["key"] == "cc" and s2["levels"] == 1
+
+
+def test_solver_world_serializes_to_spec():
+    w = world.solver_world("tn36", _chain())
+    spec = O.to_spec(w)
+    assert spec["name"] == "arc_tn36"
+    assert "a7" in spec["actions"] and "click_60_32" in spec["actions"]
+```
+
+- [ ] **Step 2: Run to verify failure**
+
+Run: `python -m pytest tests/test_e119_world.py -q`
+Expected: FAIL with `ModuleNotFoundError: No module named 'e119.world'`
+
+- [ ] **Step 3: Implement**
+
+`experiments/e119/world.py` (uses only the verified `World` signature
+`World(name, description, initial_state, actions, rules=None, transition=None, llm=None)` —
+the `CodeObjective` is attached by the scorer, not the constructor):
+```python
+"""Emit a solved ARC game as an openworld.World (CLAUDE.md: build solvers as OpenWorld)."""
+import openworld as O
+
+
+def action_name(act):
+    if act[0] == 6:
+        return f"click_{act[1]}_{act[2]}"
+    return f"a{act[0]}"
+
+
+def solver_world(game_name, chain):
+    """Materialize the solved path as a World: masked-frame key = state; the learned
+    (key, action_name) -> (next_key, levels) table = FunctionTransition dynamics."""
+    table = {(t["key"], action_name(t["action"])): (t["next_key"], t["levels"]) for t in chain}
+    actions = sorted({action_name(t["action"]) for t in chain})
+    start_key = chain[0]["key"] if chain else ""
+
+    def fn(state, action):
+        nxt = table.get((state.get("key"), action.get("name")))
+        return dict(state) if nxt is None else {"key": nxt[0], "levels": nxt[1]}
+
+    return O.World(
+        name=f"arc_{game_name}",
+        description=f"Learned state-graph solver for ARC-AGI-3 game {game_name}.",
+        initial_state={"key": start_key, "levels": 0},
+        actions=actions,
+        rules=[f"Masked-frame key = state; raising 'levels' wins. {len(chain)} learned transitions."],
+        transition=O.FunctionTransition(fn),
+    )
+```
+
+- [ ] **Step 4: Run to verify pass**
+
+Run: `python -m pytest tests/test_e119_world.py -q`
+Expected: PASS (3 passed)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add experiments/e119/world.py tests/test_e119_world.py
+git commit -m "feat(e119): emit solved solver as an openworld.World (framework binding)"
+```
+
+---
+
 ## Phase 1 Done-When
 
-- All five hermetic test files pass under plain `python -m pytest` (no env, no network).
+- All six hermetic test files pass under plain `python -m pytest` (no env, no network):
+  `test_e119_perceive`, `_planner`, `_abstain`, `_slm`, `_solve`, `_world`.
+- The proposer runs through `openworld.BaseLLM` — tests use `openworld.MockLLM`, the entry uses `openworld.OllamaLLM`. **No Claude/Anthropic backbone exists or is used.**
 - `--mode search` runs the pilot under the arc venv and banks ≥1 replay-verified level on the directional games (the search-only control rung).
 - `--mode slm --model qwen2.5-coder:7b` runs end-to-end (subgoal proposed *or* cleanly abstained; never crashes a game), writing per-level JSONL.
 - `experiments/results/e119_slm_solver.json` exists via `save_results`.
+- `world.solver_world(...)` produces an `openworld.World` whose rollout follows the learned table and serializes via `to_spec` (the framework binding).
 
 ## Out of scope (later plans)
-- **Phase 2:** full 25-game sweep, the capability-substitution curve, the diverse-model voting pool, per-family decoding for all families wired into the entry, Pareto-vs-compute + Wilson CIs reporting, the hidden held-out game.
+- **Phase 2:** full 25-game sweep, the capability-substitution curve, the diverse-model voting pool, per-family decoding for all families wired into the entry, Pareto-vs-compute + Wilson CIs reporting, the hidden held-out game, lossless `CodeTransition` (Phase 1 emits a closure flagged `lossy` by `to_spec`), and serving the solver Worlds in `serve /view`.
 - **Phase 3:** LoRA distillation of search-verified subgoal/macro traces into a small Gemma; the vision-representation ablation.
 - **`macro` slot** (when search stalls) and the **in-model `rule` prediction** acceleration — added once the subgoal rung is shown to help.
 
 ## Self-Review notes
-- Spec coverage: §3 masking/object-JSON/diff → Tasks 1–2; §4.1 probe → Task 3; §4.3 search → Task 3; §4.2 abstention behavioral + subgoal → Tasks 4–5; §5 per-family decoding (Qwen+Gemma pinned) → Task 5; §4.4 banking+JSONL → Task 6; §6 rungs (search-only control + SLM) + save_results → Task 7. Pareto/CIs/held-out/distillation/vision are explicitly Phase 2–3.
-- Type consistency: action tuples `(a,)`/`(6,x,y)`, `search_level(game,candidates_fn,key_fn,budget,score_fn)`, `best_of_n(sample_fn,behavior_fn,n,tau)`, `propose_subgoal(llm,obj_json,frames,n,tau)`, `solve_game(game,llm,mode,budget,logdir)` used identically in every consumer.
+- Spec coverage: §3 masking/object-JSON/diff → Tasks 1–2; §3.5 OpenWorld binding (BaseLLM proposer + World emission) → Tasks 5 & 8; §4.1 probe → Task 3; §4.3 search → Task 3; §4.2 abstention behavioral + subgoal → Tasks 4–5; §5 per-family decoding (Qwen+Gemma pinned) → Task 5; §4.4 banking+JSONL + build-solver-as-World → Tasks 6 & 8; §6 rungs (search-only control + SLM) + save_results → Task 7. Pareto/CIs/held-out/distillation/vision/serve are explicitly Phase 2–3.
+- Type consistency: action tuples `(a,)`/`(6,x,y)`, `action_name((a,))="a{a}"`/`action_name((6,x,y))="click_{x}_{y}"`, `search_level(game,candidates_fn,key_fn,budget,score_fn)`, `best_of_n(sample_fn,behavior_fn,n,tau)`, `propose_subgoal(llm:BaseLLM,obj_json,frames,n,tau)`, `solve_game(game,llm,mode,budget,logdir)`, `solver_world(game_name,chain)` used identically in every consumer.
+- OpenWorld binding: proposer takes `openworld.BaseLLM` (tests `MockLLM`, entry `OllamaLLM`); solver emitted via `openworld.World`/`FunctionTransition`/`to_spec`. SLM-only, no Claude.
 - Pixel-honest: no privileged engine calls anywhere; candidates come from `click_candidates` only.

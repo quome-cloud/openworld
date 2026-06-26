@@ -213,6 +213,8 @@ def main():
     ap.add_argument("--ollama", default="", help="ollama model id for synthesis (else baselines only)")
     ap.add_argument("--anthropic", default="", help="anthropic model id for synthesis (e.g. claude-sonnet-4-6)")
     ap.add_argument("--api-key", default="", dest="api_key", help="Anthropic API key (else env ANTHROPIC_API_KEY)")
+    ap.add_argument("--claude-chrome", default="", dest="claude_chrome",
+                    help="Path to claude_chrome_synth.py; drives logged-in claude.ai session (T369 Path B)")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -249,6 +251,25 @@ def main():
         res["total_output_tokens"] = sum(u["output_tokens"] for u in usage_log)
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)
         print(f"[e86/{args.game}] token usage: {res['total_input_tokens']} in / {res['total_output_tokens']} out", flush=True)
+
+    if args.claude_chrome:
+        import subprocess, sys as _sys
+        def chrome_llm(prompt):
+            r = subprocess.run(
+                [_sys.executable, args.claude_chrome, "--headless", "--prompt", prompt],
+                capture_output=True, text=True, timeout=360,
+            )
+            if r.returncode != 0:
+                raise RuntimeError(f"claude_chrome failed: {r.stderr[:200]}")
+            out = json.loads(r.stdout)
+            if out.get("status") != "ok" or not out.get("code_blocks"):
+                raise RuntimeError(f"claude_chrome error: {out.get('error', 'no code blocks')}")
+            return out["code_blocks"][0]
+        acc, code = synthesize(trans, chrome_llm)
+        res["synth_model"] = "claude-chrome"
+        res["verified_exact"] = round(acc, 4)
+        res["code"] = code
+        print(f"[e86/{args.game}] claude-chrome verified-exact (held-out): {acc:.3f}", flush=True)
 
     model_slug = args.anthropic.replace(":", "-").replace("/", "-") if args.anthropic else (args.ollama.replace(":", "-") if args.ollama else "")
     default_stem = f"e86_arc3_{args.game}_{model_slug}" if model_slug else f"e86_arc3_{args.game}"

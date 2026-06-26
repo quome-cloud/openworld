@@ -201,7 +201,7 @@ def synthesize(trans, llm_fn, rounds=4, n_demo=12):
             break
         feedback = ("\n\nYour function failed these (show full intent): "
                     + json.dumps([{"action": e.get("action"), "changed": deltas(e["frame"], e["next"])}
-                                  for e in errs if "frame" in e][:2]))
+                                  for e in errs if isinstance(e, dict) and "frame" in e][:2]))
     return best  # (held-out exact-match rate, code)
 
 
@@ -215,6 +215,8 @@ def main():
     ap.add_argument("--api-key", default="", dest="api_key", help="Anthropic API key (else env ANTHROPIC_API_KEY)")
     ap.add_argument("--claude-chrome", default="", dest="claude_chrome",
                     help="Path to claude_chrome_synth.py; drives logged-in claude.ai session (T369 Path B)")
+    ap.add_argument("--synth-rounds", type=int, default=4, dest="synth_rounds",
+                    help="Number of LLM synthesis rounds (default 4; use 1 for Chrome wire to avoid OOM)")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
@@ -233,7 +235,7 @@ def main():
           f"| copy-frame exact {res['copy_frame_exact']}", flush=True)
 
     if args.ollama:
-        acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
+        acc, code = synthesize(trans, lambda p: ollama(args.ollama, p), rounds=args.synth_rounds)
         res["synth_model"] = args.ollama
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
@@ -242,7 +244,8 @@ def main():
     if args.anthropic:
         api_key = args.api_key or None
         usage_log = []
-        acc, code = synthesize(trans, lambda p: anthropic_llm(args.anthropic, p, api_key=api_key, usage_log=usage_log))
+        acc, code = synthesize(trans, lambda p: anthropic_llm(args.anthropic, p, api_key=api_key, usage_log=usage_log),
+                               rounds=args.synth_rounds)
         res["synth_model"] = args.anthropic
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
@@ -253,20 +256,29 @@ def main():
         print(f"[e86/{args.game}] token usage: {res['total_input_tokens']} in / {res['total_output_tokens']} out", flush=True)
 
     if args.claude_chrome:
-        import subprocess, sys as _sys
+        import subprocess, sys as _sys, os as _os
+        chrome_call_n = [0]
+        proof_dir = HERE / "results"
+        _chrome_env = {**_os.environ, "DISPLAY": _os.environ.get("DISPLAY") or ":1"}
         def chrome_llm(prompt):
+            n = chrome_call_n[0]; chrome_call_n[0] += 1
+            proof = str(proof_dir / f"e87_{args.game}_chrome_r{n:02d}_websearch_off.png")
             r = subprocess.run(
-                [_sys.executable, args.claude_chrome, "--headless", "--prompt", prompt],
-                capture_output=True, text=True, timeout=360,
+                [_sys.executable, args.claude_chrome, "--prompt", prompt, "--proof-path", proof],
+                capture_output=True, text=True, timeout=420, env=_chrome_env,
             )
             if r.returncode != 0:
-                raise RuntimeError(f"claude_chrome failed: {r.stderr[:200]}")
+                raise RuntimeError(f"claude_chrome failed rc={r.returncode} stderr={r.stderr[:200]!r} stdout={r.stdout[:300]!r}")
             out = json.loads(r.stdout)
             if out.get("status") != "ok" or not out.get("code_blocks"):
                 raise RuntimeError(f"claude_chrome error: {out.get('error', 'no code blocks')}")
             return out["code_blocks"][0]
-        acc, code = synthesize(trans, chrome_llm)
+        acc, code = synthesize(trans, chrome_llm, rounds=args.synth_rounds)
         res["synth_model"] = "claude-chrome"
+        res["synth_model_id"] = "claude-opus-4-8"
+        res["extended_thinking"] = True
+        res["wire_type"] = "claude_chrome"
+        res["web_search_enabled"] = False
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
         print(f"[e86/{args.game}] claude-chrome verified-exact (held-out): {acc:.3f}", flush=True)

@@ -32,9 +32,14 @@ Recipe (executable world model, the OpenWorld way):
 This is a FULL-GAME task: aim for g.levels == g.win. Iterate until the full game is solved or you
 genuinely exhaust ideas; always leave solved.json at your deepest verified progress.
 TASK
-# seed with prior >=1-level solution if available, so the agent starts past level 1
+# Per-game source-audit hints (persist across resume-loop sessions): appended to the task so
+# every session inherits the targeted mandate, not just the generic recipe.
+[ -f "$WD/HINTS_$GAME.md" ] && { printf '\n\n---\nGAME-SPECIFIC HINTS (read these FIRST, they encode hard-won mechanics):\n\n' >> "$WD/TASK.md"; cat "$WD/HINTS_$GAME.md" >> "$WD/TASK.md"; }
+# Seed with the prior >=1-level solution ONLY if we have no solution yet. The resume loop
+# pre-seeds solved.json from solved_best.json (the deepest known), so copying a shallow PRIOR
+# here would REGRESS that seed and waste the session re-solving known levels.
 PRIOR="$ROOT/experiments/results/agent_solves/$GAME.json"
-[ -f "$PRIOR" ] && cp "$PRIOR" "$WD/solved.json"
+[ -f "$PRIOR" ] && [ ! -f "$WD/solved.json" ] && cp "$PRIOR" "$WD/solved.json"
 cd "$WD"
 claude -p "$(cat TASK.md)" --dangerously-skip-permissions > "$WD/agent.log" 2>&1
 echo "full-game agent finished for $GAME"

@@ -790,6 +790,29 @@ replay-verify deterministically against the live games; all numbers and figures 
 \texttt{bench/verify\_arc3\_solves.sh}, replays every saved winning sequence against the live games
 and confirms all \ArcNSolved{} complete a level.
 
+\paragraph{Full-game result, efficiency, and OpenWorld round-trip.} The full-game numbers regenerate
+the same way. \textbf{Source of truth:} \texttt{scripts/build\_arc3\_fullgame.py} reads each game's
+replay-verified solution and writes \texttt{experiments/results/arc3\_fullgame.json}
+(\ArcFullGames/\ArcUnionGames{} full, \ArcFullLevels/\ArcTotalLevels{} levels); \texttt{make\_arc3\_assets.py}
+turns it into the completion matrix (Fig.~\ref{fig:arc3matrix}), the per-game table
+(Table~\ref{tab:arc3games}), the atlas gallery (Fig.~\ref{fig:arc3gallery}), and every \texttt{Arc*}
+macro. \textbf{Action efficiency (E120):} \texttt{experiments/e120\_rhae.py} replays each solution in
+the engine, segments actions per level, and scores them with \texttt{arc\_agi}'s \emph{own}
+\texttt{EnvironmentScoreCalculator} against the official per-level human baselines shipped in
+\texttt{EnvironmentInfo.baseline\_actions}---mean \ArcRhaeMean{} (Fig.~\ref{fig:arc3rhae},
+\texttt{arc3\_rhae.json}); no metric is re-implemented. \textbf{OpenWorld round-trip (E121):}
+\texttt{experiments/e121\_openworld\_roundtrip.py} builds, per game, an \texttt{openworld.World} from the
+discovered masked-frame state graph (a \texttt{FunctionTransition} over the learned table plus an
+induced \texttt{CodeObjective}, reward $=$ \texttt{levels\_completed}) and \emph{replays the banked
+solution through it} via \texttt{world.step}; all \textbf{\ArcOWVerified/\ArcOWTotal{}} reproduce their
+verified level count through the framework, and every world \texttt{to\_spec}/\texttt{validate\_spec}/
+\texttt{render\_card} cleanly (\ArcOWIndexed{} game uses trajectory-indexed state where status-bar
+masking is too coarse; flagged in \texttt{arc3\_openworld\_roundtrip.json}). The two solver scripts run
+under the \texttt{arc-agi} interpreter; the world round-trip imports the zero-dependency
+\texttt{openworld} core. In short:
+\texttt{build\_arc3\_fullgame.py $\to$ e120\_rhae.py $\to$ e121\_openworld\_roundtrip.py $\to$
+make\_arc3\_assets.py} regenerates every full-game number, figure, and verification in this paper.
+
 \clearpage
 \appendix
 \section{Primer: what is a ``world'' in a world model?}

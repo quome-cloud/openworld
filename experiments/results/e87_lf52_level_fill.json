@@ -1,0 +1,19 @@
+{
+  "experiment": "E87",
+  "game": "lf52",
+  "candidate": "level_fill",
+  "candidate_source": "Forge_A003_direct_analysis",
+  "model": "leftmost cell < current_max_level gets incremented; when all at max, first cell advances to max+1",
+  "steps_collected": 250,
+  "n_transitions": 250,
+  "n_train": 187,
+  "n_held": 63,
+  "seed": 0,
+  "verify_full_acc": 1.0,
+  "verify_full_n": 250,
+  "verify_held_acc": 1.0,
+  "verify_held_n": 63,
+  "warmup_used": true,
+  "note": "Action irrelevant. Sequential level-fill: cells advance left-to-right, all reach level N before any reaches N+1.",
+  "code": "import numpy as np\ndef predict(frame: np.ndarray, action: int) -> np.ndarray:\n    result = frame.copy()\n    row0 = frame[0, :]\n    nonzero = row0[row0 > 0]\n    mx = int(nonzero.max()) if len(nonzero) > 0 else 1\n    for c in range(64):\n        if frame[0, c] < mx:\n            result[0, c] = frame[0, c] + 1\n            return result\n    # All cells at mx: advance one more (new frontier)\n    for c in range(64):\n        if frame[0, c] == mx:\n            result[0, c] = mx + 1\n            break\n    return result"
+}

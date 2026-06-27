@@ -1,0 +1,92 @@
+{
+  "bp35": {
+    "start_level": 7,
+    "win_level": 9,
+    "best_level": 7,
+    "new_levels": 0,
+    "attempts": [
+      {
+        "hyp": "H1_click_non_bg_targets",
+        "n_positions": 29,
+        "result": "fail"
+      },
+      {
+        "hyp": "H2_directional_moves",
+        "actions": [
+          3,
+          4,
+          7
+        ],
+        "result": "fail"
+      },
+      {
+        "hyp": "H3_grid_scan_6px",
+        "positions_tried": 121,
+        "result": "fail"
+      },
+      {
+        "hyp": "H4_level7_pattern_clicks",
+        "positions_tried": 36,
+        "result": "fail"
+      },
+      {
+        "hyp": "H5_comprehensive_6px_scan",
+        "positions_tried": 121,
+        "result": "fail"
+      }
+    ],
+    "hamming_to_prev_level_completion": {
+      "5": 1184,
+      "6": 1522,
+      "7": 0
+    },
+    "finding": "Isolated single-step clicks/moves do not trigger level 8 completion. Multi-step coordinated sequences required."
+  },
+  "lf52": {
+    "start_level": 6,
+    "win_level": 10,
+    "best_level": 6,
+    "new_levels": 0,
+    "attempts": [
+      {
+        "hyp": "H1_click_non_bg_targets",
+        "n_positions": 46,
+        "result": "fail"
+      },
+      {
+        "hyp": "H2_directional_moves",
+        "actions": [
+          3,
+          4,
+          7
+        ],
+        "result": "fail"
+      },
+      {
+        "hyp": "H3_y43_55_x12_step_scan",
+        "positions_tried": 35,
+        "result": "fail"
+      },
+      {
+        "hyp": "H4_progressive_y_x12_pattern",
+        "positions_tried": 110,
+        "result": "fail"
+      }
+    ],
+    "hamming_to_prev_level_completion": {
+      "4": 1976,
+      "5": 2146,
+      "6": 0
+    },
+    "finding": "Pattern extrapolation from levels 1-6 (y-progression, x 12-step intervals) does not unlock level 7. Multi-step coordinated sequences required."
+  },
+  "summary": "Clean negative. Hypothesis-driven single-step probes cannot unlock levels 8-9 for bp35 or 7-10 for lf52. The win mechanic for these levels is buried in multi-step action sequences unreachable by isolated probes.",
+  "implication": "Confirms goal-predicate dependency finding from T361: without a learned is_won predicate for the next level, BFS/systematic search cannot make progress even with a 100% verified world model.",
+  "hypothesis_classes_tested": [
+    "entity_at_target",
+    "directional_exploration",
+    "pattern_extrapolation",
+    "systematic_click_scan"
+  ],
+  "n_total_attempts": "bp35: ~320 probe actions; lf52: ~150 probe actions"
+}

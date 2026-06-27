@@ -51,11 +51,11 @@ def milestones(gid, actions):
     return out, lv
 
 
-def map_raster(gid, width=520):
+def map_raster(gid, width=1700):
     p = os.path.join(MAPS, f"{gid}.svg")
     if not os.path.exists(p):
         return None
-    png = cairosvg.svg2png(url=p, output_width=width)
+    png = cairosvg.svg2png(url=p, output_width=width)   # high-res so the card text stays legible
     return Image.open(io.BytesIO(png))
 
 
@@ -67,25 +67,33 @@ def figure(gid):
     win = PG.get(gid, {}).get("win", reached)
     fcols = min(len(frames), 5)
     frows = math.ceil(len(frames) / fcols)
-    fig = plt.figure(figsize=(2.05 * fcols, 3.4 + 2.0 * frows))
-    gs = GridSpec(1 + frows, fcols, height_ratios=[3.0] + [2.0] * frows, hspace=0.32, wspace=0.08)
-    # ---- discovered map (atlas card) across the top ----
-    axm = fig.add_subplot(gs[0, :]); axm.axis("off")
+    fig_w = 2.35 * fcols                         # filmstrip width drives the page width
     img = map_raster(gid)
+    # size the map band to the card's TRUE aspect so it fills the full width (no letterbox)
+    card_aspect = (img.width / img.height) if img is not None else 1.28   # w/h, ~1.28 for these cards
+    map_h = fig_w / card_aspect                  # full-width card height (inches)
+    frame_h = (fig_w / fcols) * 1.20             # per filmstrip row (square cell + label)
+    fig_h = map_h + frows * frame_h + 0.55
+    fig = plt.figure(figsize=(fig_w, fig_h))
+    gs = GridSpec(1 + frows, fcols, height_ratios=[map_h] + [frame_h] * frows,
+                  hspace=0.30, wspace=0.06)
+    # ---- discovered map (atlas card): full-width, high-res, dominant ----
+    axm = fig.add_subplot(gs[0, :]); axm.axis("off")
     if img is not None:
-        axm.imshow(img); axm.set_title("discovered OpenWorld world-model map (atlas card)",
-                                       fontsize=9, color="#334155", pad=4)
+        axm.imshow(img, aspect="auto")           # axes already sized to card aspect -> fills, no distortion
+        axm.set_title("discovered OpenWorld world-model map (atlas card)",
+                      fontsize=10.5, color="#334155", pad=5)
     # ---- replay filmstrip ----
     for k, (label, fr, step) in enumerate(frames):
         ax = fig.add_subplot(gs[1 + k // fcols, k % fcols])
         ax.imshow(fr, cmap=CMAP, vmin=0, vmax=15, interpolation="nearest")
-        ax.set_title(label + (f"\n(step {step})" if step else ""), fontsize=7.6, color="#0f172a")
+        ax.set_title(label + (f"\n(step {step})" if step else ""), fontsize=8.2, color="#0f172a")
         ax.set_xticks([]); ax.set_yticks([])
     fig.suptitle(f"ARC-AGI-3  ·  {gid}  —  solved {reached}/{win} levels in {len(actions)} verified actions",
-                 fontsize=12.5, fontweight="bold", y=0.995)
+                 fontsize=13.5, fontweight="bold", y=0.997)
     out = os.path.join(FIGS, f"arc3_replay_{gid}.png")
-    fig.savefig(out, dpi=150, bbox_inches="tight"); plt.close(fig)
-    print(f"  wrote arc3_replay_{gid}.png  ({len(frames)} frames, reached L{reached})")
+    fig.savefig(out, dpi=160, bbox_inches="tight"); plt.close(fig)
+    print(f"  wrote arc3_replay_{gid}.png  ({len(frames)} frames, reached L{reached}, card {img.width}x{img.height})")
     return out
 
 

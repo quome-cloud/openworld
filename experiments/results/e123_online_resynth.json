@@ -1,0 +1,58 @@
+{
+  "experiment": "e123_online_resynth",
+  "method": "per-regime replay-to-boundary + fresh model -> PhasedTransition; round-trip verified",
+  "games": {
+    "ka59": {
+      "game": "ka59",
+      "n_regimes": 8,
+      "boundaries": [
+        0,
+        10,
+        66,
+        103,
+        157,
+        177,
+        225,
+        312
+      ],
+      "replay_to_boundary_landed": "8/8",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        10,
+        56,
+        37,
+        54,
+        20,
+        48,
+        87,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/ka59_resynth.svg"
+    },
+    "m0r0": {
+      "game": "m0r0",
+      "n_regimes": 6,
+      "boundaries": [
+        0,
+        14,
+        37,
+        92,
+        103,
+        142
+      ],
+      "replay_to_boundary_landed": "6/6",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        14,
+        23,
+        55,
+        11,
+        39,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/m0r0_resynth.svg"
+    }
+  }
+}

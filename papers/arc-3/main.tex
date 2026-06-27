@@ -817,6 +817,58 @@ false solve.}
 \label{fig:e119}
 \end{figure}
 
+\section{Multi-world dynamics: voting experts and a self-rebuilding world model (E120--E121)}
+\label{sec:selfrebuild}
+E119 keeps a posterior over \emph{goal-programs}; the complementary object is a posterior---and a
+structural response---over \emph{dynamics}. Two pressures motivate it. First, when repeated attempts on a
+game \emph{plateau}, the agent has tunnelled on one framing of the mechanic; a single proposer cannot
+diversify itself. Second, ARC-AGI-3's compositionality cliff means the rules literally \emph{change} at
+level boundaries, so any one fixed transition model is wrong past the next level. Both are answered by
+treating the world model as \emph{plural and revisable}, using only primitives already in the framework.
+
+\textbf{E120 --- a committee of expert worlds.} A stuck game is routed to a panel of differently-primed
+coding agents---one \emph{lens} each (topology, temporal/phase, force-transmission, color-algebra,
+symmetry, perception-reframe, counting)---so the diversity is in \emph{framing}, not model size; the panel
+\emph{replaces} the repeated identical prompt, so it is cost-neutral. Each lens that produces a
+replay-verified trace is reconstructed into its own \openworld{} \texttt{World} (a \texttt{FunctionTransition}
+over that run's discovered $(s,a)\!\to\!s'$ table), and the lenses are combined with
+\texttt{ConsensusTransition}$(\text{mode}{=}\texttt{vote})$: a per-state majority over the members'
+predicted next-states, each weighted by its env-verified levels reached (Fig.~\ref{fig:selfrebuild}A). A
+shared per-game status-mask and a global state-id map make identical physical states vote on the same
+node, so the vote is well-posed. The frames are thus genuine \openworld{} worlds, not prompts: $N$ experts
+$\to$ $N$ worlds $\to$ one consensus world.
+
+\textbf{E121 --- a world model that notices when the rules change.} Replaying a verified trace, we
+online-learn the dynamics and watch the model's own \textbf{surprise}: an anomalously large masked-board
+delta---a level-up reloads the board---signals that the rules just changed. We segment the trace at those
+surprise spikes, build a per-regime world model, and compose them forward with \texttt{PhasedTransition},
+whose dynamics advance \emph{irreversibly} and record the active regime in state (Fig.~\ref{fig:selfrebuild}C):
+a single \openworld{} \texttt{World} that rebuilds its own dynamics at each detected change. The detector is
+honest---it reads frames only; the ground-truth level signal is used \emph{solely to score} it, never to
+detect. On the two near-full games it recovers \textbf{every} rule change: recall $1.0$ on \texttt{ka59}
+(all six level-ups, precision $0.857$) and \texttt{m0r0} (all five, precision $1.0$)
+(Fig.~\ref{fig:selfrebuild}B). This is the MSA on-demand-synthesis loop (\texttt{arXiv:2507.12547}) realized
+over \emph{dynamics}: surprise is the trigger to synthesize a new sub-world and carry it forward. We report
+it at its honest boundary: the segmentation is \emph{retrospective} over completed traces, and wiring the
+surprise monitor \emph{online}---re-synthesizing a regime mid-play, which is the path to attacking a
+topologically ``sealed'' wall by rejecting the stale model rather than the level---is the immediate next
+step.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_selfrebuild.png}
+\caption{\textbf{Plural, revisable world models in \openworld{} (E120--E121).}
+\textbf{(A)} The expert-\emph{consensus} world for \texttt{ka59}: each strategy lens that solved becomes a
+\texttt{World}, combined by \texttt{ConsensusTransition} hard-voting weighted by env-verified depth.
+\textbf{(B)} \emph{Surprise detects every rule change from frames alone.} The masked-board delta per step
+(blue) spikes exactly when the board reloads; surprise-detected regime boundaries (orange) land on the
+ground-truth level-ups (green markers)---recall $1.0$, precision $0.857$ on \texttt{ka59}---with the level
+signal used only to score, never to detect. \textbf{(C)} The resulting self-rebuilding world: an
+\texttt{PhasedTransition} over the detected regimes, its dynamics advancing irreversibly as the rules
+change (the active regime is recorded in state, visible in the rollout).}
+\label{fig:selfrebuild}
+\end{figure}
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each

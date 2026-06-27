@@ -1,0 +1,1 @@
+{"game": "g50t", "level": 0, "regime": 0, "model": "gpt-5.5", "model_version": "", "decision": "commit", "tainted": false, "tokens": null, "latency": null, "started": "2026-06-27T15:13:01", "finished": "2026-06-27T15:13:28", "run_id": "g50t__0_0__14bc389f02", "parsed_summary": {"n_subgoals": 3, "n_macros": 7}, "hash": "14bc389f02"}

@@ -887,6 +887,40 @@ change (the active regime is recorded in state, visible in the rollout).}
 \label{fig:selfrebuild}
 \end{figure}
 
+\section{Codex-steered autonomous deep search (E124, design)}
+\label{sec:e124}
+Every method above is, structurally, an \openworld{} world model: a \textbf{perceptor} turns the replay-only
+frame into a discrete state $\sigma(s)$, the agent's exploration builds the $(s,a)\!\to\!s'$
+\texttt{FunctionTransition} \textbf{dynamics}, an \textbf{objective} scores progress, and the result
+serialises (\textbf{emit}) to a map and atlas card. The goal-inference wall (\S\ref{sec:solvewall}) is
+precisely a missing \emph{objective}: a static state score cannot express an ordered \emph{procedure}, so
+blind search banks $0$. E124's design keeps the world model intact and swaps only the objective's
+\emph{source}. A strong external coder (OpenAI Codex) compiles the goal \emph{source-free}---as an ordered
+list of subgoal predicates plus macro-actions (multi-step options that collapse search depth)---and a
+best-first search uses them to \emph{order} exploration while the environment \emph{decides} correctness (a
+replay-verified \texttt{levels\_completed} bump). On a level-up the surprise monitor (E122) fires, the world
+replays to the boundary and rebuilds (E123), and Codex re-compiles the goal for the new regime; competing
+hypotheses combine by \texttt{ConsensusTransition} (E120). Figure~\ref{fig:e124flow} traces how each stage
+fills an \openworld{} world slot. As with E119, we present this as a \emph{design with a fair control}: the
+measured claim is whether Codex-ordered search beats an \emph{identical} blind-BFS loop on the same budget
+and reachable set; every Codex call is source-free-audited (it never reads a game's code) and captured for
+deterministic replay. The build is in progress and gated on that lift.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/e124_openworld_flow.png}
+\caption{\textbf{The ARC-AGI-3 solver as an \openworld{} world model, with Codex as the objective compiler
+(E124, design).} Three roles are colour-coded. The \textbf{environment} (ground truth, ochre) is replay-only
+and decides correctness---a level-up is a verified solve. \textbf{\openworld{} primitives} (teal/blue)
+supply the perceptor $\sigma(s)$, the discovered \texttt{FunctionTransition} dynamics the search builds by
+acting, the \texttt{PhasedTransition}/\texttt{ConsensusTransition} composition that rebuilds the world when
+the rules change, and the emitted map/atlas. The \textbf{Codex brain} (indigo) supplies the one missing
+piece---the \emph{objective}, as ordered subgoals $+$ macros---source-free. The left loop is
+env-verification (act/verify); the per-regime rebuild makes the search autonomous and \emph{deep}. Right:
+the four-slot anatomy of an \openworld{} world and which stage fills each.}
+\label{fig:e124flow}
+\end{figure}
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each

@@ -190,8 +190,9 @@ own efficiency axis (Fig.~\ref{fig:arc3rhae}).
 \textbf{We report this honestly.} Solves are \emph{offline} with \emph{unbounded resets} and
 deterministic replay-verification; we do not report RHAE (the leaderboard's live action-efficiency
 metric), so the comparison is on full-game \emph{completion}, not efficiency. Three games remain
-partial (\ArcPartialList). For the weaker $\geq$1-level union, random play alone clears $11/25$ under
-this protocol, so we also report the more honest \textbf{$14/25$ above random}.
+partial (\ArcPartialList). For the weaker $\geq$1-level union (\emph{first level only}), random play
+alone clears $\ArcRandomGeqOne/\ArcUnionGames$ under this protocol (a \ArcRandomBudget{}-step/game
+budget), so we also report the more honest \textbf{$14/25$ above random}.
 \textbf{Contributions:} (i)~surpassing the executable-world-model SOTA on full-game completion
 (\ArcFullGames/\ArcUnionGames{}, \ArcFullLevels/\ArcTotalLevels{} levels); (ii)~the goal-as-procedure
 diagnosis explaining why \emph{undirected} discovery fails (four methods, $0$ on perfect models) and
@@ -224,7 +225,8 @@ fidelity-$1.0$ model, because a goal scored over a single \emph{state} cannot ex
 \emph{procedure}; \textbf{(ii)~the strategy landscape} (Fig.~\ref{fig:heatmap})---a guide to what does
 and does not solve interactive reasoning, with the negatives as first-class results; \textbf{(iii)~an
 honest above-random measure}---under the offline unbounded-reset protocol random play reaches
-$\geq$1 level on $11/25$, so we report \textbf{$14/25$ above random} rather than the inflated $\geq$1-level
+the first level on $\ArcRandomGeqOne/\ArcUnionGames$ (a \ArcRandomBudget{}-step/game budget; never a
+full game), so we report \textbf{$14/25$ above random} rather than the inflated $\geq$1-level
 union; and \textbf{(iv)~a new full-game state of the art}---the executable-world-model recipe
 (recover dynamics, reason the win condition, build a verified per-game simulator, search, and
 replay-verify) fully completes \textbf{\ArcFullGames/\ArcUnionGames{} games}
@@ -736,19 +738,23 @@ constructive: the recipe, reproduced in an open zero-dependency framework with a
 \centering
 \includegraphics[width=\textwidth]{figs/arc3_above_random.png}
 \caption{\textbf{Levels reached: random baseline vs.\ our best method, per game.} Green = we beat
-random; orange = we tie or trail it. Random (unbounded resets) already reaches $\geq$1 level on
-$11/25$ and even chains to level~2 on \texttt{ar25, cd82, sp80} (where our non-chaining solvers stop
-at level~1). Our distinctive value is the $14$ games random never reaches (the procedural walls) and
-the two where we go strictly deeper (\texttt{ft09}~6 vs.~2, \texttt{r11l}~6 vs.~1): $16/25$ strictly
-above random.}
+random; orange = we tie or trail it. Within a budget of \ArcRandomBudget{} steps per game and unbounded
+resets, random play reaches \emph{the first} level on \ArcRandomGeqOne/\ArcUnionGames{} (and at most
+level~2, on \texttt{ar25, cd82, sp80}, where our non-chaining solvers stop at level~1) but
+\emph{completes no game in full}. Our distinctive value is the $14$ games random never reaches (the
+procedural walls) and the two where we go strictly deeper (\texttt{ft09}~6 vs.~2, \texttt{r11l}~6
+vs.~1): $16/25$ strictly above random.}
 \label{fig:aboverandom}
 \end{figure}
 Because every solve here is \emph{offline} with \emph{unbounded resets}, we must ask how much the
 \emph{protocol}---not the method---contributes. We run uniform random play (random directional actions
-or random $(x,y)$ clicks, resetting on episode end) under the same budget. \textbf{Random reaches
-$\geq$1 level on 11/25 games} (\texttt{ar25, cd82, cn04, ft09, lp85, ls20, m0r0, r11l, sk48, sp80,
-vc33}); it even beats directed search ($6$) on the $\geq$1-level count, because unbounded resets let
-undirected clicking stumble into many tutorial-level wins. This sharply qualifies the headline: nearly
+or random $(x,y)$ clicks, resetting on episode end) under a fixed budget of \textbf{\ArcRandomBudget{}
+steps per game} (each episode capped at \ArcRandomMaxDepth{} steps before a reset). \emph{This baseline
+measures reaching the first level only, never full-game completion.} \textbf{Random clears at least one
+level (its $\geq$1-level reach) on \ArcRandomGeqOne/\ArcUnionGames{} games} (\texttt{ar25, cd82, cn04,
+ft09, lp85, ls20, m0r0, r11l, sk48, sp80, vc33}) but \textbf{completes $0/\ArcUnionGames$ games in full};
+on the $\geq$1-level count it even beats directed search ($6$), because \ArcRandomBudget{} undirected
+attempts with unbounded resets stumble into many tutorial first-level wins. This sharply qualifies the headline: nearly
 half the $\geq$1-level metric is free, and one agent ``solve'' (\texttt{lp85}, a single repeated
 click) is \emph{no better than random}. The \emph{distinctive} result is therefore the
 \textbf{14/25 games random does \emph{not} reach}---which include all nine procedural walls

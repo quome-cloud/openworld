@@ -38,6 +38,8 @@ def main():
         except Exception as e: r={"game":g,"random_levels":0,"error":str(e)[:60]}
         res[g]=r; print(f"  {g}: random reaches {r.get('random_levels',0)} levels",flush=True)
     solved=[g for g,r in res.items() if r.get("random_levels",0)>=1]
-    Path(a.out).write_text(json.dumps({"random_geq1_level":sorted(solved),"n":len(solved),"results":res},indent=2))
+    Path(a.out).write_text(json.dumps({"random_geq1_level":sorted(solved),"n":len(solved),
+        "budget_steps":a.budget,"max_depth_per_episode":300,"metric":"reaches >=1 (first) level",
+        "results":res},indent=2))
     print(f"[e117] RANDOM solves >=1 level on {len(solved)}/{len(games)}: {sorted(solved)}",flush=True)
 if __name__=="__main__": main()

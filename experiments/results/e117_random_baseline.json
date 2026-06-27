@@ -164,5 +164,8 @@
       "win": 9,
       "click": false
     }
-  }
+  },
+  "budget_steps": 100000,
+  "max_depth_per_episode": 300,
+  "metric": "reaches >=1 (first) level"
 }

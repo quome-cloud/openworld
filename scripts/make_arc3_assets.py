@@ -278,6 +278,16 @@ def main():
             "ArcSolveTrials": str(e93d.get("trials",300)),
         })
 
+    # ---- E117 random-play baseline (the protocol-control numbers) ----
+    e117=jload("e117_random_baseline.json")
+    if e117:
+        b=int(e117.get("budget_steps",100000))
+        macros.update({
+            "ArcRandomGeqOne": str(e117.get("n",11)),          # games random reaches the FIRST level on
+            "ArcRandomBudget": f"{b:,}".replace(",", "{,}"),    # steps/game, e.g. 100{,}000
+            "ArcRandomMaxDepth": str(e117.get("max_depth_per_episode",300)),
+        })
+
 
     # ---- E99 solve sweep (the successful directed-search approach) ----
     sweep=jload("e99_deep_sweep.json")

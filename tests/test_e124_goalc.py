@@ -32,3 +32,6 @@ def test_compile_writes_telemetry(tmp_path):
     codex_goalc.compile_goal(FRAMES, API, "dyn", "ka59", 0, 0, n=1,
                              traces_dir=str(tmp_path), _runner=_runner_returning(obj))
     assert os.path.exists(tmp_path/"calls.jsonl")
+    import json
+    rec = json.loads(open(tmp_path/"calls.jsonl").read().splitlines()[-1])
+    assert rec["decision"] == "abstain"

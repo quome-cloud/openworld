@@ -1,6 +1,6 @@
 """Compile a goal STRUCTURE (ordered subgoals + macros + optional score_fn) from codex, source-free and
 telemetry-captured. Codex only orders search; the env decides correctness (the caller verifies level-ups)."""
-import os, sys, json, time
+import os, sys, time
 from collections import namedtuple
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))   # experiments/
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "scripts"))
@@ -63,14 +63,12 @@ def _valid_predicate(src):
 
 
 def compile_goal(frames, action_api, dynamics, game, level, regime, model="gpt-5.5", n=3, tau=0.5,
-                 traces_dir=None, replay=None, _runner=None):
+                 traces_dir=None, _runner=None):
     run = _runner or codex_iso.run
     prompt = _prompt(frames, action_api, dynamics, level, regime)
     started = time.strftime("%Y-%m-%dT%H:%M:%S")
-    if _runner:
-        res = run(prompt, SCHEMA, model, game, replay=replay)
-    else:
-        res = run(prompt, SCHEMA, model, game)
+    # replay-from-cache is Milestone 2 (not wired yet)
+    res = run(prompt, SCHEMA, model, game)
     final = res.get("final") or {}
     tainted = bool(res.get("tainted"))
     subgoals = [(s.get("name", f"sg{i}"), s["predicate_src"])

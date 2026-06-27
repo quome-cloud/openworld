@@ -992,19 +992,22 @@ as follows.
 \begin{itemize}\setlength{\itemsep}{1pt}
   \item \textbf{Header} --- \texttt{arc3-map-<g>}: the discovered multi-perception world model for game
   \texttt{<g>}, with its spec version.
-  \item \textbf{State-transition graph} --- the explored dynamics as a graph: each \emph{node} is a
-  distinct \emph{discovered state} (a masked-frame signature \texttt{sig}---the $64{\times}64$ board hashed
-  after zeroing the always-changing status-bar cells), and each directed \emph{edge} is an action that
-  carried one state to another; the \texttt{start} tag marks the initial state. It is the
-  \texttt{preview.graph} (a bounded BFS from the start). \emph{Node positions are a force-directed layout
-  for legibility only---they are not board coordinates, so no spatial meaning should be read into where a
-  node sits.} A card showing a single self-looping node means heavy masking collapsed the probed region to
-  one signature (the solve still proceeds by the verified action trace, not the graph).
+  \item \textbf{State-transition graph} --- the explored dynamics as a graph: each \emph{node}
+  \texttt{q0,q1,\dots} is a distinct \emph{discovered state}, and each directed \emph{edge} is an action
+  that carried one state to another; the \texttt{start} tag marks the initial state. It is the
+  \texttt{preview.graph} (a bounded BFS from the start). A state is the $64{\times}64$ board reduced to a
+  signature (the board hashed after zeroing the always-changing status-bar cells); the underlying value is
+  a large integer, so we relabel the distinct signatures \texttt{q0,q1,\dots} for legibility---these are
+  identifiers, not magnitudes, and only equality between them matters. \emph{Node positions are a
+  force-directed layout for legibility only---they are not board coordinates, so no spatial meaning should
+  be read into where a node sits.} A card showing a single self-looping node means heavy masking collapsed
+  the probed region to one signature (the solve still proceeds by the verified action trace, not the graph).
   \item \textbf{State schema} --- the inferred state variables and types (here \texttt{sig\,:\,int}, the
-  one integer signature that identifies a board).
-  \item \textbf{Actions} --- the action vocabulary used: directional keys \texttt{a1..a7} and/or
-  coordinate clicks named \texttt{c\textit{<color>}\_\textit{<id>}} (a click on a pixel-inferred sprite
-  cell); \texttt{+N} abbreviates further actions.
+  one integer signature \texttt{q\textit{k}} that identifies a board).
+  \item \textbf{Actions} --- the action vocabulary used: the edge labels \texttt{s1,s2,\dots} (directional
+  keys) and/or coordinate clicks named \texttt{c\textit{<color>}\_\textit{<id>}} (a click on a
+  pixel-inferred sprite cell); \texttt{+N} abbreviates further actions. (Actions are \texttt{s\textit{k}};
+  states are \texttt{q\textit{k}}---distinct namespaces.)
   \item \textbf{Sample rollout} --- a short numeric preview of the state under a default policy; it reads
   ``no numeric preview'' when the state is an opaque hash rather than a plottable number.
   \item \textbf{Dynamics} --- the transition mechanism: \texttt{function (lossy)} is a

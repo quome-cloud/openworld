@@ -51,11 +51,31 @@ def milestones(gid, actions):
     return out, lv
 
 
+import re
+_SCI = re.compile(r"-?\d(?:\.\d+)?e[+-]?\d+")   # scientific-notation board signatures
+
+
+def _humanize_svg(svg):
+    """The atlas card labels state nodes with the raw masked-frame signature (e.g. 'sig -7.68629e+17'),
+    which is meaningless to a reader. Remap each distinct signature to a short stable id q0,q1,... so the
+    graph reads like a state machine. We use 'q' for states because the card already names ACTIONS s1,s2,...
+    -- keeping the two namespaces distinct (q = discovered board state, s = action)."""
+    ids, order = {}, []
+    for m in _SCI.findall(svg):
+        if m not in ids:
+            ids[m] = f"q{len(ids)}"; order.append(m)
+    # node labels 'sig <num>' -> 'q_k'; bare schema/rollout signature values '<num>' -> 'q_k'
+    for num in sorted(order, key=len, reverse=True):
+        svg = svg.replace(f"sig {num}", ids[num]).replace(num, ids[num])
+    return svg
+
+
 def map_raster(gid, width=1700):
     p = os.path.join(MAPS, f"{gid}.svg")
     if not os.path.exists(p):
         return None
-    png = cairosvg.svg2png(url=p, output_width=width)   # high-res so the card text stays legible
+    svg = _humanize_svg(open(p, encoding="utf-8").read())
+    png = cairosvg.svg2png(bytestring=svg.encode("utf-8"), output_width=width)   # hi-res, legible text
     return Image.open(io.BytesIO(png))
 
 

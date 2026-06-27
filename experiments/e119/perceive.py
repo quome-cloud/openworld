@@ -74,3 +74,27 @@ def click_candidates(frame, bg=None, max_size=40):
         if c not in seen:
             seen.add(c); out.append(c)
     return out
+
+
+def probe(game):
+    """Single-step transitions from reset(): each directional avail action + each click candidate.
+    Returns list of {action, before, after, dlevels}. Replays from reset() per probe (env is replay-only)."""
+    game.reset()
+    base_frame = np.asarray(game.frame).reshape(64, 64).copy()
+    base_levels = game.levels
+    avail = [a for a in getattr(game, "avail", [1, 2, 3, 4, 5, 7]) if a != 6]
+    transitions = []
+    for a in avail:
+        game.reset()
+        game.step(a)
+        transitions.append({"action": (a,), "before": base_frame,
+                            "after": np.asarray(game.frame).reshape(64, 64).copy(),
+                            "dlevels": game.levels - base_levels})
+    if 6 in getattr(game, "avail", []):
+        for (x, y) in click_candidates(base_frame):
+            game.reset()
+            game.step(6, x, y)
+            transitions.append({"action": (6, x, y), "before": base_frame,
+                                "after": np.asarray(game.frame).reshape(64, 64).copy(),
+                                "dlevels": game.levels - base_levels})
+    return transitions

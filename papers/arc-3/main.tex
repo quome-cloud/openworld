@@ -986,6 +986,35 @@ left-to-right shows the per-game dynamics the solver discovered---e.g.\ \texttt{
 morphing into a lights-out pattern, or \texttt{ar25} building from a single corridor into a four-quadrant
 structure.
 
+\paragraph{Anatomy of the atlas card.} The map at the top of each figure is the game's world model
+serialised by \texttt{to\_spec} and rendered by \texttt{render\_card}; every card shares one layout, read
+as follows.
+\begin{itemize}\setlength{\itemsep}{1pt}
+  \item \textbf{Header} --- \texttt{arc3-map-<g>}: the discovered multi-perception world model for game
+  \texttt{<g>}, with its spec version.
+  \item \textbf{State-transition graph} --- the explored dynamics as a graph: each \emph{node} is a
+  distinct \emph{discovered state} (a masked-frame signature \texttt{sig}---the $64{\times}64$ board hashed
+  after zeroing the always-changing status-bar cells), and each directed \emph{edge} is an action that
+  carried one state to another; the \texttt{start} tag marks the initial state. It is the
+  \texttt{preview.graph} (a bounded BFS from the start). \emph{Node positions are a force-directed layout
+  for legibility only---they are not board coordinates, so no spatial meaning should be read into where a
+  node sits.} A card showing a single self-looping node means heavy masking collapsed the probed region to
+  one signature (the solve still proceeds by the verified action trace, not the graph).
+  \item \textbf{State schema} --- the inferred state variables and types (here \texttt{sig\,:\,int}, the
+  one integer signature that identifies a board).
+  \item \textbf{Actions} --- the action vocabulary used: directional keys \texttt{a1..a7} and/or
+  coordinate clicks named \texttt{c\textit{<color>}\_\textit{<id>}} (a click on a pixel-inferred sprite
+  cell); \texttt{+N} abbreviates further actions.
+  \item \textbf{Sample rollout} --- a short numeric preview of the state under a default policy; it reads
+  ``no numeric preview'' when the state is an opaque hash rather than a plottable number.
+  \item \textbf{Dynamics} --- the transition mechanism: \texttt{function (lossy)} is a
+  \texttt{FunctionTransition} over the learned $(s,a)\!\to\!s'$ table (\emph{lossy}: the closure is not yet
+  re-emitted as standalone verified code). The same World serves interactively via the
+  ``open in React Flow'' affordance.
+\end{itemize}
+In the replay panels below each card, cells are the ARC 16-colour palette (0--15); the scattered small
+sprites are the game's actual objects, not noise---e.g.\ keys, walls, and goal markers.
+
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ar25.png}
 \caption{\texttt{ar25} solved trajectory (8/8): discovered map + level-completion replay.}\label{app:replay:ar25}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_re86.png}

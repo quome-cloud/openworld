@@ -1,7 +1,7 @@
 """Codex synthesizes predict(frame,action)->(next_frame,level_up); accepted ONLY via verify.check on a
 held-out split. On a miss, the counterexample is appended and codex re-proposes (bounded retries). Source-free
 + telemetry-captured. Codex is a proposal engine inside the verifier loop -- never an authority."""
-import os, sys, time
+import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "scripts"))
 import numpy as np
@@ -42,8 +42,10 @@ def _prompt(transitions, action_api, mask, counterexample):
 
 def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=3, traces_dir=None, _runner=None):
     run = _runner or codex_iso.run
-    split = max(1, int(len(transitions) * 0.7))
-    train, held = transitions[:split], transitions[split:] or transitions
+    if len(transitions) < 2:
+        return None, None                      # cannot form a disjoint held-out set
+    split = max(1, min(len(transitions) - 1, int(len(transitions) * 0.7)))
+    train, held = transitions[:split], transitions[split:]
     ce = None
     for attempt in range(n_retries):
         prompt = _prompt(train, action_api, mask, ce)
@@ -53,6 +55,7 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=3
         tainted = bool(res.get("tainted"))
         fn = None if tainted else verify.compile_predict(src or "")
         ok, ce = verify.check(fn, held, mask) if fn else (False, held[0] if held else None)
+        if fn is None: ce = None
         if traces_dir:
             capture_lib.codex_record(traces_dir, {"game": game, "level": 0, "regime": attempt, "model": model,
                 "model_version": res.get("model_version", ""), "prompt": prompt, "raw": res.get("raw", ""),

@@ -79,9 +79,9 @@
    "tier": "agent"
   },
   "g50t": {
-   "levels": 1,
+   "levels": 2,
    "win": 7,
-   "tier": "agent"
+   "tier": "expert"
   },
   "lf52": {
    "levels": 6,
@@ -9140,21 +9140,6 @@
     4
    ],
    [
-    5
-   ],
-   [
-    1
-   ],
-   [
-    5
-   ],
-   [
-    1
-   ],
-   [
-    5
-   ],
-   [
     3
    ],
    [
@@ -13292,14 +13277,14 @@
    "pass": true
   },
   "g50t": {
-   "depth_real": 1,
-   "depth_through_world": 1,
+   "depth_real": 2,
+   "depth_through_world": 2,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
-   "indexed_fallback": true,
-   "n_states": 54,
-   "n_transitions": 53,
+   "indexed_fallback": false,
+   "n_states": 49,
+   "n_transitions": 48,
    "pass": true
   },
   "lf52": {
@@ -13524,8 +13509,8 @@
    "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "g50t": {
-   "run_id": "g50t__agent__2026-06-26T20-45-38Z",
-   "tier": "agent",
+   "run_id": "g50t__expert__2026-06-27T18-43-44Z",
+   "tier": "expert",
    "method": "live-coding-agent-sandbox",
    "model": "claude-opus-4-8",
    "effort": "high",
@@ -13615,7 +13600,7 @@
   "tr87"
  ],
  "n_full_games": 8,
- "total_levels": 119,
+ "total_levels": 120,
  "total_possible": 183,
  "n_games_started": 25,
  "by_tier": {
@@ -13635,7 +13620,6 @@
    "wa30",
    "bp35",
    "dc22",
-   "g50t",
    "lf52",
    "lp85",
    "m0r0",
@@ -13645,7 +13629,10 @@
    "tr87",
    "r11l",
    "sc25"
+  ],
+  "expert": [
+   "g50t"
   ]
  },
- "updated_at": "2026-06-27T18:43:44Z"
+ "updated_at": "2026-06-27T19:42:03Z"
 }

@@ -16,3 +16,61 @@ def state_key(frame, mask):
     g = np.asarray(frame).reshape(64, 64).copy()
     g[mask] = 0
     return g.astype(np.int16).tobytes()
+
+
+def object_json(frame, bg=None):
+    g = np.asarray(frame).reshape(64, 64)
+    objs, bg = arc3_graph.objects(g, bg=bg)
+    out = []
+    for i, o in enumerate(objs):
+        out.append({"id": i, "color": o["color"], "size": o["size"],
+                    "centroid": o["centroid"], "bbox": o["bbox"]})
+    relations = []
+    if out:
+        ref = out[0]["centroid"]                       # largest object is the anchor
+        for o in out[1:]:
+            dy = round(o["centroid"][0] - ref[0], 1)
+            dx = round(o["centroid"][1] - ref[1], 1)
+            relations.append(f"#{o['id']}(c{o['color']}) at dy={dy},dx={dx} of #0")
+    return {"bg": bg, "objects": out, "relations": relations}
+
+
+def contrastive_diff(before, after, bg=None):
+    ba, aa = object_json(before, bg)["objects"], object_json(after, bg)["objects"]
+    by_color_b, by_color_a = {}, {}
+    for o in ba: by_color_b.setdefault(o["color"], []).append(o)
+    for o in aa: by_color_a.setdefault(o["color"], []).append(o)
+    moved, appeared, vanished = [], [], []
+    for color, alist in by_color_a.items():
+        blist = by_color_b.get(color, [])
+        if blist and alist:
+            b0, a0 = blist[0], alist[0]
+            if b0["centroid"] != a0["centroid"]:
+                moved.append({"color": color, "from": b0["centroid"], "to": a0["centroid"]})
+        elif alist and not blist:
+            appeared.append({"color": color, "at": alist[0]["centroid"]})
+    for color in by_color_b:
+        if color not in by_color_a:
+            vanished.append({"color": color})
+    return {"moved": moved, "appeared": appeared, "vanished": vanished, "recolored": []}
+
+
+def click_candidates(frame, bg=None, max_size=40):
+    g = np.asarray(frame).reshape(64, 64)
+    objs, bg = arc3_graph.objects(g, bg=bg)
+    color_counts = {}
+    for o in objs:
+        color_counts[o["color"]] = color_counts.get(o["color"], 0) + o["size"]
+    cands = []
+    for o in objs:
+        small = o["size"] <= max_size
+        rare = color_counts[o["color"]] <= max_size
+        if small or rare:
+            cy, cx = o["centroid"]
+            cands.append((int(round(cx)), int(round(cy))))   # (x=col, y=row)
+    # dedup, stable order
+    seen, out = set(), []
+    for c in cands:
+        if c not in seen:
+            seen.add(c); out.append(c)
+    return out

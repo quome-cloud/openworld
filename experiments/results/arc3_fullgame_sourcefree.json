@@ -74,7 +74,7 @@
    "tier": "agent"
   },
   "dc22": {
-   "levels": 2,
+   "levels": 3,
    "win": 6,
    "tier": "agent"
   },
@@ -114,7 +114,7 @@
    "tier": "agent"
   },
   "tr87": {
-   "levels": 5,
+   "levels": 6,
    "win": 6,
    "tier": "agent"
   },
@@ -8206,6 +8206,157 @@
    ],
    [
     4
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    51,
+    18
+   ],
+   [
+    6,
+    51,
+    27
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    51,
+    18
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    51,
+    27
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    51,
+    18
+   ],
+   [
+    6,
+    51,
+    27
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    6,
+    51,
+    36
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    6,
+    51,
+    45
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    4
    ]
   ],
   "g50t": [
@@ -11810,6 +11961,177 @@
    ],
    [
     1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
    ]
   ],
   "r11l": [
@@ -12231,14 +12553,14 @@
    "pass": true
   },
   "dc22": {
-   "depth_real": 2,
-   "depth_through_world": 2,
+   "depth_real": 3,
+   "depth_through_world": 3,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
    "indexed_fallback": false,
-   "n_states": 67,
-   "n_transitions": 67,
+   "n_states": 112,
+   "n_transitions": 112,
    "pass": true
   },
   "g50t": {
@@ -12319,14 +12641,14 @@
    "pass": true
   },
   "tr87": {
-   "depth_real": 5,
-   "depth_through_world": 5,
+   "depth_real": 6,
+   "depth_through_world": 6,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
    "indexed_fallback": false,
-   "n_states": 155,
-   "n_transitions": 154,
+   "n_states": 212,
+   "n_transitions": 211,
    "pass": true
   },
   "r11l": {
@@ -12466,7 +12788,7 @@
    "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "dc22": {
-   "run_id": "dc22__agent__2026-06-26T20-45-38Z",
+   "run_id": "dc22__agent__2026-06-27T11-12-55Z",
    "tier": "agent",
    "method": "live-coding-agent-sandbox",
    "model": "claude-opus-4-8",
@@ -12530,7 +12852,7 @@
    "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "tr87": {
-   "run_id": "tr87__agent__2026-06-27T09-43-17Z",
+   "run_id": "tr87__agent__2026-06-27T13-13-06Z",
    "tier": "agent",
    "method": "live-coding-agent-sandbox",
    "model": "claude-opus-4-8",
@@ -12561,10 +12883,11 @@
   "ft09",
   "lp85",
   "re86",
-  "sb26"
+  "sb26",
+  "tr87"
  ],
- "n_full_games": 7,
- "total_levels": 113,
+ "n_full_games": 8,
+ "total_levels": 115,
  "total_possible": 183,
  "n_games_started": 25,
  "by_tier": {
@@ -12596,5 +12919,5 @@
    "sc25"
   ]
  },
- "updated_at": "2026-06-27T11:12:55Z"
+ "updated_at": "2026-06-27T14:30:51Z"
 }

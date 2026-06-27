@@ -1,0 +1,11 @@
+{
+  "experiment": "E88",
+  "game": "cd82",
+  "method": "claude-cli-synthesis-3rounds",
+  "note": "cross-game transfer: predict() from random-walk transitions, 3 rounds with feedback",
+  "n_transitions": 300,
+  "copy_frame_baseline": 0.2533,
+  "verified_exact": 0.3867,
+  "elapsed_s": 426.2,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Deterministic 64x64 grid, background = 5.\n    # The only fully-consistent, action-independent signal across the data is a\n    # status bar on the bottom row (row 63): each move consumes the rightmost\n    # remaining marker cell, turning it into background (5).\n    #   action 6 -> [[63,63,5]], action 1 -> [[63,62,5]], action 6 -> [[63,61,5]],\n    #   action 2 -> [[63,59,5]], action 6 -> [[63,58,5]], ...\n    # (One step showed no change, i.e. a blocked/invalid move leaves the bar alone;\n    #  we cannot distinguish that from the frame alone, so we model the common case.)\n    out = np.array(frame, dtype=frame.dtype).copy()\n\n    bottom = out[63]\n    nonbg = np.where(bottom != 5)[0]\n    if nonbg.size > 0:\n        c = int(nonbg.max())          # rightmost remaining marker\n        out[63, c] = 5\n\n    return out"
+}

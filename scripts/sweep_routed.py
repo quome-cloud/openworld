@@ -12,7 +12,7 @@ game -> archive, tier-tagged). Local commit per phase/round; NO push (the human 
 Plain python3 (stdlib). Banker/finalizer/cheap run under the arc venv (need arc_agi + openworld).
     python3 scripts/sweep_routed.py
 """
-import subprocess, time, os, sys, json, signal
+import subprocess, time, os, sys, json, signal, glob, re
 from pathlib import Path
 
 ROOT = Path("/Users/jim/Desktop/openworld")
@@ -81,6 +81,50 @@ def kill_tree(p):
         pass
 
 
+def rate_limit_reset():
+    """If the most-recent agent runs were REJECTED by the usage cap (tiny stub transcripts carrying a
+    'rateLimitType'/'session limit' marker), return the reset epoch (seconds) so the caller can wait it
+    out instead of spinning. Only considers freshly-written stubs whose reset is still in the future."""
+    tdir = TRACES / "transcripts"
+    files = sorted(glob.glob(str(tdir / "*__agent__*.jsonl")),
+                   key=lambda f: os.path.getmtime(f), reverse=True)[:max(POOL + 1, 4)]
+    now = time.time(); reset = None
+    for f in files:
+        try:
+            if now - os.path.getmtime(f) > 900:      # only recent runs (<15 min) count
+                continue
+            if os.path.getsize(f) > 60000:           # big transcript => real work, not a rejection
+                continue
+            txt = open(f, encoding="utf-8", errors="ignore").read()
+            if not re.search(r"rateLimitType|session limit|usage limit|\"rejected\"", txt):
+                continue
+            m = re.search(r'"resetsAt":\s*(\d+)', txt)
+            if m:
+                reset = max(reset or 0, int(m.group(1)))
+            else:
+                reset = max(reset or 0, int(now + 1800))   # unknown reset -> back off 30 min
+        except Exception:
+            pass
+    return reset if (reset and reset > now + 5) else None
+
+
+def wait_if_rate_limited():
+    """Block until the usage cap resets (plus a small buffer) if a rejection was just detected. Returns
+    True if it waited. Caps the wait at 6h as a safety. This converts wasteful reject-spin into productive
+    waiting: when the window resets, the very next agent launch does real work again."""
+    reset = rate_limit_reset()
+    if not reset:
+        return False
+    wait = min(reset - time.time() + 30, 6 * 3600)
+    if wait <= 0:
+        return False
+    log(f"RATE-LIMITED: usage cap hit; pausing {int(wait)}s until reset "
+        f"~{time.strftime('%H:%M', time.localtime(reset))} (no agents launched meanwhile)")
+    time.sleep(wait)
+    log("rate-limit window reset; resuming agent launches")
+    return True
+
+
 def commit(tag):
     a = json.loads(ARCH.read_text()) if ARCH.exists() else {}
     by_tier = a.get("by_tier", {})
@@ -145,6 +189,8 @@ def main():
         running = {}
         qi = 0
         while qi < len(queue) or running:
+            if len(running) < POOL and qi < len(queue):
+                wait_if_rate_limited()      # don't launch agents into a usage-cap rejection window
             while len(running) < POOL and qi < len(queue):
                 g = queue[qi]; qi += 1
                 running[g] = (launch_agent(g), time.time())

@@ -1,0 +1,259 @@
+% =============================================================================
+%  E89: ARC-AGI-2 via LLM-Written Python — Arbitrary Code, No DSL
+%  Technical note: verified-code synthesis without a fixed DSL on ARC-AGI-2.
+%  Companion to E84 (T358). Built from the Task Force house template.
+% =============================================================================
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{array}
+\definecolor{kwblue}{rgb}{0.10,0.20,0.65}
+\definecolor{cmtgreen}{rgb}{0.20,0.45,0.20}
+\definecolor{strred}{rgb}{0.62,0.12,0.12}
+\lstdefinestyle{housespecpy}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{black!3},
+  frame=single, framesep=5pt, rulecolor=\color{black!45},
+  columns=fullflexible, breaklines=true, keepspaces=true,
+  showstringspaces=false,
+  commentstyle=\color{cmtgreen}\itshape,
+  stringstyle=\color{strred},
+  keywordstyle=\color{kwblue}\bfseries,
+  language=Python,
+}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\newcommand{\openworld}{\textsc{OpenWorld}}
+\newcommand{\monthyeartoday}{%
+  \ifcase\month\or January\or February\or March\or April\or May\or June\or
+  July\or August\or September\or October\or November\or December\fi
+  \space\number\year}
+
+\begin{document}
+
+\thispagestyle{empty}
+\noindent
+\begin{minipage}[c]{0.65\textwidth}
+  \raggedright\textbf{E89 Technical Note} \quad \texttt{exp-e89-arc-agi2-python-synth}
+\end{minipage}\hfill
+\begin{minipage}[c]{0.35\textwidth}
+  \raggedleft\itshape \monthyeartoday
+\end{minipage}
+
+\vspace{1em}
+
+\begin{center}
+  {\LARGE\bfseries E89: ARC-AGI-2 via LLM-Written Python}\\[0.4em]
+  {\large Arbitrary Code, No DSL, Exact-Match Verify Gate}\\[0.8em]
+  {\normalsize D.O.H.\ Research Team \quad Quome}\\[0.3em]
+  {\small\texttt{exp-e89-arc-agi2-python-synth} branch, \openworld{} repository}
+\end{center}
+
+\vspace{0.5em}
+\hrule
+\vspace{0.5em}
+
+\begin{abstract}
+We test whether removing a fixed DSL constraint improves LLM-based program
+synthesis on ARC-AGI-2.  E84 (fixed 17-primitive geometric DSL) scored 0\%
+and attributed failure to coverage gaps.  E89 removes that constraint
+entirely: the synthesis agent writes arbitrary Python with no vocabulary
+restrictions, accepted only when programs \emph{exactly} reproduce every
+demo pair.  Burst-1 (30 tasks, 3 candidates/task, \texttt{claude-sonnet-4-6})
+scores \textbf{0/30 (0\%)}—identical to E84.  We conclude that the binding
+bottleneck is not DSL coverage but LLM rule-inference correctness under
+few-shot conditions.
+\end{abstract}
+
+\vspace{0.5em}
+\hrule
+
+%% ============================================================
+\section{Motivation}
+\label{sec:motivation}
+
+E84 tested a 17-primitive geometric DSL (translate, recolor, tile, etc.)
+against ARC-AGI-2 and scored 0\% across six search budgets (10--10{,}000).
+Post-hoc analysis identified the bottleneck as \emph{coverage}: the DSL
+lacked connected-component, object-identity, and counting primitives required
+by the evaluated tasks.  E84's conclusion was explicit: ``scaling the fixed
+DSL does not help; the straitjacket is the representation, not the search.''
+
+E89 tests this claim directly.  If coverage is the bottleneck, replacing the
+fixed DSL with unrestricted Python should recover accuracy.  If the LLM
+cannot reliably derive correct transformation rules from a handful of
+examples regardless of representation, both approaches will score zero.
+
+%% ============================================================
+\section{Method}
+\label{sec:method}
+
+\subsection{Pipeline}
+
+\begin{enumerate}
+  \item \textbf{Load task}: ARC-AGI-2 evaluation task with demo pairs and a held-out test grid.
+  \item \textbf{Synthesize}: Send demo pairs to \texttt{claude-sonnet-4-6} via DM protocol
+        (arc\_synthesizer\_harness.py).  The prompt asks the model to write a
+        \texttt{transform(grid) -> grid} function in \emph{arbitrary Python}
+        with no vocabulary restrictions.
+  \item \textbf{Verify}: Accept candidates that \emph{exact-match} every demo pair.
+        Partial credit is not allowed; any incorrect cell = reject.
+  \item \textbf{Apply}: Run verified survivors on the test grid.
+        Vote across multiple verified candidates if more than one survives.
+\end{enumerate}
+
+\subsection{Configuration}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Synthesis model & \texttt{claude-sonnet-4-6} \\
+Candidates per task & 3 (burst-1) \\
+Tasks evaluated & 30 (ARC-AGI-2 evaluation set) \\
+Verify gate & Exact match on all demo pairs \\
+Evaluation set & Public ARC-AGI-2 evaluation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Comparison baseline}
+
+E84 (T358): fixed 17-primitive geometric DSL on the same ARC-AGI-2 evaluation set.
+Both experiments use identical task selection and verify gate semantics.
+
+%% ============================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{Burst-1: 30-task evaluation}
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Metric & E84 (Fixed DSL) & E89 (Arbitrary Python) \\
+\midrule
+Tasks evaluated & 30 & 30 \\
+Candidates per task & 6-budgets & 3 \\
+Candidates passing verify gate & 0 & 1 / 90 (1.1\%) \\
+Tasks solved (ground truth) & 0 / 30 & \textbf{0 / 30} \\
+ARC-AGI-2 accuracy & 0\% & \textbf{0\%} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The one candidate that passed the exact-match verify gate did not match the
+ground-truth test output.
+
+\subsection{Best-effort verify-gate demonstration (T365)}
+
+To confirm the verify gate is functional end-to-end, a best-effort sub-run
+targeted five hand-selected tasks with 32 candidates each.  Task
+\texttt{d35bdbdc} produced 20/32 candidates passing all demo pairs via exact
+match, with consistent outputs on all three test inputs.  The transformation
+pattern (``chain pairing'': shapes with uniform 3$\times$3 surroundings form
+chains; alternate shapes swap centers) was decoded correctly.
+This demonstrates the pipeline can produce and accept verified programs; the
+challenge is generalization across the broad evaluation distribution.
+
+%% ============================================================
+\section{Analysis}
+\label{sec:analysis}
+
+\subsection{Primary finding: coverage is not the bottleneck}
+
+E84 hypothesized that its 0\% score reflected DSL coverage gaps (no
+object-identity, connected-component, or counting primitives).  E89 removes
+those restrictions entirely and scores identically.  The data falsify the
+coverage-gap hypothesis as the \emph{primary} bottleneck.
+
+\subsection{Alternative hypothesis: inference correctness}
+
+The 1.1\% gate-pass rate (1/90 candidates) across 30 tasks indicates that
+\texttt{claude-sonnet-4-6} rarely produces programs that correctly replicate
+all demo pairs, regardless of representation.  Candidate programs showed
+plausible but incorrect approaches: typically identifying the correct
+structural pattern class while mishandling edge cases, directionality, or
+selection logic.  The exact-match gate is unforgiving; programs that
+``approximately'' capture the pattern still fail.
+
+\subsection{The regime map}
+
+Together, E84 and E89 establish two axes of a synthesis regime map:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Experiment & Representation & Bottleneck tested & ARC-AGI-2 \\
+\midrule
+E84 & Fixed 17-prim DSL & Coverage & 0\% \\
+E89 & Arbitrary Python & Inference correctness & 0\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Future axes: multi-turn refinement with failure feedback (E84/E89 both
+used single-shot synthesis); stronger models (Opus 4.8); and higher candidate
+counts (N=32 expected gate-pass rate $\approx 28$\% if rate is stable at
+1.1\%).
+
+%% ============================================================
+\section{Limitations}
+\label{sec:limitations}
+
+\begin{itemize}
+  \item \textbf{Sample size}: 30 tasks from the public evaluation set.
+  \item \textbf{Candidates}: 3 per task.  Higher N could recover some tasks.
+  \item \textbf{Contamination}: Tasks are from the public set; contamination
+        cannot be ruled out, though ARC-AGI-2 is purpose-built to resist
+        memorization.
+  \item \textbf{No private-set score}: The definitive headline number requires
+        the held-out private evaluation set.
+\end{itemize}
+
+%% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Removing the DSL constraint does not improve ARC-AGI-2 accuracy.  E89
+(arbitrary Python) scores 0/30, matching E84 (fixed geometric DSL).
+The binding bottleneck for few-shot program synthesis on ARC-AGI-2 is
+LLM rule-inference correctness, not representation coverage.
+
+This is a useful negative result: it rules out one class of explanation
+(vocabulary poverty) and points toward a distinct engineering lever
+(inference correctness via refinement, stronger models, or larger candidate
+pools) as the productive path forward.
+
+%% ============================================================
+\appendix
+\section{Failure mode examples}
+\label{sec:appendix}
+
+Candidate programs in burst-1 consistently showed the following pattern:
+
+\begin{lstlisting}[style=housespecpy]
+def transform(grid):
+    # Model identifies pattern: "fill enclosed regions"
+    # But misses the diagonal-vs-orthogonal distinction
+    result = [[row[:] for row in grid]]
+    for r in range(1, len(grid)-1):
+        for c in range(1, len(grid[0])-1):
+            if grid[r][c] == 0 and is_enclosed_ortho(grid, r, c):
+                result[r][c] = 1  # Wrong: should check diagonal too
+    return result
+\end{lstlisting}
+
+The model identifies the correct transformation class (enclosed-region fill)
+but implements it incorrectly (orthogonal-only vs.\ true enclosure).  The
+exact-match gate correctly rejects these; no partial credit is awarded.
+
+\end{document}

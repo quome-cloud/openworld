@@ -14,8 +14,8 @@ import subprocess, time, os, sys, json, signal
 from pathlib import Path
 
 ROOT = Path("/Users/jim/Desktop/openworld")
-ARC_VENV = ("/private/tmp/claude-501/-Users-jim-Desktop-openworld/"
-            "71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python")
+# Durable arc venv (see sweep_routed.py); override with ARC_VENV, default in $HOME (survives sessions).
+ARC_VENV = os.environ.get("ARC_VENV", os.path.expanduser("~/.arcv/bin/python"))
 RUNNER = str(ROOT / "scripts" / "run_arc_agent_sandbox.sh")
 BANKER = str(ROOT / "scripts" / "autobank_sourcefree.py")
 ARCH = ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree.json"

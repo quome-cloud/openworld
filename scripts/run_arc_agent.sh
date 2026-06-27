@@ -2,7 +2,7 @@
 # Live OpenWorld coding-agent solver: launch Claude Code to build an executable world model + reason
 # about the goal for one ARC-AGI-3 game. Usage: run_arc_agent.sh <game>
 set -uo pipefail
-GAME="$1"; VENV="/private/tmp/claude-501/-Users-jim-Desktop-openworld/71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python"
+GAME="$1"; VENV="/Users/jim/.arcv/bin/python"
 ROOT="/Users/jim/Desktop/openworld"; WD="$ROOT/scratch_arc/agent_$GAME"
 mkdir -p "$WD"; cp "$ROOT/scratch_arc/agent/arc3_harness.py" "$WD/"
 cat > "$WD/TASK.md" <<TASK

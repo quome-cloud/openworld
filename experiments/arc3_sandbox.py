@@ -12,8 +12,8 @@ and reason the win from observed frames, which is the real ARC-AGI-3 task.
 """
 import sys, os, json, subprocess
 
-ARC_VENV = ("/private/tmp/claude-501/-Users-jim-Desktop-openworld/"
-            "71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python")
+# Durable arc venv; override with ARC_VENV, default in $HOME (survives across Claude sessions).
+ARC_VENV = os.environ.get("ARC_VENV", os.path.expanduser("~/.arcv/bin/python"))
 # Source downloads here -- a tree SEPARATE from any agent working dir.
 WORKER_ROOT = "/Users/jim/Desktop/openworld/experiments/.sandbox_env"
 

@@ -5,7 +5,7 @@
 #   nohup caffeinate -i bash scripts/autobank_watch.sh 9 > scratch_arc/autobank_watch.log 2>&1 &
 set -uo pipefail
 ROOT=/Users/jim/Desktop/openworld
-VENV=/private/tmp/claude-501/-Users-jim-Desktop-openworld/71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python
+VENV=/Users/jim/.arcv/bin/python
 HOURS="${1:-9}"; DEADLINE=$(( $(date +%s) + HOURS*3600 ))
 echo "[watch] START $(date) deadline=+${HOURS}h"
 while [ "$(date +%s)" -lt "$DEADLINE" ]; do

@@ -1,0 +1,53 @@
+{
+  "experiment": "e120_expert_consensus",
+  "method": "ConsensusTransition(mode=vote) over expert-lens world models",
+  "games": {
+    "ka59": {
+      "game": "ka59",
+      "n_experts": 3,
+      "experts": [
+        {
+          "lens": "banked",
+          "fidelity": 6,
+          "states": 313
+        },
+        {
+          "lens": "open",
+          "fidelity": 6,
+          "states": 313
+        },
+        {
+          "lens": "topology",
+          "fidelity": 6,
+          "states": 313
+        }
+      ],
+      "shared_states": 314,
+      "graph_nodes": 6,
+      "graph_edges": 10,
+      "card_svg": "maps/ka59_consensus.svg",
+      "card_png": "ka59_consensus.png"
+    },
+    "m0r0": {
+      "game": "m0r0",
+      "n_experts": 2,
+      "experts": [
+        {
+          "lens": "banked",
+          "fidelity": 5,
+          "states": 143
+        },
+        {
+          "lens": "open",
+          "fidelity": 5,
+          "states": 143
+        }
+      ],
+      "shared_states": 144,
+      "graph_nodes": 6,
+      "graph_edges": 10,
+      "card_svg": "maps/m0r0_consensus.svg",
+      "card_png": "m0r0_consensus.png"
+    }
+  }
+}

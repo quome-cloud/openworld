@@ -1,0 +1,144 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "arc3-consensus-m0r0",
+  "description": "Bayesian-experts CONSENSUS world model of ARC-AGI-3 m0r0: openworld.ConsensusTransition vote over 2 expert lenses [banked(L5), open(L5)], each weighted by env-verified levels reached.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "Bayesian-experts CONSENSUS world model of ARC-AGI-3 m0r0: openworld.ConsensusTransition vote over 2 expert lenses [banked(L5), open(L5)], each weighted by env-verified levels reached."
+  },
+  "state_schema": {
+    "sig": "str"
+  },
+  "initial_state": {
+    "sig": "q0"
+  },
+  "actions": [
+    "c11_19",
+    "c14_29",
+    "c22_46",
+    "c30_30",
+    "c31_15",
+    "c39_31",
+    "s1",
+    "s2",
+    "s3",
+    "s4"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "function",
+    "lossy": true,
+    "repr": "<openworld.consensus.ConsensusTransition object at 0x10b109bd0>",
+    "class_source": "class ConsensusTransition(Transition):\n    def __init__(self, members: List[Tuple[Transition, float]], mode: str = \"select\") -> None:\n        if not members:\n            raise ValueError(\"ConsensusTransition needs at least one member\")\n        if mode not in (\"select\", \"vote\"):\n            raise ValueError(\"mode must be 'select' or 'vote'\")\n        # highest verified fidelity first\n        self.members = sorted(members, key=lambda m: -float(m[1]))\n        self.mode = mode\n\n    def step(self, state: WorldState, action: Action) -> WorldState:\n        if self.mode == \"select\":\n            for t, _ in self.members:\n                try:\n                    return t.step(state, action)\n                except Exception:  # noqa: BLE001 -- fall through to the next-best member\n                    continue\n            return WorldState(dict(state))\n        # vote: per-key majority over members' predicted next-states\n        outs = []\n        for t, _ in self.members:\n            try:\n                outs.append(dict(t.step(state, action)))\n            except Exception:  # noqa: BLE001\n                pass\n        if not outs:\n            return WorldState(dict(state))\n        keys = set().union(*(o.keys() for o in outs))\n        result = {}\n        for k in keys:\n            present = [o[k] for o in outs if k in o]\n            counts = Counter(repr(v) for v in present)\n            winner = counts.most_common(1)[0][0]\n            result[k] = next(v for v in present if repr(v) == winner)  # the actual value, not its repr\n        return WorldState(result)\n"
+  },
+  "preview": {
+    "steps": 16,
+    "action": "c11_19",
+    "series": {},
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "s0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "s1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "s2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "s3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "s4"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "s5"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s1"
+        },
+        {
+          "src": 0,
+          "dst": 0,
+          "action": "c11_19, c14_29, c22_46"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "s1"
+        },
+        {
+          "src": 1,
+          "dst": 1,
+          "action": "c11_19, c14_29, c22_46"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "s3"
+        },
+        {
+          "src": 2,
+          "dst": 2,
+          "action": "c11_19, c14_29, c22_46"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "s1"
+        },
+        {
+          "src": 3,
+          "dst": 3,
+          "action": "c11_19, c14_29, c22_46"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "s3"
+        },
+        {
+          "src": 4,
+          "dst": 4,
+          "action": "c11_19, c14_29, c22_46"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

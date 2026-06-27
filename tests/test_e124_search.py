@@ -35,3 +35,40 @@ def test_ladder_blind_fails_macros_solves():
     res = e.run_one(ToyGame, _cands, None, 5, goal)
     assert res["blind"] is None
     assert res["blind_macros"] == 3
+
+
+class ToyGame2:
+    """A DEEP procedure: level-up only after [1,1,1,2,2,2] (depth 6). frame[0,0] records the count of leading
+    1s, so a subgoal predicate `frame[0,0] >= 3` fires at the half-way point. Single-step BFS over {1,2} to
+    depth 6 needs ~126 nodes; with budget 30 it cannot reach it. But ORDERED subgoals split it into two
+    depth-3 searches (reach the half-way subgoal, then the win) -- well within budget."""
+    WIN = [(1,), (1,), (1,), (2,), (2,), (2,)]
+    def __init__(self): self.reset()
+    def reset(self):
+        self.seq = []; self.levels = 0; self.done = False; self.frame = np.zeros((64, 64), dtype=int)
+    def step(self, a, x=None, y=None):
+        self.seq.append((a,) if x is None else (6, x, y))
+        c = 0
+        for s in self.seq:
+            if s == (1,):
+                c += 1
+            else:
+                break
+        self.frame = np.zeros((64, 64), dtype=int); self.frame[0, 0] = c
+        if self.seq == self.WIN:
+            self.levels = 1; self.done = True
+        if len(self.seq) > 8:
+            self.done = True
+
+def _cands2(frame): return [[1], [2]]
+
+def test_subgoals_solve_what_blind_cannot():
+    """The core Task-6b claim: codex's ordered subgoals collapse a deep procedure that blind BFS cannot
+    crack in the same budget."""
+    half = "def predicate(frame):\n    return frame[0, 0] >= 3"
+    sub_goal = codex_goalc.Goal([("half", half)], [], None, "", False, [])
+    blind = search.run(ToyGame2(), codex_goalc.Goal([], [], None, "", True, []),
+                       budget=30, rung="blind", candidates_fn=_cands2, mask=None)
+    sub = search.run(ToyGame2(), sub_goal, budget=30, rung="subgoals", candidates_fn=_cands2, mask=None)
+    assert blind is None
+    assert sub == [[1], [1], [1], [2], [2], [2]]

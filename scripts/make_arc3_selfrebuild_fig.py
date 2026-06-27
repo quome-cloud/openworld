@@ -50,13 +50,22 @@ def surprise_series(game):
     return delta, bounds, ups, sc
 
 
+def recall_distribution():
+    """Per-game retrospective recall from the committed E121 run (honest generalization, n=25)."""
+    d = json.loads((ROOT / "experiments/results/e121_surprise_regimes.json").read_text())["games"]
+    pairs = [(g, v["recall"]) for g, v in d.items() if v.get("recall") is not None]
+    pairs.sort(key=lambda kv: kv[1])              # worst first, so failures are visible on the left
+    return pairs
+
+
 def main():
     delta, bounds, ups, sc = surprise_series(GAME_B)
     cardA = card_img(f"{GAME_B}_consensus")
     cardC = card_img(f"{GAME_B}_regimes")
+    dist = recall_distribution()
 
-    fig = plt.figure(figsize=(15.5, 9.2))
-    gs = GridSpec(2, 2, height_ratios=[1.05, 1.0], width_ratios=[1, 1], hspace=0.32, wspace=0.10)
+    fig = plt.figure(figsize=(15.5, 12.4))
+    gs = GridSpec(3, 2, height_ratios=[1.05, 0.92, 0.66], width_ratios=[1, 1], hspace=0.34, wspace=0.10)
 
     # ---- A: consensus card ----
     axA = fig.add_subplot(gs[0, 0]); axA.axis("off")
@@ -88,18 +97,37 @@ def main():
                     label="ground-truth level-up (rule change)" if j == 0 else None)
     axB.set_xlabel("step along the verified solution trace", fontsize=10.5)
     axB.set_ylabel("board cells changed (Δ)", fontsize=10.5)
-    axB.set_title(f"B  ·  surprise detects every rule change from frames alone  —  {GAME_B}:  "
-                  f"recall={sc['recall']}, precision={sc['precision']}  "
-                  f"({sc['matched']}/{sc['level_ups']} level-ups recovered; the level signal is used only "
-                  f"to score, never to detect)", fontsize=11, color="#1e293b", loc="left", pad=6)
+    axB.set_title(f"B  ·  one game in detail ({GAME_B}): surprise detects every rule change from frames "
+                  f"alone  —  recall={sc['recall']}, precision={sc['precision']} "
+                  f"({sc['matched']}/{sc['level_ups']} level-ups; the level signal is used only to score, "
+                  f"never to detect)", fontsize=11, color="#1e293b", loc="left", pad=6)
     axB.legend(loc="upper right", fontsize=9.5, framealpha=0.95)
     axB.grid(True, alpha=0.25); axB.margins(x=0.01)
     for s in ("top", "right"):
         axB.spines[s].set_visible(False)
 
-    fig.suptitle("Multi-world ARC-AGI-3: a panel of expert world models that VOTE, and a world model that "
-                 "NOTICES when the rules change and REBUILDS itself",
-                 fontsize=13.5, fontweight="bold", y=0.998)
+    # ---- D: honest generalization -- per-game recall across all 25 banked traces ----
+    axD = fig.add_subplot(gs[2, :])
+    games = [g for g, _ in dist]; rec = [r for _, r in dist]
+    mean_r = sum(rec) / len(rec); med_r = sorted(rec)[len(rec) // 2]
+    colors = ["#dc2626" if r < 0.5 else "#f59e0b" if r < 1.0 else "#059669" for r in rec]
+    axD.bar(range(len(games)), rec, color=colors, edgecolor="white", linewidth=0.6)
+    axD.axhline(mean_r, color="#1d4ed8", ls="--", lw=1.4, label=f"mean {mean_r:.2f}")
+    axD.axhline(med_r, color="#7c3aed", ls=":", lw=1.4, label=f"median {med_r:.2f}")
+    axD.set_xticks(range(len(games))); axD.set_xticklabels(games, rotation=90, fontsize=7.5)
+    axD.set_ylim(0, 1.05); axD.set_ylabel("rule-change recall", fontsize=10.5)
+    axD.set_title(f"D  ·  honest generalization across all {len(games)} banked games  —  median "
+                  f"{med_r:.2f}, mean {mean_r:.2f}, {sum(1 for r in rec if r==1.0)}/{len(rec)} perfect; "
+                  f"failures (red) are games whose level-ups do NOT reload the board (e.g. cd82, bp35)",
+                  fontsize=11, color="#1e293b", loc="left", pad=6)
+    axD.legend(loc="lower right", fontsize=9.5, framealpha=0.95)
+    axD.grid(True, axis="y", alpha=0.25)
+    for s in ("top", "right"):
+        axD.spines[s].set_visible(False)
+
+    fig.suptitle("Multi-world ARC-AGI-3: expert world models that VOTE, and a world model that NOTICES when "
+                 "the rules change and REBUILDS itself (honest cross-game generalization)",
+                 fontsize=13.5, fontweight="bold", y=0.999)
     out = FIGS / "arc3_selfrebuild.png"
     fig.savefig(out, dpi=155, bbox_inches="tight"); plt.close(fig)
     print(f"wrote {out.relative_to(ROOT)}  (cardsA/C {'ok' if cardA is not None else 'MISSING'}, "

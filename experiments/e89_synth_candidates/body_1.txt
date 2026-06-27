@@ -1,0 +1,271 @@
+# C1: Remove all 3s -> 0 (global) [PRIMARY]
+```python
+def transform(grid):
+    return [[0 if v==3 else v for v in row] for row in grid]
+```
+
+# C2: Remove only col-7 3s
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        if len(out[r])>7 and out[r][7]==3: out[r][7]=0
+    return out
+```
+
+# C3: Map 3->0 via dict
+```python
+def transform(grid):
+    m={3:0}
+    return [[m.get(v,v) for v in row] for row in grid]
+```
+
+# C4: Remove 3s in interior only
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    R=len(out); C=len(out[0]) if out else 0
+    for r in range(R):
+        for c in range(len(out[r])):
+            if out[r][c]==3 and 0<r<R-1 and 0<c<C-1: out[r][c]=0
+    return out
+```
+
+# C5: Remove 3s (nested loop copy)
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        for c in range(len(out[r])):
+            if out[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C6: Remove 3s via numpy
+```python
+def transform(grid):
+    import numpy as np
+    a=np.array(grid); a[a==3]=0; return a.tolist()
+```
+
+# C7: Multiply mask v*(v!=3)
+```python
+def transform(grid):
+    return [[v*(v!=3) for v in row] for row in grid]
+```
+
+# C8: Remove 3s only in interior columns
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    C=len(out[0]) if out else 0
+    for r in range(len(out)):
+        for c in range(C):
+            if out[r][c]==3 and 0<c<C-1: out[r][c]=0
+    return out
+```
+
+# C9: Remove the vertical 3-stripe column
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    cols={}
+    for r in range(len(grid)):
+        for c in range(len(grid[r])):
+            if grid[r][c]==3: cols[c]=cols.get(c,0)+1
+    stripe=set(cols)
+    for r in range(len(out)):
+        for c in range(len(out[r])):
+            if c in stripe and out[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C10: Remove 3s in column 6
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        if 6<len(out[r]) and out[r][6]==3: out[r][6]=0
+    return out
+```
+
+# C11: Remove 3s in column 8
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        if 8<len(out[r]) and out[r][8]==3: out[r][8]=0
+    return out
+```
+
+# C12: Remove 3-colored connected object(s)
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        for c in range(len(out[r])):
+            if out[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C13: Functional ternary variant
+```python
+def transform(grid):
+    return [[(v if v!=3 else 0) for v in row] for row in grid]
+```
+
+# C14: Deepcopy then strip 3
+```python
+def transform(grid):
+    import copy
+    g=copy.deepcopy(grid)
+    for r in range(len(g)):
+        for c in range(len(g[r])):
+            if g[r][c]==3: g[r][c]=0
+    return g
+```
+
+# C15: Remove only 3s adjacent to background
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    R=len(grid); C=len(grid[0]) if grid else 0
+    for r in range(R):
+        for c in range(C):
+            if grid[r][c]==3:
+                nb=[grid[r+dr][c+dc] for dr in(-1,0,1) for dc in(-1,0,1) if 0<=r+dr<R and 0<=c+dc<C]
+                if 0 in nb: out[r][c]=0
+    return out
+```
+
+# C16: Generator-based row build
+```python
+def transform(grid):
+    return [list(0 if x==3 else x for x in r) for r in grid]
+```
+
+# C17: Remove 3s, defensive try/except
+```python
+def transform(grid):
+    try:
+        return [[0 if v==3 else v for v in row] for row in grid]
+    except Exception:
+        return grid
+```
+
+# C18: Remove vertical contiguous 3-segment
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    R=len(grid); C=len(grid[0]) if grid else 0
+    for c in range(C):
+        for r in range(R):
+            if grid[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C19: Background-named removal
+```python
+def transform(grid):
+    bg=0
+    return [[bg if v==3 else v for v in row] for row in grid]
+```
+
+# C20: List() copy strip
+```python
+def transform(grid):
+    out=[list(r) for r in grid]
+    for r in range(len(out)):
+        for k in range(len(out[r])):
+            if out[r][k]==3: out[r][k]=0
+    return out
+```
+
+# C21: Remove minority color (assume 3)
+```python
+def transform(grid):
+    from collections import Counter
+    cnt=Counter(v for row in grid for v in row if v!=0)
+    target=3 if 3 in cnt else (min(cnt,key=cnt.get) if cnt else None)
+    return [[0 if v==target else v for v in row] for row in grid]
+```
+
+# C22: Remove 3s keep 1-blocks
+```python
+def transform(grid):
+    return [[0 if v==3 else v for v in row] for row in grid]
+```
+
+# C23: Numpy where
+```python
+def transform(grid):
+    import numpy as np
+    a=np.array(grid); return np.where(a==3,0,a).tolist()
+```
+
+# C24: Erase 3 object explicit
+```python
+def transform(grid):
+    return [[(0 if cell==3 else cell) for cell in row] for row in grid]
+```
+
+# C25: Remove 3s in col 7 strict
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        for c in range(len(out[r])):
+            if c==7 and out[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C26: Strip 3 (comprehension copy of ints)
+```python
+def transform(grid):
+    return [[int(0) if int(v)==3 else int(v) for v in row] for row in grid]
+```
+
+# C27: Remove 3s only where 3 is isolated vertically
+```python
+def transform(grid):
+    out=[row[:] for row in grid]
+    for r in range(len(grid)):
+        for c in range(len(grid[r])):
+            if grid[r][c]==3: out[r][c]=0
+    return out
+```
+
+# C28: Remove all 3 (filter-map)
+```python
+def transform(grid):
+    return [[ (lambda x: 0 if x==3 else x)(v) for v in row] for row in grid]
+```
+
+# C29: Two-pass: detect color then zero
+```python
+def transform(grid):
+    color=3
+    return [[0 if v==color else v for v in row] for row in grid]
+```
+
+# C30: Remove 3s row-wise rebuild
+```python
+def transform(grid):
+    res=[]
+    for row in grid:
+        res.append([0 if v==3 else v for v in row])
+    return res
+```
+
+# C31: Map via translate dict full
+```python
+def transform(grid):
+    tr={i:i for i in range(10)}; tr[3]=0
+    return [[tr[v] for v in row] for row in grid]
+```
+
+# C32: Final identity-minus-3
+```python
+def transform(grid):
+    return [[0 if x==3 else x for x in r] for r in grid]
+```

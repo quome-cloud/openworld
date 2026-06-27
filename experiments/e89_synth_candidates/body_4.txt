@@ -1,0 +1,738 @@
+# C1: Caps-at-crossings: replace 2 with the perpendicular line color so the crossing line passes through
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C2: Remove all 2s -> 0 (simplest)
+```python
+def transform(grid):
+    return [[0 if v==2 else v for v in row] for row in grid]
+```
+
+# C3: Replace each 2 with the color that continues the straight line through it
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C4: Replace 2 with the OTHER (perpendicular) line color (crossing passes over)
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C5: Extend lines: for each 2-capped line end, continue the line one cell and drop cap
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C6: 2-caps mark where two line-colors meet: fill 2 with whichever neighbor color is more frequent globally
+```python
+def transform(grid):
+    import copy
+    from collections import Counter
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    glob=Counter(v for row in g for v in row if v not in(0,2))
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                nbs=[at(r+dr,c+dc) for dr,dc in((-1,0),(1,0),(0,-1),(0,1))]
+                cand=[x for x in nbs if x not in(0,2)]
+                if cand: out[r][c]=max(cand,key=lambda x:glob.get(x,0))
+                else: out[r][c]=0
+    return out
+```
+
+# C7: Perpendicular-pass replica v6
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C8: Extend-and-drop-cap replica v7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C9: Caps-at-crossings replica v8
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C10: Through-line continuation replica v9
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C11: Perpendicular-pass replica v10
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C12: Extend-and-drop-cap replica v11
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C13: Caps-at-crossings replica v12
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C14: Through-line continuation replica v13
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C15: Perpendicular-pass replica v14
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C16: Extend-and-drop-cap replica v15
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C17: Caps-at-crossings replica v16
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C18: Through-line continuation replica v17
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C19: Perpendicular-pass replica v18
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C20: Extend-and-drop-cap replica v19
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C21: Caps-at-crossings replica v20
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C22: Through-line continuation replica v21
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C23: Perpendicular-pass replica v22
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C24: Extend-and-drop-cap replica v23
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C25: Caps-at-crossings replica v24
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C26: Through-line continuation replica v25
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C27: Perpendicular-pass replica v26
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C28: Extend-and-drop-cap replica v27
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```
+
+# C29: Caps-at-crossings replica v28
+```python
+def transform(grid):
+    # Hypothesis: value-2 cells are "caps"/junction markers where two lines cross.
+    # At each 2, the line passing through continues straight; replace 2 with the dominant
+    # crossing line's color, and let the other line pass over.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    twos=[(r,c) for r in range(R) for c in range(C) if g[r][c]==2]
+    def col_at(r,c):
+        return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r,c in twos:
+        left=col_at(r,c-1); right=col_at(r,c+1)
+        up=col_at(r-1,c); down=col_at(r+1,c)
+        horiz=[x for x in (left,right) if x not in (0,2)]
+        vert=[x for x in (up,down) if x not in (0,2)]
+        # the cap belongs to a line; replace 2 with the color of the line that is the SAME on both ends,
+        # else with the horizontal line color (line being capped), let perpendicular pass.
+        if horiz and (not vert):
+            out[r][c]=horiz[0]
+        elif vert and (not horiz):
+            out[r][c]=vert[0]
+        elif horiz and vert:
+            # crossing: the 'through' line (appearing on both opposite sides) wins; perpendicular passes over center
+            if left and right and left==right: out[r][c]=up or down or left
+            elif up and down and up==down: out[r][c]=left or right or up
+            else: out[r][c]=horiz[0]
+        else:
+            out[r][c]=0
+    return out
+```
+
+# C30: Through-line continuation replica v29
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                if u and d and u not in(0,2) and d not in(0,2): out[r][c]=u
+                elif l and ri and l not in(0,2) and ri not in(0,2): out[r][c]=l
+                elif u not in(0,2) and u: out[r][c]=u
+                elif d not in(0,2) and d: out[r][c]=d
+                elif l not in(0,2) and l: out[r][c]=l
+                elif ri not in(0,2) and ri: out[r][c]=ri
+                else: out[r][c]=0
+    return out
+```
+
+# C31: Perpendicular-pass replica v30
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                u,d,l,ri=at(r-1,c),at(r+1,c),at(r,c-1),at(r,c+1)
+                hor=[x for x in(l,ri) if x not in(0,2)]
+                ver=[x for x in(u,d) if x not in(0,2)]
+                if hor and ver:
+                    # the line with matching ends is 'capped'; perpendicular passes -> use perpendicular
+                    if l==ri and l: out[r][c]=ver[0]
+                    elif u==d and u: out[r][c]=hor[0]
+                    else: out[r][c]=ver[0]
+                elif hor: out[r][c]=hor[0]
+                elif ver: out[r][c]=ver[0]
+                else: out[r][c]=0
+    return out
+```
+
+# C32: Extend-and-drop-cap replica v31
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    def at(r,c): return g[r][c] if 0<=r<R and 0<=c<C else 0
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2:
+                for dr,dc in((-1,0),(1,0),(0,-1),(0,1)):
+                    nb=at(r+dr,c+dc)
+                    if nb not in(0,2):
+                        out[r][c]=nb; break
+                else: out[r][c]=0
+    return out
+```

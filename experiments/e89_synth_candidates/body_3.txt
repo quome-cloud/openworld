@@ -1,0 +1,892 @@
+# C1: Count all 9s, fill box border clockwise from TL, remove outside 9s (bg=7)
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C2: Same but background = 0 not 7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C3: Count 9-GROUPS (connected components), fill that many
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    seen=set(); groups=0
+    pts=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    sp=set(pts)
+    for p in pts:
+        if p in seen: continue
+        groups+=1; stack=[p]; seen.add(p)
+        while stack:
+            r,c=stack.pop()
+            for dr in(-1,0,1):
+                for dc in(-1,0,1):
+                    q=(r+dr,c+dc)
+                    if q in sp and q not in seen: seen.add(q); stack.append(q)
+    order=[(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=groups: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3: out[rr][cc2]=9; cnt+=1
+    for r,c in pts:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1): out[r][c]=7
+    return out
+```
+
+# C4: Fill ALL box border with 9 (8 cells), preserve center, remove outside 9s
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    for dr in(-1,0,1):
+        for dc in(-1,0,1):
+            if dr==0 and dc==0: continue
+            rr,cc2=cr+dr,cc+dc
+            if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3: out[rr][cc2]=9
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==9 and not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1): out[r][c]=7
+    return out
+```
+
+# C5: Count 9s in input, fill that many counter-clockwise from TL
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C6: Fill clockwise from TL by 9-group count, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    seen=set(); groups=0
+    pts=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    sp=set(pts)
+    for p in pts:
+        if p in seen: continue
+        groups+=1; stack=[p]; seen.add(p)
+        while stack:
+            r,c=stack.pop()
+            for dr in(-1,0,1):
+                for dc in(-1,0,1):
+                    q=(r+dr,c+dc)
+                    if q in sp and q not in seen: seen.add(q); stack.append(q)
+    order=[(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=groups: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3: out[rr][cc2]=9; cnt+=1
+    for r,c in pts:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1): out[r][c]=0
+    return out
+```
+
+# C7: Fill row-major (TL,T,TR,L,R,BL,B,BR) by total 9 count
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C8: Count 9s INSIDE the 6-frame only (if a 6-frame exists), else all 9s
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    has6=any(g[r][c]==6 for r in range(R) for c in range(C))
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    if has6:
+        # 9s with a 6 neighbor within radius 2 (embedded in frame)
+        def emb(r,c):
+            for dr in range(-2,3):
+                for dc in range(-2,3):
+                    rr,cc2=r+dr,c+dc
+                    if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==6: return True
+            return False
+        # group embedded 9s
+        emb9=[p for p in nines if emb(*p)]
+        seen=set(); groups=0; sp=set(emb9)
+        for p in emb9:
+            if p in seen: continue
+            groups+=1; st=[p]; seen.add(p)
+            while st:
+                r,c=st.pop()
+                for dr in(-1,0,1):
+                    for dc in(-1,0,1):
+                        q=(r+dr,c+dc)
+                        if q in sp and q not in seen: seen.add(q); st.append(q)
+        n=groups
+    else:
+        n=len(nines)
+    order=[(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3: out[rr][cc2]=9; cnt+=1
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1): out[r][c]=7
+    return out
+```
+
+# C9: Fill from TOP row left-to-right then next ring, by 9 count
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C10: 9-count fill, order variant 0, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C11: 9-count fill, order variant 1, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C12: 9-count fill, order variant 2, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C13: 9-count fill, order variant 3, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, 0), (0, 1), (1, 0), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C14: 9-count fill, order variant 4, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C15: 9-count fill, order variant 5, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C16: 9-count fill, order variant 6, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C17: 9-count fill, order variant 7, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, 0), (0, 1), (1, 0), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C18: 9-count fill, order variant 8, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C19: 9-count fill, order variant 9, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C20: 9-count fill, order variant 10, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C21: 9-count fill, order variant 11, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, 0), (0, 1), (1, 0), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C22: 9-count fill, order variant 12, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C23: 9-count fill, order variant 13, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C24: 9-count fill, order variant 14, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C25: 9-count fill, order variant 15, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, 0), (0, 1), (1, 0), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C26: 9-count fill, order variant 16, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C27: 9-count fill, order variant 17, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C28: 9-count fill, order variant 18, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C29: 9-count fill, order variant 19, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 1), (1, 1), (1, -1), (-1, 0), (0, 1), (1, 0), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C30: 9-count fill, order variant 20, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```
+
+# C31: 9-count fill, order variant 21, bg=0
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=0
+    return out
+```
+
+# C32: 9-count fill, order variant 22, bg=7
+```python
+def transform(grid):
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    cr=cc=None
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==2: cr,cc=r,c
+    if cr is None: return out
+    nines=[(r,c) for r in range(R) for c in range(C) if g[r][c]==9]
+    n=len(nines)
+    order=[(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
+    cnt=0
+    for dr,dc in order:
+        if cnt>=n: break
+        rr,cc2=cr+dr,cc+dc
+        if 0<=rr<R and 0<=cc2<C and g[rr][cc2]==3:
+            out[rr][cc2]=9; cnt+=1
+    # remove all 9s outside the box border
+    for r,c in nines:
+        if not(cr-1<=r<=cr+1 and cc-1<=c<=cc+1):
+            out[r][c]=7
+    return out
+```

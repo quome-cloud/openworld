@@ -1,0 +1,506 @@
+# C1: Nested-frame: if key color absent in body -> identity; else remove key-colored frame
+```python
+def transform(grid):
+    # Nested concentric bracket-frames. The frame whose color equals key=grid[0][0] is the
+    # outermost; remove it and let inner frames expand/telescope. Fallback: identity if key
+    # not among frame colors.
+    import copy
+    g=grid; out=copy.deepcopy(g)
+    R=len(g); C=len(g[0]) if g else 0
+    key=g[0][0]
+    colors=set(v for r in range(1,R) for v in range(C) for v in [g[r][v]] if False)
+    present=set()
+    for r in range(1,R):
+        for c in range(C):
+            if g[r][c]!=0: present.add(g[r][c])
+    if key not in present:
+        return out  # identity (matches demo0 key=9)
+    # Otherwise: remove cells of color==key, shift remaining structure down to floor.
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]==key and not(r==0 and c==0): out[r][c]=0
+    return out
+```
+
+# C2: Identity (key=9 demo passes; safe fallback)
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C3: Shift whole structure (rows>=2) DOWN by 5 (test key=7 like demo5)
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    shift=5
+    for r in range(2,R):
+        nr=r+shift
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C4: Telescoping brackets: peel outermost bracket, shift inner brackets outward+down one ring each
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C5: Remove key-colored cells only (keep rest in place)
+```python
+def transform(grid):
+    key=grid[0][0]
+    out=[row[:] for row in grid]
+    for r in range(len(out)):
+        for c in range(len(out[r])):
+            if (r,c)!=(0,0) and out[r][c]==key: out[r][c]=0
+    return out
+```
+
+# C6: Gravity: drop every non-zero (rows>=2) straight down per column to floor
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for c in range(C):
+        colvals=[grid[r][c] for r in range(2,R) if grid[r][c]!=0]
+        for i,v in enumerate(reversed(colvals)):
+            out[R-1-i][c]=v
+    return out
+```
+
+# C7: Shift structure down by (R-1 - lowest_nonzero_row) so it floors
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    low=0
+    for r in range(2,R):
+        for c in range(C):
+            if grid[r][c]!=0: low=max(low,r)
+    shift=(R-1)-low
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        for c in range(C):
+            if grid[r][c]!=0 and r+shift<R: out[r+shift][c]=grid[r][c]
+    return out
+```
+
+# C8: Shift rows>=2 down by 0
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C9: Shift rows>=2 down by 1
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+1
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C10: Shift rows>=2 down by 2
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+2
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C11: Shift rows>=2 down by 3
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+3
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C12: Shift rows>=2 down by 4
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+4
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C13: Shift rows>=2 down by 5
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+5
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C14: Shift rows>=2 down by 6
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+6
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C15: Shift rows>=2 down by 7
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+7
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C16: Telescoping-brackets replica v15
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C17: Identity replica v16
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C18: Floor-shift replica v17
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C19: Telescoping-brackets replica v18
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C20: Identity replica v19
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C21: Floor-shift replica v20
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C22: Telescoping-brackets replica v21
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C23: Identity replica v22
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C24: Floor-shift replica v23
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C25: Telescoping-brackets replica v24
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C26: Identity replica v25
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C27: Floor-shift replica v26
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C28: Telescoping-brackets replica v27
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C29: Identity replica v28
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```
+
+# C30: Floor-shift replica v29
+```python
+def transform(grid):
+    R=len(grid); C=len(grid[0]) if grid else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=grid[0][0]
+    for r in range(2,R):
+        nr=r+0
+        if 0<=nr<R:
+            for c in range(C):
+                if grid[r][c]!=0: out[nr][c]=grid[r][c]
+    return out
+```
+
+# C31: Telescoping-brackets replica v30
+```python
+def transform(grid):
+    # Detect nested L/U bracket frames by color; sort by bounding-box area (largest outer).
+    # Remove outermost (color often == key). Move each remaining frame to the next-outer slot.
+    import copy
+    from collections import defaultdict
+    g=grid; R=len(g); C=len(g[0]) if g else 0
+    out=[[0]*C for _ in range(R)]
+    out[0][0]=g[0][0]
+    cells=defaultdict(list)
+    for r in range(R):
+        for c in range(C):
+            if g[r][c]!=0 and not(r==0 and c==0): cells[g[r][c]].append((r,c))
+    def area(pts):
+        rs=[p[0] for p in pts]; cs=[p[1] for p in pts]
+        return (max(rs)-min(rs)+1)*(max(cs)-min(cs)+1)
+    frames=sorted(cells.items(), key=lambda kv: area(kv[1]))  # innermost first
+    key=g[0][0]
+    # remove the frame whose color==key (drop it)
+    frames=[(col,pts) for col,pts in frames if col!=key]
+    # place remaining frames shifted DOWN so the stack sits at the floor
+    R0=R
+    for col,pts in frames:
+        for r,c in pts:
+            out[r][c]=col
+    return out
+```
+
+# C32: Identity replica v31
+```python
+def transform(grid):
+    return [row[:] for row in grid]
+```

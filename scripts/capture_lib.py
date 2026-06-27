@@ -247,3 +247,27 @@ def append_run(record):
         for r in ordered:
             f.write(json.dumps(r) + "\n")
     return len(ordered)
+
+
+# --- E124 codex telemetry (reproducibility) ---
+def codex_record(traces_dir, rec):
+    """Write one codex-call record (JSONL) + prompt/transcript sidecars. rec carries game/level/regime,
+    model+version, prompt, raw response, events, parsed goal, decision, tainted, tokens, latency, timings."""
+    import os, json, hashlib
+    os.makedirs(os.path.join(traces_dir, "prompts"), exist_ok=True)
+    os.makedirs(os.path.join(traces_dir, "transcripts"), exist_ok=True)
+    base = f"{rec.get('game','?')}__{rec.get('level',0)}_{rec.get('regime',0)}"
+    h = hashlib.blake2b((base + str(rec.get('prompt',''))).encode(), digest_size=5).hexdigest()
+    rid = f"{base}__{h}"
+    open(os.path.join(traces_dir, "prompts", rid + ".txt"), "w").write(rec.get("prompt", ""))
+    json.dump({"raw": rec.get("raw", ""), "events": rec.get("events", [])},
+              open(os.path.join(traces_dir, "transcripts", rid + ".json"), "w"))
+    line = {k: rec.get(k) for k in ("game", "level", "regime", "model", "model_version",
+            "decision", "tainted", "tokens", "latency", "started", "finished")}
+    line["run_id"] = rid
+    line["parsed_summary"] = {"n_subgoals": len((rec.get("parsed") or {}).get("subgoals", [])),
+                              "n_macros": len((rec.get("parsed") or {}).get("macros", []))}
+    line["hash"] = h
+    with open(os.path.join(traces_dir, "calls.jsonl"), "a") as fh:
+        fh.write(json.dumps(line) + "\n")
+    return rid

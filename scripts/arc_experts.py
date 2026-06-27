@@ -64,6 +64,18 @@ def lens(key):
     return name, text
 
 
+# Shared with every panel attempt: operationalises surprise-driven regime resets (E121). A stuck agent
+# often fails because it is forcing a STALE world model onto a level whose rules already changed.
+REGIME_RESET = (
+    "WATCH FOR RULE CHANGES (the levels are compositional -- mechanics get added). Two signals that the "
+    "rules just changed: (a) a board RELOAD -- a large, sudden change across most of the board (often a "
+    "level-up); (b) SURPRISE -- your predict() starts mis-predicting transitions it used to get right. When "
+    "either fires, do NOT carry your old dynamics forward: treat it as a NEW regime, re-explore from "
+    "scratch, and rebuild predict()/the goal for it. If you are STUCK and your model keeps mis-predicting, "
+    "that is the signal your model is wrong for the current regime -- rebuild it rather than forcing the old "
+    "rules (a wall is often a stale model, not an impossible level).")
+
+
 def task_addendum(key):
     """The block appended to TASK.md when this game is routed to the expert panel."""
     name, text = lens(key)
@@ -72,7 +84,8 @@ def task_addendum(key):
             f"attempt, lead with a DIFFERENT working hypothesis:\n  {text}\nStill discover everything by "
             f"acting and replay-verify; this lens only changes which hypothesis you test FIRST, never what "
             f"counts as a solve (only raising g.levels does). If this lens clearly does not fit after honest "
-            f"probing, say so and fall back to open exploration.\n")
+            f"probing, say so and fall back to open exploration.\n\n"
+            f"--- WHEN THE RULES CHANGE (surprise-driven regime reset) ---\n  {REGIME_RESET}\n")
 
 
 if __name__ == "__main__":

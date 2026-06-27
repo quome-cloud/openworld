@@ -4,9 +4,9 @@
  "dataset": "experiments/results/arc3_traces/runs.jsonl",
  "per_game": {
   "ls20": {
-   "levels": 1,
+   "levels": 2,
    "win": 7,
-   "tier": "cheap"
+   "tier": "agent"
   },
   "ar25": {
    "levels": 8,
@@ -29,7 +29,7 @@
    "tier": "agent"
   },
   "sp80": {
-   "levels": 2,
+   "levels": 3,
    "win": 6,
    "tier": "agent"
   },
@@ -94,7 +94,7 @@
    "tier": "agent"
   },
   "m0r0": {
-   "levels": 4,
+   "levels": 5,
    "win": 6,
    "tier": "agent"
   },
@@ -119,14 +119,14 @@
    "tier": "agent"
   },
   "r11l": {
-   "levels": 0,
+   "levels": 1,
    "win": 6,
-   "tier": null
+   "tier": "agent"
   },
   "sc25": {
-   "levels": 0,
+   "levels": 4,
    "win": 6,
-   "tier": null
+   "tier": "agent"
   }
  },
  "solutions": {
@@ -138,36 +138,6 @@
     1
    ],
    [
-    4
-   ],
-   [
-    2
-   ],
-   [
-    3
-   ],
-   [
-    1
-   ],
-   [
-    1
-   ],
-   [
-    2
-   ],
-   [
-    4
-   ],
-   [
-    3
-   ],
-   [
-    4
-   ],
-   [
-    1
-   ],
-   [
     1
    ],
    [
@@ -177,46 +147,7 @@
     3
    ],
    [
-    1
-   ],
-   [
-    4
-   ],
-   [
-    1
-   ],
-   [
-    2
-   ],
-   [
-    4
-   ],
-   [
     3
-   ],
-   [
-    1
-   ],
-   [
-    1
-   ],
-   [
-    2
-   ],
-   [
-    2
-   ],
-   [
-    1
-   ],
-   [
-    1
-   ],
-   [
-    2
-   ],
-   [
-    2
    ],
    [
     3
@@ -228,43 +159,76 @@
     1
    ],
    [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
     2
    ],
    [
     4
    ],
    [
-    4
-   ],
-   [
-    4
-   ],
-   [
-    4
+    2
    ],
    [
     2
    ],
    [
-    4
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
    ],
    [
     2
    ],
    [
     1
-   ],
-   [
-    2
-   ],
-   [
-    4
-   ],
-   [
-    2
-   ],
-   [
-    2
    ],
    [
     3
@@ -279,28 +243,16 @@
     3
    ],
    [
+    4
+   ],
+   [
     1
-   ],
-   [
-    2
-   ],
-   [
-    2
-   ],
-   [
-    3
-   ],
-   [
-    3
    ],
    [
     4
    ],
    [
-    3
-   ],
-   [
-    2
+    1
    ],
    [
     2
@@ -315,19 +267,10 @@
     1
    ],
    [
-    4
-   ],
-   [
     1
    ],
    [
-    4
-   ],
-   [
     1
-   ],
-   [
-    4
    ],
    [
     1
@@ -339,16 +282,40 @@
     3
    ],
    [
-    4
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
    ],
    [
     2
    ],
    [
-    1
+    3
    ],
    [
-    1
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
    ]
   ],
   "ar25": [
@@ -3181,6 +3148,47 @@
    ],
    [
     4
+   ],
+   [
+    4
+   ],
+   [
+    5
+   ],
+   [
+    6,
+    10,
+    21
+   ],
+   [
+    4
+   ],
+   [
+    6,
+    42,
+    29
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    10,
+    33
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    38,
+    41
    ],
    [
     4
@@ -10023,6 +10031,123 @@
    ],
    [
     4
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
    ]
   ],
   "s5i5": [
@@ -11251,18 +11376,280 @@
    [
     1
    ]
+  ],
+  "r11l": [
+   [
+    6,
+    39,
+    21
+   ],
+   [
+    6,
+    27,
+    59
+   ],
+   [
+    6,
+    33,
+    40
+   ],
+   [
+    6,
+    36,
+    30
+   ]
+  ],
+  "sc25": [
+   [
+    1
+   ],
+   [
+    6,
+    30,
+    50
+   ],
+   [
+    6,
+    25,
+    55
+   ],
+   [
+    6,
+    35,
+    55
+   ],
+   [
+    6,
+    30,
+    60
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    25,
+    50
+   ],
+   [
+    6,
+    30,
+    50
+   ],
+   [
+    6,
+    30,
+    55
+   ],
+   [
+    1
+   ],
+   [
+    1
+   ],
+   [
+    4
+   ],
+   [
+    6,
+    30,
+    50
+   ],
+   [
+    6,
+    30,
+    55
+   ],
+   [
+    6,
+    30,
+    60
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    30,
+    50
+   ],
+   [
+    6,
+    25,
+    55
+   ],
+   [
+    6,
+    35,
+    55
+   ],
+   [
+    6,
+    30,
+    60
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    3
+   ],
+   [
+    6,
+    30,
+    50
+   ],
+   [
+    6,
+    30,
+    55
+   ],
+   [
+    6,
+    30,
+    60
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    2
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ],
+   [
+    4
+   ]
   ]
  },
  "roundtrip": {
   "ls20": {
-   "depth_real": 1,
-   "depth_through_world": 1,
+   "depth_real": 2,
+   "depth_through_world": 2,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
    "indexed_fallback": false,
-   "n_states": 73,
-   "n_transitions": 73,
+   "n_states": 63,
+   "n_transitions": 62,
    "pass": true
   },
   "ar25": {
@@ -11310,14 +11697,14 @@
    "pass": true
   },
   "sp80": {
-   "depth_real": 2,
-   "depth_through_world": 2,
+   "depth_real": 3,
+   "depth_through_world": 3,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
    "indexed_fallback": false,
-   "n_states": 21,
-   "n_transitions": 20,
+   "n_states": 32,
+   "n_transitions": 31,
    "pass": true
   },
   "su15": {
@@ -11453,14 +11840,14 @@
    "pass": true
   },
   "m0r0": {
-   "depth_real": 4,
-   "depth_through_world": 4,
+   "depth_real": 5,
+   "depth_through_world": 5,
    "misses": 0,
    "spec_valid": true,
    "card_renders": true,
    "indexed_fallback": false,
-   "n_states": 105,
-   "n_transitions": 104,
+   "n_states": 144,
+   "n_transitions": 143,
    "pass": true
   },
   "s5i5": {
@@ -11506,16 +11893,38 @@
    "n_states": 127,
    "n_transitions": 126,
    "pass": true
+  },
+  "r11l": {
+   "depth_real": 1,
+   "depth_through_world": 1,
+   "misses": 0,
+   "spec_valid": true,
+   "card_renders": true,
+   "indexed_fallback": false,
+   "n_states": 5,
+   "n_transitions": 4,
+   "pass": true
+  },
+  "sc25": {
+   "depth_real": 4,
+   "depth_through_world": 4,
+   "misses": 0,
+   "spec_valid": true,
+   "card_renders": true,
+   "indexed_fallback": false,
+   "n_states": 68,
+   "n_transitions": 68,
+   "pass": true
   }
  },
  "provenance": {
   "ls20": {
-   "run_id": "ls20__cheap__2026-06-26T08-44-42Z",
-   "tier": "cheap",
-   "method": "e107-graph-explore (frontier pixel search)",
-   "model": null,
-   "effort": null,
-   "fairness": "by-audit (fixed solver reads only frames)"
+   "run_id": "ls20__agent__2026-06-27T03-00-45Z",
+   "tier": "agent",
+   "method": "live-coding-agent-sandbox",
+   "model": "claude-opus-4-8",
+   "effort": "high",
+   "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "ar25": {
    "run_id": "ar25__agent__2026-06-26T08-51-10Z",
@@ -11550,7 +11959,7 @@
    "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "sp80": {
-   "run_id": "sp80__agent__2026-06-26T09-04-38Z",
+   "run_id": "sp80__agent__2026-06-27T05-03-00Z",
    "tier": "agent",
    "method": "live-coding-agent-sandbox",
    "model": "claude-opus-4-8",
@@ -11654,7 +12063,7 @@
    "fairness": "by-construction (process-isolated SandboxGame)"
   },
   "m0r0": {
-   "run_id": "m0r0__agent__2026-06-27T00-20-45Z",
+   "run_id": "m0r0__agent__2026-06-27T03-00-45Z",
    "tier": "agent",
    "method": "live-coding-agent-sandbox",
    "model": "claude-opus-4-8",
@@ -11692,6 +12101,22 @@
    "model": "claude-opus-4-8",
    "effort": "high",
    "fairness": "by-construction (process-isolated SandboxGame)"
+  },
+  "r11l": {
+   "run_id": "r11l__agent__2026-06-27T03-57-29Z",
+   "tier": "agent",
+   "method": "live-coding-agent-sandbox",
+   "model": "claude-opus-4-8",
+   "effort": "high",
+   "fairness": "by-construction (process-isolated SandboxGame)"
+  },
+  "sc25": {
+   "run_id": "sc25__agent__2026-06-27T03-57-29Z",
+   "tier": "agent",
+   "method": "live-coding-agent-sandbox",
+   "model": "claude-opus-4-8",
+   "effort": "high",
+   "fairness": "by-construction (process-isolated SandboxGame)"
   }
  },
  "full_games": [
@@ -11704,14 +12129,12 @@
   "sb26"
  ],
  "n_full_games": 7,
- "total_levels": 98,
+ "total_levels": 106,
  "total_possible": 183,
- "n_games_started": 23,
+ "n_games_started": 25,
  "by_tier": {
-  "cheap": [
-   "ls20"
-  ],
   "agent": [
+   "ls20",
    "ar25",
    "cn04",
    "ft09",
@@ -11733,12 +12156,10 @@
    "s5i5",
    "sb26",
    "sk48",
-   "tr87"
-  ],
-  "null": [
+   "tr87",
    "r11l",
    "sc25"
   ]
  },
- "updated_at": "2026-06-27T02:02:24Z"
+ "updated_at": "2026-06-27T05:38:58Z"
 }

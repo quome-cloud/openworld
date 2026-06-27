@@ -72,3 +72,21 @@ def test_subgoals_solve_what_blind_cannot():
     sub = search.run(ToyGame2(), sub_goal, budget=30, rung="subgoals", candidates_fn=_cands2, mask=None)
     assert blind is None
     assert sub == [[1], [1], [1], [2], [2], [2]]
+
+
+def test_interactive_receding_horizon_solves():
+    """The interactive MPC loop: a planner that proposes a 3-step maneuver per round solves ToyGame2's
+    depth-6 procedure in 2 grounded rounds, where myopic single-step greedy could stall."""
+    from e124 import interactive
+    def planner(frame, history, rnd, horizon):
+        # round 0: reach the half-way subgoal; round 1: finish. (A mock; live uses codex.plan_ahead.)
+        return [[[1],[1],[1]]] if rnd == 0 else [[[2],[2],[2]]]
+    sol = interactive.solve_interactive(ToyGame2, planner, None, max_rounds=5)
+    assert sol == [[1],[1],[1],[2],[2],[2]]
+
+def test_interactive_returns_none_when_stuck():
+    from e124 import interactive
+    def planner(frame, history, rnd, horizon):
+        return [[[2]]]   # never makes progress toward the [1,1,1,...] win; no novel state after first
+    sol = interactive.solve_interactive(ToyGame2, planner, None, max_rounds=4)
+    assert sol is None

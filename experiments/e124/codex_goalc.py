@@ -87,3 +87,41 @@ def compile_goal(frames, action_api, dynamics, game, level, regime, model="gpt-5
         })
     return Goal(subgoals, macros, final.get("score_fn_src"), final.get("rationale", ""),
                 abstained, [final])
+
+
+# ---- interactive receding-horizon planner (E124 interactive mode) ----
+PLAN_SCHEMA = {"type": "object", "additionalProperties": False,
+    "required": ["plans", "rationale"],
+    "properties": {
+        "plans": {"type": "array", "items": {"type": "array",
+            "items": {"type": "array", "items": {"type": "integer"}}}},
+        "rationale": {"type": "string"}}}
+
+
+def _grid(frame):
+    import numpy as np
+    return "\n".join(" ".join(f"{int(c):x}" for c in row) for row in np.asarray(frame).reshape(64, 64))
+
+
+def plan_ahead(frame, action_api, history, game, rnd, horizon=5, model="gpt-5.5", n_plans=3,
+               traces_dir=None, _runner=None):
+    """Codex plans the next short maneuver from the REAL current frame. Returns a list of candidate plans,
+    each a list of action-arg steps (e.g. [[3],[3],[5]] or [[6,12,30]]). Source-free + telemetry-captured."""
+    hist = "; ".join(f"r{h['round']}:{'progressed' if h.get('progressed') else 'stuck'}"
+                     for h in (history or [])[-6:]) or "none yet"
+    prompt = (f"Interactive solve of an unknown grid puzzle, round {rnd}. You see the CURRENT 64x64 frame "
+              f"(hex 0-f) and plan the NEXT short maneuver. Do NOT run shell commands or read any files.\n\n"
+              f"Current frame:\n{_grid(frame)}\n\nActions: {action_api}\nProgress so far: {hist}\n\n"
+              f"Return up to {n_plans} candidate PLANS; each plan is a list of about {horizon} single-action "
+              f"steps (e.g. [[3],[3],[5]] directional, or [[6,12,30]] a click) that you predict makes progress "
+              f"toward raising the level FROM HERE. Favor a coherent multi-step maneuver over single steps.")
+    run = _runner or codex_iso.run
+    res = run(prompt, PLAN_SCHEMA, model, game)
+    final = res.get("final") or {}
+    plans = [[list(s) for s in p] for p in final.get("plans", []) if isinstance(p, list) and p]
+    if traces_dir:
+        capture_lib.codex_record(traces_dir, {"game": game, "level": 0, "regime": rnd, "model": model,
+            "model_version": res.get("model_version", ""), "prompt": prompt, "raw": res.get("raw", ""),
+            "events": res.get("events", []), "parsed": {"subgoals": [], "macros": plans},
+            "decision": "plan", "tainted": bool(res.get("tainted"))})
+    return [] if res.get("tainted") else plans

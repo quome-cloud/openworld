@@ -1,0 +1,86 @@
+{
+  "experiment": "e121_surprise_regimes",
+  "method": "online surprise (novelty/contradiction) -> regime boundaries -> PhasedTransition self-rebuilding world; scored vs level-ups",
+  "tolerance_steps": 3,
+  "games": {
+    "ka59": {
+      "game": "ka59",
+      "steps": 313,
+      "novel_steps": 313,
+      "contradiction_steps": 0,
+      "n_regimes": 8,
+      "regime_states": [
+        10,
+        56,
+        37,
+        54,
+        20,
+        48,
+        87,
+        1
+      ],
+      "graph_nodes": 6,
+      "level_ups": 6,
+      "boundaries": 8,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 0.857,
+      "up_steps": [
+        10,
+        66,
+        103,
+        157,
+        177,
+        312
+      ],
+      "boundary_steps": [
+        0,
+        10,
+        66,
+        103,
+        157,
+        177,
+        225,
+        312
+      ],
+      "card_svg": "maps/ka59_regimes.svg"
+    },
+    "m0r0": {
+      "game": "m0r0",
+      "steps": 143,
+      "novel_steps": 143,
+      "contradiction_steps": 0,
+      "n_regimes": 6,
+      "regime_states": [
+        14,
+        23,
+        55,
+        11,
+        39,
+        1
+      ],
+      "graph_nodes": 6,
+      "level_ups": 5,
+      "boundaries": 6,
+      "matched": 5,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        14,
+        37,
+        92,
+        103,
+        142
+      ],
+      "boundary_steps": [
+        0,
+        14,
+        37,
+        92,
+        103,
+        142
+      ],
+      "card_svg": "maps/m0r0_regimes.svg"
+    }
+  }
+}

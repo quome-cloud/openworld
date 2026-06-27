@@ -778,6 +778,45 @@ since walls never fire a reward) that we leave to future work. We present this h
 \emph{try-cheap-then-escalate} dispatch, not a novel routing algorithm; its only claim is that it
 turns the union into one pipeline that invokes the expensive reasoning agent on barely half the suite.
 
+\section{On-demand goal synthesis: a Bayesian SLM rung (E119)}
+\label{sec:e119}
+The goal-inference wall (\S\ref{sec:solvewall}) showed that scoring a static \emph{state} cannot express an
+ordered \emph{procedure}. A complementary response, drawn from the Model Synthesis Architecture
+(MSA; Wong et al., \texttt{arXiv:2507.12547}), is to treat the goal itself as something a model
+\emph{synthesizes on demand} rather than scores: a small language model (SLM) emits the level's
+objective as an executable \textbf{predicate-program} ($\texttt{reach}\,/\,\texttt{count}\,/\,\texttt{align}$),
+and we keep a \textbf{posterior over these programs}---sample best-of-$N$, cluster by \emph{observed
+behavioral effect} on probed frames, weight by cluster mass, and \textbf{abstain} when no hypothesis
+clears a threshold~$\tau$ (Fig.~\ref{fig:e119}). The synthesized program is used \emph{only} to order an
+env-ground-truth search (a \texttt{score\_fn} priority); correctness comes entirely from deterministic
+replay, so the SLM can make search \emph{faster} but never \emph{wrong}. The invariant gives a free
+control: a \emph{search-only} rung (no SLM) lower-bounds the \emph{slm} rung over the identical
+reachable set, isolating ``does on-demand model synthesis speed search?'' as the measured effect. The
+solved path is emitted as an \openworld{} \texttt{World} (masked-frame state, a \texttt{FunctionTransition}
+over the learned $(s,a)\!\to\!s'$ table, an induced \texttt{CodeObjective}), so the Bayesian rung
+inhabits the same structure as every other method here. We present E119 as a \emph{design with a verified
+control rung}, not a solved-count claim: the deterministic core and abstaining proposer are implemented
+and unit-tested; the search-only control banks $0$ levels on the directional pilot games (blind BFS does
+not crack procedure goals, as expected), and the SLM-in-loop measurement is left as the immediate next
+run.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/e119_msa_strategy.png}
+\caption{\textbf{The MSA Bayesian loop inside an \openworld{} solver (E119).} \openworld{} primitives are
+teal, the MSA Bayesian core indigo. \textbf{Perceptors} turn the replay-only ARC frame into a discrete
+masked-frame state $\sigma(s)$ and a \emph{relational} \texttt{object\_json} scene (the only perceptor
+that conditions the proposer). The \textbf{Bayesian subgoal} synthesizes $N$ goal-programs
+$\pi_i\!\sim\!p(\pi\mid\texttt{object\_json})$, forms a posterior by clustering on behavioral effect
+(cluster mass $\approx\hat p(\pi\mid\text{obs})$), and either commits the $\arg\max$ program $\pi^*$ once
+its mass clears $\tau$ or \emph{abstains}. $\pi^*$ supplies a \texttt{score\_fn} that \emph{orders}
+env-ground-truth search; a child that raises \texttt{levels\_completed} is a replay-verified solve, which
+is banked and emitted as an \openworld{} \texttt{World} map. \textbf{Invariant:} the synthesized model
+only orders search---the env decides correctness---so a wrong or abstained subgoal costs speed, never a
+false solve.}
+\label{fig:e119}
+\end{figure}
+
 \section{Reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each

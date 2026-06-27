@@ -1019,21 +1019,65 @@ In the replay panels below each card, cells are the ARC 16-colour palette (0--15
 sprites are the game's actual objects, not noise---e.g.\ keys, walls, and goal markers.
 
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ar25.png}
-\caption{\texttt{ar25} solved trajectory (8/8): discovered map + level-completion replay.}\label{app:replay:ar25}\end{figure}
+\caption{\texttt{ar25} solved trajectory (8/8): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:ar25}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_re86.png}
-\caption{\texttt{re86} solved trajectory (8/8): discovered map + level-completion replay.}\label{app:replay:re86}\end{figure}
+\caption{\texttt{re86} solved trajectory (8/8): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:re86}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_lp85.png}
-\caption{\texttt{lp85} solved trajectory (8/8): discovered map + level-completion replay.}\label{app:replay:lp85}\end{figure}
+\caption{\texttt{lp85} solved trajectory (8/8): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:lp85}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_sb26.png}
-\caption{\texttt{sb26} solved trajectory (8/8): discovered map + level-completion replay.}\label{app:replay:sb26}\end{figure}
+\caption{\texttt{sb26} solved trajectory (8/8): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:sb26}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_cn04.png}
-\caption{\texttt{cn04} solved trajectory (6/6): discovered map + level-completion replay.}\label{app:replay:cn04}\end{figure}
+\caption{\texttt{cn04} solved trajectory (6/6): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:cn04}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ft09.png}
-\caption{\texttt{ft09} solved trajectory (6/6): discovered map + level-completion replay (icon-ring $\to$ lights-out).}\label{app:replay:ft09}\end{figure}
+\caption{\texttt{ft09} solved trajectory (6/6): discovered map + level-completion replay (icon-ring $\to$ lights-out). The map's nodes $q_k$ are produced by the \emph{state function}
+\texttt{state\_key}$(s)$---the masked-frame signature that hashes the board (status-bar cells zeroed) to a
+discrete identity, so $q_k$ merely names a distinct board configuration (only equality matters). Edges
+$s_k$ are actions; the dynamics are the learned \texttt{FunctionTransition} $(q,s)\!\to\!q'$. The filmstrip
+below shows the concrete boards these states stand for.}\label{app:replay:ft09}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_cd82.png}
-\caption{\texttt{cd82} solved trajectory (6/6): discovered map + level-completion replay.}\label{app:replay:cd82}\end{figure}
+\caption{\texttt{cd82} solved trajectory (6/6): discovered map + level-completion replay. The map's nodes $q_k$ are produced by the \emph{state
+function} \texttt{state\_key}$(s)$---the masked-frame signature that hashes the $64{\times}64$ board after
+zeroing the always-changing status-bar cells, reducing a board to a discrete identity; thus $q_k$ merely
+\emph{names} a distinct board configuration (only equality between states matters, not magnitude). Edges
+$s_k$ are the actions taken, and the dynamics are the learned \texttt{FunctionTransition}
+$(q,s)\!\to\!q'$ over the explored table. The filmstrip below shows the concrete boards these abstract
+states stand for.}\label{app:replay:cd82}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_tr87.png}
-\caption{\texttt{tr87} solved trajectory (6/6): discovered map + level-completion replay (solved this run).}\label{app:replay:tr87}\end{figure}
+\caption{\texttt{tr87} solved trajectory (6/6): discovered map + level-completion replay (solved this run). The map's nodes $q_k$ are produced by the \emph{state function}
+\texttt{state\_key}$(s)$---the masked-frame signature that hashes the board (status-bar cells zeroed) to a
+discrete identity, so $q_k$ merely names a distinct board configuration (only equality matters). Edges
+$s_k$ are actions; the dynamics are the learned \texttt{FunctionTransition} $(q,s)\!\to\!q'$. The filmstrip
+below shows the concrete boards these states stand for.}\label{app:replay:tr87}\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{refs}

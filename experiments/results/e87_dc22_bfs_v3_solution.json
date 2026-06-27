@@ -1,0 +1,97 @@
+{
+  "game": "dc22",
+  "experiment": "E87_dc22_bfs_v3",
+  "model_version": "v3",
+  "bfs_nodes_expanded": 2536,
+  "solution_depth": 20,
+  "solution": [
+    [
+      1
+    ],
+    [
+      6,
+      48,
+      36
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      4
+    ],
+    [
+      4
+    ],
+    [
+      4
+    ],
+    [
+      4
+    ],
+    [
+      4
+    ],
+    [
+      6,
+      48,
+      36
+    ],
+    [
+      6,
+      48,
+      19
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      1
+    ],
+    [
+      4
+    ],
+    [
+      4
+    ]
+  ],
+  "real_game_delta": 1,
+  "notes": {
+    "action_mapping": {
+      "model_action_6": "button y=19 (RECT_A+RECT_B toggle 4<->8)",
+      "model_action_7": "button y=36 (TOGGLE_B toggle 4<->9)"
+    },
+    "traversable": [
+      2,
+      8,
+      9,
+      13
+    ],
+    "bugs_fixed_vs_v2": [
+      "1_action_label_swap: model action=6/7 was reversed for real click coords",
+      "2_traversable_missing_8_13: RECT cells (8) and sprite zone (13) are open",
+      "3_parity_start_0: should start at 1 so first move increments counter",
+      "4_scalar_bg: entity_bg must be 2x2 array not scalar for mixed cells",
+      "5_goal_not_in_traversable: BFS must treat goal (11) as win, not barrier"
+    ],
+    "solution_episode_accuracy": "19/20 (step 20 = level-complete reset, unpredictable)",
+    "training_held_out_accuracy": "111/121 = 0.917 (below 0.99 gate \u2014 needs investigation)"
+  }
+}

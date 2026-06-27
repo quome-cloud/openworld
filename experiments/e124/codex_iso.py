@@ -1,7 +1,7 @@
 """Source-free isolation for codex calls: audit the codex exec --json event stream for any read of game
 source, and (Task 2) wrap the codex exec invocation. The read-only sandbox still permits disk reads, so the
 audit is the real gate -- a tainted call is discarded (CLAUDE.md cardinal rule)."""
-import json, re
+import json, re, os, subprocess, tempfile
 
 # any of these appearing in a shell command or file path = a source read
 _SOURCE_RE = re.compile(
@@ -22,7 +22,6 @@ def audit_events(events, game):
     return False
 
 
-import os, subprocess, tempfile, time
 CODEX = os.path.expanduser("~/.local/bin/codex")
 
 
@@ -47,20 +46,25 @@ def parse_output(jsonl_stdout, out_file):
         info = e.get("info") or {}
         if isinstance(info, dict) and info.get("model"):
             ver = str(info["model"]); break
+    raw = ""
+    if os.path.exists(out_file):
+        with open(out_file, encoding="utf-8") as fh:
+            raw = fh.read()
     final = None
     try:
-        final = json.loads(open(out_file, encoding="utf-8").read())
+        final = json.loads(raw)
     except Exception:
         final = None
-    return {"final": final, "events": events, "model_version": ver,
-            "raw": (open(out_file, encoding="utf-8").read() if os.path.exists(out_file) else "")}
+    return {"final": final, "events": events, "model_version": ver, "raw": raw}
 
 
 def run(prompt, schema, model, game, workdir=None, timeout=300):
     workdir = workdir or tempfile.mkdtemp(prefix="e124_codex_")   # clean dir: NO game source here
     os.makedirs(workdir, exist_ok=True)
-    pf = os.path.join(workdir, "_prompt.txt"); open(pf, "w").write(prompt)
-    sf = os.path.join(workdir, "_schema.json"); open(sf, "w").write(json.dumps(schema))
+    pf = os.path.join(workdir, "_prompt.txt");
+    with open(pf, "w") as f: f.write(prompt)
+    sf = os.path.join(workdir, "_schema.json");
+    with open(sf, "w") as f: f.write(json.dumps(schema))
     of = os.path.join(workdir, "_final.json")
     cmd = build_cmd(pf, sf, of, workdir, model)
     try:

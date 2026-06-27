@@ -67,11 +67,53 @@ def fully_solved(g):
         return False
 
 
-def launch_agent(g):
+def launch_agent(g, expert=None):
     out = open(LOGDIR / f"sb_{g}_sweep.out", "a")
     env = dict(os.environ, MODEL=MODEL, EFFORT=EFFORT)
+    if expert is not None:
+        env["EXPERT"] = str(expert)        # runner injects the strategy lens + tags the run tier=expert
     return subprocess.Popen(["bash", RUNNER, g, "agent"], cwd=str(ROOT), env=env,
                             stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+
+
+# ---- Bayesian-experts router tier: when a game is STUCK, rotate expert strategy LENSES instead of
+#      repeating the same prompt (cost-neutral: same attempt budget, diverse framing). ----
+EXPERT_GAMES = set(x for x in os.environ.get("EXPERT_GAMES", "").split(",") if x)
+EXPERTS_ON = os.environ.get("EXPERTS", "1") != "0"     # master switch (default on)
+_expert_rot = {}        # game -> next expert index (rotates the panel)
+
+
+def game_depth(g):
+    try:
+        return int(json.loads(ARCH.read_text()).get("per_game", {}).get(g, {}).get("levels", 0))
+    except Exception:
+        return 0
+
+
+def expert_for(g, stuck):
+    """Pick the next expert lens (a rotating index) if game g should go to the panel, else None.
+    Routes to the panel when g is explicitly targeted (EXPERT_GAMES) or has plateaued (stuck)."""
+    if not EXPERTS_ON or not (g in EXPERT_GAMES or stuck):
+        return None
+    i = _expert_rot.get(g, 0)
+    _expert_rot[g] = i + 1
+    return i
+
+
+def arc_experts_names():
+    try:
+        sys.path.insert(0, str(ROOT / "scripts")); import arc_experts
+        return ",".join(arc_experts.names())
+    except Exception:
+        return "?"
+
+
+def arc_experts_lensname(i):
+    try:
+        sys.path.insert(0, str(ROOT / "scripts")); import arc_experts
+        return arc_experts.lens(i)[0]
+    except Exception:
+        return str(i)
 
 
 def kill_tree(p):
@@ -180,9 +222,17 @@ def main():
         commit("cheap")
 
     # ---- Phase 2: agent rounds on not-fully-solved games ----
+    prev_depth = {}     # game -> banked depth at the start of the previous round (stuck detector)
     for r in range(ROUNDS):
         queue = [g for g in GAMES if not fully_solved(g)]
+        # stuck = attempted before and did NOT get deeper last round (or explicitly targeted)
+        depth_now = {g: game_depth(g) for g in queue}
+        stuck = {g: (g in prev_depth and depth_now[g] <= prev_depth[g]) for g in queue}
+        panel = [g for g in queue if EXPERTS_ON and (g in EXPERT_GAMES or stuck[g])]
         log(f"round {r}: {len(queue)} games not fully solved -> agent: {queue}")
+        if panel:
+            log(f"round {r}: EXPERT PANEL (stuck/targeted) -> {panel} "
+                f"(rotating lenses: {arc_experts_names()})")
         if not queue:
             log("all games fully solved; stopping early")
             break
@@ -193,8 +243,10 @@ def main():
                 wait_if_rate_limited()      # don't launch agents into a usage-cap rejection window
             while len(running) < POOL and qi < len(queue):
                 g = queue[qi]; qi += 1
-                running[g] = (launch_agent(g), time.time())
-                log(f"launch agent {g}  ({len(running)} active, {len(queue) - qi} queued)")
+                xp = expert_for(g, stuck.get(g, False))
+                running[g] = (launch_agent(g, expert=xp), time.time())
+                tag = "" if xp is None else f" [expert:{arc_experts_lensname(xp)}]"
+                log(f"launch agent {g}{tag}  ({len(running)} active, {len(queue) - qi} queued)")
             time.sleep(20)
             done = []
             for g, (p, st) in running.items():
@@ -206,6 +258,7 @@ def main():
                 del running[g]
                 log(f"agent {g} {why}")
                 finalize_and_bank()
+        prev_depth = depth_now      # remember this round's starting depths for next round's stuck check
         commit(f"round{r}")
 
     finalize_and_bank()

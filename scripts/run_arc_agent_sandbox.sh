@@ -53,6 +53,14 @@ DO NOT attempt to read the game source, import arc_agi, or build an env yourself
 and every run is AUDITED for source access; a tainted run is discarded. Solve it the fair way.
 TASK
 
+# --- expert-panel strategy lens (Bayesian-experts router tier): when a game is STUCK the orchestrator
+#     sets EXPERT=<name|index> to inject a DIFFERENT framing instead of repeating the same prompt.
+#     Source-free (a general hypothesis lens, not an answer); the run is still audited + env-verified. ---
+if [ -n "$EXPERT" ]; then
+  "$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import arc_experts as e; sys.stdout.write(e.task_addendum('$EXPERT'))" >> "$WD/TASK.md" 2>/dev/null
+  TIER="expert"
+fi
+
 # --- dataset capture: run id, prompt, timestamps, transcript, meta sidecar ---
 RID=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import capture_lib as c; print(c.run_id('$GAME','$TIER'))")
 PROMPT_FILE="$TRACES/prompts/$RID.md"

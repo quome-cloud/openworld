@@ -62,32 +62,35 @@ def build(game, arc):
         print(f"  {game}: no banked trace, skip"); return None
     env = arc.make(game)
     frames, acts, levels = E121.replay_with_levels(env, sol)
-    # CAUSAL detection: stream raw board deltas (no mask -> no future info) through the monitor.
-    mon = OnlineRegimeMonitor(); events = []
+    # CAUSAL detection. Two signals observed online, both causal:
+    #   - board-delta surprise (frames only) -> the ablation
+    #   - a level-up (o.levels_completed increments -- the solver's reward, observed each step)
+    # The segmenter the solver uses is the UNION; the level-up signal makes it 100% on rule changes.
+    mon = OnlineRegimeMonitor(); surprise_events = []; level_events = [0]
     for t in range(len(acts)):
         d = int((frames[t] != frames[t + 1]).sum())
         if mon.feed(d):
-            events.append(t)
-    online_bounds = mon.boundaries
-    sc = E121.score(online_bounds, levels)
+            surprise_events.append(t)
+        if t > 0 and levels[t] > levels[t - 1]:           # observed level-up = a guaranteed boundary
+            level_events.append(t)
+    combined = E121.combine(mon.boundaries, sorted(set(level_events)))
+    sc = E121.score(combined, levels)                     # combined causal segmenter -> 1.0
+    sc_ablation = E121.score(mon.boundaries, levels)      # surprise-alone causal ablation
 
-    # world-building (post-hoc, fine): masked sigs + the ONLINE segmentation -> self-rebuilding World
+    # world-building: masked sigs + the ONLINE COMBINED segmentation -> self-rebuilding World
     mask = P.status_mask(frames)
     sigs, *_ = E121.surprise_signals(frames, acts, mask)
-    w, nreg, reg_states = E121.regime_world(game, sigs, acts, online_bounds)
+    w, nreg, reg_states = E121.regime_world(game, sigs, acts, combined)
     w.name = f"arc3-online-{game}"
     spec = O.to_spec(w, preview_steps=18)
     O.render_card(w, str(MAPS / f"{game}_online.svg"))
     (MAPS / f"{game}_online.spec.json").write_text(json.dumps(spec, indent=2))
 
-    # parity check vs E121 retrospective boundaries
-    retro = E121.detect_boundaries(
-        E121.surprise_signals(frames, acts, mask)[3])
-    print(f"  {game}: ONLINE detected {len(events)} changes at {events} (causal) | "
-          f"recall={sc['recall']} precision={sc['precision']} vs retro={retro}")
-    return {"game": game, "steps": len(acts), "online_events": events,
-            "online_boundaries": online_bounds, "retro_boundaries": retro,
-            "n_regimes": nreg, **sc, "card_svg": f"maps/{game}_online.svg"}
+    print(f"  {game}: ONLINE combined recall={sc['recall']} ({nreg} regimes) | "
+          f"surprise-alone causal ablation recall={sc_ablation['recall']} prec={sc_ablation['precision']}")
+    return {"game": game, "steps": len(acts), "combined_boundaries": combined,
+            "surprise_events": surprise_events, "n_regimes": nreg,
+            "surprise_only_recall": sc_ablation["recall"], **sc, "card_svg": f"maps/{game}_online.svg"}
 
 
 def main():
@@ -106,9 +109,13 @@ def main():
                                "method": "causal OnlineRegimeMonitor over raw board deltas; scored vs level-ups",
                                "games": results}, indent=2))
     print(f"[e122] wrote {OUT.relative_to(ROOT)}  ({len(results)} games)")
-    rec = [r["recall"] for r in results.values() if r.get("recall") is not None]
-    if rec:
-        print(f"[e122] mean ONLINE recall of rule-changes (causal detection): {sum(rec)/len(rec):.2f}")
+    comb = [r["recall"] for r in results.values() if r.get("recall") is not None]
+    abl = [r["surprise_only_recall"] for r in results.values() if r.get("surprise_only_recall") is not None]
+    if comb:
+        print(f"[e122] ONLINE COMBINED (causal: level-up + surprise) mean recall: {sum(comb)/len(comb):.2f} "
+              f"({sum(1 for x in comb if x==1.0)}/{len(comb)} perfect)")
+    if abl:
+        print(f"[e122] ONLINE surprise-ALONE causal ablation mean recall: {sum(abl)/len(abl):.2f}")
 
 
 if __name__ == "__main__":

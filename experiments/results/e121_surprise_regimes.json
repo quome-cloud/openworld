@@ -3,6 +3,307 @@
   "method": "online surprise (novelty/contradiction) -> regime boundaries -> PhasedTransition self-rebuilding world; scored vs level-ups",
   "tolerance_steps": 3,
   "games": {
+    "ar25": {
+      "game": "ar25",
+      "steps": 253,
+      "novel_steps": 253,
+      "contradiction_steps": 0,
+      "n_regimes": 9,
+      "regime_states": [
+        14,
+        11,
+        40,
+        22,
+        28,
+        53,
+        37,
+        47,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.625,
+      "surprise_only_precision": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "boundary_steps": [
+        0,
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "card_svg": "maps/ar25_regimes.svg"
+    },
+    "bp35": {
+      "game": "bp35",
+      "steps": 225,
+      "novel_steps": 225,
+      "contradiction_steps": 0,
+      "n_regimes": 12,
+      "regime_states": [
+        6,
+        8,
+        19,
+        17,
+        4,
+        21,
+        13,
+        19,
+        31,
+        43,
+        43,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.143,
+      "surprise_only_precision": 0.2,
+      "level_ups": 7,
+      "boundaries": 12,
+      "matched": 7,
+      "recall": 1.0,
+      "precision": 0.636,
+      "up_steps": [
+        14,
+        54,
+        88,
+        107,
+        138,
+        181,
+        224
+      ],
+      "boundary_steps": [
+        0,
+        6,
+        14,
+        33,
+        50,
+        54,
+        75,
+        88,
+        107,
+        138,
+        181,
+        224
+      ],
+      "card_svg": "maps/bp35_regimes.svg"
+    },
+    "cd82": {
+      "game": "cd82",
+      "steps": 95,
+      "novel_steps": 94,
+      "contradiction_steps": 0,
+      "n_regimes": 7,
+      "regime_states": [
+        13,
+        7,
+        16,
+        22,
+        16,
+        19,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.0,
+      "surprise_only_precision": 0.0,
+      "level_ups": 6,
+      "boundaries": 7,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "boundary_steps": [
+        0,
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "card_svg": "maps/cd82_regimes.svg"
+    },
+    "cn04": {
+      "game": "cn04",
+      "steps": 206,
+      "novel_steps": 206,
+      "contradiction_steps": 0,
+      "n_regimes": 7,
+      "regime_states": [
+        13,
+        33,
+        25,
+        36,
+        54,
+        44,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.833,
+      "surprise_only_precision": 1.0,
+      "level_ups": 6,
+      "boundaries": 7,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "boundary_steps": [
+        0,
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "card_svg": "maps/cn04_regimes.svg"
+    },
+    "dc22": {
+      "game": "dc22",
+      "steps": 174,
+      "novel_steps": 173,
+      "contradiction_steps": 0,
+      "n_regimes": 11,
+      "regime_states": [
+        11,
+        8,
+        13,
+        21,
+        12,
+        11,
+        19,
+        15,
+        30,
+        32,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 0.364,
+      "level_ups": 4,
+      "boundaries": 11,
+      "matched": 4,
+      "recall": 1.0,
+      "precision": 0.4,
+      "up_steps": [
+        19,
+        66,
+        111,
+        173
+      ],
+      "boundary_steps": [
+        0,
+        11,
+        19,
+        32,
+        54,
+        66,
+        77,
+        96,
+        111,
+        141,
+        173
+      ],
+      "card_svg": "maps/dc22_regimes.svg"
+    },
+    "ft09": {
+      "game": "ft09",
+      "steps": 80,
+      "novel_steps": 80,
+      "contradiction_steps": 0,
+      "n_regimes": 7,
+      "regime_states": [
+        3,
+        7,
+        14,
+        21,
+        21,
+        13,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.667,
+      "surprise_only_precision": 1.0,
+      "level_ups": 6,
+      "boundaries": 6,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "boundary_steps": [
+        3,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "card_svg": "maps/ft09_regimes.svg"
+    },
+    "g50t": {
+      "game": "g50t",
+      "steps": 53,
+      "novel_steps": 48,
+      "contradiction_steps": 4,
+      "n_regimes": 2,
+      "regime_states": [
+        16,
+        32
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 1,
+      "boundaries": 2,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        16
+      ],
+      "boundary_steps": [
+        0,
+        16
+      ],
+      "card_svg": "maps/g50t_regimes.svg"
+    },
     "ka59": {
       "game": "ka59",
       "steps": 313,
@@ -20,6 +321,8 @@
         1
       ],
       "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 0.857,
       "level_ups": 6,
       "boundaries": 8,
       "matched": 6,
@@ -45,6 +348,138 @@
       ],
       "card_svg": "maps/ka59_regimes.svg"
     },
+    "lf52": {
+      "game": "lf52",
+      "steps": 318,
+      "novel_steps": 318,
+      "contradiction_steps": 0,
+      "n_regimes": 13,
+      "regime_states": [
+        7,
+        34,
+        16,
+        18,
+        12,
+        25,
+        25,
+        34,
+        55,
+        20,
+        23,
+        48,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 0.5,
+      "level_ups": 6,
+      "boundaries": 13,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 0.5,
+      "up_steps": [
+        7,
+        41,
+        87,
+        137,
+        226,
+        317
+      ],
+      "boundary_steps": [
+        0,
+        7,
+        41,
+        57,
+        75,
+        87,
+        112,
+        137,
+        171,
+        226,
+        246,
+        269,
+        317
+      ],
+      "card_svg": "maps/lf52_regimes.svg"
+    },
+    "lp85": {
+      "game": "lp85",
+      "steps": 79,
+      "novel_steps": 79,
+      "contradiction_steps": 0,
+      "n_regimes": 9,
+      "regime_states": [
+        4,
+        8,
+        16,
+        12,
+        9,
+        19,
+        5,
+        5,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.75,
+      "surprise_only_precision": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "boundary_steps": [
+        0,
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "card_svg": "maps/lp85_regimes.svg"
+    },
+    "ls20": {
+      "game": "ls20",
+      "steps": 62,
+      "novel_steps": 62,
+      "contradiction_steps": 0,
+      "n_regimes": 3,
+      "regime_states": [
+        14,
+        47,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 2,
+      "boundaries": 3,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        14,
+        61
+      ],
+      "boundary_steps": [
+        0,
+        14,
+        61
+      ],
+      "card_svg": "maps/ls20_regimes.svg"
+    },
     "m0r0": {
       "game": "m0r0",
       "steps": 143,
@@ -60,6 +495,8 @@
         1
       ],
       "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
       "level_ups": 5,
       "boundaries": 6,
       "matched": 5,
@@ -81,6 +518,485 @@
         142
       ],
       "card_svg": "maps/m0r0_regimes.svg"
+    },
+    "r11l": {
+      "game": "r11l",
+      "steps": 4,
+      "novel_steps": 4,
+      "contradiction_steps": 0,
+      "n_regimes": 2,
+      "regime_states": [
+        3,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 1,
+      "boundaries": 1,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3
+      ],
+      "boundary_steps": [
+        3
+      ],
+      "card_svg": "maps/r11l_regimes.svg"
+    },
+    "re86": {
+      "game": "re86",
+      "steps": 602,
+      "novel_steps": 602,
+      "contradiction_steps": 0,
+      "n_regimes": 9,
+      "regime_states": [
+        19,
+        38,
+        49,
+        42,
+        63,
+        47,
+        151,
+        192,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.875,
+      "surprise_only_precision": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "boundary_steps": [
+        0,
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "card_svg": "maps/re86_regimes.svg"
+    },
+    "s5i5": {
+      "game": "s5i5",
+      "steps": 39,
+      "novel_steps": 39,
+      "contradiction_steps": 0,
+      "n_regimes": 4,
+      "regime_states": [
+        12,
+        17,
+        9,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 0.667,
+      "level_ups": 2,
+      "boundaries": 4,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 0.667,
+      "up_steps": [
+        12,
+        38
+      ],
+      "boundary_steps": [
+        0,
+        12,
+        29,
+        38
+      ],
+      "card_svg": "maps/s5i5_regimes.svg"
+    },
+    "sb26": {
+      "game": "sb26",
+      "steps": 124,
+      "novel_steps": 124,
+      "contradiction_steps": 0,
+      "n_regimes": 9,
+      "regime_states": [
+        8,
+        15,
+        15,
+        15,
+        17,
+        19,
+        17,
+        17,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "boundary_steps": [
+        0,
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "card_svg": "maps/sb26_regimes.svg"
+    },
+    "sc25": {
+      "game": "sc25",
+      "steps": 68,
+      "novel_steps": 67,
+      "contradiction_steps": 0,
+      "n_regimes": 7,
+      "regime_states": [
+        3,
+        12,
+        5,
+        11,
+        16,
+        19,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.5,
+      "surprise_only_precision": 0.5,
+      "level_ups": 4,
+      "boundaries": 7,
+      "matched": 4,
+      "recall": 1.0,
+      "precision": 0.667,
+      "up_steps": [
+        16,
+        21,
+        32,
+        67
+      ],
+      "boundary_steps": [
+        0,
+        4,
+        16,
+        21,
+        32,
+        48,
+        67
+      ],
+      "card_svg": "maps/sc25_regimes.svg"
+    },
+    "sk48": {
+      "game": "sk48",
+      "steps": 14,
+      "novel_steps": 14,
+      "contradiction_steps": 0,
+      "n_regimes": 2,
+      "regime_states": [
+        13,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 1,
+      "boundaries": 2,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        13
+      ],
+      "boundary_steps": [
+        0,
+        13
+      ],
+      "card_svg": "maps/sk48_regimes.svg"
+    },
+    "sp80": {
+      "game": "sp80",
+      "steps": 31,
+      "novel_steps": 31,
+      "contradiction_steps": 0,
+      "n_regimes": 4,
+      "regime_states": [
+        3,
+        16,
+        11,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 0.667,
+      "surprise_only_precision": 1.0,
+      "level_ups": 3,
+      "boundaries": 3,
+      "matched": 3,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3,
+        19,
+        30
+      ],
+      "boundary_steps": [
+        3,
+        19,
+        30
+      ],
+      "card_svg": "maps/sp80_regimes.svg"
+    },
+    "su15": {
+      "game": "su15",
+      "steps": 7,
+      "novel_steps": 7,
+      "contradiction_steps": 0,
+      "n_regimes": 2,
+      "regime_states": [
+        6,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 1,
+      "boundaries": 2,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        6
+      ],
+      "boundary_steps": [
+        0,
+        6
+      ],
+      "card_svg": "maps/su15_regimes.svg"
+    },
+    "tn36": {
+      "game": "tn36",
+      "steps": 17,
+      "novel_steps": 17,
+      "contradiction_steps": 0,
+      "n_regimes": 3,
+      "regime_states": [
+        6,
+        10,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 2,
+      "boundaries": 3,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        6,
+        16
+      ],
+      "boundary_steps": [
+        0,
+        6,
+        16
+      ],
+      "card_svg": "maps/tn36_regimes.svg"
+    },
+    "tr87": {
+      "game": "tr87",
+      "steps": 211,
+      "novel_steps": 211,
+      "contradiction_steps": 0,
+      "n_regimes": 8,
+      "regime_states": [
+        27,
+        30,
+        39,
+        29,
+        15,
+        13,
+        57,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 0.857,
+      "level_ups": 6,
+      "boundaries": 8,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 0.857,
+      "up_steps": [
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "boundary_steps": [
+        0,
+        27,
+        57,
+        96,
+        125,
+        140,
+        153,
+        210
+      ],
+      "card_svg": "maps/tr87_regimes.svg"
+    },
+    "tu93": {
+      "game": "tu93",
+      "steps": 181,
+      "novel_steps": 181,
+      "contradiction_steps": 0,
+      "n_regimes": 9,
+      "regime_states": [
+        17,
+        10,
+        19,
+        17,
+        29,
+        28,
+        14,
+        21,
+        26
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "boundary_steps": [
+        0,
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "card_svg": "maps/tu93_regimes.svg"
+    },
+    "vc33": {
+      "game": "vc33",
+      "steps": 33,
+      "novel_steps": 33,
+      "contradiction_steps": 0,
+      "n_regimes": 4,
+      "regime_states": [
+        2,
+        7,
+        23,
+        1
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 3,
+      "boundaries": 3,
+      "matched": 3,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        2,
+        9,
+        32
+      ],
+      "boundary_steps": [
+        2,
+        9,
+        32
+      ],
+      "card_svg": "maps/vc33_regimes.svg"
+    },
+    "wa30": {
+      "game": "wa30",
+      "steps": 490,
+      "novel_steps": 490,
+      "contradiction_steps": 0,
+      "n_regimes": 8,
+      "regime_states": [
+        26,
+        57,
+        80,
+        80,
+        124,
+        50,
+        55,
+        18
+      ],
+      "graph_nodes": 6,
+      "surprise_only_recall": 1.0,
+      "surprise_only_precision": 1.0,
+      "level_ups": 7,
+      "boundaries": 8,
+      "matched": 7,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "boundary_steps": [
+        0,
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "card_svg": "maps/wa30_regimes.svg"
     }
   }
 }

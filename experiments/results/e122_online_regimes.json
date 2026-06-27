@@ -2,19 +2,369 @@
   "experiment": "e122_online_regimes",
   "method": "causal OnlineRegimeMonitor over raw board deltas; scored vs level-ups",
   "games": {
+    "ar25": {
+      "game": "ar25",
+      "steps": 253,
+      "combined_boundaries": [
+        0,
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "surprise_events": [
+        14,
+        65,
+        87,
+        205
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 0.5,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "boundary_steps": [
+        0,
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "card_svg": "maps/ar25_online.svg"
+    },
+    "bp35": {
+      "game": "bp35",
+      "steps": 225,
+      "combined_boundaries": [
+        0,
+        9,
+        14,
+        18,
+        28,
+        36,
+        49,
+        54,
+        59,
+        67,
+        75,
+        83,
+        88,
+        101,
+        107,
+        112,
+        124,
+        133,
+        138,
+        145,
+        157,
+        165,
+        175,
+        181,
+        187,
+        196,
+        205,
+        213,
+        224
+      ],
+      "surprise_events": [
+        9,
+        18,
+        28,
+        36,
+        49,
+        59,
+        67,
+        75,
+        83,
+        91,
+        101,
+        112,
+        124,
+        133,
+        145,
+        157,
+        165,
+        175,
+        187,
+        196,
+        205,
+        213,
+        224
+      ],
+      "n_regimes": 29,
+      "surprise_only_recall": 0.286,
+      "level_ups": 7,
+      "boundaries": 29,
+      "matched": 7,
+      "recall": 1.0,
+      "precision": 0.25,
+      "up_steps": [
+        14,
+        54,
+        88,
+        107,
+        138,
+        181,
+        224
+      ],
+      "boundary_steps": [
+        0,
+        9,
+        14,
+        18,
+        28,
+        36,
+        49,
+        54,
+        59,
+        67,
+        75,
+        83,
+        88,
+        101,
+        107,
+        112,
+        124,
+        133,
+        138,
+        145,
+        157,
+        165,
+        175,
+        181,
+        187,
+        196,
+        205,
+        213,
+        224
+      ],
+      "card_svg": "maps/bp35_online.svg"
+    },
+    "cd82": {
+      "game": "cd82",
+      "steps": 95,
+      "combined_boundaries": [
+        0,
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "surprise_events": [],
+      "n_regimes": 7,
+      "surprise_only_recall": 0.0,
+      "level_ups": 6,
+      "boundaries": 7,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "boundary_steps": [
+        0,
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "card_svg": "maps/cd82_online.svg"
+    },
+    "cn04": {
+      "game": "cn04",
+      "steps": 206,
+      "combined_boundaries": [
+        0,
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "surprise_events": [
+        13,
+        71,
+        107,
+        161
+      ],
+      "n_regimes": 7,
+      "surprise_only_recall": 0.667,
+      "level_ups": 6,
+      "boundaries": 7,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "boundary_steps": [
+        0,
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "card_svg": "maps/cn04_online.svg"
+    },
+    "dc22": {
+      "game": "dc22",
+      "steps": 174,
+      "combined_boundaries": [
+        0,
+        19,
+        32,
+        54,
+        66,
+        77,
+        86,
+        111,
+        173
+      ],
+      "surprise_events": [
+        19,
+        32,
+        54,
+        66,
+        77,
+        86,
+        111,
+        173
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 1.0,
+      "level_ups": 4,
+      "boundaries": 9,
+      "matched": 4,
+      "recall": 1.0,
+      "precision": 0.5,
+      "up_steps": [
+        19,
+        66,
+        111,
+        173
+      ],
+      "boundary_steps": [
+        0,
+        19,
+        32,
+        54,
+        66,
+        77,
+        86,
+        111,
+        173
+      ],
+      "card_svg": "maps/dc22_online.svg"
+    },
+    "ft09": {
+      "game": "ft09",
+      "steps": 80,
+      "combined_boundaries": [
+        3,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "surprise_events": [
+        10,
+        24,
+        45,
+        66
+      ],
+      "n_regimes": 7,
+      "surprise_only_recall": 0.833,
+      "level_ups": 6,
+      "boundaries": 6,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "boundary_steps": [
+        3,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "card_svg": "maps/ft09_online.svg"
+    },
+    "g50t": {
+      "game": "g50t",
+      "steps": 53,
+      "combined_boundaries": [
+        0,
+        16
+      ],
+      "surprise_events": [
+        16
+      ],
+      "n_regimes": 2,
+      "surprise_only_recall": 1.0,
+      "level_ups": 1,
+      "boundaries": 2,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        16
+      ],
+      "boundary_steps": [
+        0,
+        16
+      ],
+      "card_svg": "maps/g50t_online.svg"
+    },
     "ka59": {
       "game": "ka59",
       "steps": 313,
-      "online_events": [
-        10,
-        66,
-        103,
-        157,
-        177,
-        225,
-        312
-      ],
-      "online_boundaries": [
+      "combined_boundaries": [
         0,
         10,
         66,
@@ -24,8 +374,7 @@
         225,
         312
       ],
-      "retro_boundaries": [
-        0,
+      "surprise_events": [
         10,
         66,
         103,
@@ -35,6 +384,7 @@
         312
       ],
       "n_regimes": 8,
+      "surprise_only_recall": 1.0,
       "level_ups": 6,
       "boundaries": 8,
       "matched": 6,
@@ -60,17 +410,162 @@
       ],
       "card_svg": "maps/ka59_online.svg"
     },
+    "lf52": {
+      "game": "lf52",
+      "steps": 318,
+      "combined_boundaries": [
+        0,
+        7,
+        41,
+        52,
+        75,
+        87,
+        95,
+        112,
+        137,
+        159,
+        167,
+        226,
+        246,
+        269,
+        288,
+        317
+      ],
+      "surprise_events": [
+        41,
+        52,
+        75,
+        87,
+        95,
+        112,
+        137,
+        159,
+        167,
+        226,
+        246,
+        269,
+        288,
+        317
+      ],
+      "n_regimes": 16,
+      "surprise_only_recall": 0.833,
+      "level_ups": 6,
+      "boundaries": 16,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 0.4,
+      "up_steps": [
+        7,
+        41,
+        87,
+        137,
+        226,
+        317
+      ],
+      "boundary_steps": [
+        0,
+        7,
+        41,
+        52,
+        75,
+        87,
+        95,
+        112,
+        137,
+        159,
+        167,
+        226,
+        246,
+        269,
+        288,
+        317
+      ],
+      "card_svg": "maps/lf52_online.svg"
+    },
+    "lp85": {
+      "game": "lp85",
+      "steps": 79,
+      "combined_boundaries": [
+        0,
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "surprise_events": [
+        12,
+        28,
+        40,
+        68
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 0.5,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "boundary_steps": [
+        0,
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "card_svg": "maps/lp85_online.svg"
+    },
+    "ls20": {
+      "game": "ls20",
+      "steps": 62,
+      "combined_boundaries": [
+        0,
+        14,
+        61
+      ],
+      "surprise_events": [
+        14,
+        61
+      ],
+      "n_regimes": 3,
+      "surprise_only_recall": 1.0,
+      "level_ups": 2,
+      "boundaries": 3,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        14,
+        61
+      ],
+      "boundary_steps": [
+        0,
+        14,
+        61
+      ],
+      "card_svg": "maps/ls20_online.svg"
+    },
     "m0r0": {
       "game": "m0r0",
       "steps": 143,
-      "online_events": [
-        14,
-        37,
-        92,
-        103,
-        142
-      ],
-      "online_boundaries": [
+      "combined_boundaries": [
         0,
         14,
         37,
@@ -78,8 +573,7 @@
         103,
         142
       ],
-      "retro_boundaries": [
-        0,
+      "surprise_events": [
         14,
         37,
         92,
@@ -87,6 +581,7 @@
         142
       ],
       "n_regimes": 6,
+      "surprise_only_recall": 1.0,
       "level_ups": 5,
       "boundaries": 6,
       "matched": 5,
@@ -108,6 +603,494 @@
         142
       ],
       "card_svg": "maps/m0r0_online.svg"
+    },
+    "r11l": {
+      "game": "r11l",
+      "steps": 4,
+      "combined_boundaries": [
+        3
+      ],
+      "surprise_events": [],
+      "n_regimes": 2,
+      "surprise_only_recall": 1.0,
+      "level_ups": 1,
+      "boundaries": 1,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3
+      ],
+      "boundary_steps": [
+        3
+      ],
+      "card_svg": "maps/r11l_online.svg"
+    },
+    "re86": {
+      "game": "re86",
+      "steps": 602,
+      "combined_boundaries": [
+        0,
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "surprise_events": [
+        19,
+        106,
+        148,
+        211,
+        258,
+        409
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 0.75,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "boundary_steps": [
+        0,
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "card_svg": "maps/re86_online.svg"
+    },
+    "s5i5": {
+      "game": "s5i5",
+      "steps": 39,
+      "combined_boundaries": [
+        0,
+        12,
+        38
+      ],
+      "surprise_events": [
+        12,
+        38
+      ],
+      "n_regimes": 3,
+      "surprise_only_recall": 1.0,
+      "level_ups": 2,
+      "boundaries": 3,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        12,
+        38
+      ],
+      "boundary_steps": [
+        0,
+        12,
+        38
+      ],
+      "card_svg": "maps/s5i5_online.svg"
+    },
+    "sb26": {
+      "game": "sb26",
+      "steps": 124,
+      "combined_boundaries": [
+        0,
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "surprise_events": [
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "boundary_steps": [
+        0,
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "card_svg": "maps/sb26_online.svg"
+    },
+    "sc25": {
+      "game": "sc25",
+      "steps": 68,
+      "combined_boundaries": [
+        0,
+        16,
+        21,
+        32,
+        67
+      ],
+      "surprise_events": [
+        16,
+        32,
+        67
+      ],
+      "n_regimes": 5,
+      "surprise_only_recall": 0.75,
+      "level_ups": 4,
+      "boundaries": 5,
+      "matched": 4,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        16,
+        21,
+        32,
+        67
+      ],
+      "boundary_steps": [
+        0,
+        16,
+        21,
+        32,
+        67
+      ],
+      "card_svg": "maps/sc25_online.svg"
+    },
+    "sk48": {
+      "game": "sk48",
+      "steps": 14,
+      "combined_boundaries": [
+        0,
+        8,
+        13
+      ],
+      "surprise_events": [
+        8
+      ],
+      "n_regimes": 3,
+      "surprise_only_recall": 0.0,
+      "level_ups": 1,
+      "boundaries": 3,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 0.5,
+      "up_steps": [
+        13
+      ],
+      "boundary_steps": [
+        0,
+        8,
+        13
+      ],
+      "card_svg": "maps/sk48_online.svg"
+    },
+    "sp80": {
+      "game": "sp80",
+      "steps": 31,
+      "combined_boundaries": [
+        3,
+        19,
+        30
+      ],
+      "surprise_events": [
+        19,
+        28
+      ],
+      "n_regimes": 4,
+      "surprise_only_recall": 1.0,
+      "level_ups": 3,
+      "boundaries": 3,
+      "matched": 3,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        3,
+        19,
+        30
+      ],
+      "boundary_steps": [
+        3,
+        19,
+        30
+      ],
+      "card_svg": "maps/sp80_online.svg"
+    },
+    "su15": {
+      "game": "su15",
+      "steps": 7,
+      "combined_boundaries": [
+        0,
+        6
+      ],
+      "surprise_events": [],
+      "n_regimes": 2,
+      "surprise_only_recall": 0.0,
+      "level_ups": 1,
+      "boundaries": 2,
+      "matched": 1,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        6
+      ],
+      "boundary_steps": [
+        0,
+        6
+      ],
+      "card_svg": "maps/su15_online.svg"
+    },
+    "tn36": {
+      "game": "tn36",
+      "steps": 17,
+      "combined_boundaries": [
+        0,
+        6,
+        16
+      ],
+      "surprise_events": [
+        16
+      ],
+      "n_regimes": 3,
+      "surprise_only_recall": 0.5,
+      "level_ups": 2,
+      "boundaries": 3,
+      "matched": 2,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        6,
+        16
+      ],
+      "boundary_steps": [
+        0,
+        6,
+        16
+      ],
+      "card_svg": "maps/tn36_online.svg"
+    },
+    "tr87": {
+      "game": "tr87",
+      "steps": 211,
+      "combined_boundaries": [
+        0,
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "surprise_events": [
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "n_regimes": 7,
+      "surprise_only_recall": 1.0,
+      "level_ups": 6,
+      "boundaries": 7,
+      "matched": 6,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "boundary_steps": [
+        0,
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "card_svg": "maps/tr87_online.svg"
+    },
+    "tu93": {
+      "game": "tu93",
+      "steps": 181,
+      "combined_boundaries": [
+        0,
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "surprise_events": [
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "n_regimes": 9,
+      "surprise_only_recall": 1.0,
+      "level_ups": 8,
+      "boundaries": 9,
+      "matched": 8,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "boundary_steps": [
+        0,
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "card_svg": "maps/tu93_online.svg"
+    },
+    "vc33": {
+      "game": "vc33",
+      "steps": 33,
+      "combined_boundaries": [
+        2,
+        9,
+        32
+      ],
+      "surprise_events": [
+        9,
+        32
+      ],
+      "n_regimes": 4,
+      "surprise_only_recall": 1.0,
+      "level_ups": 3,
+      "boundaries": 3,
+      "matched": 3,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        2,
+        9,
+        32
+      ],
+      "boundary_steps": [
+        2,
+        9,
+        32
+      ],
+      "card_svg": "maps/vc33_online.svg"
+    },
+    "wa30": {
+      "game": "wa30",
+      "steps": 490,
+      "combined_boundaries": [
+        0,
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "surprise_events": [
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "n_regimes": 8,
+      "surprise_only_recall": 1.0,
+      "level_ups": 7,
+      "boundaries": 8,
+      "matched": 7,
+      "recall": 1.0,
+      "precision": 1.0,
+      "up_steps": [
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "boundary_steps": [
+        0,
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "card_svg": "maps/wa30_online.svg"
     }
   }
 }

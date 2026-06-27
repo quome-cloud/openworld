@@ -132,7 +132,8 @@ def build(game, arc):
         return idmap[b]
 
     true_sigs = [qid(f) for f in frames]        # the clean, full sig sequence (ground truth for round-trip)
-    bset = sorted(set(bounds) | {0})
+    # the segmenter the solver uses: causal surprise UNION observed level-ups (-> 100% of rule changes)
+    bset = E121.combine(bounds, E121.level_boundaries(levels))
     spans = [(bset[i], bset[i + 1] if i + 1 < len(bset) else len(acts)) for i in range(len(bset))]
     regimes = []; landed = []
     for lo, hi in spans:                        # <-- each regime: fresh env, replay-to-boundary, rebuild

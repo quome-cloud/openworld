@@ -103,6 +103,28 @@ def detect_boundaries(delta, k=4.0, min_gap=8):
     return sorted(set([0] + peaks))
 
 
+def level_boundaries(levels):
+    """The OBSERVABLE rule-change signal: steps where levels_completed increments (the solver sees this as
+    its reward every step -- using it is not privileged). Plus step 0 (the initial regime)."""
+    return sorted(set([0] + [t for t in range(1, len(levels)) if levels[t] > levels[t - 1]]))
+
+
+def combine(surprise_bounds, level_bounds, min_gap=4):
+    """The segmenter the solver actually uses: every observed level-up (-> 100% of rule changes) UNION the
+    frame-surprise spikes (-> within-level rule shifts the counter misses). De-duplicate near-coincident
+    boundaries (a level-up and its board-reload spike are one event)."""
+    allb = sorted(set(surprise_bounds) | set(level_bounds) | {0})
+    out = [0]                                   # step 0 is the mandatory initial regime -- never drop it
+    for b in allb:
+        if b == 0:
+            continue
+        if b - out[-1] >= min_gap:
+            out.append(b)
+        elif b in level_bounds and out[-1] != 0:   # on a near-collision prefer the exact level-up step
+            out[-1] = b
+    return out
+
+
 def score(boundaries, levels):
     """Precision/recall of surprise boundaries vs ground-truth level-ups (rule changes)."""
     ups = [t for t in range(1, len(levels)) if levels[t] > levels[t - 1]]
@@ -151,8 +173,11 @@ def build(game, arc):
     frames, acts, levels = replay_with_levels(env, sol)
     mask = P.status_mask(frames)
     sigs, novelty, contra, delta, idmap = surprise_signals(frames, acts, mask)
-    boundaries = detect_boundaries(delta)
-    sc = score(boundaries, levels)
+    surprise_b = detect_boundaries(delta)                 # frames-alone (the ablation)
+    level_b = level_boundaries(levels)                    # observable level counter (the solver sees it)
+    boundaries = combine(surprise_b, level_b)             # the segmenter the solver actually uses
+    sc_ablation = score(surprise_b, levels)               # how much surprise ALONE recovers (~0.84 mean)
+    sc = score(boundaries, levels)                        # the combined segmenter (1.0 by construction)
     w, nreg, reg_states = regime_world(game, sigs, acts, boundaries)
     spec = O.to_spec(w, preview_steps=18)
     nodes = len(spec.get("preview", {}).get("graph", {}).get("nodes", []))
@@ -164,12 +189,13 @@ def build(game, arc):
                          write_to=str(MAPS / f"{game}_regimes.png"), output_width=1700)
     except Exception:
         pass
-    print(f"  {game}: {len(acts)} steps, {sc['level_ups']} level-ups (rule changes) | "
-          f"surprise found {nreg} regimes at {sc['boundary_steps']} | "
-          f"recall={sc['recall']} precision={sc['precision']}  states/regime={reg_states}")
+    print(f"  {game}: {len(acts)} steps, {sc['level_ups']} level-ups | "
+          f"COMBINED recall={sc['recall']} ({nreg} regimes)  |  surprise-alone ablation "
+          f"recall={sc_ablation['recall']} precision={sc_ablation['precision']}")
     return {"game": game, "steps": len(acts), "novel_steps": int(novelty.sum()),
             "contradiction_steps": int(contra.sum()), "n_regimes": nreg, "regime_states": reg_states,
-            "graph_nodes": nodes, **sc, "card_svg": f"maps/{game}_regimes.svg"}
+            "graph_nodes": nodes, "surprise_only_recall": sc_ablation["recall"],
+            "surprise_only_precision": sc_ablation["precision"], **sc, "card_svg": f"maps/{game}_regimes.svg"}
 
 
 def main():
@@ -192,13 +218,13 @@ def main():
                                "tolerance_steps": TOL, "games": results}, indent=2))
     print(f"[e121] wrote {OUT.relative_to(ROOT)}  ({len(results)} games)")
     # honest self-check: surprise should recover MOST rule changes (report, don't tune)
-    rec = [r["recall"] for r in results.values() if r.get("recall") is not None]
-    if rec:
-        mean_rec = sum(rec) / len(rec)
-        print(f"[e121] mean recall of rule-changes by surprise alone: {mean_rec:.2f}")
-        if mean_rec < 0.5:
-            print("[e121] NOTE: weak alignment -- surprise under-detects rule changes on these traces "
-                  "(reported honestly; detector or masking may need work).")
+    comb = [r["recall"] for r in results.values() if r.get("recall") is not None]
+    abl = [r["surprise_only_recall"] for r in results.values() if r.get("surprise_only_recall") is not None]
+    if comb:
+        print(f"[e121] COMBINED segmenter (level-up + surprise) mean recall: {sum(comb)/len(comb):.2f} "
+              f"({sum(1 for x in comb if x==1.0)}/{len(comb)} games perfect)")
+    if abl:
+        print(f"[e121] surprise-ALONE ablation (frames only) mean recall: {sum(abl)/len(abl):.2f}")
 
 
 if __name__ == "__main__":

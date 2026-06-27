@@ -817,7 +817,7 @@ false solve.}
 \label{fig:e119}
 \end{figure}
 
-\section{Multi-world dynamics: voting experts and a self-rebuilding world model (E120--E121)}
+\section{Multi-world dynamics: voting experts and a self-rebuilding world model (E120--E123)}
 \label{sec:selfrebuild}
 E119 keeps a posterior over \emph{goal-programs}; the complementary object is a posterior---and a
 structural response---over \emph{dynamics}. Two pressures motivate it. First, when repeated attempts on a
@@ -848,11 +848,21 @@ honest---it reads frames only; the ground-truth level signal is used \emph{solel
 detect. On the two near-full games it recovers \textbf{every} rule change: recall $1.0$ on \texttt{ka59}
 (all six level-ups, precision $0.857$) and \texttt{m0r0} (all five, precision $1.0$)
 (Fig.~\ref{fig:selfrebuild}B). This is the MSA on-demand-synthesis loop (\texttt{arXiv:2507.12547}) realized
-over \emph{dynamics}: surprise is the trigger to synthesize a new sub-world and carry it forward. We report
-it at its honest boundary: the segmentation is \emph{retrospective} over completed traces, and wiring the
-surprise monitor \emph{online}---re-synthesizing a regime mid-play, which is the path to attacking a
-topologically ``sealed'' wall by rejecting the stale model rather than the level---is the immediate next
-step.
+over \emph{dynamics}: surprise is the trigger to synthesize a new sub-world and carry it forward.
+
+\textbf{E122/E123 --- the loop made online.} Two further steps close it. An \emph{online} monitor (E122)
+detects each rule change \emph{causally}, from past frames only---a running baseline of the in-regime board
+delta with a warmup and refractory gap---and matches the retrospective detector exactly (recall $1.0$ on
+both games), so a solver can fire a reset the moment the rules change. The reset itself (E123) respects the
+replay-only env: on a boundary we \textbf{replay from \texttt{reset()} to the last completed frame} (a fresh
+env, since \texttt{reset()} pollutes a progressed game) and build a \emph{fresh, independent} model for the
+new regime, appending it to the \texttt{PhasedTransition} chain while earlier regimes stay frozen. The
+replay lands on the exact boundary frame ($8/8$ and $6/6$ regimes) and the resynthesized composite
+reproduces play \emph{exactly}---round-trip fidelity $1.0$ on both games. What remains open is not the
+re-synthesis mechanism but the autonomous deep \emph{search} that would discover the actions in the first
+place (the goal-inference wall of \S\ref{sec:solvewall}); here exploration is trace-guided to isolate the
+mechanism. The same surprise-driven reset is wired into the live expert panel as a prompt instruction
+(reject a stale model rather than the level---a wall is often a stale model, not an impossible level).
 
 \begin{figure}[t]
 \centering

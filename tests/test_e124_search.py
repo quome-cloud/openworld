@@ -25,3 +25,13 @@ def test_macro_solves_what_blind_cannot_in_budget():
                       rung="blind", candidates_fn=_cands, mask=None) is None
     out = search.run(ToyGame(), macro_goal, budget=5, rung="blind_macros", candidates_fn=_cands, mask=None)
     assert out == [[1],[1],[2]]
+
+
+def test_ladder_blind_fails_macros_solves():
+    """Offline ladder-dispatch test: run_one with an injected macro goal.
+    blind (no macros, budget 5) cannot reach the 3-step win; blind_macros solves it."""
+    import e124_autonomous_search as e
+    goal = codex_goalc.Goal([], [[[1],[1],[2]]], None, "", False, [])
+    res = e.run_one(ToyGame, _cands, None, 5, goal)
+    assert res["blind"] is None
+    assert res["blind_macros"] == 3

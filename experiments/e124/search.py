@@ -5,7 +5,6 @@
   full         : subgoals + macros (+ optional score_fn)
 A level is solved only when the env raises `levels` (the caller re-verifies by replay)."""
 from collections import deque
-from e124 import sandbox_exec
 
 def _apply(game, seq):
     game.reset()
@@ -30,6 +29,8 @@ def _candidate_steps(frame, candidates_fn, macros, use_macros):
     return steps
 
 def run(game, goal, budget, rung, candidates_fn, mask):
+    if rung in ("subgoals", "full"):
+        raise NotImplementedError(f"rung '{rung}' (subgoal hill-climbing) is Task 6b")
     use_macros = rung in ("blind_macros", "full")
     game.reset()
     frame0 = game.frame

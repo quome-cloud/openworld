@@ -79,11 +79,18 @@ The env runs **locally** after a one-time ~1.3s Arcade init (`step()` sub-ms), s
 search is ~30s/game.
 
 ## Next levers (to give the SLM a fair chance at a positive delta)
-1. **Games with headroom** — sweep the harder reachable games / the 15 currently-0 games where
-   blind BFS struggles, so ordering can break ties within budget.
-2. **Dense scoring / pruning** — filter candidates or give a distance-to-goal gradient instead
-   of binary 0/1 (the design intends this; the code does not do it yet).
-3. **Beyond level 1** — needs a true-reset per level (fresh env) for the multi-level search loop,
-   since `reset()` is checkpoint-based.
-4. Minor: a malformed-JSON sample escapes `best_of_n` (only `behavior_fn` errors are discarded);
+
+See `PROGRESS.md` for the full journey and the step-(a) classification that re-prioritized these.
+The classification of the 15 unsolved games (1 width-bound vs 14 procedure-walls) says the
+**macro/procedure slot is the dominant lever**, not the pruner:
+
+1. **Build the `macro` slot** (highest value — addresses ~14/15 unsolved games). SLM proposes a
+   short action *procedure* when search stalls; replay-verify. Matches the repo's goal-as-procedure
+   finding (E102/103/104); the design lists `macro` as primary but this run never exercised it.
+2. **Candidate pruner** as a narrow add-on for high-branching games (`bp35`, b=190; maybe
+   `tn36`/`sk48`). Pruning cuts branching multiplicatively; ordering does not.
+3. **Re-measure on the headroom set only** — the 15 unsolved + open levels of the 10 partials
+   (e.g. `vc33` 3→7); solved games show no lift by construction.
+4. **Perception gap**: `sc25` clicks are all no-ops → candidate inference is wrong there.
+5. Minor: a malformed-JSON sample escapes `best_of_n` (only `behavior_fn` errors are discarded);
    one game errored on gemma3 in the pre-fix sweep. Discard `sample_fn` parse errors too.

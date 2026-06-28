@@ -46,3 +46,32 @@ def check(predict_fn, transitions, mask):
         if bool(lu) != bool(t["level_up"]):
             return False, t
     return True, None
+
+
+# --- decision-equivalent gate over OBJECT states (value-equivalent, not pixel reconstruction) ---
+from e125 import objstate as _objstate
+
+
+def score_obj(predict_fn, transitions, fields=("color", "y", "x")):
+    """(n_matched, fails). Match iff the DECISION-RELEVANT state_key of the predicted next_state equals the
+    real one AND level_up matches. fails = [(transition, predicted_next_state|None)]."""
+    if predict_fn is None:
+        return 0, [(t, None) for t in transitions]
+    n, fails = 0, []
+    for t in transitions:
+        try:
+            ns, lu = predict_fn(dict(t["state"]), list(t["action"]))
+        except Exception:
+            fails.append((t, None)); continue
+        if (_objstate.state_key(ns, fields) == _objstate.state_key(t["next_state"], fields)
+                and bool(lu) == bool(t["level_up"])):
+            n += 1
+        else:
+            fails.append((t, ns))
+    return n, fails
+
+
+def check_obj(predict_fn, transitions, fields=("color", "y", "x")):
+    """(ok, counterexample). ok iff every transition matches on the decision-relevant key + level_up."""
+    n, fails = score_obj(predict_fn, transitions, fields)
+    return (len(fails) == 0 and predict_fn is not None), (fails[0][0] if fails else None)

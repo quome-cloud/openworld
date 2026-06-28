@@ -15,10 +15,11 @@ MACRO_SCHEMA = {"type": "object", "additionalProperties": False,
 
 def _macro_prompt(state, action_api, predict_src, goal_src, history):
     hist = "\n".join(f"- tried {h['macro']} -> {h['outcome']}" for h in history[-6:]) or "(none yet)"
+    predict_block = f"```python\n{predict_src}\n```" if predict_src else "(unavailable)"
     goal_block = f"```python\n{goal_src}\n```" if goal_src else "(unknown -- hypothesise from object config)"
     return ("You are solving an unknown grid game by acting. You have a VERIFIED world model (predict) and a goal "
             f"energy (goal_score) of the current OBJECT state. Propose a SHORT macro (3-5 actions) toward the win.\n\n"
-            f"predict():\n```python\n{predict_src}\n```\ngoal_score():\n{goal_block}\n"
+            f"predict():\n{predict_block}\ngoal_score():\n{goal_block}\n"
             f"Current state: {synth._objs(state)}\nActions: {action_api}\n"
             f"Macros already tried (do not repeat fruitless ones):\n{hist}\n\n"
             "Return JSON {macro: [[a],...], rationale, goal_note}. macro is a list of actions like [[4],[4],[6,3,5]].")
@@ -71,6 +72,11 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
             g.step(*a)
         return g, perceive(g.frame)
 
+    # Initialise seen_states with the current committed prefix's object state so that
+    # a round that leaves the committed state KEY unchanged is counted as a stall cycle.
+    _, _init_st = _state_after(committed)
+    seen_states = {objstate.state_key(_init_st)}
+
     for _ in range(max_macros):
         _, init_state = _state_after(committed)
 
@@ -93,7 +99,7 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
                 stall += 1
                 if stall >= stall_macros:
                     return {"solved": False, "actions": committed, "new_transitions": new_trans,
-                            "reason": "no macro", "macros_used": macros_used}
+                            "reason": "stall", "macros_used": macros_used}
                 continue
 
         # 3. Execute actions against real env (fresh game replayed to committed prefix)
@@ -113,9 +119,16 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
             return {"solved": False, "actions": committed, "new_transitions": new_trans,
                     "reason": "surprise", "macros_used": macros_used}
 
-        # No progress this round
+        # No progress this round — detect state novelty to distinguish genuine progress from cycles.
+        _, cur_state = _state_after(committed)
+        cur_key = objstate.state_key(cur_state)
+        if cur_key in seen_states:
+            stall += 1
+        else:
+            stall = 0
+            seen_states.add(cur_key)
+
         history.append({"macro": actions, "outcome": "no progress"})
-        stall += 1
         if stall >= stall_macros:
             return {"solved": False, "actions": committed, "new_transitions": new_trans,
                     "reason": "stall", "macros_used": macros_used}

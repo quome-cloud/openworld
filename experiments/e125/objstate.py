@@ -4,8 +4,8 @@ verifier gate compares -- abstracting away pixels/animation. PERCEIVE_SRC is the
 `perceive(data)` for an OpenWorld CodePerceptor (stdlib only, no imports -- runs in the sandbox)."""
 
 _BODY = '''
-    g = [list(map(int, row)) for row in (data[0] if (len(data) == 1 and hasattr(data[0], "__len__")
-                                                     and hasattr(data[0][0], "__len__")) else data)]
+    g = [list(map(int, row)) for row in (data[0] if (len(data) == 1 and isinstance(data[0], (list, tuple))
+                                                     and isinstance(data[0][0], (list, tuple))) else data)]
     h = len(g); w = len(g[0])
     cnt = {}
     for row in g:

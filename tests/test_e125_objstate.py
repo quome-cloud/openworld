@@ -33,3 +33,23 @@ def test_perceive_src_matches_object_state():
     ns = {}
     exec(objstate.PERCEIVE_SRC, ns)
     assert ns["perceive"](_grid()) == objstate.object_state(_grid())
+
+def test_perceive_src_sandbox_safe_no_hasattr():
+    """PERCEIVE_SRC must work in a sandbox that excludes hasattr (like OpenWorld SAFE_BUILTINS).
+    Verifies both a plain 8x8 grid and a (1,8,8)-wrapped grid."""
+    import builtins
+    safe = {k: getattr(builtins, k) for k in (
+        "len", "range", "int", "float", "list", "tuple", "dict", "set",
+        "round", "sum", "max", "min", "sorted", "enumerate", "isinstance",
+        "map", "abs"
+    )}
+    ns = {"__builtins__": safe}
+    exec(objstate.PERCEIVE_SRC, ns)
+
+    grid = _grid()
+    # plain (H, W) grid
+    assert ns["perceive"](grid) == objstate.object_state(grid)
+
+    # (1, H, W) wrapped grid — same data with an extra outer dimension
+    wrapped = [grid]
+    assert ns["perceive"](wrapped) == objstate.object_state(grid)

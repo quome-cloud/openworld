@@ -58,3 +58,35 @@ def goal_directed_collect(game_factory, candidates_fn, predict_fn, goal_fn, budg
         if g.done:
             g = game_factory(); g.reset()
     return trans
+
+
+def collect_obj(game_factory, candidates_fn, budget, perceive, prefix=None):
+    """Object-state exploration: replay prefix, then round-robin candidates, perceiving each frame to an object
+    state; dedup by (state_key, action). Returns object transitions {state,action,next_state,level_up}."""
+    from e125 import objstate
+    prefix = list(prefix or [])
+
+    def _fresh():
+        g = game_factory(); g.reset()
+        for a in prefix:
+            g.step(*a)
+        return g
+
+    g = _fresh()
+    trans, seen = [], set()
+    for _ in range(budget):
+        state = perceive(g.frame)
+        cands = [s if isinstance(s, list) else [s] for s in candidates_fn(state)]
+        if not cands:
+            break
+        a = cands[len(trans) % len(cands)]
+        lv = g.levels
+        g.step(*a)
+        nstate = perceive(g.frame)
+        key = (objstate.state_key(state), tuple(a))
+        if key not in seen:
+            seen.add(key)
+            trans.append({"state": state, "action": list(a), "next_state": nstate, "level_up": g.levels > lv})
+        if g.done:
+            g = _fresh()
+    return trans

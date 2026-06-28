@@ -64,17 +64,27 @@ def _worker(gid):
 class SandboxGame:
     def __init__(self, gid, venv=ARC_VENV):
         import numpy as np
-        self._np = np; self.gid = gid
+        self._np = np; self.gid = gid; self.frame = None
         self.p = subprocess.Popen([venv, os.path.abspath(__file__), "--worker", gid],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=subprocess.DEVNULL, text=True, bufsize=1)
-        while True:
-            line = self.p.stdout.readline()
-            if not line:
-                raise RuntimeError("worker died before ready")
-            if json.loads(line).get("ready"):
-                break
-        self.reset()
+        try:
+            while True:
+                line = self.p.stdout.readline()
+                if not line:
+                    raise RuntimeError("worker died before ready")
+                if json.loads(line).get("ready"):
+                    break
+            self.reset()
+        except BaseException:
+            # Reap the worker on ANY failure after Popen so a half-built
+            # SandboxGame never orphans the arc_agi engine subprocess.
+            self.p.terminate()
+            try:
+                self.p.wait(timeout=2)
+            except Exception:
+                pass
+            raise
 
     def _rpc(self, req):
         self.p.stdin.write(json.dumps(req) + "\n"); self.p.stdin.flush()

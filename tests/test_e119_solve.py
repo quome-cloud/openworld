@@ -34,6 +34,28 @@ def test_solve_game_search_mode_never_calls_llm(tmp_path):
     assert res["levels"] == 2
 
 
+class DeadGame:
+    """No action ever raises levels; search must return 0 honestly (the control-rung baseline case)."""
+    def __init__(self): self.win = 3; self.reset()
+    def reset(self):
+        self.levels = 0; self.done = False; self.avail = [7, 1]
+        self.frame = np.zeros((64, 64), int); return self.frame
+    def step(self, a, x=None, y=None): return self.frame   # frame never changes, levels never rise
+
+
+def test_zero_solve_is_honest_not_a_failed_assert(tmp_path):
+    """A game the control rung cannot solve yields levels=0 with no error; the driver's
+    honesty invariant must ACCEPT that, while still rejecting a fabricated unverified solve."""
+    import e119_slm_solver as entry
+    payload = entry.run_pilot(["d1"], mode="search", make=lambda gid: DeadGame(),
+                              budget={"max_nodes": 200, "max_depth": 6}, logdir=tmp_path)
+    assert payload["levels_solved"] == 0
+    r = payload["results"][0]
+    assert r["levels"] == 0 and r["verified"] is False and "error" not in r
+    assert entry._is_honest(r)                                   # honest zero passes
+    assert not entry._is_honest({"levels": 2, "verified": False})  # unverified non-zero solve fails
+
+
 def test_entry_run_pilot_aggregates(monkeypatch, tmp_path):
     import e119_slm_solver as entry
 

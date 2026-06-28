@@ -18,6 +18,13 @@ def _real_make(gid):
     return g
 
 
+def _is_honest(r):
+    """A result is honest iff it errored, claimed no solve (levels==0), or its claimed
+    levels are replay-verified. A zero-solve is the expected control-rung baseline, not a
+    failure; only a non-zero solve that was never replay-verified is dishonest."""
+    return ("error" in r) or r["levels"] == 0 or r["verified"]
+
+
 def run_pilot(games, mode="search", make=_real_make, llm=None, budget=None, logdir=None):
     results = []
     for gid in games:
@@ -50,7 +57,7 @@ def main():
                         budget={"max_nodes": 6000, "max_depth": 60}, logdir=logdir)
     save_results("e119_slm_solver", payload)          # SAVE before asserts (CLAUDE.md)
     assert payload["levels_solved"] >= 0
-    assert all(("error" in r) or r["verified"] for r in payload["results"]), "unverified non-error solve"
+    assert all(_is_honest(r) for r in payload["results"]), "unverified non-zero solve"
     print(f"[e119] mode={a.mode} levels={payload['levels_solved']} full={payload['full_games']}")
 
 

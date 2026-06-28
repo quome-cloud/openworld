@@ -1,0 +1,878 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "arc3-regimes-bp35",
+  "description": "Self-rebuilding world model of ARC-AGI-3 bp35: openworld.PhasedTransition over 12 SURPRISE-detected regimes (rule changes at steps [0, 6, 14, 33, 50, 54, 75, 88, 107, 138, 181, 224]); dynamics advance irreversibly as the rules change.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "Self-rebuilding world model of ARC-AGI-3 bp35: openworld.PhasedTransition over 12 SURPRISE-detected regimes (rule changes at steps [0, 6, 14, 33, 50, 54, 75, 88, 107, 138, 181, 224]); dynamics advance irreversibly as the rules change."
+  },
+  "state_schema": {
+    "sig": "str"
+  },
+  "initial_state": {
+    "sig": "q0"
+  },
+  "actions": [
+    "c15_32",
+    "c15_38",
+    "c21_32",
+    "c21_34",
+    "c21_38",
+    "c21_40",
+    "c27_10",
+    "c27_16",
+    "c27_28",
+    "c27_32",
+    "c27_38",
+    "c27_40",
+    "c33_2",
+    "c33_32",
+    "c33_38",
+    "c33_50",
+    "c33_56",
+    "c39_16",
+    "c39_28",
+    "c39_32",
+    "c39_34",
+    "c39_38",
+    "c39_50",
+    "c3_0",
+    "c3_16",
+    "c3_2",
+    "c3_20",
+    "c3_38",
+    "c3_62",
+    "c45_14",
+    "c45_34",
+    "c45_38",
+    "c51_2",
+    "c51_32",
+    "c51_34",
+    "c51_38",
+    "c51_58",
+    "c57_32",
+    "s3",
+    "s4"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "phased",
+    "record_key": "_phase",
+    "phases": [
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 0
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 6
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 14
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 33
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 50
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 54
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 75
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 88
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 107
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 138
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 181
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 224
+      }
+    ]
+  },
+  "preview": {
+    "steps": 18,
+    "action": "c15_32",
+    "series": {
+      "_phase": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        2.0,
+        2.0,
+        2.0,
+        2.0
+      ],
+      "_phase_steps": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "s0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c15_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c15_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c21_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c21_34"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c21_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c21_40"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_10"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_16"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_28"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c27_40"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c33_2"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c33_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c33_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c33_50"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c33_56"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_16"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_28"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_34"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c39_50"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_0"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_16"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_2"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_20"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c3_62"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c45_14"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c45_34"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c45_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c51_2"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c51_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c51_34"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c51_38"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c51_58"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c57_32"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s3"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "s4"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c15_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c15_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c21_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c21_34"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c21_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c21_40"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_10"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_16"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_28"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c27_40"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c33_2"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c33_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c33_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c33_50"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c33_56"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_16"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_28"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_34"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c39_50"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_0"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_16"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_2"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_20"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c3_62"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c45_14"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c45_34"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c45_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c51_2"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c51_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c51_34"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c51_38"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c51_58"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c57_32"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s3"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "s4"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c15_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c15_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c21_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c21_34"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c21_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c21_40"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_10"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_16"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_28"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c27_40"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c33_2"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c33_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c33_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c33_50"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c33_56"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_16"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_28"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_34"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c39_50"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_0"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_16"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_2"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_20"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c3_62"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c45_14"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c45_34"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c45_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c51_2"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c51_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c51_34"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c51_38"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c51_58"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c57_32"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s3"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "s4"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

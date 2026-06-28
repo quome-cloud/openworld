@@ -216,7 +216,7 @@ class _Database:
 
 
 def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4, traces_dir=None, _runner=None,
-               functions_per_prompt=2, seed=0, seed_src=None):
+               functions_per_prompt=2, seed=0, seed_src=None, fallback_runner=None, stall_window=3):
     """FunSearch over predict() world models: codex proposes programs; the verifier gate (exact masked-frame +
     level_up match on held-out transitions) is the evaluator; programs enter a database clustered by
     score-signature; each new prompt shows prior programs ASCENDING BY SCORE as predict_v0/v1 and asks for a
@@ -225,7 +225,7 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4
     energy rides along. `seed_src` carries a prior round's verified program forward WITHIN a level: it is
     registered first so the search extends it instead of re-climbing from scratch (reset is per-LEVEL, not
     per-round). Returns (src, predict_fn, goal_fn) on a full gate-pass, else (None, None, None)."""
-    run = _runner or codex_iso.run
+    primary = _runner or codex_iso.run
     if len(transitions) < 2:
         return None, None, None                # cannot form a disjoint held-out set
     split = max(1, min(len(transitions) - 1, int(len(transitions) * 0.7)))
@@ -250,7 +250,10 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4
             if sc == len(held):                         # still verifies on the (grown) held set -> reuse, no codex
                 return _accept(db.best)
 
+    best_score = db.best["score"] if db.best else -1
+    since_improve = 0
     for attempt in range(n_retries):
+        run = (fallback_runner if (fallback_runner is not None and since_improve >= stall_window) else primary)
         samples = db.sample()
         prompt = (_prompt(train, action_api, mask, None) if not samples
                   else _funsearch_prompt(samples, action_api, mask, db.best["goal_src"],
@@ -265,6 +268,11 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4
         sc, sig, fails = score_program(fn, held, mask)
         if src and not tainted:
             db.register(src, fn, sc, sig, fails, goal_src, rationale=rationale)
+        cur = db.best["score"] if db.best else -1
+        if cur > best_score:
+            best_score = cur; since_improve = 0
+        else:
+            since_improve += 1
         best_full = db.best is not None and db.best["score"] == len(held) and db.best["fn"] is not None
         if traces_dir:
             capture_lib.codex_record(traces_dir, {"game": game, "level": 0, "regime": attempt, "model": model,
@@ -365,11 +373,12 @@ def _score_obj_program(predict_fn, transitions, fields):
 
 
 def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, traces_dir=None, _runner=None,
-                   functions_per_prompt=2, seed=0, seed_src=None, k_ensemble=3, fields=("color", "y", "x")):
+                   functions_per_prompt=2, seed=0, seed_src=None, k_ensemble=3, fields=("color", "y", "x"),
+                   fallback_runner=None, stall_window=3):
     """FunSearch over OBJECT-state predict(); decision-equivalent gate (verify.check_obj); sandbox-env compile
     (verify.compile_obj_predict). Returns (src, predict_fn, goal_fn, ensemble[top-k callables]) on a full
     gate-pass, else (None, None, None, [])."""
-    run = _runner or codex_iso.run
+    primary = _runner or codex_iso.run
     if len(transitions) < 2:
         return None, None, None, []
     split = max(1, min(len(transitions) - 1, int(len(transitions) * 0.7)))
@@ -399,7 +408,10 @@ def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, 
             if sc == len(held):
                 return _accept(db.best)
 
+    best_score = db.best["score"] if db.best else -1
+    since_improve = 0
     for attempt in range(n_retries):
+        run = (fallback_runner if (fallback_runner is not None and since_improve >= stall_window) else primary)
         samples = db.sample()
         prompt = (_obj_prompt(train, action_api, None) if not samples
                   else _obj_funsearch_prompt(samples, action_api, failed=db.failed_summaries(),
@@ -414,6 +426,11 @@ def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, 
         sc, sig, fails = _score_obj_program(fn, held, fields)
         if src and not tainted:
             db.register(src, fn, sc, sig, fails, goal_src, rationale=rationale)
+        cur = db.best["score"] if db.best else -1
+        if cur > best_score:
+            best_score = cur; since_improve = 0
+        else:
+            since_improve += 1
         best_full = db.best is not None and db.best["score"] == len(held) and db.best["fn"] is not None
         if traces_dir:
             capture_lib.codex_record(traces_dir, {"game": game, "level": 0, "regime": attempt, "model": model,

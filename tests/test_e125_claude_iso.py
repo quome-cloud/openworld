@@ -64,9 +64,26 @@ def test_run_uses_injected_exec_and_returns_final():
     flat = " ".join(calls["cmd"])
     assert "-p" in calls["cmd"] and "--disallowedTools" in calls["cmd"]
     assert "--dangerously-skip-permissions" not in calls["cmd"]   # tools must NOT be bypassed
+    # deny-list contains critical read tools
+    assert "Read" in flat and "Bash" in flat
+    # structural MCP isolation and permission mode are present
+    assert "--strict-mcp-config" in calls["cmd"]
+    assert "--permission-mode" in calls["cmd"]
+    assert "default" in calls["cmd"]
+    # cwd must be a clean tempdir, NOT the repo root
+    assert isinstance(calls["cwd"], str)
+    assert calls["cwd"] != os.getcwd()
 
 def test_run_handles_exec_failure_gracefully():
     def boom_exec(cmd, cwd, timeout):
         raise TimeoutError("slow")
     out = claude_iso.run("P", {}, game="g", _exec=boom_exec)
     assert out["final"] is None and out["tainted"] is False
+
+def test_deny_list_non_empty_and_covers_read_tools():
+    """_DENY must be a non-empty string that covers the core file-content read tools."""
+    deny = claude_iso._DENY
+    assert isinstance(deny, str) and len(deny) > 0
+    tools = {t.strip() for t in deny.split(",")}
+    for required in ("Read", "Bash", "Grep", "Glob"):
+        assert required in tools, f"_DENY missing required tool: {required}"

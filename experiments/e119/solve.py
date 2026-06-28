@@ -16,7 +16,7 @@ def _candidates_fn(game, mask):
     return fn
 
 
-def solve_game(game, llm=None, mode="search", budget=None, logdir=None):
+def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=None):
     budget = budget or {"max_nodes": 4000, "max_depth": 40}
     game.reset()
     win = game.win
@@ -48,9 +48,16 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None):
         # re-apply to advance the real game state for the next iteration
         game.reset()
         for a in actions: game.step(*a)
-    # verify before banking
-    reached, _ = planner.replay_levels(game, actions)
-    verified = reached >= game.levels and reached > 0
+    # verify before banking. The real arc env's reset() retains completed-level progress
+    # (it resets to the current-level checkpoint, not game start), so replaying on the
+    # reused, progress-polluted game makes replay_levels' delta collapse to 0. Verify on a
+    # FRESH env when we can build one (mirrors arc3_harness.replay's new-Game pattern); fall
+    # back to the passed game for mocks that reset truly. reached is the replay-confirmed
+    # level count, so it is the level count we report and trust.
+    gid = getattr(game, "gid", None)
+    verify_game = make(gid) if (make is not None and isinstance(gid, str)) else game
+    reached, _ = planner.replay_levels(verify_game, actions)
+    verified = reached > 0
     result = {"game": name, "mode": mode, "levels": reached, "win": win,
               "actions": actions, "verified": bool(verified)}
     if logdir is not None and verified:

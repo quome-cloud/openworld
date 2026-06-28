@@ -30,7 +30,7 @@ def run_pilot(games, mode="search", make=_real_make, llm=None, budget=None, logd
     for gid in games:
         try:
             g = make(gid)
-            r = solve.solve_game(g, llm=llm, mode=mode, budget=budget, logdir=logdir)
+            r = solve.solve_game(g, llm=llm, mode=mode, budget=budget, logdir=logdir, make=make)
         except Exception as e:
             r = {"game": gid, "mode": mode, "levels": 0, "win": 0,
                  "actions": [], "verified": False, "error": str(e)[:160]}

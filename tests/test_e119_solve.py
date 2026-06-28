@@ -56,6 +56,34 @@ def test_zero_solve_is_honest_not_a_failed_assert(tmp_path):
     assert not entry._is_honest({"levels": 2, "verified": False})  # unverified non-zero solve fails
 
 
+class CheckpointGame:
+    """Mimics the real arc env: reset() restores the board to the start of the CURRENT
+    level but RETAINS completed-level progress (it does not zero levels_completed). Only a
+    fresh make() is a true game start. 1 level: walk right to x==3. Action 7 = right."""
+    def __init__(self): self.win = 2; self.gid = "cp"; self.levels = 0; self._init()
+    def _init(self):
+        self.pos = 0; self.done = False; self.avail = [7, 1]; self._r()
+    def reset(self):
+        self._init()                # board resets; self.levels deliberately NOT zeroed
+        return self.frame
+    def _r(self):
+        f = np.zeros((64, 64), int); f[0, self.pos] = 4; self.frame = f
+    def step(self, a, x=None, y=None):
+        if a == 7 and self.pos < 63: self.pos += 1
+        if self.pos == 3 and self.levels == 0: self.levels = 1
+        self._r(); return self.frame
+
+
+def test_verify_uses_fresh_env_when_reset_retains_progress(tmp_path):
+    """Root cause of the 0-vs-0 mis-measure: the arc env's reset() keeps completed-level
+    progress, so verifying on the reused env makes replay_levels' delta collapse to 0.
+    solve_game must verify on a FRESH env (via make) so a real solve isn't reported as 0."""
+    res = solve.solve_game(CheckpointGame(), mode="search", make=lambda gid: CheckpointGame(),
+                           budget={"max_nodes": 200, "max_depth": 8}, logdir=tmp_path)
+    assert res["levels"] == 1, f"expected 1 replay-verified level, got {res['levels']}"
+    assert res["verified"] is True
+
+
 def test_entry_run_pilot_aggregates(monkeypatch, tmp_path):
     import e119_slm_solver as entry
 

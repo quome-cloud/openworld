@@ -32,3 +32,39 @@ def test_obj_funsearch_prompt_kshot_and_failed_block():
     p = synth._obj_funsearch_prompt(samples, "actions=[4]", failed=["tried Z -> scored 0"])
     assert "predict_v0" in p and "predict_v1" in p and "predict_v2" in p
     assert "tried Z -> scored 0" in p and "do not repeat" in p.lower()
+
+
+# --- synthesize_obj tests (Task 3) ---
+
+GOODO = ("def predict(state, action):\n"
+         "    ns={'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}\n"
+         "    if action==[4]:\n        [o.__setitem__('x', o['x']+1) for o in ns['objects']]\n"
+         "    return ns, False")
+GOALO = "def goal_score(state):\n    o=state['objects'][0]\n    return float(5 - o['x'])"
+S2 = {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 1, "x": 3}]}
+TR2 = [_t(S0, [4], S1, False), _t(S1, [4], S2, False)]
+
+def _runner(src, goal):
+    def run(prompt, schema, model, game, **kw):
+        return {"final": {"predict_src": src, "goal_score_src": goal, "rationale": "x"},
+                "events": [], "tainted": False, "raw": "", "model_version": ""}
+    return run
+
+def test_synthesize_obj_accepts_and_returns_ensemble(tmp_path):
+    src, fn, goal, ens = synth.synthesize_obj(TR2, "actions=[4]", "g", n_retries=1,
+                                              traces_dir=str(tmp_path), _runner=_runner(GOODO, GOALO))
+    assert fn is not None and callable(goal)
+    ns, lu = fn(dict(S0), [4]); assert ns["objects"][0]["x"] == 2
+    assert isinstance(ens, list) and len(ens) >= 1 and all(callable(f) for f in ens)
+
+def test_synthesize_obj_rejects_numpy_predict(tmp_path):
+    npp = "def predict(state, action):\n    import numpy as np\n    return state, False"
+    src, fn, goal, ens = synth.synthesize_obj(TR2, "actions=[4]", "g", n_retries=1,
+                                              traces_dir=str(tmp_path), _runner=_runner(npp, GOALO))
+    assert fn is None and ens == []      # gate env == sandbox: a numpy predict cannot pass
+
+def test_synthesize_obj_returns_none_when_never_passes(tmp_path):
+    bad = "def predict(state, action):\n    return state, False"   # never moves -> mispredicts
+    src, fn, goal, ens = synth.synthesize_obj(TR2, "actions=[4]", "g", n_retries=2,
+                                              traces_dir=str(tmp_path), _runner=_runner(bad, GOALO))
+    assert fn is None and ens == []

@@ -355,6 +355,73 @@ def _obj_funsearch_prompt(samples, action_api, failed=None):
             f"Return JSON {{predict_src, goal_score_src, rationale}}.")
 
 
+def _score_obj_program(predict_fn, transitions, fields):
+    """(n_matched, signature, fails) over object state -- the clustering signature for the FunSearch DB."""
+    n, fails = verify.score_obj(predict_fn, transitions, fields)
+    failed_ids = {id(t) for (t, _) in fails}
+    sig = tuple(id(t) not in failed_ids for t in transitions)
+    return n, sig, fails
+
+
+def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, traces_dir=None, _runner=None,
+                   functions_per_prompt=2, seed=0, seed_src=None, k_ensemble=3, fields=("color", "y", "x")):
+    """FunSearch over OBJECT-state predict(); decision-equivalent gate (verify.check_obj); sandbox-env compile
+    (verify.compile_obj_predict). Returns (src, predict_fn, goal_fn, ensemble[top-k callables]) on a full
+    gate-pass, else (None, None, None, [])."""
+    run = _runner or codex_iso.run
+    if len(transitions) < 2:
+        return None, None, None, []
+    split = max(1, min(len(transitions) - 1, int(len(transitions) * 0.7)))
+    train, held = transitions[:split], transitions[split:]
+    db = _Database(functions_per_prompt=functions_per_prompt, rng=np.random.RandomState(seed))
+
+    def _ensemble():
+        return [p["fn"] for p in db.top_k(k_ensemble) if p["fn"] is not None] or ([db.best["fn"]] if db.best and db.best["fn"] else [])
+
+    def _accept(prog):
+        goal_fn = verify.compile_goal(prog["goal_src"]) if prog.get("goal_src") else None
+        if traces_dir:
+            try:
+                with open(os.path.join(traces_dir, f"{game}_obj_verified.py"), "w") as fh:
+                    fh.write(f"# E125 verified OBJECT predict()+goal_score() for {game}\n{prog['src'] or ''}\n\n{prog.get('goal_src') or ''}\n")
+            except Exception:
+                pass
+        return prog["src"], prog["fn"], goal_fn, _ensemble()
+
+    if seed_src:
+        sfn = verify.compile_obj_predict(seed_src)
+        if sfn is not None:
+            sc, sig, fails = _score_obj_program(sfn, held, fields)
+            db.register(seed_src, sfn, sc, sig, fails, None, rationale="carried-forward best")
+            if sc == len(held):
+                return _accept(db.best)
+
+    for attempt in range(n_retries):
+        samples = db.sample()
+        prompt = (_obj_prompt(train, action_api, None) if not samples
+                  else _obj_funsearch_prompt(samples, action_api, failed=db.failed_summaries()))
+        res = run(prompt, SCHEMA, model, game)
+        final = res.get("final") or {}
+        src = final.get("predict_src")
+        goal_src = final.get("goal_score_src")
+        rationale = final.get("rationale") or ""
+        tainted = bool(res.get("tainted"))
+        fn = None if tainted else verify.compile_obj_predict(src or "")
+        sc, sig, fails = _score_obj_program(fn, held, fields)
+        if src and not tainted:
+            db.register(src, fn, sc, sig, fails, goal_src, rationale=rationale)
+        best_full = db.best is not None and db.best["score"] == len(held) and db.best["fn"] is not None
+        if traces_dir:
+            capture_lib.codex_record(traces_dir, {"game": game, "level": 0, "regime": attempt, "model": model,
+                "model_version": res.get("model_version", ""), "prompt": prompt, "raw": res.get("raw", ""),
+                "events": res.get("events", []), "parsed": {"subgoals": [], "macros": []},
+                "decision": ("accept" if best_full else f"evolve {sc}/{len(held)} (best {db.best['score'] if db.best else 0})"),
+                "tainted": tainted})
+        if best_full:
+            return _accept(db.best)
+    return None, None, None, []
+
+
 def ensemble_disagreement(predict_fns, state, action, fields=("color", "y", "x")):
     """Fraction of programs whose predicted next_state key differs from the plurality (errors are their own
     outcome). 0.0 when all agree or a single program."""

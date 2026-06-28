@@ -280,11 +280,20 @@ finds the goal-as-procedure wins that state-scored discovery cannot (\S\ref{sec:
 under $1\%$, while purpose-built systems do far better (Table~\ref{tab:priorart}). The state of the
 art, \emph{baseline1}~\cite{baseline1_ewm}, has a coding agent construct an \emph{executable} Python
 world model with verifiers and an MDL simplicity bias---the recipe our live coding agent reproduces in
-OpenWorld with Claude. \emph{Auditability caveat:} baseline1 targets a source-free protocol, but its
-reported \ArcBaselineFull/\ArcUnionGames{} predates a source-leakage patch to its harness (the
-vulnerable version is archived in their repository; the safeguards postdate the paper); absent
-per-run leakage audit, the published figure cannot be confirmed leak-free. This motivates the
-per-run audited telemetry we adopt.
+OpenWorld with Claude. \emph{Rigor and auditability caveats.} baseline1 is a sole-authored,
+by-its-own-description ``intentionally direct'' systems report: a scripted controller over
+\emph{predefined} world-model interfaces and verifier programs, with an unspecified ``MDL-like''
+refactor, \emph{no} ablations (the verifier, refactor, planner, and base model are not separated), and
+results on the \emph{public} set only---the private validation set, by the author's statement,
+``remains to be tested.'' It targets a source-free protocol but its reported
+\ArcBaselineFull/\ArcUnionGames{} predates a source-leakage patch to its harness (the vulnerable
+version is archived in their repository; the safeguards postdate the paper), and the agent's ``broad
+system access'' leakage ``audit'' is asserted, not quantified. We do not dispute the result---we build
+on the recipe---but absent a per-run leakage audit, ablations, error bars, or reported cost, the figure
+can be neither confirmed leak-free nor attributed to its components. That is precisely the gap our
+protocol closes: per-run audited telemetry that \emph{quantifies} the leak channel (we catch our own
+agent reading source), replay $+$ OpenWorld round-trip verification, two clearly-labeled protocols, and
+reported cost.
 \emph{DreamTeam}~\cite{dreamteam_workspace} casts the external workspace
 (prompts, files, code) as the trainable substrate; the training-free \emph{Graph
 Explorer}~\cite{graphexplore_arc3} maps each game as a directed state graph with status-bar masking and

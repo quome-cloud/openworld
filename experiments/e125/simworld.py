@@ -69,3 +69,47 @@ def plan(predict_fn, initial_frame, candidates_fn, budget, max_depth=40, goal_fn
             if n >= budget:
                 break
     return None
+
+
+import copy as _copy_sw
+import math as _math_sw
+
+
+def plan_obj(predict_fn, initial_state, candidates_fn, budget, max_depth=40, goal_fn=None):
+    """Best-first energy descent over OBJECT states. Dedup by objstate.state_key; each frontier node carries its
+    own state (one predict() per expansion). Returns the winning action list (predicted level_up) or None."""
+    from e125 import objstate
+    import heapq
+
+    def energy(s):
+        if goal_fn is None:
+            return 0.0
+        try:
+            v = float(goal_fn(s))
+        except Exception:
+            return 1e18
+        return v if _math_sw.isfinite(v) else 1e18
+
+    seen = {objstate.state_key(initial_state)}
+    counter = 0
+    heap = [(energy(initial_state), 0, counter, initial_state, [])]
+    n = 0
+    while heap and n < budget:
+        _, depth, _, state, actions = heapq.heappop(heap)
+        if depth >= max_depth:
+            continue
+        for st in (s if isinstance(s, list) else [s] for s in candidates_fn(state)):
+            try:
+                ns, lu = predict_fn(_copy_sw.deepcopy(state), list(st))
+            except Exception:
+                continue
+            n += 1
+            if lu:
+                return actions + [st]
+            key = objstate.state_key(ns)
+            if key not in seen:
+                seen.add(key); counter += 1
+                heapq.heappush(heap, (energy(ns), depth + 1, counter, ns, actions + [st]))
+            if n >= budget:
+                break
+    return None

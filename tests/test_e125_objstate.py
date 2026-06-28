@@ -53,3 +53,18 @@ def test_perceive_src_sandbox_safe_no_hasattr():
     # (1, H, W) wrapped grid — same data with an extra outer dimension
     wrapped = [grid]
     assert ns["perceive"](wrapped) == objstate.object_state(grid)
+
+
+# --- I2: order-insensitive state_key (TDD: this FAILS before the fix) ---
+
+def test_state_key_order_insensitive():
+    """state_key must be identical when same-color objects appear in reversed list order."""
+    s_a = {"bg": 0, "objects": [
+        {"color": 3, "y": 1, "x": 1},
+        {"color": 3, "y": 5, "x": 6},
+    ]}
+    s_b = {"bg": 0, "objects": [
+        {"color": 3, "y": 5, "x": 6},
+        {"color": 3, "y": 1, "x": 1},
+    ]}
+    assert objstate.state_key(s_a) == objstate.state_key(s_b)

@@ -2,12 +2,32 @@
 exact-matches every held-out transition (masked next-frame equality + level_up equality). Predicts are
 compiled in-process for speed (codex is not adversarial; a predict that errors fails the gate)."""
 import copy
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import numpy as np
 from e125 import objstate as _objstate
+from openworld.sandbox import SAFE_BUILTINS
 
 
 def compile_predict(src):
+    """Compile a pixel predict(frame, action) -> (next_frame, level_up). Uses full builtins + numpy
+    because pixel compares legitimately need array ops. Do NOT use for object-state predicts."""
     ns = {"np": np, "__builtins__": __builtins__}
+    try:
+        exec(src, ns)
+        fn = ns.get("predict")
+        return fn if callable(fn) else None
+    except Exception:
+        return None
+
+
+def compile_obj_predict(src):
+    """Compile an object-state predict(state, action) -> (next_state, level_up) in the OpenWorld
+    sandbox environment (SAFE_BUILTINS only — no numpy, no __import__). Object-state predicts
+    operate on dicts/lists/ints and need no numpy; running them in SAFE_BUILTINS guarantees the
+    gate environment is a SUBSET of the World's sandbox so a passing predict never fails at
+    run-time. Returns the callable, or None if the source fails to compile or define predict()."""
+    ns = {"__builtins__": SAFE_BUILTINS}
     try:
         exec(src, ns)
         fn = ns.get("predict")

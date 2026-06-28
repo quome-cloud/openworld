@@ -44,7 +44,7 @@ def object_state(frame, ignore_colors=()):
 
 def state_key(s, fields=("color", "y", "x")):
     return (int(s.get("bg", -1)),
-            tuple(tuple(o[f] for f in fields) for o in s.get("objects", [])))
+            tuple(sorted(tuple(o[f] for f in fields) for o in s.get("objects", []))))
 
 
 # Self-contained perceive(data) for a CodePerceptor (ignore_colors fixed to none at the boundary).

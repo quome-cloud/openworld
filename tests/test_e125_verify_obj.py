@@ -26,25 +26,25 @@ MUTATEP = ("def predict(state, action):\n"
            "    state['objects'][0]['x'] = 999\n"
            "    return state, False")
 
+# All object-gate tests compile via compile_obj_predict (sandbox-env, no numpy/imports).
+
 def test_check_obj_accepts_decision_correct():
-    ok, ce = verify.check_obj(verify.compile_predict(GOODP), TR)
+    ok, ce = verify.check_obj(verify.compile_obj_predict(GOODP), TR)
     assert ok is True and ce is None
 
 def test_check_obj_ignores_non_decision_fields():
-    ok, ce = verify.check_obj(verify.compile_predict(COSMETIC), TR)
+    ok, ce = verify.check_obj(verify.compile_obj_predict(COSMETIC), TR)
     assert ok is True                      # size differs but is not a decision field
 
 def test_check_obj_rejects_decision_wrong():
-    ok, ce = verify.check_obj(verify.compile_predict(BADP), TR)
+    ok, ce = verify.check_obj(verify.compile_obj_predict(BADP), TR)
     assert ok is False and ce is not None and ce["action"] == [4]
 
 def test_score_obj_counts_matches():
-    n, fails = verify.score_obj(verify.compile_predict(GOODP), TR)
+    n, fails = verify.score_obj(verify.compile_obj_predict(GOODP), TR)
     assert n == 2 and fails == []
-    n, fails = verify.score_obj(verify.compile_predict(BADP), TR)
+    n, fails = verify.score_obj(verify.compile_obj_predict(BADP), TR)
     assert n == 0 and len(fails) == 2
-
-# --- new tests added in P2.2 fix ---
 
 def test_check_obj_none_predict():
     """check_obj(None, TR) must return (False, non-None counterexample)."""
@@ -53,13 +53,13 @@ def test_check_obj_none_predict():
 
 def test_exception_predict_check_obj_false():
     """A predict that raises -> check_obj returns (False, counterexample not None)."""
-    fn = verify.compile_predict(RAISEP)
+    fn = verify.compile_obj_predict(RAISEP)
     ok, ce = verify.check_obj(fn, TR)
     assert ok is False and ce is not None
 
 def test_exception_predict_score_obj_fail():
     """A predict that raises -> score_obj counts every transition as a fail."""
-    fn = verify.compile_predict(RAISEP)
+    fn = verify.compile_obj_predict(RAISEP)
     n, fails = verify.score_obj(fn, TR)
     assert n == 0 and len(fails) == len(TR)
 
@@ -72,9 +72,56 @@ def test_mutating_predict_does_not_corrupt_transition():
         False,
     )
     original_x = t["state"]["objects"][0]["x"]
-    fn = verify.compile_predict(MUTATEP)
+    fn = verify.compile_obj_predict(MUTATEP)
     verify.score_obj(fn, [t])
     assert t["state"]["objects"][0]["x"] == original_x, (
         f"score_obj mutated t['state']: x changed from {original_x} to "
         f"{t['state']['objects'][0]['x']}"
     )
+
+# --- I1: gate env must be a SUBSET of world sandbox env (TDD: these FAIL before the fix) ---
+
+def test_compile_obj_predict_rejects_numpy():
+    """compile_obj_predict must reject a predict that imports numpy — numpy is absent in the
+    OpenWorld sandbox (SAFE_BUILTINS) so it would raise at World run-time. Gate must match."""
+    numpy_src = (
+        "import numpy as np\n"
+        "def predict(state, action):\n"
+        "    return state, False"
+    )
+    fn = verify.compile_obj_predict(numpy_src)
+    # import statement must fail in the restricted env → None returned
+    assert fn is None, "compile_obj_predict should reject a numpy-importing predict"
+
+def test_compile_obj_predict_stdlib_still_passes():
+    """A stdlib-only predict compiled via compile_obj_predict passes check_obj."""
+    fn = verify.compile_obj_predict(GOODP)
+    ok, ce = verify.check_obj(fn, TR)
+    assert ok is True and ce is None
+
+# --- I2: reversed-object predict still matches after state_key sort fix ---
+
+def test_check_obj_reversed_objects_matches():
+    """A predict that returns correct objects in reversed order must still match
+    (state_key comparison is order-insensitive after the I2 fix)."""
+    S_two = {"bg": 0, "objects": [
+        {"color": 3, "size": 1, "y": 1, "x": 1},
+        {"color": 3, "size": 1, "y": 5, "x": 6},
+    ]}
+    S_two_next = {"bg": 0, "objects": [
+        {"color": 3, "size": 1, "y": 1, "x": 2},
+        {"color": 3, "size": 1, "y": 5, "x": 7},
+    ]}
+    # Correct predict but returns objects in reversed order
+    rev_pred_src = (
+        "def predict(state, action):\n"
+        "    ns = {'bg': state['bg'], 'objects': [dict(o) for o in state['objects']]}\n"
+        "    if action == [4]:\n"
+        "        for o in ns['objects']: o['x'] += 1\n"
+        "    ns['objects'] = list(reversed(ns['objects']))\n"
+        "    return ns, False"
+    )
+    tr_two = [{"state": S_two, "action": [4], "next_state": S_two_next, "level_up": False}]
+    fn = verify.compile_obj_predict(rev_pred_src)
+    ok, ce = verify.check_obj(fn, tr_two)
+    assert ok is True, f"check_obj must match reversed-order objects; counterexample: {ce}"

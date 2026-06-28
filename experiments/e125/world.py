@@ -99,10 +99,10 @@ def build_world(predict_src: str, goal_src: str, initial_state: dict,
         transition=transition,
     )
     # Attach perception boundary (frame -> object state) for to_spec.
-    # modality="image" keeps it within MODALITIES; produces=["objects"] is List[str].
+    # modality="image" keeps it within MODALITIES; produces=["bg","objects"] matches PERCEIVE_SRC output.
     w.perceptors = [CodePerceptor(
         objstate.PERCEIVE_SRC,
-        produces=["objects"],
+        produces=["bg", "objects"],
         modality="image",
     )]
     # Attach goal energy for to_spec (serialised as an objectives descriptor).

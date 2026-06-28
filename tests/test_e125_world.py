@@ -27,5 +27,19 @@ def test_to_spec_round_trips_and_has_map():
     w = world.build_world(PRED, GOAL, S0, [[1],[2],[3],[4]], "synthA")
     spec = O.to_spec(w)
     assert O.from_spec(spec, allow_code=True) is not None
-    assert spec.get("preview", {}).get("graph") is not None   # the MAP exists
+    # M2: {} is not None but is empty — assert the graph actually has reachable nodes
+    assert spec["preview"]["graph"]["nodes"], (
+        f"Expected non-empty graph nodes, got: {spec['preview']['graph']}"
+    )
     assert world.round_trip_ok(w)
+
+
+# --- M1: perceptor produces must include both 'bg' and 'objects' (TDD: FAILS before fix) ---
+
+def test_perceptor_produces_bg_and_objects():
+    """PERCEIVE_SRC returns {'bg', 'objects'}; produces must declare both."""
+    w = world.build_world(PRED, GOAL, S0, [[1],[2],[3],[4]], "synthA")
+    produces = w.perceptors[0].produces
+    assert "bg" in produces and "objects" in produces, (
+        f"perceptor.produces should include 'bg' and 'objects', got: {produces}"
+    )

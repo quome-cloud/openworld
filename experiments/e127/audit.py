@@ -5,7 +5,11 @@ import os, glob, re
 
 SOURCE_READ = re.compile(
     r"environment_files|inspect\.getsource|spec_from_file_location|"
-    r"importlib\.util\.spec_from_file_location|[a-z0-9]{4,8}\.py['\"]")
+    r"importlib\.util\.spec_from_file_location|[a-z0-9]{4,8}\.py['\"]|"
+    # General file I/O: a reconstructed ENGINE is a pure function over frames and
+    # never reads files, so any of these is a source-read bypass (e.g. f-string /
+    # variable filename open(f"{gid}.py"), or pathlib Path(...).read_text()).
+    r"\bopen\s*\(|read_text|read_bytes|pathlib|\bPath\s*\(")
 
 
 def audit_dir(wd):

@@ -19,3 +19,13 @@ def test_flags_getsource(tmp_path):
 def test_flags_spec_from_file_location(tmp_path):
     (tmp_path / "y.py").write_text("import importlib.util\nimportlib.util.spec_from_file_location('g','g.py')\n")
     assert audit.audit_clean(str(tmp_path)) is False
+
+def test_flags_fstring_open(tmp_path):
+    # f-string / variable filename: open(f"{gid}.py") has no literal id before .py"
+    (tmp_path / "z.py").write_text("gid = 'dc22'\nsrc = open(f'{gid}.py').read()\n")
+    assert audit.audit_clean(str(tmp_path)) is False
+
+def test_flags_pathlib_read_text(tmp_path):
+    # pathlib source read: no open(), no literal id
+    (tmp_path / "w.py").write_text("import pathlib\nsrc = pathlib.Path(p).read_text()\n")
+    assert audit.audit_clean(str(tmp_path)) is False

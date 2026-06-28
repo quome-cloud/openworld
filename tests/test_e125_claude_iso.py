@@ -5,6 +5,13 @@ from e125 import claude_iso
 FINAL = {"predict_src": "def predict(state, action):\n    return state, False",
          "goal_score_src": "def goal_score(state):\n    return 0.0", "rationale": "x"}
 
+# FINAL_BRACES: predict_src contains dict literals with { and } — stress-tests brace balancing.
+FINAL_BRACES = {
+    "predict_src": "def predict(state, action):\n    ns={'bg':state['bg'],'objects':[]}\n    return ns, False",
+    "goal_score_src": "def goal_score(state):\n    return 0.0",
+    "rationale": "y",
+}
+
 def test_extract_json_plain():
     assert claude_iso._extract_json(json.dumps(FINAL))["predict_src"].startswith("def predict")
 
@@ -15,6 +22,28 @@ def test_extract_json_in_fences_with_prose():
 
 def test_extract_json_none_when_absent():
     assert claude_iso._extract_json("no json here") is None
+
+# --- brace-balanced scanner tests (a), (b), (c) ---
+
+def test_extract_json_braces_inside_predict_src_plain():
+    """(a) predict_src contains { and } — lazy regex would truncate; scanner must not."""
+    text = json.dumps(FINAL_BRACES)
+    got = claude_iso._extract_json(text)
+    assert got is not None
+    assert "{'bg'" in got["predict_src"]
+
+def test_extract_json_braces_in_fences_with_prose():
+    """(b) JSON with braces inside predict_src, wrapped in ```json fences, prose before and after."""
+    text = "Thinking...\n```json\n" + json.dumps(FINAL_BRACES) + "\n```\nHope that helps!"
+    got = claude_iso._extract_json(text)
+    assert got is not None and got["rationale"] == "y"
+    assert "{'bg'" in got["predict_src"]
+
+def test_extract_json_prose_with_braces_after_object():
+    """(c) Stray braces in prose that follows the object must not corrupt extraction."""
+    text = "Result: " + json.dumps(FINAL_BRACES) + "\nSee also: {TODO} and {FIXME} for details."
+    got = claude_iso._extract_json(text)
+    assert got is not None and got["rationale"] == "y"
 
 def test_parse_result_wraps_claude_json_envelope():
     # claude --output-format json prints an envelope whose `result` holds the assistant text

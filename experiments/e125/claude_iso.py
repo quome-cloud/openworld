@@ -13,18 +13,59 @@ _DENY = "Bash,Read,Edit,Write,Glob,Grep,WebFetch,WebSearch,Task,NotebookEdit,Mul
 
 
 def _extract_json(text):
-    """Return the first JSON object containing 'predict_src' from text (tolerating ```json fences / prose)."""
+    """Return the first JSON object containing 'predict_src' from text (tolerating ```json fences / prose).
+
+    Uses a brace-balanced scanner: walks left-to-right tracking depth while skipping string
+    literals (handling \\" escapes), so braces inside predict_src (dict literals, function
+    bodies) do not truncate the candidate prematurely.  Handles (a) plain JSON, (b) ```json
+    fences with prose before/after, (c) prose containing stray braces after the object.
+    Single O(n) pass; no catastrophic backtracking.
+    """
     if not text:
         return None
-    fenced = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S)
-    candidates = fenced + re.findall(r"\{.*\}", text, re.S)
-    for c in candidates:
-        try:
-            obj = json.loads(c)
-        except Exception:
-            continue
-        if isinstance(obj, dict) and "predict_src" in obj:
-            return obj
+    i = 0
+    n = len(text)
+    while i < n:
+        start = text.find('{', i)
+        if start == -1:
+            break
+        depth = 0
+        j = start
+        end = None
+        while j < n:
+            ch = text[j]
+            if ch == '"':
+                # skip over a JSON string literal, honouring backslash escapes
+                j += 1
+                while j < n:
+                    c2 = text[j]
+                    if c2 == '\\':
+                        j += 2          # skip escaped char (including \\")
+                    elif c2 == '"':
+                        j += 1
+                        break
+                    else:
+                        j += 1
+            elif ch == '{':
+                depth += 1
+                j += 1
+            elif ch == '}':
+                depth -= 1
+                j += 1
+                if depth == 0:
+                    end = j
+                    break
+            else:
+                j += 1
+        if end is not None:
+            candidate = text[start:end]
+            try:
+                obj = json.loads(candidate)
+                if isinstance(obj, dict) and "predict_src" in obj:
+                    return obj
+            except Exception:
+                pass
+        i = start + 1   # advance past the '{' we just tried and look for the next one
     return None
 
 
@@ -48,6 +89,7 @@ def _default_exec(cmd, cwd, timeout):
 
 
 def run(prompt, schema, model="claude-opus-4-8", game="", workdir=None, timeout=300, _exec=None):
+    # schema is unused: claude has no --output-schema flag; JSON shape is enforced via the prompt instruction
     ex = _exec or _default_exec
     workdir = workdir or tempfile.mkdtemp(prefix="e125_claude_")   # clean dir: NO game source here
     os.makedirs(workdir, exist_ok=True)
@@ -58,6 +100,9 @@ def run(prompt, schema, model="claude-opus-4-8", game="", workdir=None, timeout=
     try:
         rc, out, err = ex(cmd, workdir, timeout)
     except Exception as e:
-        return {"final": None, "events": [], "tainted": False, "model_version": "", "raw": "",
-                "error": f"{type(e).__name__}: {e}"}
-    return parse_result(out, model, game, events=[])
+        return {"final": None, "events": [], "tainted": False, "model_version": model, "raw": "",
+                "rc": None, "error": f"{type(e).__name__}: {e}"}
+    result = parse_result(out, model, game, events=[])
+    result["rc"] = rc
+    result["stderr"] = err
+    return result

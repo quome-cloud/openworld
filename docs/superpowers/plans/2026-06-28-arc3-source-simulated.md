@@ -22,6 +22,7 @@
 - **Determinism / honesty (CLAUDE.md):** fixed seeds; `assert` the sign/shape of every claim; call any `save_results` BEFORE asserts. Tests must be deterministic (no `random` without a seed, no wall-clock, no real network).
 - **Commit after each task** with the trailing `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>` line. Work happens in the worktree `/Users/jim/Desktop/openworld-e127` on branch `e127-source-simulated`.
 - **Run tests with the arc venv:** `~/.arcv/bin/python -m pytest tests/e127/<file> -v`.
+- **All perception/interaction modalities are in scope.** Frame perception is the `(H,W)` grid; interaction is directional (`1–5,7`) AND click/mouse (`ACTION6` with `x,y`). Click targets are inferred ONLY from pixels (small connected components + rare-color cells) — never from source or any privileged engine method. Candidate actions are derived from the game's `available_actions`, so a click-only game gets clicks at inferred targets and a directional game gets directional moves. The reconstruct loop (Task 9) must be validated on BOTH a directional fixture (`ToyGame`) and a click fixture (`ToyClickGame`).
 
 ## Shared interfaces (every task depends on these — copy exactly)
 
@@ -1613,6 +1614,329 @@ git commit -m "E127 T9: differential-CEGIS reconstruction loop (real-env oracle 
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
+
+---
+
+### Task 3P: Perception primitives — all modalities (`perception.py`)
+
+Execution order: after Task 3 (engine), before Task 5 (probes). Pure functions; cheap to test with hand-crafted frames + the directional ToyGame.
+
+**Files:**
+- Create: `experiments/e127/perception.py`
+- Test: `tests/e127/test_perception.py`
+
+**Interfaces:**
+- Consumes: `numpy`.
+- Produces:
+  - `infer_click_targets(frame, max_size=40, rare_frac=0.02) -> list[(y,x)]` — pixel-only target inference: cells in small 4-connected non-background components, plus rare-color cells. Background = the most common color.
+  - `board_match_error(pred, real) -> {"cells_total":int,"cells_wrong":int,"exact":bool,"error_map":np.ndarray(bool)}` — the simulated-vs-real board error (the perception unit test against reality). Shape mismatch → all wrong.
+  - `render_diff(pred, real) -> str` — a compact text map: a header line + an `X`/`.` grid marking disagreeing cells (the viewable board diff).
+  - `candidate_actions(frame, avail) -> list[(kind,x,y)]` — from `available_actions`: directional kinds become `(k,None,None)`; `6` becomes a click `(6, x, y)` (x=col, y=row) at each inferred target.
+
+- [ ] **Step 1: Write the failing test**
+```python
+# tests/e127/test_perception.py
+import numpy as np
+from experiments.e127 import perception as P
+
+def test_infer_click_targets_small_sprites_only():
+    f = np.zeros((8, 8), dtype=int)
+    f[2, 2] = 5                     # small sprite (size 1)
+    f[5, 5] = 6                     # small sprite (size 1)
+    f[0:1, 0:8] = 0                 # background row stays bg
+    f[6:8, 0:8] = 3                 # a LARGE block (16 cells) -> not a click target
+    t = P.infer_click_targets(f, max_size=4)
+    assert (2, 2) in t and (5, 5) in t
+    assert (6, 0) not in t          # big block excluded
+
+def test_board_match_error_counts_and_exact():
+    a = np.zeros((4, 4), dtype=int); b = np.zeros((4, 4), dtype=int)
+    assert P.board_match_error(a, b)["exact"] is True
+    b[1, 1] = 9
+    e = P.board_match_error(a, b)
+    assert e["exact"] is False and e["cells_wrong"] == 1 and e["cells_total"] == 16
+    assert e["error_map"][1, 1] == True and e["error_map"].sum() == 1
+
+def test_board_match_error_shape_mismatch_all_wrong():
+    e = P.board_match_error(np.zeros((2, 2), dtype=int), np.zeros((4, 4), dtype=int))
+    assert e["exact"] is False and e["cells_wrong"] == e["cells_total"]
+
+def test_render_diff_marks_differences():
+    a = np.zeros((3, 3), dtype=int); b = np.zeros((3, 3), dtype=int); b[0, 0] = 1
+    s = P.render_diff(a, b)
+    assert "X" in s and "board-match" in s
+
+def test_candidate_actions_click_game():
+    f = np.zeros((8, 8), dtype=int); f[2, 2] = 5
+    acts = P.candidate_actions(f, avail=[6])
+    assert (6, 2, 2) in acts        # click at x=col=2, y=row=2
+    assert all(a[0] == 6 for a in acts)
+
+def test_candidate_actions_directional_game():
+    f = np.zeros((8, 8), dtype=int)
+    acts = P.candidate_actions(f, avail=[1, 2, 3, 4, 7])
+    assert (1, None, None) in acts and (7, None, None) in acts
+    assert all(a[0] != 6 for a in acts)
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+Run: `~/.arcv/bin/python -m pytest tests/e127/test_perception.py -v`
+Expected: FAIL — `ModuleNotFoundError: experiments.e127.perception`.
+
+- [ ] **Step 3: Write minimal implementation**
+```python
+# experiments/e127/perception.py
+"""All-modality perception for reconstruction. Frame perception = the (H,W) grid. Interaction =
+directional (1-5,7) + click/mouse (ACTION6 at x,y). Click targets are inferred ONLY from pixels
+(small 4-connected components + rare-color cells) -- honest, source-free. board_match_error /
+render_diff measure the simulated board against the perceived real board (perception vs reality)."""
+import numpy as np
+
+
+def _background(frame):
+    vals, cnts = np.unique(frame, return_counts=True)
+    return int(vals[int(np.argmax(cnts))])
+
+
+def _components(mask):
+    H, W = mask.shape
+    seen = np.zeros_like(mask, dtype=bool)
+    comps = []
+    for y in range(H):
+        for x in range(W):
+            if mask[y, x] and not seen[y, x]:
+                stack = [(y, x)]; seen[y, x] = True; comp = []
+                while stack:
+                    cy, cx = stack.pop(); comp.append((cy, cx))
+                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                        ny, nx = cy + dy, cx + dx
+                        if 0 <= ny < H and 0 <= nx < W and mask[ny, nx] and not seen[ny, nx]:
+                            seen[ny, nx] = True; stack.append((ny, nx))
+                comps.append(comp)
+    return comps
+
+
+def infer_click_targets(frame, max_size=40, rare_frac=0.02):
+    frame = np.asarray(frame); bg = _background(frame)
+    targets = set()
+    for comp in _components(frame != bg):
+        if len(comp) <= max_size:
+            targets.update(comp)
+    vals, cnts = np.unique(frame, return_counts=True); tot = frame.size
+    rare = {int(v) for v, c in zip(vals, cnts) if int(v) != bg and c / tot <= rare_frac}
+    if rare:
+        for y in range(frame.shape[0]):
+            for x in range(frame.shape[1]):
+                if int(frame[y, x]) in rare:
+                    targets.add((y, x))
+    return sorted(targets)
+
+
+def board_match_error(pred, real):
+    pred = np.asarray(pred); real = np.asarray(real)
+    if pred.shape != real.shape:
+        return {"cells_total": int(real.size), "cells_wrong": int(real.size),
+                "exact": False, "error_map": np.ones(real.shape, dtype=bool)}
+    diff = pred != real
+    return {"cells_total": int(real.size), "cells_wrong": int(diff.sum()),
+            "exact": bool(not diff.any()), "error_map": diff}
+
+
+def render_diff(pred, real):
+    e = board_match_error(pred, real); em = e["error_map"]
+    lines = [f"board-match: {e['cells_total'] - e['cells_wrong']}/{e['cells_total']} cells, exact={e['exact']}"]
+    for y in range(em.shape[0]):
+        lines.append("".join("X" if em[y, x] else "." for x in range(em.shape[1])))
+    return "\n".join(lines)
+
+
+def candidate_actions(frame, avail):
+    acts = []
+    for k in avail:
+        if int(k) == 6:
+            for (y, x) in infer_click_targets(frame):
+                acts.append((6, int(x), int(y)))
+        else:
+            acts.append((int(k), None, None))
+    return acts
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+Run: `~/.arcv/bin/python -m pytest tests/e127/test_perception.py -v`
+Expected: PASS (6 tests).
+
+- [ ] **Step 5: Commit**
+```bash
+git add experiments/e127/perception.py tests/e127/test_perception.py
+git commit -m "E127 T3P: all-modality perception (click-target inference, board-match diff, candidate actions)
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 3C: Click/mouse ToyClickGame fixture (`tests/e127/toy_click.py`)
+
+A click-ONLY (mouse) ground-truth game with an **ordered-protocol** win (the goal-as-procedure case: press buttons in a fixed sequence). `avail=[6]`. Hidden state = a `phase` index. Used so the reconstruct loop (Task 9) is validated on a mouse game, not just directional.
+
+ToyClickGame rules (8×8, colors 0–15), fixed and exact:
+- Background 0. Three button sprites (size 1): button A color 5 at (2,2), button B color 6 at (4,5), button C color 7 at (6,1). Status bar cell (0,0) = `(t % 15) + 1`, `t=0` at reset.
+- `avail = [6]` (click only). A click is `step(6, x, y)` with x=col, y=row.
+- Protocol: the buttons must be PRESSED in order A→B→C. Clicking the *correct next* button (matching the hidden `phase`: 0→A,1→B,2→C) advances `phase += 1` and recolors that button to 3 (pressed). Clicking anything else (wrong button, already-pressed, or empty cell) is a NO-OP (board unchanged except the status bar still ticks on every accepted step — but an invalid click does NOT tick `t`; only a *valid target click* advances `t`. Rationale: matches "non-target clicks are no-ops that dedup away"). When `phase == 3`, `levels += 1`, `done = True` (`win = 1`).
+- Determinism: identical click sequences from reset yield identical frames.
+
+**Files:**
+- Create: `tests/e127/toy_click.py`
+- Test: `tests/e127/test_toy_click.py`
+
+**Interfaces:**
+- Produces: `ToyClickGame()` (GameLike), `toy_click_factory()`, `TOY_CLICK_ENGINE_SRC` (faithful Engine str), `CLICK_ACTION_API` (str), and target coords `A=(2,2),B=(4,5),C=(6,1)`.
+
+- [ ] **Step 1: Write the failing test**
+```python
+# tests/e127/test_toy_click.py
+import numpy as np
+from tests.e127.toy_click import ToyClickGame, toy_click_factory, TOY_CLICK_ENGINE_SRC
+from experiments.e127.safe_exec import compile_engine
+from experiments.e127 import engine, perception as P
+
+def test_reset_layout_click_only():
+    g = ToyClickGame(); f = g.reset()
+    assert f.shape == (8, 8)
+    assert f[2, 2] == 5 and f[4, 5] == 6 and f[6, 1] == 7
+    assert f[0, 0] == 1 and g.avail == [6] and g.levels == 0 and g.done is False
+
+def test_invalid_click_is_noop():
+    g = ToyClickGame(); g.reset()
+    before = g.frame.copy()
+    g.step(6, 0, 0)                      # empty cell -> no-op (status bar unchanged too)
+    assert np.array_equal(g.frame, before)
+
+def test_wrong_order_click_is_noop():
+    g = ToyClickGame(); g.reset()
+    before = g.frame.copy()
+    g.step(6, 5, 4)                      # clicking B (x=5,y=4) before A -> no-op
+    assert np.array_equal(g.frame, before)
+
+def test_ordered_protocol_wins():
+    g = ToyClickGame(); g.reset()
+    g.step(6, 2, 2)                      # press A (x=col=2,y=row=2)
+    assert g.frame[2, 2] == 3 and g.levels == 0
+    g.step(6, 5, 4)                      # press B
+    assert g.frame[4, 5] == 3 and g.levels == 0
+    g.step(6, 1, 6)                      # press C -> level up
+    assert g.levels == 1 and g.done is True
+
+def test_targets_inferred_from_pixels():
+    g = ToyClickGame(); f = g.reset()
+    targets = P.infer_click_targets(f)
+    assert (2, 2) in targets and (4, 5) in targets and (6, 1) in targets   # the 3 buttons (+status cell)
+
+def test_faithful_click_engine_matches():
+    factory = compile_engine(TOY_CLICK_ENGINE_SRC); assert factory is not None
+    e = factory(); g = ToyClickGame()
+    ef = e.reset(); gf = g.reset()
+    assert np.array_equal(ef, gf)
+    for (x, y) in [(0, 0), (2, 2), (3, 3), (5, 4), (5, 4), (1, 6)]:   # mix of valid/invalid clicks
+        ef = e.step((6, x, y)); gf = g.step(6, x, y)
+        assert np.array_equal(ef, gf), f"mismatch after click ({x},{y})"
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+Run: `~/.arcv/bin/python -m pytest tests/e127/test_toy_click.py -v`
+Expected: FAIL — `ModuleNotFoundError: tests.e127.toy_click`.
+
+- [ ] **Step 3: Write minimal implementation**
+```python
+# tests/e127/toy_click.py
+"""Click-only (mouse) ordered-protocol ground-truth game for E127 (GameLike). Win = press buttons
+A->B->C in order. Hidden state = phase. Invalid/out-of-order clicks are no-ops."""
+import numpy as np
+
+A, B, C = (2, 2), (4, 5), (6, 1)            # (row, col)
+_BTN = [(A, 5), (B, 6), (C, 7)]             # in required press order
+CLICK_ACTION_API = ("Click-only game (avail=[6]). A click is step(6, x, y) with x=col, y=row, 0-63. "
+                    "Small colored buttons must be pressed in a fixed order; pressing the correct next "
+                    "button recolors it; wrong/empty clicks are no-ops. Row 0 is a status bar. 8x8, colors 0-15.")
+
+
+def _draw(pressed, t):
+    f = np.zeros((8, 8), dtype=int)
+    for i, ((ry, cx), col) in enumerate(_BTN):
+        f[ry, cx] = 3 if i < pressed else col
+    f[0, 0] = (t % 15) + 1
+    return f
+
+
+class ToyClickGame:
+    def __init__(self):
+        self.win = 1
+        self._reset_fields()
+
+    def _reset_fields(self):
+        self.phase = 0; self.t = 0; self.levels = 0; self.done = False; self.avail = [6]
+
+    def reset(self):
+        self._reset_fields()
+        self.frame = _draw(self.phase, self.t)
+        return self.frame
+
+    def step(self, a, x=None, y=None):
+        if not self.done and a == 6 and self.phase < 3:
+            (ry, cx), _col = _BTN[self.phase]
+            if x == cx and y == ry:                 # correct next button
+                self.phase += 1; self.t += 1
+                if self.phase == 3:
+                    self.levels += 1; self.done = self.levels >= self.win
+        self.frame = _draw(self.phase, self.t)
+        return self.frame
+
+
+def toy_click_factory():
+    return ToyClickGame()
+
+
+TOY_CLICK_ENGINE_SRC = '''
+_BTN = [((2, 2), 5), ((4, 5), 6), ((6, 1), 7)]
+class Engine:
+    def __init__(self):
+        self.state = {"levels": 0, "phase": 0, "t": 0, "done": False}
+    def _draw(self):
+        f = np.zeros((8, 8), dtype=int)
+        for i, ((ry, cx), col) in enumerate(_BTN):
+            f[ry, cx] = 3 if i < self.state["phase"] else col
+        f[0, 0] = (self.state["t"] % 15) + 1
+        return f
+    def reset(self):
+        self.state = {"levels": 0, "phase": 0, "t": 0, "done": False}
+        return self._draw()
+    def step(self, action):
+        k, x, y = action; s = self.state
+        if not s["done"] and k == 6 and s["phase"] < 3:
+            (ry, cx), _col = _BTN[s["phase"]]
+            if x == cx and y == ry:
+                s["phase"] += 1; s["t"] += 1
+                if s["phase"] == 3:
+                    s["levels"] += 1; s["done"] = s["levels"] >= 1
+        return self._draw()
+    def is_win(self, prev_frame):
+        return self.state["levels"] >= 1
+'''
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+Run: `~/.arcv/bin/python -m pytest tests/e127/test_toy_click.py -v`
+Expected: PASS (6 tests).
+
+- [ ] **Step 5: Commit**
+```bash
+git add tests/e127/toy_click.py tests/e127/test_toy_click.py
+git commit -m "E127 T3C: click/mouse ToyClickGame ordered-protocol fixture
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
+```
+
+> **Note for Task 5 (probes) and Task 9 (reconstruct):** generate candidate action sequences via `perception.candidate_actions(frame, game.avail)` so both modalities are covered, and run the reconstruct offline test on BOTH `toy_factory` (directional) and `toy_click_factory` (click). The click game's faithful engine is `TOY_CLICK_ENGINE_SRC`; a wrong engine for the gap/agreement tests can ignore the ordered protocol.
 
 ---
 

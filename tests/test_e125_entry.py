@@ -40,3 +40,18 @@ def test_candidates_mixed_includes_directional_and_clicks():
     out = entry._candidates_fn([1, 2, 3, 4, 6])(fr)
     assert [1] in out and [2] in out and [3] in out and [4] in out
     assert any(c[0] == 6 for c in out)
+
+
+# --- _obj_candidates_fn tests (Task 3) ---
+
+def test_obj_candidates_directional():
+    cands = entry._obj_candidates_fn([1, 2, 3, 4])
+    st = {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 2, "x": 5}]}
+    assert cands(st) == [[1], [2], [3], [4]]
+
+
+def test_obj_candidates_includes_clicks_from_objects():
+    cands = entry._obj_candidates_fn([1, 2, 3, 4, 6])
+    st = {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 2, "x": 5}]}
+    out = cands(st)
+    assert [1] in out and [6, 5, 2] in out          # click target at (x=5,y=2)

@@ -330,19 +330,20 @@ def _obj_diff(fails, fields=("color", "y", "x"), k=3):
     for t, ns in fails[:k]:
         if ns is None:
             out.append(f"action={t['action']}: predict raised/failed"); continue
-        pk = _objstate_s.state_key(ns, fields)[1]
-        rk = _objstate_s.state_key(t["next_state"], fields)[1]
+        pk = _objstate_s.state_key(ns, fields)
+        rk = _objstate_s.state_key(t["next_state"], fields)
         msg = f"you->{pk} real->{rk}" if pk != rk else "(objects match -- the level_up flag is wrong)"
         out.append(f"action={t['action']}: {msg}")
     return "\n".join(out)
 
 
-def _obj_funsearch_prompt(samples, action_api, failed=None):
+def _obj_funsearch_prompt(samples, action_api, failed=None, goal_src=None):
     progs = sorted(samples, key=lambda p: p["score"])
     blocks = [f"# predict_v{i} (score {p['score']})\n```python\n{_rename_fn(p['src'], 'predict', f'predict_v{i}')}\n```"
               for i, p in enumerate(progs)]
     nextv = len(progs)
     diff = _obj_diff(progs[-1].get("fails") or [])
+    goal_block = f"\nCurrent goal_score():\n```python\n{goal_src}\n```\n" if goal_src else ""
     fail_block = ""
     if failed:
         fail_block = ("\n\nAlready tried and FAILED -- do not repeat these approaches:\n"
@@ -350,7 +351,7 @@ def _obj_funsearch_prompt(samples, action_api, failed=None):
     return ("These are successive predict() object-state world models, ordered by increasing score:\n\n"
             + "\n\n".join(blocks)
             + f"\n\nWrite an IMPROVED `predict_v{nextv}` scoring HIGHER than all above. predict_v{nextv-1} "
-            f"still mispredicts:\n{diff}\n{fail_block}Name the function `predict` (pure Python, no imports, no numpy). "
+            f"still mispredicts:\n{diff}\n{goal_block}{fail_block}Name the function `predict` (pure Python, no imports, no numpy). "
             f"Keep/improve the win hypothesis in level_up and the goal_score(state) energy. Actions: {action_api}. "
             f"Return JSON {{predict_src, goal_score_src, rationale}}.")
 
@@ -376,7 +377,9 @@ def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, 
     db = _Database(functions_per_prompt=functions_per_prompt, rng=np.random.RandomState(seed))
 
     def _ensemble():
-        return [p["fn"] for p in db.top_k(k_ensemble) if p["fn"] is not None] or ([db.best["fn"]] if db.best and db.best["fn"] else [])
+        full = [p["fn"] for p in db.top_k(k_ensemble)
+                if p["fn"] is not None and p["score"] == len(held)]
+        return full or ([db.best["fn"]] if db.best and db.best["fn"] else [])
 
     def _accept(prog):
         goal_fn = verify.compile_goal(prog["goal_src"]) if prog.get("goal_src") else None
@@ -399,7 +402,8 @@ def synthesize_obj(transitions, action_api, game, model="gpt-5.5", n_retries=4, 
     for attempt in range(n_retries):
         samples = db.sample()
         prompt = (_obj_prompt(train, action_api, None) if not samples
-                  else _obj_funsearch_prompt(samples, action_api, failed=db.failed_summaries()))
+                  else _obj_funsearch_prompt(samples, action_api, failed=db.failed_summaries(),
+                                             goal_src=db.best["goal_src"] if db.best else None))
         res = run(prompt, SCHEMA, model, game)
         final = res.get("final") or {}
         src = final.get("predict_src")

@@ -1,0 +1,125 @@
+{
+  "mode": "search",
+  "n_games": 5,
+  "levels_solved": 3,
+  "full_games": 0,
+  "results": [
+    {
+      "game": "tn36",
+      "mode": "search",
+      "levels": 0,
+      "win": 7,
+      "actions": [],
+      "verified": false
+    },
+    {
+      "game": "ar25",
+      "mode": "search",
+      "levels": 0,
+      "win": 8,
+      "actions": [],
+      "verified": false
+    },
+    {
+      "game": "vc33",
+      "mode": "search",
+      "levels": 2,
+      "win": 7,
+      "actions": [
+        [
+          6,
+          62,
+          34
+        ],
+        [
+          6,
+          62,
+          34
+        ],
+        [
+          6,
+          62,
+          34
+        ],
+        [
+          6,
+          2,
+          26
+        ],
+        [
+          6,
+          2,
+          26
+        ],
+        [
+          6,
+          2,
+          46
+        ],
+        [
+          6,
+          2,
+          46
+        ],
+        [
+          6,
+          2,
+          46
+        ],
+        [
+          6,
+          2,
+          46
+        ],
+        [
+          6,
+          2,
+          46
+        ]
+      ],
+      "verified": true
+    },
+    {
+      "game": "lp85",
+      "mode": "search",
+      "levels": 1,
+      "win": 8,
+      "actions": [
+        [
+          6,
+          5,
+          32
+        ],
+        [
+          6,
+          5,
+          32
+        ],
+        [
+          6,
+          5,
+          32
+        ],
+        [
+          6,
+          5,
+          32
+        ],
+        [
+          6,
+          5,
+          32
+        ]
+      ],
+      "verified": true
+    },
+    {
+      "game": "sk48",
+      "mode": "search",
+      "levels": 0,
+      "win": 8,
+      "actions": [],
+      "verified": false
+    }
+  ]
+}

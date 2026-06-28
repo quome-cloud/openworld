@@ -330,6 +330,24 @@ hands the agent the exact dynamics and goal (so only search remains), whereas so
 goal-as-procedure wall of \S\ref{sec:solvewall} from interaction alone. The remaining sections diagnose
 \emph{why} that wall is hard and which methods cross it.
 
+\textbf{Why the distinction matters: humans cannot read source.} ARC-AGI-3 is a \emph{human-vs-machine}
+benchmark---human players solve these games at near-ceiling by \emph{playing}, never by inspecting code,
+while public agents stall~\cite{arcagi3_report}. The \textbf{source-free} protocol is therefore the one
+directly comparable to that human baseline (both discover the rules by acting); the source-faithful
+result instead measures the advantage of an information channel \emph{no human player has}. Read this
+way, our two numbers bracket the axis: \ArcSFGames/\ArcUnionGames{} is the human-comparable result, and
+\ArcFullGames/\ArcUnionGames{} is what becomes possible the moment a system's code is exposed to a
+capable agent.
+
+\textbf{A security reading.} Each ARC-AGI-3 game is a small adversarial system with hidden dynamics and a
+hidden objective. The source-faithful result shows that an agent combining (i)~a capable reasoner with
+(ii)~read access to a system's source can recover its exact behavior, build a faithful simulator, and
+\emph{search} it to any objective---here, completing every level. For real software the implication is a
+caution: when \emph{both} model intelligence and target source are available to an autonomous agent, the
+methods here let it exhaustively solve---or exploit---the system, a capability that scales with model
+strength. The defensible, human-relevant condition is source-free, which is exactly the harder protocol
+where performance drops by \ArcSourceGapGames{} games.
+
 \textbf{Every solve is a verified, serveable artifact---and that is the invitation.} Each game's
 solver is an \openworld{} \texttt{World}: a masked-frame perceptor maps pixels to symbolic state, a
 \texttt{FunctionTransition} over the learned dynamics is the model, and \texttt{levels\_completed} (or
@@ -504,41 +522,6 @@ planning through these models (compounding error) is E87. These bound the claim 
 \emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---the foundation
 on which the solving results of \S\ref{sec:landscape}ff are built.
 
-\section{Agentic synthesis and the capability ceiling (E86b)}
-Does a better \emph{harness} close the synthesizer gap? We replace one-shot prompting with a
-verifier-in-the-loop (generate $\to$ run the code $\to$ read the exact failing cells $\to$ revise),
-run \emph{identically} for qwen-30B and Claude across \ArcAgenticN{} games (Table~\ref{tab:arc2x2}).
-The agentic loop lifts Claude (\ArcOneShotClaudeB$\,\to\,$\ArcAgenticClaude, helping
-\ArcAgenticHelped/\ArcAgenticN{} games---e.g.\ pushing \texttt{s5i5} to a \emph{perfect} model) but
-does \textbf{nothing} for qwen-30B (\ArcOneShotQwenB$\,\to\,$\ArcAgenticQwen). The harness is
-\textbf{capability-gated}: it helps a model that can already reason about \emph{why} its code failed,
-and \emph{widens} the gap rather than closing it. A free local model is not rescued by a better
-loop---the bottleneck is generation capability, not the harness.
-
-\begin{table}[t]\centering
-\caption{\textbf{The 2$\times$2 (verified-code fidelity, \ArcAgenticN{} games).} Synthesizer
-capability dominates ($\sim$7$\times$); the agentic loop is capability-gated---it helps Claude,
-not qwen.}\label{tab:arc2x2}
-\begin{tabular}{lcc}
-\hline
-synthesizer & one-shot & agentic loop \\
-\hline
-qwen-30B & \ArcOneShotQwenB & \ArcAgenticQwen \\
-Claude & \ArcOneShotClaudeB & \ArcAgenticClaude \\
-\hline
-\end{tabular}
-\end{table}
-
-\section{Planning through the model (E87)}
-A verified model is only useful if you can \emph{search} it. We test \textbf{controllability}: sample
-a reachable target (a short random action sequence from reset), plan a sequence \emph{through the
-verified code} to reach it, then execute in the real environment. On a perfect model (\texttt{sb26},
-fidelity $1.0$) planning reaches the target \ArcCtrlPlan{} of the time vs.\ \ArcCtrlRand{} for
-random---the model is plannable. But success is \textbf{fidelity-gated}: below fidelity $1$ the plan,
-correct \emph{in the model}, diverges in reality as single-step error compounds over the horizon, so
-partial models do not yet support reliable multi-step control. \emph{Exact models admit search;
-approximate ones mislead it}---reinforcing why verification, not just learning, is the point.
-
 \section{The solving wall: goal inference (E88--E90)}
 \label{sec:solvewall}
 
@@ -573,57 +556,6 @@ for \emph{automated} verified-world-model agents this is the central wall---and
 \S\ref{sec:agent} shows that a live coding agent which \emph{reasons} the win condition (rather than
 searching a fixed hypothesis space) crosses it on every such game.
 
-\section{Solving a level (E93): directed beats random}
-Closing the loop from modeling to a genuine completion. A reachability sweep finds \texttt{\ArcSolveGame{}}
-is the only public game whose reward is reachable by undirected play; reward-capture records a winning
-episode, and deterministic replay verifies an \ArcSolveLen-action sequence that completes
-\textbf{level \ArcSolveLevel{} of \texttt{\ArcSolveGame{}}}, reproducibly. This is a \emph{directed}
-solve that beats random: at a matched \ArcSolveLen-step budget the verified solution succeeds
-\textbf{\ArcDirectedRate{}} vs.\ \textbf{\ArcRandomRate{}} for random (\ArcSolveTrials{} trials).
-\emph{Honest limits:} level 2 is unreachable even by a 600k-step biased search, and the solve is a
-verified action \emph{sequence}, not a reverse-engineered win \emph{rule} -- the goal-inference wall
-(\S\ref{sec:solvewall}) holds for the \emph{automated} methods here, though a reasoning agent
-(\S\ref{sec:agent}) later completes full games (e.g.\ \texttt{ft09}, \texttt{r11l}).
-
-\paragraph{Scaling to more games (E99): \ArcNSolved{} solved.} The sp80 win fired on an
-\emph{interact} action, which a uniform sweep under-weights. An interact-biased, multi-seed reward
-search (capture $\to$ deterministic replay-verify) per game raises the count from $1$ to
-\textbf{\ArcNSolved{}/25 verified level-1 solves}: \ArcSolvedList{} (winning sequences
-\ArcSeqLenRange{} actions, all saved and replay-verified). A solve counts only if its captured
-sequence reproduces the completion deterministically. One of these (\texttt{cd82}) is additionally
-solved \emph{through the synthesized code world model} (E101: predict-lookahead MPC to navigate the
-typed agent), and the verified-reward induction (E97/E98) recognizes the win on \texttt{sp80} with
-acc $1.0$ from the agent's \emph{own} synthesized objective.
-
-\paragraph{What the remaining $\sim$19 expose: a trilogy of goal-discovery negatives.}
-No reward is found on the rest even at $25\text{k}\times4$-seed interact-biased search: their wins are
-not \emph{reachable}, they must be \emph{understood}. We ran three increasingly sophisticated,
-principled attacks---all planning \emph{through} the code world model---and report them honestly:
-(i)~\textbf{E102}, a core-knowledge perceptor generating atomic candidate-goal \texttt{CodeObjective}s
-(reach/cover/collect/extremize): \textbf{0/9}; (ii)~\textbf{E103}, a frontier model (Claude)
-\emph{generating} rich, \emph{compositional}, closed-loop-refined goal hypotheses: \textbf{0/3};
-(iii)~\textbf{E104}, procedure-aware Bayesian active inference over composite \emph{subworlds} with
-TROPICAL-semiring hierarchical planning: \textbf{0/3}. None succeed \emph{even with a fidelity-$1.0$
-model}. The trilogy yields a sharp diagnosis: the walls are \textbf{not} atomic goals, and the
-failure is \emph{representational}---many ARC-AGI-3 wins are a \textbf{goal-as-procedure} (a specific
-ordered protocol), which a goal-score over a single state cannot express, so planning optimizes the
-wrong target (this is precisely why undirected \emph{search} stumbles into some wins while
-goal-conditioned \emph{planning} finds none).
-
-\paragraph{A visual perceptor foreshadows the fix (E106).} Rendered in the official palette and read
-by a \texttt{VisionPerceptor} (Claude-vision), the frames yield \emph{semantic} goal hypotheses the
-structured methods miss---e.g.\ \texttt{ka59} as ``two rooms joined by a corridor, a purple door, a
-green agent, a target: cross the door.'' We did not turn this into a solver, but it points to the
-resolution: the procedural walls need a \emph{reasoning} reader of the game, realized in
-\S\ref{sec:agent} as a live coding agent. (We note this as a bridge, not a result.)
-
-\paragraph{Search vs.\ reasoning.} The automated methods expose a clean dichotomy: directed search and
-multi-perception consensus solve the \emph{reachable} games, but a comprehensive, principled
-goal-discovery toolkit (atomic objectives, LLM hypotheses, Bayesian sub-worlds) does \emph{not} close
-the goal-as-procedure walls---which is precisely the boundary a \emph{reasoning} agent crosses
-(\S\ref{sec:agent}). Leaderboard comparisons and the offline-replay caveat are stated precisely in
-\S\ref{sec:agent}.
-
 \section{The strategy landscape: what solves ARC-AGI-3}
 \label{sec:landscape}
 We ran seven increasingly sophisticated strategies and record, for every public game, which ones
@@ -652,68 +584,6 @@ Bayesian active inference over composite sub-worlds with semiring-weighted plann
 large class of approaches and sharpens the diagnosis: a goal scored over a single \emph{state}
 cannot express an ordered \emph{procedure}, which is why undirected search occasionally stumbles
 into a win while goal-conditioned planning never does.
-
-\section{Multi-perception consensus world models (the winning method)}
-The method that moves the needle perceives each game through \emph{multiple modalities} and
-synthesizes their discovered world models by consensus---all in the \openworld{} structure
-(Fig.~\ref{fig:arch}).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/arc3_architecture.png}
-\caption{\textbf{How the multi-perception consensus world model works.} OpenWorld primitives are
-shaded teal. A \texttt{Perceptor} masks the status bar and emits a masked-frame state (and
-pixel-inferred click targets). Each action \emph{modality}---directional and click---drives its own
-discovered \texttt{World} map (a \texttt{FunctionTransition} over the explored
-$(s,a)\!\to\!s'$ table, built at \emph{world-time compute}); a \texttt{ConsensusTransition}
-synthesizes them by hard-voting/selecting the best-fidelity modality. Planning through the consensus
-World reaches level completion; \texttt{to\_spec} renders the discovered graph as a viewable atlas
-map. Reward is \texttt{levels\_completed} or an induced \texttt{CodeObjective}.}
-\label{fig:arch}
-\end{figure}
-
-\textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
-(\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are
-click-only (e.g.\ \texttt{vc33}); the board responds only to clicks on valid sprite cells, which we
-infer \emph{from pixels} (small connected components + rare colors). A UI step-counter changes every
-frame, so we detect and \emph{mask} those cells before hashing---otherwise the state graph never
-compresses. The masked-frame signature is the perceptor's state.
-
-\textbf{Discovered map = an \openworld{} \texttt{World}.} Frontier-biased rollouts build the reachable
-state-transition graph at \emph{world-time compute}---by which we mean inference-time search that
-\emph{constructs the world model during play} (test-time compute spent building the model and its map,
-not sampling outputs). The discovered $(s,a)\!\to\!s'$ table becomes a \texttt{World} via
-\texttt{FunctionTransition}, with \texttt{levels\_completed} (or an induced \texttt{CodeObjective}) as
-reward. \texttt{to\_spec} renders its \texttt{preview.graph}---the
-game's \emph{map}---as an atlas card, viewable in \texttt{openworld serve /view}.
-
-\textbf{Synthesis = consensus hard-voting across modalities.} Each modality yields its own discovered
-world model; we combine them with \texttt{ConsensusTransition} (select the highest-fidelity modality,
-or per-state vote). \emph{Ablation:} of the $10$ games this tier solves, the directional modality
-accounts for $7$ and click for $3$---neither single modality reaches all $10$, so combining modalities
-adds coverage (\texttt{ar25} needs directional, \texttt{vc33} click). We are candid that this is a
-\emph{selection across views}, not a deep mechanism: its value is breadth, and the genuinely
-surprising case (\texttt{s5i5}, solved here after defeating the goal-discovery trilogy on a perfect
-model) is the one worth studying further.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.72\textwidth]{figs/arc3_strategy_bar.png}
-\caption{\textbf{Games solved per strategy.} Goal-discovery methods solve $0$; directed search and
-graph exploration $6$; multi-perception consensus $10$ (adding \texttt{cn04, lf52, m0r0, s5i5}); the
-\textbf{live coding agent} solves $15$ and cracks the procedural walls. Across all strategies the
-union is \textbf{25/25}.}
-\label{fig:bar}
-\end{figure}
-
-\textbf{Result.} Multi-perception consensus solves \textbf{10/25} public games (Fig.~\ref{fig:bar}),
-including four---\texttt{cn04, lf52, m0r0, s5i5}---reached by \emph{no} other method; the union of
-all strategies is \textbf{12/25}. \texttt{s5i5} is the headline: it had resisted the entire
-goal-discovery trilogy on a perfect model, yet world-time-compute exploration over the right
-perceptual modality completes it. The takeaway for world-model research: \emph{the leverage is in
-perception and synthesis, not in a cleverer single planner.} What it does \emph{not} crack are the
-goal-as-procedure walls---which is exactly where a reasoning agent that writes its own world model
-takes over.
 
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
 \label{sec:agent}
@@ -795,6 +665,197 @@ click) is \emph{no better than random}. The \emph{distinctive} result is therefo
 solves---plus the cases where our solutions go strictly \emph{deeper} than random (\texttt{ft09} 6
 levels vs.\ 2; \texttt{r11l} 6 vs.\ 1). We thus report two numbers and prefer the second:
 $25/25$ at $\geq$1 level (11 random-reachable) and \textbf{14/25 above random}.
+
+\section{Reproducibility}
+The agent, the per-game transition logs, and every number regenerate from one repository; the
+ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each
+experiment is a self-contained script under \texttt{experiments/}: synthesis (\texttt{e86\_arc3.py},
+\texttt{e86b\_agentic.py}), planning/controllability (\texttt{e87\_arc3\_plan.py}), the solving
+pipeline---reward capture (\texttt{e93\_capture\_reward.py}), deterministic replay-verify
+(\texttt{e93b\_replay\_solve.py}), directed-vs-random (\texttt{e93d\_directed\_vs\_random.py}), and the
+\ArcNSolved-game interact-biased sweep (\texttt{e99\_solve\_sweep.py})---the world-model-driven solver
+(\texttt{e101\_model\_solver.py}), and the goal-discovery attack (\texttt{e102\_goal\_search.py}). The
+foundational primitives are in the zero-dependency core: \texttt{CodeObjective}/\texttt{induce\_reward}
+(\texttt{openworld/reward.py}), \texttt{ConsensusTransition} (\texttt{consensus.py}), and
+\texttt{make\_typed\_perceptor} (\texttt{perceive.py}). \textbf{The verified winning action sequences
+for all \ArcNSolved{} solves are saved in \texttt{experiments/results/e99\_deep\_sweep.json}} and
+replay-verify deterministically against the live games; all numbers and figures regenerate via
+\texttt{scripts/make\_arc3\_assets.py}. A one-command check,
+\texttt{bench/verify\_arc3\_solves.sh}, replays every saved winning sequence against the live games
+and confirms all \ArcNSolved{} complete a level.
+
+\paragraph{Full-game result, efficiency, and OpenWorld round-trip.} The full-game numbers regenerate
+the same way. \textbf{Source of truth:} \texttt{scripts/build\_arc3\_fullgame.py} reads each game's
+replay-verified solution and writes \texttt{experiments/results/arc3\_fullgame.json}
+(\ArcFullGames/\ArcUnionGames{} full, \ArcFullLevels/\ArcTotalLevels{} levels); \texttt{make\_arc3\_assets.py}
+turns it into the completion matrix (Fig.~\ref{fig:arc3matrix}), the per-game table
+(Table~\ref{tab:arc3games}), the atlas gallery (Fig.~\ref{fig:arc3gallery}), and every \texttt{Arc*}
+macro. \textbf{Action efficiency (E120):} \texttt{experiments/e120\_rhae.py} replays each solution in
+the engine, segments actions per level, and scores them with \texttt{arc\_agi}'s \emph{own}
+\texttt{EnvironmentScoreCalculator} against the official per-level human baselines shipped in
+\texttt{EnvironmentInfo.baseline\_actions}---mean \ArcRhaeMean{} (Fig.~\ref{fig:arc3rhae},
+\texttt{arc3\_rhae.json}); no metric is re-implemented. \textbf{OpenWorld round-trip (E121):}
+\texttt{experiments/e121\_openworld\_roundtrip.py} builds, per game, an \texttt{openworld.World} from the
+discovered masked-frame state graph (a \texttt{FunctionTransition} over the learned table plus an
+induced \texttt{CodeObjective}, reward $=$ \texttt{levels\_completed}) and \emph{replays the banked
+solution through it} via \texttt{world.step}; all \textbf{\ArcOWVerified/\ArcOWTotal{}} reproduce their
+verified level count through the framework, and every world \texttt{to\_spec}/\texttt{validate\_spec}/
+\texttt{render\_card} cleanly (\ArcOWIndexed{} game uses trajectory-indexed state where status-bar
+masking is too coarse; flagged in \texttt{arc3\_openworld\_roundtrip.json}). The two solver scripts run
+under the \texttt{arc-agi} interpreter; the world round-trip imports the zero-dependency
+\texttt{openworld} core. In short:
+\texttt{build\_arc3\_fullgame.py $\to$ e120\_rhae.py $\to$ e121\_openworld\_roundtrip.py $\to$
+make\_arc3\_assets.py} regenerates every full-game number, figure, and verification in this paper.
+
+\clearpage
+\appendix
+\section{Agentic synthesis and the capability ceiling (E86b)}
+Does a better \emph{harness} close the synthesizer gap? We replace one-shot prompting with a
+verifier-in-the-loop (generate $\to$ run the code $\to$ read the exact failing cells $\to$ revise),
+run \emph{identically} for qwen-30B and Claude across \ArcAgenticN{} games (Table~\ref{tab:arc2x2}).
+The agentic loop lifts Claude (\ArcOneShotClaudeB$\,\to\,$\ArcAgenticClaude, helping
+\ArcAgenticHelped/\ArcAgenticN{} games---e.g.\ pushing \texttt{s5i5} to a \emph{perfect} model) but
+does \textbf{nothing} for qwen-30B (\ArcOneShotQwenB$\,\to\,$\ArcAgenticQwen). The harness is
+\textbf{capability-gated}: it helps a model that can already reason about \emph{why} its code failed,
+and \emph{widens} the gap rather than closing it. A free local model is not rescued by a better
+loop---the bottleneck is generation capability, not the harness.
+
+\begin{table}[t]\centering
+\caption{\textbf{The 2$\times$2 (verified-code fidelity, \ArcAgenticN{} games).} Synthesizer
+capability dominates ($\sim$7$\times$); the agentic loop is capability-gated---it helps Claude,
+not qwen.}\label{tab:arc2x2}
+\begin{tabular}{lcc}
+\hline
+synthesizer & one-shot & agentic loop \\
+\hline
+qwen-30B & \ArcOneShotQwenB & \ArcAgenticQwen \\
+Claude & \ArcOneShotClaudeB & \ArcAgenticClaude \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Planning through the model (E87)}
+A verified model is only useful if you can \emph{search} it. We test \textbf{controllability}: sample
+a reachable target (a short random action sequence from reset), plan a sequence \emph{through the
+verified code} to reach it, then execute in the real environment. On a perfect model (\texttt{sb26},
+fidelity $1.0$) planning reaches the target \ArcCtrlPlan{} of the time vs.\ \ArcCtrlRand{} for
+random---the model is plannable. But success is \textbf{fidelity-gated}: below fidelity $1$ the plan,
+correct \emph{in the model}, diverges in reality as single-step error compounds over the horizon, so
+partial models do not yet support reliable multi-step control. \emph{Exact models admit search;
+approximate ones mislead it}---reinforcing why verification, not just learning, is the point.
+
+\section{Solving a level (E93): directed beats random}
+Closing the loop from modeling to a genuine completion. A reachability sweep finds \texttt{\ArcSolveGame{}}
+is the only public game whose reward is reachable by undirected play; reward-capture records a winning
+episode, and deterministic replay verifies an \ArcSolveLen-action sequence that completes
+\textbf{level \ArcSolveLevel{} of \texttt{\ArcSolveGame{}}}, reproducibly. This is a \emph{directed}
+solve that beats random: at a matched \ArcSolveLen-step budget the verified solution succeeds
+\textbf{\ArcDirectedRate{}} vs.\ \textbf{\ArcRandomRate{}} for random (\ArcSolveTrials{} trials).
+\emph{Honest limits:} level 2 is unreachable even by a 600k-step biased search, and the solve is a
+verified action \emph{sequence}, not a reverse-engineered win \emph{rule} -- the goal-inference wall
+(\S\ref{sec:solvewall}) holds for the \emph{automated} methods here, though a reasoning agent
+(\S\ref{sec:agent}) later completes full games (e.g.\ \texttt{ft09}, \texttt{r11l}).
+
+\paragraph{Scaling to more games (E99): \ArcNSolved{} solved.} The sp80 win fired on an
+\emph{interact} action, which a uniform sweep under-weights. An interact-biased, multi-seed reward
+search (capture $\to$ deterministic replay-verify) per game raises the count from $1$ to
+\textbf{\ArcNSolved{}/25 verified level-1 solves}: \ArcSolvedList{} (winning sequences
+\ArcSeqLenRange{} actions, all saved and replay-verified). A solve counts only if its captured
+sequence reproduces the completion deterministically. One of these (\texttt{cd82}) is additionally
+solved \emph{through the synthesized code world model} (E101: predict-lookahead MPC to navigate the
+typed agent), and the verified-reward induction (E97/E98) recognizes the win on \texttt{sp80} with
+acc $1.0$ from the agent's \emph{own} synthesized objective.
+
+\paragraph{What the remaining $\sim$19 expose: a trilogy of goal-discovery negatives.}
+No reward is found on the rest even at $25\text{k}\times4$-seed interact-biased search: their wins are
+not \emph{reachable}, they must be \emph{understood}. We ran three increasingly sophisticated,
+principled attacks---all planning \emph{through} the code world model---and report them honestly:
+(i)~\textbf{E102}, a core-knowledge perceptor generating atomic candidate-goal \texttt{CodeObjective}s
+(reach/cover/collect/extremize): \textbf{0/9}; (ii)~\textbf{E103}, a frontier model (Claude)
+\emph{generating} rich, \emph{compositional}, closed-loop-refined goal hypotheses: \textbf{0/3};
+(iii)~\textbf{E104}, procedure-aware Bayesian active inference over composite \emph{subworlds} with
+TROPICAL-semiring hierarchical planning: \textbf{0/3}. None succeed \emph{even with a fidelity-$1.0$
+model}. The trilogy yields a sharp diagnosis: the walls are \textbf{not} atomic goals, and the
+failure is \emph{representational}---many ARC-AGI-3 wins are a \textbf{goal-as-procedure} (a specific
+ordered protocol), which a goal-score over a single state cannot express, so planning optimizes the
+wrong target (this is precisely why undirected \emph{search} stumbles into some wins while
+goal-conditioned \emph{planning} finds none).
+
+\paragraph{A visual perceptor foreshadows the fix (E106).} Rendered in the official palette and read
+by a \texttt{VisionPerceptor} (Claude-vision), the frames yield \emph{semantic} goal hypotheses the
+structured methods miss---e.g.\ \texttt{ka59} as ``two rooms joined by a corridor, a purple door, a
+green agent, a target: cross the door.'' We did not turn this into a solver, but it points to the
+resolution: the procedural walls need a \emph{reasoning} reader of the game, realized in
+\S\ref{sec:agent} as a live coding agent. (We note this as a bridge, not a result.)
+
+\paragraph{Search vs.\ reasoning.} The automated methods expose a clean dichotomy: directed search and
+multi-perception consensus solve the \emph{reachable} games, but a comprehensive, principled
+goal-discovery toolkit (atomic objectives, LLM hypotheses, Bayesian sub-worlds) does \emph{not} close
+the goal-as-procedure walls---which is precisely the boundary a \emph{reasoning} agent crosses
+(\S\ref{sec:agent}). Leaderboard comparisons and the offline-replay caveat are stated precisely in
+\S\ref{sec:agent}.
+
+\section{Multi-perception consensus world models (the winning method)}
+The method that moves the needle perceives each game through \emph{multiple modalities} and
+synthesizes their discovered world models by consensus---all in the \openworld{} structure
+(Fig.~\ref{fig:arch}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_architecture.png}
+\caption{\textbf{How the multi-perception consensus world model works.} OpenWorld primitives are
+shaded teal. A \texttt{Perceptor} masks the status bar and emits a masked-frame state (and
+pixel-inferred click targets). Each action \emph{modality}---directional and click---drives its own
+discovered \texttt{World} map (a \texttt{FunctionTransition} over the explored
+$(s,a)\!\to\!s'$ table, built at \emph{world-time compute}); a \texttt{ConsensusTransition}
+synthesizes them by hard-voting/selecting the best-fidelity modality. Planning through the consensus
+World reaches level completion; \texttt{to\_spec} renders the discovered graph as a viewable atlas
+map. Reward is \texttt{levels\_completed} or an induced \texttt{CodeObjective}.}
+\label{fig:arch}
+\end{figure}
+
+\textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
+(\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are
+click-only (e.g.\ \texttt{vc33}); the board responds only to clicks on valid sprite cells, which we
+infer \emph{from pixels} (small connected components + rare colors). A UI step-counter changes every
+frame, so we detect and \emph{mask} those cells before hashing---otherwise the state graph never
+compresses. The masked-frame signature is the perceptor's state.
+
+\textbf{Discovered map = an \openworld{} \texttt{World}.} Frontier-biased rollouts build the reachable
+state-transition graph at \emph{world-time compute}---by which we mean inference-time search that
+\emph{constructs the world model during play} (test-time compute spent building the model and its map,
+not sampling outputs). The discovered $(s,a)\!\to\!s'$ table becomes a \texttt{World} via
+\texttt{FunctionTransition}, with \texttt{levels\_completed} (or an induced \texttt{CodeObjective}) as
+reward. \texttt{to\_spec} renders its \texttt{preview.graph}---the
+game's \emph{map}---as an atlas card, viewable in \texttt{openworld serve /view}.
+
+\textbf{Synthesis = consensus hard-voting across modalities.} Each modality yields its own discovered
+world model; we combine them with \texttt{ConsensusTransition} (select the highest-fidelity modality,
+or per-state vote). \emph{Ablation:} of the $10$ games this tier solves, the directional modality
+accounts for $7$ and click for $3$---neither single modality reaches all $10$, so combining modalities
+adds coverage (\texttt{ar25} needs directional, \texttt{vc33} click). We are candid that this is a
+\emph{selection across views}, not a deep mechanism: its value is breadth, and the genuinely
+surprising case (\texttt{s5i5}, solved here after defeating the goal-discovery trilogy on a perfect
+model) is the one worth studying further.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{figs/arc3_strategy_bar.png}
+\caption{\textbf{Games solved per strategy.} Goal-discovery methods solve $0$; directed search and
+graph exploration $6$; multi-perception consensus $10$ (adding \texttt{cn04, lf52, m0r0, s5i5}); the
+\textbf{live coding agent} solves $15$ and cracks the procedural walls. Across all strategies the
+union is \textbf{25/25}.}
+\label{fig:bar}
+\end{figure}
+
+\textbf{Result.} Multi-perception consensus solves \textbf{10/25} public games (Fig.~\ref{fig:bar}),
+including four---\texttt{cn04, lf52, m0r0, s5i5}---reached by \emph{no} other method; the union of
+all strategies is \textbf{12/25}. \texttt{s5i5} is the headline: it had resisted the entire
+goal-discovery trilogy on a perfect model, yet world-time-compute exploration over the right
+perceptual modality completes it. The takeaway for world-model research: \emph{the leverage is in
+perception and synthesis, not in a cleverer single planner.} What it does \emph{not} crack are the
+goal-as-procedure walls---which is exactly where a reasoning agent that writes its own world model
+takes over.
 
 \section{A routed solver: 25/25 as one pipeline, not a union}
 \label{sec:router}
@@ -954,49 +1015,6 @@ the four-slot anatomy of an \openworld{} world and which stage fills each.}
 \label{fig:e124flow}
 \end{figure}
 
-\section{Reproducibility}
-The agent, the per-game transition logs, and every number regenerate from one repository; the
-ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each
-experiment is a self-contained script under \texttt{experiments/}: synthesis (\texttt{e86\_arc3.py},
-\texttt{e86b\_agentic.py}), planning/controllability (\texttt{e87\_arc3\_plan.py}), the solving
-pipeline---reward capture (\texttt{e93\_capture\_reward.py}), deterministic replay-verify
-(\texttt{e93b\_replay\_solve.py}), directed-vs-random (\texttt{e93d\_directed\_vs\_random.py}), and the
-\ArcNSolved-game interact-biased sweep (\texttt{e99\_solve\_sweep.py})---the world-model-driven solver
-(\texttt{e101\_model\_solver.py}), and the goal-discovery attack (\texttt{e102\_goal\_search.py}). The
-foundational primitives are in the zero-dependency core: \texttt{CodeObjective}/\texttt{induce\_reward}
-(\texttt{openworld/reward.py}), \texttt{ConsensusTransition} (\texttt{consensus.py}), and
-\texttt{make\_typed\_perceptor} (\texttt{perceive.py}). \textbf{The verified winning action sequences
-for all \ArcNSolved{} solves are saved in \texttt{experiments/results/e99\_deep\_sweep.json}} and
-replay-verify deterministically against the live games; all numbers and figures regenerate via
-\texttt{scripts/make\_arc3\_assets.py}. A one-command check,
-\texttt{bench/verify\_arc3\_solves.sh}, replays every saved winning sequence against the live games
-and confirms all \ArcNSolved{} complete a level.
-
-\paragraph{Full-game result, efficiency, and OpenWorld round-trip.} The full-game numbers regenerate
-the same way. \textbf{Source of truth:} \texttt{scripts/build\_arc3\_fullgame.py} reads each game's
-replay-verified solution and writes \texttt{experiments/results/arc3\_fullgame.json}
-(\ArcFullGames/\ArcUnionGames{} full, \ArcFullLevels/\ArcTotalLevels{} levels); \texttt{make\_arc3\_assets.py}
-turns it into the completion matrix (Fig.~\ref{fig:arc3matrix}), the per-game table
-(Table~\ref{tab:arc3games}), the atlas gallery (Fig.~\ref{fig:arc3gallery}), and every \texttt{Arc*}
-macro. \textbf{Action efficiency (E120):} \texttt{experiments/e120\_rhae.py} replays each solution in
-the engine, segments actions per level, and scores them with \texttt{arc\_agi}'s \emph{own}
-\texttt{EnvironmentScoreCalculator} against the official per-level human baselines shipped in
-\texttt{EnvironmentInfo.baseline\_actions}---mean \ArcRhaeMean{} (Fig.~\ref{fig:arc3rhae},
-\texttt{arc3\_rhae.json}); no metric is re-implemented. \textbf{OpenWorld round-trip (E121):}
-\texttt{experiments/e121\_openworld\_roundtrip.py} builds, per game, an \texttt{openworld.World} from the
-discovered masked-frame state graph (a \texttt{FunctionTransition} over the learned table plus an
-induced \texttt{CodeObjective}, reward $=$ \texttt{levels\_completed}) and \emph{replays the banked
-solution through it} via \texttt{world.step}; all \textbf{\ArcOWVerified/\ArcOWTotal{}} reproduce their
-verified level count through the framework, and every world \texttt{to\_spec}/\texttt{validate\_spec}/
-\texttt{render\_card} cleanly (\ArcOWIndexed{} game uses trajectory-indexed state where status-bar
-masking is too coarse; flagged in \texttt{arc3\_openworld\_roundtrip.json}). The two solver scripts run
-under the \texttt{arc-agi} interpreter; the world round-trip imports the zero-dependency
-\texttt{openworld} core. In short:
-\texttt{build\_arc3\_fullgame.py $\to$ e120\_rhae.py $\to$ e121\_openworld\_roundtrip.py $\to$
-make\_arc3\_assets.py} regenerates every full-game number, figure, and verification in this paper.
-
-\clearpage
-\appendix
 \section{Primer: what is a ``world'' in a world model?}
 \label{app:primer}
 Readers often ask what a ``world'' is, and how a \emph{world model} differs from the world. They are

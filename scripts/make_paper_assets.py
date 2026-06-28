@@ -1108,8 +1108,11 @@ def fig_path_integral(e49):
     betas = e49["betas"]
     fe = [e49["free_energy_by_beta"][str(bb)] for bb in betas]
     c.plot(betas, fe, "-o", color=BLUE, lw=2, markersize=4, label=r"$-\frac{1}{\beta}\log Z$")
-    c.axhline(e49["transfer"]["least_action_cost"], color=RED, lw=1.5, ls="--",
-              label="least action")
+    lac = e49["transfer"]["least_action_cost"]
+    c.axhline(lac, color=RED, lw=1.5, ls="--", label="least action")
+    # Headroom so the least-action line sits below the top spine (not flush/clipped).
+    _ymin = min(fe)
+    c.set_ylim(_ymin - 0.05 * (lac - _ymin), lac + 0.12 * (lac - _ymin))
     c.set_xscale("log")
     c.set_xlabel(r"inverse temperature $\beta$"); c.set_ylabel("free energy")
     c.set_title("C. Path integral → least action", fontsize=9.5, loc="left")
@@ -3130,7 +3133,7 @@ def numbers_tex(d):
         macro("ManyWorldsEnumMax", f"${sci(e46['enum_max_worlds'])}$"),
         macro("ManyWorldsConsistent", f"{big['consistent']:,}"),
         macro("ManyWorldsCoupleWidth", str(coup[-1]["w"])),
-        macro("ManyWorldsCoupleFactor", str(coup[-1]["factor_size"])),
+        macro("ManyWorldsCoupleFactor", f"{coup[-1]['factor_size']:,}"),
         macro("ManyWorldsCoupleIdeal", str(coup[-1]["ideal_factored"])),
     ]
     # E45 (next-token world models: length generalization)

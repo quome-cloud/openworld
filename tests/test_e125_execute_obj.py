@@ -33,3 +33,17 @@ def test_execute_obj_halts_on_surprise():
     r = execute.execute_obj(Stuck(), [[4]], fn, perc)
     assert r["solved"] is False and r["halt_step"] == 1 and len(r["new_transitions"]) == 1
     assert r["new_transitions"][0]["level_up"] is False
+
+def test_execute_obj_halts_on_refuted_win():
+    # Real game: step redraws only -- never moves, never levels up.
+    # Predict returns the SAME state (keys agree) but level_up=True -> refuted-win branch.
+    class StationaryGame(RealObjGame):
+        def step(self, a, x=None, y=None): self._draw()   # never moves, never levels up
+    PRED_WIN = ("def predict(state, action):\n"
+                "    return {'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}, True")
+    fn_win = verify.compile_predict(PRED_WIN)
+    r = execute.execute_obj(StationaryGame(), [[4]], fn_win, perc)
+    assert r["solved"] is False
+    assert r["halt_step"] == 1
+    assert len(r["new_transitions"]) == 1
+    assert r["new_transitions"][0]["level_up"] is False

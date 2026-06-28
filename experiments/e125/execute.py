@@ -1,8 +1,10 @@
 """Execute a sim-planned trajectory against the REAL env, step-by-step, halting the instant the real masked
 next-frame diverges from predict()'s -- that divergence is the model-surprise signal (E122-style); the real
 transition is recorded so the model can be re-synthesized. Only verified plans touch the env (action-efficient)."""
+import copy
 import numpy as np
 from e125 import verify
+from e125 import objstate
 
 
 def execute_plan(real_game, plan, predict_fn, mask, do_reset=True):
@@ -38,13 +40,9 @@ def execute_plan(real_game, plan, predict_fn, mask, do_reset=True):
     return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
 
 
-import copy as _copy_ex
-
-
 def execute_obj(real_game, actions, predict_fn, perceive, do_reset=True):
     """Run an action list vs the REAL env in OBJECT state. Solved on a real levels bump; halt+record an object
     transition on a decision-key surprise or a refuted win hypothesis. do_reset=False continues from current."""
-    from e125 import objstate
     if do_reset:
         real_game.reset()
     base = real_game.levels
@@ -52,7 +50,7 @@ def execute_obj(real_game, actions, predict_fn, perceive, do_reset=True):
     verified, new_trans = [], []
     for i, a in enumerate(actions):
         try:
-            pred_ns, pred_lu = predict_fn(_copy_ex.deepcopy(cur), list(a))
+            pred_ns, pred_lu = predict_fn(copy.deepcopy(cur), list(a))
         except Exception:
             pred_ns, pred_lu = cur, False
         real_game.step(*a)

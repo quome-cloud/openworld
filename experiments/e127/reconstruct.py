@@ -49,15 +49,17 @@ def _acc_vs_real(factory, holdout):
     return (exact / n) if n else 0.0
 
 
-def _ab_agreement(fa, fb, probe_eps):
+def _ab_agreement(fa, fb, holdout):
     """Fraction of held-out transitions where the two final engines produce identical frames.
-    Measured on a probe set distinct from the accuracy holdout, so that when one model is faithful
-    (== reality) the gap is a small SAMPLING residual rather than identically zero, while two models
-    that share a wrong engine register a structurally large gap (folie a deux)."""
+    Measured on the SAME holdout set that drives the vs-real accuracies, so that when one model is
+    faithful (== reality) ab_agreement(A,B) identically equals acc_B_vs_real and the gap is exactly 0
+    (a clean, interpretable baseline: 0 = no shared-prior bias). Two models that share a wrong engine
+    are byte-identical (ab_agreement == 1.0 on any set), so the gap stays robustly positive (folie a
+    deux) regardless of the probe set."""
     if fa is None or fb is None:
         return 0.0
     agree = tot = 0
-    for ep in probe_eps:
+    for ep in holdout:
         actions = [s["action"] for s in ep[1:]]
         try:
             ra = _engine.rollout(fa, actions); rb = _engine.rollout(fb, actions)
@@ -88,7 +90,6 @@ def reconstruct(real_factory, action_api, n_levels, models=("claude", "codex"),
     observed = _explore(real_factory, n_eps=8, len_eps=16, seed=seed)
     mask = _engine.identity_mask(observed)
     holdout = _explore(real_factory, n_eps=32, len_eps=16, seed=seed + 1000, mask=mask)   # DISJOINT
-    probe_eps = _explore(real_factory, n_eps=16, len_eps=16, seed=seed + 2000, mask=mask)  # for A/B gap
 
     if _runners is None:
         from experiments.e127 import iso
@@ -135,7 +136,7 @@ def reconstruct(real_factory, action_api, n_levels, models=("claude", "codex"),
     champ = cur[champ_i]
     cert = (_certify.certify_engine(champ, holdout, n_levels, coverage_target=0.0) if champ else {
         "pass": False, "acc": 0.0, "acc_lower": 0.0, "n": 0, "exact": 0, "coverage": 0.0})
-    ab_agree = _ab_agreement(cur[0], cur[1], probe_eps)
+    ab_agree = _ab_agreement(cur[0], cur[1], holdout)
     min_vs_real = min(cur_acc)
     return {"engine_src": cur_src[champ_i], "certificate": cert, "champion_acc": cur_acc[champ_i],
             "ab_agreement": ab_agree, "ab_vs_real_gap": ab_agree - min_vs_real,

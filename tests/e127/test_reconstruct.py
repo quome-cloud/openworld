@@ -45,8 +45,10 @@ def test_converges_to_certified_engine_with_fake_runners():
     assert res["certificate"]["pass"] is True            # champion certified against the REAL env
     assert res["champion_acc"] >= 0.99
     assert res["engine_src"] is not None
-    # The champion is the faithful engine; B never reaches it -> a measurable gap exists.
-    assert res["ab_vs_real_gap"] != 0.0
+    # The champion is the faithful engine (A == reality). On the COMMON holdout, ab_agreement(A,B)
+    # identically equals acc_B_vs_real, so the gap is exactly 0 (to float tolerance) -- the clean
+    # baseline: no shared-prior bias beyond reality.
+    assert abs(res["ab_vs_real_gap"]) < 0.05
     assert res["real_steps"] > 0
 
 
@@ -82,5 +84,6 @@ def test_converges_on_click_game():
     assert res["certificate"]["pass"] is True             # champion = faithful click engine, vs REAL
     assert res["champion_acc"] >= 0.99
     assert res["engine_src"] is not None
-    assert res["ab_vs_real_gap"] != 0.0                   # B never reaches it -> measurable gap
+    # Faithful click champion (A == reality) -> common-holdout gap is ~0, the clean baseline.
+    assert abs(res["ab_vs_real_gap"]) < 0.05
     assert res["real_steps"] > 0

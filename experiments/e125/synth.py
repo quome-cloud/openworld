@@ -262,3 +262,79 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4
         if best_full:
             return _accept(db.best)
     return None, None, None
+
+
+# --- object-state synthesis path (predict(state,action)->(next_state,level_up)); reuses the FunSearch
+#     _Database/_softmax/_rename_fn/failed_summaries machinery, but renders/scoring is over OBJECT state ---
+from e125 import objstate as _objstate_s
+
+
+def _objs(s):
+    return (f"bg={s.get('bg')} objects=["
+            + ", ".join(f"(c{o['color']} y{o['y']} x{o['x']} s{o['size']})" for o in s.get("objects", []))
+            + "]")
+
+
+def render_obj_transitions(transitions, k=12):
+    out = []
+    for t in transitions[:k]:
+        out.append(f"action={t['action']} level_up={bool(t['level_up'])}\n"
+                   f"FROM: {_objs(t['state'])}\nTO:   {_objs(t['next_state'])}")
+    return "\n---\n".join(out)
+
+
+_OBJ_GOAL_INSTR = (
+    "\n\nIMPORTANT -- the win condition is NOT given and no observed transition won. HYPOTHESISE the goal from "
+    "the object configurations (e.g. a movable object reaching a target object's position). Bake it into "
+    "predict()'s level_up (True only when next_state matches your hypothesised win; it must be False on every "
+    "observed transition above). Also write goal_score(state) -> float: a SYMBOLIC energy LOWER nearer the goal "
+    "(e.g. Manhattan distance between the mover and the target object), varying smoothly. Operate on the object "
+    "dict only (state['objects'] = list of {color,size,y,x}); pure Python, no imports, no numpy.")
+
+
+def _obj_contract(action_api):
+    return (f"You are reverse-engineering an unknown grid game's dynamics from observed OBJECT-state transitions. "
+            f"Do NOT run shell commands or read files. Write `predict(state, action) -> (next_state, level_up)` "
+            f"in pure Python (NO imports, NO numpy), where `state` is a dict "
+            f"{{'bg': int, 'objects': [{{'color','size','y','x'}}, ...]}}, `action` is a list like [4] or [6,x,y], "
+            f"`next_state` is the predicted next state dict (same shape), `level_up` a bool. Actions: {action_api}")
+
+
+def _obj_prompt(transitions, action_api, counterexample=None):
+    base = (_obj_contract(action_api) + "\n\nObserved transitions:\n"
+            + render_obj_transitions(transitions))
+    if counterexample is not None:
+        base += (f"\n\nYour previous predict() FAILED on:\naction={counterexample['action']} "
+                 f"level_up={bool(counterexample['level_up'])}\nFROM: {_objs(counterexample['state'])}\n"
+                 f"TO:   {_objs(counterexample['next_state'])}")
+    return base + _OBJ_GOAL_INSTR + "\n\nReturn JSON {predict_src, goal_score_src, rationale}."
+
+
+def _obj_diff(fails, fields=("color", "y", "x"), k=3):
+    out = []
+    for t, ns in fails[:k]:
+        if ns is None:
+            out.append(f"action={t['action']}: predict raised/failed"); continue
+        pk = _objstate_s.state_key(ns, fields)[1]
+        rk = _objstate_s.state_key(t["next_state"], fields)[1]
+        msg = f"you->{pk} real->{rk}" if pk != rk else "(objects match -- the level_up flag is wrong)"
+        out.append(f"action={t['action']}: {msg}")
+    return "\n".join(out)
+
+
+def _obj_funsearch_prompt(samples, action_api, failed=None):
+    progs = sorted(samples, key=lambda p: p["score"])
+    blocks = [f"# predict_v{i} (score {p['score']})\n```python\n{_rename_fn(p['src'], 'predict', f'predict_v{i}')}\n```"
+              for i, p in enumerate(progs)]
+    nextv = len(progs)
+    diff = _obj_diff(progs[-1].get("fails") or [])
+    fail_block = ""
+    if failed:
+        fail_block = ("\n\nAlready tried and FAILED -- do not repeat these approaches:\n"
+                      + "\n".join(f"- {f}" for f in failed) + "\n")
+    return ("These are successive predict() object-state world models, ordered by increasing score:\n\n"
+            + "\n\n".join(blocks)
+            + f"\n\nWrite an IMPROVED `predict_v{nextv}` scoring HIGHER than all above. predict_v{nextv-1} "
+            f"still mispredicts:\n{diff}\n{fail_block}Name the function `predict` (pure Python, no imports). "
+            f"Keep/improve the win hypothesis in level_up and the goal_score(state) energy. Actions: {action_api}. "
+            f"Return JSON {{predict_src, goal_score_src, rationale}}.")

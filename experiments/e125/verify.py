@@ -1,7 +1,9 @@
 """The verifier gate: a synthesized predict(frame,action)->(next_frame,level_up) is ACCEPTED only if it
 exact-matches every held-out transition (masked next-frame equality + level_up equality). Predicts are
 compiled in-process for speed (codex is not adversarial; a predict that errors fails the gate)."""
+import copy
 import numpy as np
+from e125 import objstate as _objstate
 
 
 def compile_predict(src):
@@ -49,8 +51,6 @@ def check(predict_fn, transitions, mask):
 
 
 # --- decision-equivalent gate over OBJECT states (value-equivalent, not pixel reconstruction) ---
-from e125 import objstate as _objstate
-
 
 def score_obj(predict_fn, transitions, fields=("color", "y", "x")):
     """(n_matched, fails). Match iff the DECISION-RELEVANT state_key of the predicted next_state equals the
@@ -60,7 +60,7 @@ def score_obj(predict_fn, transitions, fields=("color", "y", "x")):
     n, fails = 0, []
     for t in transitions:
         try:
-            ns, lu = predict_fn(dict(t["state"]), list(t["action"]))
+            ns, lu = predict_fn(copy.deepcopy(t["state"]), list(t["action"]))
         except Exception:
             fails.append((t, None)); continue
         if (_objstate.state_key(ns, fields) == _objstate.state_key(t["next_state"], fields)

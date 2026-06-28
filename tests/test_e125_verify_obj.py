@@ -19,6 +19,12 @@ GOODP = ("def predict(state, action):\n"
 COSMETIC = GOODP.replace("o['x'] += 1", "o['x'] += 1; o['size'] += 9")
 # wrong on a decision field (x): mispredicts -> fails
 BADP = ("def predict(state, action):\n    return {'bg': state['bg'], 'objects': [dict(o) for o in state['objects']]}, False")
+# raises unconditionally
+RAISEP = "def predict(state, action):\n    raise ValueError('boom')"
+# mutates the input state in-place (shallow-copy bug bait)
+MUTATEP = ("def predict(state, action):\n"
+           "    state['objects'][0]['x'] = 999\n"
+           "    return state, False")
 
 def test_check_obj_accepts_decision_correct():
     ok, ce = verify.check_obj(verify.compile_predict(GOODP), TR)
@@ -37,3 +43,38 @@ def test_score_obj_counts_matches():
     assert n == 2 and fails == []
     n, fails = verify.score_obj(verify.compile_predict(BADP), TR)
     assert n == 0 and len(fails) == 2
+
+# --- new tests added in P2.2 fix ---
+
+def test_check_obj_none_predict():
+    """check_obj(None, TR) must return (False, non-None counterexample)."""
+    ok, ce = verify.check_obj(None, TR)
+    assert ok is False and ce is not None
+
+def test_exception_predict_check_obj_false():
+    """A predict that raises -> check_obj returns (False, counterexample not None)."""
+    fn = verify.compile_predict(RAISEP)
+    ok, ce = verify.check_obj(fn, TR)
+    assert ok is False and ce is not None
+
+def test_exception_predict_score_obj_fail():
+    """A predict that raises -> score_obj counts every transition as a fail."""
+    fn = verify.compile_predict(RAISEP)
+    n, fails = verify.score_obj(fn, TR)
+    assert n == 0 and len(fails) == len(TR)
+
+def test_mutating_predict_does_not_corrupt_transition():
+    """A predict that mutates state in-place must NOT corrupt the held-out transition."""
+    t = _t(
+        {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 1, "x": 1}]},
+        [4],
+        {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 1, "x": 2}]},
+        False,
+    )
+    original_x = t["state"]["objects"][0]["x"]
+    fn = verify.compile_predict(MUTATEP)
+    verify.score_obj(fn, [t])
+    assert t["state"]["objects"][0]["x"] == original_x, (
+        f"score_obj mutated t['state']: x changed from {original_x} to "
+        f"{t['state']['objects'][0]['x']}"
+    )

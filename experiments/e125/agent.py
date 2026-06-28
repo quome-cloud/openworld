@@ -55,3 +55,43 @@ def solve_level(game_factory, candidates_fn, action_api, game, mask, synth_fn,
             return {"solved": False, "actions": committed, "rounds_used": rnd + 1, "real_actions": real_actions,
                     "reason": "plan exhausted without progress"}
     return {"solved": False, "actions": committed, "rounds_used": rounds, "real_actions": real_actions}
+
+
+def solve_game(game_factory, candidates_fn, action_api, game, synth_obj_fn, perceive=None, macro_runner=None,
+               budget_explore=60, budget_plan=20000, rounds_per_level=4, max_levels=9, max_macros=8,
+               traces_dir=None):
+    """Per-level loop over the verified object-world. Explore -> synth_obj (seeded from the prior level's
+    verified program = rule-library transfer) -> traverse_level (committed=solution so far). On a real level-up
+    extend the solution and carry the program forward; on surprise re-synth; on stall stop. The env decides wins."""
+    from e125 import explorer, traverse, objstate
+    perceive = perceive or objstate.object_state
+    solution = []                 # actions through solved levels
+    rule_src = None               # last verified predict src (transfer seed for the next level)
+    levels = []; real_actions = 0
+    for level in range(max_levels):
+        trans = explorer.collect_obj(game_factory, candidates_fn, budget_explore, perceive, prefix=solution)
+        real_actions += budget_explore
+        last_src = rule_src; solved = False; reason = "no model"
+        for _ in range(rounds_per_level):
+            src, fn, goal_fn, ensemble = synth_obj_fn(trans, action_api, game, seed_src=last_src,
+                                                      traces_dir=traces_dir)
+            if fn is None:
+                reason = "no verified predict()"; break
+            last_src = src
+            wm = {"predict_src": src, "predict_fn": fn, "goal_src": None, "goal_fn": goal_fn, "ensemble": ensemble}
+            res = traverse.traverse_level(game_factory, candidates_fn, wm, action_api, game,
+                                          macro_runner=macro_runner, perceive=perceive, committed=list(solution),
+                                          budget_plan=budget_plan, max_macros=max_macros, traces_dir=traces_dir)
+            real_actions += max(0, len(res["actions"]) - len(solution)) + res["macros_used"]
+            reason = res["reason"]
+            if res["solved"]:
+                solution = res["actions"]; rule_src = src; solved = True; break
+            if res["new_transitions"]:
+                trans = trans + res["new_transitions"]      # surprise -> re-synthesize (seeded)
+            else:
+                break                                        # stall/no progress
+        levels.append({"level": level, "solved": solved, "reason": reason})
+        if not solved:
+            break
+    return {"levels_solved": sum(1 for l in levels if l["solved"]), "solution": solution,
+            "levels": levels, "real_actions": real_actions}

@@ -18,7 +18,12 @@ def _observed(seed=0, n=20):
 
 
 def test_finds_counterexample_for_wrong_engine():
-    obs = _observed()
+    # Drive the real game through a KNOWN gem-collecting path so the observed corpus provably contains
+    # a real gem-collection transition the wrong engine (which ignores collection) cannot reproduce.
+    # From the reset cursor (4,4): up x3 clamps to row 1 -> (1,4); left x3 -> (1,1), collecting gem
+    # (1,1). The bare-prefix replay then diverges deterministically -- no reliance on the novelty walk.
+    g = toy_factory()
+    obs = [engine.play(g, _acts([1, 1, 1, 3, 3, 3]))]
     mask = engine.identity_mask(obs)
     wrong = compile_engine(TOY_WRONG_SRC)
     budget = {"limit": 500, "used": 0}

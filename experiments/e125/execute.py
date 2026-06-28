@@ -36,3 +36,32 @@ def execute_plan(real_game, plan, predict_fn, mask, do_reset=True):
             return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": i+1}
         verified.append(a); cur = real_nf.copy()
     return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
+
+
+import copy as _copy_ex
+
+
+def execute_obj(real_game, actions, predict_fn, perceive, do_reset=True):
+    """Run an action list vs the REAL env in OBJECT state. Solved on a real levels bump; halt+record an object
+    transition on a decision-key surprise or a refuted win hypothesis. do_reset=False continues from current."""
+    from e125 import objstate
+    if do_reset:
+        real_game.reset()
+    base = real_game.levels
+    cur = perceive(real_game.frame)
+    verified, new_trans = [], []
+    for i, a in enumerate(actions):
+        try:
+            pred_ns, pred_lu = predict_fn(_copy_ex.deepcopy(cur), list(a))
+        except Exception:
+            pred_ns, pred_lu = cur, False
+        real_game.step(*a)
+        real_ns = perceive(real_game.frame)
+        if real_game.levels > base:
+            verified.append(a)
+            return {"solved": True, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
+        if objstate.state_key(pred_ns) != objstate.state_key(real_ns) or pred_lu:
+            new_trans.append({"state": cur, "action": list(a), "next_state": real_ns, "level_up": False})
+            return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": i + 1}
+        verified.append(a); cur = real_ns
+    return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}

@@ -19,7 +19,12 @@ def test_obj_prompt_states_object_contract_and_goal():
 def test_obj_diff_lists_mispredicted_objects():
     bad_next = {"bg": 0, "objects": [{"color": 3, "size": 1, "y": 1, "x": 9}]}   # wrong x
     d = synth._obj_diff([(TR[0], bad_next)])
-    assert "action=[4]" in d and ("9" in d or "real" in d)
+    assert "action=[4]" in d and "you->" in d and "real->" in d
+
+def test_obj_diff_level_up_flag_wrong():
+    # predicted next_state equals real next_state (same objects), so it's a level_up mismatch
+    d = synth._obj_diff([(_t(S0, [4], S1, True), S1)])
+    assert "level_up" in d
 
 def test_obj_funsearch_prompt_kshot_and_failed_block():
     samples = [{"src": "def predict(state, action):\n    return state, False", "score": 0, "fails": []},

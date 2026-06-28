@@ -335,6 +335,6 @@ def _obj_funsearch_prompt(samples, action_api, failed=None):
     return ("These are successive predict() object-state world models, ordered by increasing score:\n\n"
             + "\n\n".join(blocks)
             + f"\n\nWrite an IMPROVED `predict_v{nextv}` scoring HIGHER than all above. predict_v{nextv-1} "
-            f"still mispredicts:\n{diff}\n{fail_block}Name the function `predict` (pure Python, no imports). "
+            f"still mispredicts:\n{diff}\n{fail_block}Name the function `predict` (pure Python, no imports, no numpy). "
             f"Keep/improve the win hypothesis in level_up and the goal_score(state) energy. Actions: {action_api}. "
             f"Return JSON {{predict_src, goal_score_src, rationale}}.")

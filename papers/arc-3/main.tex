@@ -175,13 +175,18 @@ a goal scored over a single \emph{state} cannot express an ordered \emph{procedu
 undirected search occasionally stumbles into a win while goal-conditioned planning never does.
 \emph{(3)~Cracking the wall with executable world models.} The diagnosis says \emph{undirected},
 observation-only goal discovery fails. The remedy is the executable-world-model recipe: per game,
-recover the dynamics and \emph{reason the win condition}, build a \textbf{verified source-faithful
-simulator}, \emph{search} for the winning procedure, and \emph{replay-verify} it against the real
-engine. Reproduced in OpenWorld---each solver a serveable verified \texttt{World}---this completes
-\textbf{\ArcFullGames/\ArcUnionGames{} games in full} (\ArcFullLevels/\ArcTotalLevels{} levels;
+recover the dynamics and \emph{reason the win condition}, build a \textbf{verified simulator from the
+game's own code (source-faithful)}, \emph{search} for the winning procedure, and \emph{replay-verify} it
+against the real engine. Reproduced in OpenWorld---each solver a serveable verified \texttt{World}---this
+completes \textbf{\ArcFullGames/\ArcUnionGames{} games in full} (\ArcFullLevels/\ArcTotalLevels{} levels;
 Fig.~\ref{fig:arc3matrix}, Table~\ref{tab:arc3games}; atlas cards in Fig.~\ref{fig:arc3gallery}),
 \textbf{surpassing the prior executable-world-model state of the art of
-\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm} on full-game completion. \emph{And the solutions
+\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm} on full-game completion. Under a stricter
+\textbf{source-free} protocol---process-isolated, no game code; dynamics and goal discovered by acting,
+audited clean, and round-tripped through an OpenWorld \texttt{World}---the same recipe completes
+\textbf{\ArcSFGames/\ArcUnionGames{}} (\ArcSFLevels/\ArcTotalLevels{} levels); the
+\textbf{\ArcSourceGapGames-game} gap between the two is the measured \emph{cost of discovery}
+(Fig.~\ref{fig:arc3source}). \emph{And the solutions
 are efficient:} scored by the official per-level action metric against the human baselines the
 environment ships, they average \textbf{\ArcRhaeMean{}} (\ArcRhaeAboveHuman/\ArcRhaeN{} at the
 human-efficiency cap) versus baseline1's \ArcRhaeBaselineOne---human-competitive on the leaderboard's
@@ -189,8 +194,8 @@ own efficiency axis (Fig.~\ref{fig:arc3rhae}).
 
 \textbf{We report this honestly.} Solves are \emph{offline} with \emph{unbounded resets} and
 deterministic replay-verification; we do not report RHAE (the leaderboard's live action-efficiency
-metric), so the comparison is on full-game \emph{completion}, not efficiency. Three games remain
-partial (\ArcPartialList). For the weaker $\geq$1-level union (\emph{first level only}), random play
+metric), so the comparison is on full-game \emph{completion}, not efficiency. \ArcPartialGames{} game
+remains partial (\ArcPartialList) under the source-faithful protocol. For the weaker $\geq$1-level union (\emph{first level only}), random play
 alone clears $\ArcRandomGeqOne/\ArcUnionGames$ under this protocol (a \ArcRandomBudget{}-step/game
 budget), so we also report the more honest \textbf{$14/25$ above random}.
 \textbf{Contributions:} (i)~surpassing the executable-world-model SOTA on full-game completion
@@ -297,17 +302,33 @@ StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6
 \end{table}
 
 % ============================================================================
-\section{Result: \ArcFullGames/\ArcUnionGames{} full games}
+\section{Result: \ArcFullGames/\ArcUnionGames{} with game source, \ArcSFGames/\ArcUnionGames{} source-free}
 \label{sec:fullgame}
-The headline first. Reproducing the executable-world-model recipe inside \openworld{}---for each game,
-recover the dynamics, \emph{reason the win condition}, build a verified source-faithful simulator,
-\emph{search} for the winning procedure, and \emph{replay-verify} it against the real engine---we
-\textbf{fully complete \ArcFullGames{} of the \ArcUnionGames{} public games}
-(\ArcFullPct), totalling \textbf{\ArcFullLevels/\ArcTotalLevels{} levels} (\ArcLevelsPct;
-Fig.~\ref{fig:arc3matrix}). On the full-game-completion metric the leaderboard and prior work use,
-this \textbf{surpasses the prior executable-world-model state of the art of
-\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm}. Only three games remain partial
-(\ArcPartialList), and they are partial by a few levels, not blocked outright.
+The headline first, on \textbf{two protocols} that differ only in whether the agent may read the game's
+own code (Fig.~\ref{fig:arc3source}); neither uses banked solution traces, and both are replay-verified
+against the real engine.
+
+\textbf{Source-faithful.} The agent reads each game's downloaded source (\texttt{<game>.py}: map layout,
+dynamics, and win condition---but \emph{no} solution) to build a faithful simulator, \emph{searches} for
+the winning procedure, and \emph{replay-verifies} it. We \textbf{fully complete \ArcFullGames{} of the
+\ArcUnionGames{} public games} (\ArcFullPct), \textbf{\ArcFullLevels/\ArcTotalLevels{} levels}
+(\ArcLevelsPct). On the full-game-completion metric the leaderboard and prior work use, this
+\textbf{surpasses the prior executable-world-model state of the art of
+\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm}; only \ArcPartialGames{} game remains partial
+(\ArcPartialList).
+
+\textbf{Source-free.} The agent runs in a \emph{process-isolated} sandbox with \emph{no} access to the
+game source---it must discover the dynamics by acting and infer the win condition from frames. A solve
+is banked only if it (i) audits clean (no source read), (ii) replay-verifies, \emph{and} (iii)
+round-trips through an OpenWorld \texttt{World}. Under this harder, honest protocol we complete
+\textbf{\ArcSFGames/\ArcUnionGames{} games} (\ArcSFLevels/\ArcTotalLevels{} levels, \ArcSFLevelsPct):
+\ArcSFList{}.
+
+\textbf{The gap is the result.} The \textbf{\ArcSourceGapGames-game, \ArcSourceGapLevels-level} delta
+between the two protocols \emph{quantifies the cost of having to discover the world}---reading the code
+hands the agent the exact dynamics and goal (so only search remains), whereas source-free must solve the
+goal-as-procedure wall of \S\ref{sec:solvewall} from interaction alone. The remaining sections diagnose
+\emph{why} that wall is hard and which methods cross it.
 
 \textbf{Every solve is a verified, serveable artifact---and that is the invitation.} Each game's
 solver is an \openworld{} \texttt{World}: a masked-frame perceptor maps pixels to symbolic state, a
@@ -335,12 +356,24 @@ diagnosis of \S\ref{sec:solvewall}.
 
 \begin{figure}[t]
 \centering
+\includegraphics[width=0.6\textwidth]{figs/arc3_source_matrix.png}
+\caption{\textbf{With vs.\ without the game source.} Per-game full-game completion under the two
+protocols: \emph{source-faithful} (reads \texttt{<game>.py} to build an exact simulator, then searches)
+reaches \ArcFullGames/\ArcUnionGames; \emph{source-free} (process-isolated, no source---discovers
+dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames. Green $=$ fully completed (level count
+shown), pale green $=$ partial, grey $=$ unsolved. The \ArcSourceGapGames-game gap is the measured cost
+of discovery. Both replay-verified; neither uses banked solutions.}
+\label{fig:arc3source}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \includegraphics[width=\textwidth]{figs/arc3_completion_matrix.png}
-\caption{\textbf{Completes-per-level across all \ArcUnionGames{} games.} Each row is a game, each
+\caption{\textbf{Completes-per-level across all \ArcUnionGames{} games (source-faithful protocol).} Each row is a game, each
 column a level; a filled teal cell is a level completed and replay-verified, an ochre cell a level that
 exists but is not yet solved, and no cell means the game has no such level. \ArcFullGames{} games are
 full (\checkmark). The right margin gives each game's action modality category. The \ArcPartialGames{}
-partials (\texttt{lf52}, \texttt{bp35}) sit at the bottom. Totals: \ArcFullLevels/\ArcTotalLevels{}
+partial (\ArcPartialList) sits at the bottom. Totals: \ArcFullLevels/\ArcTotalLevels{}
 levels, \ArcFullGames/\ArcUnionGames{} full games.}
 \label{fig:arc3matrix}
 \end{figure}

@@ -87,6 +87,8 @@ def collect_obj(game_factory, candidates_fn, budget, perceive, prefix=None):
         if key not in seen:
             seen.add(key)
             trans.append({"state": state, "action": list(a), "next_state": nstate, "level_up": g.levels > lv})
+        if g.levels > lv:
+            break                                         # stop so next-level dynamics don't pollute this level's data
         if g.done:
             g = _fresh()
     return trans

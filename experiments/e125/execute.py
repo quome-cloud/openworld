@@ -42,24 +42,30 @@ def execute_plan(real_game, plan, predict_fn, mask, do_reset=True):
 
 def execute_obj(real_game, actions, predict_fn, perceive, do_reset=True):
     """Run an action list vs the REAL env in OBJECT state. Solved on a real levels bump; halt+record an object
-    transition on a decision-key surprise or a refuted win hypothesis. do_reset=False continues from current."""
+    transition on a decision-key surprise or a refuted win hypothesis. do_reset=False continues from current.
+    Always returns "steps": <count of real real_game.step() calls made> for accurate RHAE accounting."""
     if do_reset:
         real_game.reset()
     base = real_game.levels
     cur = perceive(real_game.frame)
     verified, new_trans = [], []
+    steps = 0
     for i, a in enumerate(actions):
         try:
             pred_ns, pred_lu = predict_fn(copy.deepcopy(cur), list(a))
         except Exception:
             pred_ns, pred_lu = cur, False
         real_game.step(*a)
+        steps += 1                                        # count every real env step
         real_ns = perceive(real_game.frame)
         if real_game.levels > base:
             verified.append(a)
-            return {"solved": True, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
+            return {"solved": True, "verified_prefix": verified, "new_transitions": new_trans,
+                    "halt_step": None, "steps": steps}
         if objstate.state_key(pred_ns) != objstate.state_key(real_ns) or pred_lu:
             new_trans.append({"state": cur, "action": list(a), "next_state": real_ns, "level_up": False})
-            return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": i + 1}
+            return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans,
+                    "halt_step": i + 1, "steps": steps}
         verified.append(a); cur = real_ns
-    return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
+    return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans,
+            "halt_step": None, "steps": steps}

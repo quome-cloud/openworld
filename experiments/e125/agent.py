@@ -67,10 +67,10 @@ def solve_game(game_factory, candidates_fn, action_api, game, synth_obj_fn, perc
     perceive = perceive or objstate.object_state
     solution = []                 # actions through solved levels
     rule_src = None               # last verified predict src (transfer seed for the next level)
-    levels = []; real_actions = 0
+    levels = []; real_actions = 0; macros_used = 0
     for level in range(max_levels):
         trans = explorer.collect_obj(game_factory, candidates_fn, budget_explore, perceive, prefix=solution)
-        real_actions += budget_explore
+        real_actions += budget_explore                    # upper bound: collect_obj may break early on level-up
         last_src = rule_src; solved = False; reason = "no model"
         for _ in range(rounds_per_level):
             src, fn, goal_fn, ensemble = synth_obj_fn(trans, action_api, game, seed_src=last_src,
@@ -82,7 +82,8 @@ def solve_game(game_factory, candidates_fn, action_api, game, synth_obj_fn, perc
             res = traverse.traverse_level(game_factory, candidates_fn, wm, action_api, game,
                                           macro_runner=macro_runner, perceive=perceive, committed=list(solution),
                                           budget_plan=budget_plan, max_macros=max_macros, traces_dir=traces_dir)
-            real_actions += max(0, len(res["actions"]) - len(solution)) + res["macros_used"]
+            real_actions += res["env_steps"]              # env steps only — NOT macro LLM call count
+            macros_used += res["macros_used"]             # track LLM macro calls separately
             reason = res["reason"]
             if res["solved"]:
                 solution = res["actions"]; rule_src = src; solved = True; break
@@ -94,4 +95,4 @@ def solve_game(game_factory, candidates_fn, action_api, game, synth_obj_fn, perc
         if not solved:
             break
     return {"levels_solved": sum(1 for l in levels if l["solved"]), "solution": solution,
-            "levels": levels, "real_actions": real_actions}
+            "levels": levels, "real_actions": real_actions, "macros_used": macros_used}

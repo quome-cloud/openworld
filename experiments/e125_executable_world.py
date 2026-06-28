@@ -91,7 +91,8 @@ def main():
                                    perceive=objstate.object_state, macro_runner=None,
                                    budget_explore=a.budget_explore, budget_plan=a.budget_plan,
                                    rounds_per_level=a.rounds, max_levels=a.max_levels, traces_dir=a.traces)
-            results[gid] = {k: res[k] for k in ("levels_solved", "real_actions", "levels")}
+            g.close()                                     # release the shared SandboxGame worker (traverse branch)
+            results[gid] = {k: res[k] for k in ("levels_solved", "real_actions", "macros_used", "levels")}
     save_results("e125_executable_world", {"experiment": "e125_executable_world", "mode": a.mode, "games": results})
     print("[e125]", json.dumps({k: {kk: v.get(kk) for kk in ("solved", "real_actions", "rounds_used", "reason",
                                                                "levels_solved", "levels")}

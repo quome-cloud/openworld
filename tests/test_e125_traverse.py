@@ -101,3 +101,61 @@ def test_traverse_returns_surprise_on_predict_divergence():
     assert r["solved"] is False
     assert r["reason"] == "surprise"
     assert len(r["new_transitions"]) > 0
+
+# --- env_steps (RHAE accuracy) ---
+
+def test_traverse_env_steps_present_in_solved():
+    r = traverse.traverse_level(RealObjGame, lambda s:[[4],[2]], WM, "actions=[2,4]", "g",
+                                perceive=perc, budget_plan=200)
+    assert r["solved"] is True
+    assert "env_steps" in r
+    assert r["env_steps"] > 0
+
+def test_traverse_env_steps_present_in_surprise():
+    class StillGame:
+        def __init__(self): self.reset()
+        def reset(self): self.levels=0; self.frame=np.zeros((8,8),dtype=int); self.frame[0,0]=1
+        def step(self, a, x=None, y=None): pass
+    r = traverse.traverse_level(StillGame, lambda s: [[4]], WM, "actions=[4]", "g",
+                                perceive=perc, budget_plan=200)
+    assert r["solved"] is False
+    assert r["reason"] == "surprise"
+    assert "env_steps" in r
+    assert r["env_steps"] > 0
+
+def test_traverse_env_steps_present_in_stall():
+    class NoOpGame:
+        def __init__(self): self.reset()
+        def reset(self): self.levels=0; self.frame=np.zeros((8,8),dtype=int); self.frame[0,0]=1
+        def step(self, a, x=None, y=None): pass
+    NOOP_PRED = ("def predict(state, action):\n"
+                 "    return {'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}, False")
+    noop_fn = verify.compile_predict(NOOP_PRED)
+    wm_noop = {"predict_src": NOOP_PRED, "predict_fn": noop_fn,
+               "goal_src": None, "goal_fn": None, "ensemble": [noop_fn]}
+    def macro_runner(prompt, schema, model, game, **kw):
+        return {"final": {"macro": [[2]], "rationale": "noop", "goal_note": "noop"},
+                "events": [], "tainted": False, "raw": "", "model_version": ""}
+    r = traverse.traverse_level(NoOpGame, lambda s: [[2]], wm_noop, "actions=[2]", "g",
+                                macro_runner=macro_runner, perceive=perc,
+                                budget_plan=20, max_macros=10, stall_macros=3)
+    assert "env_steps" in r
+
+def test_traverse_env_steps_macros_not_counted():
+    """env_steps must reflect only real env steps, NOT macro LLM calls."""
+    # 1 macro call returns [4,4,4]; game wins in 3 steps -> env_steps==3, macros_used==1
+    nowin = verify.compile_predict(
+        "def predict(state, action):\n"
+        "    ns={'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}\n"
+        "    if action==[4]:\n        ns['objects'][0]['x']=ns['objects'][0]['x']+1\n"
+        "    return ns, False")
+    wm2 = {"predict_src": "src", "predict_fn": nowin, "goal_src": None, "goal_fn": None, "ensemble": [nowin]}
+    def macro_runner(prompt, schema, model, game, **kw):
+        return {"final": {"macro": [[4],[4],[4]], "rationale": "go right", "goal_note": "x->4"},
+                "events": [], "tainted": False, "raw": "", "model_version": ""}
+    r = traverse.traverse_level(RealObjGame, lambda s: [[4],[2]], wm2, "actions=[2,4]", "g",
+                                macro_runner=macro_runner, perceive=perc, budget_plan=50)
+    assert r["solved"] is True
+    assert r["macros_used"] >= 1
+    # env_steps should be 3 (the 3 actual game.step calls) not 4 (3 + 1 macro)
+    assert r["env_steps"] == 3

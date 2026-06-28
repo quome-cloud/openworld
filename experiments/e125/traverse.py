@@ -62,6 +62,7 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
     history = []
     new_trans = []
     macros_used = 0
+    env_steps = 0
     stall = 0
 
     def _state_after(prefix):
@@ -99,7 +100,7 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
                 stall += 1
                 if stall >= stall_macros:
                     return {"solved": False, "actions": committed, "new_transitions": new_trans,
-                            "reason": "stall", "macros_used": macros_used}
+                            "reason": "stall", "macros_used": macros_used, "env_steps": env_steps}
                 continue
 
         # 3. Execute actions against real env (fresh game replayed to committed prefix)
@@ -108,16 +109,17 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
         for a in committed:
             rg.step(*a)
         r = execute.execute_obj(rg, actions, predict_fn, perceive, do_reset=False)
+        env_steps += r["steps"]                           # accumulate real env steps only
         committed += r["verified_prefix"]
 
         if r["solved"]:
             return {"solved": True, "actions": committed, "new_transitions": new_trans,
-                    "reason": "solved", "macros_used": macros_used}
+                    "reason": "solved", "macros_used": macros_used, "env_steps": env_steps}
 
         if r["new_transitions"]:
             new_trans += r["new_transitions"]
             return {"solved": False, "actions": committed, "new_transitions": new_trans,
-                    "reason": "surprise", "macros_used": macros_used}
+                    "reason": "surprise", "macros_used": macros_used, "env_steps": env_steps}
 
         # No progress this round — detect state novelty to distinguish genuine progress from cycles.
         _, cur_state = _state_after(committed)
@@ -131,7 +133,7 @@ def traverse_level(game_factory, candidates_fn, wm, action_api, game, macro_runn
         history.append({"macro": actions, "outcome": "no progress"})
         if stall >= stall_macros:
             return {"solved": False, "actions": committed, "new_transitions": new_trans,
-                    "reason": "stall", "macros_used": macros_used}
+                    "reason": "stall", "macros_used": macros_used, "env_steps": env_steps}
 
     return {"solved": False, "actions": committed, "new_transitions": new_trans,
-            "reason": "max_macros", "macros_used": macros_used}
+            "reason": "max_macros", "macros_used": macros_used, "env_steps": env_steps}

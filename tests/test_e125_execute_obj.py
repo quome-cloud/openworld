@@ -47,3 +47,46 @@ def test_execute_obj_halts_on_refuted_win():
     assert r["halt_step"] == 1
     assert len(r["new_transitions"]) == 1
     assert r["new_transitions"][0]["level_up"] is False
+
+# --- steps count (RHAE accuracy) ---
+
+def test_execute_obj_steps_count_solved():
+    # solved-in-3: all 3 real env steps were made -> steps == 3
+    r = execute.execute_obj(RealObjGame(), [[4],[4],[4]], fn, perc)
+    assert r["solved"] is True
+    assert r["steps"] == 3
+
+def test_execute_obj_steps_count_halt_surprise():
+    # halt-on-surprise at first step -> steps == 1
+    class Stuck(RealObjGame):
+        def step(self, a, x=None, y=None): self._draw()   # never moves
+    r = execute.execute_obj(Stuck(), [[4]], fn, perc)
+    assert r["solved"] is False
+    assert r["steps"] == 1
+
+def test_execute_obj_steps_count_clean_end():
+    # actions exhaust without solving or halting (model correct, level_up never fires) -> steps == len(actions)
+    PRED_NO_WIN = ("def predict(state, action):\n"
+                   "    ns={'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}\n"
+                   "    if action==[4]:\n        o=ns['objects'][0]; o['x']=o['x']+1\n"
+                   "    return ns, False")
+    fn_nw = verify.compile_predict(PRED_NO_WIN)
+    # 1 step only (x goes 1->2, no level-up win at 2)
+    r = execute.execute_obj(RealObjGame(), [[4]], fn_nw, perc)
+    assert r["solved"] is False and r["halt_step"] is None
+    assert r["steps"] == 1
+
+def test_execute_obj_steps_present_in_all_return_paths():
+    # verify the key exists in every code path
+    r1 = execute.execute_obj(RealObjGame(), [[4],[4],[4]], fn, perc)
+    assert "steps" in r1
+    class Stuck(RealObjGame):
+        def step(self, a, x=None, y=None): self._draw()
+    r2 = execute.execute_obj(Stuck(), [[4]], fn, perc)
+    assert "steps" in r2
+    PRED_NO_WIN = ("def predict(state, action):\n"
+                   "    ns={'bg':state['bg'],'objects':[dict(o) for o in state['objects']]}\n"
+                   "    if action==[4]:\n        o=ns['objects'][0]; o['x']=o['x']+1\n"
+                   "    return ns, False")
+    r3 = execute.execute_obj(RealObjGame(), [[4]], verify.compile_predict(PRED_NO_WIN), perc)
+    assert "steps" in r3

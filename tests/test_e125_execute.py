@@ -30,3 +30,34 @@ def test_execute_solves_when_model_matches():
     mask=np.zeros((64,64),dtype=bool); mask[1,1]=True
     r = execute.execute_plan(RealGame(), [[1],[1],[1]], fn, mask=mask)
     assert r["solved"] is True and r["halt_step"] is None
+
+
+class NoWinGame:
+    """[1] increments (0,0); the level NEVER advances. Frames are otherwise simple (no surprise cells)."""
+    def __init__(self): self.reset()
+    def reset(self): self.c=0; self.levels=0; self.done=False; self.frame=np.zeros((64,64),dtype=int)
+    def step(self,a,x=None,y=None):
+        if a==1: self.c+=1
+        self.frame=np.zeros((64,64),dtype=int); self.frame[0,0]=self.c
+
+# model whose WIN HYPOTHESIS is wrong: it predicts a level_up at (0,0)==2, but the real env never levels up.
+FALSEWIN="def predict(frame, action):\n    nf=frame.copy()\n    if action==[1]: nf[0,0]=frame[0,0]+1\n    return nf, bool(nf[0,0]==2)"
+fw=verify.compile_predict(FALSEWIN)
+
+def test_execute_refutes_false_win_hypothesis():
+    # frames match exactly, but predict claims level_up where the real env does not -> record + halt (the env
+    # is the authority on the win condition; the bad hypothesis is fed back as a level_up=False transition).
+    r = execute.execute_plan(NoWinGame(), [[1],[1]], fw, mask=None)
+    assert r["solved"] is False and r["halt_step"] == 2
+    assert len(r["new_transitions"]) == 1
+    t = r["new_transitions"][0]
+    assert t["level_up"] is False and t["next_frame"][0,0] == 2
+
+def test_execute_no_reset_continues_from_current_state():
+    nw = NoWinGame()
+    plain = "def predict(frame, action):\n    nf=frame.copy()\n    if action==[1]: nf[0,0]=frame[0,0]+1\n    return nf, False"
+    pfn = verify.compile_predict(plain)
+    for _ in range(3): nw.step(1)                       # advance to c=3 OUTSIDE execute_plan
+    r = execute.execute_plan(nw, [[1]], pfn, mask=None, do_reset=False)
+    assert nw.frame[0,0] == 4                           # continued from 3 (no reset back to 0)
+    assert r["verified_prefix"] == [[1]] and r["halt_step"] is None

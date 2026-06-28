@@ -35,3 +35,17 @@ def test_check_masks_status_bar():
     mask = np.zeros((64,64), dtype=bool); mask[63,63] = True
     ok, _ = verify.check(verify.compile_predict(GOOD), [_t(a,[1],b,False)], mask=mask)
     assert ok is True
+
+
+# --- goal_score (energy) compilation: a SYMBOLIC heuristic, not gated against data ---
+GOAL = "def goal_score(frame):\n    return float(3 - frame[0,0])"   # energy: 0 at the goal (frame[0,0]==3)
+
+def test_compile_goal_returns_callable():
+    g = verify.compile_goal(GOAL); assert callable(g)
+    assert g(F0) == 3.0 and g(F2) == 1.0
+
+def test_compile_goal_bad_src_returns_none():
+    assert verify.compile_goal("def goal_score(:\n bad") is None
+
+def test_compile_goal_missing_fn_returns_none():
+    assert verify.compile_goal("x = 1") is None

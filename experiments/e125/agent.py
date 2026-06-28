@@ -1,6 +1,7 @@
-"""The single-level loop: explore -> synthesize predict() (verifier-gated) -> plan IN SIMULATION -> execute
-vs the real env, halting on mismatch -> add the surprising transition + re-synthesize -> repeat. Only verified
-plans touch the env. The env decides correctness (a real levels bump)."""
+"""The single-level loop: explore -> synthesize predict()+goal_score (verifier-gated dynamics, autonomous win
+hypothesis) -> plan IN SIMULATION by best-first ENERGY DESCENT on goal_score -> execute vs the real env,
+halting on mismatch OR a refuted win hypothesis -> add the surprising transition + re-synthesize -> repeat.
+Only verified plans touch the env. The env decides correctness (a real levels bump)."""
 from e125 import explorer, simworld, execute
 
 
@@ -9,23 +10,41 @@ def solve_level(game_factory, candidates_fn, action_api, game, mask, synth_fn,
     trans = explorer.collect(game_factory, candidates_fn, budget_explore)
     real_actions = budget_explore
     committed = []
+    seen_keys = {(t["frame"].tobytes(), tuple(t["action"])) for t in trans}   # dedup grounded transitions
+    last_src = last_goal = None                          # carry the prior verified program forward (per-level)
     for rnd in range(rounds):
-        src, fn = synth_fn(trans, action_api, game, mask, traces_dir=traces_dir)
+        src, fn, goal_fn = synth_fn(trans, action_api, game, mask, traces_dir=traces_dir, seed_src=last_src)
         if fn is None:
             return {"solved": False, "actions": committed, "rounds_used": rnd, "real_actions": real_actions,
                     "reason": "no verified predict()"}
+        last_src = src
+        if goal_fn is not None:                          # a reused full seed returns goal_fn=None -> keep cache
+            last_goal = goal_fn
+        goal_fn = goal_fn or last_goal
         init = game_factory(); init.reset()
         for a in committed:
             init.step(*a)
-        plan = simworld.plan(fn, init.frame, candidates_fn, budget_plan)
+        plan = simworld.plan(fn, init.frame, candidates_fn, budget_plan, goal_fn=goal_fn)
         if plan is None:
+            # No predicted win is reachable in sim (the offline win hypothesis never fires). Fall back to
+            # GOAL-DIRECTED real-env exploration: descend goal_score toward the hypothesised win to reach and
+            # GROUND a real level-up (the online oracle). A grounded level_up=True transition makes the next
+            # synth learn a VERIFIED win condition -> the replan then finds it. (Restartable-agent strategy.)
+            gd = explorer.goal_directed_collect(game_factory, candidates_fn, fn, goal_fn, budget_explore)
+            real_actions += len(gd)
+            fresh = [t for t in gd if (t["frame"].tobytes(), tuple(t["action"])) not in seen_keys]
+            for t in fresh:
+                seen_keys.add((t["frame"].tobytes(), tuple(t["action"])))
+            if fresh:
+                trans = trans + fresh                    # re-synthesize next round with the new (grounded) data
+                continue
             return {"solved": False, "actions": committed, "rounds_used": rnd, "real_actions": real_actions,
                     "reason": "no sim plan"}
-        # execute committed+plan against a fresh real game, but verify only the new `plan` segment
+        # replay the committed prefix on a fresh real game, then verify only the new `plan` segment
         rg = game_factory(); rg.reset()
         for a in committed:
             rg.step(*a)
-        res = _exec_from(rg, plan, fn, mask)
+        res = execute.execute_plan(rg, plan, fn, mask, do_reset=False)
         real_actions += len(res["verified_prefix"]) + (1 if res["halt_step"] is not None else 0)
         committed += res["verified_prefix"]
         if res["solved"]:
@@ -36,25 +55,3 @@ def solve_level(game_factory, candidates_fn, action_api, game, mask, synth_fn,
             return {"solved": False, "actions": committed, "rounds_used": rnd + 1, "real_actions": real_actions,
                     "reason": "plan exhausted without progress"}
     return {"solved": False, "actions": committed, "rounds_used": rounds, "real_actions": real_actions}
-
-
-def _exec_from(real_game, plan, predict_fn, mask):
-    """execute.execute_plan but the real_game is already advanced to the committed prefix (do not reset)."""
-    import numpy as np
-    from e125 import verify
-    base = real_game.levels; cur = np.asarray(real_game.frame).copy()
-    verified, new_trans = [], []
-    for i, a in enumerate(plan):
-        try:
-            pred_nf, _ = predict_fn(cur, list(a))
-        except Exception:
-            pred_nf = cur
-        real_game.step(*a); real_nf = np.asarray(real_game.frame)
-        if real_game.levels > base:
-            verified.append(a)
-            return {"solved": True, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}
-        if not np.array_equal(verify._masked(pred_nf, mask), verify._masked(real_nf, mask)):
-            new_trans.append({"frame": cur.copy(), "action": list(a), "next_frame": real_nf.copy(), "level_up": False})
-            return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": i}
-        verified.append(a); cur = real_nf.copy()
-    return {"solved": False, "verified_prefix": verified, "new_transitions": new_trans, "halt_step": None}

@@ -14,6 +14,19 @@ def compile_predict(src):
         return None
 
 
+def compile_goal(src):
+    """Compile a synthesized goal_score(frame)->float (an energy/heuristic). Unlike predict(), goal_score is
+    NOT gated against data (there is no ground-truth energy) -- it only has to compile and return a number;
+    planning descends it. Returns the callable or None."""
+    ns = {"np": np, "__builtins__": __builtins__}
+    try:
+        exec(src, ns)
+        fn = ns.get("goal_score")
+        return fn if callable(fn) else None
+    except Exception:
+        return None
+
+
 def _masked(frame, mask):
     fr = np.asarray(frame)
     return np.where(mask, 0, fr) if mask is not None else fr

@@ -182,6 +182,19 @@ class _Database:
                 break
         return list(reversed(out))
 
+    def top_k(self, k):
+        """Up to k distinct-by-src programs, highest score first (the ensemble)."""
+        progs = [p for c in self.clusters.values() for p in c["progs"]]
+        progs.sort(key=lambda p: -p["score"])
+        out, seen = [], set()
+        for p in progs:
+            if p["src"] in seen:
+                continue
+            seen.add(p["src"]); out.append(p)
+            if len(out) >= k:
+                break
+        return out
+
     def sample(self):
         """Return up to fpp prior programs (one per sampled cluster) for the next k-shot prompt."""
         sigs = list(self.clusters)
@@ -264,6 +277,8 @@ def synthesize(transitions, action_api, game, mask, model="gpt-5.5", n_retries=4
     return None, None, None
 
 
+import copy as _copy_s
+
 # --- object-state synthesis path (predict(state,action)->(next_state,level_up)); reuses the FunSearch
 #     _Database/_softmax/_rename_fn/failed_summaries machinery, but renders/scoring is over OBJECT state ---
 from e125 import objstate as _objstate_s
@@ -338,3 +353,23 @@ def _obj_funsearch_prompt(samples, action_api, failed=None):
             f"still mispredicts:\n{diff}\n{fail_block}Name the function `predict` (pure Python, no imports, no numpy). "
             f"Keep/improve the win hypothesis in level_up and the goal_score(state) energy. Actions: {action_api}. "
             f"Return JSON {{predict_src, goal_score_src, rationale}}.")
+
+
+def ensemble_disagreement(predict_fns, state, action, fields=("color", "y", "x")):
+    """Fraction of programs whose predicted next_state key differs from the plurality (errors are their own
+    outcome). 0.0 when all agree or a single program."""
+    fns = [f for f in predict_fns if f is not None]
+    if len(fns) <= 1:
+        return 0.0
+    outcomes = []
+    for f in fns:
+        try:
+            ns, _ = f(_copy_s.deepcopy(state), list(action))
+            outcomes.append(_objstate_s.state_key(ns, fields))
+        except Exception:
+            outcomes.append(("__error__",))
+    counts = {}
+    for o in outcomes:
+        counts[o] = counts.get(o, 0) + 1
+    plurality = max(counts.values())
+    return (len(outcomes) - plurality) / len(outcomes)

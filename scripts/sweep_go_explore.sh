@@ -22,10 +22,11 @@ for g in $GAMES; do
 done
 wait
 echo "[ge-sweep] all runs done $(date); aggregating..."
-"$PY" - <<'PY'
+GE_AGG="$AGG" GE_PREF="$PREF" "$PY" - <<'PY'
 import json, glob, os
 ROOT="/Users/jim/Desktop/openworld"; agg={}
-for f in glob.glob(f"{ROOT}/scratch_arc/*/result.json"):
+pref=os.environ.get("GE_PREF","ge_")
+for f in glob.glob(f"{ROOT}/scratch_arc/{pref}*/result.json"):
     try:
         r=json.load(open(f)); agg[r["game"]]=r
     except Exception: pass

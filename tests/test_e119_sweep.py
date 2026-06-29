@@ -46,3 +46,18 @@ def test_log_run_appends_one_json_line(tmp_path):
     trace.log_run(f, {"run_id": "tr87__search__t", "game": "tr87", "verified": False})
     lines = f.read_text().strip().splitlines()
     assert len(lines) == 2 and json.loads(lines[0])["run_id"] == "tr87__macro__t"
+
+
+def test_run_sweep_aggregates_arms_and_seeds():
+    import e119_macro_sweep as sweep
+    from openworld import MockLLM
+    # SLM arm: 12 replies of the winning 6-step macro -> solves; search arm: tight budget -> 0.
+    def llm_factory(seed):
+        return MockLLM([json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12)
+    payload = sweep.run_sweep(["mg"], seeds=[0, 1, 2], make=lambda gid: MacroGame(),
+                              llm_factory=llm_factory, budget={"max_nodes": 3, "max_depth": 10})
+    mg = payload["by_game_arm"]["mg"]
+    assert mg["search"]["k_solved"] == 0                      # blind cannot, deterministic
+    assert mg["macro"]["k_solved"] == 3 and mg["macro"]["m"] == 3   # SLM solves every seed
+    assert mg["macro"]["levels_mean"] == 1.0
+    assert "provenance" in payload and payload["provenance"]["seeds"] == [0, 1, 2]

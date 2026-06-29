@@ -665,6 +665,16 @@ steps of the click-only baseline), but the heuristic proposers never \emph{propo
 procedure: the EFEI theorem reduces \emph{variance}, not the \emph{bias} of a misspecified goal. Search
 with a better engine is still search; only reasoning the win clears the walls.
 
+\textbf{A direction in progress (E131): short-horizon receding-horizon lookahead.} The negatives above
+all try to infer a \emph{whole-level} goal from sparse feedback. E131 inverts the bottleneck: the
+explosion is in the \emph{horizon}, not the branching (per step there are only $\sim$4--7 actions), so
+rather than decode a global objective it exhaustively expands a \emph{2--3-frame} tree, scores leaves by
+\emph{level-delta} (primary) then \emph{novelty} (tie-break), commits only the first action, and recedes
+the window. A deterministic fast-forward transition cache makes the tiny tree nearly free---the
+architecture is \emph{Lazy Receding-Horizon A\*}, with environment replay as a lazily-evaluated edge.
+Whether chaining locally-optimal short lookaheads clears procedural walls that defeat whole-level goal
+inference is the open question we are currently evaluating.
+
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
 \label{sec:agent}
 The procedural walls resisted five automated attacks because they need \emph{genuine goal reasoning},

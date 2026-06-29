@@ -113,13 +113,24 @@ def _result(win, lv, actions, archive, real):
             "archive": len(archive), "real_steps": int(real)}
 
 
+def _micro_executor(g, spec):
+    """Default executor: a spec IS a single micro-action (kind,x,y). Returns the micro-actions it took
+    (one) and whether the resulting state is explorable. Macro-Go-Explore passes an executor that
+    realizes an object-macro as a SHORT sub-sequence of micro-actions (see e128.macros)."""
+    a = tuple(spec)
+    return [a], _safe_step(g, a)
+
+
 def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
-               explore_horizon=15, seed=0, win=None, mask=None, cell_rep="object"):
-    """Returns {win, best_levels, best_actions, archive, real_steps}. `candidate_actions(frame,avail)
-    -> list of (kind,x,y)` (directional AND mouse clicks at inferred targets); `seed_actions` = a banked
-    frontier trajectory to seed the archive from. `cell_rep`: 'object' (OpenWorld object-state, default)
-    or 'masked' (raw masked-frame). The cell key always includes `levels` so progress isn't collapsed."""
+               explore_horizon=15, seed=0, win=None, mask=None, cell_rep="object", executor=None):
+    """Returns {win, best_levels, best_actions, archive, real_steps}. `candidate_actions(frame,avail)`
+    returns a list of action SPECS; `executor(g, spec) -> (micro_actions_taken, ok)` applies one (default:
+    a spec is a single micro-action (kind,x,y) -- directional or mouse click). Pass a MACRO executor +
+    macro candidate_actions for object-level macro-Go-Explore. `seed_actions` = a banked frontier
+    trajectory (micro) to seed from. `cell_rep`: 'object' (OpenWorld object-state, default) or 'masked'.
+    The cell key always includes `levels`. Cell trajectories are stored as MICRO actions for exact replay."""
     rng = np.random.default_rng(seed)
+    executor = executor or _micro_executor
     if mask is None:
         mask = _probe_mask(game_factory, seed=seed)
     cf = _cellfn(cell_rep)
@@ -173,8 +184,9 @@ def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
             acts = candidate_actions(g.frame, list(getattr(g, "avail", _DIR_DEFAULT)))
             if not acts:
                 break
-            a = tuple(acts[int(rng.integers(0, len(acts)))])
-            ok = _safe_step(g, a); real += 1; path = path + [a]
+            spec = acts[int(rng.integers(0, len(acts)))]
+            micro, ok = executor(g, spec)         # one macro = a short micro-action sub-sequence
+            real += len(micro); path = path + [tuple(a) for a in micro]
             lv = int(g.levels)
             if lv > best[0]:
                 best = (lv, list(path))

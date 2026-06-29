@@ -41,16 +41,22 @@ def banked_frontier(game):
 def main():
     game = sys.argv[1] if len(sys.argv) > 1 else "tu93"
     budget = int(sys.argv[2]) if len(sys.argv) > 2 else 200000
+    mode = sys.argv[3] if len(sys.argv) > 3 else "macro"     # 'macro' (object-level) | 'micro'
+    pref = "gm_" if mode == "macro" else "ge_"               # separate workdir per mode (no collision)
     seed_actions, seed_lv, win = banked_frontier(game)
     fac = shared_factory(game)
     g = fac(); g.reset()
     win = win or int(g.win)
-    print(f"[e128] {game}: seed frontier {seed_lv}/{win} ({len(seed_actions)} actions), budget {budget} steps",
-          flush=True)
+    print(f"[e128] {game} ({mode}): seed frontier {seed_lv}/{win} ({len(seed_actions)} actions), "
+          f"budget {budget} steps", flush=True)
     t0 = time.time()
     try:
-        res = go_explore(fac, perception.candidate_actions, budget=budget,
-                         seed_actions=seed_actions, win=win, seed=0)
+        if mode == "macro":
+            from experiments.e128.macros import macro_solve
+            res = macro_solve(fac, budget, seed_actions=seed_actions, win=win, seed=0)
+        else:
+            res = go_explore(fac, perception.candidate_actions, budget=budget,
+                             seed_actions=seed_actions, win=win, seed=0)
     except Exception as ex:
         traceback.print_exc()
         res = {"win": False, "best_levels": seed_lv, "best_actions": [list(a) for a in seed_actions],
@@ -58,8 +64,9 @@ def main():
     wall = round(time.time() - t0, 1)
     lv = res["best_levels"]
     improved = lv > seed_lv
-    # write solved.json to a clean ge_ workdir for the attestation gate (audit + replay + roundtrip)
-    wd = f"{ROOT}/scratch_arc/ge_{game}"
+    print(f"[e128] {game} ({mode}): avatar={res.get('avatar')}", flush=True)
+    # write solved.json to a clean per-mode workdir for the attestation gate (audit + replay + roundtrip)
+    wd = f"{ROOT}/scratch_arc/{pref}{game}"
     os.makedirs(wd, exist_ok=True)
     shutil.copy(f"{ROOT}/experiments/arc3_sandbox.py", wd)   # the only file -> audit-clean
     sol = {"game": game, "actions": res["best_actions"], "levels": lv, "win": win,
@@ -72,7 +79,8 @@ def main():
            "archive_cells": res.get("archive"), "real_steps": res.get("real_steps"),
            "wall_s": wall, "error": res.get("error")}
     json.dump(rec, open(f"{wd}/result.json", "w"))            # per-game (no race across parallel runs)
-    out = f"{ROOT}/experiments/results/arc3_go_explore.json"  # best-effort shared aggregate
+    out = (f"{ROOT}/experiments/results/arc3_go_explore_macro.json" if mode == "macro"
+           else f"{ROOT}/experiments/results/arc3_go_explore.json")
     try:
         allr = json.load(open(out)) if os.path.exists(out) else {}
         allr[game] = rec

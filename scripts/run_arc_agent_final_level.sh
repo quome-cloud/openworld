@@ -17,9 +17,29 @@ WD="$ROOT/scratch_arc/fl_$GAME"
 mkdir -p "$WD"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"                    # the only harness (no source)
 cp "$ROOT/experiments/e125/objstate.py" "$WD/"                  # OpenWorld object perceptor (solver tool)
-# the agent's OWN banked frontier (level N-1) to resume from
-FR="$ROOT/scratch_arc/sb_$GAME/solved_best.json"; [ -f "$FR" ] || FR="$ROOT/scratch_arc/sb_$GAME/solved.json"
-[ -f "$FR" ] && cp "$FR" "$WD/frontier.json" || echo '{"actions":[],"levels":0,"win":0}' > "$WD/frontier.json"
+# the agent's OWN deepest banked frontier (level N-1) to resume from. Prefer the source-free archive's
+# banked solution (the deepest across ALL source-free methods -- Claude-SF, Go-Explore, etc.); fall back
+# to the per-game sb_ best-keeper. This is the agent's own replay-verified work, never the answer key.
+ARCH="$ROOT/experiments/results/arc3_fullgame_sourcefree.json"
+"$AGENT_PY" - "$ARCH" "$GAME" "$WD/frontier.json" <<'PY' || true
+import json, sys
+arch_path, game, out = sys.argv[1], sys.argv[2], sys.argv[3]
+try:
+    a = json.load(open(arch_path))
+    acts = a.get("solutions", {}).get(game) or []
+    pg = a.get("per_game", {}).get(game, {})
+    if acts:
+        json.dump({"game": game, "actions": acts, "levels": int(pg.get("levels", 0)),
+                   "win": int(pg.get("win", 0))}, open(out, "w"))
+        sys.exit(0)
+except Exception:
+    pass
+sys.exit(1)
+PY
+if [ ! -f "$WD/frontier.json" ]; then
+  FR="$ROOT/scratch_arc/sb_$GAME/solved_best.json"; [ -f "$FR" ] || FR="$ROOT/scratch_arc/sb_$GAME/solved.json"
+  [ -f "$FR" ] && cp "$FR" "$WD/frontier.json" || echo '{"actions":[],"levels":0,"win":0}' > "$WD/frontier.json"
+fi
 N=$("$AGENT_PY" -c "import json;d=json.load(open('$WD/frontier.json'));print(d.get('levels',0))")
 W=$("$AGENT_PY" -c "import json;d=json.load(open('$WD/frontier.json'));print(d.get('win',0))")
 

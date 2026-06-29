@@ -134,3 +134,136 @@ def best_sequence(env, perceive, frontier_path, frontier_key, frontier_levels,
     if best_first is None:
         return None, (0, 0)
     return best_first, best_val
+
+
+# ---------------------------------------------------------------------------
+# Result dataclass + receding-horizon driver
+# ---------------------------------------------------------------------------
+
+class Result:
+    """Return value of solve_lookahead."""
+    def __init__(self, best_levels, best_actions, cycles, real_steps, cache_size):
+        self.best_levels = best_levels
+        self.best_actions = best_actions
+        self.cycles = cycles
+        self.real_steps = real_steps
+        self.cache_size = cache_size
+
+    def __repr__(self):
+        return (f"Result(best_levels={self.best_levels}, actions={len(self.best_actions)}, "
+                f"cycles={self.cycles}, real_steps={self.real_steps}, "
+                f"cache_size={self.cache_size})")
+
+
+def solve_lookahead(env, perceive, seed_actions, win, depth=3, beam=4, budget=4000):
+    """Receding-horizon lookahead driver.
+
+    1. Replay seed_actions from reset().
+    2. Observe the post-seed state; set best_levels/best_actions baseline (NEVER regress).
+    3. Loop:
+       - Call best_sequence(...) from the current frontier state.
+       - Commit the first action via _act.
+       - Append to running action list; update frontier; mark seen.
+       - Bank (best_levels / best_actions) whenever levels rise.
+       - Stop on: win reached, budget exhausted, env.done, or K=20 consecutive
+         cycles with no new state AND no level gain.
+    4. Return Result(best_levels, best_actions, cycles, real_steps, cache_size).
+    """
+    K = 20  # stagnation limit
+
+    # ---- seed phase ----
+    env.reset()
+    for a in seed_actions:
+        _act(env, a)
+
+    # Post-seed observation
+    s = perceive(env.frame)
+    frontier_key = s.key
+    frontier_levels = getattr(env, 'levels', 0)
+    frontier_path = [list(a) for a in seed_actions]
+
+    # Initialise cache with seed state as known
+    cache = FrontierCache()
+    cache.seen.add(frontier_key)
+    cache.path_to[frontier_key] = list(frontier_path)
+
+    # Best so far (never regress from seed)
+    best_levels = frontier_levels
+    best_actions = list(frontier_path)
+
+    actions = list(frontier_path)   # running committed action sequence
+    real_steps = 0
+    stagnant_cycles = 0
+    prev_seen_count = len(cache.seen)
+
+    for cycle in range(budget):
+        avail = list(getattr(env, 'avail', []))
+        if not avail:
+            break
+
+        # Lookahead from current frontier
+        first_action, _ = best_sequence(
+            env, perceive,
+            frontier_path, frontier_key, frontier_levels,
+            avail, cache,
+            depth=depth, beam=beam,
+        )
+
+        if first_action is None:
+            break
+
+        # Commit the first action; env must be at frontier_path after best_sequence
+        # (best_sequence may have left the env in an unknown state → replay to frontier)
+        _replay_to(env, frontier_path)
+        _act(env, first_action)
+        real_steps += 1
+
+        # Observe new state
+        s = perceive(env.frame)
+        next_key = s.key
+        next_levels = getattr(env, 'levels', frontier_levels)
+
+        # Update cache with this transition
+        new_path = frontier_path + [first_action]
+        cache.put(frontier_key, tuple(first_action), next_key, next_levels, new_path)
+
+        # Advance frontier
+        actions.append(first_action)
+        frontier_path = new_path
+        frontier_key = next_key
+        frontier_levels = next_levels
+
+        # Bank on level rise
+        if next_levels > best_levels:
+            best_levels = next_levels
+            best_actions = list(actions)
+
+        # Win check
+        if best_levels >= win and win > 0:
+            break
+        if getattr(env, 'done', False):
+            break
+        if best_levels >= win and win > 0:
+            break
+
+        # Stagnation: no new state AND no level gain
+        new_seen_count = len(cache.seen)
+        gained_state = new_seen_count > prev_seen_count
+        gained_level = next_levels > (best_levels if actions == best_actions else best_levels)
+        # simpler: track whether frontier_levels increased vs last cycle
+        if not gained_state:
+            stagnant_cycles += 1
+        else:
+            stagnant_cycles = 0
+        prev_seen_count = new_seen_count
+
+        if stagnant_cycles >= K:
+            break
+
+    return Result(
+        best_levels=best_levels,
+        best_actions=best_actions,
+        cycles=cycle + 1,
+        real_steps=real_steps,
+        cache_size=len(cache.trans),
+    )

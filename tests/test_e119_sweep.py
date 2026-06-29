@@ -1,5 +1,5 @@
-import json, numpy as np
-from e119 import solve
+import json, numpy as np, hashlib
+from e119 import solve, trace
 
 
 class MacroGame:
@@ -23,3 +23,26 @@ def test_random_macro_mode_is_seed_deterministic():
     r2 = solve.solve_game(MacroGame(), llm=Boom(), mode="random-macro", seed=7,
                           budget={"max_nodes": 3, "max_depth": 10}, make=lambda gid: MacroGame())
     assert r1["actions"] == r2["actions"] and r1["levels"] == r2["levels"]
+
+
+def test_prompt_digest_is_stable():
+    d = trace.prompt_digest("hello world")
+    assert d["chars"] == 11 and d["lines"] == 1
+    assert d["sha256"] == hashlib.sha256(b"hello world").hexdigest()
+    assert d["approx_tokens"] >= 1
+
+
+def test_provenance_captures_config():
+    p = trace.provenance("qwen2.5-coder:7b", {"num_ctx": 8192, "temperature": 0.7}, [0, 1, 2], {"max_nodes": 6000})
+    assert p["model"] == "qwen2.5-coder:7b" and p["seeds"] == [0, 1, 2]
+    assert p["options"]["num_ctx"] == 8192 and p["budget"]["max_nodes"] == 6000
+    assert "python" in p["versions"]              # version block present
+    assert "digest" in p                          # best-effort key always present (may be None)
+
+
+def test_log_run_appends_one_json_line(tmp_path):
+    f = tmp_path / "runs.jsonl"
+    trace.log_run(f, {"run_id": "tr87__macro__t", "game": "tr87", "verified": True})
+    trace.log_run(f, {"run_id": "tr87__search__t", "game": "tr87", "verified": False})
+    lines = f.read_text().strip().splitlines()
+    assert len(lines) == 2 and json.loads(lines[0])["run_id"] == "tr87__macro__t"

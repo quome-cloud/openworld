@@ -4,7 +4,7 @@ ToyClickGame is the cleanest goal-as-PROCEDURE test: the win requires pressing A
 (an ordered protocol -- exactly what static-goal methods cannot express and what defeats source-free
 agents on the real walls). Go-Explore must discover that order. ToyGame is a navigation/collection
 procedure. Both are deterministic, so results are reproducible with a fixed seed."""
-from experiments.e128.go_explore import go_explore, identity_mask, cell_key
+from experiments.e128.go_explore import go_explore, identity_mask, cell_key, object_cell
 from experiments.e127 import perception
 from tests.e127.toy_click import toy_click_factory, ToyClickGame
 from tests.e127.toy import toy_factory, ToyGame
@@ -57,3 +57,40 @@ def test_identity_mask_flags_status_only():
     # masking changes the cell key (status cell ignored)
     f = frames[-1]
     assert cell_key(f, m) != cell_key(f, None)
+
+
+def test_mouse_clicks_are_in_the_action_space():
+    # a click game (avail=[6]) must yield (6,x,y) click actions at inferred sprite targets
+    g = ToyClickGame(); f = g.reset()
+    acts = perception.candidate_actions(f, g.avail)
+    assert g.avail == [6]
+    assert acts and all(a[0] == 6 for a in acts)              # all clicks
+    assert (6, 2, 2) in acts                                  # at button A (x=col,y=row)
+
+
+def test_free_timer_masked_but_meaningful_counter_survives():
+    # free-running timer: changes EVERY step -> masked (noise). meaningful counter: changes only on a
+    # specific event -> NOT masked (kept in the representation).
+    H = W = 8
+    frames = []
+    for t in range(20):
+        f = np.zeros((H, W), dtype=int)
+        f[0, 0] = (t % 15) + 1            # FREE-RUNNING timer: changes every step
+        f[7, 7] = 1 if t >= 10 else 0     # MEANINGFUL counter: flips once, at t=10 (selective)
+        frames.append(f)
+    m = identity_mask(frames)
+    assert m[0, 0] == True                # free timer masked
+    assert m[7, 7] == False               # meaningful counter NOT masked -> stays in the cell rep
+    # object-state cell distinguishes the counter state (the win-relevant change is preserved)
+    before = object_cell(frames[0], m, levels=0)
+    after = object_cell(frames[19], m, levels=0)
+    assert before != after
+
+
+def test_object_cell_distinguishes_procedure_phases():
+    # the object-state rep must distinguish the ordered-protocol phases (else Go-Explore is blind)
+    g = ToyClickGame(); f0 = g.reset()
+    k0 = object_cell(f0, None, levels=0)
+    g.step(6, 2, 2)                        # press A -> recolors -> different object-state
+    k1 = object_cell(g.frame, None, levels=0)
+    assert k0 != k1

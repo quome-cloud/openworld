@@ -21,6 +21,7 @@ Phase 1, faithful to the paper:
 Source-free by construction: only frames/levels are read through the GameLike client; never code.
 """
 import numpy as np
+from experiments.e125 import objstate   # OpenWorld object-centric perceptor (the cell representation)
 
 _DIR_DEFAULT = [1, 2, 3, 4, 5, 7]
 
@@ -43,11 +44,36 @@ def identity_mask(frames, thr=0.95):
     return (changed / total) >= thr
 
 
-def cell_key(frame, mask):
-    f = np.asarray(frame)
+def _denoise(frame, mask):
+    """Zero ONLY per-step-noise cells (status timers/animations) to the background color, so they don't
+    spawn phantom objects -- meaningful counters (which change SELECTIVELY, not every step) survive."""
+    f = np.asarray(frame).astype(int)
     if mask is not None and getattr(mask, "shape", None) == f.shape:
-        f = np.where(mask, 0, f)
-    return f.astype(np.int16).tobytes()
+        bg = int(np.bincount(f.ravel()).argmax())
+        f = np.where(mask, bg, f)
+    return f
+
+
+def cell_key(frame, mask):
+    """Masked-frame byte hash (the 'masked' cell rep / fallback)."""
+    return _denoise(frame, mask).astype(np.int16).tobytes()
+
+
+def object_cell(frame, mask, levels=0, ignore_colors=()):
+    """OpenWorld object-state cell rep: de-noise, then the object-centric perceptor (connected
+    components -> {bg, objects[color,size,y,x]}) canonicalized, COMBINED with the level (so progress is
+    never collapsed). Captures object configuration, click-target sprites, and meaningful counters
+    (rendered as objects/lit cells) while abstracting away pixel/animation noise. Clicks (mouse) are
+    covered by candidate_actions; the level signal (which detects the win) is in the key."""
+    f = _denoise(frame, mask)
+    s = objstate.object_state(f.tolist(), ignore_colors)
+    return (int(levels), objstate.state_key(s))
+
+
+def _cellfn(rep):
+    if rep == "masked":
+        return lambda frame, mask, levels: (int(levels), cell_key(frame, mask))
+    return lambda frame, mask, levels: object_cell(frame, mask, levels)
 
 
 def _probe_mask(game_factory, steps=40, seed=0):
@@ -76,19 +102,22 @@ def _step(g, a):
 
 
 def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
-               explore_horizon=15, seed=0, win=None, mask=None):
+               explore_horizon=15, seed=0, win=None, mask=None, cell_rep="object"):
     """Returns {win, best_levels, best_actions, archive, real_steps}. `candidate_actions(frame,avail)
-    -> list of (kind,x,y)`; `seed_actions` = a banked frontier trajectory to seed the archive from."""
+    -> list of (kind,x,y)` (directional AND mouse clicks at inferred targets); `seed_actions` = a banked
+    frontier trajectory to seed the archive from. `cell_rep`: 'object' (OpenWorld object-state, default)
+    or 'masked' (raw masked-frame). The cell key always includes `levels` so progress isn't collapsed."""
     rng = np.random.default_rng(seed)
     if mask is None:
         mask = _probe_mask(game_factory, seed=seed)
+    cf = _cellfn(cell_rep)
     g = game_factory()
     f0 = np.asarray(g.reset())
     win = int(win if win is not None else getattr(g, "win", 1))
     archive = {}
 
     def consider(actions, frame, levels):
-        k = cell_key(frame, mask)
+        k = cf(frame, mask, levels)
         cur = archive.get(k)
         if cur is None or levels > cur["levels"] or (levels == cur["levels"] and len(actions) < len(cur["actions"])):
             archive[k] = {"actions": [tuple(a) for a in actions], "levels": int(levels), "chosen": 0}

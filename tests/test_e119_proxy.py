@@ -79,8 +79,9 @@ def test_search_stats_guided_reaches_depth_faster_than_blind():
 
 
 def test_probe_game_reports_signals_on_corridor():
-    # Corridor: blind explores all positions (frontier exhausts -> no novelty headroom),
-    # and a gradient predicate ("reach color 4 far right") is FALSE at start, TRUE later.
+    # Corridor: blind explores all positions (frontier exhausts -> no novelty headroom).
+    # All reach(4) predicates are TRUE at start (color 4 is always present), so n_gradient==0;
+    # this exercises the no-gradient / novelty-headroom path, not the guided-search loop.
     g = CorridorGame(L=8)
     # monkeypatch perception/candidates to the corridor's 1-D state via proxy_probe seams:
     import numpy as np
@@ -122,3 +123,82 @@ def test_run_probe_aggregates_and_decides(tmp_path):
     assert payload["n_games"] == 2
     assert payload["decision"]["go"] in (True, False)
     assert any(r["game"] == "g50t" for r in payload["rows"])
+
+
+# ── Finding 1: decide_go handles error rows / missing keys for primary ──────────
+
+def test_decide_go_primary_error_row_returns_no_go():
+    """Error row for the primary must not raise; returns go=False, signal='none'."""
+    rows = [{"game": "g50t", "error": "timeout after 30s"}]
+    d = proxy_probe.decide_go(rows)
+    assert d["go"] is False
+    assert d["signal"] == "none"
+    assert "error" in d["reason"].lower() or "errored" in d["reason"].lower()
+
+
+def test_decide_go_primary_missing_keys_returns_no_go():
+    """Row with missing signal keys for the primary must not raise KeyError."""
+    rows = [{"game": "g50t"}]          # no n_satisfiable, best_depth_gain, etc.
+    d = proxy_probe.decide_go(rows)
+    assert d["go"] is False
+    assert d["signal"] == "none"
+    assert "missing" in d["reason"].lower()
+
+
+# ── Finding 2: probe_game gradient loop is exercised ────────────────────────────
+
+class OneStepColorGame:
+    """Minimal game: a single right-move (action 7) changes cell (0,0) from color 3 to color 5.
+    Color 5 is absent at the start frame, so reach(5) is FALSE at start but satisfiable after
+    one step — ensuring n_gradient >= 1 and exercising the guided-search loop in probe_game."""
+    gid = "one_step_color"
+    win = 1
+    avail = [7]
+
+    def reset(self):
+        self.stepped = False; self.levels = 0; self.done = False; self._r(); return self.frame
+    def _r(self):
+        g = np.zeros((64, 64), int)
+        g[0, 0] = 5 if self.stepped else 3
+        self.frame = g
+    def step(self, a, x=None, y=None):
+        if a == 7: self.stepped = True
+        self._r(); return self.frame
+
+
+def test_probe_game_gradient_loop_exercised():
+    """At least one predicate is false-at-start but satisfiable (n_gradient >= 1),
+    confirming the guided-search loop inside probe_game runs."""
+    g = OneStepColorGame()
+    g.reset()
+    row = proxy_probe.probe_game(g, {"max_nodes": 200, "max_depth": 10}, max_preds=20)
+    assert row["game"] == "one_step_color"
+    assert row["n_gradient"] >= 1, "expected at least one gradient predicate (reach 5 is false at start)"
+    assert isinstance(row["best_depth_gain"], int) and row["best_depth_gain"] >= 0
+    assert isinstance(row["best_novel_gain"], float) and row["best_novel_gain"] >= 0.0
+
+
+# ── Finding 4: probe_game handles empty perceive.probe result ────────────────────
+
+class NoActionGame:
+    """Game that perceive.probe will return [] for (no avail actions yields no transitions)."""
+    gid = "no_action"
+    win = 1
+    avail = []      # no available actions -> perceive.probe returns []
+
+    def reset(self):
+        self.levels = 0; self.done = False
+        self.frame = np.zeros((64, 64), int); return self.frame
+    def step(self, a, x=None, y=None):
+        return self.frame
+
+
+def test_probe_game_empty_probe_returns_error_row():
+    """When perceive.probe returns [], probe_game returns an error row instead of IndexError."""
+    from unittest.mock import patch
+    g = NoActionGame()
+    with patch("e119.perceive.probe", return_value=[]):
+        row = proxy_probe.probe_game(g, {"max_nodes": 200, "max_depth": 10})
+    assert row["game"] == "no_action"
+    assert "error" in row
+    assert "empty probe" in row["error"]

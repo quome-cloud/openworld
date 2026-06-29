@@ -72,6 +72,9 @@ def probe_game(game, budget, max_preds=20):
     gain from pursuing a satisfiable-but-false-at-start predicate (the directionality test)."""
     game.reset()
     trans = perceive.probe(game)
+    if not trans:
+        return {"game": getattr(game, "gid", type(game).__name__),
+                "modality": "unknown", "error": "empty probe (no actionable transitions)"}
     frames = [t["before"] for t in trans] + [t["after"] for t in trans]
     mask = perceive.status_mask(frames)
     key_fn = lambda f, m=mask: perceive.state_key(f, m)
@@ -102,10 +105,19 @@ def probe_game(game, budget, max_preds=20):
 
 def decide_go(rows, primary="g50t"):
     """GO iff the primary game shows either a non-flat subgoal proxy OR novelty headroom.
-    Default the macro selection signal to novelty when both qualify (brainstorm decision)."""
+    Default the macro selection signal to novelty when both qualify (brainstorm decision).
+    An error row or a row with missing signal keys for the primary is treated as No-Go."""
     pr = next((r for r in rows if r["game"] == primary), None)
     if pr is None:
         return {"go": False, "signal": "none", "reason": f"primary {primary} missing from rows"}
+    if "error" in pr:
+        return {"go": False, "signal": "none",
+                "reason": f"primary {primary} errored: {pr['error']}"}
+    required = ("n_satisfiable", "best_depth_gain", "best_novel_gain", "novelty_headroom")
+    missing = [k for k in required if k not in pr]
+    if missing:
+        return {"go": False, "signal": "none",
+                "reason": f"primary {primary} missing keys: {missing}"}
     subgoal = pr["n_satisfiable"] >= 1 and (pr["best_depth_gain"] >= 2 or pr["best_novel_gain"] >= 0.10)
     novelty = bool(pr["novelty_headroom"])
     signal = "novelty" if novelty else ("subgoal" if subgoal else "none")

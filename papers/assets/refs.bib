@@ -52,7 +52,7 @@
   author       = {{OpenAI}},
   year         = {2024},
   howpublished = {OpenAI technical report},
-  url          = {https://openai.com/research/video-generation-models-as-world-simulators}
+  url          = {https://openai.com/index/video-generation-models-as-world-simulators/}
 }
 
 @misc{worldlabs2025,
@@ -64,12 +64,12 @@
 }
 
 @misc{vjepa2025,
-  title        = {{V-JEPA 2}: Self-Supervised Video World Models from Joint-Embedding Predictive Architectures},
-  author       = {{Meta AI (FAIR)}},
+  title        = {{V-JEPA 2}: Self-Supervised Video Models Enable Understanding, Prediction and Planning},
+  author       = {Assran, Mido and others},
   year         = {2025},
-  howpublished = {arXiv preprint},
+  howpublished = {arXiv preprint arXiv:2506.09985},
   note         = {Joint-embedding predictive world model; predicts in representation space, not pixels},
-  url          = {https://ai.meta.com/vjepa/}
+  url          = {https://arxiv.org/abs/2506.09985}
 }
 
 @article{unizero2024,
@@ -90,7 +90,7 @@
 
 @article{nedreamer2026,
   title   = {Next Embedding Prediction Makes World Models Stronger},
-  author  = {{NE-Dreamer Authors}},
+  author  = {Bredis, George and Balagansky, Nikita and Gavrilov, Daniil and Rakhimov, Ruslan},
   journal = {arXiv preprint arXiv:2603.02765},
   year    = {2026},
   url     = {https://arxiv.org/abs/2603.02765}
@@ -122,7 +122,7 @@
 
 @article{cwmgames2025,
   title   = {Code World Models for General Game Playing},
-  author  = {Lehrach, Wolfgang and Marino, Joseph and Piloto, Luis and others},
+  author  = {Lehrach, Wolfgang and others},
   journal = {arXiv preprint arXiv:2510.04542},
   year    = {2025},
   url     = {https://arxiv.org/abs/2510.04542}
@@ -138,7 +138,7 @@
 
 @article{nesys2026,
   title   = {Neuro-Symbolic Synergy for Interactive World Modeling},
-  author  = {{NeSyS Authors}},
+  author  = {Zhao, Hongyu and Zhou, Siyu and Yang, Haolin and Qin, Zengyi and Zhou, Tianyi},
   journal = {arXiv preprint arXiv:2602.10480},
   year    = {2026},
   url     = {https://arxiv.org/abs/2602.10480}
@@ -146,7 +146,7 @@
 
 @article{spectrap2025,
   title   = {The Specification Trap: Why Static Value Alignment Alone Is Insufficient for Robust Alignment},
-  author  = {{Specification Trap Authors}},
+  author  = {Spizzirri, Austin},
   journal = {arXiv preprint arXiv:2512.03048},
   year    = {2025},
   url     = {https://arxiv.org/abs/2512.03048}
@@ -154,7 +154,7 @@
 
 @article{mas2025,
   title   = {Moral Anchor System: A Predictive Framework for {AI} Value Alignment and Drift Prevention},
-  author  = {{MAS Authors}},
+  author  = {Ravindran, Santhosh Kumar},
   journal = {arXiv preprint arXiv:2510.04073},
   year    = {2025},
   url     = {https://arxiv.org/abs/2510.04073}
@@ -162,7 +162,7 @@
 
 @article{stablevalue2026,
   title   = {Toward Stable Value Alignment: Introducing Independent Modules for Consistent Value Guidance},
-  author  = {{Stable Value Alignment Authors}},
+  author  = {Chen, Wenhao and Sun, Sirui and Bai, Shengyuan and Song, Guojie},
   journal = {arXiv preprint arXiv:2605.11712},
   year    = {2026},
   url     = {https://arxiv.org/abs/2605.11712}
@@ -433,7 +433,7 @@
 
 @article{metacwm2025,
   title   = {{CWM}: An Open-Weights {LLM} for Research on Code Generation with World Models},
-  author  = {{Meta FAIR CodeGen Team}},
+  author  = {Copet, Jade and others},
   journal = {arXiv preprint arXiv:2510.02387},
   year    = {2025},
   note    = {32B open-weights neural code world model; mid-trained on Python execution and Docker container traces, then multi-task RL},
@@ -507,4 +507,64 @@
   journal={arXiv preprint arXiv:2601.10904},
   year={2026},
   note={\url{https://arxiv.org/abs/2601.10904}}
+}
+% --- Related-work additions (2026-06-27 revision): world-model survey + explicit-vs-implicit
+%     world models + world-models-as-evaluators; metadata from the OSB World-Models survey
+%     references.bib (arXiv IDs verified there 2026-06-05). Re-verify before camera-ready.
+@article{ding2024world,
+  title   = {Understanding World or Predicting Future? {A} Comprehensive Survey of World Models},
+  author  = {Ding, Jingtao and others},
+  journal = {ACM Computing Surveys},
+  year    = {2025},
+  note    = {arXiv:2411.14499},
+  url     = {https://arxiv.org/abs/2411.14499}
+}
+
+@article{vafa2024evaluating,
+  title   = {Evaluating the World Model Implicit in a Generative Model},
+  author  = {Vafa, Keyon and Chen, Justin Y. and Rambachan, Ashesh and others},
+  journal = {arXiv preprint arXiv:2406.03689},
+  year    = {2024},
+  url     = {https://arxiv.org/abs/2406.03689}
+}
+
+@article{li2025what,
+  title   = {What Does it Mean for a Neural Network to Learn a ``World Model''?},
+  author  = {Li, Kenneth and Vi{\'e}gas, Fernanda and Wattenberg, Martin and others},
+  journal = {arXiv preprint arXiv:2507.21513},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2507.21513}
+}
+
+@article{kang2024how,
+  title   = {How Far is Video Generation from World Model: {A} Physical Law Perspective},
+  author  = {Kang, Bingyi and Yue, Yang and Lu, Rui and others},
+  journal = {arXiv preprint arXiv:2411.02385},
+  year    = {2024},
+  url     = {https://arxiv.org/abs/2411.02385}
+}
+
+@article{quevedo2025worldgym,
+  title   = {{WorldGym}: World Model as An Environment for Policy Evaluation},
+  author  = {Quevedo, Julian and Sharma, Ansh Kumar and Sun, Yixiang and others},
+  journal = {arXiv preprint arXiv:2506.00613},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2506.00613}
+}
+
+% --- Probabilistic-database foundations (for the many-worlds store, E46).
+@inproceedings{green2007provenance,
+  title     = {Provenance semirings},
+  author    = {Green, Todd J. and Karvounarakis, Grigoris and Tannen, Val},
+  booktitle = {Proceedings of the ACM Symposium on Principles of Database Systems (PODS)},
+  pages     = {31--40},
+  year      = {2007}
+}
+
+@book{suciu2011probabilistic,
+  title     = {Probabilistic Databases},
+  author    = {Suciu, Dan and Olteanu, Dan and R{\'e}, Christopher and Koch, Christoph},
+  publisher = {Morgan \& Claypool},
+  series    = {Synthesis Lectures on Data Management},
+  year      = {2011}
 }

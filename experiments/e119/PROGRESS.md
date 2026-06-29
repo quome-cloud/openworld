@@ -198,3 +198,33 @@ never produced a false solve.
 follow-up that wires the (built-but-deferred) per-call `trace.log_run` at the proposer would attribute
 the 0 precisely, and is the cheapest next step before any larger investment (longer macros, a denser
 non-binary subgoal scorer, or the pruner on `bp35`).
+
+## Step 8 — per-call transcripts caught a confound; fair re-run still negative
+
+Wired the per-call transcript logger (`trace.log_run` at the macro proposer →
+`experiments/results/e119_logs/e119_call_traces.jsonl`) and re-ran. **The transcripts overturned
+Step 7's "clean negative":** the macro prompt never named the available actions, so qwen proposed
+**`click` ops** (`["click #6"]`, `["click #0"]`) on *directional* games (tr87 `avail=[1,2,3,4]`,
+re86 `[1,2,3,4,5]` — no click). **54/60 samples compiled to empty** — the negative was an artifact
+of the SLM proposing the wrong action *modality*, not the procedure-wall.
+
+**Fix:** the prompt now names the only valid actions and forbids click when absent (commit
+`53846dd`). **Fair re-run:** 100% of samples now compile to valid directional macros (`["a2","a3",
+"a1",...]`, sweeps, repeats); every stall genuinely proposes (20/20, no invalid-op abstentions).
+
+| game | search | random-macro | SLM macro | SLM proposals valid |
+|------|:---:|:---:|:---:|:---:|
+| tr87 | 0/1 | 0/5 | 0/5 | 100% (was 10%) |
+| re86 | 0/1 | 0/5 | 0/5 | 100% (was 10%) |
+
+**Corrected verdict: the clean negative HOLDS — now un-confounded.** With valid, varied
+SLM-proposed procedures, the macro slot still solves nothing blind search/random can't on tr87/re86.
+Neither directed (SLM) nor undirected (random) short macros reach reward; the goal-as-procedure wall
+genuinely holds for a small local model — this time demonstrated *without* the proposal-validity
+confound. The invariant held throughout (env replay = truth; nothing banked; the 2 pilot solves
+re-verify 2/2). Audit trail: `e119_call_traces.jsonl` (per-call prompt-digest + completion +
+compiled macro), `e119_macro_sweep.json`, `e119_runs.jsonl`.
+
+**Lesson banked:** always put the available-action set in the proposer prompt — and log per-call
+transcripts, since the aggregate k/m hid a proposal-validity bug that fully explained the first
+negative. Next levers unchanged (longer macros / dense scorer / `bp35` pruner), now on a fair baseline.

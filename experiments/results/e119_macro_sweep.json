@@ -91,7 +91,7 @@
     }
   },
   "experiment": "e119_macro_sweep",
-  "timestamp": "2026-06-28T22:31:38",
+  "timestamp": "2026-06-28T23:15:27",
   "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
   "env": {
     "python": "3.13.5",

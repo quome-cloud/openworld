@@ -1,5 +1,5 @@
 """Per-game orchestration: probe -> (optional subgoal) -> search each level -> bank replay-verified."""
-import json, time
+import json, random, time
 import numpy as np
 from e119 import perceive, planner, slm
 
@@ -16,7 +16,7 @@ def _candidates_fn(game, mask):
     return fn
 
 
-def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=None):
+def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=None, seed=0):
     budget = budget or {"max_nodes": 4000, "max_depth": 40}
     game.reset()
     win = game.win
@@ -43,8 +43,9 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
                "ts": None}
         log.append(rec)
         if seq is None:
-            if mode in ("macro", "macro+slm") and llm is not None:
-                seq = _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal)
+            if mode in ("macro", "macro+slm", "random-macro") and llm is not None:
+                seq = _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal,
+                                      mode=mode, seed=seed)
             if seq is None:
                 break
         actions += seq
@@ -88,27 +89,31 @@ class _PrefixGame:
         return self.frame
 
 
-def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None):
-    """On a stall, synthesize a subgoal, propose+rank macros, and return the FIRST macro whose
-    fresh-env replay of (actions+macro) raises levels. Returns the macro (list of action tuples)
-    or None (honest stop). The env decides correctness."""
+def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None, mode="macro", seed=0):
+    """On a stall, propose macros (SLM or, in random-macro mode, a seeded random baseline),
+    rank, and return the FIRST whose fresh-env replay raises levels. The env decides correctness."""
     from e119 import macro
     avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
     oj = perceive.object_json(trans[0]["before"])
-    diffs = [perceive.contrastive_diff(t["before"], t["after"]) for t in trans]
-    if subgoal is None:
-        try:
-            subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
-        except Exception:
-            subgoal = None      # a flaky/parse-failed subgoal must not kill the macro fallback
-    cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
+    if mode == "random-macro":
+        rng = random.Random(seed + len(actions))     # vary per level, deterministic given seed
+        cands = macro.propose_random_macros(avail, oj, k_max=8, count=6, rng=rng)
+        cands = [m for m in cands if m]
+        subgoal = None
+    else:
+        diffs = [perceive.contrastive_diff(t["before"], t["after"]) for t in trans]
+        if subgoal is None:
+            try:
+                subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
+            except Exception:
+                subgoal = None
+        cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
     if not cands:
         return None
     ranked = macro.rank_macros(cands, game, actions, subgoal, key_fn, seen=set())
     base_levels = _levels_after(make, game, actions)
     for m in ranked:
-        reached = _levels_after(make, game, actions + list(m))
-        if reached > base_levels:
+        if _levels_after(make, game, actions + list(m)) > base_levels:
             return list(m)
     return None
 

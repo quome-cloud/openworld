@@ -48,14 +48,15 @@ def test_log_run_appends_one_json_line(tmp_path):
     assert len(lines) == 2 and json.loads(lines[0])["run_id"] == "tr87__macro__t"
 
 
-def test_run_sweep_aggregates_arms_and_seeds():
+def test_run_sweep_aggregates_arms_and_seeds(tmp_path):
     import e119_macro_sweep as sweep
     from openworld import MockLLM
     # SLM arm: 12 replies of the winning 6-step macro -> solves; search arm: tight budget -> 0.
     def llm_factory(seed):
         return MockLLM([json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12)
     payload = sweep.run_sweep(["mg"], seeds=[0, 1, 2], make=lambda gid: MacroGame(),
-                              llm_factory=llm_factory, budget={"max_nodes": 3, "max_depth": 10})
+                              llm_factory=llm_factory, budget={"max_nodes": 3, "max_depth": 10},
+                              logdir=tmp_path)
     mg = payload["by_game_arm"]["mg"]
     assert mg["search"]["k_solved"] == 0                      # blind cannot, deterministic
     assert mg["macro"]["k_solved"] == 3 and mg["macro"]["m"] == 3   # SLM solves every seed
@@ -112,16 +113,11 @@ def test_run_sweep_writes_per_run_log_records(tmp_path):
     from openworld import MockLLM
     def llm_factory(seed):
         return MockLLM([json.dumps(["a7"] * 6)] * 12)
-    # Monkey-patch LOGDIR to tmp_path
-    orig_logdir = sweep.LOGDIR
-    sweep.LOGDIR = tmp_path
-    try:
-        sweep.run_sweep(["mg"], seeds=[0, 1], make=lambda gid: MacroGame(),
-                        llm_factory=llm_factory,
-                        budget={"max_nodes": 3, "max_depth": 10},
-                        arms=("search", "macro"))
-    finally:
-        sweep.LOGDIR = orig_logdir
+    sweep.run_sweep(["mg"], seeds=[0, 1], make=lambda gid: MacroGame(),
+                    llm_factory=llm_factory,
+                    budget={"max_nodes": 3, "max_depth": 10},
+                    arms=("search", "macro"),
+                    logdir=tmp_path)
     runs_file = tmp_path / "e119_runs.jsonl"
     assert runs_file.exists(), "run_sweep must write e119_runs.jsonl"
     lines = runs_file.read_text().strip().splitlines()
@@ -169,14 +165,10 @@ def test_run_sweep_exception_logged_with_error_field(tmp_path):
         def reset(self): self.levels = 0; self.done = False; self.avail = [7]; import numpy as np; self.frame = np.zeros((64, 64), int); return self.frame
         def step(self, *a, **k): raise RuntimeError("env exploded")
 
-    orig_logdir = sweep.LOGDIR
-    sweep.LOGDIR = tmp_path
-    try:
-        payload = sweep.run_sweep(["boom"], seeds=[0], make=lambda gid: BoomGame(),
-                                  budget={"max_nodes": 3, "max_depth": 10},
-                                  arms=("search",))
-    finally:
-        sweep.LOGDIR = orig_logdir
+    payload = sweep.run_sweep(["boom"], seeds=[0], make=lambda gid: BoomGame(),
+                              budget={"max_nodes": 3, "max_depth": 10},
+                              arms=("search",),
+                              logdir=tmp_path)
     # levels aggregated to 0 (honest zero, not silent crash)
     assert payload["by_game_arm"]["boom"]["search"]["k_solved"] == 0
     # error field present in run log

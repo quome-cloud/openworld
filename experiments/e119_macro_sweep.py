@@ -26,8 +26,9 @@ def _real_make(gid):
 
 
 def run_sweep(games, seeds, make=_real_make, llm_factory=None, budget=None,
-              arms=("search", "random-macro", "macro"), options=None, digest=None):
+              arms=("search", "random-macro", "macro"), options=None, digest=None, logdir=None):
     budget = budget or BUDGET
+    ld = logdir if logdir is not None else LOGDIR
     # per-call LLM transcripts deferred; per-run records + banked replayable solutions are the audit trail
     by = {}
     for gid in games:
@@ -40,15 +41,15 @@ def run_sweep(games, seeds, make=_real_make, llm_factory=None, budget=None,
                 llm = None if arm == "search" else (llm_factory(s) if llm_factory else None)
                 try:
                     r = solve.solve_game(make(gid), llm=llm, mode=mode, budget=budget,
-                                         logdir=LOGDIR, make=make, seed=s)
+                                         logdir=ld, make=make, seed=s)
                     levels.append(r["levels"])
-                    trace.log_run(LOGDIR / "e119_runs.jsonl", {
+                    trace.log_run(ld / "e119_runs.jsonl", {
                         "game": gid, "arm": arm, "mode": mode, "seed": s,
                         "levels": r["levels"], "verified": r.get("verified", False),
                     })
                 except Exception as e:
                     levels.append(0)
-                    trace.log_run(LOGDIR / "e119_runs.jsonl", {
+                    trace.log_run(ld / "e119_runs.jsonl", {
                         "game": gid, "arm": arm, "mode": mode, "seed": s,
                         "levels": 0, "verified": False, "error": type(e).__name__,
                     })

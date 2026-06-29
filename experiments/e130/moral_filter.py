@@ -77,7 +77,7 @@ def select(stereotype, history, world_model, experts, rng, dir_map=None, amateur
         return wp, realize(wp, stereotype, dir_map), 0.0
     # phi = pooled agreement (how many experts proposed this (kind,y,x)); S = phi * V
     agree = Counter((w.kind, w.y, w.x) for w in pool)
-    best, best_s = None, -1.0
+    best, best_s = None, float("-inf")   # -inf (not -1.0): a pool member always wins, so best is never None
     for w in pool:
         V = valence(w, stereotype, world_model)
         if weights is not None:

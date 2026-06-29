@@ -38,3 +38,7 @@ scratch_arc/
 # arc3_traces dataset: raw stream-json transcripts are large -> kept on disk for HuggingFace/object-storage
 # upload, not committed. The lightweight index (runs.jsonl), prompts, solutions, and meta ARE committed.
 experiments/results/arc3_traces/transcripts/
+
+# E127 source-free sandbox: the isolated arc_agi worker downloads the real game
+# source (the answer key) here. It must NEVER be committed (source-free invariant).
+experiments/e127/.sandbox_env/

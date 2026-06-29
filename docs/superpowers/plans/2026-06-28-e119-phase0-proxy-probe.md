@@ -144,25 +144,38 @@ class CorridorGame:
         self._r(); return self.frame
 
 
-def _corridor_helpers():
-    cands = lambda f: [(7,), (1,)]
-    key = lambda f: int(np.asarray(f).reshape(64, 64)[0].argmax())  # pos is the only state
-    return cands, key
+class BinaryPathGame:
+    """Binary tree of L/R moves; every distinct path is a distinct state (no dedup), so the
+    search BRANCHES. action 1 = append-L, 7 = append-R. No reward (levels stay 0). Used to
+    show best-first dives one branch deep while BFS spreads breadth-first within a node budget."""
+    def __init__(self, maxlen=30): self.maxlen = maxlen; self.win = 1; self.gid = "tree"; self.reset()
+    def reset(self):
+        self.path = []; self.levels = 0; self.done = False; self.avail = [1, 7]; self._r(); return self.frame
+    def _r(self):
+        g = np.zeros((64, 64), int)
+        for i, m in enumerate(self.path): g[0, i] = m
+        self.frame = g
+    def step(self, a, x=None, y=None):
+        if a in (1, 7) and len(self.path) < self.maxlen: self.path = self.path + [a]
+        self._r(); return self.frame
 
 
 def test_search_stats_blind_exhausts_small_corridor():
-    cands, key = _corridor_helpers()
+    cands = lambda f: [(7,), (1,)]
+    key = lambda f: int(np.asarray(f).reshape(64, 64)[0].argmax())  # pos is the only state
     s = proxy_probe.search_stats(CorridorGame(L=6), cands, key, {"max_nodes": 500, "max_depth": 20})
     assert s["states"] == 6 and s["frontier_exhausted"] is True and s["solved"] is False
 
 
 def test_search_stats_guided_reaches_depth_faster_than_blind():
-    cands, key = _corridor_helpers()
-    budget = {"max_nodes": 8, "max_depth": 30}          # tight: cuts off before full exploration
-    blind = proxy_probe.search_stats(CorridorGame(L=20), cands, key, budget, None)
-    far = lambda f: 1.0 if int(np.asarray(f).reshape(64, 64)[0].argmax()) >= 15 else 0.0
-    guided = proxy_probe.search_stats(CorridorGame(L=20), cands, key, budget, far)
-    assert guided["max_depth"] > blind["max_depth"]      # best-first dives toward the goal
+    # Branching tree: BFS spreads breadth-first; best-first scored by depth dives one branch.
+    cands = lambda f: [(1,), (7,)]
+    key = lambda f: np.asarray(f).reshape(64, 64)[0].tobytes()           # distinct path -> distinct state
+    depth = lambda f: float((np.asarray(f).reshape(64, 64)[0] != 0).sum())
+    budget = {"max_nodes": 12, "max_depth": 30}         # tight: cuts off before full exploration
+    blind = proxy_probe.search_stats(BinaryPathGame(), cands, key, budget, None)
+    guided = proxy_probe.search_stats(BinaryPathGame(), cands, key, budget, depth)
+    assert guided["max_depth"] > blind["max_depth"]      # best-first dives; BFS spreads
 ```
 
 - [ ] **Step 2: Run test to verify it fails**

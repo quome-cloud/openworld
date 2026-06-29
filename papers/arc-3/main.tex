@@ -646,9 +646,28 @@ other} more than with reality, precisely where the reconstruction is unreliable-
 naive two-model consensus would hide, and a reminder that ground truth, not model agreement, must
 gate any source-free claim.
 
+\textbf{A fifth negative result: an explicit formal solving cycle (E130).} The four attacks above are
+\emph{search} over a fixed hypothesis space; does giving the search a principled, convergence-guaranteed
+structure help? E130 implements the behavioral cycle of a world-model formalism as a source-free
+solver---an introspective world model $\sigma_I$, perception $\sigma_E$, an expert-pooled \emph{moral
+filter} that selects actions, and a tension signal $T=\lVert\sigma_I-\sigma_E\rVert$ that updates the
+model by acting. Its two load-bearing theorems \emph{reproduce} deterministically: expert-facilitated
+selection reaches target accuracy in \ArcShuExpertConsult{} consultations versus an amateur (random)
+filter's \ArcShuAmateurTrials{}---a \ArcShuSeparation$\times$ separation, with $O(1/\sqrt N)$ error
+($\ArcShuErrReduction\times$ reduction at $N{=}100$) against the amateur's $\Theta(M)$---and the cycle
+contracts geometrically ($\rho=\ArcShuRho$) to a faithful model. This is the formal statement of
+``directed beats undirected.'' Yet \emph{online it cracks nothing}: across \ArcShuOnlineGames{} the
+solver---even with the reinforcement-learning upgrades it invited (avatar navigation, an adaptive
+expert bandit, object-relative dynamics; \ArcShuTests{} unit tests)---improves \ArcShuOnlineGain{} of
+\ArcShuOnlineN{}. The mechanism demonstrably \emph{engages} (on \texttt{ka59} the receding-horizon
+navigation executes \ArcShuNavSteps{} real steps over \ArcShuNavCycles{} cycles, not the greedy single
+steps of the click-only baseline), but the heuristic proposers never \emph{propose} the winning
+procedure: the EFEI theorem reduces \emph{variance}, not the \emph{bias} of a misspecified goal. Search
+with a better engine is still search; only reasoning the win clears the walls.
+
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
 \label{sec:agent}
-The procedural walls resisted four automated attacks because they need \emph{genuine goal reasoning},
+The procedural walls resisted five automated attacks because they need \emph{genuine goal reasoning},
 not search over a fixed hypothesis space. So we hand the game to a \textbf{live coding agent}---Claude
 Code, given the deterministic game harness and the OpenWorld recipe: explore to gather $(s,a,s')$
 transitions, write a verified \texttt{predict(frame,action)} world model, \emph{reason} about what
@@ -679,8 +698,15 @@ completes \textbf{\ArcFullGames/\ArcUnionGames{} games source-assisted} (\ArcFul
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (GPT-5.5, mean per-game RHAE $\approx$58\%),
 and we do not claim to surpass it on a like-for-like basis. On the audited source-free axis the result
 is \ArcSFGames/\ArcUnionGames{} (\emph{below} baseline1's \ArcBaselineFull); the
-\ArcSourceGapGames-game gap is the measured cost of discovery. The
-graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
+\ArcSourceGapGames-game gap is the measured cost of discovery---and that cost is
+\emph{model-dependent}. Reading a game's source reveals its \emph{mechanics and win-condition}, not the
+solution steps (the agent derives the action path either way), so the gap isolates the cost of
+\emph{discovering} dynamics, not of planning them. With source, both frontier models are at parity
+(Claude \ArcFullGames/\ArcUnionGames{}, codex gpt-5.5 \ArcCodexFaithfulFull/\ArcUnionGames{} full,
+$\sim$\ArcCodexFaithfulLevels{} levels); source-free they diverge sharply---the Claude agent holds
+\ArcSFLevels{} levels (\ArcSFGames{} full) where source-free codex holds \ArcCodexFreeLevels{}
+(\ArcCodexFreeFull{} full): \emph{discovery ability, not source access, is what separates the models}.
+The graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
 also reach $\geq$1 level on \emph{all} \ArcUnionGames{} games, of which $14$ are above a random
 baseline (\S\ref{sec:baseline}). \textbf{Honest scope.} (i)~Solves are \emph{offline and
 replay-verified}, exploiting determinism and unbounded resets; we report games \emph{completed}, not

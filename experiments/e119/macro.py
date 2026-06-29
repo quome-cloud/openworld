@@ -2,7 +2,6 @@
 behavioral clustering + abstention), subgoal-proxy ranker, and a seeded random-macro baseline.
 The env decides correctness; macros only ORDER/extend search and are replay-verified before banking."""
 import json, re
-import numpy as np
 from collections import defaultdict
 from e119 import planner, solve, slm
 

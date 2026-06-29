@@ -44,7 +44,7 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
         log.append(rec)
         if seq is None:
             if mode in ("macro", "macro+slm") and llm is not None:
-                seq = _macro_fallback(game, actions, trans, llm, key_fn, make)
+                seq = _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal)
             if seq is None:
                 break
         actions += seq
@@ -88,7 +88,7 @@ class _PrefixGame:
         return self.frame
 
 
-def _macro_fallback(game, actions, trans, llm, key_fn, make):
+def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None):
     """On a stall, synthesize a subgoal, propose+rank macros, and return the FIRST macro whose
     fresh-env replay of (actions+macro) raises levels. Returns the macro (list of action tuples)
     or None (honest stop). The env decides correctness."""
@@ -96,10 +96,11 @@ def _macro_fallback(game, actions, trans, llm, key_fn, make):
     avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
     oj = perceive.object_json(trans[0]["before"])
     diffs = [perceive.contrastive_diff(t["before"], t["after"]) for t in trans]
-    try:
-        subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
-    except Exception:
-        subgoal = None      # a flaky/parse-failed subgoal must not kill the macro fallback
+    if subgoal is None:
+        try:
+            subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
+        except Exception:
+            subgoal = None      # a flaky/parse-failed subgoal must not kill the macro fallback
     cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
     if not cands:
         return None

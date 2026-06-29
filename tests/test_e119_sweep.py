@@ -79,14 +79,14 @@ def test_reverify_replays_banked_solutions(tmp_path):
 
 
 # Fix 1: run_sweep threads real options into provenance
-def test_run_sweep_options_wired_into_provenance():
+def test_run_sweep_options_wired_into_provenance(tmp_path):
     import e119_macro_sweep as sweep
     from openworld import MockLLM
     opts = {"num_ctx": 8192, "temperature": 0.7}
     def llm_factory(seed):
         return MockLLM([json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12)
     payload = sweep.run_sweep(["mg"], seeds=[0], make=lambda gid: MacroGame(),
-                              llm_factory=llm_factory,
+                              llm_factory=llm_factory, logdir=tmp_path,
                               budget={"max_nodes": 3, "max_depth": 10},
                               options=opts)
     prov = payload["provenance"]

@@ -121,11 +121,39 @@ stalls — the design's primary-but-unimplemented slot), with the pruner as a ch
 high-branching games like `bp35` (and possibly `tn36`/`sk48`). `sc25` additionally flags a
 **perception** gap (click candidates are all no-ops there).
 
-## Next steps
-1. **Build the `macro` slot** (highest value; addresses 14/15). SLM proposes a short action template
-   when search plateaus; replay-verify; on progress, continue. → run **brainstorming** to spec the
-   loop hook in `solve.py`, the prompt, and the verification, before any code.
-2. **Pruner** as a narrow add-on for high-branching games (`bp35`).
-3. Re-measure search-vs-SLM **only on the headroom set** (the 15 unsolved + the open levels of the
-   10 partials, e.g. `vc33` 3→7), since solved games show no lift by construction.
-4. Revisit `sc25` perception (clicks are no-ops → candidate inference is wrong there).
+## Step 6 (b) — Phase 0 proxy probe (gating pre-experiment for the macro slot)
+
+Deterministic, no-LLM probe (`experiments/e119_proxy_probe.py`, results in
+`experiments/results/e119_proxy_probe.json`): for each headroom game, does any macro selection
+signal carry directional information? Measures, vs a matched-budget blind control: subgoal-proxy
+directionality (`depth_gain`/`novel_gain` of best-first guided by a satisfiable-but-false-at-start
+predicate) and novelty headroom (does blind BFS frontier-exhaust). Budget 6000/60.
+
+| game | mod | n_sat | n_grad | depth_gain | novel_gain | novelty_headroom | blind_states | exhausted |
+|------|-----|------:|-------:|-----------:|-----------:|:----------------:|-------------:|:---------:|
+| **g50t** (primary) | dir | 20 | 0 | 0 | 0.0 | False | 843 | True |
+| tr87 | dir | 42 | 9 | +52 | 0.243 | True | 3491 | False |
+| re86 | dir | 42 | 10 | +24 | 0.251 | True | 2501 | False |
+| sb26 | mixed | 56 | 12 | +3 | 0.011 | True | 999 | False |
+| cn04 | mixed | 36 | 9 | +5 | 0.064 | True | 1452 | False |
+
+**Gate decision (per spec, primary = g50t): NO-GO** — `subgoal=False (depth_gain=0, n_sat=20 but
+n_grad=0), novelty_headroom=False`. g50t is uniquely flat: every satisfiable predicate is already
+true at the start (no gradient), and blind BFS exhausts the reachable space (no novelty headroom).
+
+**Crucial nuance:** the gate keys on g50t, which turns out to be the *hardest* game in the set.
+The other 4 games show signal — **tr87 (+52 depth, +24% novel) and re86 (+24, +25%) strongly**;
+sb26/cn04 weakly. So the proxy is flat *on g50t* but **strongly directional on tr87/re86**. Two
+implications: (1) a NO-GO keyed solely on g50t under-reads the evidence — a *scoped* GO on the
+signal-bearing subset (tr87, re86) is defensible; (2) where signal exists it is the **subgoal
+proxy** (depth_gain dominates), which favors the subgoal-proxy ranker over the brainstorm's
+novelty default — Phase 0 thus informs the selection-signal choice.
+
+## Next steps (pending the GO/No-Go interpretation call)
+1. **Decision point:** honor the literal g50t-primary NO-GO (report the g50t flat-proxy boundary,
+   stop) **vs** re-scope GO to the signal-bearing games (tr87/re86) and build the macro slot there.
+2. If GO (scoped): **build the `macro` slot** targeting tr87/re86, using the **subgoal-proxy**
+   ranker the Phase 0 data supports; re-measure 3-arm (control/random-macro/SLM-macro) per the
+   reproducibility protocol. Run **brainstorming/writing-plans** for the macro build first.
+3. **Pruner** as a narrow add-on for high-branching games (`bp35`).
+4. `sc25` is a confirmed inert wall (separate harness-layer question; excluded from this set).

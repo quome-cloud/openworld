@@ -61,3 +61,17 @@ def test_run_sweep_aggregates_arms_and_seeds():
     assert mg["macro"]["k_solved"] == 3 and mg["macro"]["m"] == 3   # SLM solves every seed
     assert mg["macro"]["levels_mean"] == 1.0
     assert "provenance" in payload and payload["provenance"]["seeds"] == [0, 1, 2]
+
+
+def test_reverify_replays_banked_solutions(tmp_path):
+    from e119 import reverify
+    # a banked solve: the 6-step macro that wins MacroGame
+    (tmp_path / "mg_solved.json").write_text(json.dumps(
+        {"game": "mg", "levels": 1, "actions": [[7], [7], [7], [7], [7], [7]]}))
+    res = reverify.reverify_solves(tmp_path, make=lambda gid: MacroGame())
+    assert res["ok"] == 1 and res["n"] == 1 and res["fail"] == []
+    # a bogus banked solve fails re-verification
+    (tmp_path / "bad_solved.json").write_text(json.dumps(
+        {"game": "bad", "levels": 1, "actions": [[1], [1]]}))
+    res2 = reverify.reverify_solves(tmp_path, make=lambda gid: MacroGame())
+    assert res2["ok"] == 1 and res2["n"] == 2 and "bad" in res2["fail"]

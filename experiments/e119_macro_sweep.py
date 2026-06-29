@@ -64,6 +64,9 @@ def main():
         b = payload["by_game_arm"][g]
         print(f"{g}: search={b['search']['k_solved']}/1  random={b['random-macro']['k_solved']}/{b['random-macro']['m']}  "
               f"macro={b['macro']['k_solved']}/{b['macro']['m']} (levels {b['macro']['levels_mean']}±{b['macro']['levels_var']})")
+    from e119 import reverify
+    rv = reverify.reverify_solves(LOGDIR, _real_make)
+    print(f"[reverify] {rv['ok']}/{rv['n']} banked solves replay-confirmed; fail={rv['fail']}")
 
 
 if __name__ == "__main__":

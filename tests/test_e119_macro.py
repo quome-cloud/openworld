@@ -1,4 +1,4 @@
-import json, numpy as np
+import json, random, numpy as np
 from openworld import MockLLM
 from e119 import macro, slm
 
@@ -72,3 +72,13 @@ def test_rank_macros_subgoal_satisfier_first():
     m_near = [(7,)]               # reaches pos 1 -> color 4 -> does not
     ranked = macro.rank_macros([m_near, m_far], ColorAtThree(), [], sub, _key, seen=set())
     assert ranked[0] == m_far     # subgoal-satisfier ranked first
+
+
+def test_random_macros_seeded_and_bounded():
+    rng1 = random.Random(0); rng2 = random.Random(0)
+    a = macro.propose_random_macros([1, 2, 3, 4], {"objects": []}, k_max=8, count=5, rng=rng1)
+    b = macro.propose_random_macros([1, 2, 3, 4], {"objects": []}, k_max=8, count=5, rng=rng2)
+    assert a == b                                 # same seed -> identical
+    assert len(a) == 5
+    assert all(2 <= len(m) <= 8 for m in a)       # length bounds
+    assert all(act[0] in (1, 2, 3, 4) for m in a for act in m)   # only avail directional actions

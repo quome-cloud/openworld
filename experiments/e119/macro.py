@@ -99,3 +99,16 @@ def propose_macros(llm, game, prefix, obj_json, diffs, subgoal, avail, key_fn,
     if drawn == 0 or top / drawn < tau:    # no consensus -> abstain
         return []
     return [reps[0] for reps in ranked if len(reps) >= 1]
+
+
+def propose_random_macros(avail, obj_json, k_max, count, rng):
+    """Matched-budget baseline: `count` random op-lists (len 2..k_max), compiled. Seeded by `rng`."""
+    dirs = [f"a{a}" for a in avail if a != 6]
+    clicks = [f"click #{o['id']}" for o in obj_json.get("objects", [])] if 6 in avail else []
+    vocab = dirs + clicks
+    out = []
+    for _ in range(count):
+        length = rng.randint(2, k_max)
+        ops = [rng.choice(vocab) for _ in range(length)] if vocab else []
+        out.append(compile_macro(ops, obj_json, avail))
+    return out

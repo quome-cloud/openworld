@@ -46,11 +46,11 @@ def find_avatar(game_factory, seed_actions, avail):
         return g
 
     def singletons(frame):
-        # only UNIQUE-colored objects: the avatar is a distinct sprite, so this excludes groups of
-        # same-colored objects (gems, walls) AND the color-cycling status bar (its color never matches).
+        # UNIQUE-colored, SMALL objects: the avatar is a distinct small sprite. Excludes groups of
+        # same-colored objects (gems, walls), large background regions, and the color-cycling status bar.
         from collections import Counter
         objs = _objs(frame); cnt = Counter(o["color"] for o in objs)
-        return {o["color"]: (o["y"], o["x"]) for o in objs if cnt[o["color"]] == 1}
+        return {o["color"]: (o["y"], o["x"]) for o in objs if cnt[o["color"]] == 1 and o["size"] <= 16}
 
     base = singletons(frontier().frame)
     moves = {}                              # color -> {action: (dy,dx)}
@@ -60,10 +60,14 @@ def find_avatar(game_factory, seed_actions, avail):
             continue
         for c, (y, x) in singletons(g.frame).items():
             if c in base and (y, x) != base[c]:
-                moves.setdefault(c, {})[a] = (y - base[c][0], x - base[c][1])
+                dy, dx = y - base[c][0], x - base[c][1]
+                if abs(dy) + abs(dx) <= 4:  # avatar moves LOCALLY (1-4 cells), not a whole-board shift
+                    moves.setdefault(c, {})[a] = (dy, dx)
     if not moves:
         return None, {}
-    avatar = max(moves, key=lambda c: len(moves[c]))    # the most-mobile object = the avatar
+    # prefer the object that moves on the MOST directions with DISTINCT displacements (a real avatar
+    # moves differently per direction; a spurious match repeats one displacement).
+    avatar = max(moves, key=lambda c: (len(set(moves[c].values())), len(moves[c])))
     return avatar, moves[avatar]
 
 

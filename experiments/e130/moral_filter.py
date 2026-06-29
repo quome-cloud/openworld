@@ -43,19 +43,30 @@ def reach_unseen_state(stereotype, history, world_model):
 DEFAULT_EXPERTS = [reach_rare_color, click_smallest]
 
 
-def valence(wp, stereotype, world_model):
+def valence(wp, stereotype, world_model, potential=None):
     # simulated progress: novelty of the waypoint's induced transition under sigma_I.
     seen = (stereotype.key, (wp.kind, wp.y, wp.x)) in world_model.table
-    return 0.5 if seen else 1.0       # unseen transitions carry more expected progress
+    base = 0.5 if seen else 1.0       # unseen transitions carry more expected progress
+    if potential is None:
+        return base
+    # potential-based shaping (Ng-Harada-Russell): gamma*Phi(s') - Phi(s)
+    # proxy: unseen next-state has potential 1.0 (novel), seen has 0.0.
+    phi_cur = potential(stereotype.key)
+    phi_next = 0.0 if seen else 1.0
+    return base + phi_next - phi_cur
 
 
-def realize(wp, stereotype, dir_map=None):
+def realize(wp, stereotype, dir_map=None, avatar=None):
+    if wp.kind == "reach" and dir_map and avatar is not None:
+        # use navigation to produce a directional action plan toward the target
+        from experiments.e130 import navigation  # lazy import to avoid circular dependency
+        return navigation.plan_reach(stereotype, avatar, dir_map, (wp.y, wp.x))
     if wp.kind == "click":
         return [(6, wp.x, wp.y)]
-    return [(6, wp.x, wp.y)]          # reach degenerates to click without a dir_map (overridden in cycle)
+    return [(6, wp.x, wp.y)]          # reach degenerates to click without dir_map+avatar
 
 
-def select(stereotype, history, world_model, experts, rng, dir_map=None, amateur=False):
+def select(stereotype, history, world_model, experts, rng, dir_map=None, amateur=False, weights=None):
     pool = []
     for e in experts:
         pool += e(stereotype, history, world_model)
@@ -68,7 +79,11 @@ def select(stereotype, history, world_model, experts, rng, dir_map=None, amateur
     agree = Counter((w.kind, w.y, w.x) for w in pool)
     best, best_s = None, -1.0
     for w in pool:
-        s = agree[(w.kind, w.y, w.x)] * valence(w, stereotype, world_model)
+        V = valence(w, stereotype, world_model)
+        if weights is not None:
+            s = weights.weight(w.source) * agree[(w.kind, w.y, w.x)] * V
+        else:
+            s = agree[(w.kind, w.y, w.x)] * V
         if s > best_s:
             best, best_s = w, s
     return best, realize(best, stereotype, dir_map), float(best_s)

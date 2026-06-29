@@ -165,6 +165,10 @@ Three arms at matched node/depth budget:
 - **Mechanism value** = either − `search`.
 - Run across the four SLMs (qwen2.5-coder:7b, qwen2.5:7b, gemma3, llama3.1:8b) for the model-diversity
   corollary, **per the reproducibility protocol below** (seeds + variance).
+- **Cost control (one model first):** establish the GO/positive signal with **one** model
+  (qwen2.5-coder:7b) × m seeds before fanning out; expand to the full diversity set only if that arm
+  shows a verified solve or measurable lift (full fan-out ≈ 5 games × m≥5 seeds × 2 arms × 4 models
+  ≈ 200 SLM runs).
 
 ### Success criterion (falsifiable)
 The macro slot solves **≥ 1 procedure-wall** (replay-verified, `levels ≥ 1`) that blind search at
@@ -201,6 +205,10 @@ solves g50t" is a draw from a distribution.
 - **Fix all deterministic knobs** shared with control: budget (`max_nodes`/`max_depth`), masking
   threshold, candidate `max_size`, RNG seed for `random-macro`.
 - **Pin the env**: arc-agi / arcengine versions and Python (≥3.12) in the results `env` block.
+- **Re-verify banked solves** (the deterministic anchor): extend `experiments/verify_arc3_solves.py`
+  to load every `e119_logs/*_solved.json`, replay its action sequence on a **fresh** env, and assert
+  `levels`. Run after each sweep and in any audit — this is what makes "a verified solve exists"
+  machine-independent regardless of SLM stochasticity.
 
 **Bottom line:** the *claims* (a solve exists; the control numbers; the Phase 0 gate) are fully
 reproducible; the *SLM-arm magnitudes* (delta, levels, which macro won) are reproducible only in

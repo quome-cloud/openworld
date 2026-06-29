@@ -3,7 +3,7 @@ information on the zero-reward procedure-walls? No LLM; reuses existing percepti
 import heapq
 from collections import deque
 import numpy as np
-from e119 import slm, planner
+from e119 import slm, planner, perceive, solve
 
 
 def enumerate_predicates(frames):
@@ -65,3 +65,36 @@ def search_stats(game, candidates_fn, key_fn, budget, score_fn=None):
             break
     return {"nodes": nodes, "states": len(seen), "max_depth": max_depth,
             "frontier_exhausted": (len(frontier) == 0 and not solved), "solved": solved}
+
+
+def probe_game(game, budget, max_preds=20):
+    """Probe one game: blind-search stats, predicate satisfiability, and the best depth/novelty
+    gain from pursuing a satisfiable-but-false-at-start predicate (the directionality test)."""
+    game.reset()
+    trans = perceive.probe(game)
+    frames = [t["before"] for t in trans] + [t["after"] for t in trans]
+    mask = perceive.status_mask(frames)
+    key_fn = lambda f, m=mask: perceive.state_key(f, m)
+    cands = solve._candidates_fn(game, mask)
+    start = trans[0]["before"]
+
+    blind = search_stats(solve._PrefixGame(game, []), cands, key_fn, budget, None)
+
+    preds = enumerate_predicates(frames)
+    satisf = scan_satisfiable(preds, frames)
+    gradient = [p for p in satisf if not slm.compile_predicate(p)(start)][:max_preds]
+
+    best_depth_gain, best_novel_gain = 0, 0.0
+    for p in gradient:
+        score = lambda f, pp=p: 1.0 if slm.compile_predicate(pp)(f) else 0.0
+        g = search_stats(solve._PrefixGame(game, []), cands, key_fn, budget, score)
+        best_depth_gain = max(best_depth_gain, g["max_depth"] - blind["max_depth"])
+        novel = max(0, g["states"] - blind["states"])
+        best_novel_gain = max(best_novel_gain, (novel / blind["states"]) if blind["states"] else 0.0)
+
+    avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
+    modality = "click" if avail == [6] else ("dir" if 6 not in avail else "mixed")
+    return {"game": getattr(game, "gid", type(game).__name__), "modality": modality,
+            "n_satisfiable": len(satisf), "n_gradient": len(gradient), "blind": blind,
+            "best_depth_gain": int(best_depth_gain), "best_novel_gain": round(best_novel_gain, 3),
+            "novelty_headroom": not blind["frontier_exhausted"]}

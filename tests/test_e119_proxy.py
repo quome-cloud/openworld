@@ -76,3 +76,17 @@ def test_search_stats_guided_reaches_depth_faster_than_blind():
     blind = proxy_probe.search_stats(BinaryPathGame(), cands, key, budget, None)
     guided = proxy_probe.search_stats(BinaryPathGame(), cands, key, budget, depth)
     assert guided["max_depth"] > blind["max_depth"]      # best-first dives; BFS spreads
+
+
+def test_probe_game_reports_signals_on_corridor():
+    # Corridor: blind explores all positions (frontier exhausts -> no novelty headroom),
+    # and a gradient predicate ("reach color 4 far right") is FALSE at start, TRUE later.
+    g = CorridorGame(L=8)
+    # monkeypatch perception/candidates to the corridor's 1-D state via proxy_probe seams:
+    import numpy as np
+    from e119 import proxy_probe as pp
+    row = pp.probe_game(g, {"max_nodes": 500, "max_depth": 20}, max_preds=10)
+    assert row["game"] == "corridor"
+    assert row["blind"]["frontier_exhausted"] is True
+    assert row["novelty_headroom"] is False
+    assert "best_depth_gain" in row and "best_novel_gain" in row

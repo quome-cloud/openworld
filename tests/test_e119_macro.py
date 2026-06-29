@@ -1,3 +1,5 @@
+import json, numpy as np
+from openworld import MockLLM
 from e119 import macro
 
 
@@ -22,3 +24,37 @@ def test_compile_drops_unresolvable_ops():
 
 def test_compile_caps_repeat_at_four():
     assert macro.compile_macro(["a1 x99"], OJ, [1]) == [(1,), (1,), (1,), (1,)]
+
+
+class StepGame:
+    """Each action 7 advances pos by 1 (deterministic). frame[0,pos]=4. No reward path here.
+    Mirrors the Game/_PrefixGame surface propose_macros replays against."""
+    def __init__(self): self.win = 1; self.gid = "step"; self.reset()
+    def reset(self): self.pos = 0; self.levels = 0; self.done = False; self.avail = [7, 1]; self._r(); return self.frame
+    def _r(self): g = np.zeros((64, 64), int); g[0, self.pos] = 4; self.frame = g
+    def step(self, a, x=None, y=None):
+        if a == 7 and self.pos < 63: self.pos += 1
+        if a == 1 and self.pos > 0: self.pos -= 1
+        self._r(); return self.frame
+
+
+def _key(f): return int(np.asarray(f).reshape(64, 64)[0].argmax())
+
+
+def test_propose_macros_returns_consensus_macro():
+    # 4 of 6 samples agree on ["a7","a7"] (-> pos 2); they cluster, clear tau=0.5, and survive.
+    replies = [json.dumps(["a7", "a7"])] * 4 + [json.dumps(["a1"]), json.dumps(["a7", "a7", "a7"])]
+    llm = MockLLM(replies)
+    macros = macro.propose_macros(llm, StepGame(), [], {"objects": []}, [], None,
+                                  avail=[7, 1], key_fn=_key, k_max=8, n=6, tau=0.5)
+    assert [(7,), (7,)] in macros            # the consensus macro survived
+    assert macros[0] == [(7,), (7,)]         # ranked first by cluster mass
+
+
+def test_propose_macros_abstains_on_disagreement():
+    replies = [json.dumps(["a7"]), json.dumps(["a7", "a7"]), json.dumps(["a1"]),
+               json.dumps(["a7", "a7", "a7"]), json.dumps(["a1", "a1"]), json.dumps(["a7", "a1"])]
+    llm = MockLLM(replies)
+    macros = macro.propose_macros(llm, StepGame(), [], {"objects": []}, [], None,
+                                  avail=[7, 1], key_fn=_key, k_max=8, n=6, tau=0.6)
+    assert macros == []                       # no cluster clears tau -> abstain

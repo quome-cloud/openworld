@@ -42,9 +42,26 @@ _PROMPT = (
     "Blind search STALLED on an interactive puzzle. Propose ONE short action PROCEDURE (a macro) "
     "to make progress. Relational scene:\n{oj}\nWhat each action did from the current state:\n{diffs}\n"
     "Goal to pursue: {subgoal}\n"
-    'Reply ONLY a JSON list of {k} ops max. Ops: "aN" (do action N), "aN xK" (repeat K), '
-    '"click #I" (click object I). Example: ["a7","a7","a1"].'
+    "{avail}\n"
+    'Reply ONLY a JSON list of {k} ops max, using ONLY the actions listed above. '
+    'Ops: "aN" (do action N), "aN xK" (repeat K){click}. Example: {example}.'
 )
+
+
+def _avail_desc(avail):
+    """Prompt fragment naming the ONLY valid actions, so the SLM never proposes nonexistent ops
+    (e.g. clicks on a directional game). Returns (avail_line, click_op_fragment, example)."""
+    dirs = [a for a in avail if a != 6]
+    names = ", ".join(f"a{a}" for a in dirs)
+    if 6 in avail:
+        avail_line = f'Available actions: {names} and "click #I" (click object I by id).'
+        click = ', "click #I" (click object I)'
+        example = '["click #0","a1"]' if dirs else '["click #0","click #1"]'
+    else:
+        avail_line = f"Available actions ONLY: {names}. This game has NO click action — NEVER use click."
+        click = ""
+        example = "[\"%s\",\"%s\",\"%s\"]" % (f"a{dirs[0]}", f"a{dirs[0]}", f"a{dirs[-1]}") if dirs else "[]"
+    return avail_line, click, example
 
 
 def _endpoint(game, prefix, macro_actions, key_fn):
@@ -74,8 +91,10 @@ def propose_macros(llm, game, prefix, obj_json, diffs, subgoal, avail, key_fn,
     """Sample n op-lists from LLM, compile, cluster by behavioral effect (endpoint key + level delta).
     Return cluster representatives sorted by cluster mass, or [] (abstain) if top cluster doesn't clear tau.
     If `tracer` is given, it is called once per sampled call with {prompt, completion, compiled} for audit."""
+    avail_line, click_op, example = _avail_desc(avail)
     prompt = _PROMPT.format(oj=json.dumps(obj_json)[:1200], diffs=json.dumps(diffs)[:800],
-                            subgoal=json.dumps(subgoal), k=k_max)
+                            subgoal=json.dumps(subgoal), k=k_max,
+                            avail=avail_line, click=click_op, example=example)
     clusters = defaultdict(list)      # behavioral signature -> [compiled macro, ...]
     drawn = 0
     for _ in range(n):

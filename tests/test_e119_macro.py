@@ -62,6 +62,18 @@ def test_propose_macros_invokes_tracer_per_sample():
     assert calls[0]["compiled"] == [(7,), (7,)]             # the compiled macro is captured
 
 
+def test_propose_macros_prompt_constrains_to_available_actions():
+    seen = {}
+    class RecLLM:
+        def ask(self, prompt, **k): seen["p"] = prompt; return json.dumps(["a3"])
+    # directional game (no click): prompt must list a1..a4 and forbid click
+    macro.propose_macros(RecLLM(), StepGame(), [], {"objects": []}, [], None,
+                         avail=[1, 2, 3, 4], key_fn=_key, n=1, tau=0.5)
+    p = seen["p"]
+    assert "a1" in p and "a3" in p and "a4" in p          # available actions named
+    assert "NO click" in p                                 # click explicitly forbidden on dir games
+
+
 def test_propose_macros_abstains_on_disagreement():
     replies = [json.dumps(["a7"]), json.dumps(["a7", "a7"]), json.dumps(["a1"]),
                json.dumps(["a7", "a7", "a7"]), json.dumps(["a1", "a1"]), json.dumps(["a7", "a1"])]

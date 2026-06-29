@@ -48,6 +48,10 @@ def solve(game, budget):
     json.dump(sol, open(os.path.join(wd, "solved.json"), "w"))
     if res.best_levels > seed_lv:
         shutil.copy(os.path.join(wd, "solved.json"), os.path.join(wd, "solved_best.json"))
+    json.dump({"solver": "shu-cycle", "seed": 0, "seed_levels": seed_lv, "best_levels": res.best_levels,
+               "win": win, "cycles": res.cycles, "tension_steps": len(res.tension_trace),
+               "banked": res.banked, "improved": res.best_levels > seed_lv},
+              open(os.path.join(wd, "run_meta.json"), "w"))   # telemetry for the deterministic-run capture
     print(f"[e130] {game}: {seed_lv} -> {res.best_levels}/{win} "
           f"{'IMPROVED' if res.best_levels > seed_lv else 'no gain'} cycles={res.cycles} "
           f"banked={res.banked} tension_steps={len(res.tension_trace)}", flush=True)

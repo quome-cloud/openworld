@@ -43,7 +43,13 @@ def collect(game_id, steps, seed):
     trans, best = [], obs.levels_completed
     for _ in range(steps):
         ai = rng.choice(avail)
-        nobs = env.step(ACTS[ai])
+        try:
+            nobs = env.step(ACTS[ai])
+        except Exception:  # noqa: BLE001 -- some games' step can throw internally
+            nobs = None
+        if nobs is None or getattr(nobs, "frame", None) is None:  # game returned a bad frame -> reset
+            obs = env.reset(); g = grid(obs); avail = [a - 1 for a in obs.available_actions]
+            continue
         ng = grid(nobs)
         trans.append({"frame": g.tolist(), "action": ai + 1, "next": ng.tolist()})
         best = max(best, nobs.levels_completed)
@@ -62,7 +68,13 @@ def replay_determinism(game_id, steps, seed):
         env = arc.make(game_id); obs = env.reset(); rng = random.Random(seed)
         avail = [a - 1 for a in obs.available_actions]; frames = [grid(obs).copy()]
         for _ in range(steps):
-            obs = env.step(ACTS[rng.choice(avail)]); frames.append(grid(obs).copy())
+            try:
+                obs = env.step(ACTS[rng.choice(avail)])
+            except Exception:  # noqa: BLE001
+                break
+            if obs is None or getattr(obs, "frame", None) is None:
+                break
+            frames.append(grid(obs).copy())
             if str(obs.state) != "GameState.NOT_FINISHED":
                 break
         return frames
@@ -149,9 +161,25 @@ def ollama(model, prompt, host="http://localhost:11434", num_ctx=8192, timeout=6
         return json.loads(r.read())["response"]
 
 
+def claude_cli(prompt, timeout=600):
+    """Synthesize via Claude (headless `claude -p`) -- the frontier synthesizer OpenWorld actually
+    uses (openworld build/optimize). No GPU needed."""
+    import subprocess
+    r = subprocess.run(["claude", "-p", prompt], capture_output=True, text=True, timeout=timeout)
+    return r.stdout
+
+
 def extract_code(text):
     m = re.search(r"```(?:python)?\s*(.*?)```", text, re.S)
     return m.group(1).strip() if m else text.strip()
+
+
+def _demo_str(t, cap=80):
+    """Compact demo: cap the changed-cell list so dense games don't blow up the prompt/timeout.
+    (Verification still uses FULL held-out frames -- this only bounds what the synthesizer sees.)"""
+    d = deltas(t["frame"], t["next"])
+    body = str(d[:cap]) + (f" ...(+{len(d) - cap} more cells)" if len(d) > cap else "")
+    return f"action {t['action']} -> {body}"
 
 
 def synthesize(trans, llm_fn, rounds=4, n_demo=12):
@@ -160,9 +188,13 @@ def synthesize(trans, llm_fn, rounds=4, n_demo=12):
     best = (0.0, None)
     feedback = ""
     for _ in range(rounds):
-        ex = "\n".join(f"action {t['action']} -> {deltas(t['frame'], t['next'])}" for t in train[:n_demo])
+        ex = "\n".join(_demo_str(t) for t in train[:n_demo])
         prompt = PROMPT.format(bg=bg, examples=ex) + feedback
-        code = extract_code(llm_fn(prompt))
+        try:
+            code = extract_code(llm_fn(prompt))
+        except Exception as e:  # noqa: BLE001 -- timeout/error -> miss this round, keep best so far
+            print(f"[synth] llm call failed ({type(e).__name__}); keeping best", flush=True)
+            continue
         acc, errs = verify_code(code, held)
         if acc > best[0]:
             best = (acc, code)
@@ -180,10 +212,19 @@ def main():
     ap.add_argument("--steps", type=int, default=300)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--ollama", default="", help="ollama model id for synthesis (else baselines only)")
+    ap.add_argument("--claude", action="store_true", help="synthesize with Claude (claude -p) instead of ollama")
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
     trans, levels, win = collect(args.game, args.steps, args.seed)
+    if not trans:  # random play never produced a valid step -- record + exclude, don't crash
+        res = {"game": args.game, "steps": args.steps, "transitions": 0, "verified_exact": None,
+               "note": "no valid transitions (random actions never produced a good step); excluded",
+               "baseline_levels": levels, "win_levels": win}
+        out = Path(args.out) if args.out else HERE / "results" / f"e86_arc3_{args.game}.json"
+        out.write_text(json.dumps(res, indent=2))
+        print(f"[e86/{args.game}] 0 transitions -> excluded", flush=True)
+        return
     det, ndet = determinism(trans)
     rdet, rn = replay_determinism(args.game, min(args.steps, 80), args.seed)
     chg = [len(deltas(t["frame"], t["next"])) for t in trans]
@@ -196,9 +237,13 @@ def main():
     print(f"[e86/{args.game}] {len(trans)} transitions | baseline levels {levels}/{win} "
           f"| copy-frame exact {res['copy_frame_exact']}", flush=True)
 
-    if args.ollama:
-        acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
-        res["synth_model"] = args.ollama
+    if args.claude or args.ollama:
+        if args.claude:
+            acc, code = synthesize(trans, claude_cli)
+            res["synth_model"] = "claude-cli"
+        else:
+            acc, code = synthesize(trans, lambda p: ollama(args.ollama, p))
+            res["synth_model"] = args.ollama
         res["verified_exact"] = round(acc, 4)
         res["code"] = code
         print(f"[e86/{args.game}] synthesized code verified-exact (held-out): {acc:.3f}", flush=True)

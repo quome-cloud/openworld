@@ -1,0 +1,31 @@
+{
+  "game": "s5i5",
+  "model_fidelity": 1.0,
+  "win_levels": 8,
+  "rounds": 5,
+  "best_levels": 0,
+  "solved": false,
+  "attempts": [
+    {
+      "levels": 0,
+      "terminations": 8
+    },
+    {
+      "levels": 0,
+      "terminations": 8
+    },
+    {
+      "levels": 0,
+      "terminations": 8
+    },
+    {
+      "levels": 0,
+      "terminations": 8
+    },
+    {
+      "levels": 0,
+      "terminations": 8
+    }
+  ],
+  "final_goal_code": "import numpy as np\n\ndef goal_score(frame):\n    \"\"\"\n    s5i5 \u2014 HIGHER = closer to completing a level.\n\n    The single hard fact from FOUR real-env runs: every episode ended in game-over at\n    EXACTLY 50 steps == M, 8/8, whether the reward rewarded draining the clock (attempts\n    0, 2) or hoarding it (attempts 1, 3). Conservation changed NOTHING. The only honest\n    reading: the last-row bar is a DEADLINE that ticks down one step per real action no\n    matter what you do \u2014 you cannot \"hold,\" and hitting 0 is inevitable. So every prior\n    reward, by making planning revolve around the budget, optimized a quantity the agent\n    does not control, and all four collapsed to the same forced death.\n\n    The feedback has said it four times: \"achieve something BEFORE a timer runs out.\" The\n    timer is the deadline; the OBJECTIVE is on the board. The clearest monotone completion\n    meter on the board is the left vertical gauge \u2014 a color-11 ('b') bar capped at the top\n    by color-3 ('3'), with a color-13 ('d') fill-marker sitting LOW inside it (row 34 of an\n    8-tall bar). A level completes when that gauge FILLS: the marker climbs to the cap\n    and/or the bar converts to the 'done' color (3, same as the cap). That is the only thing\n    a winning run must move, and it is what a real-env replanner can actually drive.\n\n    This reward is therefore BOARD-DOMINANT and clock-DECOUPLED:\n      * The score reflects the LEVEL STATE (gauge fill), not the budget, so the planner is\n        graded on progress toward the win \u2014 not on a clock it cannot stop. Reaching 0 is\n        NOT a -10 catastrophe (that framing is exactly what fixated attempts 1/3 on the\n        timer); it is just the deadline, and a frame that made progress scores high at 0.\n      * Remaining time enters ONLY as a tiny urgency term that is positive while progress is\n        incomplete \u2014 encoding \"make progress while you still can.\" A side benefit: in the\n        verified timer-only simulator (where the board is frozen and the budget is the sole\n        moving quantity), this makes the planner strictly prefer the NON-draining action\n        (the no-op ACTION1 it has never tried) over the budget-burning ACTION6 \u2014 the only\n        candidate that could move the board it cannot yet simulate.\n    \"\"\"\n    f = np.asarray(frame)\n    H, W = f.shape\n    board = f[:H - 1]                     # exclude the interface/deadline row\n\n    # ---- DOMINANT: fill level of the left vertical completion gauge ----\n    # Find the tallest vertical color-11 ('b') run that is capped directly above by a 3.\n    is_b = (board == 11)\n    colcnt = is_b.sum(axis=0)\n    progress = 0.0\n    if colcnt.max() >= 3:\n        # candidate gauge columns: the tall bar (and immediate neighbors for the marker)\n        cols = np.where(colcnt >= max(3, colcnt.max() - 1))[0]\n        rows_b = np.where(is_b[:, cols].any(axis=1))[0]\n        if rows_b.size >= 2:\n            top, bot = int(rows_b.min()), int(rows_b.max())\n            span = bot - top\n            # require the color-3 cap directly above the bar (the target the fill rises to)\n            cap_ok = top - 1 >= 0 and np.any(board[top - 1, cols] == 3)\n            if span > 0 and cap_ok:\n                # (a) marker height: the 'd' fill-marker climbing from bottom (0) to cap (1)\n                d_here = (board[:, cols] == 13)\n                d_rows = np.where(d_here.any(axis=1))[0]\n                d_in = d_rows[(d_rows >= top) & (d_rows <= bot)]\n                p_marker = (bot - int(d_in.min())) / float(span) if d_in.size else 0.0\n                # (b) conversion: gauge cells turned to the 'done' color 3 (loading-bar fill)\n                gauge = board[top:bot + 1, cols]\n                p_fill = float(np.count_nonzero(gauge == 3)) / float(gauge.size)\n                progress = max(p_marker, p_fill)\n    progress = float(min(max(progress, 0.0), 1.0))\n\n    if progress >= 0.95:\n        return 100.0                      # gauge full -> level complete\n\n    # ---- DEADLINE (last-row bar): urgency only, never the objective ----\n    remaining = int(np.count_nonzero(f[H - 1] == 3)) / float(W)   # [0,1], cannot be held\n\n    # Board progress dominates by ~10x. The urgency term (<=0.1, and ->0 as progress->1)\n    # says \"advance the gauge while time is left\"; it never rivals a sliver of real fill,\n    # and in the frozen simulator it simply favors the untried non-draining action.\n    return 10.0 * progress + 0.1 * remaining * (1.0 - progress)"
+}

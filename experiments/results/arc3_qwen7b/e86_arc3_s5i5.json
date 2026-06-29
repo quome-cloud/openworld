@@ -1,0 +1,16 @@
+{
+  "game": "s5i5",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 250,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 1.3,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0133,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 6:\n        for row, col, new_color in [\n            [63, 63, 4], [63, 61, 4], [63, 62, 4],\n            [63, 60, 4], [63, 59, 4], [63, 58, 4],\n            [63, 56, 4], [63, 57, 4],\n            [63, 55, 4], [63, 54, 4],\n            [63, 52, 4], [63, 53, 4],\n            [63, 51, 4], [63, 50, 4], [63, 49, 4]\n        ]:\n            next_frame[row, col] = new_color\n    return next_frame"
+}

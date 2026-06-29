@@ -1,0 +1,15 @@
+{
+  "game": "sk48",
+  "e86_fidelity": 0.3,
+  "controllability": {
+    "n_tasks": 13,
+    "plan_found_frac": 0.154,
+    "plan_reach_frac": 0.077,
+    "random_reach_frac": 0.154
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 8
+  }
+}

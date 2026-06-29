@@ -1,0 +1,16 @@
+{
+  "game": "tu93",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 16,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 7.8,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.44,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    if action == 3:\n        # left block active, right block cleared\n        out[15:18, 15:18] = 9\n        out[16, 15] = 4\n        out[15:18, 21:24] = 0\n    elif action == 4:\n        # right block active, left block cleared\n        out[15:18, 21:24] = 9\n        out[16, 23] = 4\n        out[15:18, 15:18] = 0\n\n    # bottom timer bar (row 63) shrinks from the right\n    row = out[63]\n    bar = np.where((row != 5) & (row != 0))[0]\n    if bar.size > 0:\n        out[63, bar.max()] = 0\n\n    return out"
+}

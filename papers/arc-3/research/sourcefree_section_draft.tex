@@ -1,0 +1,59 @@
+% =============================================================================
+% DRAFT section for main.tex -- "Source-free protocol: fair by construction".
+% Numbers are macros; wire them through scripts/make_arc3_assets.py (do NOT hand-edit numbers.tex).
+% Macro names are letters-only (no digits) per the house LaTeX rule.
+% Suggested placement: immediately AFTER \section{The ARC-AGI-3 setting} and BEFORE the recipe,
+% so the protocol is fixed before any result is reported. Cross-ref \label{sec:sourcefree}.
+% =============================================================================
+\section{Source-free protocol: fair by construction}
+\label{sec:sourcefree}
+
+\textbf{The concern.} The downloadable ARC-AGI-3 environment ships each game's \emph{Python source}.
+An agent running in the same process and working directory can therefore read it---either by
+\texttt{importlib}-loading \texttt{<game>.py} or by \texttt{inspect.getsource(env.\_game)}---and recover
+the win condition directly. That trivialises the two capabilities the benchmark is meant to test:
+``discover the dynamics \emph{by acting}'' and ``\emph{reason} the win condition.'' Reading the source
+is reading the answer key, and it breaks comparability to the live leaderboard agents, which cannot.
+
+\textbf{We audited our own initial runs and found the leak.} A file-access audit of the first
+full-game push shows \ArcSourceUsedFull{} of the \ArcSourceAssistedFull{} full-game solves consulted
+the provided source (an \texttt{importlib} load of \texttt{<game>.py}, or hand reverse-engineering with
+line citations). We report that number plainly rather than bury it: the \emph{source-assisted}
+full-game total is \ArcSourceAssistedFull/\ArcUnionGames{}, but it is not a fair-agent result.
+
+\textbf{The fix is a sandbox that makes source access impossible, not merely discouraged.} Prompting
+the agent ``do not read the source'' is unverifiable and, empirically, was not obeyed. Instead we
+re-run every game under a protocol that is \emph{source-free by construction} (three guarantees,
+each independently checkable):
+\begin{enumerate}\setlength{\itemsep}{1pt}
+\item \textbf{Process isolation.} The real \texttt{arc\_agi} game runs in a separate \emph{worker}
+process whose working directory holds the downloaded source. The agent imports only
+\texttt{SandboxGame}, a thin pipe client exposing \emph{only} \{\texttt{frame}, \texttt{levels},
+\texttt{win}, \texttt{avail}, \texttt{done}\}. No game object exists in the agent's process, so
+\texttt{inspect.getsource} has no target.
+\item \textbf{Clean filesystem.} The agent's working directory contains only the client harness---%
+\emph{no} \texttt{environment\_files}---and the agent interpreter cannot \texttt{import arc\_agi}. There
+is no \texttt{<game>.py} to load.
+\item \textbf{Audit-gated banking.} Every solve's working directory is audited
+(\texttt{scripts/audit\_sandbox.py}: no \texttt{environment\_files}, and no script referencing
+\texttt{getsource} / \texttt{spec\_from\_file\_location} / \texttt{arc\_agi}); only audit-clean,
+replay-verified solves are banked into \texttt{arc3\_fullgame\_sourcefree.json}.
+\end{enumerate}
+The agent thus \emph{must} gather \((s,a,s')\) transitions through the pipe, synthesise
+\texttt{predict(frame,action)} from observation, and reason the win from the frames it sees---the
+intended task. A smoke test confirms the guarantees end-to-end: a \texttt{numpy}-only agent process
+(which cannot import \texttt{arc\_agi}) drives the game, its working tree contains no game source, and
+no game object is reachable from the client (the worker is a distinct OS process).
+
+\textbf{Result (source-free).} Under this protocol the executable-world-model recipe completes
+\textbf{\ArcSourceFreeFull/\ArcUnionGames{} games in full} (\ArcSourceFreeLevels/\ArcTotalLevels{}
+levels), every solve audit-clean and replay-verified. This is the number we compare to the prior state
+of the art (\ArcBaselineFull/\ArcUnionGames~\cite{baseline1_ewm}): \ArcSourceFreeVsSota. We report the
+source-assisted \ArcSourceAssistedFull/\ArcUnionGames{} separately and clearly labelled, never as the
+headline.
+
+\textbf{The boundary is the diagnosis.} The games that resist \emph{source-free} solving are the deep
+\emph{procedural} ones---precisely where the win must be \emph{reasoned} from observation rather than
+\emph{read}. The source-free frontier is therefore not an artifact of the sandbox but a direct
+measurement of the goal-as-procedure wall (\S\ref{sec:solvewall}): removing the answer key leaves
+exactly the levels whose win is an ordered protocol no observation-only score expresses.

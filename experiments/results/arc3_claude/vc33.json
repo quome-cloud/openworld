@@ -1,0 +1,16 @@
+{
+  "game": "vc33",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 150,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 1.3,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    # Observed rule (action 6): a run of color 4 in row 0 grows leftward,\n    # one cell per step, starting from the right edge (col 63) toward col 0.\n    if action == 6:\n        row = out[0]\n        cols4 = np.where(row == 4)[0]\n        if cols4.size == 0:\n            # nothing painted yet -> start at the right edge\n            out[0, 63] = 4\n        else:\n            left = int(cols4.min())\n            if left > 0:\n                out[0, left - 1] = 4\n    return out"
+}

@@ -1,0 +1,9 @@
+{
+  "game": "r11l",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.9306,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):  # frame: numpy (64,64) int; action: int (1-indexed); -> (64,64)\n    BG = 5\n    out = frame.copy()\n    if action == 6:\n        # Column 0 is consumed top-to-bottom: clear the topmost\n        # remaining non-background cell in column 0.\n        col = out[:, 0]\n        nz = np.where(col != BG)[0]\n        if nz.size > 0:\n            out[nz[0], 0] = BG\n    # No transition data observed for other actions -> assume unchanged.\n    return out"
+}

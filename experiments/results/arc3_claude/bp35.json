@@ -1,0 +1,16 @@
+{
+  "game": "bp35",
+  "steps": 200,
+  "transitions": 151,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 0.9875,
+  "repeat_pairs": 80,
+  "replay_determinism": 1.0,
+  "replay_steps": 4,
+  "mean_cells_changed": 51.9,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.5,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    BG = 5\n\n    # row-63 append counter: write 15 at next free slot\n    cnt = int(np.count_nonzero(out[63] == 15))\n    if cnt < 64:\n        out[63, cnt] = 15\n\n    # locate avatar glyph (color 9)\n    rs, cs = np.where(frame == 9)\n    if len(cs) == 0:\n        return out                      # no avatar -> only counter changed\n    top = int(rs.min())                 # glyph top row\n    cols9 = sorted(set(cs.tolist()))\n    L = cols9[0] - 1                    # glyph tile origin column (tile is 5 wide)\n\n    # action -> move direction\n    if action == 3:\n        d = -1\n    elif action in (4, 7):\n        d = 1\n    else:\n        return out                      # other actions: no grid move\n\n    Lt = L + 6 * d                      # destination tile origin\n    if Lt < 0 or Lt + 4 >= 64:\n        return out                      # off-grid -> blocked\n    if frame[top, Lt] != 10:\n        return out                      # neighbor isn't a solid tile -> blocked\n\n    def paint_solid(o, base):\n        for rr in range(top, top + 4):\n            o[rr, base:base + 5] = 10\n        o[top + 4, base + 1:base + 4] = 10\n\n    def paint_glyph(o, base, facing):\n        for rr in range(top, top + 4):\n            o[rr, base:base + 5] = BG\n        o[top + 4, base + 1:base + 4] = BG\n        o[top + 0, base + 2] = 9\n        o[top + 1, base + 1] = 9; o[top + 1, base + 2] = 9; o[top + 1, base + 3] = 9\n        o[top + 2, base + 1] = 9; o[top + 2, base + 2] = 9; o[top + 2, base + 3] = 9\n        o[top + 3, base + 2] = 9\n        eye = base + 1 if facing < 0 else base + 3   # eye faces move direction\n        o[top + 1, eye] = 11; o[top + 2, eye] = 11\n\n    paint_solid(out, L)                 # old position becomes a solid tile\n    paint_glyph(out, Lt, d)             # destination becomes the glyph\n    return out"
+}

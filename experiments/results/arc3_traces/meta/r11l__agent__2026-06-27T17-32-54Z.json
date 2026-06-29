@@ -1,0 +1,117 @@
+{
+ "run_id": "r11l__agent__2026-06-27T17-32-54Z",
+ "game": "r11l",
+ "tier": "agent",
+ "method": "live-coding-agent-sandbox",
+ "source_free": true,
+ "fairness": "by-construction (process-isolated SandboxGame)",
+ "audit_dir": "scratch_arc/sb_r11l",
+ "audit_mode": "strict",
+ "knowledge_audit": {
+  "clean": true,
+  "findings": [],
+  "scanned": [
+   "memory/*.md",
+   "CLAUDE.md"
+  ]
+ },
+ "memory_tainted": false,
+ "started_at": "2026-06-27T17:32:54Z",
+ "ended_at": "2026-06-27T17:56:23Z",
+ "exit_code": 137,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.195",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_file": "prompts/r11l__agent__2026-06-27T17-32-54Z.md",
+ "prompt": {
+  "chars": 1914,
+  "lines": 30,
+  "sha256": "a015733c661aa79acd47a88764f92bfc7e20668734c807a72219b8d3e6b5d0d3",
+  "approx_tokens": 478
+ },
+ "solution_file": "solutions/r11l__agent__2026-06-27T17-32-54Z.json",
+ "transcript_file": "transcripts/r11l__agent__2026-06-27T17-32-54Z.jsonl",
+ "transcript_sha256": "a4d277824bb99fdf902777aa93f66ec9a6009621c1155a6dc6611f6581b7d142",
+ "transcript": {
+  "session_id": "0574edac-cdba-49d9-a6fb-e5c1d6994a67",
+  "num_turns": null,
+  "n_messages": 631,
+  "n_tool_calls": 60,
+  "tool_calls_by_name": {
+   "Bash": 47,
+   "Read": 3,
+   "Edit": 4,
+   "ToolSearch": 3,
+   "Monitor": 2,
+   "TaskStop": 1
+  },
+  "n_text_blocks": 39,
+  "n_thinking_blocks": 47,
+  "n_user_msgs": 59,
+  "cost_usd": null,
+  "tokens": {
+   "input": 24057,
+   "output": 1202,
+   "cache_creation": 520239,
+   "cache_read": 13106503,
+   "total": 13652001,
+   "source": "reconstructed_from_messages"
+  },
+  "usage": {
+   "input_tokens": 24057,
+   "output_tokens": 1202,
+   "cache_creation_input_tokens": 520239,
+   "cache_read_input_tokens": 13106503,
+   "n_calls": 146
+  },
+  "is_error": null,
+  "api_error_status": null,
+  "duration_ms": null,
+  "duration_api_ms": null,
+  "ttft_ms": null
+ },
+ "host": {
+  "hostname": "Mac.lan",
+  "platform": "macOS-26.5-arm64-arm-64bit",
+  "system": "Darwin",
+  "machine": "arm64",
+  "python": "3.9.18"
+ },
+ "git": {
+  "commit": "539dc5b751f166f8f99aee3ce124530fd647e97c",
+  "branch": "arc3-runner-fix",
+  "dirty": true,
+  "remote": "https://github.com/quome-cloud/openworld.git"
+ },
+ "pipeline": {
+  "run_arc_agent_sandbox.sh": {
+   "sha256": "c742217301fa58ef6d712619cc6f82f4569de35a86ae731f5cff5323caff6449",
+   "bytes": 7626,
+   "mtime": "2026-06-27T17:47:26Z"
+  },
+  "arc3_sandbox.py": {
+   "sha256": "243552d0c0740b69ef461f8721b1799924af873944928053a6898401f3cb5807",
+   "bytes": 5374,
+   "mtime": "2026-06-27T07:21:32Z"
+  },
+  "audit_sandbox.py": {
+   "sha256": "819340950c8e0533fabc0e0201cde707f6c25100fa62594c95706314e9586238",
+   "bytes": 6069,
+   "mtime": "2026-06-26T22:23:48Z"
+  }
+ },
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "dataset_version": "1.0",
+ "outcome": null
+}

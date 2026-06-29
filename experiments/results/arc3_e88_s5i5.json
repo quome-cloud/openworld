@@ -1,0 +1,11 @@
+{
+  "game": "s5i5",
+  "model_fidelity": 1.0,
+  "win_levels": 8,
+  "budget": 3000,
+  "levels_model_guided": 0,
+  "levels_random": 0,
+  "coverage_model": 50,
+  "coverage_random": 50,
+  "solved": false
+}

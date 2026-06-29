@@ -1,0 +1,16 @@
+{
+  "game": "cd82",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.1667,
+  "repeat_pairs": 18,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 62.3,
+  "copy_frame_exact": 0.24,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0,
+  "code": null
+}

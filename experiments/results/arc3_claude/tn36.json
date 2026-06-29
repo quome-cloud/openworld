@@ -1,0 +1,9 @@
+{
+  "game": "tn36",
+  "steps": 200,
+  "transitions": 0,
+  "verified_exact": null,
+  "note": "no valid transitions (random actions never produced a good step); excluded",
+  "baseline_levels": 0,
+  "win_levels": 7
+}

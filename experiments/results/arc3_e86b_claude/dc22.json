@@ -1,0 +1,9 @@
+{
+  "game": "dc22",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.3333,
+  "copy_frame_exact": 0.2361,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):  # frame: (64,64) int; action: 1-indexed\n    out = frame.copy()\n    H, W = out.shape\n    CURSOR, TRAIL, COUNTER, BG = 14, 2, 3, 4\n\n    # locate the 2x2 cursor block (all four cells == 14)\n    is14 = (out == CURSOR)\n    cur = None\n    for r in range(H - 1):\n        for c in range(W - 1):\n            if is14[r, c] and is14[r, c+1] and is14[r+1, c] and is14[r+1, c+1]:\n                cur = (r, c); break\n        if cur is not None:\n            break\n\n    deltas = {1: (-2, 0), 2: (2, 0), 3: (0, -2), 4: (0, 2)}  # up,down,left,right\n    moved = False\n    if cur is not None and action in deltas:\n        r, c = cur\n        dr, dc = deltas[action]\n        nr, nc = r + dr, c + dc\n        if 0 <= nr <= H - 2 and 0 <= nc <= W - 2:\n            dest = out[nr:nr+2, nc:nc+2]\n            # only move onto background/trail/itself (blocked by obstacles)\n            if np.all((dest == BG) | (dest == TRAIL) | (dest == CURSOR)):\n                out[r:r+2, c:c+2] = TRAIL      # vacated -> trail\n                out[nr:nr+2, nc:nc+2] = CURSOR  # new pos -> cursor\n                moved = True\n\n    # bottom-row step counter (color 3), advances for actions {1,4,6}\n    if action == 6 or (moved and action in (1, 4)):\n        col = int(np.count_nonzero(out[H - 1] == COUNTER))\n        if col < W:\n            out[H - 1, col] = COUNTER\n\n    return out"
+}

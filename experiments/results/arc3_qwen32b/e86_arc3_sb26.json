@@ -1,0 +1,16 @@
+{
+  "game": "sb26",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 158,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.3,
+  "copy_frame_exact": 0.6633,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.7333,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Based on the given transitions, it seems that:\n    # - Action 5 changes a specific cell to color 3.\n    # - Action 6 and 7 do not change any cells.\n    \n    # Create a copy of the frame to avoid modifying the original\n    next_frame = np.copy(frame)\n    \n    if action == 5:\n        # For action 5, we need to determine which cell changes to color 3\n        # From the given transitions, it seems that the column index decreases by 1 each time action 5 is called.\n        # We can infer that the row index remains constant at 53 and the column index starts from 63 and decreases.\n        \n        # Find the last changed column index for action 5\n        last_changed_col = np.max(np.where(frame[53] == 3)[0]) if 3 in frame[53] else 63\n        \n        # Change the next cell to color 3\n        next_frame[53, last_changed_col - 1] = 3\n    \n    # Actions 6 and 7 do not change any cells, so we return the frame as is for these actions.\n    \n    return next_frame"
+}

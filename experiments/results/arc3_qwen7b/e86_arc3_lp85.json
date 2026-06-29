@@ -1,0 +1,16 @@
+{
+  "game": "lp85",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 299,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.0,
+  "copy_frame_exact": 1.0,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 1.0,
+  "code": "def predict(frame, action):\n    return frame.copy()"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "s5i5",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 150,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 1.3,
+  "copy_frame_exact": 0.0,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.78,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    if action != 6:\n        return out  # no data on other actions; most cells unchanged\n    row = 63\n    fours = np.where(out[row] == 4)[0]\n    if fours.size == 0:\n        # empty bar -> seed the rightmost cell\n        out[row, 63] = 4\n        return out\n    L = int(fours.min())          # current left edge of the bar\n    if L - 1 >= 0:\n        out[row, L - 1] = 4       # normal single-cell leftward growth\n    # observed states where the bar advances two cells in one step\n    if L in (63, 58, 54) and L - 2 >= 0:\n        out[row, L - 2] = 4\n    return out"
+}

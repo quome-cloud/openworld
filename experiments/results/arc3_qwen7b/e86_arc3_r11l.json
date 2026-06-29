@@ -1,0 +1,16 @@
+{
+  "game": "r11l",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 240,
+  "replay_determinism": 1.0,
+  "replay_steps": 61,
+  "mean_cells_changed": 1.1,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.0267,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 6:\n        for row in range(48, 50):\n            next_frame[row, 0] = 5\n    return next_frame"
+}

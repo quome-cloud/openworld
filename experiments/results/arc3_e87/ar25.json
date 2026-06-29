@@ -1,0 +1,15 @@
+{
+  "game": "ar25",
+  "e86_fidelity": 0.32,
+  "controllability": {
+    "n_tasks": 15,
+    "plan_found_frac": 0.2,
+    "plan_reach_frac": 0.0,
+    "random_reach_frac": 0.0
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 8
+  }
+}

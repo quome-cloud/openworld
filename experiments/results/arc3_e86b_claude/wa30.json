@@ -1,0 +1,9 @@
+{
+  "game": "wa30",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.5556,
+  "copy_frame_exact": 0.1528,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    # The object is the set of foreground cells (14 = body, 0 = leading head).\n    mask = (frame == 14) | (frame == 0)\n    ys, xs = np.where(mask)\n    if len(ys) == 0:\n        return out\n    r0, r1 = int(ys.min()), int(ys.max())\n    c0, c1 = int(xs.min()), int(xs.max())\n    h = r1 - r0 + 1\n    w = c1 - c0 + 1\n\n    # action: 1=up, 2=down, 3=left, 4=right; 5 (and others) = no movement\n    deltas = {1: (-4, 0), 2: (4, 0), 3: (0, -4), 4: (0, 4)}\n    if action not in deltas:\n        return out\n\n    dr, dc = deltas[action]\n    nr0, nc0 = r0 + dr, c0 + dc\n    nr1, nc1 = nr0 + h - 1, nc0 + w - 1\n\n    # don't move off the grid\n    if nr0 < 0 or nc0 < 0 or nr1 > 63 or nc1 > 63:\n        return out\n\n    # clear old box to background\n    out[r0:r1 + 1, c0:c1 + 1] = 1\n\n    # paint new box: body of 14 with the 0 head on the leading edge\n    out[nr0:nr1 + 1, nc0:nc1 + 1] = 14\n    if action == 1:      # up -> head on top row\n        out[nr0, nc0:nc1 + 1] = 0\n    elif action == 2:    # down -> head on bottom row\n        out[nr1, nc0:nc1 + 1] = 0\n    elif action == 3:    # left -> head on left column\n        out[nr0:nr1 + 1, nc0] = 0\n    elif action == 4:    # right -> head on right column\n        out[nr0:nr1 + 1, nc1] = 0\n\n    return out"
+}

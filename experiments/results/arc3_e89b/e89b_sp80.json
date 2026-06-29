@@ -1,0 +1,31 @@
+{
+  "game": "sp80",
+  "model_fidelity": 0.8472,
+  "win_levels": 6,
+  "rounds": 5,
+  "best_levels": 1,
+  "solved": false,
+  "attempts": [
+    {
+      "levels": 0,
+      "terminations": 13
+    },
+    {
+      "levels": 0,
+      "terminations": 13
+    },
+    {
+      "levels": 0,
+      "terminations": 13
+    },
+    {
+      "levels": 1,
+      "terminations": 56
+    },
+    {
+      "levels": 0,
+      "terminations": 13
+    }
+  ],
+  "final_goal_code": "import numpy as np\n\ndef goal_score(frame):  # (64,64) int -> float, HIGHER = closer to completing a level\n    f = np.asarray(frame)\n\n    # --- movable avatar (color 9) ---\n    ar, ac = np.where(f == 9)\n    if ar.size == 0:\n        return -1e6  # avatar gone -> degenerate / terminal\n    ay, ax = ar.mean(), ac.mean()\n    a_bot = ar.max()\n\n    score = 0.0\n\n    # READING OF THE EVIDENCE\n    #   attempt 3 is the ONLY win, and it worked by (a) protecting the row-0\n    #   countdown (time = the resource you must beat) and (b) refusing the\n    #   suicidal dive into the big 'b'(=11) container pads that killed attempts\n    #   0/2. So survival + NOT crashing into the 11-pads is the proven core --\n    #   keep it. But attempt 3 was purely passive (won ~1 in 56 episodes by\n    #   drifting), so it needs a DIRECTED objective.\n    #\n    #   The timer drains every step no matter what (verified dynamics), so you\n    #   cannot \"survive\" by waiting -- you must REACH a goal before it empties.\n    #   The only distinct, non-pad, reachable target is the 4/6 marker (a small\n    #   key-like bar). Crucially, in the start layout the marker sits at the TOP\n    #   and the lethal 11-pads sit at the BOTTOM, so pulling the avatar toward\n    #   the marker AUTOMATICALLY pulls it away from the killer pads -- the two\n    #   refinements reinforce instead of fight (attempt 1's many competing\n    #   gravity terms flattened the gradient and it barely moved).\n\n    # (1) TIME LEFT = surviving 14-cells in the row-0 countdown. Proven resource.\n    time_left = int(np.count_nonzero(f[0] == 14))\n    score += 1.5 * time_left\n\n    # (2) REACH THE 4/6 MARKER (the goal/key). One clean, dominant attractor so\n    #     the planner commits to closing the gap every step. Split axes so it\n    #     both lines up and arrives; a saturating bonus rewards actually getting\n    #     on top of it (a level-completing contact).\n    gr, gc = np.where((f == 4) | (f == 6))\n    if gr.size:\n        gy, gx = gr.mean(), gc.mean()\n        dv, dh = abs(ay - gy), abs(ax - gx)\n        score -= 1.3 * dv + 1.6 * dh                 # clean linear pull, no dead zone\n        score += 80.0 / (1.0 + 0.5 * dv + 0.7 * dh)  # saturating arrival bonus\n\n    # (3) THE LETHAL HAZARD: the big 'b'(=11) container pads. Steep repulsion as\n    #     the avatar gets adjacent -- this is the dive that ended attempts 0/2.\n    hr, hc = np.where(f == 11)\n    if hr.size:\n        d = float(np.min(np.hypot(hr - ay, hc - ax)))\n        score -= 70.0 / (1.0 + d)\n        score += 0.3 * min(d, 10.0)  # mild credit for standing clear\n\n    # (4) Never sink into the bottom band where attempts 0/2 strike out.\n    score -= 0.6 * max(0.0, a_bot - 44.0)\n\n    return float(score)"
+}

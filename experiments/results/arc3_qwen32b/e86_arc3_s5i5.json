@@ -1,0 +1,16 @@
+{
+  "game": "s5i5",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 250,
+  "replay_determinism": 1.0,
+  "replay_steps": 51,
+  "mean_cells_changed": 1.3,
+  "copy_frame_exact": 0.0,
+  "synth_model": "qwen2.5-coder:32b",
+  "verified_exact": 0.0267,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    if action == 6:\n        # For action 6, the changes occur in the last row (row index 63)\n        # and specifically affect cells that are not background color (5).\n        new_frame = frame.copy()\n        for col in range(64):\n            if new_frame[63, col] != 5:\n                new_frame[63, col] = 4\n    else:\n        # For other actions, we assume no change as per the given data.\n        new_frame = frame.copy()\n    \n    return new_frame"
+}

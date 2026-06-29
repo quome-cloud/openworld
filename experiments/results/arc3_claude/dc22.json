@@ -1,0 +1,16 @@
+{
+  "game": "dc22",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 6,
+  "deterministic_frac": 0.4167,
+  "repeat_pairs": 12,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 4.9,
+  "copy_frame_exact": 0.205,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.44,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    head = np.argwhere(frame == 14)\n    if head.size == 0:\n        return out\n    r0, c0 = head[:, 0].min(), head[:, 1].min()  # top-left of 2x2 head\n    deltas = {1: (-2, 0), 2: (2, 0), 3: (0, -2), 4: (0, 2)}\n    if action not in deltas:\n        return out  # action 6 / unknown -> no move\n    dr, dc = deltas[action]\n    nr, nc = r0 + dr, c0 + dc\n    # bounds check\n    if nr < 0 or nc < 0 or nr + 1 >= 64 or nc + 1 >= 64:\n        return out\n    target = frame[nr:nr+2, nc:nc+2]\n    # blocked if any target cell is a wall (not background/trail/head)\n    if not np.isin(target, (2, 4, 14)).all():\n        return out\n    out[r0:r0+2, c0:c0+2] = 2     # old head -> trail\n    out[nr:nr+2, nc:nc+2] = 14    # new head\n    return out"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "sb26",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 73,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.4,
+  "copy_frame_exact": 0.64,
+  "synth_model": "claude-cli",
+  "verified_exact": 1.0,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    # actions 6, 7 (and others) are no-ops in the observed data\n    if action == 5:\n        # action 5 paints color 3 into row 53, advancing one column to the left.\n        row = 53\n        cols = np.where(out[row] == 3)[0]\n        if cols.size == 0:\n            c = 63               # start at the right edge\n        else:\n            c = int(cols.min()) - 1   # one cell left of the current leftmost 3\n        if 0 <= c < out.shape[1]:\n            out[row, c] = 3\n    return out"
+}

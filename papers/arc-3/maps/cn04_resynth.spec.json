@@ -1,0 +1,481 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "arc3-resynth-cn04",
+  "description": "Online re-synthesized world model of ARC-AGI-3 cn04: 7 regimes, each built by REPLAY-TO-BOUNDARY then a fresh model, composed with openworld.PhasedTransition (irreversible advance as the rules change).",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "Online re-synthesized world model of ARC-AGI-3 cn04: 7 regimes, each built by REPLAY-TO-BOUNDARY then a fresh model, composed with openworld.PhasedTransition (irreversible advance as the rules change)."
+  },
+  "state_schema": {
+    "sig": "str"
+  },
+  "initial_state": {
+    "sig": "q0"
+  },
+  "actions": [
+    "c17_47",
+    "c20_26",
+    "c23_35",
+    "c29_53",
+    "c35_20",
+    "c44_41",
+    "c47_11",
+    "c47_14",
+    "c47_53",
+    "c50_53",
+    "c56_8",
+    "c5_47",
+    "c8_44",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "phased",
+    "record_key": "_phase",
+    "phases": [
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 0
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 13
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 46
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 71
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 107
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 161
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 205
+      }
+    ]
+  },
+  "preview": {
+    "steps": 18,
+    "action": "c17_47",
+    "series": {
+      "_phase": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "_phase_steps": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "s0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c17_47"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c20_26"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c23_35"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c29_53"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c35_20"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c44_41"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c47_11"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c47_14"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c47_53"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c50_53"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c56_8"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c5_47"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "c8_44"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s1"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s2"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s3"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s4"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "s5"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c17_47"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c20_26"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c23_35"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c29_53"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c35_20"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c44_41"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c47_11"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c47_14"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c47_53"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c50_53"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c56_8"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c5_47"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "c8_44"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s1"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s2"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s3"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s4"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "s5"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c17_47"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c20_26"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c23_35"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c29_53"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c35_20"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c44_41"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c47_11"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c47_14"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c47_53"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c50_53"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c56_8"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c5_47"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "c8_44"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s1"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s2"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s3"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s4"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "s5"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

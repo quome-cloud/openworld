@@ -1,0 +1,16 @@
+{
+  "game": "ka59",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 7,
+  "deterministic_frac": 0.0,
+  "repeat_pairs": 3,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 13.4,
+  "copy_frame_exact": 0.13,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.36,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    # The creature is a 2-segment \"snake\": a 3x3 head (color 14 with a 0 eye at\n    # its center) leading a 3x3 body (color 1). Each move, the head advances one\n    # head-length (3 cells) in the commanded direction and the head's previous\n    # cells become body (color 1). The body trail is left in place (never erased).\n    #   action 2 = down, 3 = left, 4 = right. Other actions: no movement.\n    deltas = {2: (3, 0), 3: (0, -3), 4: (0, 3)}\n\n    if action in deltas:\n        ys, xs = np.where(frame == 14)\n        if len(ys) > 0:\n            ht, hl = int(ys.min()), int(xs.min())          # head top-left (3x3)\n            dr, dc = deltas[action]\n            nt, nl = ht + dr, hl + dc                       # new head top-left\n\n            if 0 <= nt and nt + 3 <= 64 and 0 <= nl and nl + 3 <= 64:\n                # old head region becomes body\n                out[ht:ht + 3, hl:hl + 3] = 1\n                # new head region\n                out[nt:nt + 3, nl:nl + 3] = 14\n                out[nt + 1, nl + 1] = 0                     # eye\n\n                # advance the row-63 countdown timer (paint next cell leftward)\n                row = out[63]\n                zc = np.where(row == 0)[0]\n                if len(zc) == 0:\n                    out[63, 63] = 0\n                else:\n                    c = int(zc.min())\n                    if c - 1 >= 0:\n                        out[63, c - 1] = 0\n\n    return out"
+}

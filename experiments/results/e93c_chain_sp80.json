@@ -1,0 +1,28 @@
+{
+  "game": "sp80",
+  "best_levels": 1,
+  "win_levels": 6,
+  "solved_full": false,
+  "solution_len": 18,
+  "solution": [
+    5,
+    2,
+    6,
+    3,
+    2,
+    2,
+    2,
+    6,
+    4,
+    4,
+    6,
+    6,
+    5,
+    4,
+    1,
+    4,
+    6,
+    5
+  ],
+  "beats_random": false
+}

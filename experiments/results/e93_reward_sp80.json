@@ -1,0 +1,154 @@
+{
+  "game": "sp80",
+  "budget": 5000,
+  "n_rewards": 1,
+  "rewards": [
+    {
+      "step": 291,
+      "action": 5,
+      "level_to": 1,
+      "diff": {
+        "moved": [
+          {
+            "color": 1,
+            "size": 256,
+            "delta": [
+              -60.0,
+              0.0
+            ]
+          },
+          {
+            "color": 9,
+            "size": 80,
+            "delta": [
+              8.0,
+              -4.0
+            ]
+          },
+          {
+            "color": 11,
+            "size": 80,
+            "delta": [
+              -48.8,
+              -4.0
+            ]
+          },
+          {
+            "color": 11,
+            "size": 80,
+            "delta": [
+              -48.8,
+              4.0
+            ]
+          },
+          {
+            "color": 14,
+            "size": 28,
+            "delta": [
+              63.0,
+              18.0
+            ]
+          },
+          {
+            "color": 6,
+            "size": 16,
+            "delta": [
+              52.0,
+              4.0
+            ]
+          },
+          {
+            "color": 4,
+            "size": 12,
+            "delta": [
+              59.0,
+              4.0
+            ]
+          }
+        ],
+        "appeared": [
+          {
+            "color": 11,
+            "size": 80,
+            "centroid": [
+              7.1,
+              33.5
+            ]
+          },
+          {
+            "color": 8,
+            "size": 48,
+            "centroid": [
+              17.5,
+              13.5
+            ]
+          },
+          {
+            "color": 8,
+            "size": 48,
+            "centroid": [
+              25.5,
+              33.5
+            ]
+          }
+        ],
+        "vanished": [
+          {
+            "color": 0,
+            "size": 36,
+            "centroid": [
+              0.0,
+              45.5
+            ]
+          }
+        ],
+        "resized": [
+          {
+            "color": 14,
+            "from": 28,
+            "to": 64
+          }
+        ]
+      },
+      "objs_before": "background=color12, 8 objects:\n  obj0: color=1 size=256 centroid=(61.5, 31.5) bbox=(60,0)-(63,63)\n  obj1: color=9 size=80 centroid=(29.5, 33.5) bbox=(28,24)-(31,43)\n  obj2: color=11 size=80 centroid=(55.9, 21.5) bbox=(52,16)-(59,27)\n  obj3: color=11 size=80 centroid=(55.9, 45.5) bbox=(52,40)-(59,51)\n  obj4: color=0 size=36 centroid=(0.0, 45.5) bbox=(0,28)-(0,63)\n  obj5: color=14 size=28 centroid=(0.0, 13.5) bbox=(0,0)-(0,27)\n  obj6: color=6 size=16 centroid=(5.5, 37.5) bbox=(4,36)-(7,39)\n  obj7: color=4 size=12 centroid=(2.0, 37.5) bbox=(1,36)-(3,39)",
+      "objs_after": "background=color12, 10 objects:\n  obj0: color=1 size=256 centroid=(1.5, 31.5) bbox=(0,0)-(3,63)\n  obj1: color=11 size=80 centroid=(7.1, 17.5) bbox=(4,12)-(11,23)\n  obj2: color=11 size=80 centroid=(7.1, 33.5) bbox=(4,28)-(11,39)\n  obj3: color=11 size=80 centroid=(7.1, 49.5) bbox=(4,44)-(11,55)\n  obj4: color=9 size=80 centroid=(37.5, 29.5) bbox=(36,20)-(39,39)\n  obj5: color=14 size=64 centroid=(63.0, 31.5) bbox=(63,0)-(63,63)\n  obj6: color=8 size=48 centroid=(17.5, 13.5) bbox=(16,8)-(19,19)\n  obj7: color=8 size=48 centroid=(25.5, 33.5) bbox=(24,28)-(27,39)\n  obj8: color=6 size=16 centroid=(57.5, 41.5) bbox=(56,40)-(59,43)\n  obj9: color=4 size=12 centroid=(61.0, 41.5) bbox=(60,40)-(62,43)",
+      "full_prefix": [
+        5,
+        2,
+        6,
+        3,
+        2,
+        2,
+        2,
+        6,
+        4,
+        4,
+        6,
+        6,
+        5,
+        4,
+        1,
+        4,
+        6,
+        5
+      ],
+      "recent_actions": [
+        2,
+        2,
+        6,
+        4,
+        4,
+        6,
+        6,
+        5,
+        4,
+        1,
+        4,
+        6
+      ]
+    }
+  ],
+  "winning_actions": {
+    "5": 1
+  }
+}

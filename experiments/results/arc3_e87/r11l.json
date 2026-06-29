@@ -1,0 +1,15 @@
+{
+  "game": "r11l",
+  "e86_fidelity": 0.94,
+  "controllability": {
+    "n_tasks": 15,
+    "plan_found_frac": 1.0,
+    "plan_reach_frac": 1.0,
+    "random_reach_frac": 1.0
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 6
+  }
+}

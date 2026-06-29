@@ -103,6 +103,53 @@ Rules:
   reconstruct (`from_spec`/`_attach_io`), `validate_spec`, the card section + graph,
   `to_reactflow` + `to_mermaid`, and the serve `/metrics` + `/worlds/{name}` info.
 
+## ARC-AGI-3 environment — general API/harness mechanics (READ before touching arc3 experiments)
+
+These are environment/API facts, not game solutions. **SOURCE-FREE RULE: never read a game's
+`<game>.py` (it is the answer key) and never write game-specific solutions/mechanics here or in
+memory — solvers must discover dynamics by acting and reason the win from observed frames.** The notes
+below are about the *harness*, not any game; they are legitimately discoverable by play.
+
+**Action space — many games are CLICK-based, not just directional.**
+- `available_actions` per game tells you the space: `[1..5,7]` = directional, `[6]` = **click-only**,
+  or a mix. **Always check it; never assume the 7 simple actions.** Treating a click game as directional
+  (or vice-versa) = 0 solves.
+- A click is `GameAction.ACTION6` with coordinates passed as the **`data` arg of `env.step`**:
+  `env.step(GameAction.ACTION6, {"x": col, "y": row})` (x=col, y=row, both 0–63). **NOT**
+  `ACTION6.set_data({...})` then stepping the enum — that silently drops the coords (every click lands
+  at (0,0)). This bug makes every click game a "wall".
+- Clicks only register on **valid targets** (small sprites). Clicking elsewhere is a **no-op** (board
+  unchanged). Random/grid clicking → 0 solves. Infer targets **from pixels** (honest): cells of *small
+  connected components* + *rare-color* cells (`arc3_graph.objects`, `size<=~40`). Do NOT use any
+  privileged engine method that returns the answer — infer from pixels only.
+- Non-target clicks are no-ops that **dedup away** in a state graph, so the graph self-filters to real
+  targets even with a loose pixel candidate set.
+
+**State identity — MASK the status bar or the state hash explodes.**
+- A UI counter/timer can change **every step**. Hashing the raw frame makes every step a "new" state →
+  no graph compression. Detect cells that change on ~every step (>0.95 freq over a probe) and **zero
+  them before hashing**. Do NOT over-mask: change-frequency masking on click games can eat the signal
+  (collapse to 1 state) — keep the threshold high (≈0.95).
+
+**Env performance + shape.**
+- Frame is `(1,64,64)`; take `np.asarray(o.frame)[-1].reshape(64,64)`. Colors 0–15.
+- `o.levels_completed` is the reward signal (raising it = a level solved); `o.win_levels` = total
+  levels. A level-up coincides with a large board change (board reload); use that to label win states.
+- The env is **replay-only**: no checkpoint/clone (`deepcopy` does NOT isolate state). To reach a state
+  you replay actions from `reset()`. **`arc.make(game)` is SLOW** (fetches metadata) — make the env
+  **once**, then `env.reset()` (0.6 ms) + replay; `env.step` is 0.04 ms. Never `arc.make` in a loop.
+- `reset()` does not necessarily return a multi-level game to level 0 (see the replay-reset notes) —
+  measure deep-level progress in a fresh process.
+
+**General lessons (no game specifics).**
+- Wins are typically goal-as-*procedure* (an ordered protocol), not goal-as-*state*-score, so a static
+  scoring hypothesis over frames usually fails; raw-frame-hash exploration explodes without masking;
+  random clicks fail without valid targets.
+- **Build solvers as OpenWorld**: the discovered state-transition graph IS a `World` (masked-frame
+  perceptor → state, `FunctionTransition` over the learned table → dynamics, induced `CodeObjective` →
+  reward); `to_spec` → `preview.graph` is the **map**, `render_card` the atlas, viewable in
+  `openworld serve /view`. Combine parallel representations with `ConsensusTransition(mode="vote")`.
+
 ## Build → optimize → deploy (CLI + server)
 
 - `openworld serve <specs> --allow-code [--open]` runs a FastAPI multi-world

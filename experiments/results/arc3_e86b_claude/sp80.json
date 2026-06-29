@@ -1,0 +1,9 @@
+{
+  "game": "sp80",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.8472,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n\n    # --- moving 9-block on background 12 ---\n    deltas = {1: (-4, 0), 2: (4, 0), 3: (0, -4), 4: (0, 4)}\n    if action in deltas:\n        dr, dc = deltas[action]\n        rows, cols = np.where(frame == 9)\n        if rows.size:\n            nr, nc = rows + dr, cols + dc\n            if nr.min() >= 0 and nr.max() < 64 and nc.min() >= 0 and nc.max() < 64:\n                out[rows, cols] = 12      # clear vacated cells to background\n                out[nr, nc] = 9           # paint shifted block\n\n    # --- row-0 countdown bar (color 14, consumed -> 0 from the right) ---\n    bar = np.where(frame[0] == 14)[0]\n    if bar.size:\n        edge = int(bar.max())\n        k = 3 if (edge % 17 == 6) else 2\n        lo = max(edge - k + 1, 0)\n        out[0, lo:edge + 1] = 0\n\n    return out"
+}

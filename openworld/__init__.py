@@ -33,6 +33,7 @@ from .memory import MemoryStore
 from .manyworlds import (BOOLEAN, COUNTING, PROBABILITY, Mechanism, Semiring,
                          WorldStore)
 from .objectives import Dial, Objective, ObjectiveSuite
+from .reward import CodeObjective, induce_reward, verify_reward
 from .pathintegral import LOG, TROPICAL, Skill, TrajectorySpace
 from .intervals import Affine, Interval
 # numpy-backed extras (wavelets/sheaf/infogeom/transport) are imported lazily via
@@ -49,7 +50,7 @@ from .perceive import (
     JSONPerceptor, LLMEmitter, MockPerceptor, Observation, PerceptionError,
     PerceptionGate, Perceptor, RegexPerceptor, TextPerceptor, ToolEmitter,
     ToolRegistry, TranscriptPerceptor, VisionPerceptor, image_to_b64,
-    sample_frames,
+    make_typed_perceptor, sample_frames,
 )
 from .sandbox import SandboxError
 from .simulation import Simulation, StepRecord, Trajectory
@@ -62,6 +63,7 @@ from .repairbench import (
     run_instance_tests, solve_in_world, solve_single_shot,
 )
 from .transition import CodeTransition, FunctionTransition, LLMTransition, PhasedTransition, Transition
+from .consensus import ConsensusTransition
 from .tune import Choice, IntRange, Param, Study, Trial, Tuner, Uniform
 from .verify import SynthesisError, Verifier, synthesize_transition
 from .world import World
@@ -77,6 +79,7 @@ __all__ = [
     "Bridge",
     "Choice",
     "CodeTransition",
+    "ConsensusTransition",
     "CompositeWorld",
     "Constraint",
     "compile_bridge",
@@ -140,6 +143,9 @@ __all__ = [
     "to_reactflow",
     "Objective",
     "ObjectiveSuite",
+    "CodeObjective",
+    "induce_reward",
+    "verify_reward",
     "OllamaConnectionError",
     "OllamaLLM",
     "Observation",
@@ -148,6 +154,7 @@ __all__ = [
     "PerceptionError",
     "MockPerceptor",
     "CodePerceptor",
+    "make_typed_perceptor",
     "JSONPerceptor",
     "RegexPerceptor",
     "LLMEmitter",

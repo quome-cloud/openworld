@@ -1,0 +1,15 @@
+{
+  "game": "dc22",
+  "e86_fidelity": 0.44,
+  "controllability": {
+    "n_tasks": 15,
+    "plan_found_frac": 0.0,
+    "plan_reach_frac": 0.0,
+    "random_reach_frac": 0.0
+  },
+  "levels": {
+    "levels_random": 0,
+    "levels_mpc": 0,
+    "win_levels": 6
+  }
+}

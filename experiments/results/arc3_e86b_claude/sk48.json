@@ -1,0 +1,9 @@
+{
+  "game": "sk48",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.3611,
+  "copy_frame_exact": 0.25,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    H, W = out.shape\n    BG = 5\n\n    # --- locate the 2-row \"conveyor\" texture band (cells valued 1 or 2) ---\n    tex = (frame == 1) | (frame == 2)\n\n    def longest_run_end(rowmask):\n        # returns (length, end_col) of the longest contiguous True run\n        best_len = 0; best_end = -1; cur = 0\n        for col in range(W):\n            if rowmask[col]:\n                cur += 1\n                if cur > best_len:\n                    best_len = cur; best_end = col\n            else:\n                cur = 0\n        return best_len, best_end\n\n    band_r = None; band_end = -1; band_len = 0\n    for r in range(H - 1):\n        both = tex[r] & tex[r + 1]\n        ln, end = longest_run_end(both)\n        if ln > band_len:\n            band_len = ln; band_r = r; band_end = end\n\n    # need a real band to act on the conveyor\n    if band_r is not None and band_len >= 3:\n        r = band_r            # top row\n        c = band_end          # rightmost textured column\n\n        if action == 4:\n            # stamp the next 6-wide block just to the right\n            s = c + 1\n            e = min(s + 6, W)\n            for col in range(s, e):\n                out[r,     col] = 2 if (col % 3) == 2 else 1   # top row phase\n                out[r + 1, col] = 2 if (col % 3) == 1 else 1   # bottom row phase\n            return out\n\n        if action == 3:\n            # commit the rightmost block: fill it solid with color 4\n            s = max(c - 5, 0)\n            out[r:r + 2, s:c + 1] = 4\n            return out\n\n    # actions 1 (draw), 2 (erase), 5, 6 and the no-band case: unchanged\n    return out"
+}

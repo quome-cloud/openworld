@@ -1,0 +1,9 @@
+{
+  "game": "cd82",
+  "method": "agentic-qwen3-coder:30b",
+  "backend": "ollama:qwen3-coder:30b",
+  "verified_exact": 0.0556,
+  "copy_frame_exact": 0.2222,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    # Create a copy of the frame to avoid modifying the original\n    next_frame = frame.copy()\n    \n    # Background color\n    bg_color = 5\n    \n    # Determine movement direction based on action\n    if action == 1:  # Up\n        dy, dx = -1, 0\n    elif action == 2:  # Down\n        dy, dx = 1, 0\n    elif action == 3:  # Left\n        dy, dx = 0, -1\n    elif action == 4:  # Right\n        dy, dx = 0, 1\n    elif action == 5:  # Stay (no movement)\n        dy, dx = 0, 0\n    else:\n        raise ValueError(\"Invalid action. Must be between 1 and 5.\")\n    \n    # Get the current frame dimensions\n    height, width = frame.shape\n    \n    # Process each cell in the frame\n    for y in range(height):\n        for x in range(width):\n            # If the cell is not background color, it might move\n            if frame[y, x] != bg_color:\n                # Calculate new position\n                new_y = y + dy\n                new_x = x + dx\n                \n                # Check bounds\n                if 0 <= new_y < height and 0 <= new_x < width:\n                    # If the new position is background color, move the cell there\n                    if frame[new_y, new_x] == bg_color:\n                        next_frame[new_y, new_x] = frame[y, x]\n                        # Mark old position as background\n                        next_frame[y, x] = bg_color\n                else:\n                    # If out of bounds, remove the cell (set to background)\n                    next_frame[y, x] = bg_color\n    \n    return next_frame"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "ar25",
+  "steps": 200,
+  "transitions": 200,
+  "baseline_levels": 0,
+  "win_levels": 8,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 9,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 74.9,
+  "copy_frame_exact": 0.14,
+  "synth_model": "claude-cli",
+  "verified_exact": 0.32,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    out = frame.copy()\n    # Column-63 step counter: advancing actions append the next 5 going downward.\n    # Action 7 (and other non-advancing actions) leave it alone.\n    if action in (1, 3, 4, 5):\n        col = out[:, 63]\n        empties = np.where(col != 5)[0]\n        if empties.size:\n            out[empties[0], 63] = 5\n    return out"
+}

@@ -1,0 +1,12 @@
+{
+  "game": "r11l",
+  "fidelity": 0.9306,
+  "win_levels": 6,
+  "budget": 3000,
+  "levels_graph_novelty": 0,
+  "levels_pixel_novelty": 0,
+  "levels_random": 0,
+  "graph_configs_seen": 60,
+  "pixel_states_seen": 60,
+  "first_reward": false
+}

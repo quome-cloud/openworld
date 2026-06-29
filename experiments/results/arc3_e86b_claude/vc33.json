@@ -1,0 +1,9 @@
+{
+  "game": "vc33",
+  "method": "agentic-claude",
+  "backend": "claude",
+  "verified_exact": 0.8333,
+  "copy_frame_exact": 0.0,
+  "n_test": 72,
+  "code": "import numpy as np\n\ndef predict(frame, action):  # frame: (64,64) int; action: 1-indexed int -> (64,64)\n    out = frame.copy()\n    # Only action 6 has observed dynamics: a right->left fill of row 0 with color 4,\n    # advancing at exactly 9/7 cells per step (filled region = rightmost C cells of row 0).\n    if action != 6:\n        return out\n\n    C = int(np.count_nonzero(out[0] == 4))   # cells already filled (rightmost C cols)\n    if C >= 64:\n        return out                            # row 0 fully filled -> no change\n\n    n = int(7 * C / 9 + 0.5)                  # recover step index from fill count\n    Cn = int(9 * (n + 1) / 7 + 0.5)           # fill count after this step\n    if Cn > 64:\n        Cn = 64\n\n    # newly exposed columns are [64-Cn, 63-C]; existing fill occupies [64-C, 63]\n    out[0, 64 - Cn:64 - C] = 4\n    return out"
+}

@@ -1,0 +1,69 @@
+{
+  "solved": [],
+  "n_solved": 0,
+  "results": {
+    "tu93": {
+      "game": "tu93",
+      "levels_solved": 0,
+      "win_levels": 9,
+      "winning_mode": null,
+      "modes": [
+        "dir",
+        "typednav"
+      ],
+      "map_nodes": 6,
+      "verified": false,
+      "solution": null
+    },
+    "tr87": {
+      "game": "tr87",
+      "levels_solved": 0,
+      "win_levels": 6,
+      "winning_mode": null,
+      "modes": [
+        "dir",
+        "typednav"
+      ],
+      "map_nodes": 6,
+      "verified": false,
+      "solution": null
+    },
+    "r11l": {
+      "game": "r11l",
+      "levels_solved": 0,
+      "win_levels": 6,
+      "winning_mode": null,
+      "modes": [
+        "click"
+      ],
+      "map_nodes": 1,
+      "verified": false,
+      "solution": null
+    },
+    "lp85": {
+      "game": "lp85",
+      "levels_solved": 0,
+      "win_levels": 8,
+      "winning_mode": null,
+      "modes": [
+        "click"
+      ],
+      "map_nodes": 1,
+      "verified": false,
+      "solution": null
+    },
+    "re86": {
+      "game": "re86",
+      "levels_solved": 0,
+      "win_levels": 8,
+      "winning_mode": null,
+      "modes": [
+        "dir",
+        "typednav"
+      ],
+      "map_nodes": 6,
+      "verified": false,
+      "solution": null
+    }
+  }
+}

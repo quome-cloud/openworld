@@ -1,0 +1,16 @@
+{
+  "game": "su15",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 1.0,
+  "repeat_pairs": 298,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 0.0,
+  "copy_frame_exact": 1.0,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.5467,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 6:\n        # Rule for action 6: Change the color of a specific cell (e.g., top-left corner to 10)\n        next_frame[0, 0] = 10\n    elif action == 7:\n        # Rule for action 7: No change in the grid\n        pass\n    return next_frame"
+}

@@ -1,0 +1,16 @@
+{
+  "game": "wa30",
+  "steps": 300,
+  "transitions": 300,
+  "baseline_levels": 0,
+  "win_levels": 9,
+  "deterministic_frac": 0.6667,
+  "repeat_pairs": 12,
+  "replay_determinism": 1.0,
+  "replay_steps": 81,
+  "mean_cells_changed": 26.2,
+  "copy_frame_exact": 0.14,
+  "synth_model": "qwen2.5-coder:7b",
+  "verified_exact": 0.12,
+  "code": "import numpy as np\n\ndef predict(frame, action):\n    next_frame = frame.copy()\n    if action == 1:\n        for row in range(44, 48):\n            for col in range(24, 28):\n                next_frame[row, col] = 0 if next_frame[row, col] == 1 else 1\n    elif action == 3:\n        for row in range(44, 48):\n            for col in range(40, 44):\n                next_frame[row, col] = 0 if next_frame[row, col] == 1 else 14\n    elif action == 5:\n        next_frame[63, 55] = 4\n    return next_frame"
+}

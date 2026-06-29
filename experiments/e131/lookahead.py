@@ -106,7 +106,7 @@ def best_sequence(env, perceive, frontier_path, frontier_key, frontier_levels,
                     # Replay to node if env is not already there
                     if not replayed:
                         _replay_to(env, frontier_path + suffix)
-                    _act(env, a_list)
+                    alive = _act(env, a_list)
                     s = perceive(env.frame)
                     next_key = s.key
                     next_levels = getattr(env, 'levels', frontier_levels)
@@ -121,7 +121,11 @@ def best_sequence(env, perceive, frontier_path, frontier_key, frontier_levels,
                     best_val = val
                     best_first = new_suffix[0]
 
-                candidates.append((val, next_key, next_levels, new_suffix))
+                # done-guard: a freshly-discovered TERMINAL state (game over / level reload) is scored
+                # above but NOT promoted into the beam -- re-replaying through done yields unreliable
+                # frames. Cache hits are assumed non-terminal (the cache only stores reached states).
+                if cached is not None or alive:
+                    candidates.append((val, next_key, next_levels, new_suffix))
 
         if not candidates:
             break

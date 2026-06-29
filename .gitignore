@@ -28,3 +28,7 @@ gallery/preview.html
 # Local secrets (API keys) -- never commit
 .env
 .env.*
+
+# E127 source-free sandbox: the isolated arc_agi worker downloads the real game
+# source (the answer key) here. It must NEVER be committed (source-free invariant).
+experiments/e127/.sandbox_env/

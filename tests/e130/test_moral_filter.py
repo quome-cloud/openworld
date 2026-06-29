@@ -20,8 +20,14 @@ def test_experts_propose_at_least_one_waypoint():
 
 def test_select_returns_argmax_phi_times_V():
     s = _stereo(); rng = np.random.default_rng(0)
-    wp, plan, score = mf.select(s, [], WorldModel(), mf.DEFAULT_EXPERTS, rng)
-    assert isinstance(wp, mf.Waypoint) and isinstance(plan, list) and score >= 0.0
+    wm = WorldModel()
+    # both experts target (1,1) but as different kinds; mark the 'reach' transition seen (valence 0.5)
+    # so the unseen 'click' (valence 1.0) is the strict phi*V argmax the selector must return.
+    wm.update(s.key, ("reach", 1, 1), ("other",))
+    wp, plan, score = mf.select(s, [], wm, mf.DEFAULT_EXPERTS, rng)
+    assert isinstance(wp, mf.Waypoint) and isinstance(plan, list)
+    assert wp.kind == "click" and (wp.y, wp.x) == (1, 1)   # higher-valence waypoint wins
+    assert score == 1.0                                    # phi(1) * valence(1.0)
 
 
 def test_amateur_degenerates_to_uniform_choice():

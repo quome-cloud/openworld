@@ -79,3 +79,5 @@ cd "$WD"
   --output-format stream-json --verbose --dangerously-skip-permissions \
   > "$WD/agent.log" 2> "$WD/agent.err"
 echo "final-level agent finished for $GAME (was $N/$W)"
+# capture this run into the HF-ready dataset (experiments/results/arc3_traces/) -- reuses capture_lib
+"$AGENT_PY" "$ROOT/scripts/capture_arc_run.py" "$GAME" "$WD" focused-final-level run_arc_agent_final_level.sh || true

@@ -619,7 +619,9 @@ produce a \emph{verified} ($\geq$1-level, replay-checked) solve. The landscape
 methods (atomic objectives, LLM hypotheses, Bayesian sub-worlds) are \emph{empty}---they fail even
 on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, not goal-as-state.
 Directed search and graph exploration each reach $6$; multi-perception consensus reaches $10$
-(uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). The \textbf{live coding agent} (right,
+(uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). Source-simulated engine reconstruction
+(E127) is likewise \emph{empty}---it certifies an engine on the easy game but cannot reconstruct the
+walls it was built to crack. The \textbf{live coding agent} (right,
 boxed) lights up the procedural walls no other method touches---\texttt{dc22, ft09, g50t, ka59, lp85,
 re86, sb26, sc25, su15, tn36, wa30, bp35}---lifting the union to $\mathbf{25/25}$ ($\geq$1 level on every game).}
 \label{fig:heatmap}
@@ -633,6 +635,25 @@ Bayesian active inference over composite sub-worlds with semiring-weighted plann
 large class of approaches and sharpens the diagnosis: a goal scored over a single \emph{state}
 cannot express an ordered \emph{procedure}, which is why undirected search occasionally stumbles
 into a win while goal-conditioned planning never does.
+
+\textbf{A fourth negative result: source-\emph{simulated} reconstruction (E127).} Rather than read a
+game's code, can two models \emph{reconstruct} its engine from source-free play---synthesising a
+stateful \texttt{Engine}, converging them by differential CEGIS with the \emph{real environment} as
+the oracle, and \emph{certifying} the result by a Clopper--Pearson lower bound on held-out
+next-frame accuracy? On the easy game \texttt{ar25} this works cleanly: the certified engine
+reproduces \ArcSimEasyExact{} held-out transitions exactly ($\geq\ArcSimEasyBound$ at 95\%
+confidence). But on the gap game \texttt{dc22}---a wall the source-free \emph{observational} solver
+already misses---the reconstruction collapses to \ArcSimGapExact{} ($\ArcSimGapAcc$) and the
+certificate \emph{correctly refuses to pass}: the toggle/counter dynamics are not recoverable from
+shallow source-free play in a few rounds. Of \ArcSimAttempted{} games attempted, \ArcSimCertified{}
+certified, and the method produces \emph{no} verified solves (empty column, Fig.~\ref{fig:heatmap}):
+reconstruction is easy where the game is easy and fails exactly on the walls that motivate it. One
+methodological dividend survives. Because the real environment---not two-model agreement---is the
+convergence oracle, the \emph{A-vs-B-vs-real gap} ($+\ArcSimBias$ on \texttt{dc22} vs.\ $0$ on
+\texttt{ar25}) measures the shared-prior bias by which two frontier models agree with \emph{each
+other} more than with reality, precisely where the reconstruction is unreliable---a failure mode a
+naive two-model consensus would hide, and a reminder that ground truth, not model agreement, must
+gate any source-free claim.
 
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
 \label{sec:agent}

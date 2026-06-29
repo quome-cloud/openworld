@@ -36,6 +36,10 @@ STRATS=[
     ("Bayes subworld\n+semiring (E104)",  solved_set("e104_bayesian_subworld")),
     ("Graph explore\n(E107)",             solved_set("e107_graph_explore")),
     ("Multi-Perception\nConsensus (E112)",solved_set("e112_arc_simulator")),
+    # E127 source-SIMULATED: reconstruct the engine source-free and certify vs the real env. It produces
+    # CERTIFIED engines, not verified solves (the solve step was never run), and its reconstruction
+    # fidelity collapses on the gap games -> 0 verified solves (empty column), a stated negative result.
+    ("Source-sim\nreconstruct (E127)",    set()),
     ("Live coding agent\n(E115, OpenWorld)", agent_solved()),
 ]
 ALL=["ar25","bp35","cd82","cn04","dc22","ft09","g50t","ka59","lf52","lp85","ls20","m0r0","r11l",

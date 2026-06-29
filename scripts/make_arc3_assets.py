@@ -315,6 +315,25 @@ def main():
             "ArcRandomMaxDepth": str(e117.get("max_depth_per_episode",300)),
         })
 
+    # ---- E127 source-SIMULATED reconstruction (a NEGATIVE result): reconstruct each game's engine
+    #      from source-free play and CERTIFY it against the real env (Clopper-Pearson held-out bound).
+    #      Certifies the easy game (ar25) but the gap game (dc22) is unreconstructable from shallow play;
+    #      the A-vs-B-vs-real gap flags shared-prior bias that naive two-model agreement would miss. ----
+    ss = jload("arc3_source_simulated.json")
+    if ss:
+        ar = ss.get("ar25", {}); dc = ss.get("dc22", {})
+        arc_ = ar.get("certificate", {}) or {}; dcc = dc.get("certificate", {}) or {}
+        n_cert = sum(1 for v in ss.values() if (v.get("certificate") or {}).get("pass"))
+        macros.update({
+            "ArcSimAttempted": str(len(ss)),
+            "ArcSimCertified": str(n_cert),
+            "ArcSimEasyExact": f"{arc_.get('exact',0)}/{arc_.get('n',0)}",
+            "ArcSimEasyBound": pct(arc_.get("acc_lower", 0) or 0),
+            "ArcSimGapExact": f"{dcc.get('exact',0)}/{dcc.get('n',0)}",
+            "ArcSimGapAcc": pct(dc.get("champion_acc", 0) or 0),
+            "ArcSimBias": f"{(dc.get('ab_vs_real_gap') or 0):.2f}",
+        })
+
 
     # ---- E99 solve sweep (the successful directed-search approach) ----
     sweep=jload("e99_deep_sweep.json")

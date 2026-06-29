@@ -97,8 +97,20 @@ def _select(archive, rng):
     return cells[int(rng.choice(len(cells), p=w))]
 
 
-def _step(g, a):
-    return g.step(a[0], a[1], a[2]) if a[0] == 6 else g.step(a[0])
+def _safe_step(g, a):
+    """Step the env; return True if the resulting state is explorable (valid frame AND not done),
+    False if TERMINAL (done, or the env returned an empty frame = game over). Terminal states are
+    dead ends -- never explored from, never archived."""
+    try:
+        g.step(a[0], a[1], a[2]) if a[0] == 6 else g.step(a[0])
+        return not bool(getattr(g, "done", False))
+    except Exception:
+        return False
+
+
+def _result(win, lv, actions, archive, real):
+    return {"win": bool(win), "best_levels": int(lv), "best_actions": [list(x) for x in actions],
+            "archive": len(archive), "real_steps": int(real)}
 
 
 def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
@@ -116,36 +128,44 @@ def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
     win = int(win if win is not None else getattr(g, "win", 1))
     archive = {}
 
-    def consider(actions, frame, levels):
+    def consider(actions, frame, levels, done):
+        if done:                     # terminal / dead-end states are NOT explorable -> never archived
+            return
         k = cf(frame, mask, levels)
         cur = archive.get(k)
         if cur is None or levels > cur["levels"] or (levels == cur["levels"] and len(actions) < len(cur["actions"])):
             archive[k] = {"actions": [tuple(a) for a in actions], "levels": int(levels), "chosen": 0}
 
     real = 0
-    consider([], f0, int(g.levels))
+    consider([], f0, int(g.levels), bool(getattr(g, "done", False)))
     best = (int(g.levels), [])
 
-    # seed the archive with a banked frontier trajectory (the focused-final-level start)
+    # SEED from the banked frontier, stopping at the deepest PRE-terminal state (banked frontiers can
+    # overshoot the deepest level and flail into a done state -- we keep the clean level-N-1 cells).
     if seed_actions:
         gs = game_factory(); gs.reset(); path = []
         for a in seed_actions:
-            a = tuple(a); _step(gs, a); real += 1; path.append(a)
-            consider(path, gs.frame, int(gs.levels))
-        if int(gs.levels) > best[0]:
-            best = (int(gs.levels), list(path))
-        if best[0] >= win:
-            return {"win": True, "best_levels": best[0], "best_actions": [list(a) for a in best[1]],
-                    "archive": len(archive), "real_steps": real}
+            a = tuple(a); ok = _safe_step(gs, a); real += 1; path.append(a)
+            lv = int(gs.levels)
+            if lv > best[0]:
+                best = (lv, list(path))
+            if lv >= win:
+                return _result(True, lv, path, archive, real)
+            if not ok:               # reached terminal -> stop seeding (don't archive the dead end)
+                break
+            consider(path, gs.frame, lv, False)
 
-    while real < budget:
+    while real < budget and archive:
         cell = _select(archive, rng); cell["chosen"] += 1
         # RETURN: replay the cell's trajectory from reset()
-        g.reset()
+        g.reset(); terminal = False
         for a in cell["actions"]:
-            _step(g, a)
+            if not _safe_step(g, a):
+                terminal = True; break
         real += len(cell["actions"])
-        # EXPLORE: random candidate actions from the cell
+        if terminal:
+            continue
+        # EXPLORE: random candidate actions (directional + mouse clicks at inferred targets)
         path = list(cell["actions"])
         for _ in range(explore_horizon):
             if real >= budget:
@@ -154,15 +174,13 @@ def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
             if not acts:
                 break
             a = tuple(acts[int(rng.integers(0, len(acts)))])
-            _step(g, a); real += 1; path = path + [a]
+            ok = _safe_step(g, a); real += 1; path = path + [a]
             lv = int(g.levels)
-            consider(path, g.frame, lv)
             if lv > best[0]:
                 best = (lv, list(path))
             if lv >= win:
-                return {"win": True, "best_levels": lv, "best_actions": [list(x) for x in path],
-                        "archive": len(archive), "real_steps": real}
-            if getattr(g, "done", False):
+                return _result(True, lv, path, archive, real)
+            if not ok:               # terminal -> stop this rollout (don't archive the dead end)
                 break
-    return {"win": best[0] >= win, "best_levels": best[0], "best_actions": [list(x) for x in best[1]],
-            "archive": len(archive), "real_steps": real}
+            consider(path, g.frame, lv, False)
+    return _result(best[0] >= win, best[0], best[1], archive, real)

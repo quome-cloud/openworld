@@ -97,7 +97,23 @@ not to predict success.
 
 ---
 
-## The macro slot (build only on GO)
+## Phase 0 outcome (resolved 2026-06-28 — scoped GO)
+
+Phase 0 ran (`experiments/results/e119_proxy_probe.json`; see `PROGRESS.md` step 6b). Result:
+the literal g50t-primary gate is **NO-GO** (g50t is flat both ways: n_gradient=0, frontier
+exhausted), **but tr87 (+52 depth_gain, +0.243 novel) and re86 (+24, +0.251) show strong
+subgoal-proxy directionality**; sb26/cn04 weak. Decision: **scoped GO** on the signal-bearing
+subset. This locks the spec's previously-open choices:
+
+- **Build scope:** `tr87`, `re86` (primary targets). `sb26`, `cn04` secondary (weak signal).
+  `g50t` is a **documented flat-boundary case** (excluded from the build set, kept as the honest
+  "hardest wall has no gradient" finding). `bp35` remains pruner-only; `sc25` remains an inert wall.
+- **Selection signal = subgoal-proxy** (not the novelty default): Phase 0 shows depth_gain (subgoal
+  guidance) dominates novelty headroom on the signal-bearing games. The macro ranker scores
+  endpoints by satisfaction of the synthesized subgoal predicate.
+- **Macro length 2–8 stands** (Phase 0 gave no reason to widen it).
+
+## The macro slot (GO — build per above scope)
 
 ### Decisions (this session's brainstorm)
 - **Integration:** post-stall fallback (not super-actions in the frontier).

@@ -95,13 +95,13 @@ def test_run_sweep_options_wired_into_provenance():
 
 
 # Fix 1: run_sweep with no options still works (defaults to empty dict in provenance)
-def test_run_sweep_no_options_provenance_still_has_options_key():
+def test_run_sweep_no_options_provenance_still_has_options_key(tmp_path):
     import e119_macro_sweep as sweep
     from openworld import MockLLM
     def llm_factory(seed):
         return MockLLM([json.dumps(["a7"] * 6)] * 12)
     payload = sweep.run_sweep(["mg"], seeds=[0], make=lambda gid: MacroGame(),
-                              llm_factory=llm_factory,
+                              llm_factory=llm_factory, logdir=tmp_path,
                               budget={"max_nodes": 3, "max_depth": 10})
     assert "options" in payload["provenance"]
     assert isinstance(payload["provenance"]["options"], dict)

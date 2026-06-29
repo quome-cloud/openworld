@@ -43,7 +43,7 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
                "ts": None}
         log.append(rec)
         if seq is None:
-            if mode in ("macro", "macro+slm", "random-macro") and llm is not None:
+            if (mode == "random-macro") or (mode in ("macro", "macro+slm") and llm is not None):
                 seq = _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal,
                                       mode=mode, seed=seed)
             if seq is None:
@@ -62,13 +62,14 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
     verify_game = make(gid) if (make is not None and isinstance(gid, str)) else game
     reached, _ = planner.replay_levels(verify_game, actions)
     verified = reached > 0
-    result = {"game": name, "mode": mode, "levels": reached, "win": win,
+    result = {"game": name, "mode": mode, "seed": seed, "levels": reached, "win": win,
               "actions": actions, "verified": bool(verified)}
     if logdir is not None and verified:
         import pathlib
         d = pathlib.Path(logdir); d.mkdir(parents=True, exist_ok=True)
-        (d / f"{name}_solved.json").write_text(json.dumps(result))
-        (d / f"{name}.jsonl").write_text("\n".join(json.dumps(r) for r in log))
+        # filename includes mode and seed so arm×seed runs don't overwrite each other
+        (d / f"{name}__{mode}__s{seed}_solved.json").write_text(json.dumps(result))
+        (d / f"{name}__{mode}__s{seed}.jsonl").write_text("\n".join(json.dumps(r) for r in log))
     return result
 
 

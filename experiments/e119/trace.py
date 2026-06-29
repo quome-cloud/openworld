@@ -33,3 +33,21 @@ def log_run(path, record):
     p = pathlib.Path(path); p.parent.mkdir(parents=True, exist_ok=True)
     with open(p, "a") as f:
         f.write(json.dumps(record) + "\n")
+
+
+def ollama_digest(model):
+    """Best-effort: return the local Ollama digest string for `model`, or None on any failure.
+    Never raises; never blocks longer than the default urllib timeout (~few seconds)."""
+    try:
+        import urllib.request
+        req = urllib.request.Request(
+            "http://localhost:11434/api/show",
+            data=json.dumps({"name": model}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return data.get("digest") or data.get("details", {}).get("digest")
+    except Exception:
+        return None

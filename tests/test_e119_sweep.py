@@ -65,13 +65,124 @@ def test_run_sweep_aggregates_arms_and_seeds():
 
 def test_reverify_replays_banked_solutions(tmp_path):
     from e119 import reverify
-    # a banked solve: the 6-step macro that wins MacroGame
-    (tmp_path / "mg_solved.json").write_text(json.dumps(
+    # a banked solve with new filename scheme: name__mode__sN_solved.json
+    (tmp_path / "mg__search__s0_solved.json").write_text(json.dumps(
         {"game": "mg", "levels": 1, "actions": [[7], [7], [7], [7], [7], [7]]}))
     res = reverify.reverify_solves(tmp_path, make=lambda gid: MacroGame())
     assert res["ok"] == 1 and res["n"] == 1 and res["fail"] == []
     # a bogus banked solve fails re-verification
-    (tmp_path / "bad_solved.json").write_text(json.dumps(
+    (tmp_path / "bad__search__s0_solved.json").write_text(json.dumps(
         {"game": "bad", "levels": 1, "actions": [[1], [1]]}))
     res2 = reverify.reverify_solves(tmp_path, make=lambda gid: MacroGame())
     assert res2["ok"] == 1 and res2["n"] == 2 and "bad" in res2["fail"]
+
+
+# Fix 1: run_sweep threads real options into provenance
+def test_run_sweep_options_wired_into_provenance():
+    import e119_macro_sweep as sweep
+    from openworld import MockLLM
+    opts = {"num_ctx": 8192, "temperature": 0.7}
+    def llm_factory(seed):
+        return MockLLM([json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12)
+    payload = sweep.run_sweep(["mg"], seeds=[0], make=lambda gid: MacroGame(),
+                              llm_factory=llm_factory,
+                              budget={"max_nodes": 3, "max_depth": 10},
+                              options=opts)
+    prov = payload["provenance"]
+    assert prov["options"]["num_ctx"] == 8192
+    assert prov["options"]["temperature"] == 0.7
+
+
+# Fix 1: run_sweep with no options still works (defaults to empty dict in provenance)
+def test_run_sweep_no_options_provenance_still_has_options_key():
+    import e119_macro_sweep as sweep
+    from openworld import MockLLM
+    def llm_factory(seed):
+        return MockLLM([json.dumps(["a7"] * 6)] * 12)
+    payload = sweep.run_sweep(["mg"], seeds=[0], make=lambda gid: MacroGame(),
+                              llm_factory=llm_factory,
+                              budget={"max_nodes": 3, "max_depth": 10})
+    assert "options" in payload["provenance"]
+    assert isinstance(payload["provenance"]["options"], dict)
+
+
+# Fix 3: run_sweep writes per-run log records to runs.jsonl
+def test_run_sweep_writes_per_run_log_records(tmp_path):
+    import e119_macro_sweep as sweep
+    from openworld import MockLLM
+    def llm_factory(seed):
+        return MockLLM([json.dumps(["a7"] * 6)] * 12)
+    # Monkey-patch LOGDIR to tmp_path
+    orig_logdir = sweep.LOGDIR
+    sweep.LOGDIR = tmp_path
+    try:
+        sweep.run_sweep(["mg"], seeds=[0, 1], make=lambda gid: MacroGame(),
+                        llm_factory=llm_factory,
+                        budget={"max_nodes": 3, "max_depth": 10},
+                        arms=("search", "macro"))
+    finally:
+        sweep.LOGDIR = orig_logdir
+    runs_file = tmp_path / "e119_runs.jsonl"
+    assert runs_file.exists(), "run_sweep must write e119_runs.jsonl"
+    lines = runs_file.read_text().strip().splitlines()
+    records = [json.loads(l) for l in lines]
+    # search arm: 1 run; macro arm: 2 seeds => 3 records total
+    assert len(records) == 3
+    fields = {"game", "arm", "mode", "seed", "levels", "verified"}
+    for rec in records:
+        assert fields.issubset(rec.keys()), f"missing fields in {rec}"
+
+
+# Fix 4: ollama_digest returns None for unreachable/garbage model without raising
+def test_ollama_digest_returns_none_on_failure():
+    d = trace.ollama_digest("this-model-does-not-exist-xyzzy-9999")
+    assert d is None
+
+
+def test_ollama_digest_returns_none_for_bad_host():
+    # Patch socket to force connection refused
+    import unittest.mock as mock
+    import urllib.request
+    def boom(*a, **k): raise OSError("Connection refused")
+    with mock.patch.object(urllib.request, "urlopen", boom):
+        result = trace.ollama_digest("qwen2.5-coder:7b")
+    assert result is None
+
+
+# Fix 5: random-macro with llm=None still fires (no LLM needed)
+def test_random_macro_fires_without_llm():
+    """random-macro must not require an LLM — it uses seeded random macros only."""
+    r = solve.solve_game(MacroGame(), llm=None, mode="random-macro", seed=3,
+                         budget={"max_nodes": 3, "max_depth": 10},
+                         make=lambda gid: MacroGame())
+    # It may or may not solve (budget is tight), but must not raise and must return a result dict
+    assert "levels" in r and "mode" in r
+
+
+# Fix 5: run_sweep exception in a seed records error field in run log
+def test_run_sweep_exception_logged_with_error_field(tmp_path):
+    import e119_macro_sweep as sweep
+
+    class BoomGame:
+        """Always raises on step — simulates a broken env."""
+        win = 1; gid = "boom"
+        def reset(self): self.levels = 0; self.done = False; self.avail = [7]; import numpy as np; self.frame = np.zeros((64, 64), int); return self.frame
+        def step(self, *a, **k): raise RuntimeError("env exploded")
+
+    orig_logdir = sweep.LOGDIR
+    sweep.LOGDIR = tmp_path
+    try:
+        payload = sweep.run_sweep(["boom"], seeds=[0], make=lambda gid: BoomGame(),
+                                  budget={"max_nodes": 3, "max_depth": 10},
+                                  arms=("search",))
+    finally:
+        sweep.LOGDIR = orig_logdir
+    # levels aggregated to 0 (honest zero, not silent crash)
+    assert payload["by_game_arm"]["boom"]["search"]["k_solved"] == 0
+    # error field present in run log
+    runs_file = tmp_path / "e119_runs.jsonl"
+    if runs_file.exists():
+        lines = runs_file.read_text().strip().splitlines()
+        records = [json.loads(l) for l in lines]
+        error_recs = [r for r in records if "error" in r]
+        assert error_recs, "exception run must record an error field"

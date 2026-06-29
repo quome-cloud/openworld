@@ -26,8 +26,9 @@ def _real_make(gid):
 
 
 def run_sweep(games, seeds, make=_real_make, llm_factory=None, budget=None,
-              arms=("search", "random-macro", "macro")):
+              arms=("search", "random-macro", "macro"), options=None, digest=None):
     budget = budget or BUDGET
+    # per-call LLM transcripts deferred; per-run records + banked replayable solutions are the audit trail
     by = {}
     for gid in games:
         by[gid] = {}
@@ -41,10 +42,18 @@ def run_sweep(games, seeds, make=_real_make, llm_factory=None, budget=None,
                     r = solve.solve_game(make(gid), llm=llm, mode=mode, budget=budget,
                                          logdir=LOGDIR, make=make, seed=s)
                     levels.append(r["levels"])
+                    trace.log_run(LOGDIR / "e119_runs.jsonl", {
+                        "game": gid, "arm": arm, "mode": mode, "seed": s,
+                        "levels": r["levels"], "verified": r.get("verified", False),
+                    })
                 except Exception as e:
                     levels.append(0)
+                    trace.log_run(LOGDIR / "e119_runs.jsonl", {
+                        "game": gid, "arm": arm, "mode": mode, "seed": s,
+                        "levels": 0, "verified": False, "error": type(e).__name__,
+                    })
             by[gid][arm] = _agg(levels)
-    prov = trace.provenance(MODEL, {}, seeds, budget)
+    prov = trace.provenance(MODEL, options or {}, seeds, budget, digest=digest)
     summary = {g: {a: by[g][a]["k_solved"] for a in arms} for g in games}
     return {"arms": list(arms), "games": list(games), "by_game_arm": by,
             "provenance": prov, "summary": summary}
@@ -55,9 +64,11 @@ def main():
     import openworld as O
     from e119 import slm as _slm
     seeds = [0, 1, 2, 3, 4]
+    opts = _slm.llm_options(MODEL)                               # decoding params (minus per-seed seed)
     def llm_factory(seed):
-        return O.OllamaLLM(model=MODEL, options={**_slm.llm_options(MODEL), "seed": seed})
-    payload = run_sweep(games, seeds=seeds, llm_factory=llm_factory)
+        return O.OllamaLLM(model=MODEL, options={**opts, "seed": seed})
+    payload = run_sweep(games, seeds=seeds, llm_factory=llm_factory, options=opts,
+                        digest=trace.ollama_digest(MODEL))
     save_results("e119_macro_sweep", payload)               # SAVE before asserts (CLAUDE.md)
     assert all(arm in payload["arms"] for arm in ("search", "random-macro", "macro"))
     for g in games:

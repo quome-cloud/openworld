@@ -21,9 +21,9 @@ def test_solve_game_search_only_chains_all_levels(tmp_path):
                            budget={"max_nodes": 500, "max_depth": 8}, logdir=tmp_path)
     assert res["levels"] == 2 and res["win"] == 2
     assert res["verified"] is True
-    # banked solved.json round-trips
-    saved = json.loads((tmp_path / "TrackGame_solved.json").read_text())
-    assert saved["levels"] == 2
+    # banked solved.json round-trips with new filename scheme: name__mode__sN_solved.json
+    saved = json.loads((tmp_path / "TrackGame__search__s0_solved.json").read_text())
+    assert saved["levels"] == 2 and saved["seed"] == 0 and saved["mode"] == "search"
 
 
 def test_solve_game_search_mode_never_calls_llm(tmp_path):

@@ -90,3 +90,24 @@ def test_probe_game_reports_signals_on_corridor():
     assert row["blind"]["frontier_exhausted"] is True
     assert row["novelty_headroom"] is False
     assert "best_depth_gain" in row and "best_novel_gain" in row
+
+
+def test_decide_go_subgoal_signal():
+    rows = [{"game": "g50t", "n_satisfiable": 3, "best_depth_gain": 4,
+             "best_novel_gain": 0.0, "novelty_headroom": False}]
+    d = proxy_probe.decide_go(rows)
+    assert d["go"] is True and d["signal"] == "subgoal"
+
+
+def test_decide_go_novelty_default_when_both():
+    rows = [{"game": "g50t", "n_satisfiable": 3, "best_depth_gain": 4,
+             "best_novel_gain": 0.0, "novelty_headroom": True}]
+    d = proxy_probe.decide_go(rows)
+    assert d["go"] is True and d["signal"] == "novelty"   # novelty wins ties (brainstorm default)
+
+
+def test_decide_go_no_go_when_flat_and_exhausted():
+    rows = [{"game": "g50t", "n_satisfiable": 0, "best_depth_gain": 0,
+             "best_novel_gain": 0.0, "novelty_headroom": False}]
+    d = proxy_probe.decide_go(rows)
+    assert d["go"] is False and d["signal"] == "none"

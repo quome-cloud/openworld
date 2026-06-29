@@ -98,3 +98,18 @@ def probe_game(game, budget, max_preds=20):
             "n_satisfiable": len(satisf), "n_gradient": len(gradient), "blind": blind,
             "best_depth_gain": int(best_depth_gain), "best_novel_gain": round(best_novel_gain, 3),
             "novelty_headroom": not blind["frontier_exhausted"]}
+
+
+def decide_go(rows, primary="g50t"):
+    """GO iff the primary game shows either a non-flat subgoal proxy OR novelty headroom.
+    Default the macro selection signal to novelty when both qualify (brainstorm decision)."""
+    pr = next((r for r in rows if r["game"] == primary), None)
+    if pr is None:
+        return {"go": False, "signal": "none", "reason": f"primary {primary} missing from rows"}
+    subgoal = pr["n_satisfiable"] >= 1 and (pr["best_depth_gain"] >= 2 or pr["best_novel_gain"] >= 0.10)
+    novelty = bool(pr["novelty_headroom"])
+    signal = "novelty" if novelty else ("subgoal" if subgoal else "none")
+    return {"go": bool(novelty or subgoal), "signal": signal,
+            "reason": (f"{primary}: subgoal={subgoal} (depth_gain={pr['best_depth_gain']}, "
+                       f"novel_gain={pr['best_novel_gain']}, n_sat={pr['n_satisfiable']}), "
+                       f"novelty_headroom={novelty}")}

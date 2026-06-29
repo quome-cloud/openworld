@@ -67,13 +67,18 @@ def main():
     json.dump(sol, open(f"{wd}/solved.json", "w"))
     if improved:
         shutil.copy(f"{wd}/solved.json", f"{wd}/solved_best.json")
-    out = f"{ROOT}/experiments/results/arc3_go_explore.json"
-    allr = json.load(open(out)) if os.path.exists(out) else {}
-    allr[game] = {"game": game, "levels": lv, "win": win, "seed_levels": seed_lv,
-                  "improved": improved, "full": bool(win and lv >= win),
-                  "archive_cells": res.get("archive"), "real_steps": res.get("real_steps"),
-                  "wall_s": wall, "error": res.get("error")}
-    json.dump(allr, open(out, "w"), indent=1)
+    rec = {"game": game, "levels": lv, "win": win, "seed_levels": seed_lv,
+           "improved": improved, "full": bool(win and lv >= win),
+           "archive_cells": res.get("archive"), "real_steps": res.get("real_steps"),
+           "wall_s": wall, "error": res.get("error")}
+    json.dump(rec, open(f"{wd}/result.json", "w"))            # per-game (no race across parallel runs)
+    out = f"{ROOT}/experiments/results/arc3_go_explore.json"  # best-effort shared aggregate
+    try:
+        allr = json.load(open(out)) if os.path.exists(out) else {}
+        allr[game] = rec
+        json.dump(allr, open(out, "w"), indent=1)
+    except Exception:
+        pass
     print(f"[e128] {game}: {seed_lv} -> {lv}/{win}  {'IMPROVED' if improved else 'no gain'} "
           f"{'FULL' if lv>=win else ''}  archive={res.get('archive')} steps={res.get('real_steps')} "
           f"wall={wall}s", flush=True)

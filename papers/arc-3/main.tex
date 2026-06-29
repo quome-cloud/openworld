@@ -607,10 +607,17 @@ searching a fixed hypothesis space) crosses it on every such game.
 
 \section{The strategy landscape: what solves ARC-AGI-3}
 \label{sec:landscape}
-We ran seven increasingly sophisticated strategies and record, for every public game, which ones
+We ran a dozen increasingly sophisticated strategies and record, for every public game, which ones
 produce a \emph{verified} ($\geq$1-level, replay-checked) solve. The landscape
 (Fig.~\ref{fig:heatmap}) is the paper's most useful artifact for world-model research: it shows
-\emph{where} each idea works and, just as importantly, where principled ideas fail.
+\emph{where} each idea works and, just as importantly, where principled ideas fail. \textbf{The
+headline is the rightmost column: a reachability \emph{router} that sends each game to the cheapest
+solver that clears it---cheap perceptual/graph solvers when they suffice, the live coding agent for
+the walls---combines the strategies into a single \ArcUnionGames/\ArcUnionGames{} pipeline.} Under
+the source-faithful protocol this pipeline is full on \ArcFullGames/\ArcUnionGames{} games and
+$\geq$1 level on all \ArcUnionGames; under the stricter audited source-free protocol every routed
+solution carries a no-source-access attestation, and the pipeline is $\geq$1 level on all
+\ArcUnionGames{} with \ArcSFGames/\ArcUnionGames{} full (\S\ref{sec:router}).
 
 \begin{figure}[t]
 \centering
@@ -621,9 +628,11 @@ on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, no
 Directed search and graph exploration each reach $6$; multi-perception consensus reaches $10$
 (uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). Source-simulated engine reconstruction
 (E127) is likewise \emph{empty}---it certifies an engine on the easy game but cannot reconstruct the
-walls it was built to crack. The \textbf{live coding agent} (right,
-boxed) lights up the procedural walls no other method touches---\texttt{dc22, ft09, g50t, ka59, lp85,
-re86, sb26, sc25, su15, tn36, wa30, bp35}---lifting the union to $\mathbf{25/25}$ ($\geq$1 level on every game).}
+walls it was built to crack. The \textbf{live coding agent} lights up the procedural walls no other
+method touches---\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36, wa30, bp35}. The
+\textbf{router} (rightmost, boxed) sends each game to the \emph{cheapest} solver that clears it
+(cheap/perceptual within budget, else the coding agent), combining the strategies into one
+$\mathbf{25/25}$ pipeline---the paper's headline result.}
 \label{fig:heatmap}
 \end{figure}
 

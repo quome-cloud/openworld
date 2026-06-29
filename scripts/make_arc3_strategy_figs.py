@@ -16,6 +16,11 @@ def random_solved():
 def agent_solved():
     import glob, os
     return {os.path.basename(f)[:-5] for f in glob.glob("experiments/results/agent_solves/*.json")}
+def router_solved():
+    # E116 reachability router: route each game to the cheap/perceptual solver if it succeeds within
+    # budget, else to the live coding agent. The union of both routed buckets is the pipeline's solve set.
+    d=load("e116_router")
+    return set(d.get("routed_reachable",[])) | set(d.get("routed_agent",[])) if d else set()
 def load(name):
     p=R/f"{name}.json"
     return json.load(open(p)) if p.exists() else {}
@@ -36,11 +41,16 @@ STRATS=[
     ("Bayes subworld\n+semiring (E104)",  solved_set("e104_bayesian_subworld")),
     ("Graph explore\n(E107)",             solved_set("e107_graph_explore")),
     ("Multi-Perception\nConsensus (E112)",solved_set("e112_arc_simulator")),
+    ("Expert consensus\nvote (E120)",     solved_set("e120_expert_consensus")),
+    ("Qwen-30B agent\n(E118)",            solved_set("e118_qwen_agent")),
     # E127 source-SIMULATED: reconstruct the engine source-free and certify vs the real env. It produces
     # CERTIFIED engines, not verified solves (the solve step was never run), and its reconstruction
     # fidelity collapses on the gap games -> 0 verified solves (empty column), a stated negative result.
     ("Source-sim\nreconstruct (E127)",    set()),
     ("Live coding agent\n(E115, OpenWorld)", agent_solved()),
+    # E116 ROUTER: route each game to the cheapest solver that clears it (cheap/perceptual within budget,
+    # else the live coding agent) -> the union as ONE pipeline. This is the headline: 25/25.
+    ("ROUTER → one pipeline\n(E116)", router_solved()),
 ]
 ALL=["ar25","bp35","cd82","cn04","dc22","ft09","g50t","ka59","lf52","lp85","ls20","m0r0","r11l",
      "re86","s5i5","sb26","sc25","sk48","sp80","su15","tn36","tr87","tu93","vc33","wa30"]

@@ -1,6 +1,6 @@
 import json, numpy as np
 from openworld import MockLLM
-from e119 import macro
+from e119 import macro, slm
 
 
 OJ = {"bg": 0, "objects": [{"id": 0, "color": 5, "centroid": (10, 20)},
@@ -58,3 +58,17 @@ def test_propose_macros_abstains_on_disagreement():
     macros = macro.propose_macros(llm, StepGame(), [], {"objects": []}, [], None,
                                   avail=[7, 1], key_fn=_key, k_max=8, n=6, tau=0.6)
     assert macros == []                       # no cluster clears tau -> abstain
+
+
+def test_rank_macros_subgoal_satisfier_first():
+    g = StepGame()
+    # subgoal: reach color 5. StepGame never produces color 5, so make a game variant:
+    class ColorAtThree(StepGame):
+        def _r(self):
+            v = 5 if self.pos == 3 else 4
+            x = np.zeros((64, 64), int); x[0, self.pos] = v; self.frame = x
+    sub = {"type": "reach", "color": 5}
+    m_far = [(7,), (7,), (7,)]    # reaches pos 3 -> color 5 -> satisfies subgoal
+    m_near = [(7,)]               # reaches pos 1 -> color 4 -> does not
+    ranked = macro.rank_macros([m_near, m_far], ColorAtThree(), [], sub, _key, seen=set())
+    assert ranked[0] == m_far     # subgoal-satisfier ranked first

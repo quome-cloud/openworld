@@ -4,7 +4,7 @@ The env decides correctness; macros only ORDER/extend search and are replay-veri
 import json, re
 import numpy as np
 from collections import defaultdict
-from e119 import planner, solve
+from e119 import planner, solve, slm
 
 _MAX_REPEAT = 4
 
@@ -54,6 +54,20 @@ def _endpoint(game, prefix, macro_actions, key_fn):
     base = pg.levels
     frame, levels, _ = planner._frame_after(pg, list(macro_actions))
     return key_fn(frame), levels - base
+
+
+def rank_macros(macros, game, prefix, subgoal, key_fn, seen):
+    """Order macros: subgoal-satisfying endpoints first, then novel (unseen) endpoints."""
+    pred = slm.compile_predicate(subgoal) if subgoal else (lambda f: False)
+    scored = []
+    for i, m in enumerate(macros):
+        pg = solve._PrefixGame(game, prefix)
+        frame, _, _ = planner._frame_after(pg, list(m))
+        sat = 1 if pred(frame) else 0
+        novel = 1 if key_fn(frame) not in seen else 0
+        scored.append((-sat, -novel, i, m))         # stable within tier via original index i
+    scored.sort(key=lambda t: t[:3])
+    return [t[3] for t in scored]
 
 
 def propose_macros(llm, game, prefix, obj_json, diffs, subgoal, avail, key_fn,

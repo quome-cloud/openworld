@@ -36,3 +36,12 @@ class WorldModel:
 
     def lookup(self, name):
         return self.db.get(name)
+
+    # --- object-relative (lifted) dynamics: transfer across configs/levels (RL-review fix) ---
+    def learn_rule(self, avatar_color, action, prev_pos, next_pos):
+        self.rules = getattr(self, "rules", {})
+        dy, dx = next_pos[0] - prev_pos[0], next_pos[1] - prev_pos[1]
+        self.rules[(avatar_color, action)] = (dy, dx)
+
+    def predict_rel(self, avatar_color, action):
+        return getattr(self, "rules", {}).get((avatar_color, action))

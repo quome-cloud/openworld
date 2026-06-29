@@ -703,10 +703,15 @@ is \ArcSFGames/\ArcUnionGames{} (\emph{below} baseline1's \ArcBaselineFull); the
 solution steps (the agent derives the action path either way), so the gap isolates the cost of
 \emph{discovering} dynamics, not of planning them. With source, both frontier models are at parity
 (Claude \ArcFullGames/\ArcUnionGames{}, codex gpt-5.5 \ArcCodexFaithfulFull/\ArcUnionGames{} full,
-$\sim$\ArcCodexFaithfulLevels{} levels); source-free they diverge sharply---the Claude agent holds
-\ArcSFLevels{} levels (\ArcSFGames{} full) where source-free codex holds \ArcCodexFreeLevels{}
-(\ArcCodexFreeFull{} full): \emph{discovery ability, not source access, is what separates the models}.
-The graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
+$\sim$\ArcCodexFaithfulLevels{} levels). Source-free the two figures diverge---Claude's \emph{cumulative}
+source-free archive (multiple methods over many best-keeper rounds) holds \ArcSFLevels{} levels
+(\ArcSFGames{} full) where a \emph{single} codex sweep holds \ArcCodexFreeLevels{} (\ArcCodexFreeFull{}
+full)---but we flag this as \emph{suggestive, not a clean model comparison}: the Claude figure aggregates
+strictly more search effort and methods than the one codex run, so the gap conflates capability with
+pipeline maturity. The like-for-like control (codex versus Claude under one matched single sweep)
+remains to be run; what we can say cleanly is that \emph{both} models collapse from near-perfect
+\emph{with} source to a fraction of the levels \emph{without} it---the cost of discovery is large for
+each. The graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
 also reach $\geq$1 level on \emph{all} \ArcUnionGames{} games, of which $14$ are above a random
 baseline (\S\ref{sec:baseline}). \textbf{Honest scope.} (i)~Solves are \emph{offline and
 replay-verified}, exploiting determinism and unbounded resets; we report games \emph{completed}, not

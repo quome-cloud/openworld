@@ -416,7 +416,8 @@ class MacroGame:
 
 def test_macro_mode_banks_a_verified_macro_solve(tmp_path):
     from e119 import solve
-    replies = [json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 6   # consensus 6-step macro
+    # enough replies for both the (tolerated) subgoal probe and the macro proposer's n samples
+    replies = [json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12   # consensus 6-step macro
     llm = MockLLM(replies)
     res = solve.solve_game(MacroGame(), llm=llm, mode="macro",
                            budget={"max_nodes": 3, "max_depth": 8},   # tight: blind cannot reach pos 6
@@ -426,7 +427,7 @@ def test_macro_mode_banks_a_verified_macro_solve(tmp_path):
 
 def test_macro_mode_never_banks_unverified(tmp_path):
     from e119 import solve
-    replies = [json.dumps(["a1", "a1"])] * 6      # macro that never raises levels
+    replies = [json.dumps(["a1", "a1"])] * 12     # macro that never raises levels
     llm = MockLLM(replies)
     res = solve.solve_game(MacroGame(), llm=llm, mode="macro",
                            budget={"max_nodes": 3, "max_depth": 8}, make=lambda gid: MacroGame())
@@ -440,7 +441,7 @@ Expected: FAIL — `solve_game` does not run a macro fallback, so `levels == 0` 
 
 - [ ] **Step 3: Write minimal implementation**
 
-In `experiments/e119/solve.py`, add `from e119 import macro` at the top with the other `e119` imports. Replace the body of the `while not game.done and game.levels < win:` loop's tail so that, after `seq = planner.search_level(...)`, a stall triggers the macro fallback. The current tail is:
+In `experiments/e119/solve.py` — **do NOT import `macro` at the top**: `macro.py` imports `solve` at its top, so a top-level `from e119 import macro` here would be a circular import. The `_macro_fallback` helper below imports `macro` lazily (inside the function) for exactly this reason. Replace the body of the `while not game.done and game.levels < win:` loop's tail so that, after `seq = planner.search_level(...)`, a stall triggers the macro fallback. The current tail is:
 
 ```python
         if seq is None:
@@ -484,7 +485,10 @@ def _macro_fallback(game, actions, trans, llm, key_fn, make):
     avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
     oj = perceive.object_json(trans[0]["before"])
     diffs = [perceive.contrastive_diff(t["before"], t["after"]) for t in trans]
-    subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
+    try:
+        subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
+    except Exception:
+        subgoal = None      # a flaky/parse-failed subgoal must not kill the macro fallback
     cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
     if not cands:
         return None

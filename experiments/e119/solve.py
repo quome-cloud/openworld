@@ -30,7 +30,7 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
         cands = _candidates_fn(game, mask)
         score_fn = None
         subgoal = None
-        if mode == "slm" and llm is not None:
+        if mode in ("slm", "macro+slm") and llm is not None:
             frames = [t["after"] for t in trans]
             oj = perceive.object_json(trans[0]["before"])
             subgoal = slm.propose_subgoal(llm, oj, frames)
@@ -43,7 +43,10 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
                "ts": None}
         log.append(rec)
         if seq is None:
-            break
+            if mode in ("macro", "macro+slm") and llm is not None:
+                seq = _macro_fallback(game, actions, trans, llm, key_fn, make)
+            if seq is None:
+                break
         actions += seq
         # re-apply to advance the real game state for the next iteration
         game.reset()
@@ -83,3 +86,35 @@ class _PrefixGame:
         self._g.step(a, x, y)
         self.levels = self._g.levels; self.done = self._g.done; self.frame = self._g.frame
         return self.frame
+
+
+def _macro_fallback(game, actions, trans, llm, key_fn, make):
+    """On a stall, synthesize a subgoal, propose+rank macros, and return the FIRST macro whose
+    fresh-env replay of (actions+macro) raises levels. Returns the macro (list of action tuples)
+    or None (honest stop). The env decides correctness."""
+    from e119 import macro
+    avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
+    oj = perceive.object_json(trans[0]["before"])
+    diffs = [perceive.contrastive_diff(t["before"], t["after"]) for t in trans]
+    try:
+        subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
+    except Exception:
+        subgoal = None      # a flaky/parse-failed subgoal must not kill the macro fallback
+    cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
+    if not cands:
+        return None
+    ranked = macro.rank_macros(cands, game, actions, subgoal, key_fn, seen=set())
+    base_levels = _levels_after(make, game, actions)
+    for m in ranked:
+        reached = _levels_after(make, game, actions + list(m))
+        if reached > base_levels:
+            return list(m)
+    return None
+
+
+def _levels_after(make, game, action_list):
+    """Fresh-env replay (Bug #2): make a new game from gid when possible, else reuse `game`."""
+    gid = getattr(game, "gid", None)
+    g = make(gid) if (make is not None and isinstance(gid, str)) else game
+    reached, _ = planner.replay_levels(g, action_list)
+    return reached

@@ -43,12 +43,12 @@ def run_pilot(games, mode="search", make=_real_make, llm=None, budget=None, logd
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["search", "slm"], default="search")
+    ap.add_argument("--mode", choices=["search", "slm", "macro", "macro+slm"], default="search")
     ap.add_argument("--model", default="qwen2.5-coder:7b")
     ap.add_argument("--games", default=",".join(PILOT))
     a = ap.parse_args()
     llm = None
-    if a.mode == "slm":
+    if a.mode != "search":
         import openworld as O
         from e119 import slm as _slm
         llm = O.OllamaLLM(model=a.model, options=_slm.llm_options(a.model))

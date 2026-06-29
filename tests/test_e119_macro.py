@@ -82,3 +82,36 @@ def test_random_macros_seeded_and_bounded():
     assert len(a) == 5
     assert all(2 <= len(m) <= 8 for m in a)       # length bounds
     assert all(act[0] in (1, 2, 3, 4) for m in a for act in m)   # only avail directional actions
+
+
+class MacroGame:
+    """Level 1 needs the exact 6-action sequence (7,7,7,7,7,7) (walk to pos 6). With a tight
+    node budget blind BFS cannot assemble it, but a single banked macro of that sequence does."""
+    def __init__(self): self.win = 1; self.gid = "mg"; self.reset()
+    def reset(self): self.pos = 0; self.levels = 0; self.done = False; self.avail = [7, 1]; self._r(); return self.frame
+    def _r(self): g = np.zeros((64, 64), int); g[0, self.pos] = 4; self.frame = g
+    def step(self, a, x=None, y=None):
+        if a == 7 and self.pos < 63: self.pos += 1
+        if a == 1 and self.pos > 0: self.pos -= 1
+        if self.pos == 6 and self.levels == 0: self.levels = 1; self.done = True
+        self._r(); return self.frame
+
+
+def test_macro_mode_banks_a_verified_macro_solve(tmp_path):
+    from e119 import solve
+    # enough replies for both the (tolerated) subgoal probe and the macro proposer's n samples
+    replies = [json.dumps(["a7", "a7", "a7", "a7", "a7", "a7"])] * 12   # consensus 6-step macro
+    llm = MockLLM(replies)
+    res = solve.solve_game(MacroGame(), llm=llm, mode="macro",
+                           budget={"max_nodes": 3, "max_depth": 8},   # tight: blind cannot reach pos 6
+                           make=lambda gid: MacroGame())
+    assert res["levels"] == 1 and res["verified"] is True
+
+
+def test_macro_mode_never_banks_unverified(tmp_path):
+    from e119 import solve
+    replies = [json.dumps(["a1", "a1"])] * 12     # macro that never raises levels
+    llm = MockLLM(replies)
+    res = solve.solve_game(MacroGame(), llm=llm, mode="macro",
+                           budget={"max_nodes": 3, "max_depth": 8}, make=lambda gid: MacroGame())
+    assert res["levels"] == 0 and res["verified"] is False     # honest stop, nothing banked

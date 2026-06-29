@@ -157,3 +157,44 @@ novelty default — Phase 0 thus informs the selection-signal choice.
    reproducibility protocol. Run **brainstorming/writing-plans** for the macro build first.
 3. **Pruner** as a narrow add-on for high-branching games (`bp35`).
 4. `sc25` is a confirmed inert wall (separate harness-layer question; excluded from this set).
+
+## Step 7 — macro slot built + 3-arm sweep (the falsifiable test)
+
+Scoped GO taken (tr87/re86). The macro slot was built and reviewed in two plans
+(`docs/superpowers/plans/2026-06-28-e119-macro-slot-plan-{a-mechanism,b-measurement}.md`):
+**Plan A (mechanism)** — object/action-referential op grammar + compiler, SLM proposer
+(best-of-N + behavioral clustering + τ-abstention), subgoal-proxy ranker, seeded random-macro
+baseline, and a post-stall hook in `solve_game` (`--mode macro`/`macro+slm`); **Plan B
+(measurement)** — the `random-macro` arm, provenance + per-run trace logging, the 3-arm × m-seed
+sweep driver, and a banked-solve re-verifier. Each task was implementer- and reviewer-gated, with a
+final whole-branch review per plan; the invariant *macros only add states; only fresh-env
+replay-verified level-ups bank* was traced end-to-end (60 unit tests pass).
+
+**Result (3-arm, matched budget 6000/60, qwen2.5-coder:7b, seeds 0–4):**
+
+| game | search | random-macro | SLM macro |
+|------|:------:|:------------:|:---------:|
+| tr87 | 0/1 | 0/5 | 0/5 (levels 0.0±0.0) |
+| re86 | 0/1 | 0/5 | 0/5 (levels 0.0±0.0) |
+
+**Verdict: clean negative.** On the two strongest-Phase-0-signal procedure-walls, *no* arm solves
+any level — the SLM macro slot does not beat blind search or the random-macro baseline. The 2 real
+banked pilot solves (vc33, lp85) re-verify 2/2 on fresh envs; the sweep banked nothing (no false
+solves). Provenance pinned (model + seeds + decoding options in the results `env` block; digest
+best-effort/None). Per the one-model-first cost rule, a negative on qwen ⇒ **no diversity-set
+fan-out**. Results: `experiments/results/e119_macro_sweep.json`; per-run trace:
+`experiments/results/e119_logs/e119_runs.jsonl`.
+
+**Interpretation (honest boundary).** This matches the strong prior: E102/103/104 — and Claude-grade
+goal-discovery with *perfect* world models — scored 0 on these procedure-walls. Phase 0's
+subgoal-proxy signal (best-first reaches +52/+24 levels deeper) was *necessary-not-sufficient*, exactly
+as the spec caveated: moving the frontier deeper ≠ reaching the deep procedural reward. So the
+**goal-as-procedure wall holds for a small local model** in this harness; the macro slot's value on
+tr87/re86 is unproven. The harness law stands — correctness came entirely from env replay; the SLM
+never produced a false solve.
+
+**Caveat / next lever.** Per-call LLM transcripts were deferred this run, so we cannot distinguish
+"the SLM proposed macros that failed" from "the SLM abstained every stall" on these games. A
+follow-up that wires the (built-but-deferred) per-call `trace.log_run` at the proposer would attribute
+the 0 precisely, and is the cheapest next step before any larger investment (longer macros, a denser
+non-binary subgoal scorer, or the pruner on `bp35`).

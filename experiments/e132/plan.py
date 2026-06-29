@@ -110,61 +110,55 @@ class Result:
         )
 
 
-def explore(env, perceive, frontier_path, sim, wm, actions_of, budget):
-    """Bounded real-env walk from the frontier; sim.learn every (s,a,s') observed.
-
-    Greedily takes the first *unknown* action at each state.  When all transitions
-    from the current state are known the walk stops and restarts from the frontier
-    (probing a different branch).  Stops when `budget` real steps have been used
-    or no new transitions can be discovered from the frontier.
+def explore(env, perceive, frontier_path, sim, wm, actions_of, budget, targets_by_key=None):
+    """Bounded BFS from the frontier: from each reached state try EVERY candidate action once
+    (learning the full local transition fan-out, so the model branches and plan_in_model can search),
+    expanding into newly-discovered states. Records per-state click targets into `targets_by_key` so
+    `actions_of` uses each state's OWN targets, not a stale frontier snapshot. Real env touched only
+    here; we replay-to-state (deterministic) to backtrack between siblings.
 
     Args:
-        env           : real env (reset/step interface).
-        perceive      : frame -> Stereotype (.key, .click_targets).
-        frontier_path : action list from reset() to the frontier state.
-        sim           : WorldSim — learns discovered transitions.
-        wm            : WorldModel — available for rule learning (optional).
-        actions_of    : state_key -> list of candidate actions.
-        budget        : max real env steps.
+        env, perceive, frontier_path : real env + frame->Stereotype + reset-relative path to the frontier.
+        sim            : WorldSim — learns discovered transitions.
+        wm             : WorldModel — available for rule learning (optional).
+        actions_of     : state_key -> candidate actions (reads targets_by_key for clicks).
+        budget         : max real-env action attempts.
+        targets_by_key : dict state_key -> click targets, populated as states are perceived.
     """
     from experiments.e131.lookahead import _replay_to, _act
 
-    steps = 0
-    while steps < budget:
-        if not _replay_to(env, frontier_path):
-            break  # Frontier is unreachable (reset pollution or terminal)
+    if not _replay_to(env, frontier_path):
+        return  # frontier unreachable
+    s = perceive(env.frame)
+    cur_key = s.key
+    cur_levels = getattr(env, "levels", 0)
+    if targets_by_key is not None:
+        targets_by_key.setdefault(cur_key, list(getattr(s, "click_targets", [])))
 
-        s = perceive(env.frame)
-        cur_key = s.key
-        cur_levels = getattr(env, 'levels', 0)
-        walked = False
-
-        # Single walk: move forward as long as there are unknown transitions
-        for _ in range(min(budget - steps, 200)):
-            acts = actions_of(cur_key)
-            unknown = [a for a in acts if not sim.known(cur_key, a)]
-            if not unknown:
-                break  # All transitions from this state are known; reset & retry
-
-            a = unknown[0]
-            if not _act(env, a):
-                break  # Step failed or env done
-
-            steps += 1
-            walked = True
-
-            s2 = perceive(env.frame)
-            nk = s2.key
-            nl = getattr(env, 'levels', cur_levels)
-            sim.learn(cur_key, a, nk, nl)
-            cur_key = nk
-            cur_levels = nl
-
-            if getattr(env, 'done', False):
-                break
-
-        if not walked:
-            break  # No new transitions reachable; exploration exhausted
+    # FORWARD-ONLY walk: take the first UNKNOWN action and move on -- NO per-action reset()+replay.
+    # Real-env backtracking is unreliable on multi-level games (the worker corrupts after some steps),
+    # so a replay-per-sibling tree search collapses. A forward walk is cheap and reliable; it learns a
+    # chain (thin, not a fan-out). Branchy discovery requires a GENERALIZING synthesized model (the EWM
+    # agent), not real-env backtracking -- the documented binding constraint.
+    for _ in range(budget):
+        acts = actions_of(cur_key)
+        unknown = [a for a in acts if not sim.known(cur_key, a)]
+        if not unknown:
+            break                                   # nothing new reachable from here on this walk
+        a = unknown[0]
+        alive = _act(env, a)
+        nl = getattr(env, "levels", cur_levels)
+        if not alive:
+            if nl > cur_levels:                     # WIN-CAPTURE: final-level win-edge (frame may be empty)
+                sim.learn(cur_key, a, ("__win__", nl), nl)
+            break                                   # dead-end/terminal ends this forward walk
+        s2 = perceive(env.frame)
+        nk = s2.key
+        sim.learn(cur_key, a, nk, nl)
+        if targets_by_key is not None:
+            targets_by_key.setdefault(nk, list(getattr(s2, "click_targets", [])))
+        cur_key = nk
+        cur_levels = nl
 
 
 def verify(env, perceive, frontier_path, plan):
@@ -177,24 +171,29 @@ def verify(env, perceive, frontier_path, plan):
         plan          : list of actions to execute after the frontier.
 
     Returns:
-        (real_levels, ok)
-        real_levels — env.levels after executing as many plan steps as succeeded.
-        ok          — True if no step in plan raised or returned done=False (i.e.
-                      the full plan executed without a dead-end; False = truncated).
+        (real_levels, ok, n_executed)
+        real_levels — env.levels after the executed prefix (level is read AFTER each step, so a
+                      final-level WIN that sets done is still measured).
+        ok          — True if the full plan executed without a dead-end.
+        n_executed  — number of plan steps actually executed (the verified prefix length); commit
+                      only this prefix so best_actions always replays to real_levels.
     """
     from experiments.e131.lookahead import _replay_to, _act
 
     if not _replay_to(env, frontier_path):
-        return 0, False
+        return 0, False, 0
 
     levels = getattr(env, 'levels', 0)
     ok = True
+    n = 0
     for a in plan:
-        if not _act(env, a):
+        alive = _act(env, a)
+        levels = getattr(env, 'levels', levels)   # read AFTER the step: captures a done-setting win
+        n += 1
+        if not alive:
             ok = False
             break
-        levels = getattr(env, 'levels', levels)
-    return levels, ok
+    return levels, ok, n
 
 
 def solve_hybrid(env, perceive, wm, frontier_path, seed_levels, win,
@@ -246,21 +245,22 @@ def solve_hybrid(env, perceive, wm, frontier_path, seed_levels, win,
     K = max(2, rounds // 2)   # stagnation limit
 
     avail = list(getattr(env, 'avail', []))
-    # For click games: seed click targets from the frontier frame; updated on commit
-    click_targets = list(s0.click_targets) if 6 in avail else []
+    # Per-STATE click targets (the data fix): each state has its own valid targets, recorded as states
+    # are perceived during explore/refine/commit. A stale frontier snapshot would mis-explore click games.
+    targets_by_key = {frontier_key: list(s0.click_targets) if 6 in avail else []}
 
     def actions_of(state_key):
-        """Candidate actions: directional ids + current frontier click targets."""
+        """Candidate actions at THIS state: directional ids + the state's own recorded click targets."""
         acts = [[a] for a in avail if a != 6]
-        acts += [[6, t["x"], t["y"]] for t in click_targets]
+        acts += [[6, t["x"], t["y"]] for t in targets_by_key.get(state_key, [])]
         return acts
 
     rounds_done = 0
     for r in range(rounds):
         rounds_done = r + 1
 
-        # 1. Explore — fill sim from real env
-        explore(env, perceive, frontier_path, sim, wm, actions_of, explore_budget)
+        # 1. Explore — fill sim from real env (records per-state targets into targets_by_key)
+        explore(env, perceive, frontier_path, sim, wm, actions_of, explore_budget, targets_by_key)
 
         if not sim.trans:
             # No transitions discovered (e.g. all actions no-ops on first try)
@@ -280,39 +280,41 @@ def solve_hybrid(env, perceive, wm, frontier_path, seed_levels, win,
                 break
             continue
 
-        # 3. Verify plan on real env
-        real_levels, ok = verify(env, perceive, frontier_path, plan)
-        real_steps += len(plan)
+        # 3. Verify plan on real env (captures a done-setting final-level win; returns the verified prefix)
+        real_levels, ok, n_exec = verify(env, perceive, frontier_path, plan)
+        verified_plan = plan[:n_exec]                  # only what actually executed
+        real_steps += n_exec
 
-        # 4. Refine — learn from verified real transitions (corrects model mismatches)
+        # 4. Refine — re-learn the verified real transitions (corrects model mismatches); win-edges too
         if _replay_to(env, frontier_path):
             ck = frontier_key
             cl = frontier_levels
-            for a in plan:
-                if not _act(env, a):
-                    break
-                s_nxt = perceive(env.frame)
-                nk = s_nxt.key
+            for a in verified_plan:
+                alive = _act(env, a)
                 nl = getattr(env, 'levels', cl)
+                if not alive:
+                    if nl > cl:
+                        sim.learn(ck, a, ("__win__", nl), nl)   # final-level win-edge
+                    break
+                nk = perceive(env.frame).key
                 sim.learn(ck, a, nk, nl)
+                targets_by_key.setdefault(nk, list(perceive(env.frame).click_targets) if 6 in avail else [])
                 ck = nk
                 cl = nl
-                real_steps += 1
 
-        # 5. Commit if improved; never regress below seed_levels
+        # 5. Commit if improved; never regress. Extend the frontier by the VERIFIED PREFIX only, so
+        #    best_actions always replays to real_levels (no unverified trailing actions).
         if real_levels > best_levels:
             best_levels = real_levels
-            new_fp = frontier_path + plan
-            frontier_path = new_fp
+            frontier_path = frontier_path + verified_plan
             best_actions = list(frontier_path)
 
-            # Update frontier key/levels for the next round
+            # Update frontier key/levels for the next round (replayable since we committed the prefix)
             if _replay_to(env, frontier_path):
                 s_f = perceive(env.frame)
                 frontier_key = s_f.key
-                frontier_levels = real_levels
-                if 6 in avail:
-                    click_targets[:] = list(s_f.click_targets)
+                frontier_levels = getattr(env, 'levels', real_levels)
+                targets_by_key.setdefault(frontier_key, list(s_f.click_targets) if 6 in avail else [])
 
             no_improve_rounds = 0
         else:

@@ -70,19 +70,24 @@ def rank_macros(macros, game, prefix, subgoal, key_fn, seen):
 
 
 def propose_macros(llm, game, prefix, obj_json, diffs, subgoal, avail, key_fn,
-                   k_max=8, n=6, tau=0.5):
+                   k_max=8, n=6, tau=0.5, tracer=None):
     """Sample n op-lists from LLM, compile, cluster by behavioral effect (endpoint key + level delta).
-    Return cluster representatives sorted by cluster mass, or [] (abstain) if top cluster doesn't clear tau."""
+    Return cluster representatives sorted by cluster mass, or [] (abstain) if top cluster doesn't clear tau.
+    If `tracer` is given, it is called once per sampled call with {prompt, completion, compiled} for audit."""
     prompt = _PROMPT.format(oj=json.dumps(obj_json)[:1200], diffs=json.dumps(diffs)[:800],
                             subgoal=json.dumps(subgoal), k=k_max)
     clusters = defaultdict(list)      # behavioral signature -> [compiled macro, ...]
     drawn = 0
     for _ in range(n):
+        raw = ""
         try:
-            ops = json.loads(re.search(r"\[.*\]", llm.ask(prompt), re.S).group(0))
+            raw = llm.ask(prompt)
+            ops = json.loads(re.search(r"\[.*\]", raw, re.S).group(0))
             m = compile_macro(ops, obj_json, avail)[:k_max]
         except Exception:
+            if tracer: tracer({"prompt": prompt, "completion": raw, "compiled": None})
             continue
+        if tracer: tracer({"prompt": prompt, "completion": raw, "compiled": m})
         drawn += 1
         if not m:                     # empty/ungradeable macro discarded, not fatal
             continue

@@ -45,7 +45,7 @@ def solve_game(game, llm=None, mode="search", budget=None, logdir=None, make=Non
         if seq is None:
             if (mode == "random-macro") or (mode in ("macro", "macro+slm") and llm is not None):
                 seq = _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal,
-                                      mode=mode, seed=seed)
+                                      mode=mode, seed=seed, logdir=logdir)
             if seq is None:
                 break
         actions += seq
@@ -90,12 +90,29 @@ class _PrefixGame:
         return self.frame
 
 
-def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None, mode="macro", seed=0):
+def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None, mode="macro", seed=0,
+                    logdir=None):
     """On a stall, propose macros (SLM or, in random-macro mode, a seeded random baseline),
-    rank, and return the FIRST whose fresh-env replay raises levels. The env decides correctness."""
+    rank, and return the FIRST whose fresh-env replay raises levels. The env decides correctness.
+    When `logdir` is set (SLM modes), each proposer LLM call + the stall outcome are appended to
+    `logdir/e119_call_traces.jsonl` for audit (distinguishes 'proposed-and-failed' from 'abstained')."""
     from e119 import macro
     avail = list(getattr(game, "avail", [1, 2, 3, 4, 5, 7]))
     oj = perceive.object_json(trans[0]["before"])
+
+    tracer = None
+    trace_path = None
+    if logdir is not None:
+        import pathlib
+        from e119 import trace
+        trace_path = pathlib.Path(logdir) / "e119_call_traces.jsonl"
+        gid = getattr(game, "gid", type(game).__name__)
+        def tracer(rec):                                  # per-call prompt/completion record
+            trace.log_run(trace_path, {"game": gid, "mode": mode, "seed": seed, "level": len(actions),
+                                       "event": "sample", "prompt": trace.prompt_digest(rec["prompt"]),
+                                       "completion": (rec.get("completion") or "")[:600],
+                                       "compiled": rec.get("compiled")})
+
     if mode == "random-macro":
         rng = random.Random(seed + len(actions))     # vary per level, deterministic given seed
         cands = macro.propose_random_macros(avail, oj, k_max=8, count=6, rng=rng)
@@ -108,7 +125,12 @@ def _macro_fallback(game, actions, trans, llm, key_fn, make, subgoal=None, mode=
                 subgoal = slm.propose_subgoal(llm, oj, [t["after"] for t in trans])
             except Exception:
                 subgoal = None
-        cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn)
+        cands = macro.propose_macros(llm, game, actions, oj, diffs, subgoal, avail, key_fn, tracer=tracer)
+    if trace_path is not None:                            # stall outcome: proposed vs abstained
+        from e119 import trace
+        trace.log_run(trace_path, {"game": getattr(game, "gid", type(game).__name__), "mode": mode,
+                                   "seed": seed, "level": len(actions), "event": "stall",
+                                   "subgoal": subgoal, "n_candidates": len(cands)})
     if not cands:
         return None
     ranked = macro.rank_macros(cands, game, actions, subgoal, key_fn, seen=set())

@@ -51,6 +51,17 @@ def test_propose_macros_returns_consensus_macro():
     assert macros[0] == [(7,), (7,)]         # ranked first by cluster mass
 
 
+def test_propose_macros_invokes_tracer_per_sample():
+    calls = []
+    llm = MockLLM([json.dumps(["a7", "a7"])] * 6)
+    macro.propose_macros(llm, StepGame(), [], {"objects": []}, [], None,
+                         avail=[7, 1], key_fn=_key, n=6, tau=0.5,
+                         tracer=lambda rec: calls.append(rec))
+    assert len(calls) == 6                                  # one trace per sampled call
+    assert "prompt" in calls[0] and "completion" in calls[0] and "compiled" in calls[0]
+    assert calls[0]["compiled"] == [(7,), (7,)]             # the compiled macro is captured
+
+
 def test_propose_macros_abstains_on_disagreement():
     replies = [json.dumps(["a7"]), json.dumps(["a7", "a7"]), json.dumps(["a1"]),
                json.dumps(["a7", "a7", "a7"]), json.dumps(["a1", "a1"]), json.dumps(["a7", "a1"])]

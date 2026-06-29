@@ -60,7 +60,7 @@ def test_solve_game_real_actions_is_env_steps_not_macros():
     assert r["real_actions"] > 0
     # real_actions must be env steps (explore + execute calls) — not inflated by macro count
     # minimum is explore_budget * levels_solved (6*2=12); must not be inflated by macros_used
-    macros = r["macros_used"]
+    assert "macros_used" in r
     # If macros were added to real_actions (old bug), real_actions >= 12 + macros.
     # With the fix, real_actions == env steps only -> does not include macros.
     # We can't assert exact value (depends on plan path), but we CAN assert the key is present

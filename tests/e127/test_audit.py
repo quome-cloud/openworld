@@ -1,5 +1,4 @@
 # tests/e127/test_audit.py
-import os
 from experiments.e127 import audit
 
 def test_clean_dir(tmp_path):

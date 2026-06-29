@@ -4,6 +4,9 @@ the combined segmenter, the online causal monitor, and the replay-to-boundary re
 No ARC env: synthetic frames/tables/deltas only -> fast + deterministic. Run:
     ~/.arcv/bin/python -m pytest tests/test_e12x_multiworld.py -q
 """
+import pytest
+pytest.importorskip("arc_agi", reason="E121-E123 modules import arc_agi at load; "
+                    "skip where the live ARC env is unavailable (e.g. CI)")
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "experiments"))
 import numpy as np

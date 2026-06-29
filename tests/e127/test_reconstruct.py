@@ -3,7 +3,6 @@
 The REAL env is the convergence oracle; the second model is a diversity source, NEVER the
 acceptance gate. Three directional tests (from the brief) plus a CLICK-game convergence test prove
 the loop is all-modality (works on directional AND mouse games)."""
-import numpy as np
 from experiments.e127 import reconstruct
 from tests.e127.toy import toy_factory, TOY_ENGINE_SRC, TOY_WRONG_SRC, ACTION_API
 from tests.e127.toy_click import toy_click_factory, TOY_CLICK_ENGINE_SRC, CLICK_ACTION_API

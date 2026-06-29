@@ -1,8 +1,8 @@
 # tests/e127/test_toy_click.py
 import numpy as np
-from tests.e127.toy_click import ToyClickGame, toy_click_factory, TOY_CLICK_ENGINE_SRC
+from tests.e127.toy_click import ToyClickGame, TOY_CLICK_ENGINE_SRC
 from experiments.e127.safe_exec import compile_engine
-from experiments.e127 import engine, perception as P
+from experiments.e127 import perception as P
 
 def test_reset_layout_click_only():
     g = ToyClickGame(); f = g.reset()

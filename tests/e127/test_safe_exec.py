@@ -1,4 +1,3 @@
-import numpy as np
 from experiments.e127.safe_exec import compile_engine
 
 GOOD = '''

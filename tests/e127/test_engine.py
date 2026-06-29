@@ -1,8 +1,7 @@
 # tests/e127/test_engine.py
-import numpy as np
 from experiments.e127 import engine
 from experiments.e127.safe_exec import compile_engine
-from tests.e127.toy import ToyGame, toy_factory, TOY_ENGINE_SRC, TOY_WRONG_SRC
+from tests.e127.toy import ToyGame, TOY_ENGINE_SRC, TOY_WRONG_SRC
 
 def _acts(seq):
     return [(a, None, None) for a in seq]

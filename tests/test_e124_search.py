@@ -19,7 +19,6 @@ class ToyGame:
 def _cands(frame): return [[1],[2],[3]]
 
 def test_macro_solves_what_blind_cannot_in_budget():
-    g = ToyGame()
     macro_goal = codex_goalc.Goal([], [[[1],[1],[2]]], None, "", False, [])
     assert search.run(ToyGame(), codex_goalc.Goal([],[],None,"",False,[]), budget=5,
                       rung="blind", candidates_fn=_cands, mask=None) is None

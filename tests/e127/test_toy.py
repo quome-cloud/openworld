@@ -1,5 +1,5 @@
 import numpy as np
-from tests.e127.toy import ToyGame, toy_factory, TOY_ENGINE_SRC, TOY_WRONG_SRC, TOY_ACTIONS
+from tests.e127.toy import ToyGame, TOY_ENGINE_SRC, TOY_WRONG_SRC, TOY_ACTIONS
 from experiments.e127.safe_exec import compile_engine
 
 def test_reset_layout():

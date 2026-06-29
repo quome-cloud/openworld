@@ -6,9 +6,9 @@ import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
-from experiments.e130 import efei, operators as op, perception as P, moral_filter as mf
+from experiments.e130 import efei, operators as op, perception as P, moral_filter as mf, navigation
 from experiments.e130.world_model import WorldModel
-from experiments.e130.cycle import run_cycle
+from experiments.e130.cycle import run_cycle, run_cycle_v2
 
 
 def validate_theorems(rng):
@@ -40,7 +40,12 @@ def solve(game, budget):
     win = win or int(env.win)
     wm = WorldModel(); rng = np.random.default_rng(0)
     perceive = lambda fr: P.extrospect(fr, avail=list(getattr(env, "avail", [])))
-    res = run_cycle(env, wm, perceive, mf.DEFAULT_EXPERTS, budget, win, rng, seed_actions=seed)
+    # v2: detect avatar color + learned dir_map by probing a fresh env instance
+    avail = list(getattr(env, "avail", []))
+    game_factory = lambda: arc3_sandbox.SandboxGame(game)
+    avatar, dir_map = navigation.detect(game_factory, seed, avail)
+    res = run_cycle_v2(env, wm, perceive, mf.DEFAULT_EXPERTS, budget, win, rng,
+                       seed_actions=seed, avatar=avatar, dir_map=dir_map)
     wd = os.path.join(ROOT, "scratch_arc", f"su_{game}"); os.makedirs(wd, exist_ok=True)
     shutil.copy(os.path.join(ROOT, "experiments/arc3_sandbox.py"), wd)   # audit-clean workdir
     sol = {"game": game, "actions": res.best_actions, "levels": res.best_levels, "win": win,

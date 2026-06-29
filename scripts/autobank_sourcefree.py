@@ -33,7 +33,11 @@ sys.path.insert(0, str(ROOT / "scripts"))                 # audit_sandbox
 from audit_sandbox import audit
 import e121_openworld_roundtrip as e121
 
-ARCH = ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree.json"
+# Workdir prefix + result file are env-overridable so a model-ablation variant (e.g. codex) can bank to a
+# SEPARATE archive without clobbering the Claude run. Defaults preserve the original Claude behavior exactly.
+_PREFIX = os.environ.get("SF_WD_PREFIX", "sb_")
+ARCH = Path(os.environ.get(
+    "SF_ARCH", str(ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree.json")))
 
 
 def load_arch():
@@ -48,7 +52,7 @@ def load_arch():
 def sb_best(game):
     """Deepest (levels, dict, path) across this game's source-free solved files."""
     best = None
-    wd = ROOT / "scratch_arc" / f"sb_{game}"
+    wd = ROOT / "scratch_arc" / f"{_PREFIX}{game}"
     for fn in ("solved_best.json", "solved.json"):
         p = wd / fn
         if p.exists():
@@ -96,11 +100,11 @@ def main():
     arch = load_arch()
     arch.setdefault("roundtrip", {})
     changed = []
-    games = sorted(os.path.basename(d).replace("sb_", "")
-                   for d in glob.glob(str(ROOT / "scratch_arc" / "sb_*"))
+    games = sorted(os.path.basename(d)[len(_PREFIX):]
+                   for d in glob.glob(str(ROOT / "scratch_arc" / f"{_PREFIX}*"))
                    if os.path.isdir(d))
     for g in games:
-        wd = ROOT / "scratch_arc" / f"sb_{g}"
+        wd = ROOT / "scratch_arc" / f"{_PREFIX}{g}"
         sb = sb_best(g)
         if not sb:
             continue

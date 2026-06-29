@@ -30,19 +30,30 @@ class FrontierCache:
 # ---------------------------------------------------------------------------
 
 def _act(env, a):
-    """Step env with action a ([act] or [6, x, y]). Returns True if not done."""
-    if a[0] == 6:
-        env.step(6, a[1], a[2])
-    else:
-        env.step(a[0])
+    """Step env with action a ([act] or [6, x, y]). Returns True if the step succeeded and the env is
+    not done. The real env can raise (e.g. an empty frame on a level-reload/terminal) -- that is caught
+    and treated as a dead-end (return False), so a search branch never crashes the whole run."""
+    try:
+        if a[0] == 6:
+            env.step(6, a[1], a[2])
+        else:
+            env.step(a[0])
+    except Exception:
+        return False
     return not getattr(env, 'done', False)
 
 
 def _replay_to(env, path):
-    """Reset env and replay every action in path."""
-    env.reset()
+    """Reset env and replay every action in path. Returns True if the full path replayed cleanly; False
+    if reset or any step failed/terminated (the target state is then unreachable -- caller skips it)."""
+    try:
+        env.reset()
+    except Exception:
+        return False
     for a in path:
-        _act(env, a)
+        if not _act(env, a):
+            return False
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +97,8 @@ def best_sequence(env, perceive, frontier_path, frontier_key, frontier_levels,
 
             # Click: need the frame → replay to node, then perceive targets
             if 6 in avail:
-                _replay_to(env, frontier_path + suffix)
+                if not _replay_to(env, frontier_path + suffix):
+                    continue   # this beam node is unreachable (replay desynced/terminated) → skip it
                 s = perceive(env.frame)
                 action_candidates += [[6, t["x"], t["y"]]
                                       for t in s.click_targets]
@@ -104,15 +116,18 @@ def best_sequence(env, perceive, frontier_path, frontier_key, frontier_levels,
                     # env untouched; replayed flag stays as-is
                 else:
                     # Replay to node if env is not already there
-                    if not replayed:
-                        _replay_to(env, frontier_path + suffix)
+                    if not replayed and not _replay_to(env, frontier_path + suffix):
+                        replayed = False
+                        continue   # node unreachable → skip this candidate
                     alive = _act(env, a_list)
+                    replayed = False  # env has moved (or attempted to)
+                    if not alive:
+                        continue     # dead-end / terminal / empty-frame crash: don't cache or expand
                     s = perceive(env.frame)
                     next_key = s.key
                     next_levels = getattr(env, 'levels', frontier_levels)
                     path_to_next = frontier_path + suffix + [a_list]
                     cache.put(key, a_key, next_key, next_levels, path_to_next)
-                    replayed = False  # env is now at next_key, not at key
 
                 new_suffix = suffix + [a_list]
                 val = value(frontier_levels, next_levels, next_key, cache.seen)

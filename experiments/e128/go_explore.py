@@ -1,0 +1,139 @@
+"""Go-Explore for source-free ARC-AGI-3 final-level solving (Ecoffet et al. 2019, arXiv:1901.10995).
+
+ARC-3 final levels are deterministic, sparse-reward, procedural-goal problems -- the Montezuma's
+Revenge of grid games -- and Go-Explore is the method built for exactly this. We implement Phase 1
+(explore-until-solved); Phase 2 (robustify via imitation) is UNNECESSARY because ARC-3 is
+replay-deterministic, so a stored trajectory replayed from reset() is already robust.
+
+Phase 1, faithful to the paper:
+  - CELL: an abstract state. We hash the masked frame (mask cells that change every step -- status
+    bars / animations -- so they don't explode the archive). The paper stresses the cell
+    representation is everything; masked-frame is our v1 (object-state is a refinement).
+  - ARCHIVE: cell -> the BEST trajectory reaching it (deepest level, then shortest action path).
+  - SELECT: pick a cell to return to, weighted by a count-based novelty heuristic (rarely-chosen
+    cells score higher), times a LEVEL bonus so the search is driven toward the frontier (our
+    focused-final-level twist).
+  - RETURN: REPLAY the cell's stored trajectory from reset() (the paper's determinism trick -- no
+    relearning).
+  - EXPLORE: take random candidate actions from the cell for a short horizon; archive every new/
+    better cell; bank the moment levels reaches `win`.
+
+Source-free by construction: only frames/levels are read through the GameLike client; never code.
+"""
+import numpy as np
+
+_DIR_DEFAULT = [1, 2, 3, 4, 5, 7]
+
+
+def identity_mask(frames, thr=0.95):
+    """Bool mask (H,W): True where a cell changes between consecutive frames on >= thr of steps.
+    Those are status/animation 'noise' cells -- zeroed before hashing so they don't explode cells."""
+    changed = total = None
+    for i in range(1, len(frames)):
+        a, b = np.asarray(frames[i - 1]), np.asarray(frames[i])
+        if a.shape != b.shape:
+            continue
+        if changed is None:
+            changed = np.zeros(a.shape, dtype=float)
+            total = 0
+        changed += (a != b).astype(float)
+        total += 1
+    if not total:
+        return None
+    return (changed / total) >= thr
+
+
+def cell_key(frame, mask):
+    f = np.asarray(frame)
+    if mask is not None and getattr(mask, "shape", None) == f.shape:
+        f = np.where(mask, 0, f)
+    return f.astype(np.int16).tobytes()
+
+
+def _probe_mask(game_factory, steps=40, seed=0):
+    """Short random rollout to learn which cells are per-step noise (for the cell mask)."""
+    rng = np.random.default_rng(seed)
+    g = game_factory()
+    frames = [np.asarray(g.reset())]
+    avail = list(getattr(g, "avail", _DIR_DEFAULT))
+    for _ in range(steps):
+        a = int(rng.choice(avail))
+        frames.append(np.asarray(g.step(a, 0, 0) if a == 6 else g.step(a)))
+    return identity_mask(frames)
+
+
+def _select(archive, rng):
+    """Paper's count-based novelty selection x a level bonus (drive toward the frontier).
+    weight = (1 + levels) / sqrt(times_chosen + 1)."""
+    cells = list(archive.values())
+    w = np.array([(1.0 + c["levels"]) / np.sqrt(c["chosen"] + 1.0) for c in cells])
+    w = w / w.sum()
+    return cells[int(rng.choice(len(cells), p=w))]
+
+
+def _step(g, a):
+    return g.step(a[0], a[1], a[2]) if a[0] == 6 else g.step(a[0])
+
+
+def go_explore(game_factory, candidate_actions, budget, seed_actions=None,
+               explore_horizon=15, seed=0, win=None, mask=None):
+    """Returns {win, best_levels, best_actions, archive, real_steps}. `candidate_actions(frame,avail)
+    -> list of (kind,x,y)`; `seed_actions` = a banked frontier trajectory to seed the archive from."""
+    rng = np.random.default_rng(seed)
+    if mask is None:
+        mask = _probe_mask(game_factory, seed=seed)
+    g = game_factory()
+    f0 = np.asarray(g.reset())
+    win = int(win if win is not None else getattr(g, "win", 1))
+    archive = {}
+
+    def consider(actions, frame, levels):
+        k = cell_key(frame, mask)
+        cur = archive.get(k)
+        if cur is None or levels > cur["levels"] or (levels == cur["levels"] and len(actions) < len(cur["actions"])):
+            archive[k] = {"actions": [tuple(a) for a in actions], "levels": int(levels), "chosen": 0}
+
+    real = 0
+    consider([], f0, int(g.levels))
+    best = (int(g.levels), [])
+
+    # seed the archive with a banked frontier trajectory (the focused-final-level start)
+    if seed_actions:
+        gs = game_factory(); gs.reset(); path = []
+        for a in seed_actions:
+            a = tuple(a); _step(gs, a); real += 1; path.append(a)
+            consider(path, gs.frame, int(gs.levels))
+        if int(gs.levels) > best[0]:
+            best = (int(gs.levels), list(path))
+        if best[0] >= win:
+            return {"win": True, "best_levels": best[0], "best_actions": [list(a) for a in best[1]],
+                    "archive": len(archive), "real_steps": real}
+
+    while real < budget:
+        cell = _select(archive, rng); cell["chosen"] += 1
+        # RETURN: replay the cell's trajectory from reset()
+        g.reset()
+        for a in cell["actions"]:
+            _step(g, a)
+        real += len(cell["actions"])
+        # EXPLORE: random candidate actions from the cell
+        path = list(cell["actions"])
+        for _ in range(explore_horizon):
+            if real >= budget:
+                break
+            acts = candidate_actions(g.frame, list(getattr(g, "avail", _DIR_DEFAULT)))
+            if not acts:
+                break
+            a = tuple(acts[int(rng.integers(0, len(acts)))])
+            _step(g, a); real += 1; path = path + [a]
+            lv = int(g.levels)
+            consider(path, g.frame, lv)
+            if lv > best[0]:
+                best = (lv, list(path))
+            if lv >= win:
+                return {"win": True, "best_levels": lv, "best_actions": [list(x) for x in path],
+                        "archive": len(archive), "real_steps": real}
+            if getattr(g, "done", False):
+                break
+    return {"win": best[0] >= win, "best_levels": best[0], "best_actions": [list(x) for x in best[1]],
+            "archive": len(archive), "real_steps": real}

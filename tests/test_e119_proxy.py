@@ -111,3 +111,14 @@ def test_decide_go_no_go_when_flat_and_exhausted():
              "best_novel_gain": 0.0, "novelty_headroom": False}]
     d = proxy_probe.decide_go(rows)
     assert d["go"] is False and d["signal"] == "none"
+
+
+def test_run_probe_aggregates_and_decides(tmp_path):
+    import e119_proxy_probe as drv
+    def fake_make(gid):
+        g = CorridorGame(L=6); g.gid = gid; return g
+    payload = drv.run_probe(["g50t", "tr87"], make=fake_make,
+                            budget={"max_nodes": 500, "max_depth": 20})
+    assert payload["n_games"] == 2
+    assert payload["decision"]["go"] in (True, False)
+    assert any(r["game"] == "g50t" for r in payload["rows"])

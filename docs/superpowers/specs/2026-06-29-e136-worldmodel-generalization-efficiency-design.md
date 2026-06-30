@@ -47,6 +47,27 @@ The falsifier for H2, computed from the captured agent runs (HF traces / `arc3_t
 - An **efficiency column added to the source-free archive** so every solved game reports completion AND
   an action-efficiency proxy — we stop reporting completion alone.
 
+### 2b. VQ state-abstraction ablation (the coarse-macrostate lever)
+`composite_key` is an EXACT hash -> it over-distinguishes (94 states on g50t from 170 steps; the counter
+makes every frame unique), and a model over hyper-specific states cannot transfer. Test whether a
+**vector-quantized** abstraction transfers better:
+- `vq_key(features, codebook) -> code` — assign each state's composite FEATURE vector to its nearest
+  prototype via **online k-means** (cheap, no training; not a learned VQ-VAE -- too data-hungry source-free).
+- Ablate state representation in the transfer metric: exact `composite_key` vs `vq_key` at several K
+  (e.g. 8/16/26/48). Report transfer accuracy per representation. **Hypothesis:** a coarser VQ macrostate
+  raises N->N+1 (and cross-solved-level) transfer because the rule is defined over prototypes, not raw frames.
+- "Eliminate non-working quanta" = drop codes whose states never correlate with a progress signal
+  (level/goal-object delta) -> a relevance-filtered codebook. This is abstraction refinement, NOT search.
+- Honest framing: VQ here is a *world-model abstraction*, not a search-space reducer (the latter is the
+  E135 dead end). The falsifier is transfer accuracy, never "states explored."
+
+**Measurability note (important):** we CANNOT gather level-(N+1) transitions for a wall (reaching N+1 is the
+unsolved problem), so direct N->N+1 transfer is unmeasurable. Use two measurable proxies: (a) **cross-solved-
+level transfer** (induce on level N-1, score on level N, both reachable) and (b) **within-level held-out**
+(induce on a subset of a level's transitions, score on the rest). High within/cross-level transfer but the
+wall still fails => the wall is an irreducibly NEW mechanic (reasoning/goal problem), not a generalization
+one -- itself a decisive finding.
+
 ### 3. Generalization lever (only if H1 confirmed)  (`experiments/e136/induce.py`)
 If transfer accuracy is the binding gap, strengthen induction toward simplicity-biased generalization:
 - Induce `predict()` as the **simplest object-relative program that reproduces ALL observed transitions**

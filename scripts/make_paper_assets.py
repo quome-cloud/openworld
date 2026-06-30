@@ -3863,7 +3863,7 @@ def fig_arc(ttt, ladder):
         label_pad = ymax * 0.035
         ax1.bar(xs, vals, color=[b[2] for b in bars], alpha=0.9, width=0.66)
         for i, b in zip(xs, bars):
-            ax1.text(i, b[1] + label_pad, f"{100 * b[1]:.0f}", ha="center", va="bottom", fontsize=9)
+            ax1.text(i, b[1] + label_pad, f"{100 * b[1]:.0f}%", ha="center", va="bottom", fontsize=9)
         if acc("zeroshot") is not None:
             ax1.axhline(acc("zeroshot"), ls=":", color="#999999", lw=1.1)
         ax1.set_xticks(xs)
@@ -4075,7 +4075,7 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
                    yerr=[[m - lo], [hi - m]], capsize=2, error_kw=dict(lw=0.8, alpha=0.6))
             label_y = hi + 0.012
             label_tops.append(label_y)
-            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom", fontsize=6.6, color=col)
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom", fontsize=6.6, color=col)
     ax.axhline(0.5, ls=":", lw=0.8, color="#BBBBBB")
     ax.text(2.45, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
     ax.set_xticks(range(len(doms)))
@@ -4133,7 +4133,7 @@ def fig_frame_invariance(qwen, llama):
             label_y = hi + 0.008
             label_tops.append(label_y)
             group_label_tops.append(label_y)
-            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom",
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom",
                     fontsize=7.5, color=col)
         # annotate the frame-TTT delta vs zero-shot (signed: it is ~0 / negative here)
         z, t = arm_vals.get("zeroshot"), arm_vals.get("frame_ttt")
@@ -4183,7 +4183,7 @@ def fig_hybrid_loop(qwen, llama):
                    error_kw=dict(lw=0.8, alpha=0.6))
             label_y = hi + 0.012
             label_tops.append(label_y)
-            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom",
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom",
                     fontsize=7.5, color=col)
             if key != "base_pass1" and base is not None:  # signed delta vs base
                 dlt = m - base

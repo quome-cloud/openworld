@@ -978,16 +978,16 @@ formatting: an adapter that learned to infer list-function rules from one set of
 generalization---demonstrated on a real, human-authored domain, the result E83 left open.
 
 \paragraph{It scales with worlds traversed.} The cross-world lift grows with the number of
-held-in worlds---from \CrossWorldLadderLo{} at \CrossWorldLadderLoN{} worlds to
-\CrossWorldLadderHi{} by 64, then saturating---while the corrupted-label control stays flat
-(Figure~\ref{fig:crossworld_ladder}): a saturating scaling curve for the novel axis, on real data.
+held-in worlds---from \CrossWorldLadderLo{} at \CrossWorldLadderLoN{} worlds to a
+\CrossWorldLadderHi{} peak by 64 worlds, then plateauing---while the corrupted-label control stays flat
+(Figure~\ref{fig:crossworld_ladder}): a rising-then-plateauing scaling curve for the novel axis, on real data.
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.56\linewidth]{figs/crossworld_ladder.png}
 \caption{\textbf{Cross-world transfer scales with \#worlds (E84, List Functions).} Held-out
 accuracy rises with the number of disjoint held-in worlds traversed
-(\CrossWorldLadderLo$\to$\CrossWorldLadderHi) and saturates; the corrupted-label control stays
-flat. More verified worlds $\to$ more transfer.}\label{fig:crossworld_ladder}
+(\CrossWorldLadderLo$\to$\CrossWorldLadderHi), peaking near 64 worlds then plateauing; the
+corrupted-label control stays flat. More verified worlds $\to$ more transfer.}\label{fig:crossworld_ladder}
 \end{figure}
 
 \subsection{A descriptive regularity for world-time compute (E80)}\label{sec:world-time-law}

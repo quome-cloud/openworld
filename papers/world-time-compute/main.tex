@@ -234,7 +234,7 @@ imagination'' rather than by trial in the world~\cite{ha2018world}. That
 model represents state and how it is obtained}, and the term today names two largely
 disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
 generative}: a neural network learned from large amounts of data whose state is a
-continuous latent---or pixels, video, or a 3D scene---and whose output is a
+continuous latent (or pixels, video, or a 3D scene) and whose output is a
 \emph{generated observation}. It runs from the V--M--C triad of Ha and
 Schmidhuber~\cite{ha2018world} through the RSSM-based Dreamer
 family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
@@ -276,14 +276,14 @@ separate dissolves much of the remaining confusion. A \emph{world} is the
 environment-as-simulator: a symbolic state, a discrete set of \emph{actions}, and
 the verified transition that maps a $(\textrm{state}, \textrm{action})$ pair to the
 next state (plus optional perception/emit boundaries). An \emph{agent} is a
-\emph{separate} policy---an LLM planner or a fixed rule---that chooses actions
+\emph{separate} policy (an LLM planner or a fixed rule) that chooses actions
 toward a goal; it is a \emph{user} of a world, not a part of it, so one world serves
 any agent and a planner can be swapped without re-synthesizing dynamics. A
 \emph{simulation} closes the loop: it places agents in a world and repeatedly
 observes, chooses an action, and steps the world, producing a trajectory scored by
 objectives. The textbook definition puts the world model \emph{inside} the agent
 (the simulator it plans with) and distinguishes it from the true environment; the
-gap between the two---model bias, sim-to-real error---is exactly what bounds learned
+gap between the two (model bias, sim-to-real error) is exactly what bounds learned
 world models. A verified code world model does not so much eliminate that gap as
 \emph{relocate} it: once the dynamics are declared symbolically and the accepted
 program reproduces them exactly, the agent's internal model and the (symbolic)
@@ -295,7 +295,7 @@ modification, both as the ground-truth environment and as the model an agent pla
 through in our planning experiments; it is also why this paper is scoped to
 \emph{specifiable} domains, where that relocation is a genuine win.
 
-This Code World Model bargain---programs instead of weights---buys verifiability,
+This Code World Model bargain (programs instead of weights) buys verifiability,
 compute-cheap rollouts,
 and out-of-distribution generalization by construction~\cite{worldcoder2024,
 gifmcts2024, poeworld2025, cwmgames2025}. Yet CWM research has remained a set
@@ -1262,7 +1262,7 @@ capability limit.}
 \end{figure}
 
 \subsubsection{Acting closes the gap that scale cannot (E43)}\label{sec:active-induction}
-E38 names the bottleneck---identifiability, not capability---and points to the
+E38 names the bottleneck (identifiability, not capability) and points to the
 fix: \emph{informative} transitions rather than a bigger generator. E43 tests
 that fix directly. We cast dynamics recovery as version-space elimination over a
 candidate family of \ActiveCands{} sprint rules that parameterize the unknowns

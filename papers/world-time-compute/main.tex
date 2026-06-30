@@ -769,7 +769,7 @@ a confusable disease drawn from the posterior over the others---the structured e
 non-verified or learned world model makes when its rules are slightly wrong. The held-out
 test labels stay exact. Held-out accuracy declines monotonically with corruption, from
 \AblVerified{} at $p{=}0$ (verified) down to \AblNoisyFull{} at $p{=}1$---a fully-wrong world
-yields \emph{no} generalization gain (back to the no-fine-tune base), with a smooth penalty in
+yields \emph{no} generalization gain---in fact at or below the prior-only floor (\AblFloorHard)---with a smooth penalty in
 between (Figure~\ref{fig:noise-ablation}). So it is label \emph{exactness}, not task variety,
 that drives the effect---the property that separates world-time compute from domain
 randomization, and the reason the worlds must be \emph{verified} code (\AblSeeds{} seeds per

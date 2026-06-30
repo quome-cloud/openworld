@@ -1,4 +1,3 @@
-import numpy as np
 from experiments.e131.lookahead import solve_lookahead
 from experiments.e130 import perception as P
 from tests.e131.test_lookahead import TwoStepGame

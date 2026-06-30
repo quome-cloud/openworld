@@ -163,11 +163,11 @@
 Large language models generalize across a domain only after seeing many real, labeled
 examples of it, and in most domains that experience is scarce. We study a way to
 manufacture it cheaply. When a domain's dynamics can be written as code, one template
-instantiates into many \emph{world models}---simulators whose dynamics are executable,
-verifiable programs over symbolic state---each an inexhaustible source of \emph{exactly}%
+instantiates into many \emph{world models} (simulators whose dynamics are executable,
+verifiable programs over symbolic state), each an inexhaustible source of \emph{exactly}%
 -labeled trajectories. Fine-tuning an LLM on trajectories traversed through many such world
-models of a domain---which we call \textbf{world-time compute}, a training-time analogue of
-test-time compute---lifts its generalization to \emph{held-out} worlds it never trained on (demonstrated on
+models of a domain (\textbf{world-time compute}, a training-time analogue of
+test-time compute) lifts its generalization to \emph{held-out} worlds it never trained on (demonstrated on
 synthesized world families), with the largest gains where model capability is scarcest
 ($+\WTSmallGain$ points at \WTSmallName; the largest model's lift is within noise, consistent
 with task saturation). The labels can be trusted because the worlds are \emph{verified code}, not
@@ -176,7 +176,10 @@ learned approximations: synthesized-then-checked dynamics are exact over
 (\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
 collapse. Unlike domain randomization (varying one simulator's parameters), each world is
 independently authored and verified; a corrupted-label control shows label \emph{exactness}, not
-task variety, drives the held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
+task variety, drives the held-out gains.
+
+\smallskip\noindent
+On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
 algorithms) the same lever holds as \emph{per-world} test-time training, scaling with compute
 and collapsing under label corruption. On a coherent real family (List Functions) the harder
 \emph{cross-world} form holds too: one adapter trained on \CrossWorldNTrain{} \emph{disjoint}
@@ -188,7 +191,7 @@ models, and fades for long reasoning chains, for tasks induced from rich percept
 task saturates; cross-task transfer is weak where worlds share no skill.
 The worlds are authored and served by \textbf{\openworld}, a zero-dependency framework that makes
 assembling the \emph{many} worlds a domain needs cheap (the framework is a companion paper).
-\textbf{Scope: the symbolic-state regime}---where dynamics are writable, verified code makes a
+\textbf{Scope: the symbolic-state regime}: where dynamics are writable, verified code makes a
 \emph{correct} world model a zero-training prototype; pixel-native domains remain the territory of
 learned models. All code, recipes, and this manuscript regenerate from one repository.
 

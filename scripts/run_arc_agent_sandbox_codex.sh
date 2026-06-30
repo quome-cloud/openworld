@@ -13,6 +13,8 @@ ROOT="/Users/jim/Desktop/openworld"
 AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"   # has numpy, CANNOT import arc_agi
 CODEX="/Users/jim/.local/bin/codex"
 MODEL="${MODEL:-gpt-5.5}"
+REASONING="${REASONING:-xhigh}"                          # E140: full-budget reasoning (was codex DEFAULT)
+REASONING_SUMMARY="${REASONING_SUMMARY:-auto}"
 WD="$ROOT/scratch_arc/sbcodex_$GAME"
 mkdir -p "$WD"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"             # the ONLY harness the agent gets (no source)
@@ -68,6 +70,7 @@ STARTED=$(date +%s)
 # codex with full shell access (parity with the Claude runner's --dangerously-skip-permissions); the
 # autobank audit is what enforces source-freeness, identically for both models.
 "$CODEX" exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -m "$MODEL" -C "$WD" \
+  -c "model_reasoning_effort=\"$REASONING\"" -c "model_reasoning_summary=\"$REASONING_SUMMARY\"" \
   "$(cat TASK.md)" > "$WD/agent.log" 2>&1
 RC=$?
 ENDED=$(date +%s)
@@ -78,4 +81,32 @@ cat > "$WD/meta.json" <<META
  "fairness":"by-construction (process-isolated SandboxGame) + autobank audit",
  "audit_dir":"scratch_arc/sbcodex_$GAME","started":$STARTED,"ended":$ENDED,"exit_code":$RC}
 META
-echo "sandbox-codex agent finished for $GAME (rc=$RC, ${ENDED}-${STARTED}s)"
+
+# --- HF dataset capture (parity with the Claude runner): prompt + transcript + solution + meta into
+#     arc3_traces. Codex's exec log is plain text and large, so the transcript is stored gzipped
+#     (transcripts/<rid>.codex.log.gz); the structured-format reconciliation is a follow-up. ---
+TRACES="$ROOT/experiments/results/arc3_traces"
+mkdir -p "$TRACES/prompts" "$TRACES/transcripts" "$TRACES/meta" "$TRACES/solutions"
+RID=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import capture_lib as c; print(c.run_id('$GAME','agent-codex'))" 2>/dev/null || echo "${GAME}__agent-codex__$(date -u +%Y-%m-%dT%H-%M-%SZ)")
+cp "$WD/TASK.md" "$TRACES/prompts/$RID.md" 2>/dev/null || true
+[ -f "$WD/agent.log" ] && gzip -c "$WD/agent.log" > "$TRACES/transcripts/$RID.codex.log.gz"
+[ -f "$WD/solved.json" ] && cp "$WD/solved.json" "$TRACES/solutions/$RID.json"
+"$AGENT_PY" - "$GAME" "$RID" "$MODEL" "$REASONING" "$STARTED" "$ENDED" "$RC" "$WD" <<'PY' || true
+import sys, json, os
+g, rid, model, reasoning, started, ended, rc, wd = sys.argv[1:9]
+lv = win = 0
+try:
+    sj = os.path.join(wd, "solved.json")
+    if os.path.exists(sj):
+        d = json.load(open(sj)); lv = int(d.get("levels", 0)); win = int(d.get("win", 0))
+except Exception:
+    pass
+meta = {"run_id": rid, "game": g, "tier": "agent-codex", "model": model,
+        "reasoning_effort": reasoning, "source_free": True,
+        "transcript_format": "codex_exec_plaintext_gz",
+        "started": int(started), "ended": int(ended), "wall_s": int(ended) - int(started),
+        "exit_code": int(rc), "levels": lv, "win": win,
+        "experiment": "e140_fullbudget"}
+open(f"/Users/jim/Desktop/openworld/experiments/results/arc3_traces/meta/{rid}.json", "w").write(json.dumps(meta, indent=1))
+PY
+echo "sandbox-codex agent finished for $GAME (rc=$RC, ${ENDED}-${STARTED}s); captured rid=$RID"

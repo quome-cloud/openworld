@@ -10,7 +10,7 @@
 set -o pipefail
 GAME="$1"
 ROOT="/Users/jim/Desktop/openworld"
-AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"
+AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"; EFFORT="${EFFORT:-high}"
 WD="$ROOT/scratch_arc/fl_$GAME"

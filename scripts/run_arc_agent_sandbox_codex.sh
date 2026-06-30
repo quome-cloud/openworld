@@ -10,7 +10,7 @@
 set -o pipefail
 GAME="$1"
 ROOT="/Users/jim/Desktop/openworld"
-AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"   # has numpy, CANNOT import arc_agi
+AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"   # has numpy, CANNOT import arc_agi
 CODEX="/Users/jim/.local/bin/codex"
 MODEL="${MODEL:-gpt-5.5}"
 WD="$ROOT/scratch_arc/sbcodex_$GAME"

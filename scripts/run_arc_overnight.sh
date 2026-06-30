@@ -5,7 +5,7 @@
 set -uo pipefail
 GAME="$1"; ROUNDS="${2:-40}"; PER="${3:-4}"
 ROOT="/Users/jim/Desktop/openworld"
-PY=/Users/jim/.pyenv/versions/3.9.18/bin/python
+PY=/Users/jim/.pyenv/versions/3.14.6/bin/python
 BEST="$ROOT/scratch_arc/full_$GAME/solved_best.json"
 lvl(){ [ -f "$1" ] && $PY -c "import json;print(int(json.load(open('$1')).get('levels',0)))" 2>/dev/null || echo 0; }
 win(){ [ -f "$1" ] && $PY -c "import json;d=json.load(open('$1'));print(int(d.get('win',0) or 0))" 2>/dev/null || echo 0; }

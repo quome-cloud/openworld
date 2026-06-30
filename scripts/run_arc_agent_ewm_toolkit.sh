@@ -17,7 +17,7 @@ ROOT="/Users/jim/Desktop/openworld"
 AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"; EFFORT="${EFFORT:-high}"
-WD="$ROOT/scratch_arc/ek_$GAME"
+WD="$ROOT/scratch_arc/${EK_PREFIX:-ek_}$GAME"   # EK_PREFIX lets an A/B arm use a separate workspace
 mkdir -p "$WD"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"                    # env client (no game source)
 cp "$ROOT/experiments/e125/objstate.py" "$WD/"                  # object perceptor (solver helper)

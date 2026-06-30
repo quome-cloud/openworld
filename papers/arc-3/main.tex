@@ -333,6 +333,17 @@ It is therefore \emph{not} directly comparable to baseline1's source-free-intend
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}; we do not claim to surpass it on a
 like-for-like basis. Only \ArcPartialGames{} game remains partial (\ArcPartialList).
 
+\textbf{The result is model-portable: Claude and Codex agree.} The source-assisted recipe is not specific
+to one model. Running the same protocol with \ArcCodexModel{} (Codex) completes
+\ArcCodexFullGames/\ArcCodexUnionGames{} games---matching Claude---and the per-game level counts are
+\emph{identical on every game except} \texttt{lf52} (Fig.~\ref{fig:arc3codex}). On \texttt{lf52} Codex
+reaches level~\ArcCodexLfTwoLevels{} versus Claude's level~\ArcClaudeLfTwoLevels{} (neither completes its
+\ArcCodexLfTwoWin{} levels), so Codex totals \ArcCodexLevels/\ArcCodexTotalLevels{} levels against Claude's
+\ArcFullLevels/\ArcTotalLevels{}---a single-game, three-level edge and the only difference between the two
+runs. Codex is also notably command-efficient (\ArcCodexCmdLo--\ArcCodexCmdHi{} agent commands per game).
+The takeaway is near-total parity: both capable agents recover each game's dynamics from source and search
+to completion, with the lone open game (\texttt{lf52}) hard for both.
+
 \textbf{Source-free.} The agent runs in a \emph{process-isolated} sandbox with \emph{no} access to the
 game source---it must discover the dynamics by acting and infer the win condition from frames. A solve
 is banked only if it (i) audits clean (no source read), (ii) replay-verifies, \emph{and} (iii)
@@ -414,6 +425,20 @@ dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames. Green $=$ fully
 shown), pale green $=$ partial, grey $=$ unsolved. The \ArcSourceGapGames-game gap is the measured cost
 of discovery. Both replay-verified; neither uses banked solutions.}
 \label{fig:arc3source}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_codex_head_to_head.png}
+\caption{\textbf{Claude vs.\ Codex (\ArcCodexModel{}), source-assisted head-to-head.} Per game (sorted),
+levels completed by Claude (blue) and Codex (ochre); the grey cap marks each game's win ceiling (its
+level count). Both models complete \ArcCodexFullGames/\ArcCodexUnionGames{} games and reach
+\emph{identical} per-game levels on all \ArcCodexUnionGames{} games \emph{except} \texttt{lf52}, where
+Codex reaches L\ArcCodexLfTwoLevels{} and Claude L\ArcClaudeLfTwoLevels{} (neither completes its
+\ArcCodexLfTwoWin{} levels). That lone game gives Codex \ArcCodexLevels/\ArcCodexTotalLevels{} levels
+versus Claude's \ArcFullLevels/\ArcTotalLevels{}; Codex uses \ArcCodexCmdLo--\ArcCodexCmdHi{} commands per
+game. Both reads are source-assisted and replay-verified; neither uses banked solutions.}
+\label{fig:arc3codex}
 \end{figure}
 
 \begin{figure}[t]
@@ -666,6 +691,37 @@ navigation executes \ArcShuNavSteps{} real steps over \ArcShuNavCycles{} cycles,
 steps of the click-only baseline), but the heuristic proposers never \emph{propose} the winning
 procedure: the EFEI theorem reduces \emph{variance}, not the \emph{bias} of a misspecified goal. Search
 with a better engine is still search; only reasoning the win clears the walls.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/world_model_forming.pdf}
+\caption{\textbf{The verification asymmetry: a \emph{forming} world model vs.\ a \emph{verifiable}
+one.} Left (\texttt{g50t}, a wall): a composite search graph after exploration distinguishes many
+states ($94$ nodes) yet terminates in \emph{no verified win}---a rich but unverifiable map. Right
+(\texttt{tu93}, solved): the verified solution is a compact, win-terminating trajectory ($70$ nodes)
+ending in a replay-checked level-$9$ win (green). A world model can have arbitrarily many
+distinguished states and still be worthless until it contains a \emph{verified} path to reward; the
+value is in the win-terminating chain, not the breadth of the explored region. This is why smarter
+exploration of the left graph does not produce the right one.}
+\label{fig:forming}
+\end{figure}
+
+\textbf{A sixth negative result: graph/spectral exploration (E135).} If the win is unreachable by
+undirected action (result 1), is the lever a \emph{smarter frontier}---steering exploration toward
+graph bottlenecks rather than expanding blindly? On the wall \texttt{\ArcSpectralGame} we compare a
+blind forward walk against graph-novelty prioritization and against Fiedler (graph-Laplacian)
+bottleneck ranking, which orders the frontier by the second-smallest eigenvector of the discovered
+state graph to push through structural chokepoints. Under a matched \ArcSpectralBudget-step budget
+all three saturate the same tiny region (\ArcSpectralBlindStates/\ArcSpectralNoveltyStates/\ArcSpectralFiedlerStates{}
+states) and produce \emph{\ArcSpectralLevelGains{} level-gains}---the spectral and novelty heuristics
+even discover slightly \emph{fewer} states than the blind walk, and none crosses a level. ARC-AGI-3
+is engineered against blind exploration on two axes at once: later levels explode the state space so
+coverage is hopeless, and the official score is an action-\emph{efficiency} measure against a median
+human baseline, so a graph-mapper that burns hundreds of wasteful actions sees its score collapse
+even when it does complete a level. The lever is therefore not better search but active hypothesis
+testing, predictive world modeling, and test-time planning---the recipe this paper advocates
+(Fig.~\ref{fig:forming}): a \emph{forming} world model must be converted into a \emph{verified}
+win-terminating one, not merely grown.
 
 \textbf{A direction in progress (E131): short-horizon receding-horizon lookahead.} The negatives above
 all try to infer a \emph{whole-level} goal from sparse feedback. E131 inverts the bottleneck: the
@@ -921,6 +977,13 @@ map. Reward is \texttt{levels\_completed} or an induced \texttt{CodeObjective}.}
 \label{fig:arch}
 \end{figure}
 
+\textbf{Two senses of ``perception.''} A clarification, since the word is overloaded. In this section
+``modality'' means \emph{action modality}---the two interaction channels ARC-AGI-3 uses (directional keys
+vs.\ coordinate clicks)---and the board state is read by a \emph{single} perceptor (the masked frame). The
+consensus below therefore selects across \emph{action channels}, not across \emph{perceptual views}. Fusing
+several perceptual \emph{lenses} of the \emph{same} frame is a distinct, orthogonal axis, taken up under
+``Two axes'' below.
+
 \textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
 (\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are
 click-only (e.g.\ \texttt{vc33}); the board responds only to clicks on valid sprite cells, which we
@@ -944,6 +1007,17 @@ adds coverage (\texttt{ar25} needs directional, \texttt{vc33} click). We are can
 \emph{selection across views}, not a deep mechanism: its value is breadth, and the genuinely
 surprising case (\texttt{s5i5}, solved here after defeating the goal-discovery trilogy on a perfect
 model) is the one worth studying further.
+
+\textbf{Two axes of ``multi,'' not one.} The consensus above runs along the \emph{action-modality} axis
+(keys vs.\ clicks), with the state read by one perceptor (the masked frame). A second, orthogonal axis is
+\emph{perceptual perspective}: fusing several \emph{lenses} that read the same frame differently---object
+configuration, salience, the step-counter as a \emph{value} rather than a masked nuisance, symmetry, colour
+algebra, coarse regions---and selecting the highest-fidelity \emph{view} per state. The two are
+complementary: multi-modality adds \emph{interaction} coverage (some games respond only to clicks), while
+multi-perspective adds \emph{representational} coverage (some wins hinge on a feature a single lens aliases
+away). This tier exploits only the first axis; extending consensus along the perceptual-lens axis is the
+natural complement, and it is where the reasoning agent---which writes and re-perceives its own world
+model (\S\ref{sec:agent})---takes over the goal-as-procedure walls this tier cannot crack.
 
 \begin{figure}[t]
 \centering

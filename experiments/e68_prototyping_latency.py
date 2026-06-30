@@ -25,7 +25,7 @@ from statistics import mean, median
 from common import save_results
 from openworld.spec import validate_spec
 
-PY = "/Users/jim/.pyenv/versions/3.9.18/bin/python"
+PY = "/Users/jim/.pyenv/versions/3.14.6/bin/python"
 ROOT = Path(__file__).resolve().parent.parent
 RECIPES = ROOT / "recipes"
 CONCURRENCY = int(os.environ.get("E68_CONCURRENCY", "8"))

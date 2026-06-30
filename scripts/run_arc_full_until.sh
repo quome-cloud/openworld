@@ -3,7 +3,7 @@
 # we snapshot the deepest solved.json to solved_best.json and restore it if a session regresses.
 set -uo pipefail
 GAME="$1"; MAX="${2:-6}"; ROOT="/Users/jim/Desktop/openworld"; WD="$ROOT/scratch_arc/full_$GAME"
-PY=/Users/jim/.pyenv/versions/3.9.18/bin/python
+PY=/Users/jim/.pyenv/versions/3.14.6/bin/python
 mkdir -p "$WD"
 lvl(){ [ -f "$1" ] && $PY -c "import json;print(int(json.load(open('$1')).get('levels',0)))" 2>/dev/null || echo 0; }
 win(){ [ -f "$1" ] && $PY -c "import json;print(int(json.load(open('$1')).get('win',0) or 0))" 2>/dev/null || echo 0; }

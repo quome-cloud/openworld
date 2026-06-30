@@ -10,7 +10,7 @@ set -o pipefail   # NOT -u: macOS bash 3.2 errors on empty-array expansion under
 GAME="$1"
 TIER="${2:-agent}"
 ROOT="/Users/jim/Desktop/openworld"
-AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"   # has numpy, CANNOT import arc_agi
+AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"   # has numpy, CANNOT import arc_agi
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"                          # pinned for artifact isolation
 EFFORT="${EFFORT:-high}"

@@ -680,7 +680,8 @@ verified world models rather than on scarce real examples---\textbf{world-time c
 training-time analogue of test-time compute~\cite{snell2024testtime,openai2024o1,deepseekr1}
 (and, when spent per world at inference, of test-time training (TTT)~\cite{akyurek2024ttt}).
 
-We test it on a \emph{family} of diagnosis worlds (E74): one POMDP template (a hidden
+We test it on a \emph{family} of diagnosis worlds (E74): one partially observable Markov decision
+process (POMDP) template (a hidden
 disease; order tests to reveal symptoms; commit a diagnosis) instantiated as
 \WTNumTrainWorlds{}${+}$\WTNumTestWorlds{} specialties that share a goal and action grammar
 but differ in their symptom\,$\to$\,disease structure. We hold out whole specialties (a

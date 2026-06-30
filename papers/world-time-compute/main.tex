@@ -238,11 +238,11 @@ family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
 autoregressive token models such as IRIS~\cite{iris2023} and
 $\Delta$-IRIS~\cite{deltairis2024}, and diffusion dynamics in
 DIAMOND~\cite{diamond2024}, joint-embedding predictive video models that
-forecast in representation space such as V-JEPA~\cite{vjepa2025}; and, most
-prominently in recent generative AI, to interactive generative environments and
-``spatial intelligence''---internet-scale video and 3D world generators such as
-Genie~\cite{genie2024}, video-generation-as-simulator (Sora)~\cite{sora2024}, and
-Fei-Fei Li's World Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
+forecast in representation space such as V-JEPA~\cite{vjepa2025}. Most
+prominently in recent generative AI, the species now reaches interactive generative
+environments and ``spatial intelligence''---internet-scale video and 3D world
+generators such as Genie~\cite{genie2024}, video-generation-as-simulator
+(Sora)~\cite{sora2024}, and Fei-Fei Li's World Labs~\cite{worldlabs2025}. Powerful as these are, they share three structural
 costs: they are \emph{data-hungry} (millions of environment steps, or
 internet-scale video), \emph{compounding} (every learned transition adds error
 that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
@@ -666,8 +666,8 @@ mechanism and the exact-match rate as the result.
 
 \subsection{World-time compute: traversing world models to generalize from fewer examples}\label{sec:world-time}
 The results so far buy a \emph{correct} world model cheaply. A verified world model is also a
-\emph{generator}: it produces unlimited, exactly-labelled experience and exposes its own
-rules, so an agent can \emph{traverse} many worlds of a domain and distil the shared skill.
+\emph{generator}: it produces unlimited, exactly-labeled experience and exposes its own
+rules, so an agent can \emph{traverse} many worlds of a domain and distill the shared skill.
 We call spending compute this way---fine-tuning a model on trajectories drawn from traversed,
 verified world models rather than on scarce real examples---\textbf{world-time compute}, a
 training-time analogue of test-time compute~\cite{snell2024testtime,openai2024o1,deepseekr1}
@@ -687,7 +687,7 @@ the base baseline is conditioned on the \emph{same} prompt---so the lift is not 
 model reading a table the baseline cannot (both see the rules), but fine-tuning teaching the
 model to \emph{apply} provided rules in a way that carries to symptom\,$\to$\,disease maps it
 never trained on. This is the in-context regime of test-time training, one rung more general
-(across rule-sets, not within one); internalising fully \emph{latent} dynamics is harder and we
+(across rule-sets, not within one); internalizing fully \emph{latent} dynamics is harder and we
 do not claim it here.
 
 \begin{figure}[t]\centering
@@ -696,10 +696,10 @@ do not claim it here.
 hidden-state simulator: nature draws a hidden \emph{disease} from a prior, the world emits
 \emph{symptoms} from that disease's signature features (plus background noise), and the agent
 must invert the observation to name the disease. Because the world is \emph{verified code},
-the true disease is known, so the training label is \emph{exact}---a traversed world distils
+the true disease is known, so the training label is \emph{exact}---a traversed world distills
 the right rule, not a hallucinated one. Each specialty is a different symptom\,$\to$\,disease
 map; training on many and testing on \emph{held-out} specialties forces the general skill
-(match symptoms to the best-explaining profile) rather than memorisation.}
+(match symptoms to the best-explaining profile) rather than memorization.}
 \label{fig:diagnosis-world}
 \end{figure}
 
@@ -720,7 +720,7 @@ specialty from fewer cases than one learning from scratch (\WTMetaFewShot{} vs
 
 The \emph{family} is what makes this work. Fine-tuning on \emph{heterogeneous}, unrelated
 worlds that share no task structure yields no such transfer (E71, E73): there is no shared
-skill to distil, so a policy expert on one world is no better than chance on another.
+skill to distill, so a policy expert on one world is no better than chance on another.
 World-time compute pays off precisely when the traversed worlds form a domain---then more
 traversal becomes a lever on generalization, complementary to train-time data and test-time
 search. (Scope: the model-size sweep mixes precisions---0.5B--7B are bf16 LoRA, the larger
@@ -825,7 +825,7 @@ input\,$\to$\,output demonstrations---so unlike our synthetic worlds (where the 
 exact (a predicted output grid is right or it is not, no judge), and the train and evaluation
 tasks are disjoint with a novel rule each, so ``generalize to held-out worlds'' \emph{is} the
 ARC challenge. We expand each task into many world variants with rule-preserving augmentation
-(the dihedral group $\times$ colour permutations) and run two tests on a 4-bit Qwen2.5-7B.
+(the dihedral group $\times$ color permutations) and run two tests on a 4-bit Qwen2.5-7B.
 The per-task test-time-training recipe---a fresh LoRA fit on a task's augmented
 demonstrations---follows Aky\"urek et al.~\cite{akyurek2024ttt}, who established it as the
 effective approach on ARC (cf.\ induction/transduction program search~\cite{li2024barc}); our
@@ -833,15 +833,15 @@ contribution is not the recipe but to read it as \emph{world-time compute on a v
 and to add the corrupted-label ablation that isolates whether the \emph{exactness} of the
 labels---not fine-tuning per se---drives the gain.
 Figure~\ref{fig:arc-method} diagrams the regime end to end---world model
-$\to$ augmented, exactly-labelled rows $\to$ QLoRA fine-tune (frozen 4-bit base, trainable
+$\to$ augmented, exactly-labeled rows $\to$ QLoRA fine-tune (frozen 4-bit base, trainable
 LoRA), with the two strict train/test splits---and Figure~\ref{fig:arc} reports the results.
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{figs/arc_method.png}
 \caption{\textbf{How world-time compute fine-tunes on a verified world model (E80, ARC-AGI).}
 \emph{Top:} each real ARC task is a world whose rule is shown by demonstrations, not stated;
-rule-preserving augmentation (dihedral $\times$ colour) turns it into unlimited
-\emph{exactly}-labelled rows (the transition is code, so the oracle is execution), which
+rule-preserving augmentation (dihedral $\times$ color) turns it into unlimited
+\emph{exactly}-labeled rows (the transition is code, so the oracle is execution), which
 LoRA-SFT a frozen 4-bit Qwen2.5-7B---only the small adapters train. \emph{Bottom:} two
 strict world-level holdouts---(A) the cross-task ladder trains on 25--400 worlds and is scored
 on \emph{disjoint} held-out worlds; (B) test-time training fits a fresh adapter on a single
@@ -1421,7 +1421,7 @@ correctness, and the artifact remains a diffable program at every stage.
 
 \paragraph{Is world-time compute just fine-tuning?} Mechanically, yes: there is no new
 optimizer or architecture, only LoRA-SFT. The assertion is about the \emph{data source}, not
-the optimizer. Ordinary fine-tuning needs a labelled corpus---scarce, costly, and sometimes
+the optimizer. Ordinary fine-tuning needs a labeled corpus---scarce, costly, and sometimes
 wrong; world-time compute instead fine-tunes on trajectories from a \emph{verified} world
 model, which generates unlimited examples and labels them \emph{exactly} for free, because the
 transition is code and the oracle is execution. In one line: a correct world model turns
@@ -1481,18 +1481,18 @@ it is useful whether or not one ever fine-tunes; world-time compute is one of th
 it (Table~\ref{tab:routes}). \emph{Route 1---as a tool:} serve the world and call it---plan
 through it, query exact next-states, or use it as a verifier (no training; exact, auditable;
 \S\ref{sec:planning}, \S\ref{sec:minigrid}). \emph{Route 2---per-world test-time training:}
-distil a single world's exactly-labelled trajectories into weights with QLoRA, amortising that
+distill a single world's exactly-labeled trajectories into weights with QLoRA, amortizing that
 world's skill for tool-free inference (\S\ref{sec:world-time-arc}). \emph{Route 3---world-time
-compute:} traverse a \emph{family} of verified worlds and fine-tune to generalise to held-out
+compute:} traverse a \emph{family} of verified worlds and fine-tune to generalize to held-out
 worlds (\S\ref{sec:world-time}, \S\ref{sec:world-time-law}). The \emph{hybrid} composes them: use
-the tool to \emph{generate} exact trajectories, training to \emph{internalise} them, and the
+the tool to \emph{generate} exact trajectories, training to \emph{internalize} them, and the
 exact tool as a fallback for high-stakes queries---the tool bootstraps the data, training
-amortises it, and exactness is recoverable on demand.
+amortizes it, and exactness is recoverable on demand.
 
 \begin{table}[t]\centering\small
 \begin{tabular}{lcccc}
 \toprule
-Route & Exact? & Training & Tool at inference & Generalises to new worlds \\
+Route & Exact? & Training & Tool at inference & Generalizes to new worlds \\
 \midrule
 1.\ Tool & yes & none & yes & n/a (use any world) \\
 2.\ Per-world TTT & approx. & QLoRA, one world & no & within the world \\
@@ -1501,7 +1501,7 @@ Hybrid & on fallback & QLoRA & only when unsure & yes, with exact backstop \\
 \bottomrule
 \end{tabular}
 \caption{\textbf{Three routes to use a verified world model}, plus the hybrid. Need
-exactness/audit $\to$ Route 1; amortise one world $\to$ Route 2; generalise a family $\to$
+exactness/audit $\to$ Route 1; amortize one world $\to$ Route 2; generalize a family $\to$
 Route 3; best of both $\to$ Hybrid.}
 \label{tab:routes}
 \end{table}

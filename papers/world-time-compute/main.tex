@@ -325,8 +325,10 @@ ground-truth-instrumented world, dynamics synthesized and verified once as
 code (blue) match the oracle exactly at every depth of a \RolloutSteps-step
 rollout, while per-step LLM next-state prediction (orange)---a structural
 stand-in for learned neural dynamics---first diverges at step
-\LLMFirstDivergence{} on average and never completes an exact rollout. Programs
-encode rules, not statistics, so the compounding-error failure mode of learned
+\LLMFirstDivergence{} on average and never completes an exact rollout. (Panel A is the
+per-depth exact-match rate over $n{=}3$ rollouts---hence the orange trace is noisy and
+non-monotonic; the robust claim is the contrast with code's exact-at-every-depth line, not
+the orange shape.) Programs encode rules, not statistics, so the compounding-error failure mode of learned
 world models is eliminated by construction, at zero training cost. \emph{B
 (payoff):} what that exactness unlocks---\emph{world-time compute}. Fine-tuning
 an LLM on trajectories traversed through \WTNumTrainWorlds{} verified

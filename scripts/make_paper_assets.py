@@ -1977,7 +1977,7 @@ def fig_noise_ablation(abl):
     if xs:
         ax.annotate("verified\n(exact labels)", (xs[0], ys[0]), xytext=(12, 8),
                     textcoords="offset points", fontsize=8.5, color="#9a4d00", weight="bold")
-        ax.annotate("fully wrong\n$\\approx$ no gain", (xs[-1], ys[-1]), xytext=(-4, 14),
+        ax.annotate("fully wrong:\n$\\leq$ prior floor", (xs[-1], ys[-1]), xytext=(-4, 14),
                     textcoords="offset points", ha="right", fontsize=8, color="#9a4d00")
     ax.set_xlabel("training-label corruption (%)")
     ax.set_ylabel("held-out diagnostic accuracy")

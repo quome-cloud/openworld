@@ -229,10 +229,12 @@ executable-world-model recipe completes \textbf{\ArcFullGames/\ArcUnionGames{} g
 and \textbf{\ArcSFGames/\ArcUnionGames{} source-free} (audited per-run), each solver a serveable
 OpenWorld \texttt{World} (\S\ref{sec:fullgame}); the \ArcSourceGapGames-game gap is the measured cost
 of discovery. On the source-free axis our \ArcSFGames{} falls \emph{below} baseline1's
-\ArcBaselineFull{}~\cite{baseline1_ewm} (source-free-intended); the source-assisted
-\ArcFullGames/\ArcUnionGames{} is an upper bound on what code access buys and is not directly
-comparable to baseline1. (Limitations---offline, unbounded resets, $N{=}1$---are consolidated in
-\S\ref{sec:limitations}.)
+\ArcBaselineFull{}~\cite{baseline1_ewm} (source-free-intended)---but \emph{not budget-matched}: our solves
+ran under a \ArcOurBudgetMin-min/game cap (Codex reasoning at default), against baseline1's unbounded
+budget, so the gap is confounded by budget, not capability alone (\S\ref{sec:limitations}). The
+source-assisted \ArcFullGames/\ArcUnionGames{} is an upper bound on what code access buys and is not
+directly comparable to baseline1. (Limitations---offline, unbounded resets, $N{=}1$, budget
+asymmetry---are consolidated in \S\ref{sec:limitations}.)
 
 \paragraph{Three numbers, read carefully.} ARC-AGI-3 games have \emph{multiple} levels ($6$--$10$
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
@@ -561,6 +563,17 @@ the weights) and affects \emph{every} frontier-model result on this benchmark, p
 leaderboard included. The strongest claim the protocol supports is therefore \emph{no runtime source
 access (audited)}, not ``no prior knowledge''; a contamination-free test needs a model whose cutoff
 provably predates a game's release (the direction of our local-model controls).
+\item \textbf{Budget asymmetry with baseline1 (the source-free comparison is not budget-matched).} Our
+source-free results were obtained under a \emph{constrained} per-game budget---a \ArcOurBudgetMin-minute
+wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, and, for the Codex arm, with the
+model's reasoning effort left at its \emph{default} (never raised). baseline1~\cite{baseline1_ewm} reports
+\emph{no} budget cap. The \ArcSFGames{}-vs-\ArcBaselineFull{} source-free gap is therefore confounded by
+budget, not capability alone: banking \ArcSFGames{} replay-verified source-free solves under a
+\ArcOurBudgetMin-minute leash is a different---arguably harder---operating point than an unbounded one. As a
+direct test, we re-run the source-free recipe with both caps removed (multi-hour per-game budget;
+extra-high Codex reasoning; all \ArcUnionGames{} games from scratch); results are reported in
+\S\ref{sec:limitations} as they complete. Read the headline \ArcSFGames/\ArcUnionGames{} as a
+\emph{budget-constrained} number, not a like-for-like comparison to baseline1's unbounded run.
 \item \textbf{Cost is an uncontrolled estimate.} The whole campaign (all \ArcUnionGames{} games) ran from
 a single Claude Code subscription over $<\!24$h; prorating the \$200/month plan gives $\approx$\$7 vs.\
 baseline1's reported $\sim$\$350/run---\emph{roughly $50\times$}---but we did not meter tokens, and the

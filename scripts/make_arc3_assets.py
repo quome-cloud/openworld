@@ -381,6 +381,12 @@ def main():
         except Exception:
             macros["ArcAboveRandom"] = "16"
 
+    # ---- Budget asymmetry vs baseline1 (the source-free comparison is not budget-matched).
+    ba = jload("e140_budget_asymmetry.json")
+    b = ba.get("our_prior_budget", {}) if ba else {}
+    macros["ArcOurBudgetMin"] = str(b.get("per_game_minutes", 45))
+    macros["ArcOurBudgetRounds"] = str(b.get("rounds", 3))
+
     # ---- E127 source-SIMULATED reconstruction (a NEGATIVE result): reconstruct each game's engine
     #      from source-free play and CERTIFY it against the real env (Clopper-Pearson held-out bound).
     #      Certifies the easy game (ar25) but the gap game (dc22) is unreconstructable from shallow play;

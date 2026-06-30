@@ -93,9 +93,11 @@ def salience(frame):
 def meter(frame):
     """Status-bar / counter channel.
 
-    Exposes the DISTINCT non-background values of the top row(s) as a sorted
-    list so that timer/counter-driven win conditions are visible (not masked).
-    Returns {"meter": [val, ...]} — non-empty when the top row has structure.
+    Exposes the DISTINCT non-background values of the TOP ROW (row 0) as a
+    sorted list so that timer/counter-driven win conditions there are visible
+    (not masked). NOTE: this is a row-0 reader, not a change-frequency detector —
+    a counter not on row 0 is caught by the objects/palette lenses in the
+    composite, not here. Returns {"meter": [val, ...]}.
     """
     f = _to_int_array(frame)
     bg = _bg(f)

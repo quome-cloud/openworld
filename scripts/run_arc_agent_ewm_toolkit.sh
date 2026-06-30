@@ -4,14 +4,17 @@
 # over its OWN synthesized model (E132 plan_in_model), object-relative generalization (E130), and
 # salience-guided exploration (E107). The agent reasons the WIN (the what); the planner finds the exact
 # action SEQUENCE in its synthesized model (the how) -- the part plain reasoning agents stall on.
-# Source-free: workspace holds only arc3_sandbox.py + objstate.py + ewm_toolkit.py (solver helpers, no
-# game code) + the agent's OWN banked frontier. Every run is audited + replay-verified before banking.
+# Source-free: workspace holds only arc3_sandbox.py + objstate.py + ewm_toolkit.py + perceptors.py +
+# composite.py (solver helpers, no game code) + the agent's OWN banked frontier. Every run is audited +
+# replay-verified before banking.
 #   Usage: run_arc_agent_ewm_toolkit.sh <game>
 #   Env:   MODEL (default claude-opus-4-8), EFFORT (default high)
 set -o pipefail
 GAME="$1"
 ROOT="/Users/jim/Desktop/openworld"
-AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"
+# Agent interpreter: Python 3.14.6 with numpy, CANNOT import arc_agi (structural source-free isolation;
+# the arc_agi engine lives only in the ~/.arcv venv used by the sandbox worker). Matches the worker's 3.14.
+AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"; EFFORT="${EFFORT:-high}"
 WD="$ROOT/scratch_arc/ek_$GAME"

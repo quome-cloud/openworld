@@ -41,12 +41,23 @@ def _worker(gid):
     last = {"levels": 0, "win": 0}
 
     def obs(o):
+        levels = int(getattr(o, "levels_completed", last["levels"]))
+        win = int(getattr(o, "win_levels", last["win"]))
+        last["levels"] = levels
+        last["win"] = win
+        done = str(getattr(o, "state", "")) != "GameState.NOT_FINISHED"
         if o is None or getattr(o, "frame", None) is None:
-            return {"frame": None, "levels": last["levels"], "win": last["win"], "avail": [], "done": True}
-        f = np.asarray(o.frame); f = (f[-1] if f.ndim == 3 else f).reshape(64, 64)
-        last["levels"] = int(o.levels_completed); last["win"] = int(o.win_levels)
-        return {"frame": f.astype(int).tolist(), "levels": last["levels"], "win": last["win"],
-                "avail": list(o.available_actions), "done": str(o.state) != "GameState.NOT_FINISHED"}
+            return {"frame": None, "levels": levels, "win": win, "avail": [], "done": True}
+        f = np.asarray(o.frame)
+        if f.size == 0:
+            return {"frame": None, "levels": levels, "win": win, "avail": [], "done": True}
+        if f.ndim == 3:
+            f = f[-1]
+        if f.size != 64 * 64:
+            return {"frame": None, "levels": levels, "win": win, "avail": [], "done": True}
+        f = f.reshape(64, 64)
+        return {"frame": f.astype(int).tolist(), "levels": levels, "win": win,
+                "avail": list(getattr(o, "available_actions", [])), "done": done}
 
     env.reset()
     send({"ready": True})

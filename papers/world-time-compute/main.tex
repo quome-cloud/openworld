@@ -408,7 +408,7 @@ silently wrong code, reward misspecification, and value drift.
 
 \paragraph{A world model, formally.} An \openworld{} world model is a tuple
 \[
-  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
+  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(g_i, w_i)\}_i,\ \mathcal{I}\bigr),
 \]
 where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
 JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
@@ -419,15 +419,15 @@ a state acts as a no-op, so $\tau$ is total). A stochastic world threads an
 explicit pseudo-random seed through the state, so $\tau$ stays a pure function
 and every rollout is replayable; \openworld{} thus models stochasticity as
 replayable seeded determinism rather than a transition kernel $\mathcal{S} \times
-\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $o_i : \mathcal{S} \times
+\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $g_i : \mathcal{S} \times
 \mathcal{A} \times \mathcal{S} \to \mathbb{R}$ score a transition $(s, a, s')$,
-are combined as $\sum_i w_i o_i$, and are weighted by \emph{dials} $w_i$ (fixed
+are combined as $\sum_i w_i g_i$, and are weighted by \emph{dials} $w_i$ (fixed
 or tunable); invariants $\mathcal{I}$ are predicates $\iota : \mathcal{S} \to
 \{\top, \bot\}$ required (by specification) to hold on every state reachable from
 $s_0$ under $\tau$, though the acceptance gate below checks them only on the probe
 set $P$.
 The practitioner declares a \emph{spec}
-$\sigma = (s_0, \mathcal{A}, R, \{(o_i, w_i)\}_i, \mathcal{I})$---an initial
+$\sigma = (s_0, \mathcal{A}, R, \{(g_i, w_i)\}_i, \mathcal{I})$---an initial
 state, the actions, natural-language rules $R$, objectives with their dials, and
 invariants; the schema of $s_0$ induces $\mathcal{S}$, and the framework
 \emph{compiles} $\sigma$ into the world model $W$ by \emph{producing} $\tau$ from

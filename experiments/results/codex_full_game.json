@@ -92,10 +92,10 @@
     "game": "lf52",
     "levels": 9,
     "model": "gpt-5.5",
-    "n_cmds": 63,
-    "n_errors": 70,
+    "n_cmds": 58,
+    "n_errors": 10,
     "read_source": true,
-    "wall_s": 2290,
+    "wall_s": 1950,
     "win": 10
   },
   "lp85": {
@@ -187,14 +187,14 @@
     "win": 6
   },
   "sk48": {
-    "full": false,
+    "full": true,
     "game": "sk48",
-    "levels": 7,
+    "levels": 8,
     "model": "gpt-5.5",
-    "n_cmds": 48,
-    "n_errors": 150,
+    "n_cmds": 34,
+    "n_errors": 20,
     "read_source": true,
-    "wall_s": 2057,
+    "wall_s": 1230,
     "win": 8
   },
   "sp80": {
@@ -207,5 +207,71 @@
     "read_source": true,
     "wall_s": 1090,
     "win": 6
+  },
+  "su15": {
+    "full": true,
+    "game": "su15",
+    "levels": 9,
+    "model": "gpt-5.5",
+    "n_cmds": 86,
+    "n_errors": 20,
+    "read_source": true,
+    "wall_s": 1905,
+    "win": 9
+  },
+  "tn36": {
+    "full": true,
+    "game": "tn36",
+    "levels": 7,
+    "model": "gpt-5.5",
+    "n_cmds": 59,
+    "n_errors": 8,
+    "read_source": true,
+    "wall_s": 1480,
+    "win": 7
+  },
+  "tr87": {
+    "full": true,
+    "game": "tr87",
+    "levels": 6,
+    "model": "gpt-5.5",
+    "n_cmds": 25,
+    "n_errors": 8,
+    "read_source": true,
+    "wall_s": 265,
+    "win": 6
+  },
+  "tu93": {
+    "full": true,
+    "game": "tu93",
+    "levels": 9,
+    "model": "gpt-5.5",
+    "n_cmds": 26,
+    "n_errors": 3,
+    "read_source": true,
+    "wall_s": 383,
+    "win": 9
+  },
+  "vc33": {
+    "full": true,
+    "game": "vc33",
+    "levels": 7,
+    "model": "gpt-5.5",
+    "n_cmds": 27,
+    "n_errors": 6,
+    "read_source": true,
+    "wall_s": 970,
+    "win": 7
+  },
+  "wa30": {
+    "full": true,
+    "game": "wa30",
+    "levels": 9,
+    "model": "gpt-5.5",
+    "n_cmds": 58,
+    "n_errors": 173,
+    "read_source": true,
+    "wall_s": 8483,
+    "win": 9
   }
 }

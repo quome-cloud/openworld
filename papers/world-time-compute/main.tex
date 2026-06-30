@@ -1490,6 +1490,7 @@ exact tool as a fallback for high-stakes queries---the tool bootstraps the data,
 amortizes it, and exactness is recoverable on demand.
 
 \begin{table}[t]\centering\small
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 Route & Exact? & Training & Tool at inference & Generalizes to new worlds \\
@@ -1500,6 +1501,7 @@ Route & Exact? & Training & Tool at inference & Generalizes to new worlds \\
 Hybrid & on fallback & QLoRA & only when unsure & yes, with exact backstop \\
 \bottomrule
 \end{tabular}
+}
 \caption{\textbf{Three routes to use a verified world model}, plus the hybrid. Need
 exactness/audit $\to$ Route 1; amortize one world $\to$ Route 2; generalize a family $\to$
 Route 3; best of both $\to$ Hybrid.}

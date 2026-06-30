@@ -366,10 +366,11 @@ def table_synthesis(e02, e16):
             f"{s['mean_probe_accuracy_accepted']:.2f} & {s['mean_wall_seconds']:.0f}s \\\\"
         )
     (TABLES / "synthesis.tex").write_text(
+        "\\resizebox{\\linewidth}{!}{%\n"
         "\\begin{tabular}{lcccc}\n\\toprule\n"
         "Generator (family) & Runs & Verified acceptance (95\\% CI) & "
         "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
-        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n}\n"
     )
 
 
@@ -3857,13 +3858,17 @@ def fig_arc(ttt, ladder):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.6, 4.0))
     if bars:
         xs = list(range(len(bars)))
-        ax1.bar(xs, [b[1] for b in bars], color=[b[2] for b in bars], alpha=0.9, width=0.66)
+        vals = [b[1] for b in bars]
+        ymax = max(vals) * 1.22
+        label_pad = ymax * 0.035
+        ax1.bar(xs, vals, color=[b[2] for b in bars], alpha=0.9, width=0.66)
         for i, b in zip(xs, bars):
-            ax1.text(i, b[1] + 0.004, f"{100 * b[1]:.0f}", ha="center", va="bottom", fontsize=9)
+            ax1.text(i, b[1] + label_pad, f"{100 * b[1]:.0f}", ha="center", va="bottom", fontsize=9)
         if acc("zeroshot") is not None:
             ax1.axhline(acc("zeroshot"), ls=":", color="#999999", lw=1.1)
         ax1.set_xticks(xs)
         ax1.set_xticklabels([b[0].replace("\\n", "\n") for b in bars], fontsize=8.5)
+        ax1.set_ylim(0, ymax)
     ax1.set_ylabel("held-out exact-match accuracy")
     ax1.set_title("Test-time training on real ARC worlds", fontsize=10.5)
     ax1.grid(True, axis="y", alpha=0.25)
@@ -4057,6 +4062,7 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
     arms = [("base", SLATE), ("light TTT", "#F4B860"), ("heavy TTT", ORANGE), ("corrupt", RED)]
     fig, ax = plt.subplots(figsize=(10.6, 4.6))
     gw = 0.20
+    label_tops = []
     for gi, (label, d, base_key) in enumerate(doms):
         pw = d.get("per_world") or d.get("per_task") or {}
         keys = [base_key, "light", "heavy", "corrupt"]
@@ -4067,14 +4073,18 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
             x = gi + (ai - 1.5) * gw
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[m - lo], [hi - m]], capsize=2, error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.012, f"{100 * m:.0f}", ha="center", va="bottom", fontsize=6.6, color=col)
+            label_y = hi + 0.012
+            label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom", fontsize=6.6, color=col)
     ax.axhline(0.5, ls=":", lw=0.8, color="#BBBBBB")
-    ax.text(3.0, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
+    ax.text(2.45, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
     ax.set_xticks(range(len(doms)))
     ax.set_xticklabels([d[0] for d in doms], fontsize=8.5)
     ax.set_ylabel("held-out exact-match accuracy")
     ax.set_title("World-time compute across real domains: scales, and collapses under "
                  "label corruption", fontsize=10.5)
+    if label_tops:
+        ax.set_ylim(0, max(0.82, max(label_tops) + 0.04))
     from matplotlib.patches import Patch
     ax.legend(handles=[Patch(fc=c, label=n) for n, c in arms], fontsize=7.5,
               loc="upper left", ncol=2, framealpha=0.9)
@@ -4105,9 +4115,11 @@ def fig_frame_invariance(qwen, llama):
             ("corrupt", "corrupt", RED)]
     fig, ax = plt.subplots(figsize=(7.4, 4.4))
     gw = 0.24
+    label_tops = []
     for gi, (label, d) in enumerate(groups):
         per = d.get("per", {})
         arm_vals = d.get("arms", {})
+        group_label_tops = []
         for ai, (an, key, col) in enumerate(arms):
             m = arm_vals.get(key)
             if m is None:
@@ -4118,19 +4130,22 @@ def fig_frame_invariance(qwen, llama):
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
                    error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+            label_y = hi + 0.008
+            label_tops.append(label_y)
+            group_label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom",
                     fontsize=7.5, color=col)
         # annotate the frame-TTT delta vs zero-shot (signed: it is ~0 / negative here)
         z, t = arm_vals.get("zeroshot"), arm_vals.get("frame_ttt")
         if z is not None and t is not None:
-            top = max(arm_vals.values()) + 0.045
+            top = (max(group_label_tops) + 0.035) if group_label_tops else max(arm_vals.values()) + 0.045
             col = ORANGE if t >= z else RED
             ax.annotate(f"{100 * (t - z):+.0f} vs zero-shot", xy=(gi, top), ha="center",
                         fontsize=9, fontweight="bold", color=col)
     ax.set_xticks(range(len(groups)))
     ax.set_xticklabels([g[0] for g in groups], fontsize=9)
     ax.set_ylabel("held-out language-frame pass rate")
-    ax.set_ylim(0, max(0.5, max(max(d.get("arms", {}).values()) for _, d in groups) + 0.1))
+    ax.set_ylim(0, max(0.5, max(label_tops or [0]) + 0.09))
     ax.set_title("Frame-invariance (E81): cross-language TTT gives no lift over zero-shot;\n"
                  "only matched$>$corrupt (exactness) survives, on the weak base", fontsize=10.5)
     from matplotlib.patches import Patch
@@ -4152,6 +4167,7 @@ def fig_hybrid_loop(qwen, llama):
             ("hybrid (+ verifier)", "hybrid_pass", TEAL)]
     fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10.4, 4.4), gridspec_kw={"width_ratios": [2.4, 1]})
     gw = 0.26
+    label_tops = []
     for gi, (label, d) in enumerate(groups):
         r = d.get("results", {})
         n = d.get("n_eval", 40)
@@ -4165,17 +4181,20 @@ def fig_hybrid_loop(qwen, llama):
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
                    error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+            label_y = hi + 0.012
+            label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}", ha="center", va="bottom",
                     fontsize=7.5, color=col)
             if key != "base_pass1" and base is not None:  # signed delta vs base
                 dlt = m - base
-                ax.text(x, 0.02, f"{100 * dlt:+.0f}", ha="center", va="bottom",
-                        fontsize=8, fontweight="bold", color=(TEAL if dlt >= 0 else RED))
+                ax.text(x, 0.045, f"{100 * dlt:+.0f}", ha="center", va="bottom",
+                        fontsize=8, fontweight="bold", color=(TEAL if dlt >= 0 else RED),
+                        bbox=dict(facecolor="white", edgecolor="none", alpha=0.75, pad=0.7))
     ax.axhline(0, color="#999", lw=0.6)
     ax.set_xticks(range(len(groups)))
     ax.set_xticklabels([g[0] for g in groups], fontsize=9)
     ax.set_ylabel("held-out pass@1 (HumanEval-X Python)")
-    ax.set_ylim(0, 1.0)
+    ax.set_ylim(0, min(1.08, max(1.0, max(label_tops or [0]) + 0.04)))
     ax.set_title("The hybrid loop (E82): amortization helps the strong base, hurts the weak;\n"
                  "the verifier backstop lifts both", fontsize=10)
     from matplotlib.patches import Patch

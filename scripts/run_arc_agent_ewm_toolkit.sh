@@ -44,6 +44,27 @@ PY
 N=$("$AGENT_PY" -c "import json;print(json.load(open('$WD/frontier.json')).get('levels',0))")
 W=$("$AGENT_PY" -c "import json;print(json.load(open('$WD/frontier.json')).get('win',0))")
 
+# E137 (optional A/B arm): build a cross-level procedural schema packet from the agent's OWN solved
+# levels and hand it to the agent as a prior. Gated by E137_SCHEMA=1 so the default sweep is unchanged.
+SCHEMA_NOTE=""
+if [ "${E137_SCHEMA:-0}" = "1" ]; then
+  cp "$ROOT/experiments/e137/schema_induction.py" "$WD/"   # source-free: reads frames/actions only
+  cp "$ROOT/experiments/e137/goal_condition.py" "$WD/"
+  cp "$ROOT/experiments/e137/extract_demos.py" "$WD/"
+  ( cd "$WD" && "$AGENT_PY" extract_demos.py "$GAME" frontier.json schema_packet.json >/dev/null 2>&1 ) || true
+  if [ -f "$WD/schema_packet.json" ]; then
+    SCHEMA_NOTE="
+PRIOR (E137 schema packet) -- \`schema_packet.json\` summarizes your OWN prior solved levels (one demo per
+level-up) with leave-one-out-validated, source-free schemas:
+  - \`goal_condition_schemas\`: WHAT configuration each level-up achieves (the win condition) -- colours the
+    win always contains, colours consumed, whether object count grows/shrinks. READ THESE FIRST: they are
+    your win hypothesis for level $((N+1)).
+  - \`candidate_schemas\`: the action-shape (kind/signature tails, final-action kind, per-level action budget).
+Validate/repair a schema against the demos, instantiate it on the frontier frame, then let plan_in_model
+find the exact path. It is a PRIOR, not an oracle -- reality (g.levels) still decides."
+  fi
+fi
+
 cat > "$WD/TASK.md" <<TASK
 You are solving the FINAL level of the interactive ARC-AGI-3 game **$GAME**, SOURCE-FREE (no game code).
 You have already reached **level $N of $W** -- the action sequence is in \`frontier.json\` (your own prior
@@ -63,6 +84,7 @@ edge over plain reasoning (they automate the tedious search for the exact move s
   from ewm_toolkit import composite_key, select_lens, LENSES   # E134 multi-perception composite
 
 Your state key MUST be composite_key(frame) — a single object lens silently drops timers/animation/1-cell indicators that decide the win; select_lens tells you which modality to PLAN in.
+$SCHEMA_NOTE
 
 THE METHOD (reason the WHAT; let the planner find the HOW):
 1. PERCEIVE in objects, not pixels. Re-read your earlier levels' mechanic -- level $((N+1)) is almost

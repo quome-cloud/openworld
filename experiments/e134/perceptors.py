@@ -22,7 +22,10 @@ _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from experiments.e125.objstate import object_state as _object_state
+try:
+    from experiments.e125.objstate import object_state as _object_state
+except ImportError:                              # flat agent workspace: objstate.py sits alongside
+    from objstate import object_state as _object_state
 
 
 # ---------------------------------------------------------------------------

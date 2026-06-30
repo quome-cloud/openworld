@@ -9,7 +9,10 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List, Optional, Tuple
 
-from .perceptors import LENSES, key_of
+try:
+    from experiments.e134.perceptors import LENSES, key_of
+except ImportError:                              # flat agent workspace: perceptors.py sits alongside
+    from perceptors import LENSES, key_of
 
 
 # ---------------------------------------------------------------------------

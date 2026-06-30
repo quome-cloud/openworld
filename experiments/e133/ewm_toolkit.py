@@ -100,3 +100,14 @@ def _replay_to(env, path):
         if not _act(env, a):
             return False
     return True
+
+
+try:  # surface the E134 composite perception API for the agent (additive, never breaks the toolkit)
+    try:
+        from experiments.e134.composite import composite_key, select_lens
+        from experiments.e134.perceptors import LENSES
+    except ImportError:                          # flat agent workspace
+        from composite import composite_key, select_lens
+        from perceptors import LENSES
+except Exception:                                # e134 absent: leave the toolkit fully functional
+    pass

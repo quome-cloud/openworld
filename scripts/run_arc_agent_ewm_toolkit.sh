@@ -19,6 +19,8 @@ mkdir -p "$WD"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"                    # env client (no game source)
 cp "$ROOT/experiments/e125/objstate.py" "$WD/"                  # object perceptor (solver helper)
 cp "$ROOT/experiments/e133/ewm_toolkit.py" "$WD/"              # plan_in_model + WorldSim + salience
+cp "$ROOT/experiments/e134/perceptors.py" "$WD/"              # K perception lenses (no game source)
+cp "$ROOT/experiments/e134/composite.py" "$WD/"              # composite_key + select_lens (no game source)
 
 # the agent's OWN deepest banked frontier (level N-1) -- prefer the source-free archive's solution.
 ARCH="$ROOT/experiments/results/arc3_fullgame_sourcefree.json"
@@ -55,6 +57,9 @@ edge over plain reasoning (they automate the tedious search for the exact move s
 
   from objstate import object_state, state_key      # frame -> {bg, objects[color,size,y,x]}; state_key = a hashable key
   from ewm_toolkit import plan_in_model, WorldSim, salient_clicks, _act, _replay_to
+  from ewm_toolkit import composite_key, select_lens, LENSES   # E134 multi-perception composite
+
+Your state key MUST be composite_key(frame) — a single object lens silently drops timers/animation/1-cell indicators that decide the win; select_lens tells you which modality to PLAN in.
 
 THE METHOD (reason the WHAT; let the planner find the HOW):
 1. PERCEIVE in objects, not pixels. Re-read your earlier levels' mechanic -- level $((N+1)) is almost

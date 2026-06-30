@@ -4024,7 +4024,7 @@ def fig_arc_method(ttt):
         else:
             h = (v / vmax) * bh
             ax.add_patch(Rectangle((x, by0), bw, h, fc=c, ec="none", alpha=0.9, zorder=5))
-            ax.text(x + bw / 2, by0 + h + 0.06, f"{100 * v:.0f}", fontsize=7.5, ha="center",
+            ax.text(x + bw / 2, by0 + h + 0.06, f"{100 * v:.0f}%", fontsize=7.5, ha="center",
                     color=c, fontweight="bold", zorder=6)
         ax.text(x + bw / 2, by0 - 0.28, lbl, fontsize=6.3, ha="center", va="top", color="#334155")
     ax.plot([bx0 - 0.05, bx0 + 4 * 0.85 - 0.2], [by0, by0], color="#CBD5E1", lw=0.9, zorder=4)

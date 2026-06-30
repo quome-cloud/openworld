@@ -43,27 +43,23 @@ BUILD ON what you already learned -- do NOT repeat the same exploration; extend 
 {history}
 """
 
-def build_history(log, budget=24000):
-    """Accumulate a rolling transcript of prior rounds (your code + its stdout), newest kept first,
-    trimmed to a char budget so it fits num_ctx. This is the cross-round memory the agent needs to
-    iterate a world model instead of restarting from scratch every round."""
-    if not log: return "(none yet -- start by exploring)"
-    parts=[]
-    for rec in log:
-        code=rec["script"][:1800]
-        out=rec["stdout"][-1800:]
-        parts.append(f"===== round {rec['round']} (best_levels after this round = {rec.get('best_after',0)}) =====\n"
-                     f"--- YOUR SCRIPT ---\n{code}\n--- ITS STDOUT ---\n{out}")
-    kept=[]; total=0
-    for p in reversed(parts):           # keep the most recent rounds that fit the budget
-        total+=len(p)
-        if total>budget and kept: break
-        kept.append(p)
-    return "\n\n".join(reversed(kept))
+# history/extract logic lives in e126_lib (unit-tested; fixes the num_ctx-overflow empty-response bug)
+from e126_lib import history_budget, build_history, extract_code  # noqa: E402
 
-def extract_code(text):
-    m=re.search(r"```(?:python)?\s*(.*?)```", text, re.S)
-    return m.group(1).strip() if m else text.strip()
+def probe_win(game, wd):
+    """Read the game's win-level count from the env ONCE so 'best/win' reports the true denominator
+    even when the model never writes solved.json (the ka59/lf52/lp85 0/0 bug). Best-effort: 0 on any
+    failure (e.g. env not reachable)."""
+    (wd/"arc3_harness.py").write_text(HARNESS.read_text())
+    probe=wd/"_probe_win.py"
+    probe.write_text("from arc3_harness import Game\n"
+                     f"g=Game({game!r}); g.reset(); print('WIN', int(getattr(g,'win',0) or 0))\n")
+    try:
+        r=subprocess.run([VENV,str(probe)],cwd=str(wd),capture_output=True,text=True,timeout=120)
+        m=re.search(r"WIN (\d+)", r.stdout or "")
+        return int(m.group(1)) if m else 0
+    except Exception:
+        return 0
 
 def run_script(code, wd):
     (wd/"arc3_harness.py").write_text(HARNESS.read_text())
@@ -80,14 +76,19 @@ def solve(game, model, rounds, num_ctx, timeout):
     wd=ROOT/"scratch_arc"/f"qwen3c_{game}"; wd.mkdir(parents=True,exist_ok=True)
     (wd/"arc3_harness.py").write_text(HARNESS.read_text())
     log=[]; history="(none yet -- start by exploring)"
-    best=0; win=0
+    best=0; win=probe_win(game, wd)             # true denominator from the env, even if model writes nothing
+    budget=history_budget(num_ctx, task_chars=len(TASK))   # tie history to the context window
     for r in range(rounds):
         prompt=TASK.format(game=game, r=r, history=history)
         t=time.time()
         try: resp=llm.ask(prompt)
         except Exception as e: resp=f"<LLM ERROR: {e}>"
+        code=extract_code(resp)
+        if not code:                            # empty/prose response (e.g. ctx truncation): retry ONCE
+            try: resp=llm.ask(prompt); code=extract_code(resp)
+            except Exception as e: resp=f"<LLM ERROR: {e}>"
         dt=time.time()-t
-        code=extract_code(resp); out=run_script(code, wd) if code else "(no code)"
+        out=run_script(code, wd) if code else "(no code)"
         rec={"round":r,"game":game,"model":model,"prompt":prompt,"response":resp,
              "script":code,"stdout":out,"llm_seconds":round(dt,1)}
         log.append(rec)
@@ -98,7 +99,7 @@ def solve(game, model, rounds, num_ctx, timeout):
                 d=json.loads(sj.read_text()); best=max(best,int(d.get("levels",0))); win=int(d.get("win",win) or win)
             except Exception: pass
         rec["best_after"]=best
-        history=build_history(log)
+        history=build_history(log, budget)
         print(f"  [{game}] round {r}: {dt:.0f}s, best_levels={best}, code={len(code)}ch, hist={len(history)}ch",flush=True)
         if win and best>=win: break
     (LOGDIR/f"{game}.jsonl").write_text("\n".join(json.dumps(x) for x in log))

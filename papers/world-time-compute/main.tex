@@ -471,7 +471,7 @@ Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatia
 V-JEPA~\cite{vjepa2025} & joint-embedding video prediction in latent space & perceptual; latent, unauditable; trained \\
 NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
 Meta CWM~\cite{metacwm2025} & \emph{neural} code world model (32B, dynamics learned in weights) & not auditable code; frontier-scale training \\
-IVML~\cite{ivml2025} & LLM-synthesized symbolic world models via test-time scaling & per-task synthesis; not a reusable substrate \\
+Yu et al.~\cite{ivml2025} & LLM-synthesized symbolic world models via test-time scaling (BoN${+}$iVML) & per-task synthesis; not a reusable substrate \\
 WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
 PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
 NeSyS~\cite{nesys2026} & symbolic rules constrain neural logits & still requires fine-tuning data \\
@@ -896,7 +896,7 @@ further real benchmarks from different fields, plus one different \emph{modality
 (\LfNumWorlds{} hidden list$\to$list functions induced from input/output pairs),
 \textbf{CLRS-Text}~\cite{markeeva2024clrstext,velickovic2022clrs} (\ClrsNumWorlds{} classic
 algorithms---sorting, graphs, dynamic programming---each a hidden procedure to execute exactly),
-and \textbf{Bongard-RWR}~\cite{nie2020bongard} (\BongNumWorlds{} real-image visual
+and \textbf{Bongard-RWR}~\cite{bongardrwr2024,bongardrwrplus2025} (\BongNumWorlds{} real-image visual
 concept-induction problems, via frozen DINOv2 features + a per-world head).
 
 \paragraph{The trend replicates on every symbolic domain.} Held-out exact-match \emph{scales}

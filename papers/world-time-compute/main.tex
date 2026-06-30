@@ -991,7 +991,8 @@ predictive law. It is fit over \LawNDomains{} domains with single-seed runs and 
 out-of-sample check, the constants are learner-specific, and the fit is sensitive to domain
 selection (a sibling fit over a different subset is anti-predictive). We report the \emph{shape}
 as a compact summary, not a forecast. World-time compute follows a
-\textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
+\textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\kappa})$
+(with compute-scale constant $\kappa$, distinct from the transition function $\tau$),
 whose asymptote $C$ tracks \textbf{identifiability $\times$ realizability $\times$ headroom}
 and which collapses to base without \textbf{exact labels}. We test it as a conjunction of
 falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and three modalities
@@ -1047,7 +1048,7 @@ the optimal number of simulated worlds is its knee. From the per-world compute c
 (worlds for 90\% of the asymptotic gain) is \WCListfn{} for List Functions, \WCArc{} for ARC, and
 \WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
 thousands. The honest scope: the curve's \emph{form} appears to recur across the verifiable-world problems
-and learners we tested; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
+and learners we tested; the constants ($\kappa$, the depth cap) are learner-specific; and the predictor is
 cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
 

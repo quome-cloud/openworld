@@ -646,8 +646,9 @@ generator. Totals carry 95\% Wilson CIs.}
 \subsection{The central result}\label{sec:central-result}
 \emph{Verified code synthesis eliminates compounding rollout error at zero
 training cost.} The mechanism is structural, not statistical. A learned (or
-per-step predicted) transition is sampled each step, so per-step error
-$\epsilon$ compounds roughly as $1-(1-\epsilon)^{t}$: with the measured
+per-step predicted) transition is sampled each step, so with per-step error
+$\epsilon$ the probability that a $t$-step rollout has \emph{diverged} grows as
+$1-(1-\epsilon)^{t}$ (one minus the exactness probability $(1-\epsilon)^t$): with the measured
 single-transition error of the LLM engine (\LLMProbeErrorRate{} of probes wrong),
 divergence by step \LLMFirstDivergence{} is exactly what the arithmetic
 predicts, and twenty-step plans are fiction (final $L^1$ error

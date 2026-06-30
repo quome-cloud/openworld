@@ -865,7 +865,7 @@ lift survives label corruption it is not the verified labels---not the optimizer
 \emph{(i) Cross-task transfer is weak.} Training one LoRA on $N$ real training worlds and
 evaluating zero-shot on disjoint held-out worlds barely moves exact-match
 (\ArcLadderBase{} base $\to$ \ArcLadderTop{} at \ArcLadderTopN{} worlds). This is the
-expected, honest boundary: every ARC rule is novel by construction, so a single shared policy
+expected boundary: every ARC rule is novel by construction, so a single shared policy
 has little to transfer---consistent with E76/E77, where transfer turns strong only well above
 the world counts we can afford here.
 
@@ -1061,7 +1061,7 @@ outside the family structure the regularity scores.
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
 (worlds for 90\% of the asymptotic gain) is \WCListfn{} for List Functions, \WCArc{} for ARC, and
 \WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
-thousands. The honest scope: the curve's \emph{form} appears to recur across the verifiable-world problems
+thousands. The scope: the curve's \emph{form} appears to recur across the verifiable-world problems
 and learners we tested; the constants ($\kappa$, the depth cap) are learner-specific; and the predictor is
 cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
@@ -1319,7 +1319,7 @@ whole 12-step episode planned in \PlanCodeSeconds\,s. Planning through the
 LLM next-state engine is confined to depth 2 by cost (\PlanLLMSeconds\,s per
 episode) and scores \PlanLLM---\emph{worse than no model at all}: lookahead
 through hallucinated transitions steered the agent away from productive
-actions entirely. We note one honest caveat: the LLM engine falls back to a
+actions entirely. We note one caveat: the LLM engine falls back to a
 no-op when a reply does not parse as a next state, so this score conflates
 genuinely hallucinated transitions with unparseable outputs; the script now
 logs the parse-failure rate so the two can be separated on re-run, but the

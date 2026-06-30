@@ -1,8 +1,8 @@
 """Tests for object-level macro-Go-Explore: avatar detection, object-directed macros, and that the
 macro vocabulary cracks the procedural toys (ideally with FEWER real steps than micro)."""
-from experiments.e128.macros import find_avatar, object_macros, make_executor, macro_solve
+from experiments.e128.macros import find_avatar, object_macros, macro_solve
 from tests.e127.toy import toy_factory, ToyGame
-from tests.e127.toy_click import toy_click_factory, ToyClickGame
+from tests.e127.toy_click import toy_click_factory
 
 
 def test_find_avatar_detects_cursor_and_directions():

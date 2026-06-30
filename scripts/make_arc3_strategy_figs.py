@@ -55,38 +55,68 @@ STRATS=[
 ALL=["ar25","bp35","cd82","cn04","dc22","ft09","g50t","ka59","lf52","lp85","ls20","m0r0","r11l",
      "re86","s5i5","sb26","sc25","sk48","sp80","su15","tn36","tr87","tu93","vc33","wa30"]
 union=set().union(*[s for _,s in STRATS])
-# matrix (games x strats); sort games: solved-by-most first, then alpha
+# Category per strategy (same index order as STRATS) -> groups the columns so the figure shows HOW the
+# goal-directed methods fail: the "Goal-discovery" block is a contiguous, almost-empty band.
+SP="Search & perception"; GD="Goal-discovery (fails)"; RA="Reasoning agent"
+CATS=[SP,SP,SP, GD,GD,GD, SP,SP, GD, RA, GD, RA, RA]   # one per STRATS entry
+CAT_ORDER=[SP,GD,RA]
+CAT_COLOR={SP:"#2563eb", GD:"#c2410c", RA:"#15803d"}
+# column order = group by category (CAT_ORDER), preserving narrative order within each group
+corder=[j for cat in CAT_ORDER for j in range(len(STRATS)) if CATS[j]==cat]
+STRATS=[STRATS[j] for j in corder]; CATS=[CATS[j] for j in corder]
+# matrix (games x strats, reordered columns); sort games: solved-by-most first, then alpha
 M=np.array([[1 if g in s else 0 for _,s in STRATS] for g in ALL])
 order=sorted(range(len(ALL)), key=lambda i:(-M[i].sum(), ALL[i]))
 ALLo=[ALL[i] for i in order]; M=M[order]
 labels=[n for n,_ in STRATS]; counts=[len(s) for _,s in STRATS]
+# contiguous [start,end] column span of each category, for brackets/separators
+spans={c:(min(j for j in range(len(CATS)) if CATS[j]==c), max(j for j in range(len(CATS)) if CATS[j]==c)) for c in CAT_ORDER}
+winner_col=labels.index("ROUTER → one pipeline\n(E116)") if any("ROUTER" in l for l in labels) else len(labels)-1
 
 # ---- Fig 1: main bar chart (games solved per strategy) ----
 plt.figure(figsize=(8,4.2))
-colors=["#9aa7b3"]*(len(STRATS)-1)+["#2e8b57"]   # winner in green
+colors=[CAT_COLOR[c] for c in CATS]              # bars tinted by method class
 b=plt.bar(range(len(STRATS)), counts, color=colors, edgecolor="#33414f")
 for i,c in enumerate(counts): plt.text(i, c+0.15, str(c), ha="center", fontsize=11, fontweight="bold")
 plt.axhline(len(union), ls="--", c="#c2410c", lw=1.2); plt.text(0.1, len(union)+0.3, f"union = {len(union)}/25", color="#c2410c", fontsize=10, fontweight="bold")
-plt.xticks(range(len(STRATS)), labels, fontsize=7.5)
+plt.xticks(range(len(STRATS)), [l.replace("\n"," ") for l in labels], fontsize=7, rotation=40, ha="right")
 plt.ylabel("ARC-AGI-3 games solved (≥1 level)"); plt.ylim(0,26)
 plt.title(f"A live coding agent cracks the walls (union {len(union)}/25)", fontsize=12, fontweight="bold")
 plt.tight_layout(); plt.savefig(FIG/"arc3_strategy_bar.png", dpi=140); plt.close()
 
-# ---- Fig 2: strategy x game heatmap ----
-fig,ax=plt.subplots(figsize=(7.2,8.4))
+# ---- Fig 2: strategy x game heatmap (columns grouped by category) ----
+nS=len(STRATS); nG=len(ALLo)
+fig,ax=plt.subplots(figsize=(8.4,9.6))
 cmap=ListedColormap(["#eef1f4","#2e8b57"])
 ax.imshow(M, aspect="auto", cmap=cmap, vmin=0, vmax=1)
-ax.set_xticks(range(len(STRATS))); ax.set_xticklabels(labels, fontsize=7.5, rotation=0)
-ax.set_yticks(range(len(ALLo))); ax.set_yticklabels(ALLo, fontsize=8, fontfamily="monospace")
-for i in range(len(ALLo)):
-    for j in range(len(STRATS)):
+# vertical strategy labels (single line) -> no horizontal overlap; tinted by category
+ax.set_xticks(range(nS))
+xt=ax.set_xticklabels([l.replace("\n"," ") for l in labels], fontsize=7.2, rotation=90, ha="center")
+for t,c in zip(xt, CATS): t.set_color(CAT_COLOR[c])
+ax.set_yticks(range(nG)); ax.set_yticklabels(ALLo, fontsize=8, fontfamily="monospace")
+for i in range(nG):
+    for j in range(nS):
         if M[i,j]: ax.text(j,i,"✓",ha="center",va="center",color="white",fontsize=9)
-ax.set_xticks(np.arange(-.5,len(STRATS),1),minor=True); ax.set_yticks(np.arange(-.5,len(ALLo),1),minor=True)
+ax.set_xticks(np.arange(-.5,nS,1),minor=True); ax.set_yticks(np.arange(-.5,nG,1),minor=True)
 ax.grid(which="minor",color="white",lw=1.2); ax.tick_params(which="minor",length=0)
-# highlight winner column
-ax.add_patch(plt.Rectangle((len(STRATS)-1.5,-.5),1,len(ALLo),fill=False,edgecolor="#c2410c",lw=2.5))
-ax.set_title("What solves ARC-AGI-3: strategy × game\n(green = verified ≥1-level solve)", fontsize=11, fontweight="bold")
-plt.tight_layout(); plt.savefig(FIG/"arc3_strategy_heatmap.png", dpi=140); plt.close()
+# separators between category groups + winner-column highlight
+for c in CAT_ORDER[1:]:
+    ax.axvline(spans[c][0]-0.5, color="#334155", lw=1.6)
+ax.add_patch(plt.Rectangle((winner_col-.5,-.5),1,nG,fill=False,edgecolor="#c2410c",lw=2.5))
+# category brackets + labels BELOW the strategy labels (x in data coords, y in axes fraction)
+tr=ax.get_xaxis_transform()
+for c in CAT_ORDER:
+    s,e=spans[c]; mid=(s+e)/2
+    ax.plot([s-0.4,e+0.4],[-0.30,-0.30], transform=tr, color=CAT_COLOR[c], lw=2.6, clip_on=False)
+    ax.text(mid, -0.325, c, transform=tr, ha="center", va="top", fontsize=9.5, fontweight="bold",
+            color=CAT_COLOR[c], clip_on=False)
+ax.text((spans[GD][0]+spans[GD][1])/2, -0.365,
+        "score a static state \N{RIGHTWARDS ARROW} cannot rank an ordered procedure",
+        transform=tr, ha="center", va="top", fontsize=7.5, style="italic", color=CAT_COLOR[GD], clip_on=False)
+ax.set_title("What solves ARC-AGI-3: strategy \N{MULTIPLICATION SIGN} game\n"
+             "(green = verified \N{GREATER-THAN OR EQUAL TO}1-level solve; columns grouped by method class)",
+             fontsize=11, fontweight="bold")
+plt.tight_layout(); plt.savefig(FIG/"arc3_strategy_heatmap.png", dpi=140, bbox_inches="tight"); plt.close()
 print("wrote arc3_strategy_bar.png + arc3_strategy_heatmap.png")
 print("per-strategy solves:", {n:len(s) for n,s in STRATS})
 print("UNION:", len(union), sorted(union))

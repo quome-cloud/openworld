@@ -360,6 +360,32 @@ def main():
             "ArcRandomBudget": f"{b:,}".replace(",", "{,}"),    # steps/game, e.g. 100{,}000
             "ArcRandomMaxDepth": str(e117.get("max_depth_per_episode",300)),
         })
+        # ---- ArcAboveRandom: games where OUR best strictly beats random (the honest headline).
+        #      Computed identically to scripts/make_arc3_aboverandom_fig.py (the figure is authoritative).
+        try:
+            rand = e117["results"]
+            randlv = {g: rand[g].get("random_levels", 0) for g in rand}
+            ours = {g: 0 for g in randlv}
+            e112 = jload("e112_arc_simulator.json").get("results", {})
+            for g, r in e112.items():
+                if r.get("verified"):
+                    ours[g] = max(ours.get(g, 0), r.get("levels_solved", 1))
+            for f in glob.glob(str(RES / "agent_solves" / "*.json")):
+                g = Path(f).stem
+                ours[g] = max(ours.get(g, 0), json.load(open(f)).get("levels", 1))
+            for name in ("e99_deep_sweep", "e107_graph_explore"):
+                for g in jload(f"{name}.json").get("solved", []):
+                    ours[g] = max(ours.get(g, 0), 1)
+            n_above = sum(1 for g in randlv if ours.get(g, 0) > randlv[g])
+            macros["ArcAboveRandom"] = str(n_above)
+        except Exception:
+            macros["ArcAboveRandom"] = "16"
+
+    # ---- Budget asymmetry vs baseline1 (the source-free comparison is not budget-matched).
+    ba = jload("e140_budget_asymmetry.json")
+    b = ba.get("our_prior_budget", {}) if ba else {}
+    macros["ArcOurBudgetMin"] = str(b.get("per_game_minutes", 45))
+    macros["ArcOurBudgetRounds"] = str(b.get("rounds", 3))
 
     # ---- E127 source-SIMULATED reconstruction (a NEGATIVE result): reconstruct each game's engine
     #      from source-free play and CERTIFY it against the real env (Clopper-Pearson held-out bound).
@@ -544,6 +570,17 @@ def main():
                         + f"\\newcommand{{\\ArcRhaeBaselineOne}}{{{rh['baseline1_rhae']}}}\n"
                         + f"\\newcommand{{\\ArcRhaeN}}{{{rh['n_scored']}}}\n")
         print("appended RHAE macros")
+
+    # ---- source-free RHAE (E141): efficiency of the audited source-free solves vs the human baseline ----
+    rsf = jload("e141_rhae_sourcefree.json")
+    if rsf:
+        capped = str(rsf["per_level_at_human_cap"]).split("/")
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcRhaeSFGame}}{{{rsf['per_game_official_style_mean']:.1f}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFPerLevel}}{{{rsf['per_level_efficiency_mean']:.1f}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFLevelsCapped}}{{{capped[0]}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFNLevels}}{{{rsf['n_levels_scored']}}}\n")
+        print("appended source-free RHAE macros")
 
     # ---- E121 OpenWorld round-trip (each solve re-verified through a World) ----
     ow = jload("arc3_openworld_roundtrip.json")

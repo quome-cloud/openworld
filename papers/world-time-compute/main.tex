@@ -678,7 +678,7 @@ rules, so an agent can \emph{traverse} many worlds of a domain and distill the s
 We call spending compute this way---fine-tuning a model on trajectories drawn from traversed,
 verified world models rather than on scarce real examples---\textbf{world-time compute}, a
 training-time analogue of test-time compute~\cite{snell2024testtime,openai2024o1,deepseekr1}
-(and, when spent per world at inference, of test-time training~\cite{akyurek2024ttt}).
+(and, when spent per world at inference, of test-time training (TTT)~\cite{akyurek2024ttt}).
 
 We test it on a \emph{family} of diagnosis worlds (E74): one POMDP template (a hidden
 disease; order tests to reveal symptoms; commit a diagnosis) instantiated as

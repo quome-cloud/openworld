@@ -17,6 +17,20 @@ ROOT="/Users/jim/Desktop/openworld"
 AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"; EFFORT="${EFFORT:-high}"
+AGENT_TIMEOUT="${AGENT_TIMEOUT:-5400}"   # per-game wall-clock cap (s); 90 min. A stalled agent releases its pool slot.
+# Portable timeout (macOS has no GNU `timeout`): run "$@" with a SIGTERM->SIGKILL watchdog; reap this
+# game's sandbox worker if we had to kill it. Redirections on the CALL are inherited by the child.
+run_with_timeout() {
+  local secs="$1"; shift
+  "$@" &
+  local pid=$!
+  ( sleep "$secs"; kill -TERM "$pid" 2>/dev/null; sleep 10; kill -KILL "$pid" 2>/dev/null
+    pkill -f "scratch_arc/ek_${GAME}/arc3_sandbox.py --worker" 2>/dev/null ) &
+  local wpid=$!
+  wait "$pid"; local rc=$?
+  kill "$wpid" 2>/dev/null; wait "$wpid" 2>/dev/null
+  return "$rc"
+}
 WD="$ROOT/scratch_arc/ek_$GAME"
 mkdir -p "$WD"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"                    # env client (no game source)
@@ -100,9 +114,11 @@ arc_agi -- every run is AUDITED; a tainted run is discarded.
 TASK
 
 cd "$WD"
-"$CLAUDE" -p "$(cat TASK.md)" --model "$MODEL" --effort "$EFFORT" \
+run_with_timeout "$AGENT_TIMEOUT" \
+  "$CLAUDE" -p "$(cat TASK.md)" --model "$MODEL" --effort "$EFFORT" \
   --output-format stream-json --verbose --dangerously-skip-permissions \
   > "$WD/agent.log" 2> "$WD/agent.err"
+RC=$?; [ "$RC" -eq 143 -o "$RC" -eq 137 ] && echo "[timeout] $GAME agent hit ${AGENT_TIMEOUT}s cap (rc=$RC)"
 echo "ewm-toolkit agent finished for $GAME (was $N/$W)"
 # capture this run into the HF-ready dataset (reuses capture_lib via capture_arc_run.py)
 "$AGENT_PY" "$ROOT/scripts/capture_arc_run.py" "$GAME" "$WD" ewm-toolkit run_arc_agent_ewm_toolkit.sh || true

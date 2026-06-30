@@ -3984,7 +3984,7 @@ def fig_arc_method(ttt):
 
     # ---- Row 2: regimes + payoff -------------------------------------------------------
     _panel(ax, 0.2, 0.35, 4.55, 3.3, "(A)  Cross-task ladder — transfer to unseen worlds", BLUE)
-    _card(ax, 0.5, 2.3, 1.95, 0.95, "TRAIN worlds", ["25 → 400", "real ARC tasks"], face="#EFF6FF")
+    _card(ax, 0.5, 2.3, 1.95, 0.95, "TRAIN worlds", ["25 → 200", "real ARC tasks"], face="#EFF6FF")
     arrow(2.55, 2.78, 3.15, 2.78)
     ax.text(2.85, 2.92, "SFT", fontsize=7, color=SL, ha="center")
     _card(ax, 3.2, 2.3, 1.35, 0.95, "LoRA", ["one", "adapter"], face="#FFF7ED")

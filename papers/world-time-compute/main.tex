@@ -912,7 +912,7 @@ concept-induction problems, via frozen DINOv2 features + a per-world head).
 
 \paragraph{The trend replicates on every symbolic domain.} Held-out exact-match \emph{scales}
 with world-time compute and \emph{collapses} to the floor when the demonstrations' labels are
-randomised: List Functions \LfZero$\to$\LfLight$\to$\LfHeavy{} (heavy 95\% bootstrap CI over
+randomized: List Functions \LfZero$\to$\LfLight$\to$\LfHeavy{} (heavy 95\% bootstrap CI over
 worlds \LfHeavyCI), corrupt \LfCorrupt; CLRS \ClrsZero$\to$\ClrsLight$\to$\ClrsHeavy, corrupt
 \ClrsCorrupt; ARC \ArcZeroShot$\to$\ArcTTTLight$\to$\ArcTTTHeavy{} (CI \ArcHeavyCI), corrupt
 \ArcTTTCorrupt. Same mechanism, three independent real benchmarks, and in each the lift is owed
@@ -1063,7 +1063,7 @@ the optimal number of simulated worlds is its knee. From the per-world compute c
 \WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
 thousands. The scope: the curve's \emph{form} appears to recur across the verifiable-world problems
 and learners we tested; the constants ($\kappa$, the depth cap) are learner-specific; and the predictor is
-cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
+cheap but not free---a small probe, localizing the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
 
 \subsection{Composites with varying rules: language frames and the invariant principle (E81)}\label{sec:frame-invariance}
@@ -1442,7 +1442,7 @@ model, which generates unlimited examples and labels them \emph{exactly} for fre
 transition is code and the oracle is execution. In one line: a correct world model turns
 compute into unlimited correct training data. Whether the ``verified'' qualifier is
 load-bearing---rather than decoration on plain SFT---is an empirical question with a clean
-discriminator, the \textbf{corrupted-label ablation}: randomising the labels keeps the
+discriminator, the \textbf{corrupted-label ablation}: randomizing the labels keeps the
 fine-tuning and the world's structure but destroys their correctness, so if accuracy is
 unchanged the framing adds nothing. It does collapse to the no-fine-tune floor: the
 corrupted-demonstration arm on real ARC worlds falls to \ArcTTTCorrupt{} against the verified

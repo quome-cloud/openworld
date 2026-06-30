@@ -367,7 +367,7 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   rule-correctness (on a weak 3B generator the gate accepts every program yet none is
   branch-exact). Handed the dynamics, planning through the verified model beats planning through a
   hallucinating one and solves $0$-shot what trained DreamerV3 / V-JEPA-2 need $10^4$--$10^5$
-  steps to learn (a scope property, not a contest; \S\ref{sec:bakeoff}).
+  steps to learn~\cite{dreamerv3} (a scope property, not a contest; \S\ref{sec:bakeoff}).
   \item \textbf{The substrate, and full reproducibility.} \openworld, a zero-dependency framework,
   makes authoring and serving the \emph{many} verified worlds world-time compute needs a
   minutes-scale activity; the framework, its \ProtoNumWorlds-world prototyping benchmark, and the
@@ -923,7 +923,7 @@ out at \ClrsHeavy, the lowest of the three. This is the same boundary as the com
 in \emph{few reasoning steps} and degrade as the required chain lengthens. It is also exactly
 where they beat data-hungry learned world models---on the short-horizon \textbf{MiniGrid DoorKey}
 planning task (\S\ref{sec:minigrid}) the verified model solves \emph{zero-shot} while DreamerV3
-needs $10^4$--$10^5$ interactions and V-JEPA-2 cannot control at all.
+needs ${\sim}10^4$ interactions (\MGDreamerFirstSolve{} to first solve; E65) and V-JEPA-2 cannot control at all.
 
 \paragraph{The boundary: rich perceptual abstraction.} Bongard-RWR is the honest negative: per-world
 test-time training over frozen visual features stays at chance (base \BongBase, heavy \BongHeavy,
@@ -1478,7 +1478,7 @@ reintroduces compounding on the learned side.
 world-time compute win where a task reduces to \emph{few reasoning steps} over a state that can
 be \emph{told} symbolically: shallow rule induction (List Functions, the largest lift), small
 grid transforms (ARC), and short-horizon planning (MiniGrid DoorKey, solved zero-shot while
-DreamerV3 needs $10^4$--$10^5$ interactions). Performance degrades along two axes---as the
+DreamerV3 needs $10^4$--$10^5$ interactions~\cite{dreamerv3}). Performance degrades along two axes---as the
 required reasoning \emph{lengthens} (CLRS algorithm traces, the lowest of the symbolic domains;
 and the E20 complexity cliff past $\sim$8 composed rules), and as the latent rule must be
 \emph{induced from rich perception} rather than read from symbolic state (Bongard-RWR vision,

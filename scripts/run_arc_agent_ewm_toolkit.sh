@@ -24,6 +24,7 @@ cp "$ROOT/experiments/e125/objstate.py" "$WD/"                  # object percept
 cp "$ROOT/experiments/e133/ewm_toolkit.py" "$WD/"              # plan_in_model + WorldSim + salience
 cp "$ROOT/experiments/e134/perceptors.py" "$WD/"              # K perception lenses (no game source)
 cp "$ROOT/experiments/e134/composite.py" "$WD/"              # composite_key + select_lens (no game source)
+cp "$ROOT/experiments/e142/critique.md" "$WD/"              # E142 generalization-critique prompt (generic, solution-free)
 
 # the agent's OWN deepest banked frontier (level N-1) -- prefer the source-free archive's solution.
 ARCH="$ROOT/experiments/results/arc3_fullgame_sourcefree.json"
@@ -107,6 +108,17 @@ THE METHOD (reason the WHAT; let the planner find the HOW):
    re-plan. NEVER trust the model over reality.
 7. CHAIN to the win. SAVE often: write solved.json = {"game":"$GAME","actions":[...full sequence from
    reset...],"levels":M,"win":$W} whenever you reach a new deepest level M. Each action is [a] or [6,x,y].
+
+CRITIQUE PROTOCOL (E142 -- do this BEFORE banking each new deepest level): your model must GENERALIZE to
+the next level, not just reproduce the ones you have seen. After you form/refine a level's world model and
+win hypothesis, run an adversarial generalization critique on it -- spawn a subagent with the prompt in
+\`critique.md\` (preferred), or apply that prompt to your own model as a skeptic. It hunts for the failure
+that blocks the NEXT level: hard-coded coordinates/constants, per-level magic tables, ontology drift,
+dependence on a known layout/solution, and "which part breaks if the next level reuses this mechanic in a
+different layout?". ADDRESS every serious finding (replace a hard-coded constant with an inferred rule,
+unify a drifted ontology, remove a known-layout dependency) and re-verify before you bank. A model that
+only reproduces level $N is not done; a model that predicts level $((N+1)) is. The critique is
+source-free + solution-free (it reasons only from your observations/code) -- never read game source.
 
 PERSIST -- this is the most important instruction. A plan_in_model that returns NO win does NOT mean the
 level is unsolvable; it means your model does not yet CONTAIN the winning transition. When that happens:

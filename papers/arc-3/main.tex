@@ -976,6 +976,13 @@ map. Reward is \texttt{levels\_completed} or an induced \texttt{CodeObjective}.}
 \label{fig:arch}
 \end{figure}
 
+\textbf{Two senses of ``perception.''} A clarification, since the word is overloaded. In this section
+``modality'' means \emph{action modality}---the two interaction channels ARC-AGI-3 uses (directional keys
+vs.\ coordinate clicks)---and the board state is read by a \emph{single} perceptor (the masked frame). The
+consensus below therefore selects across \emph{action channels}, not across \emph{perceptual views}. Fusing
+several perceptual \emph{lenses} of the \emph{same} frame is a distinct, orthogonal axis, taken up under
+``Two axes'' below.
+
 \textbf{Perception.} ARC-AGI-3 mixes two action modalities: directional keys
 (\texttt{ACTION1--5,7}) and \emph{coordinate clicks} (\texttt{ACTION6} with $(x,y)$). Many games are
 click-only (e.g.\ \texttt{vc33}); the board responds only to clicks on valid sprite cells, which we
@@ -999,6 +1006,17 @@ adds coverage (\texttt{ar25} needs directional, \texttt{vc33} click). We are can
 \emph{selection across views}, not a deep mechanism: its value is breadth, and the genuinely
 surprising case (\texttt{s5i5}, solved here after defeating the goal-discovery trilogy on a perfect
 model) is the one worth studying further.
+
+\textbf{Two axes of ``multi,'' not one.} The consensus above runs along the \emph{action-modality} axis
+(keys vs.\ clicks), with the state read by one perceptor (the masked frame). A second, orthogonal axis is
+\emph{perceptual perspective}: fusing several \emph{lenses} that read the same frame differently---object
+configuration, salience, the step-counter as a \emph{value} rather than a masked nuisance, symmetry, colour
+algebra, coarse regions---and selecting the highest-fidelity \emph{view} per state. The two are
+complementary: multi-modality adds \emph{interaction} coverage (some games respond only to clicks), while
+multi-perspective adds \emph{representational} coverage (some wins hinge on a feature a single lens aliases
+away). This tier exploits only the first axis; extending consensus along the perceptual-lens axis is the
+natural complement, and it is where the reasoning agent---which writes and re-perceives its own world
+model (\S\ref{sec:agent})---takes over the goal-as-procedure walls this tier cannot crack.
 
 \begin{figure}[t]
 \centering

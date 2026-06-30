@@ -373,6 +373,23 @@ def main():
             "ArcShuNavCycles": str(ka.get("cycles", 0)),
         })
 
+    # ---- E135 graph/spectral exploration (a NEGATIVE result): on the wall g50t, blind walk vs
+    #      graph-novelty vs graph-spectral (Fiedler / graph-Laplacian bottleneck) frontier
+    #      prioritization gives NO lift -- slightly fewer states, identical zero level-gains.
+    #      Exploration is the wrong lever: ARC-AGI-3 is engineered against blind search.
+    sp = jload("e135_spectral_explore.json")
+    if sp:
+        pol = sp["policies"]
+        macros.update({
+            "ArcSpectralGame": sp["game"],
+            "ArcSpectralBlindStates": str(pol["blind"]["states"]),
+            "ArcSpectralNoveltyStates": str(pol["graph_novelty"]["states"]),
+            "ArcSpectralFiedlerStates": str(pol["graph_spectral"]["states"]),
+            "ArcSpectralLevelGains": str(pol["blind"]["level_gains"]),
+            "ArcSpectralMaxLevel": str(pol["blind"]["max_level"]),
+            "ArcSpectralBudget": str(sp["budget_steps"]),
+        })
+
     # ---- codex (gpt-5.5) source-faithful vs source-free: the MODEL ABLATION. Source reveals the game's
     #      MECHANICS/win-condition (not the solution steps -- the agent still derives the action path);
     #      so the gap is the cost of DISCOVERING dynamics, not of planning steps. Both models near-parity

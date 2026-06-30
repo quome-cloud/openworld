@@ -666,6 +666,37 @@ steps of the click-only baseline), but the heuristic proposers never \emph{propo
 procedure: the EFEI theorem reduces \emph{variance}, not the \emph{bias} of a misspecified goal. Search
 with a better engine is still search; only reasoning the win clears the walls.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/world_model_forming.pdf}
+\caption{\textbf{The verification asymmetry: a \emph{forming} world model vs.\ a \emph{verifiable}
+one.} Left (\texttt{g50t}, a wall): a composite search graph after exploration distinguishes many
+states ($94$ nodes) yet terminates in \emph{no verified win}---a rich but unverifiable map. Right
+(\texttt{tu93}, solved): the verified solution is a compact, win-terminating trajectory ($70$ nodes)
+ending in a replay-checked level-$9$ win (green). A world model can have arbitrarily many
+distinguished states and still be worthless until it contains a \emph{verified} path to reward; the
+value is in the win-terminating chain, not the breadth of the explored region. This is why smarter
+exploration of the left graph does not produce the right one.}
+\label{fig:forming}
+\end{figure}
+
+\textbf{A sixth negative result: graph/spectral exploration (E135).} If the win is unreachable by
+undirected action (result 1), is the lever a \emph{smarter frontier}---steering exploration toward
+graph bottlenecks rather than expanding blindly? On the wall \texttt{\ArcSpectralGame} we compare a
+blind forward walk against graph-novelty prioritization and against Fiedler (graph-Laplacian)
+bottleneck ranking, which orders the frontier by the second-smallest eigenvector of the discovered
+state graph to push through structural chokepoints. Under a matched \ArcSpectralBudget-step budget
+all three saturate the same tiny region (\ArcSpectralBlindStates/\ArcSpectralNoveltyStates/\ArcSpectralFiedlerStates{}
+states) and produce \emph{\ArcSpectralLevelGains{} level-gains}---the spectral and novelty heuristics
+even discover slightly \emph{fewer} states than the blind walk, and none crosses a level. ARC-AGI-3
+is engineered against blind exploration on two axes at once: later levels explode the state space so
+coverage is hopeless, and the official score is an action-\emph{efficiency} measure against a median
+human baseline, so a graph-mapper that burns hundreds of wasteful actions sees its score collapse
+even when it does complete a level. The lever is therefore not better search but active hypothesis
+testing, predictive world modeling, and test-time planning---the recipe this paper advocates
+(Fig.~\ref{fig:forming}): a \emph{forming} world model must be converted into a \emph{verified}
+win-terminating one, not merely grown.
+
 \textbf{A direction in progress (E131): short-horizon receding-horizon lookahead.} The negatives above
 all try to infer a \emph{whole-level} goal from sparse feedback. E131 inverts the bottleneck: the
 explosion is in the \emph{horizon}, not the branching (per step there are only $\sim$4--7 actions), so

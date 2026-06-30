@@ -293,7 +293,7 @@ entry.}
 System & Approach & Reported result \\
 \midrule
 Frontier LLM agents & direct agent (GPT-5.4, Gemini 3.1, Opus 4.6) & $<0.4\%$~\cite{arcagi3_report} \\
-\emph{baseline1}~\cite{baseline1_ewm} & executable world models (GPT-5.5); source-free, pre-patch & \textbf{15/25 full games}, $58\%$ RHAE \\
+\emph{baseline1}~\cite{baseline1_ewm} & executable world models (GPT-5.5); source-free, pre-patch & \textbf{15/25 full games}, $\ArcRhaeBaselineOne\%$ RHAE \\
 Graph Explorer~\cite{graphexplore_arc3} & training-free graph search & 30/52 \emph{levels} (6 games) \\
 DreamTeam~\cite{dreamteam_workspace} & workspace optimization (multi-agent) & $38.4\%$ RHAE \\
 StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6\%$ RHAE \\
@@ -748,10 +748,22 @@ engine's own calculator and the official human baselines, we average \ArcRhaeMea
 \textbf{\ArcRhaeAboveBaseline{} at or above baseline1's reported \ArcRhaeBaselineOne}---with per-level
 action counts typically a \emph{third} of the human baseline (Fig.~\ref{fig:arc3rhae}). This is not an
 accident of the approach but its point: \emph{an exact, verified world model is precisely what lets you
-search for short plans}, where an approximate model cannot. These efficiency figures pertain to the
-\textbf{source-assisted} solves; on action efficiency the executable-world-model recipe in \openworld{}
-is competitive with baseline1, though source-assisted and source-free-intended protocols are not
-directly comparable.
+search for short plans}, where an approximate model cannot. These figures pertain to the
+\textbf{source-assisted} solves.
+
+\textbf{Source-free efficiency---and the cleanest comparison to baseline1.} We also score the
+\emph{audited source-free} solves (replayed and split per level against the same official human
+baselines). On the levels we complete source-free, efficiency is essentially human-capped: a mean
+per-level score of \textbf{\ArcRhaeSFPerLevel{}} with \textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{}
+levels at the human cap}---the source-free solves are \emph{as action-efficient as the source-assisted
+ones}. The official-style per-game source-free RHAE is \textbf{\ArcRhaeSFGame{}} (incomplete games scored
+as-is over all their levels), and the gap to the source-assisted \ArcRhaeMean{} is therefore
+\emph{completeness, not efficiency}---source-free completes \ArcSFGames/\ArcUnionGames{} games versus
+\ArcFullGames{} source-assisted, so missing levels score zero. This is also the most directly comparable
+number to prior art: baseline1 reports \textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE
+(source-free-intended)~\cite{baseline1_ewm}, so on the axis where the two protocols align our source-free
+solving is \emph{more} action-efficient (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{}), despite completing
+fewer full games---where we solve, we solve tightly.
 
 \textbf{Honest caveat.} This scores the \emph{executed} solution, not the offline search that found it.
 If the protocol permits offline precomputation---the downloadable environment provides each game's

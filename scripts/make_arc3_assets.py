@@ -571,6 +571,17 @@ def main():
                         + f"\\newcommand{{\\ArcRhaeN}}{{{rh['n_scored']}}}\n")
         print("appended RHAE macros")
 
+    # ---- source-free RHAE (E141): efficiency of the audited source-free solves vs the human baseline ----
+    rsf = jload("e141_rhae_sourcefree.json")
+    if rsf:
+        capped = str(rsf["per_level_at_human_cap"]).split("/")
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcRhaeSFGame}}{{{rsf['per_game_official_style_mean']:.1f}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFPerLevel}}{{{rsf['per_level_efficiency_mean']:.1f}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFLevelsCapped}}{{{capped[0]}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeSFNLevels}}{{{rsf['n_levels_scored']}}}\n")
+        print("appended source-free RHAE macros")
+
     # ---- E121 OpenWorld round-trip (each solve re-verified through a World) ----
     ow = jload("arc3_openworld_roundtrip.json")
     if ow:

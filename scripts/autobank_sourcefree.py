@@ -140,7 +140,8 @@ def main():
         arch["per_game"][g] = {"levels": depth, "win": win}
         arch["solutions"][g] = actions
         arch["roundtrip"][g] = rt
-        shutil.copy(str(p), str(wd / "solved_best.json"))      # best-keeper seed for next round
+        if os.path.abspath(str(p)) != os.path.abspath(str(wd / "solved_best.json")):
+            shutil.copy(str(p), str(wd / "solved_best.json"))  # best-keeper seed (skip self-copy)
         changed.append((g, banked, depth, win))
         print(f"[sf-bank] {g}: {banked} -> {depth}/{win} CLEAN + replay-verified + "
               f"OpenWorld-World-verified ({rt['n_states']} states, "

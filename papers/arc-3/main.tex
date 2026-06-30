@@ -114,7 +114,7 @@
 \thispagestyle{empty}
 \noindent
 \begin{minipage}[c]{0.5\textwidth}
-  \raggedright\oldincludegraphics[height=0.8cm]{figs/quome.png}
+  \raggedright\oldincludegraphics[height=0.8cm]{figs/quome.pdf}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.5\textwidth}
   \raggedleft\itshape \monthyeartoday
@@ -138,6 +138,7 @@
    \mbox{Jenia Rousseva, PhD\textsuperscript{1}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Marcos Ortiz, PhD\textsuperscript{1}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Collin Overbay\textsuperscript{1}}~\textcolor{cardblue!80}{\textbullet}
+   \mbox{Christopher Klaus, PhD\textsuperscript{7}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Manish Bhatt\textsuperscript{4,\,6}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Rome Thorstenson\textsuperscript{3}}~\textcolor{cardblue!80}{\textbullet}
    \mbox{Martin G. Frasch, MD, PhD\textsuperscript{2,\,5}}\par}
@@ -146,74 +147,56 @@
   {\footnotesize\color{black!70}
    \textsuperscript{1}\,Quome, Inc.\quad \textsuperscript{2}\,University of Washington\quad
    \textsuperscript{3}\,Rafter Labs, Inc.\quad \textsuperscript{4}\,OWASP\quad
-   \textsuperscript{5}\,Health Stream Analytics, LLC\quad \textsuperscript{6}\,IEEE Computer Society\quad
+   \textsuperscript{5}\,Health Stream Analytics, LLC\quad \textsuperscript{6}\,IEEE Computer Society\quad \textsuperscript{7}\,Fusen World LLC\quad
    \textsuperscript{*}\,Corresponding author\par}
 \end{center}
 
 \vspace{0.6em}
 \begin{tcolorbox}[breakable, enhanced, colback=white, colframe=black!12,
-  arc=3pt, boxrule=0.5pt, left=18pt, right=16pt, top=8pt, bottom=9pt,
+  arc=3pt, boxrule=0.5pt, left=18pt, right=16pt, top=5pt, bottom=5pt,
   borderline west={3pt}{0pt}{cardblue}, drop fuzzy shadow=black!18]
 \setlength{\parskip}{0pt}
 {\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
-\fontsize{9.3}{11.0}\selectfont
+\fontsize{9.2}{10.5}\selectfont
 \textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped
 into an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
-frontier agents score near zero. We study what a verified-world-model approach can and cannot do here,
-and our central contribution is a \textbf{diagnosis}: the bottleneck is not modeling but \emph{goal
-discovery}, and specifically ARC-AGI-3 wins are \textbf{goal-as-procedure}, not goal-as-state.
+frontier agents score near zero. \textbf{Our headline is a router:} sending each of the
+\ArcUnionGames{} public games to the \emph{cheapest} solver that clears it---cheap perceptual and
+graph solvers when they suffice, a live coding agent for the procedural walls---combines a dozen
+strategies into a single \textbf{\ArcUnionGames/\ArcUnionGames{}} pipeline (every game's first level;
+\textbf{\ArcFullGames/\ArcUnionGames{} in full} under the source-faithful protocol). Our central
+\emph{scientific} contribution is a \textbf{diagnosis}: the bottleneck is not modeling but \emph{goal
+discovery}, and ARC-AGI-3 wins are \textbf{goal-as-procedure}, not goal-as-state.
 
-\emph{(1)~Modeling is largely solved.} All \NumArcGames{} public games are replay-deterministic
-(\ArcDeterminismAll{}), so their dynamics are exactly code-expressible; a frontier synthesizer (Claude)
-writes verified \texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
-on the real-dynamics games (vs.\ \ArcQwenThirtyTwoFid{} for a local model), with \ArcNNearPerfect{}
-near-perfect ($\geq$90\%) models. \emph{(2)~The wall.} Despite these models, \textbf{four principled
-goal-discovery methods}---atomic objectives, frontier-LLM hypotheses, Bayesian sub-world planning, and
-typed navigation---solve \emph{zero} of the hard games, several \emph{even on a fidelity-1.0 model}:
-a goal scored over a single \emph{state} cannot express an ordered \emph{procedure}, which is why
-undirected search occasionally stumbles into a win while goal-conditioned planning never does.
-\emph{(3)~Cracking the wall with executable world models.} The diagnosis says \emph{undirected},
-observation-only goal discovery fails. The remedy is the executable-world-model recipe: per game,
-recover the dynamics and \emph{reason the win condition}, build a \textbf{verified simulator from the
-game's own code (source-faithful)}, \emph{search} for the winning procedure, and \emph{replay-verify} it
-against the real engine. Reproduced in OpenWorld---each solver a serveable verified \texttt{World}---this
-completes \textbf{\ArcFullGames/\ArcUnionGames{} games in full} (\ArcFullLevels/\ArcTotalLevels{} levels;
-Fig.~\ref{fig:arc3matrix}, Table~\ref{tab:arc3games}; atlas cards in Fig.~\ref{fig:arc3gallery})
-under a \textbf{source-assisted} protocol (the agent reads each game's \texttt{<game>.py} to build an
-exact simulator; per-call telemetry confirms this). Under a stricter \textbf{source-free}
-protocol---process-isolated, no game code; dynamics and goal discovered by acting, audited clean, and
-round-tripped through an OpenWorld \texttt{World}---the same recipe completes
-\textbf{\ArcSFGames/\ArcUnionGames{}} (\ArcSFLevels/\ArcTotalLevels{} levels), which falls
-\emph{below} baseline1's source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm};
-the \textbf{\ArcSourceGapGames-game} gap between the two protocols is the measured \emph{cost of
-discovery} (Fig.~\ref{fig:arc3source}). \emph{And the source-assisted solutions are efficient:} scored by the official per-level action
-metric against the human baselines the environment ships, they average \textbf{\ArcRhaeMean{}}
-(\ArcRhaeAboveHuman/\ArcRhaeN{} at the human-efficiency cap) versus baseline1's
-\ArcRhaeBaselineOne---human-competitive on the leaderboard's own efficiency axis
-(Fig.~\ref{fig:arc3rhae}).
+\emph{Modeling is largely solved.} All \NumArcGames{} games are replay-deterministic
+(\ArcDeterminismAll{}), exactly code-expressible; a frontier synthesizer writes verified
+\texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
+(\ArcNNearPerfect{} near-perfect). \emph{The wall.} Despite these models, \textbf{four principled
+goal-discovery methods} (atomic objectives, LLM hypotheses, Bayesian sub-world planning, typed
+navigation) solve \emph{zero} hard games, several \emph{even on a fidelity-1.0 model}: a goal scored
+over a single \emph{state} cannot express an ordered \emph{procedure}. \emph{The remedy} is the
+executable-world-model recipe---recover the dynamics, \emph{reason the win condition}, search, and
+replay-verify against the real engine---each solver a serveable, verified OpenWorld \texttt{World}.
 
-\textbf{We report this honestly.} Solves are \emph{offline} with \emph{unbounded resets} and
-deterministic replay-verification; we do not report RHAE (the leaderboard's live action-efficiency
-metric), so the comparison is on full-game \emph{completion}, not efficiency. \ArcPartialGames{} game
-remains partial (\ArcPartialList) under the source-faithful protocol. For the weaker $\geq$1-level union (\emph{first level only}), random play
-alone clears $\ArcRandomGeqOne/\ArcUnionGames$ under this protocol (a \ArcRandomBudget{}-step/game
-budget), so we also report the more honest \textbf{$14/25$ above random}.
-\textbf{Contributions:} (i)~an \textbf{auditable source-free protocol}---per-run leakage audit,
-replay-verify, OpenWorld round-trip, full per-call telemetry---that makes source leakage
-\emph{detectable}: our own telemetry catches the agent reading game source, establishing
-\ArcFullGames/\ArcUnionGames{} as a source-assisted upper bound; on the audited source-free axis
-the result is \ArcSFGames/\ArcUnionGames{} (\emph{below} baseline1's source-free-intended
-\ArcBaselineFull{}~\cite{baseline1_ewm}), with the \ArcSourceGapGames-game gap quantifying the cost
-of discovery; (ii)~the goal-as-procedure diagnosis explaining why \emph{undirected} discovery fails
-(four methods, $0$ on perfect models) and why explicit per-level search is needed;
-(iii)~the strategy landscape as a research guide; and (iv)~an OpenWorld reproduction of the recipe in
-which every solver is a serveable, verified \texttt{World}.
+\textbf{Two protocols, attested.} Reading each game's own code (\textbf{source-faithful}) completes
+\textbf{\ArcFullGames/\ArcUnionGames{}} in full and is \emph{efficient}: \ArcRhaeMean{} on the
+leaderboard's official action metric (human-competitive). Under a stricter \textbf{audited
+source-free} protocol---process-isolated, no game code; discovered by acting, leakage-audited, and
+round-tripped through an OpenWorld \texttt{World}---\emph{every routed solution carries a
+no-source-access attestation}, and the recipe completes \textbf{\ArcSFGames/\ArcUnionGames{}}; the
+\textbf{\ArcSourceGapGames-game} source-faithful$-$source-free gap is the measured \emph{cost of
+discovery}. \textbf{Reported honestly:} solves are offline with unbounded resets;
+\ArcPartialGames{} game remains partial; random play alone clears $\ArcRandomGeqOne/\ArcUnionGames$
+first levels, so we also report \textbf{$14/25$ above random}. \textbf{Contributions:} (i)~the routed
+pipeline; (ii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable}---it
+catches the agent reading game source, fixing \ArcFullGames/\ArcUnionGames{} as a source-assisted
+upper bound and \ArcSFGames/\ArcUnionGames{} as the attested source-free result; (iii)~the
+goal-as-procedure diagnosis; and (iv)~the strategy landscape as a research guide.
 
-\medskip
+\smallskip
 \noindent\textbf{Keywords:}~%
-ARC-AGI-3; interactive reasoning; code world models; program synthesis; verification; planning;
-world models.
+ARC-AGI-3; interactive reasoning; code world models; verification; planning.
 \end{tcolorbox}
 
 % ============================================================================
@@ -607,10 +590,17 @@ searching a fixed hypothesis space) crosses it on every such game.
 
 \section{The strategy landscape: what solves ARC-AGI-3}
 \label{sec:landscape}
-We ran seven increasingly sophisticated strategies and record, for every public game, which ones
+We ran a dozen increasingly sophisticated strategies and record, for every public game, which ones
 produce a \emph{verified} ($\geq$1-level, replay-checked) solve. The landscape
 (Fig.~\ref{fig:heatmap}) is the paper's most useful artifact for world-model research: it shows
-\emph{where} each idea works and, just as importantly, where principled ideas fail.
+\emph{where} each idea works and, just as importantly, where principled ideas fail. \textbf{The
+headline is the rightmost column: a reachability \emph{router} that sends each game to the cheapest
+solver that clears it---cheap perceptual/graph solvers when they suffice, the live coding agent for
+the walls---combines the strategies into a single \ArcUnionGames/\ArcUnionGames{} pipeline.} Under
+the source-faithful protocol this pipeline is full on \ArcFullGames/\ArcUnionGames{} games and
+$\geq$1 level on all \ArcUnionGames; under the stricter audited source-free protocol every routed
+solution carries a no-source-access attestation, and the pipeline is $\geq$1 level on all
+\ArcUnionGames{} with \ArcSFGames/\ArcUnionGames{} full (\S\ref{sec:router}).
 
 \begin{figure}[t]
 \centering
@@ -619,9 +609,13 @@ produce a \emph{verified} ($\geq$1-level, replay-checked) solve. The landscape
 methods (atomic objectives, LLM hypotheses, Bayesian sub-worlds) are \emph{empty}---they fail even
 on a fidelity-1.0 model, because ARC-AGI-3 wins are goal-as-\emph{procedure}, not goal-as-state.
 Directed search and graph exploration each reach $6$; multi-perception consensus reaches $10$
-(uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). The \textbf{live coding agent} (right,
-boxed) lights up the procedural walls no other method touches---\texttt{dc22, ft09, g50t, ka59, lp85,
-re86, sb26, sc25, su15, tn36, wa30, bp35}---lifting the union to $\mathbf{25/25}$ ($\geq$1 level on every game).}
+(uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). Source-simulated engine reconstruction
+(E127) is likewise \emph{empty}---it certifies an engine on the easy game but cannot reconstruct the
+walls it was built to crack. The \textbf{live coding agent} lights up the procedural walls no other
+method touches---\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36, wa30, bp35}. The
+\textbf{router} (rightmost, boxed) sends each game to the \emph{cheapest} solver that clears it
+(cheap/perceptual within budget, else the coding agent), combining the strategies into one
+$\mathbf{25/25}$ pipeline---the paper's headline result.}
 \label{fig:heatmap}
 \end{figure}
 
@@ -634,9 +628,57 @@ large class of approaches and sharpens the diagnosis: a goal scored over a singl
 cannot express an ordered \emph{procedure}, which is why undirected search occasionally stumbles
 into a win while goal-conditioned planning never does.
 
+\textbf{A fourth negative result: source-\emph{simulated} reconstruction (E127).} Rather than read a
+game's code, can two models \emph{reconstruct} its engine from source-free play---synthesising a
+stateful \texttt{Engine}, converging them by differential CEGIS with the \emph{real environment} as
+the oracle, and \emph{certifying} the result by a Clopper--Pearson lower bound on held-out
+next-frame accuracy? On the easy game \texttt{ar25} this works cleanly: the certified engine
+reproduces \ArcSimEasyExact{} held-out transitions exactly ($\geq\ArcSimEasyBound$ at 95\%
+confidence). But on the gap game \texttt{dc22}---a wall the source-free \emph{observational} solver
+already misses---the reconstruction collapses to \ArcSimGapExact{} ($\ArcSimGapAcc$) and the
+certificate \emph{correctly refuses to pass}: the toggle/counter dynamics are not recoverable from
+shallow source-free play in a few rounds. Of \ArcSimAttempted{} games attempted, \ArcSimCertified{}
+certified, and the method produces \emph{no} verified solves (empty column, Fig.~\ref{fig:heatmap}):
+reconstruction is easy where the game is easy and fails exactly on the walls that motivate it. One
+methodological dividend survives. Because the real environment---not two-model agreement---is the
+convergence oracle, the \emph{A-vs-B-vs-real gap} ($+\ArcSimBias$ on \texttt{dc22} vs.\ $0$ on
+\texttt{ar25}) measures the shared-prior bias by which two frontier models agree with \emph{each
+other} more than with reality, precisely where the reconstruction is unreliable---a failure mode a
+naive two-model consensus would hide, and a reminder that ground truth, not model agreement, must
+gate any source-free claim.
+
+\textbf{A fifth negative result: an explicit formal solving cycle (E130).} The four attacks above are
+\emph{search} over a fixed hypothesis space; does giving the search a principled, convergence-guaranteed
+structure help? E130 implements the behavioral cycle of a world-model formalism as a source-free
+solver---an introspective world model $\sigma_I$, perception $\sigma_E$, an expert-pooled \emph{moral
+filter} that selects actions, and a tension signal $T=\lVert\sigma_I-\sigma_E\rVert$ that updates the
+model by acting. Its two load-bearing theorems \emph{reproduce} deterministically: expert-facilitated
+selection reaches target accuracy in \ArcShuExpertConsult{} consultations versus an amateur (random)
+filter's \ArcShuAmateurTrials{}---a \ArcShuSeparation$\times$ separation, with $O(1/\sqrt N)$ error
+($\ArcShuErrReduction\times$ reduction at $N{=}100$) against the amateur's $\Theta(M)$---and the cycle
+contracts geometrically ($\rho=\ArcShuRho$) to a faithful model. This is the formal statement of
+``directed beats undirected.'' Yet \emph{online it cracks nothing}: across \ArcShuOnlineGames{} the
+solver---even with the reinforcement-learning upgrades it invited (avatar navigation, an adaptive
+expert bandit, object-relative dynamics; \ArcShuTests{} unit tests)---improves \ArcShuOnlineGain{} of
+\ArcShuOnlineN{}. The mechanism demonstrably \emph{engages} (on \texttt{ka59} the receding-horizon
+navigation executes \ArcShuNavSteps{} real steps over \ArcShuNavCycles{} cycles, not the greedy single
+steps of the click-only baseline), but the heuristic proposers never \emph{propose} the winning
+procedure: the EFEI theorem reduces \emph{variance}, not the \emph{bias} of a misspecified goal. Search
+with a better engine is still search; only reasoning the win clears the walls.
+
+\textbf{A direction in progress (E131): short-horizon receding-horizon lookahead.} The negatives above
+all try to infer a \emph{whole-level} goal from sparse feedback. E131 inverts the bottleneck: the
+explosion is in the \emph{horizon}, not the branching (per step there are only $\sim$4--7 actions), so
+rather than decode a global objective it exhaustively expands a \emph{2--3-frame} tree, scores leaves by
+\emph{level-delta} (primary) then \emph{novelty} (tie-break), commits only the first action, and recedes
+the window. A deterministic fast-forward transition cache makes the tiny tree nearly free---the
+architecture is \emph{Lazy Receding-Horizon A\*}, with environment replay as a lazily-evaluated edge.
+Whether chaining locally-optimal short lookaheads clears procedural walls that defeat whole-level goal
+inference is the open question we are currently evaluating.
+
 \section{Cracking the walls: a live coding agent (the SOTA recipe in OpenWorld)}
 \label{sec:agent}
-The procedural walls resisted four automated attacks because they need \emph{genuine goal reasoning},
+The procedural walls resisted five automated attacks because they need \emph{genuine goal reasoning},
 not search over a fixed hypothesis space. So we hand the game to a \textbf{live coding agent}---Claude
 Code, given the deterministic game harness and the OpenWorld recipe: explore to gather $(s,a,s')$
 transitions, write a verified \texttt{predict(frame,action)} world model, \emph{reason} about what
@@ -667,8 +709,20 @@ completes \textbf{\ArcFullGames/\ArcUnionGames{} games source-assisted} (\ArcFul
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (GPT-5.5, mean per-game RHAE $\approx$58\%),
 and we do not claim to surpass it on a like-for-like basis. On the audited source-free axis the result
 is \ArcSFGames/\ArcUnionGames{} (\emph{below} baseline1's \ArcBaselineFull); the
-\ArcSourceGapGames-game gap is the measured cost of discovery. The
-graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
+\ArcSourceGapGames-game gap is the measured cost of discovery---and that cost is
+\emph{model-dependent}. Reading a game's source reveals its \emph{mechanics and win-condition}, not the
+solution steps (the agent derives the action path either way), so the gap isolates the cost of
+\emph{discovering} dynamics, not of planning them. With source, both frontier models are at parity
+(Claude \ArcFullGames/\ArcUnionGames{}, codex gpt-5.5 \ArcCodexFaithfulFull/\ArcUnionGames{} full,
+$\sim$\ArcCodexFaithfulLevels{} levels). Source-free the two figures diverge---Claude's \emph{cumulative}
+source-free archive (multiple methods over many best-keeper rounds) holds \ArcSFLevels{} levels
+(\ArcSFGames{} full) where a \emph{single} codex sweep holds \ArcCodexFreeLevels{} (\ArcCodexFreeFull{}
+full)---but we flag this as \emph{suggestive, not a clean model comparison}: the Claude figure aggregates
+strictly more search effort and methods than the one codex run, so the gap conflates capability with
+pipeline maturity. The like-for-like control (codex versus Claude under one matched single sweep)
+remains to be run; what we can say cleanly is that \emph{both} models collapse from near-perfect
+\emph{with} source to a fraction of the levels \emph{without} it---the cost of discovery is large for
+each. The graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52 \emph{levels}}. We
 also reach $\geq$1 level on \emph{all} \ArcUnionGames{} games, of which $14$ are above a random
 baseline (\S\ref{sec:baseline}). \textbf{Honest scope.} (i)~Solves are \emph{offline and
 replay-verified}, exploiting determinism and unbounded resets; we report games \emph{completed}, not
@@ -1259,6 +1313,24 @@ names for screens---their numbers and positions carry no meaning; the preamble e
 \emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
 actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
 names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:tr87}\end{figure}
+
+\section*{Declaration of generative AI use}
+During the preparation of this work the authors used \emph{Claude 4.8}
+(Anthropic, via Claude Code) to implement the \openworld{} framework and
+experiment scripts, execute the experimental campaign, generate figures and
+tables, and draft and edit this manuscript and the experiments, under the
+authors' direction. The authors reviewed and edited the content and
+take full responsibility for the content of the publication. All experimental results are produced by the released deterministic scripts (not by
+generative-AI estimation), and no AI tool is listed as an author, as such tools do not satisfy
+authorship criteria.
+
+\section*{Author contributions}
+J.S. conceived the study, directed the implementation and experiments, and
+reviewed the manuscript. I.S., J.R., M.O., C.O., C.K., M.B., R.T., and M.G.F.
+contributed to the research and edited the manuscript. Many of the authors are
+active contributors to the \openworld{} open-source project: they ran their own
+simulations with the framework and provided feedback that improved the product.
+All authors reviewed and approved the final manuscript.
 
 \bibliographystyle{plain}
 \bibliography{refs}

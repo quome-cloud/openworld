@@ -1,0 +1,29 @@
+{
+ "r11l": {
+  "game": "r11l",
+  "seed_levels": 2,
+  "levels": 2,
+  "win": 6,
+  "improved": false,
+  "cycles": 60,
+  "tension_steps": 59
+ },
+ "g50t": {
+  "game": "g50t",
+  "seed_levels": 3,
+  "levels": 3,
+  "win": 7,
+  "improved": false,
+  "cycles": 130,
+  "tension_steps": 129
+ },
+ "ka59": {
+  "game": "ka59",
+  "seed_levels": 6,
+  "levels": 6,
+  "win": 7,
+  "improved": false,
+  "cycles": 38,
+  "tension_steps": 199
+ }
+}

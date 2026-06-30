@@ -56,5 +56,11 @@ def test_first_disagreement():
     assert same is None
 
 def test_lookup_table_heuristic():
-    assert engine.looks_like_lookup_table("class Engine:\n    TABLE = {" + ",".join(f"{i}:{i}" for i in range(200)) + "}\n") is True
+    # A genuine memorized frame-table dump (tens of thousands of int literals) is flagged...
+    big = "class Engine:\n    TABLE = {" + ",".join(f"{i}:{i}" for i in range(16000)) + "}\n"
+    assert engine.looks_like_lookup_table(big) is True
+    # ...but a legitimate engine -- even one embedding a full literal 64x64 board (~4096 ints) -- is NOT
+    # (this is the dc22 false-reject the old threshold caused).
+    board = "class Engine:\n    B = [" + ",".join(str(i % 16) for i in range(4096)) + "]\n"
+    assert engine.looks_like_lookup_table(board) is False
     assert engine.looks_like_lookup_table(TOY_ENGINE_SRC) is False

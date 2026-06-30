@@ -72,15 +72,71 @@ def _ab_agreement(fa, fb, holdout):
     return (agree / tot) if tot else 0.0
 
 
+_HEX = "0123456789abcdef"
+
+
+def _grid(frame):
+    """Render a 2D int frame as rows of single hex chars (colors 0-15 -> 0-f)."""
+    return "\n".join("".join(_HEX[int(c) & 15] for c in row) for row in np.asarray(frame))
+
+
+def _changed_cells(a, b, k=60):
+    """Compact diff: list the cells that differ between two frames as (y,x):old->new."""
+    a = np.asarray(a); b = np.asarray(b)
+    if a.shape != b.shape:
+        return "[frame shape changed]"
+    ys, xs = np.where(a != b)
+    if len(ys) == 0:
+        return "(no visible change)"
+    parts = [f"({int(y)},{int(x)}):{int(a[y, x])}->{int(b[y, x])}" for y, x in list(zip(ys, xs))[:k]]
+    extra = "" if len(ys) <= k else f" ...(+{len(ys) - k} more cells)"
+    return "; ".join(parts) + extra
+
+
+def _render_transitions(episodes, k_eps=2, k_steps=10):
+    """Render a few observed episodes: the reset board in full, then per-action changed cells."""
+    out = []
+    for ei, ep in enumerate(episodes[:k_eps]):
+        out.append(f"-- episode {ei}: RESET board (levels={ep[0]['levels']}) --\n{_grid(ep[0]['frame'])}")
+        for i in range(1, min(len(ep), k_steps + 1)):
+            act = ep[i]["action"]
+            out.append(f"action {act} -> changed: {_changed_cells(ep[i - 1]['frame'], ep[i]['frame'])}"
+                       f"  (levels {ep[i - 1]['levels']}->{ep[i]['levels']})")
+    return "\n".join(out)
+
+
 def _prompt(action_api, observed, cexs, round_idx):
-    """Build the model prompt (text only; tests ignore it). Includes the action API, a few observed
-    transitions, and the real-labeled counterexamples from prior rounds."""
-    lines = [f"Reconstruct the game engine as a Python class `Engine` (reset/step/is_win/state).",
-             f"Action API: {action_api}", f"Round {round_idx}."]
-    for c in cexs[:12]:
-        lines.append(f"COUNTEREXAMPLE after actions {[a[0] for a in c['actions']]}: your frame was wrong; "
-                     f"the REAL next frame differs (kind={c['kind']}).")
-    lines.append('Reply strict JSON: {"engine_src": "...", "rationale": "..."}')
+    """Build the model prompt: the stateful-engine CONTRACT + rendered observed play (frames + per-step
+    changed cells) + the real-labeled counterexamples to fix. The model only ever sees frames the agent
+    perceived by acting -- never game source (source-free)."""
+    lines = [
+        "You are reverse-engineering the dynamics of a DETERMINISTIC grid game and must output a Python",
+        "class `Engine` that reproduces it from observed play. Contract:",
+        "  class Engine:",
+        "    def __init__(self): ...        # set self.state, a dict that MUST include integer key 'levels'",
+        "    def reset(self): ...           # -> numpy 2D int array (colors 0-15); (re)sets self.state",
+        "    def step(self, action): ...    # action=(kind,x,y); kind 1=up 2=down 3=left 4=right 5,7=other,",
+        "                                   #   6=click at x=col,y=row (x,y are None for non-click). returns next frame",
+        "    def is_win(self, prev_frame): ...  # read self.state (procedural progress) -> bool",
+        "Only `np` (numpy) and plain Python are available -- NO imports, no file/network access.",
+        f"Action space / mechanics hint for THIS game: {action_api}",
+        f"(reconstruction round {round_idx})",
+        "",
+        "OBSERVED PLAY (boards are rows of hex 0-f for colors 0-15; transitions list only the cells that changed):",
+        _render_transitions(observed),
+    ]
+    if cexs:
+        lines.append("\nYOUR PREVIOUS ENGINE WAS WRONG at these transitions -- fix them:")
+        for c in cexs[:8]:
+            acts = [a[0] for a in c.get("actions", [])]
+            rf, ef = c.get("real_frame"), c.get("engine_frame")
+            if rf is not None and ef is not None:
+                diff = _changed_cells(ef, rf)
+                lines.append(f"  after actions {acts}: your frame differs from REAL at {diff}")
+            else:
+                lines.append(f"  after actions {acts}: property violation (kind={c.get('kind')})")
+    lines.append('\nReply with STRICT JSON ONLY: {"engine_src": "<full python defining class Engine>", '
+                 '"rationale": "<one sentence>"}')
     return "\n".join(lines)
 
 

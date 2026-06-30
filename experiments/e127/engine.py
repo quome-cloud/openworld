@@ -101,10 +101,15 @@ def first_disagreement(factoryA, factoryB, actions):
     return None
 
 
-def looks_like_lookup_table(src, max_int_literals=120):
-    """Static degeneracy heuristic: an engine that memorizes observed frames as a big literal table.
-    Flags sources with an excessive count of integer literals (a frame->frame dict). The PRIMARY
-    defense against memorization is the disjoint held-out set in certify; this is a cheap pre-filter."""
+def looks_like_lookup_table(src, max_int_literals=30000):
+    """Static degeneracy backstop: an engine that memorizes observed frames as a giant literal table.
+    Flags only sources with an ENORMOUS count of integer literals -- a frame->frame dump of the corpus
+    is ~(n_transitions x 4096) literals (hundreds of thousands), whereas a LEGITIMATE engine that
+    embeds even a full literal 64x64 board is only ~4096 (and loop/region-based engines are ~100-300).
+    The threshold sits far above any honest board-embedding so real-game engines are never false-
+    rejected (the 120 default false-rejected real engines -- see dc22). The PRIMARY anti-memorization
+    defense is the DISJOINT held-out set in certify: a corpus-memorizer scores ~0 on transitions it
+    never saw and cannot certify regardless. This static check is only a cheap backstop for absurd dumps."""
     import re
     ints = re.findall(r"(?<![\w.])\d+", src)
     return len(ints) > max_int_literals

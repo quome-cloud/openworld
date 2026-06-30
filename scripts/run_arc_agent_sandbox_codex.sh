@@ -25,6 +25,15 @@ the rules BY ACTING and reason the win condition from the frames you observe.
 
 Run python with: $AGENT_PY   (it has numpy; it CANNOT import arc_agi -- do not try).
 
+EXECUTION DISCIPLINE (this environment runs your Python from STDIN, with no __main__ file on disk):
+- WRITE your code to .py FILES in this directory and run them: \`$AGENT_PY myscript.py\`. Do NOT pipe
+  scripts via stdin/heredoc -- re-exec of '<stdin>' and child processes FAIL here.
+- Do NOT use multiprocessing / Process / Pool / a ProcessPool -- child processes CANNOT spawn in this
+  stdin-run environment; they crash and waste your ENTIRE time budget (this is exactly what stalled
+  prior runs). Run SINGLE-PROCESS and SEQUENTIAL -- the env is fast (~0.04 ms/step, 0.6 ms/reset), so a
+  single process explores tens of thousands of steps per minute.
+- Make ONE SandboxGame and reuse it via reset()+replay; never re-create it in a loop.
+
 Harness (arc3_sandbox.py, already in this directory):
     from arc3_sandbox import SandboxGame
     g = SandboxGame("$GAME")
@@ -36,7 +45,10 @@ Harness (arc3_sandbox.py, already in this directory):
 The env is DETERMINISTIC: replaying actions from reset() reproduces frames -> explore offline, then
 replay-verify. Clicks register only on valid sprite cells (try distinct / non-background cells, not (0,0)).
 
-Recipe (the OpenWorld way, SOURCE-FREE):
+Recipe (the OpenWorld way, SOURCE-FREE) -- REASON the win; do NOT brute-force:
+Random/parallel search does NOT crack these games: a win is an ordered PROCEDURE, not a state score.
+Spend your budget UNDERSTANDING the mechanic and reasoning the win condition, then do a SMALL, targeted
+search -- not a giant random sweep.
 1. EXPLORE by acting: gather (frame, action, next_frame, levels) transitions; learn what each action does.
 2. MODEL: write predict(frame, action) reproducing observed transitions (verify on held-out).
 3. GOAL: REASON from the observed frames what raises g.levels at THIS level. Test it.

@@ -315,6 +315,84 @@ def main():
             "ArcRandomMaxDepth": str(e117.get("max_depth_per_episode",300)),
         })
 
+    # ---- E127 source-SIMULATED reconstruction (a NEGATIVE result): reconstruct each game's engine
+    #      from source-free play and CERTIFY it against the real env (Clopper-Pearson held-out bound).
+    #      Certifies the easy game (ar25) but the gap game (dc22) is unreconstructable from shallow play;
+    #      the A-vs-B-vs-real gap flags shared-prior bias that naive two-model agreement would miss. ----
+    ss = jload("arc3_source_simulated.json")
+    if ss:
+        ar = ss.get("ar25", {}); dc = ss.get("dc22", {})
+        arc_ = ar.get("certificate", {}) or {}; dcc = dc.get("certificate", {}) or {}
+        n_cert = sum(1 for v in ss.values() if (v.get("certificate") or {}).get("pass"))
+        macros.update({
+            "ArcSimAttempted": str(len(ss)),
+            "ArcSimCertified": str(n_cert),
+            "ArcSimEasyExact": f"{arc_.get('exact',0)}/{arc_.get('n',0)}",
+            "ArcSimEasyBound": pct(arc_.get("acc_lower", 0) or 0),
+            "ArcSimGapExact": f"{dcc.get('exact',0)}/{dcc.get('n',0)}",
+            "ArcSimGapAcc": pct(dc.get("champion_acc", 0) or 0),
+            "ArcSimBias": f"{(dc.get('ab_vs_real_gap') or 0):.2f}",
+        })
+
+    # ---- E128 Go-Explore (a NEGATIVE result): the SOTA sparse-reward explorer, seeded from each
+    #      banked frontier, finds 0 new levels on the procedural walls -> the wall is reasoning, not search.
+    ge = jload("arc3_go_explore.json")
+    if ge:
+        steps = max((r.get("real_steps", 0) or 0) for r in ge.values())
+        cells = [r.get("archive_cells", 0) or 0 for r in ge.values()]
+        macros.update({
+            "ArcGoExploreGames": ", ".join(f"\\texttt{{{g}}}" for g in sorted(ge)),
+            "ArcGoExploreN": str(len(ge)),
+            "ArcGoExploreGain": str(sum(1 for r in ge.values() if r.get("improved"))),
+            "ArcGoExploreSteps": f"{steps:,}".replace(",", "{,}"),
+            "ArcGoExploreCells": f"{min(cells)}--{max(cells)}" if cells else "0",
+        })
+
+    # ---- E130 SHU-cycle solver: the formalism's behavioral cycle. The two load-bearing theorems
+    #      reproduce (EFEI separation O(1/sqrt N) vs amateur Theta(M); damped convergence), a FORMAL
+    #      "directed beats undirected" -- but the online solver (v1 heuristic experts; v2 + navigation,
+    #      bandit weights, lifted dynamics) cracks 0 levels: a validated engine, not a SOTA solver.
+    shu = jload("e130_shu_cycle.json")
+    if shu:
+        macros.update({
+            "ArcShuExpertConsult": str(shu["expert_consultations"]),
+            "ArcShuAmateurTrials": str(round(shu["amateur_trials_mean"])),
+            "ArcShuSeparation": str(round(shu["amateur_trials_mean"] / max(shu["expert_consultations"], 1))),
+            "ArcShuErrReduction": f"{shu['expert_error_1'] / shu['expert_error_100']:.1f}",
+            "ArcShuRho": f"{shu['rho']:.1f}",
+            "ArcShuTests": "32",
+        })
+    eo = jload("e130_online.json")
+    if eo:
+        ka = eo.get("ka59", {})
+        macros.update({
+            "ArcShuOnlineN": str(len(eo)),
+            "ArcShuOnlineGain": str(sum(1 for r in eo.values() if r.get("improved"))),
+            "ArcShuOnlineGames": ", ".join(f"\\texttt{{{g}}}" for g in sorted(eo)),
+            "ArcShuNavSteps": str(ka.get("tension_steps", 0)),     # ka59: nav engaged (steps >> cycles)
+            "ArcShuNavCycles": str(ka.get("cycles", 0)),
+        })
+
+    # ---- codex (gpt-5.5) source-faithful vs source-free: the MODEL ABLATION. Source reveals the game's
+    #      MECHANICS/win-condition (not the solution steps -- the agent still derives the action path);
+    #      so the gap is the cost of DISCOVERING dynamics, not of planning steps. Both models near-parity
+    #      WITH source; source-free, the Claude agent holds far more than codex.
+    cf = jload("codex_full_game.json")
+    if cf:
+        macros.update({
+            "ArcCodexFaithfulFull": str(sum(1 for v in cf.values() if v.get("full"))),
+            "ArcCodexFaithfulLevels": str(sum(v.get("levels", 0) for v in cf.values())),
+        })
+    csf = jload("arc3_fullgame_sourcefree_codex.json")
+    if csf:
+        pg = csf.get("per_game", csf)
+        macros.update({
+            "ArcCodexFreeFull": str(sum(1 for v in pg.values() if isinstance(v, dict)
+                                        and v.get("win") and v.get("levels", 0) >= v.get("win", 99))),
+            "ArcCodexFreeLevels": str(sum(v.get("levels", 0) for v in pg.values() if isinstance(v, dict))),
+            "ArcCodexFreeGames": str(len(pg)),
+        })
+
 
     # ---- E99 solve sweep (the successful directed-search approach) ----
     sweep=jload("e99_deep_sweep.json")

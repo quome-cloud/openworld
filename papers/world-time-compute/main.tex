@@ -848,7 +848,7 @@ LoRA), with the two strict train/test splits---and Figure~\ref{fig:arc} reports 
 rule-preserving augmentation (dihedral $\times$ color) turns it into unlimited
 \emph{exactly}-labeled rows (the transition is code, so the oracle is execution), which
 LoRA-SFT a frozen 4-bit Qwen2.5-7B---only the small adapters train. \emph{Bottom:} two
-strict world-level holdouts---(A) the cross-task ladder trains on 25--400 worlds and is scored
+strict world-level holdouts---(A) the cross-task ladder trains on 25--200 worlds and is scored
 on \emph{disjoint} held-out worlds; (B) test-time training fits a fresh adapter on a single
 held-out world's demos (its test pair excluded) and predicts that test. The payoff bars track
 exact-match vs.\ world-time compute, with a corrupted-label arm as the discriminator: if the

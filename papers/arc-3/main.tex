@@ -332,6 +332,17 @@ It is therefore \emph{not} directly comparable to baseline1's source-free-intend
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}; we do not claim to surpass it on a
 like-for-like basis. Only \ArcPartialGames{} game remains partial (\ArcPartialList).
 
+\textbf{The result is model-portable: Claude and Codex agree.} The source-assisted recipe is not specific
+to one model. Running the same protocol with \ArcCodexModel{} (Codex) completes
+\ArcCodexFullGames/\ArcCodexUnionGames{} games---matching Claude---and the per-game level counts are
+\emph{identical on every game except} \texttt{lf52} (Fig.~\ref{fig:arc3codex}). On \texttt{lf52} Codex
+reaches level~\ArcCodexLfTwoLevels{} versus Claude's level~\ArcClaudeLfTwoLevels{} (neither completes its
+\ArcCodexLfTwoWin{} levels), so Codex totals \ArcCodexLevels/\ArcCodexTotalLevels{} levels against Claude's
+\ArcFullLevels/\ArcTotalLevels{}---a single-game, three-level edge and the only difference between the two
+runs. Codex is also notably command-efficient (\ArcCodexCmdLo--\ArcCodexCmdHi{} agent commands per game).
+The takeaway is near-total parity: both capable agents recover each game's dynamics from source and search
+to completion, with the lone open game (\texttt{lf52}) hard for both.
+
 \textbf{Source-free.} The agent runs in a \emph{process-isolated} sandbox with \emph{no} access to the
 game source---it must discover the dynamics by acting and infer the win condition from frames. A solve
 is banked only if it (i) audits clean (no source read), (ii) replay-verifies, \emph{and} (iii)
@@ -413,6 +424,20 @@ dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames. Green $=$ fully
 shown), pale green $=$ partial, grey $=$ unsolved. The \ArcSourceGapGames-game gap is the measured cost
 of discovery. Both replay-verified; neither uses banked solutions.}
 \label{fig:arc3source}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_codex_head_to_head.png}
+\caption{\textbf{Claude vs.\ Codex (\ArcCodexModel{}), source-assisted head-to-head.} Per game (sorted),
+levels completed by Claude (blue) and Codex (ochre); the grey cap marks each game's win ceiling (its
+level count). Both models complete \ArcCodexFullGames/\ArcCodexUnionGames{} games and reach
+\emph{identical} per-game levels on all \ArcCodexUnionGames{} games \emph{except} \texttt{lf52}, where
+Codex reaches L\ArcCodexLfTwoLevels{} and Claude L\ArcClaudeLfTwoLevels{} (neither completes its
+\ArcCodexLfTwoWin{} levels). That lone game gives Codex \ArcCodexLevels/\ArcCodexTotalLevels{} levels
+versus Claude's \ArcFullLevels/\ArcTotalLevels{}; Codex uses \ArcCodexCmdLo--\ArcCodexCmdHi{} commands per
+game. Both reads are source-assisted and replay-verified; neither uses banked solutions.}
+\label{fig:arc3codex}
 \end{figure}
 
 \begin{figure}[t]

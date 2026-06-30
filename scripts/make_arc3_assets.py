@@ -216,6 +216,52 @@ def source_matrix_assets(fg, sfg):
     plt.close(fig); print("wrote arc3_source_matrix.png")
 
 
+def codex_head_to_head_assets(claude_pg, codex):
+    """Claude vs Codex (gpt-5.5) SOURCE-ASSISTED head-to-head: per-game levels for both models, with
+    each game's win ceiling marked. Both complete 24/25; per-game levels are identical except lf52,
+    where Codex reaches L9 vs Claude L6 (neither completes it) -- the sole differentiator."""
+    import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
+    games = sorted(set(claude_pg) & set(codex))
+    cl_lv = [claude_pg[g].get("levels", 0) or 0 for g in games]
+    cx_lv = [codex[g].get("levels", 0) or 0 for g in games]
+    win = [codex[g].get("win", 0) or 0 for g in games]
+    cl_tot, cl_pos = sum(cl_lv), sum(win)
+    cx_tot = sum(cx_lv)
+    x = list(range(len(games))); w = 0.40
+    fig, ax = plt.subplots(figsize=(11.6, 3.9))
+    # win ceiling (the per-game level count) as a faint cap over each pair
+    capped = False
+    for i, wn in enumerate(win):
+        ax.plot([x[i] - w - 0.04, x[i] + w + 0.04], [wn, wn], color="#999", lw=1.1,
+                zorder=1, label=("win ceiling (levels in game)" if not capped else None))
+        capped = True
+    ax.bar([xi - w / 2 for xi in x], cl_lv, w, color=BLUE, zorder=2,
+           label=f"Claude  ({cl_tot}/{cl_pos} levels)")
+    ax.bar([xi + w / 2 for xi in x], cx_lv, w, color=OCHRE, zorder=2,
+           label=f"Codex gpt-5.5  ({cx_tot}/{cl_pos} levels)")
+    # call out the only gap (lf52)
+    if "lf52" in games:
+        gi = games.index("lf52")
+        ax.annotate("only gap: lf52\nCodex L%d vs Claude L%d\n(neither completes)"
+                    % (codex["lf52"]["levels"], claude_pg["lf52"]["levels"]),
+                    xy=(gi + w / 2, codex["lf52"]["levels"]), xytext=(gi - 3.0, 11.2),
+                    fontsize=7.5, ha="center", color="#333",
+                    arrowprops=dict(arrowstyle="->", color="#333", lw=0.9))
+    ax.set_xticks(x); ax.set_xticklabels(games, rotation=90, fontsize=7, family="monospace")
+    ax.set_ylabel("levels completed", fontsize=9)
+    ax.set_ylim(0, max(win) + 2.0)
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    ax.set_title("Claude vs. Codex (gpt-5.5), source-assisted: identical per-game levels except lf52",
+                 fontsize=10)
+    ax.legend(fontsize=8, loc="upper right", frameon=False)
+    ax.grid(axis="y", alpha=0.2)
+    fig.tight_layout()
+    fig.savefig(FIGS / "arc3_codex_head_to_head.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print("wrote arc3_codex_head_to_head.png")
+
+
 def main():
     cl, q32, q7 = load("arc3_claude"), load("arc3_qwen32b"), load("arc3_qwen7b")
 
@@ -395,11 +441,31 @@ def main():
     #      so the gap is the cost of DISCOVERING dynamics, not of planning steps. Both models near-parity
     #      WITH source; source-free, the Claude agent holds far more than codex.
     cf = jload("codex_full_game.json")
+    agc = jload("agent_full_game.json")        # Claude source-assisted per-game (head-to-head)
     if cf:
+        cx_full = sum(1 for v in cf.values() if v.get("full"))
+        cx_levels = sum(v.get("levels", 0) for v in cf.values())
+        cx_total = sum(v.get("win", 0) for v in cf.values())
+        cx_model = sorted({v.get("model", "") for v in cf.values()})[-1]
+        ncmds = [v.get("n_cmds", 0) for v in cf.values() if v.get("n_cmds")]
         macros.update({
-            "ArcCodexFaithfulFull": str(sum(1 for v in cf.values() if v.get("full"))),
-            "ArcCodexFaithfulLevels": str(sum(v.get("levels", 0) for v in cf.values())),
+            "ArcCodexFaithfulFull": str(cx_full),
+            "ArcCodexFaithfulLevels": str(cx_levels),
+            # ---- Claude-vs-Codex source-ASSISTED head-to-head (both read game source) ----
+            "ArcCodexFullGames": str(cx_full),                 # 24/25 full
+            "ArcCodexUnionGames": str(len(cf)),                # 25 games
+            "ArcCodexLevels": str(cx_levels),                  # 182 levels
+            "ArcCodexTotalLevels": str(cx_total),              # 183 possible
+            "ArcCodexModel": cx_model or "gpt-5.5",
+            "ArcCodexLfTwoLevels": str(cf.get("lf52", {}).get("levels", 0)),   # codex lf52 depth (9)
+            "ArcCodexLfTwoWin": str(cf.get("lf52", {}).get("win", 0)),         # lf52 total levels (10)
+            "ArcCodexCmdLo": str(min(ncmds) if ncmds else 0),  # command-efficiency range
+            "ArcCodexCmdHi": str(max(ncmds) if ncmds else 0),
         })
+        if agc:
+            cpg = agc.get("per_game", {})
+            macros["ArcClaudeLfTwoLevels"] = str(cpg.get("lf52", {}).get("levels", 0))  # claude lf52 depth (6)
+            codex_head_to_head_assets(cpg, cf)
     csf = jload("arc3_fullgame_sourcefree_codex.json")
     if csf:
         pg = csf.get("per_game", csf)

@@ -754,7 +754,7 @@ does it hold on a \emph{different} use case authored as real verified-code world
 \paragraph{World-count scaling (E76).} We fix the model (7B) and the hard family and vary
 only the number of train specialties traversed, holding the test specialties fixed
 (Figure~\ref{fig:world-count}). Too few worlds \emph{hurt} (the fine-tune overfits a narrow
-slice, below the \WCBase{} base); the gain then rises monotonically and is \emph{still
+slice, below the \WCBase{} base); after an initial dip the gain rises monotonically and is \emph{still
 climbing at \WCMaxWorlds{} worlds} (\WCMaxAcc, $+\WCMaxGain$ points), heading toward the
 \WCOracle{} oracle---no plateau. So world-time compute is a genuine scaling lever in the
 number of worlds, when the task has headroom; the offline empirical-Bayes prior saturated at

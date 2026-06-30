@@ -193,7 +193,7 @@ The worlds are authored and served by \textbf{\openworld}, a zero-dependency fra
 assembling the \emph{many} worlds a domain needs cheap (the framework is a companion paper).
 \textbf{Scope: the symbolic-state regime}: where dynamics are writable, verified code makes a
 \emph{correct} world model a zero-training prototype; pixel-native domains remain the territory of
-learned models. All code, recipes, and this manuscript regenerate from one repository.
+learned models. All code, recipes, and this manuscript regenerate from one public repository.
 
 \medskip
 \noindent\textbf{Keywords:}~%
@@ -201,7 +201,8 @@ world models; code world models; neuro-symbolic AI; program synthesis;
 value alignment; agents-as-a-judge; local LLMs.
 
 \medskip
-\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/quome-cloud/openworld}{\texttt{github.com/quome-cloud/openworld}}\quad\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:jim@quome.com}{jim@quome.com}
+\noindent\textcolor{blue}{\textbf{Code \& data:}}~\href{https://github.com/quome-cloud/openworld}{\texttt{github.com/quome-cloud/openworld}}\\
+\noindent\textcolor{blue}{\textbf{Correspondence:}}~\href{mailto:jim@quome.com}{jim@quome.com}
 \end{tcolorbox}
 \clearpage
 
@@ -215,17 +216,20 @@ dynamics are executable, verifiable programs over symbolic state---each an inexh
 generator of \emph{exactly}-labeled trajectories. Fine-tuning a model on trajectories
 traversed through many such worlds of a domain---\emph{world-time compute}
 (\S\ref{sec:world-time}), a training-time analogue of test-time compute---lifts its
-generalization to \emph{held-out} worlds it never trained on. Two things make this work, and
-the paper is organized around them. First, the worlds must not lie: a traversed world teaches
-the right rules only if its dynamics are correct, so we build them as \emph{verified code},
-not learned approximations---exact over long rollouts with no compounding error
-(Figure~\ref{fig:hero}A). Second, world-time compute needs \emph{many} worlds, which is
+generalization to held-out worlds it never trained on. Two conditions make it work.
+First, the worlds must not lie: a traversed world teaches
+the right rules only if its dynamics are correct, so we build them as verified code,
+not learned approximations: a model writes the transition as a program, accepted only after it
+parses with the required signature, executes in a sandbox without violating the world's declared
+invariants, and optionally survives a second-model critique against the rules. The accepted
+program is exact over long rollouts with no compounding error
+(Figure~\ref{fig:hero}A). Second, world-time compute needs many worlds, which is
 practical only if each is cheap to build; the enabling artifact is \openworld{}, a
 zero-dependency framework that turns authoring a verified world model
 (perceive\,$\to$\,world\,$\to$\,emit\,$\to$\,act, served and shareable) into a minutes-scale,
-push-button activity (the companion framework paper~\cite{openworld_framework}). PyTorch did not give deep learning new
-models; it made them fast to \emph{prototype}, and an explosion followed---world models have
-lacked that tool, and we use it here to manufacture training experience.
+push-button activity (the companion framework paper~\cite{openworld_framework}). No general tool
+has made authoring the many verified world models this needs cheap; \openworld{} is that
+tool, and we use it here to manufacture training experience.
 
 A world model is an agent's internal simulator: given a state and an action, it
 predicts the next state (and/or observation), letting the agent plan ``in
@@ -251,28 +255,26 @@ internet-scale video), \emph{compounding} (every learned transition adds error
 that accumulates over a rollout), and \emph{opaque} (dynamics and values alike
 live in continuous weights that cannot be inspected, edited, or audited).
 
-\paragraph{What ``world model'' means in this paper.} Because the term has come to
-connote those generative, pixel- and 3D-native systems, we state our usage plainly.
-We use \emph{world model} in its original, narrower sense---a forward predictor of
+\paragraph{What ``world model'' means in this paper.} While the term has come to
+connote generative, pixel- and 3D-native systems, we adopt a simpler, narrower sense---a
+forward predictor of
 the next \emph{state} for planning---and we restrict the state to a \emph{symbolic}
 object: a typed record of named variables (counts, prices, positions, flags), not
 pixels, latents, or 3D geometry. Our world models are therefore the second species,
 \emph{Code World Models} (CWMs): the transition is an explicit, human-readable
 \emph{program} over that symbolic state, synthesized by an LLM from a declared rule
 set and verified before use, and a rollout returns the next symbolic state
-\emph{exactly} rather than a generated image, with \emph{zero} training data. This
+exactly rather than a generated image, with zero training data. This
 is the same genus as the perceptual models above (a simulator the agent rolls
 forward) but a different species---and an intentionally complementary one.
 OpenWorld targets domains that can be \emph{specified} symbolically (inventories,
-markets, schedules, negotiations, physics with known equations); it is \emph{not} a
+markets, schedules, negotiations, physics with known equations); it is not a
 pixel-native, perceptual, or open-world-3D model and does not generate images,
 video, or scenes. Where the spatial-intelligence systems \emph{learn what cannot be
-told}, OpenWorld \emph{writes down what can be told, and verifies it}; the two are
-better read as adjacent tools than as competitors.
+told}, OpenWorld \emph{writes down what can be told, and verifies it}.
 
-\paragraph{World, action, agent, simulation---and why a \emph{verified} model is
-special.} The world model is only one of four distinct objects, and keeping them
-separate dissolves much of the remaining confusion. A \emph{world} is the
+\paragraph{World, action, agent, simulation.} The world model is only one of four distinct
+objects. A \emph{world} is the
 environment-as-simulator: a symbolic state, a discrete set of \emph{actions}, and
 the verified transition that maps a $(\textrm{state}, \textrm{action})$ pair to the
 next state (plus optional perception/emit boundaries). An \emph{agent} is a
@@ -286,21 +288,24 @@ objectives. The textbook definition puts the world model \emph{inside} the agent
 gap between the two (model bias, sim-to-real error) is exactly what bounds learned
 world models. A verified code world model does not so much eliminate that gap as
 \emph{relocate} it: once the dynamics are declared symbolically and the accepted
-program reproduces them exactly, the agent's internal model and the (symbolic)
-environment are the same artifact, so the dynamics contribute \emph{no} rollout
+program reproduces them exactly, the model an agent plans through and the (symbolic)
+environment it acts in can be the \emph{same} verified transition, so the dynamics contribute
+\emph{no} rollout
 error---what error remains lives entirely in the \emph{specification} and in
 \emph{perception} (the symbol-grounding boundary; see the companion framework paper~\cite{openworld_framework}),
 not in the transition. This is why the same \texttt{World} serves, without
 modification, both as the ground-truth environment and as the model an agent plans
 through in our planning experiments; it is also why this paper is scoped to
-\emph{specifiable} domains, where that relocation is a genuine win.
+\emph{specifiable} domains.
 
 This Code World Model bargain (programs instead of weights) buys verifiability,
 compute-cheap rollouts,
 and out-of-distribution generalization by construction~\cite{worldcoder2024,
 gifmcts2024, poeworld2025, cwmgames2025}. Yet CWM research has remained a set
-of bespoke systems aimed at particular benchmarks. There has been no general,
-lightweight framework that lets a practitioner \emph{declare} a world, have a
+of bespoke systems aimed at particular benchmarks---tailored for evaluation or
+post-training, rather than giving agents a reusable framework to apply them during
+inference. There has been no general,
+lightweight framework that lets a practitioner declare a world, have a
 local model write and verify its dynamics, steer behavior through declared
 value weights, and optimize the whole configuration against a goal---the
 workflow that made supervised learning ubiquitous.
@@ -323,8 +328,9 @@ trajectories against written rubrics.
 \begin{figure}[htb]
 \centering
 \includegraphics[width=0.97\linewidth]{figs/hero.png}
-\caption{\textbf{The paper in one figure.} \emph{A (foundation):} On a
-ground-truth-instrumented world, dynamics synthesized and verified once as
+\caption{\emph{A:} The task is to predict a world's next symbolic state from the current
+state and an action (here the sprint backlog/debt/bug world, instrumented with a
+ground-truth oracle). Dynamics synthesized and verified once as
 code (blue) match the oracle exactly at every depth of a \RolloutSteps-step
 rollout, while per-step LLM next-state prediction (orange)---a structural
 stand-in for learned neural dynamics---first diverges at step
@@ -335,24 +341,40 @@ the orange shape.) Programs encode rules, not statistics, so the compounding-err
 world models is eliminated by construction, at zero training cost. \emph{B
 (payoff):} what that exactness unlocks---\emph{world-time compute}. Fine-tuning
 an LLM on trajectories traversed through \WTNumTrainWorlds{} verified
-\emph{train} world models lifts held-out diagnostic accuracy on
-\WTNumTestWorlds{} \emph{unseen} worlds toward the rules-given oracle, with the
+train world models lifts held-out diagnostic accuracy on
+\WTNumTestWorlds{} unseen worlds toward the rules-given oracle, with the
 largest gain for the smallest models ($+\WTSmallGain$ points at \WTSmallName,
 shrinking to $+\WTLargeGain$ at \WTLargeName)---a generalization lever that is
-strongest where capability is scarcest (E74, \S\ref{sec:world-time}).}
+strongest where capability is scarcest (bars: 95\% bootstrap CIs over held-out
+specialties; dotted line: the prior-only floor; E74, \S\ref{sec:world-time}).}
 \label{fig:hero}
 \end{figure}
 
 A review of the world-model landscape reveals distinct strategy families with
 a recurring tension---fidelity and scale on one side; verifiability, sample
-efficiency, and steerability on the other (Table~\ref{tab:related}).
+efficiency, and steerability on the other (a positioning table against the
+representative strategies appears in the companion framework paper).
+
+\paragraph{Explicit vs.\ implicit world models, and world models as evaluators.}
+Two strands of recent work sharpen what a verified, explicit world model buys. The first
+asks whether a trained model even has a coherent world model: implicit world models
+recovered from a generative model's predictions are often incoherent~\cite{vafa2024evaluating},
+and whether a network internally represents one at all is contested~\cite{li2025what}---a
+question \openworld{} sidesteps, because the model is the human-readable transition program,
+so coherence is a checked property rather than an inferred one. Video-generation world models
+likewise miss the governing physical law even at scale~\cite{kang2024how}; \openworld{}
+instead declares and verifies the law, trading learned breadth for exactness where the law is
+known. The second strand uses world models as policy-evaluation
+environments~\cite{quevedo2025worldgym}; because those environments are learned, a policy's
+score inherits the simulator's error, whereas an \openworld{} evaluation world executes
+exactly, so the score is not confounded by model error.
 
 \paragraph{Contributions.} Three, around the world-time-compute thesis:
 \begin{enumerate}
-  \item \textbf{World-time compute, with cross-world transfer on a real domain (the finding).}
+  \item \textbf{World-time compute on real domains, with cross-world transfer.}
   A verified world model is \emph{training signal}: fine-tuning an LLM on trajectories traversed
-  through many world models of a domain lifts its generalization to \emph{held-out} worlds it
-  never trained on. The novel \emph{cross-world} axis---train on a family, generalize to unseen
+  through many world models of a domain lifts its generalization to held-out worlds it
+  never trained on. The novel cross-world axis---train on a family, generalize to unseen
   worlds---holds on a real, human-authored domain (List Functions, E84): one adapter trained on
   \CrossWorldNTrain{} disjoint worlds reaches \CrossWorldMean{} on \CrossWorldNEval{} held-out
   worlds versus \CrossWorldCorrupt{} for a corrupted-label control---a \mbox{+\CrossWorldGap}-point
@@ -360,10 +382,10 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   the gain is largest where capability is scarcest ($+\WTSmallGain$ at \WTSmallName, within noise
   by \WTLargeName{} as the task saturates). A corrupted-label control shows \emph{exact} labels,
   not task variety alone, are the lever---what separates this from domain randomization.
-  \item \textbf{Why it must be verified code (the foundation).} Traversal is safe only if the
+  \item \textbf{Why it must be verified code.} Traversal is safe only if the
   worlds do not lie. On three ground-truth worlds, verified synthesized dynamics are exact on
   \MultiCodeExact{} \RolloutSteps-step rollouts (95\% CI \MultiCodeCI) and answer $10\times$
-  out-of-distribution probes at \CodeOODRate{} from \emph{zero} transitions, whereas the LLM
+  out-of-distribution probes at \CodeOODRate{} from zero transitions, whereas the LLM
   next-state proxy completes \MultiLLMExact{} and a 10{,}000-transition MLP scores \MLPOODTenK{}
   out of distribution. Verification is \emph{measured}, not assumed (each gate buys $+0.24$ probe
   accuracy over blind acceptance) and certifies executable, invariant-respecting code, not
@@ -372,27 +394,41 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   hallucinating one and solves $0$-shot what trained DreamerV3 / V-JEPA-2 need $10^4$--$10^5$
   steps to learn~\cite{dreamerv3} (a scope property, not a contest; \S\ref{sec:bakeoff}).
   \item \textbf{The substrate, and full reproducibility.} \openworld, a zero-dependency framework,
-  makes authoring and serving the \emph{many} verified worlds world-time compute needs a
+  makes authoring and serving the many verified worlds world-time compute needs a
   minutes-scale activity; the framework, its \ProtoNumWorlds-world prototyping benchmark, and the
   broader world zoo are the companion paper~\cite{openworld_framework}. All \NumExperiments{}
-  experiments are seed-fixed, use paired tests, and regenerate from one repository.
+  experiments are seed-fixed, use paired tests, and regenerate from one public repository.
 \end{enumerate}
 
 \paragraph{Positioning in the field.} \openworld{} builds on the \emph{programmatic} code-world-model
 program~\cite{worldcoder2024,gifmcts2024,poeworld2025,cwmgames2025}---LLM-synthesized, verified
 code dynamics, as distinct from \emph{neural} code world models that learn dynamics in
 weights~\cite{metacwm2025} and from LLM synthesis of symbolic world models via test-time
-scaling~\cite{ivml2025}---but its contribution is what that machinery \emph{enables}: world-time compute,
-which turns many verified worlds into exactly-labeled training signal. Its closest relatives
+scaling~\cite{ivml2025}---but its contribution is what that machinery enables: world-time compute,
+which turns many verified worlds into exactly-labeled training signal. Against the
+\emph{learned} world-model families---latent-dynamics models (Dreamer~\cite{dreamerv3},
+MuZero~\cite{muzero}), tokenized and diffusion video models (IRIS~\cite{iris2023},
+DIAMOND~\cite{diamond2024}, Genie~\cite{genie2024}, Sora~\cite{sora2024}), and
+joint-embedding predictors (V-JEPA~\cite{vjepa2025})---it trades perceptual breadth for an
+auditable, exactly-executable symbolic transition with no compounding rollout error. Its closest relatives
 are the \emph{self-training} methods that retrain a model on its own verifier-filtered outputs
 (STaR~\cite{star2022}, ReST~\cite{rest2023,restem2024}, expert iteration~\cite{expertiteration2017},
-rejection-sampling fine-tuning~\cite{rft2023}, verifiable rewards~\cite{rlvr2024}); we differ in
-\emph{what} verifies (a full world model with dynamics, so the unit is a verified trajectory, not
+rejection-sampling fine-tuning~\cite{rft2023}, verifiable rewards~\cite{rlvr2024}, and test-time
+reinforcement learning on unlabeled data via majority-vote pseudo-rewards~\cite{ttrl2025}); we differ in
+what verifies (a full world model with dynamics, so the unit is a verified trajectory, not
 a checked answer) and in the \emph{generalization axis} (held-out worlds in a family). It is also
-distinct from domain randomization and procedural task generation~\cite{tobin2017dr,cobbe2020procgen,openended2021xland},
-where experience comes from a single (often hand-coded or learned) simulator: here every world is independently synthesized and
-verified, and the open question we frame is whether that label \emph{exactness}, not task
-variety, drives the held-out gains. The supporting machinery extends the open-specification
+distinct from domain randomization and procedural task generation~\cite{tobin2017dr,cobbe2020procgen,openended2021xland}---and
+from foundation-model-generated code environments for open-ended learning~\cite{omniepic2024}---where
+experience comes from a single (often hand-coded or learned) simulator, or from generated
+environments selected for interestingness rather than verified for label-exactness: here every
+world is independently synthesized and
+verified, and the open question we frame is whether that label exactness, not task
+variety, drives the held-out gains. The labels are
+exact only \emph{relative to the synthesized world model}---``verified'' means the transition
+respects the declared invariants and passes the probe set, not that it provably equals the
+domain's true dynamics (which may only be partially observed). A world whose declared rules are subtly wrong is
+therefore a confidently-wrong teacher; the corrupted-label ablation (\S\ref{sec:world-time-scale})
+measures exactly that failure mode. The supporting machinery extends the open-specification
 stance of the value-alignment literature~\cite{spectrap2025,mas2025} and judge-based
 behavior selection~\cite{agentasjudge2024}. We benchmark on consumer hardware with 7B/3B
 local models, the regime where learned world models are least accessible and training-free
@@ -461,36 +497,6 @@ grows. A symbolic world fixes its error \emph{once}, at synthesis time, where it
 is systematic and auditable; a learned world risks a fresh error every step,
 where it compounds. This tuple, and that property, are what the rest of the paper
 measures.
-
-Table~\ref{tab:related} situates the approach against the principal
-world-model strategy families surveyed in the accompanying literature review.
-
-\begin{table}[htb]\centering\small
-\begin{tabular}{L{3.4cm}L{4.1cm}L{4.1cm}}
-\toprule
-System & Approach & Gap \openworld{} targets \\
-\midrule
-World Models~\cite{ha2018world} & VAE + MDN-RNN latent dynamics & millions of env.\ steps; opaque latents \\
-DreamerV3~\cite{dreamerv3} & RSSM, discrete latents, imagination & compounding rollout error; values in weights \\
-MuZero~\cite{muzero} & value-equivalent latent planning & ungrounded states; incomplete context \\
-IRIS / $\Delta$-IRIS~\cite{iris2023,deltairis2024} & VQ tokens + autoregressive transformer & token budgets; drift over horizon \\
-DIAMOND~\cite{diamond2024} & diffusion dynamics in pixel space & GPU-heavy; no symbolic audit \\
-Genie~\cite{genie2024} & generative interactive video (11B) & frontier-scale compute; closed \\
-Sora / World Labs~\cite{sora2024,worldlabs2025} & generative video / 3D ``spatial intelligence'' & perceptual, not symbolic; no auditable state \\
-V-JEPA~\cite{vjepa2025} & joint-embedding video prediction in latent space & perceptual; latent, unauditable; trained \\
-NE-Dreamer~\cite{nedreamer2026} & decoder-free next-embedding prediction & still trained; latent, unauditable \\
-Meta CWM~\cite{metacwm2025} & \emph{neural} code world model (32B, dynamics learned in weights) & not auditable code; frontier-scale training \\
-Yu et al.~\cite{ivml2025} & LLM-synthesized symbolic world models via test-time scaling (BoN${+}$iVML) & per-task synthesis; not a reusable substrate \\
-WorldCoder / GIF-MCTS~\cite{worldcoder2024,gifmcts2024} & LLM-synthesized code dynamics & bespoke pipelines, no reusable framework \\
-PoE-World~\cite{poeworld2025} & products of programmatic experts & per-domain expert engineering \\
-NeSyS~\cite{nesys2026} & symbolic rules constrain neural logits & still requires fine-tuning data \\
-\textbf{\openworld{} (this work)} & declared worlds; verified code dynamics; moral dials; tuner; judge & --- \\
-\bottomrule
-\end{tabular}
-\caption{Positioning against representative world-model strategies from the
-learned and symbolic families.}
-\label{tab:related}
-\end{table}
 
 % ============================================================================
 \section{Experimental Setup}
@@ -703,18 +709,18 @@ do not claim it here.
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.98\linewidth]{figs/diagnosis_world.png}
-\caption{\textbf{Anatomy of one diagnosis world (E74--E79).} Each \emph{specialty} is a small
-hidden-state simulator: nature draws a hidden \emph{disease} from a prior, the world emits
-\emph{symptoms} from that disease's signature features (plus background noise), and the agent
-must invert the observation to name the disease. Because the world is \emph{verified code},
-the true disease is known, so the training label is \emph{exact}---a traversed world distills
-the right rule, not a hallucinated one. Each specialty is a different symptom\,$\to$\,disease
-map; training on many and testing on \emph{held-out} specialties forces the general skill
-(match symptoms to the best-explaining profile) rather than memorization.}
+\caption{\textbf{Anatomy of one diagnosis world (E74--E79).} Each specialty is a small
+hidden-state simulator: nature draws a hidden disease from a prior, the world emits
+symptoms from that disease's signature features (plus background noise), and the agent
+must invert the observation to name the disease. Because the agent treats this world---which
+it built and verified---as ground truth, the disease the world drew is a known, exact label
+(relative to that world): a traversed world distils a trusted rule, not a hallucinated one. Each specialty is a different symptom\,$\to$\,disease
+map; training on many and testing on held-out specialties forces the general skill
+(match symptoms to the best-explaining profile) rather than memorisation.}
 \label{fig:diagnosis-world}
 \end{figure}
 
-Two findings (Figure~\ref{fig:world-time}). \emph{(i) Generalization, not memorization:}
+Two findings (Figure~\ref{fig:hero}B). \emph{(i) Generalization, not memorization:}
 world-time compute lifts held-out accuracy at every model size---from \WTSmallBase{} to
 \WTSmallFT{} at \WTSmallName{}, and from \WTLargeBase{} to \WTLargeFT{} at \WTLargeName{}---%
 moving the model toward the rules-given oracle on specialties it never trained on.
@@ -737,19 +743,6 @@ traversal becomes a lever on generalization, complementary to train-time data an
 search. (Scope: the model-size sweep mixes precisions---0.5B--7B are bf16 LoRA, the larger
 sizes 4-bit QLoRA---and the per-\emph{number}-of-worlds axis saturates quickly, so we claim a
 compute \emph{lever}, not a clean world-count scaling law.)
-
-\begin{figure}[t]\centering
-\includegraphics[width=0.92\linewidth]{figs/world_time_compute.png}
-\caption{\textbf{World-time compute (E74).} Held-out diagnostic accuracy on
-\WTNumTestWorlds{} \emph{unseen} diagnosis specialties, before (gray) and after (orange)
-fine-tuning on trajectories traversed through \WTNumTrainWorlds{} \emph{train} specialties'
-verified world models, across model size. The shaded band and labels are the per-size
-generalization gain. Fine-tuning moves every model toward the rules-given oracle, with the
-largest lift for the smallest models---world traversal is a sample-efficiency multiplier,
-strongest where capability is scarcest. Fine-tuning on unrelated, heterogeneous worlds gives
-no such transfer (E71, E73).}
-\label{fig:world-time}
-\end{figure}
 
 \subsection{Scaling the lever, and a coding-world transfer test}\label{sec:world-time-scale}
 Two follow-ups sharpen the principle: does it \emph{scale} with the number of worlds, and
@@ -1348,15 +1341,15 @@ control---sometimes \emph{negative} (planning through a trained model is worse t
 lookahead drives the agent into unseen states; E61). Perceptual world
 models---DreamerV3~\cite{dreamerv3}, MuZero~\cite{muzero}, IRIS~\cite{iris2023},
 DIAMOND~\cite{diamond2024}, Genie~\cite{genie2024}, Sora~\cite{sora2024}, V-JEPA~\cite{vjepa2025}---are
-a different \emph{species} (they predict observations or embeddings, not symbolic state), so we
-compare them on \emph{properties} (Table~\ref{tab:related}), not a fabricated shared number.
+a different species (they predict observations or embeddings, not symbolic state), so we
+compare them on \emph{properties} (Table~\ref{tab:bakeoff}, below), not a fabricated shared number.
 
 \begin{table}[htb]\centering\small
 \input{tables/bakeoff.tex}
 \caption{\textbf{World-model bake-off (E63).} Every world model we can run locally on shared
 symbolic tasks (5 seeds, $K{=}10{,}000$). Verified code is the only model exact, OOD-robust,
-optimal-for-control, auditable, \emph{and} zero-data; perceptual models are a different species,
-compared on properties in Table~\ref{tab:related}.}
+optimal-for-control, auditable, and zero-data; perceptual models are a different species
+(perceptual, not symbolic), positioned against \openworld{} in the introduction.}
 \label{tab:bakeoff}
 \end{table}
 

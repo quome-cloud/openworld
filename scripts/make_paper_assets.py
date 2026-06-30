@@ -117,8 +117,8 @@ def ci_str(ci):
 def fig_hero(e01, scaling):
     """The paper in one figure: A = verified code is exact (no compounding error, the
     foundation); B = what that exactness unlocks -- world-time compute lifts an LLM's
-    generalization to held-out worlds (the payoff). Panel B is a compact teaser of
-    fig:world-time (E74); the full per-size detail lives in that figure."""
+    generalization to held-out worlds (the payoff), with the full E74 per-size detail
+    (bootstrap CIs, prior-only floor, per-size gains) folded in here."""
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
 
     ax = axes[0]
@@ -141,28 +141,37 @@ def fig_hero(e01, scaling):
     base = [s["base"] for s in sizes]
     ft = [s["ft"] for s in sizes]
     names = [s["name"] for s in sizes]
-    oracle = scaling["offline_oracle"]
+    oracle, floor = scaling["offline_oracle"], scaling["offline_floor"]
+
+    def _yerr(key):  # asymmetric 95% bootstrap CI half-widths
+        lo = [s[key][0] for s in sizes]
+        hi = [s[key][1] for s in sizes]
+        vals = base if key == "base_ci" else ft
+        return [[v - l for v, l in zip(vals, lo)], [h - v for v, h in zip(vals, hi)]]
+
     ax.set_xscale("log")
     ax.fill_between(xb, base, ft, color=ORANGE, alpha=0.13, zorder=1)
-    ax.plot(xb, base, "o-", color=SLATE, lw=1.8, markersize=3.5, zorder=3,
-            label="base LLM (zero-shot)")
-    ax.plot(xb, ft, "s-", color=ORANGE, lw=2.1, markersize=3.5, zorder=3,
-            label="+ world-time compute")
+    ax.errorbar(xb, base, yerr=_yerr("base_ci"), fmt="o-", color=SLATE, lw=1.8, markersize=3.5,
+                capsize=2.5, elinewidth=0.9, zorder=3, label="base LLM (zero-shot)")
+    ax.errorbar(xb, ft, yerr=_yerr("ft_ci"), fmt="s-", color=ORANGE, lw=2.1, markersize=3.5,
+                capsize=2.5, elinewidth=0.9, zorder=3, label="+ world-time compute")
     ax.axhline(oracle, ls="--", color=TEAL, lw=1.2)
     ax.text(xb[-1], oracle + 0.008, "oracle (handed the rules)", ha="right", va="bottom",
             fontsize=7.5, color=TEAL)
-    # label the extremes -> "largest lift for the smallest models"
-    for xi, b, f in [(xb[0], base[0], ft[0]), (xb[-1], base[-1], ft[-1])]:
+    ax.axhline(floor, ls=":", color="#999999", lw=1.1)
+    ax.annotate("prior-only floor", (xb[0], floor), xytext=(10, 2), textcoords="offset points",
+                ha="left", va="bottom", fontsize=7.5, color="#777777")
+    for xi, b, f in zip(xb, base, ft):  # per-size gain labels (full detail)
         ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2),
                     xytext=(5, 0), textcoords="offset points",
-                    fontsize=9, ha="left", va="center", color="#9a4d00", weight="bold")
+                    fontsize=8, ha="left", va="center", color="#9a4d00", weight="bold")
     ax.set_xticks(xb)
     ax.set_xticklabels(names, fontsize=8)
     ax.minorticks_off()
     ax.set_xlim(right=xb[-1] * 1.22)  # room for the rightmost gain label
     ax.set_xlabel("Model size (Qwen2.5-Instruct, params)")
     ax.set_ylabel("Held-out accuracy (unseen worlds)")
-    ax.set_ylim(min(base) - 0.05, 0.9)
+    ax.set_ylim(min(floor, min(base)) - 0.04, 0.9)
     ax.set_title("B. World-time compute lifts generalization", fontsize=10, loc="left")
     ax.legend(fontsize=8, loc="lower right")
     ax.grid(alpha=0.25, axis="y")
@@ -4435,7 +4444,7 @@ def main():
     TABLES.mkdir(exist_ok=True)
     fig_prototyping()
     data = {name: load(name) for name in EXPERIMENTS}
-    fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
+    # fig:world-time merged into the hero figure's panel B (Fig 1b); standalone cut.
     fig_world_count(data["e76_world_count"])
     fig_diagnosis_world()
     fig_noise_ablation(load("e78b_ablation"))

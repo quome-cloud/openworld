@@ -78,6 +78,14 @@ THE METHOD (reason the WHAT; let the planner find the HOW):
 7. CHAIN to the win. SAVE often: write solved.json = {"game":"$GAME","actions":[...full sequence from
    reset...],"levels":M,"win":$W} whenever you reach a new deepest level M. Each action is [a] or [6,x,y].
 
+PERSIST -- this is the most important instruction. A plan_in_model that returns NO win does NOT mean the
+level is unsolvable; it means your model does not yet CONTAIN the winning transition. When that happens:
+EXPLORE MORE (different salient targets, longer forward walks, different start configs), REFINE predict()
+(any sim-vs-real mismatch is the bug -- fix it), form a NEW win hypothesis, and RE-PLAN. Do NOT conclude
+the wall is impossible and stop after a few attempts -- the levels that were cracked took 60+ iterations
+of explore -> reason -> plan -> verify. Keep iterating until g.levels actually rises or you have
+genuinely exhausted DISTINCT hypotheses (many of them). Save solved.json at every new deepest level.
+
 EXECUTION DISCIPLINE: write code to .py FILES, run with $AGENT_PY file.py (single-process; no
 multiprocessing). Make ONE SandboxGame, reuse via reset()+replay. DO NOT read game source or import
 arc_agi -- every run is AUDITED; a tainted run is discarded.

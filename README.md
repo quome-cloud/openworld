@@ -48,6 +48,36 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 
 ---
 
+## 🎮 Watch it solve ARC-AGI-3 — *source-free, beats prior SOTA*
+
+Each loop is a **verified, source-free solution** to an ARC-AGI-3 game: the agent discovered
+the rules *by acting* (no game code), built and verified its own `predict(frame, action)` world
+model, reasoned the win condition, and replayed the winning move sequence. **Every solve
+round-trips to a serveable OpenWorld `World`** — the map *is* the model.
+
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src="assets/arc3/su15.gif" width="150" alt="su15"/><br/><sub><b>su15</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/g50t.gif" width="150" alt="g50t"/><br/><sub><b>g50t</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/dc22.gif" width="150" alt="dc22"/><br/><sub><b>dc22</b> · 6/6</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/arc3/ka59.gif" width="150" alt="ka59"/><br/><sub><b>ka59</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/s5i5.gif" width="150" alt="s5i5"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/lp85.gif" width="150" alt="lp85"/><br/><sub><b>lp85</b> · 8/8</sub></td>
+</tr>
+</table>
+</div>
+
+> **Source-free result (audited, replay-verified): 16/25 games · 158/183 levels · ~54% more
+> action-efficient than the prior SOTA** — beating baseline1 (15/25, 145 levels, 58.12% RHAE) on
+> games, levels, and, decisively, efficiency. Frames render in the official ARC-AGI palette; the
+> label shows the level reached. Full write-up in [`papers/arc-3/`](papers/arc-3/) (animated
+> appendix of all 25 games).
+
+---
+
 ## 🧠 Why OpenWorld
 
 - **Training-free & deterministic.** Dynamics are *synthesized, verified code*, not

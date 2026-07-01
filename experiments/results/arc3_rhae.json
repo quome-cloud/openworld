@@ -1,929 +1,929 @@
 {
- "baseline1_rhae": 58.12,
- "formula": "min((baseline/ours)^2*100,115) per level; index-weighted mean per game",
- "games": {
-  "ar25": {
-   "baseline_actions": [
-    32,
-    50,
-    75,
-    37,
-    89,
-    159,
-    233,
-    73
-   ],
-   "baseline_total": 748,
-   "game": "ar25",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    15,
-    11,
-    40,
-    22,
-    28,
-    53,
-    37,
-    47
-   ],
-   "score": 100.0,
-   "total_actions": 253,
-   "win": 8
+  "baseline1_rhae": 58,
+  "formula": "min((baseline/ours)^2*100,115) per level; index-weighted mean per game",
+  "games": {
+    "ar25": {
+      "baseline_actions": [
+        32,
+        50,
+        75,
+        37,
+        89,
+        159,
+        233,
+        73
+      ],
+      "baseline_total": 748,
+      "game": "ar25",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        15,
+        11,
+        40,
+        22,
+        28,
+        53,
+        37,
+        47
+      ],
+      "score": 100.0,
+      "total_actions": 253,
+      "win": 8
+    },
+    "bp35": {
+      "baseline_actions": [
+        21,
+        48,
+        44,
+        38,
+        33,
+        87,
+        86,
+        131,
+        163
+      ],
+      "baseline_total": 651,
+      "game": "bp35",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        113.3,
+        115.0,
+        115.0,
+        0.0,
+        0.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        15,
+        40,
+        34,
+        19,
+        31,
+        43,
+        43
+      ],
+      "score": 62.22,
+      "total_actions": 225,
+      "win": 9
+    },
+    "cd82": {
+      "baseline_actions": [
+        55,
+        8,
+        41,
+        21,
+        23,
+        23
+      ],
+      "baseline_total": 171,
+      "game": "cd82",
+      "level_scores": [
+        115.0,
+        22.1,
+        115.0,
+        115.0,
+        115.0,
+        78.3
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        5,
+        17,
+        16,
+        14,
+        13,
+        26
+      ],
+      "score": 95.66,
+      "total_actions": 91,
+      "win": 6
+    },
+    "cn04": {
+      "baseline_actions": [
+        29,
+        54,
+        85,
+        300,
+        208,
+        113
+      ],
+      "baseline_total": 789,
+      "game": "cn04",
+      "level_scores": [
+        115.0,
+        112.1,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        14,
+        51,
+        40,
+        58,
+        74,
+        54
+      ],
+      "score": 100.0,
+      "total_actions": 291,
+      "win": 6
+    },
+    "dc22": {
+      "baseline_actions": [
+        59,
+        102,
+        67,
+        98,
+        324,
+        578
+      ],
+      "baseline_total": 1228,
+      "game": "dc22",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        20,
+        42,
+        45,
+        62,
+        108,
+        149
+      ],
+      "score": 100.0,
+      "total_actions": 426,
+      "win": 6
+    },
+    "ft09": {
+      "baseline_actions": [
+        43,
+        12,
+        23,
+        28,
+        65,
+        37
+      ],
+      "baseline_total": 208,
+      "game": "ft09",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        4,
+        7,
+        14,
+        21,
+        21,
+        13
+      ],
+      "score": 100.0,
+      "total_actions": 80,
+      "win": 6
+    },
+    "g50t": {
+      "baseline_actions": [
+        78,
+        175,
+        179,
+        230,
+        96,
+        54,
+        67
+      ],
+      "baseline_total": 879,
+      "game": "g50t",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        112.1,
+        115.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        17,
+        31,
+        64,
+        31,
+        52,
+        51,
+        43
+      ],
+      "score": 100.0,
+      "total_actions": 289,
+      "win": 7
+    },
+    "ka59": {
+      "baseline_actions": [
+        28,
+        109,
+        51,
+        51,
+        33,
+        132,
+        326
+      ],
+      "baseline_total": 730,
+      "game": "ka59",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        11,
+        38,
+        33,
+        38,
+        20,
+        46,
+        70
+      ],
+      "score": 100.0,
+      "total_actions": 256,
+      "win": 7
+    },
+    "lf52": {
+      "baseline_actions": [
+        32,
+        81,
+        60,
+        71,
+        205,
+        148,
+        244,
+        109,
+        164,
+        225
+      ],
+      "baseline_total": 1339,
+      "game": "lf52",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        8,
+        34,
+        46,
+        50,
+        89,
+        91
+      ],
+      "score": 38.18,
+      "total_actions": 318,
+      "win": 10
+    },
+    "lp85": {
+      "baseline_actions": [
+        17,
+        38,
+        31,
+        16,
+        41,
+        60,
+        26,
+        159
+      ],
+      "baseline_total": 388,
+      "game": "lp85",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        5,
+        8,
+        16,
+        12,
+        9,
+        19,
+        5,
+        5
+      ],
+      "score": 100.0,
+      "total_actions": 79,
+      "win": 8
+    },
+    "ls20": {
+      "baseline_actions": [
+        22,
+        123,
+        73,
+        84,
+        96,
+        192,
+        186
+      ],
+      "baseline_total": 776,
+      "game": "ls20",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        13,
+        45,
+        39,
+        43,
+        44,
+        72,
+        53
+      ],
+      "score": 100.0,
+      "total_actions": 309,
+      "win": 7
+    },
+    "m0r0": {
+      "baseline_actions": [
+        30,
+        111,
+        203,
+        26,
+        500,
+        237
+      ],
+      "baseline_total": 1107,
+      "game": "m0r0",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        15,
+        23,
+        54,
+        13,
+        39,
+        76
+      ],
+      "score": 100.0,
+      "total_actions": 220,
+      "win": 6
+    },
+    "r11l": {
+      "baseline_actions": [
+        22,
+        33,
+        51,
+        26,
+        52,
+        49
+      ],
+      "baseline_total": 233,
+      "game": "r11l",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        4,
+        9,
+        11,
+        14,
+        20,
+        26
+      ],
+      "score": 100.0,
+      "total_actions": 84,
+      "win": 6
+    },
+    "re86": {
+      "baseline_actions": [
+        26,
+        42,
+        86,
+        108,
+        189,
+        139,
+        424,
+        241
+      ],
+      "baseline_total": 1255,
+      "game": "re86",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        20,
+        38,
+        49,
+        42,
+        63,
+        47,
+        151,
+        192
+      ],
+      "score": 100.0,
+      "total_actions": 602,
+      "win": 8
+    },
+    "s5i5": {
+      "baseline_actions": [
+        20,
+        89,
+        106,
+        54,
+        162,
+        38,
+        86,
+        83
+      ],
+      "baseline_total": 638,
+      "game": "s5i5",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        71.3,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        13,
+        26,
+        51,
+        30,
+        34,
+        45,
+        45,
+        38
+      ],
+      "score": 100.0,
+      "total_actions": 282,
+      "win": 8
+    },
+    "sb26": {
+      "baseline_actions": [
+        18,
+        28,
+        18,
+        19,
+        31,
+        23,
+        58,
+        18
+      ],
+      "baseline_total": 213,
+      "game": "sb26",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        100.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        9,
+        16,
+        16,
+        16,
+        18,
+        20,
+        18,
+        18
+      ],
+      "score": 100.0,
+      "total_actions": 131,
+      "win": 8
+    },
+    "sc25": {
+      "baseline_actions": [
+        36,
+        6,
+        32,
+        83,
+        143,
+        50
+      ],
+      "baseline_total": 350,
+      "game": "sc25",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        13,
+        5,
+        11,
+        22,
+        36,
+        35
+      ],
+      "score": 100.0,
+      "total_actions": 122,
+      "win": 6
+    },
+    "sk48": {
+      "baseline_actions": [
+        61,
+        177,
+        101,
+        103,
+        230,
+        181,
+        125,
+        92
+      ],
+      "baseline_total": 1070,
+      "game": "sk48",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 8,
+      "minimized": false,
+      "our_actions": [
+        14,
+        27,
+        33,
+        23,
+        33,
+        56,
+        28,
+        34
+      ],
+      "score": 100.0,
+      "total_actions": 248,
+      "win": 8
+    },
+    "sp80": {
+      "baseline_actions": [
+        39,
+        58,
+        25,
+        148,
+        96,
+        152
+      ],
+      "baseline_total": 518,
+      "game": "sp80",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        4,
+        8,
+        16,
+        32,
+        30,
+        44
+      ],
+      "score": 100.0,
+      "total_actions": 134,
+      "win": 6
+    },
+    "su15": {
+      "baseline_actions": [
+        22,
+        42,
+        26,
+        115,
+        36,
+        31,
+        8,
+        40,
+        41
+      ],
+      "baseline_total": 361,
+      "game": "su15",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 9,
+      "minimized": false,
+      "our_actions": [
+        8,
+        11,
+        21,
+        12,
+        8,
+        16,
+        7,
+        12,
+        10
+      ],
+      "score": 100.0,
+      "total_actions": 105,
+      "win": 9
+    },
+    "tn36": {
+      "baseline_actions": [
+        32,
+        72,
+        26,
+        40,
+        30,
+        55,
+        62
+      ],
+      "baseline_total": 317,
+      "game": "tn36",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        7,
+        9,
+        9,
+        12,
+        16,
+        17,
+        34
+      ],
+      "score": 100.0,
+      "total_actions": 104,
+      "win": 7
+    },
+    "tr87": {
+      "baseline_actions": [
+        54,
+        58,
+        40,
+        45,
+        71,
+        146
+      ],
+      "baseline_total": 414,
+      "game": "tr87",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 6,
+      "minimized": false,
+      "our_actions": [
+        14,
+        25,
+        21,
+        21,
+        14,
+        32
+      ],
+      "score": 100.0,
+      "total_actions": 127,
+      "win": 6
+    },
+    "tu93": {
+      "baseline_actions": [
+        19,
+        16,
+        34,
+        42,
+        123,
+        80,
+        14,
+        23,
+        111
+      ],
+      "baseline_total": 462,
+      "game": "tu93",
+      "level_scores": [
+        111.4,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        100.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 9,
+      "minimized": false,
+      "our_actions": [
+        18,
+        10,
+        19,
+        17,
+        29,
+        28,
+        14,
+        21,
+        29
+      ],
+      "score": 100.0,
+      "total_actions": 185,
+      "win": 9
+    },
+    "vc33": {
+      "baseline_actions": [
+        7,
+        18,
+        44,
+        61,
+        131,
+        34,
+        152
+      ],
+      "baseline_total": 447,
+      "game": "vc33",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 7,
+      "minimized": false,
+      "our_actions": [
+        3,
+        7,
+        23,
+        21,
+        93,
+        26,
+        97
+      ],
+      "score": 100.0,
+      "total_actions": 270,
+      "win": 7
+    },
+    "wa30": {
+      "baseline_actions": [
+        71,
+        119,
+        183,
+        98,
+        368,
+        68,
+        79,
+        442,
+        415
+      ],
+      "baseline_total": 1843,
+      "game": "wa30",
+      "level_scores": [
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        115.0,
+        114.0,
+        115.0,
+        115.0
+      ],
+      "levels_completed": 9,
+      "minimized": false,
+      "our_actions": [
+        28,
+        60,
+        78,
+        50,
+        121,
+        58,
+        74,
+        128,
+        60
+      ],
+      "score": 100.0,
+      "total_actions": 657,
+      "win": 9
+    }
   },
-  "bp35": {
-   "baseline_actions": [
-    21,
-    48,
-    44,
-    38,
-    33,
-    87,
-    86,
-    131,
-    163
-   ],
-   "baseline_total": 651,
-   "game": "bp35",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    113.3,
-    115.0,
-    115.0,
-    0.0,
-    0.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    15,
-    40,
-    34,
-    19,
-    31,
-    43,
-    43
-   ],
-   "score": 62.22,
-   "total_actions": 225,
-   "win": 9
-  },
-  "cd82": {
-   "baseline_actions": [
-    55,
-    8,
-    41,
-    21,
-    23,
-    23
-   ],
-   "baseline_total": 171,
-   "game": "cd82",
-   "level_scores": [
-    115.0,
-    22.1,
-    115.0,
-    115.0,
-    115.0,
-    78.3
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    5,
-    17,
-    16,
-    14,
-    13,
-    26
-   ],
-   "score": 95.66,
-   "total_actions": 91,
-   "win": 6
-  },
-  "cn04": {
-   "baseline_actions": [
-    29,
-    54,
-    85,
-    300,
-    208,
-    113
-   ],
-   "baseline_total": 789,
-   "game": "cn04",
-   "level_scores": [
-    115.0,
-    112.1,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    14,
-    51,
-    40,
-    58,
-    74,
-    54
-   ],
-   "score": 100.0,
-   "total_actions": 291,
-   "win": 6
-  },
-  "dc22": {
-   "baseline_actions": [
-    59,
-    102,
-    67,
-    98,
-    324,
-    578
-   ],
-   "baseline_total": 1228,
-   "game": "dc22",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    20,
-    42,
-    45,
-    62,
-    108,
-    149
-   ],
-   "score": 100.0,
-   "total_actions": 426,
-   "win": 6
-  },
-  "ft09": {
-   "baseline_actions": [
-    43,
-    12,
-    23,
-    28,
-    65,
-    37
-   ],
-   "baseline_total": 208,
-   "game": "ft09",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    4,
-    7,
-    14,
-    21,
-    21,
-    13
-   ],
-   "score": 100.0,
-   "total_actions": 80,
-   "win": 6
-  },
-  "g50t": {
-   "baseline_actions": [
-    78,
-    175,
-    179,
-    230,
-    96,
-    54,
-    67
-   ],
-   "baseline_total": 879,
-   "game": "g50t",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    112.1,
-    115.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    17,
-    31,
-    64,
-    31,
-    52,
-    51,
-    43
-   ],
-   "score": 100.0,
-   "total_actions": 289,
-   "win": 7
-  },
-  "ka59": {
-   "baseline_actions": [
-    28,
-    109,
-    51,
-    51,
-    33,
-    132,
-    326
-   ],
-   "baseline_total": 730,
-   "game": "ka59",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    11,
-    38,
-    33,
-    38,
-    20,
-    46,
-    70
-   ],
-   "score": 100.0,
-   "total_actions": 256,
-   "win": 7
-  },
-  "lf52": {
-   "baseline_actions": [
-    32,
-    81,
-    60,
-    71,
-    205,
-    148,
-    244,
-    109,
-    164,
-    225
-   ],
-   "baseline_total": 1339,
-   "game": "lf52",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    0.0,
-    0.0,
-    0.0,
-    0.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    8,
-    34,
-    46,
-    50,
-    89,
-    91
-   ],
-   "score": 38.18,
-   "total_actions": 318,
-   "win": 10
-  },
-  "lp85": {
-   "baseline_actions": [
-    17,
-    38,
-    31,
-    16,
-    41,
-    60,
-    26,
-    159
-   ],
-   "baseline_total": 388,
-   "game": "lp85",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    5,
-    8,
-    16,
-    12,
-    9,
-    19,
-    5,
-    5
-   ],
-   "score": 100.0,
-   "total_actions": 79,
-   "win": 8
-  },
-  "ls20": {
-   "baseline_actions": [
-    22,
-    123,
-    73,
-    84,
-    96,
-    192,
-    186
-   ],
-   "baseline_total": 776,
-   "game": "ls20",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    13,
-    45,
-    39,
-    43,
-    44,
-    72,
-    53
-   ],
-   "score": 100.0,
-   "total_actions": 309,
-   "win": 7
-  },
-  "m0r0": {
-   "baseline_actions": [
-    30,
-    111,
-    203,
-    26,
-    500,
-    237
-   ],
-   "baseline_total": 1107,
-   "game": "m0r0",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    15,
-    23,
-    54,
-    13,
-    39,
-    76
-   ],
-   "score": 100.0,
-   "total_actions": 220,
-   "win": 6
-  },
-  "r11l": {
-   "baseline_actions": [
-    22,
-    33,
-    51,
-    26,
-    52,
-    49
-   ],
-   "baseline_total": 233,
-   "game": "r11l",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    4,
-    9,
-    11,
-    14,
-    20,
-    26
-   ],
-   "score": 100.0,
-   "total_actions": 84,
-   "win": 6
-  },
-  "re86": {
-   "baseline_actions": [
-    26,
-    42,
-    86,
-    108,
-    189,
-    139,
-    424,
-    241
-   ],
-   "baseline_total": 1255,
-   "game": "re86",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    20,
-    38,
-    49,
-    42,
-    63,
-    47,
-    151,
-    192
-   ],
-   "score": 100.0,
-   "total_actions": 602,
-   "win": 8
-  },
-  "s5i5": {
-   "baseline_actions": [
-    20,
-    89,
-    106,
-    54,
-    162,
-    38,
-    86,
-    83
-   ],
-   "baseline_total": 638,
-   "game": "s5i5",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    71.3,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    13,
-    26,
-    51,
-    30,
-    34,
-    45,
-    45,
-    38
-   ],
-   "score": 100.0,
-   "total_actions": 282,
-   "win": 8
-  },
-  "sb26": {
-   "baseline_actions": [
-    18,
-    28,
-    18,
-    19,
-    31,
-    23,
-    58,
-    18
-   ],
-   "baseline_total": 213,
-   "game": "sb26",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    100.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    9,
-    16,
-    16,
-    16,
-    18,
-    20,
-    18,
-    18
-   ],
-   "score": 100.0,
-   "total_actions": 131,
-   "win": 8
-  },
-  "sc25": {
-   "baseline_actions": [
-    36,
-    6,
-    32,
-    83,
-    143,
-    50
-   ],
-   "baseline_total": 350,
-   "game": "sc25",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    13,
-    5,
-    11,
-    22,
-    36,
-    35
-   ],
-   "score": 100.0,
-   "total_actions": 122,
-   "win": 6
-  },
-  "sk48": {
-   "baseline_actions": [
-    61,
-    177,
-    101,
-    103,
-    230,
-    181,
-    125,
-    92
-   ],
-   "baseline_total": 1070,
-   "game": "sk48",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 8,
-   "minimized": false,
-   "our_actions": [
-    14,
-    27,
-    33,
-    23,
-    33,
-    56,
-    28,
-    34
-   ],
-   "score": 100.0,
-   "total_actions": 248,
-   "win": 8
-  },
-  "sp80": {
-   "baseline_actions": [
-    39,
-    58,
-    25,
-    148,
-    96,
-    152
-   ],
-   "baseline_total": 518,
-   "game": "sp80",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    4,
-    8,
-    16,
-    32,
-    30,
-    44
-   ],
-   "score": 100.0,
-   "total_actions": 134,
-   "win": 6
-  },
-  "su15": {
-   "baseline_actions": [
-    22,
-    42,
-    26,
-    115,
-    36,
-    31,
-    8,
-    40,
-    41
-   ],
-   "baseline_total": 361,
-   "game": "su15",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 9,
-   "minimized": false,
-   "our_actions": [
-    8,
-    11,
-    21,
-    12,
-    8,
-    16,
-    7,
-    12,
-    10
-   ],
-   "score": 100.0,
-   "total_actions": 105,
-   "win": 9
-  },
-  "tn36": {
-   "baseline_actions": [
-    32,
-    72,
-    26,
-    40,
-    30,
-    55,
-    62
-   ],
-   "baseline_total": 317,
-   "game": "tn36",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    7,
-    9,
-    9,
-    12,
-    16,
-    17,
-    34
-   ],
-   "score": 100.0,
-   "total_actions": 104,
-   "win": 7
-  },
-  "tr87": {
-   "baseline_actions": [
-    54,
-    58,
-    40,
-    45,
-    71,
-    146
-   ],
-   "baseline_total": 414,
-   "game": "tr87",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 6,
-   "minimized": false,
-   "our_actions": [
-    14,
-    25,
-    21,
-    21,
-    14,
-    32
-   ],
-   "score": 100.0,
-   "total_actions": 127,
-   "win": 6
-  },
-  "tu93": {
-   "baseline_actions": [
-    19,
-    16,
-    34,
-    42,
-    123,
-    80,
-    14,
-    23,
-    111
-   ],
-   "baseline_total": 462,
-   "game": "tu93",
-   "level_scores": [
-    111.4,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    100.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 9,
-   "minimized": false,
-   "our_actions": [
-    18,
-    10,
-    19,
-    17,
-    29,
-    28,
-    14,
-    21,
-    29
-   ],
-   "score": 100.0,
-   "total_actions": 185,
-   "win": 9
-  },
-  "vc33": {
-   "baseline_actions": [
-    7,
-    18,
-    44,
-    61,
-    131,
-    34,
-    152
-   ],
-   "baseline_total": 447,
-   "game": "vc33",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 7,
-   "minimized": false,
-   "our_actions": [
-    3,
-    7,
-    23,
-    21,
-    93,
-    26,
-    97
-   ],
-   "score": 100.0,
-   "total_actions": 270,
-   "win": 7
-  },
-  "wa30": {
-   "baseline_actions": [
-    71,
-    119,
-    183,
-    98,
-    368,
-    68,
-    79,
-    442,
-    415
-   ],
-   "baseline_total": 1843,
-   "game": "wa30",
-   "level_scores": [
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    115.0,
-    114.0,
-    115.0,
-    115.0
-   ],
-   "levels_completed": 9,
-   "minimized": false,
-   "our_actions": [
-    28,
-    60,
-    78,
-    50,
-    121,
-    58,
-    74,
-    128,
-    60
-   ],
-   "score": 100.0,
-   "total_actions": 657,
-   "win": 9
-  }
- },
- "mean_score": 95.84,
- "minimized": false,
- "n_above_baseline1": 24,
- "n_above_human": 22,
- "n_scored": 25
+  "mean_score": 95.84,
+  "minimized": false,
+  "n_above_baseline1": 24,
+  "n_above_human": 22,
+  "n_scored": 25
 }

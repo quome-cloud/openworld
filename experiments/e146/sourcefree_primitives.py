@@ -1162,6 +1162,157 @@ def sandbox_frontier_explore_candidate(
         game.close()
 
 
+def first_level_macro_tournament_candidate(
+    scratch: Path,
+    *,
+    max_candidates: int = 900,
+    max_clicks: int = 18,
+) -> dict[str, Any] | None:
+    """Tournament independent first-level macro families before random search."""
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    click_cache: dict[str, list[list[int]]] = {}
+    start_time = time.time()
+
+    def replay_candidate(game: Any, suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool]:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        start_level = int(game.levels)
+        for action in suffix:
+            _act(game, action)
+            if bool(game.done) or int(game.levels) > start_level:
+                break
+        return int(game.levels), int(game.win), bool(game.done)
+
+    def directional_runs() -> list[list[list[int]]]:
+        return _fibonacci_direction_macros()
+
+    def saturation_runs(game: Any) -> list[list[list[int]]]:
+        macros: list[list[list[int]]] = []
+        for action in (1, 2, 3, 4):
+            game.reset()
+            for p in prefix:
+                _act(game, p)
+                if bool(game.done):
+                    break
+            if bool(game.done):
+                continue
+            seq: list[list[int]] = []
+            last = _frame_digest(_frame_list(game.frame))
+            for _ in range(24):
+                _act(game, [action])
+                seq.append([action])
+                now = "none" if game.frame is None else _frame_digest(_frame_list(game.frame))
+                if bool(game.done) or now == last:
+                    break
+                last = now
+            if seq:
+                macros.append(seq)
+        return macros
+
+    def click_families(frame: Any) -> list[list[list[int]]]:
+        clicks = _frame_click_actions(frame, max_clicks=max_clicks, cache=click_cache)
+        macros: list[list[list[int]]] = [[click] for click in clicks]
+        for idx, first in enumerate(clicks[:12]):
+            for second in clicks[idx + 2 : idx + 10 : 2]:
+                macros.append([first, second])
+        for click in clicks[:8]:
+            for direction in (1, 2, 3, 4):
+                for length in (2, 3, 5, 8):
+                    run = [[direction] for _ in range(length)]
+                    macros.append([click] + run)
+                    macros.append(run + [click])
+                for total in (6, 9, 11):
+                    run = [[direction] for part in _zeckendorf_parts(total) for _ in range(part)]
+                    macros.append([click] + run + [click])
+        return macros
+
+    def interact_families() -> list[list[list[int]]]:
+        macros: list[list[list[int]]] = []
+        for action in (5, 7):
+            for length in (1, 2, 3, 5, 8):
+                macros.append([[action] for _ in range(length)])
+        for action in (5, 7):
+            for direction in (1, 2, 3, 4):
+                for length in (2, 3, 5):
+                    run = [[direction] for _ in range(length)]
+                    macros.append([[action]] + run)
+                    macros.append(run + [[action]])
+        return macros
+
+    game = SandboxGame(game_id)
+    attempts = 0
+    best: dict[str, Any] | None = None
+    try:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                return None
+        start_level = int(game.levels)
+        start_frame = game.frame
+        if start_level > 0:
+            return None
+        families: list[tuple[str, list[list[list[int]]]]] = [
+            ("directional_zeckendorf", directional_runs()),
+            ("saturation_runs", saturation_runs(game)),
+            ("click_zeckendorf", click_families(start_frame)),
+            ("interact_loops", interact_families()),
+        ]
+        seen: set[tuple[tuple[int, ...], ...]] = set()
+        for family, macros in families:
+            for suffix in macros:
+                key = tuple(tuple(int(v) for v in action) for action in suffix)
+                if key in seen:
+                    continue
+                seen.add(key)
+                attempts += 1
+                if attempts > max_candidates:
+                    break
+                try:
+                    level, win, done = replay_candidate(game, suffix)
+                except Exception:
+                    continue
+                if level <= start_level:
+                    continue
+                all_actions = prefix + [list(action) for action in suffix]
+                verified = _fresh_verified_level(
+                    scratch,
+                    game_id,
+                    all_actions,
+                    must_exceed=start_level,
+                )
+                if verified is None:
+                    continue
+                verify_level, verify_win = verified
+                candidate = {
+                    "game": game_id,
+                    "actions": all_actions,
+                    "levels": verify_level,
+                    "win": verify_win,
+                    "primitive": "first_level_macro_tournament",
+                    "macro_family": family,
+                    "searched_steps": len(suffix),
+                    "attempts": attempts,
+                    "elapsed_s": round(time.time() - start_time, 3),
+                }
+                if best is None or len(candidate["actions"]) < len(best["actions"]):
+                    best = candidate
+            if attempts > max_candidates:
+                break
+        return best
+    finally:
+        game.close()
+
+
 def semiring_macro_search_candidate(
     scratch: Path,
     *,
@@ -1497,6 +1648,10 @@ def sourcefree_primitive_candidates(
             candidates.append(detour)
             return candidates
     if include_cold_search:
+        first_level = _run_primitive_safely(first_level_macro_tournament_candidate, scratch)
+        if first_level is not None:
+            candidates.append(first_level)
+            return candidates
         explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
         if explore is not None:
             candidates.append(explore)

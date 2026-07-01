@@ -255,10 +255,9 @@ by-its-own-description ``intentionally direct'' systems report: a scripted contr
 \emph{predefined} world-model interfaces and verifier programs, with an unspecified ``MDL-like''
 refactor, \emph{no} ablations (the verifier, refactor, planner, and base model are not separated), and
 results on the \emph{public} set only---the private validation set, by the author's statement,
-``remains to be tested.'' It targets a source-free protocol but its reported
-\ArcBaselineFull/\ArcUnionGames{} predates a source-leakage patch to its harness (the vulnerable
-version is archived in their repository; the safeguards postdate the paper), and the agent's ``broad
-system access'' leakage ``audit'' is asserted, not quantified. We do not dispute the result---we build
+``remains to be tested.'' It targets a source-free protocol and reports
+discarding results from an earlier, source-leaky harness version; but with the agent's ``broad
+system access,'' its leakage ``audit'' is asserted rather than per-run quantified. We do not dispute the result---we build
 on the recipe---but absent a per-run leakage audit, ablations, error bars, or reported cost, the figure
 can be neither confirmed leak-free nor attributed to its components. That is precisely the gap our
 protocol closes: per-run audited telemetry that \emph{quantifies} the leak channel (we catch our own
@@ -575,9 +574,11 @@ extra-high Codex reasoning; all \ArcUnionGames{} games from scratch); results ar
 \S\ref{sec:limitations} as they complete. Read the headline \ArcSFGames/\ArcUnionGames{} as a
 \emph{budget-constrained} number, not a like-for-like comparison to baseline1's unbounded run.
 \item \textbf{Cost is an uncontrolled estimate.} The whole campaign (all \ArcUnionGames{} games) ran from
-a single Claude Code subscription over $<\!24$h; prorating the \$200/month plan gives $\approx$\$7 vs.\
-baseline1's reported $\sim$\$350/run---\emph{roughly $50\times$}---but we did not meter tokens, and the
-engines and accounting differ, so this is an estimate, not a controlled figure.
+a single Claude Code subscription over $<\!24$h; prorating the \$200/month plan gives $\approx$\$7.
+baseline1 reports running on a comparable \$200/month subscription that covered ``roughly two to eight
+games''---so at the same subscription price our run covers the full suite---but we did not meter tokens
+and the engines and accounting differ, so we avoid a per-run dollar multiple and treat this as an
+estimate, not a controlled figure.
 \end{enumerate}
 
 \section{Reproducibility}

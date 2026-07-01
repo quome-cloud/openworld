@@ -22,6 +22,20 @@
 > needs **0 training data**. Then `openworld serve` turns any spec into a FastAPI
 > inference server with a live, animated React Flow view.
 
+<div align="center">
+
+### 🔥 The *PyTorch for code world models*
+
+**Prototype a world model in minutes, not months.** *Describe* the state and actions →
+let an LLM **write and verify** the dynamics as plain Python → **serve** it. The same
+`World` object you sketch in a notebook serializes to a portable spec, renders to a
+model card, composes into bigger worlds, and deploys as an inference server — one
+zero-dependency core, no training loop, no GPU, no dataset.
+
+**⭐ Find it useful? [Star the repo](https://github.com/quome-cloud/openworld) — it helps others discover it. · 📄 Using it in research? [Cite the paper](#-citation).**
+
+</div>
+
 ---
 
 ## ⚡ The 30-second mental model
@@ -34,6 +48,11 @@ Every world serializes to a **lossless JSON spec** and renders to a **stunning,
 self-contained SVG model card** (a HuggingFace-style card — but the artifact is a
 *runnable world*). Composition is closed: worlds nest into worlds, coupled by
 *bridges* and rolled up by *aggregators*.
+
+<div align="center">
+<img src="assets/sample-card.png" width="620" alt="A generated OpenWorld model card for the 'sprint' world: a header with tags and version, a BFS state-transition graph, the inferred state schema, the declared actions, the verified code dynamics, a sample rollout chart, metrics (round-trip exact, reachable states, spec size), and the natural-language rule contract."/>
+<br/><sub>A generated <b>model card</b> — one self-contained SVG per world: state graph · schema · verified dynamics · rollout · metrics · declared rules. Just <code>render_card(world)</code>.</sub>
+</div>
 
 ---
 
@@ -68,6 +87,11 @@ round-trips to a serveable OpenWorld `World`** — the map *is* the model.
 ---
 
 ## 🧠 Why OpenWorld
+
+<div align="center">
+<img src="assets/why-verified.png" width="820" alt="Two result panels from the OpenWorld prototyping paper. Left: verified code stays exact (accuracy 1.0) at every rollout depth, while an LLM next-state proxy's exact-match rate collapses as depth grows. Right: adding world-time compute — traversing your own verified worlds — lifts held-out accuracy on unseen worlds across model sizes, +29 points at 0.5B, approaching an oracle handed the true rules."/>
+<br/><sub><b>Why code, not weights:</b> verified dynamics are <b>exact at every depth</b> (no compounding error), and <b>world-time compute</b> lifts generalization on unseen worlds — biggest lift where models are smallest.</sub>
+</div>
 
 - **Training-free & deterministic.** Dynamics are *synthesized, verified code*, not
   learned latents — no datasets, no GPUs, bit-exact rollouts, **zero compounding

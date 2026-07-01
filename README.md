@@ -26,20 +26,9 @@
 
 ## ⚡ The 30-second mental model
 
-```
-        BUILD                       OPTIMIZE                       DEPLOY
-  ┌────────────────┐          ┌─────────────────┐         ┌─────────────────────┐
-  │ describe it;   │          │ tune dials &    │         │ FastAPI server +    │
-  │ Claude Code    │  ─spec─▶ │ dynamics vs a   │ ─spec─▶  │ live React Flow     │
-  │ writes+verifies│          │ goal (Study /   │         │ /step /predict      │
-  │ the dynamics   │          │ sweep / dials)  │         │ /run /observe  + WS │
-  └────────────────┘          └─────────────────┘         └─────────────────────┘
-            │                                                        │
-            ▼    one portable JSON spec  ·  one self-contained SVG card    ▼
-
-   perceive ──▶  W O R L D  (verified symbolic state + code dynamics)  ──▶ emit
-   (text in)        ▲ compose: worlds-within-worlds, bridges, roll-ups       (report out)
-```
+<div align="center">
+<img src="assets/pipeline.png" alt="BUILD → OPTIMIZE → DEPLOY. BUILD: describe it in plain terms; Claude Code writes and verifies the code dynamics (0 training data). OPTIMIZE: tune dials and dynamics against a goal (Study, sweep, dials). DEPLOY: FastAPI server plus live React Flow — /step /predict /run /observe, WS /live (stateless forward pass). Between them: one portable JSON spec, one self-contained SVG card. The boundary: perceive (text in) → WORLD (verified symbolic state plus code dynamics; compose worlds-within-worlds, bridges, roll-ups) → emit (report out)." width="920"/>
+</div>
 
 Every world serializes to a **lossless JSON spec** and renders to a **stunning,
 self-contained SVG model card** (a HuggingFace-style card — but the artifact is a

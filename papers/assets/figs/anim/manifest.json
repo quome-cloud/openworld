@@ -1,0 +1,152 @@
+{
+ "ar25": {
+  "frames": 44,
+  "last": 43,
+  "level": 8,
+  "win": 8
+ },
+ "bp35": {
+  "frames": 41,
+  "last": 40,
+  "level": 7,
+  "win": 9
+ },
+ "cd82": {
+  "frames": 41,
+  "last": 40,
+  "level": 6,
+  "win": 6
+ },
+ "cn04": {
+  "frames": 40,
+  "last": 39,
+  "level": 6,
+  "win": 6
+ },
+ "dc22": {
+  "frames": 36,
+  "last": 35,
+  "level": 4,
+  "win": 6
+ },
+ "ft09": {
+  "frames": 47,
+  "last": 46,
+  "level": 6,
+  "win": 6
+ },
+ "g50t": {
+  "frames": 38,
+  "last": 37,
+  "level": 5,
+  "win": 7
+ },
+ "ka59": {
+  "frames": 39,
+  "last": 38,
+  "level": 6,
+  "win": 7
+ },
+ "lf52": {
+  "frames": 40,
+  "last": 39,
+  "level": 6,
+  "win": 10
+ },
+ "lp85": {
+  "frames": 48,
+  "last": 47,
+  "level": 8,
+  "win": 8
+ },
+ "ls20": {
+  "frames": 41,
+  "last": 40,
+  "level": 5,
+  "win": 7
+ },
+ "m0r0": {
+  "frames": 39,
+  "last": 38,
+  "level": 6,
+  "win": 6
+ },
+ "r11l": {
+  "frames": 39,
+  "last": 38,
+  "level": 3,
+  "win": 6
+ },
+ "re86": {
+  "frames": 45,
+  "last": 44,
+  "level": 8,
+  "win": 8
+ },
+ "s5i5": {
+  "frames": 40,
+  "last": 39,
+  "level": 2,
+  "win": 8
+ },
+ "sb26": {
+  "frames": 45,
+  "last": 44,
+  "level": 8,
+  "win": 8
+ },
+ "sc25": {
+  "frames": 42,
+  "last": 41,
+  "level": 6,
+  "win": 6
+ },
+ "sk48": {
+  "frames": 36,
+  "last": 35,
+  "level": 4,
+  "win": 8
+ },
+ "sp80": {
+  "frames": 32,
+  "last": 31,
+  "level": 3,
+  "win": 6
+ },
+ "su15": {
+  "frames": 41,
+  "last": 40,
+  "level": 8,
+  "win": 9
+ },
+ "tn36": {
+  "frames": 18,
+  "last": 17,
+  "level": 2,
+  "win": 7
+ },
+ "tr87": {
+  "frames": 39,
+  "last": 38,
+  "level": 6,
+  "win": 6
+ },
+ "tu93": {
+  "frames": 46,
+  "last": 45,
+  "level": 9,
+  "win": 9
+ },
+ "vc33": {
+  "frames": 33,
+  "last": 32,
+  "level": 4,
+  "win": 7
+ },
+ "wa30": {
+  "frames": 44,
+  "last": 43,
+  "level": 7,
+  "win": 9
+ }
+}

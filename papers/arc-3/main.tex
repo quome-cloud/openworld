@@ -81,6 +81,7 @@
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 
 \usepackage{caption}
+\usepackage{animate}   % looped source-free solutions in the appendix (animate in Acrobat/PDF-JS)
 \DeclareCaptionLabelFormat{boldunder}{\underline{\textbf{#1~#2}}}
 \captionsetup{
   font=small,
@@ -1321,6 +1322,25 @@ success is any increase in \texttt{levels}; determinism lets the agent search of
 The agent writes/edits Python (explore $\to$ synthesize a \texttt{predict()} world model $\to$ reason
 the goal $\to$ plan $\to$ replay-verify) and saves the winning action list to \texttt{solved.json};
 we then re-verify it independently against the live game. Full launcher: \texttt{scripts/run\_arc\_agent.sh}.
+
+\section{Animated source-free solutions (all \ArcUnionGames{} games)}
+\label{app:animations}
+Every \emph{audited source-free} solution, replayed and looped as an animation. Each tile plays that
+game's banked action sequence from \texttt{reset()} to its deepest verified level (label \texttt{game}
+$\cdot$ \texttt{L}reached\texttt{/}win); a subsample of board frames is shown, with every level-up frame
+kept. \textbf{These loop in a PDF-JavaScript viewer (Adobe Acrobat, pdf.js); in other viewers (Preview,
+most browsers, print) they show a single static frame.} Frames are rendered in the official ARC-AGI
+16-colour palette; the sequences are the same replay-verified solutions scored in \S\ref{sec:rhae}.
+
+\begin{figure}[p]
+\centering
+\input{figs/anim/anim_grid.tex}
+\caption{\textbf{The \ArcUnionGames{} source-free solutions, animated.} Each tile loops one game's
+verified source-free action sequence (Acrobat/pdf.js required for playback; a static frame otherwise).
+The depth reached per game matches the banked source-free archive (\ArcSFGames/\ArcUnionGames{} full,
+\ArcRhaeSFNLevels{} levels).}
+\label{fig:anim}
+\end{figure}
 
 \section{Solved-level replay trajectories}
 \label{app:replay}

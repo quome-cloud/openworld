@@ -126,6 +126,11 @@ round-trips to a serveable OpenWorld `World`** — the map *is* the model.
 
 A verified world model is a reusable artifact, and it is useful **whether or not you ever fine-tune**. There are **three routes to spend it**, plus a hybrid that combines them.
 
+<div align="center">
+<img src="assets/three-routes.png" width="900" alt="One verified world is a reusable artifact you can spend three ways. Route 1, Use it as a tool (no training): serve and call it — exact, tool at inference, works on any world. Route 2, Distill one world (test-time training): QLoRA-tune its skill into weights — approximate, no tool at inference, within the world. Route 3, Train across many (world-time compute): traverse a family of worlds and generalize to held-out worlds — approximate, no tool at inference, generalizes across the family. Hybrid: the tool makes exact data, training amortizes it, and the tool stays the exact oracle for high-stakes queries."/>
+</div>
+
+
 **Route 1 — Use it as a tool (no training).** Serve the world and call it: plan through it, query exact next-states, or use it as a verifier. Exact, auditable, zero training.
 ```bash
 openworld serve specs/*.json --allow-code --open
@@ -154,6 +159,11 @@ openworld serve specs/*.json --allow-code --open
 
 Verified-code dynamics vs. learned / LLM dynamics on the framework's own benchmark
 suite (numbers from the bundled, reproducible experiments — see [`experiments/`](experiments/)).
+
+<div align="center">
+<img src="assets/baselines.png" width="900" alt="Two panels from experiment E36. Left: exact accuracy on unseen part-combinations at K=5 — OpenWorld verified code scores 1.00 with zero training samples, while all nine monolithic learned families, trained on thousands of samples, collapse; the strongest (hist gradient boosting) reaches only 0.20 and the rest sit near chance. Right: swept over task size K from 2 to 5, verified code holds flat at 1.00 while the best learned model erodes from 0.48 to 0.20 and the monolithic MLP stays near zero."/>
+<br/><sub>Generated from <code>experiments/results/e36_representations.json</code> by <code>scripts/make_readme_baselines_fig.py</code>. <b>Structure, not scale:</b> verified symbolic composition needs only per-part marginals; monolithic learners need the full joint and never see it.</sub>
+</div>
 
 | Approach | Rollout exact-match | Generalization to novel combos | Training data | Determinism |
 |---|:--:|:--:|:--:|:--:|

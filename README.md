@@ -4,8 +4,9 @@
 
 # OpenWorld
 
-**Build, optimize, and deploy *verified symbolic world models* — simulated environments whose dynamics are explicit, auditable Python code instead of opaque neural weights.**
+**The *PyTorch for code world models*: describe a world, let an LLM write and _verify_ its dynamics as plain Python, and deploy it in one line — no training, no GPU, no dataset.**
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quome-cloud/openworld/blob/main/notebooks/quickstart.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1d4ed8.svg)](LICENSE)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-1d4ed8.svg)](https://www.python.org/)
 [![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
@@ -13,6 +14,15 @@
 [![Experiments: 62](https://img.shields.io/badge/experiments-62-b45309.svg)](#-empirical-baselines)
 [![GitHub stars](https://img.shields.io/github/stars/quome-cloud/openworld?style=social)](https://github.com/quome-cloud/openworld/stargazers)
 [![Cite](https://img.shields.io/badge/cite-this%20work-purple.svg)](#-citation)
+
+<br/>
+
+<a href="#arc3"><img src="assets/arc3/su15.gif" width="230" alt="OpenWorld solving ARC-AGI-3 game su15 source-free — 9 of 9 levels"/></a>
+
+**Source-free, it beats the prior SOTA on ARC-AGI-3 → [16/25 games · 158/183 levels · ~54% more action-efficient](#arc3).**
+Every solve is a *verified, serveable* world model the agent built by acting — the map **is** the model.
+
+**⭐ [Star the repo](https://github.com/quome-cloud/openworld) if this is useful · 📄 [Cite the work](#-citation)**
 
 </div>
 
@@ -22,19 +32,13 @@
 > needs **0 training data**. Then `openworld serve` turns any spec into a FastAPI
 > inference server with a live, animated React Flow view.
 
-<div align="center">
+> **Who's it for?** Agent & RL researchers who need an *auditable* simulator instead of a
+> black box · LLM builders who want a world model as a *verifier / planner* · anyone tired
+> of learned dynamics that hallucinate and compound error.
 
-### 🔥 The *PyTorch for code world models*
-
-**Prototype a world model in minutes, not months.** *Describe* the state and actions →
-let an LLM **write and verify** the dynamics as plain Python → **serve** it. The same
-`World` object you sketch in a notebook serializes to a portable spec, renders to a
-model card, composes into bigger worlds, and deploys as an inference server — one
-zero-dependency core, no training loop, no GPU, no dataset.
-
-**⭐ Find it useful? [Star the repo](https://github.com/quome-cloud/openworld) — it helps others discover it. · 📄 Using it in research? [Cite the paper](#-citation).**
-
-</div>
+**Prototype a world model in minutes, not months.** The same `World` object you sketch in a
+notebook serializes to a portable spec, renders to a model card, composes into bigger
+worlds, and deploys as an inference server — one zero-dependency core, no training loop.
 
 ---
 
@@ -55,6 +59,8 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 </div>
 
 ---
+
+<a id="arc3"></a>
 
 ## 🎮 Watch it solve ARC-AGI-3 — *source-free, beats prior SOTA*
 
@@ -382,7 +388,7 @@ adversarial code).
 
 ---
 
-## 🧭 Design principles
+## 📐 Design principles
 
 - **The core is zero-dependency.** `import openworld` and everything it pulls in uses
   only the standard library. The CLI/server are the one batteries-included layer.

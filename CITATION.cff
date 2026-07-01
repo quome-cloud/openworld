@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use OpenWorld in your research, please cite it using the metadata below."
+title: "OpenWorld: A Zero-Dependency Framework for Verified Symbolic World Models"
+abstract: >-
+  OpenWorld builds, optimizes, and deploys verified symbolic world models —
+  simulated environments whose dynamics are explicit, auditable Python code
+  (optionally synthesized and verified by an LLM) rather than opaque neural
+  weights. Worlds serialize to a portable JSON spec, render to a self-contained
+  SVG model card, compose into worlds-within-worlds, and deploy as a stateless
+  FastAPI inference server. The core is zero-dependency.
+type: software
+authors:
+  - family-names: Schwoebel
+    given-names: Jim
+version: 0.3.0
+date-released: "2026-07-01"
+license: MIT
+repository-code: "https://github.com/quome-cloud/openworld"
+url: "https://github.com/quome-cloud/openworld"
+keywords:
+  - world-models
+  - code-synthesis
+  - verified-code
+  - simulation
+  - reproducibility
+  - large-language-models
+  - reinforcement-learning
+# A companion paper is under review. When it is public, add a `preferred-citation:`
+# block here (type: article, with the DOI / arXiv identifier) so that GitHub's
+# "Cite this repository" button and downstream tools surface the paper. Tracked in
+# the repo issues.

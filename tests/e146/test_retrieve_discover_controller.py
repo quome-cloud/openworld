@@ -4,8 +4,10 @@ import time
 from experiments.e145.sourcefree_controller import eligible_solution_paths
 from experiments.e146.retrieve_discover_controller import (
     discovery_environment,
+    exact_prefix_continuations,
     memory_paths,
     run_discovery_command,
+    same_game_solution_paths,
     select_tournament_winner,
     tournament_score,
     write_local_memory_record,
@@ -43,6 +45,41 @@ def test_memory_paths_merges_archive_and_local_without_duplicates(tmp_path):
 
     assert local_path in paths
     assert len(paths) == 2
+
+
+def test_exact_prefix_continuations_extracts_verified_memory_suffixes(tmp_path):
+    full = tmp_path / "full.json"
+    full.write_text(
+        json.dumps({"game": "toy", "actions": [[1], [2], [3], [4]], "levels": 3, "win": 5}) + "\n"
+    )
+    wrong_game = tmp_path / "wrong_game.json"
+    wrong_game.write_text(json.dumps({"game": "other", "actions": [[1], [2], [7]], "levels": 9}) + "\n")
+    wrong_prefix = tmp_path / "wrong_prefix.json"
+    wrong_prefix.write_text(json.dumps({"game": "toy", "actions": [[1], [4], [3]], "levels": 3}) + "\n")
+    not_longer = tmp_path / "not_longer.json"
+    not_longer.write_text(json.dumps({"game": "toy", "actions": [[1], [2]], "levels": 2}) + "\n")
+
+    trace = {"game": "toy", "frontier_action_count": 2, "actions": [[1], [2]], "states": [{"levels": 2}]}
+
+    suffixes = exact_prefix_continuations(trace, [wrong_game, wrong_prefix, not_longer, full])
+
+    assert len(suffixes) == 1
+    assert suffixes[0]["suffix"] == [[3], [4]]
+    assert suffixes[0]["start_index"] == 2
+    assert suffixes[0]["retrieval_mode"] == "exact_prefix_continuation"
+
+
+def test_same_game_solution_paths_scans_solution_archives(tmp_path):
+    solutions = tmp_path / "solutions"
+    solutions.mkdir()
+    good = solutions / "toy__run.json"
+    good.write_text(json.dumps({"game": "toy", "actions": [[1]], "levels": 1}) + "\n")
+    wrong_game = solutions / "toy__wrong.json"
+    wrong_game.write_text(json.dumps({"game": "other", "actions": [[1]], "levels": 1}) + "\n")
+    malformed = solutions / "toy__bad.json"
+    malformed.write_text("{")
+
+    assert same_game_solution_paths(tmp_path, game="toy") == [good]
 
 
 def test_discovery_environment_points_to_frontier_and_solved_out(tmp_path):
@@ -160,3 +197,24 @@ def test_sourcefree_primitives_do_not_run_expensive_detour_by_default(monkeypatc
     monkeypatch.setattr(sourcefree_primitives, "simple_path_detour_candidate", fail_if_called)
 
     assert sourcefree_primitives.sourcefree_primitive_candidates(tmp_path) == []
+
+
+def test_sourcefree_primitives_skip_crashing_candidate(monkeypatch, tmp_path):
+    def crashing_center(_scratch):
+        raise RuntimeError("bad terminal frame")
+
+    lattice = {
+        "game": "toy",
+        "actions": [[1]],
+        "levels": 1,
+        "win": 9,
+        "primitive": "lattice",
+    }
+
+    monkeypatch.setattr(sourcefree_primitives, "center_corridor_candidate", crashing_center)
+    monkeypatch.setattr(sourcefree_primitives, "lattice_corridor_candidate", lambda scratch: lattice)
+
+    assert sourcefree_primitives.sourcefree_primitive_candidates(tmp_path) == [lattice]
+    failures = (tmp_path / "primitive_failures.jsonl").read_text()
+    assert "center" in failures
+    assert "bad terminal frame" in failures

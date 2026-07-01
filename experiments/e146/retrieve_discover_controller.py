@@ -265,6 +265,86 @@ def memory_paths(trace_root: Path, local_memory_root: Path, game: str) -> list[P
     return sorted(out)
 
 
+def same_game_solution_paths(*roots: Path, game: str) -> list[Path]:
+    """Find same-game solution JSON files without applying provenance gates."""
+
+    seen: set[Path] = set()
+    out: list[Path] = []
+    for root in roots:
+        for base in (root / "solutions", root):
+            if not base.exists():
+                continue
+            for path in sorted(base.glob(f"{game}*.json")):
+                if path in seen:
+                    continue
+                try:
+                    data = json.loads(path.read_text())
+                except Exception:
+                    continue
+                if str(data.get("game")) != str(game):
+                    continue
+                seen.add(path)
+                out.append(path)
+    return sorted(out)
+
+
+def exact_prefix_continuations(
+    trace: Mapping[str, Any],
+    solution_paths: Sequence[Path],
+    *,
+    max_suffixes: int = 8,
+) -> list[dict[str, Any]]:
+    """Return archived same-game suffixes whose actions extend this frontier.
+
+    This is a high-precision memory fallback for late frontiers where whole-frame
+    signature matching can be too brittle. It does not trust the archive blindly:
+    the returned suffixes still go through the normal sandbox tournament.
+    """
+
+    game = str(trace.get("game"))
+    frontier = action_list(trace.get("actions", []))
+    frontier_key = tuple(tuple(a) for a in frontier)
+    frontier_level = current_level(trace)
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[tuple[int, ...], ...]] = set()
+    for path in solution_paths:
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            continue
+        if str(data.get("game")) != game:
+            continue
+        actions = action_list(data.get("actions", []))
+        if len(actions) <= len(frontier):
+            continue
+        if tuple(tuple(a) for a in actions[: len(frontier)]) != frontier_key:
+            continue
+        suffix = actions[len(frontier) :]
+        key = tuple(tuple(a) for a in suffix)
+        if key in seen:
+            continue
+        seen.add(key)
+        try:
+            source_levels = int(data.get("levels", 0))
+        except Exception:
+            source_levels = 0
+        out.append(
+            {
+                "source_path": str(path),
+                "source_levels": source_levels,
+                "frontier_level": frontier_level,
+                "start_index": len(frontier),
+                "suffix": suffix,
+                "signature_distance": 0.0,
+                "retrieval_mode": "exact_prefix_continuation",
+            }
+        )
+        if len(out) >= max_suffixes:
+            break
+    out.sort(key=lambda row: (-int(row.get("source_levels", 0)), len(row.get("suffix", []))))
+    return out
+
+
 def tournament_score(candidate: Mapping[str, Any], *, level_before: int, frontier_action_count: int) -> tuple[int, int, int, str]:
     """Rank verified candidates: deepest first, then shortest added route."""
 
@@ -450,6 +530,7 @@ def run_retrieve_discover_controller(
         (stage_dir / "trace.json").write_text(json.dumps(trace, indent=2) + "\n")
 
         candidates = memory_paths(trace_root, local_memory_root, game)
+        exact_candidate_paths = same_game_solution_paths(trace_root, local_memory_root, game=game)
         write_memory_manifest(stage_dir, candidates)
         ranked = filtered_ranked_suffixes(
             scratch,
@@ -458,6 +539,16 @@ def run_retrieve_discover_controller(
             transfer_limit=transfer_limit,
             signature_threshold=signature_threshold,
         )
+        exact = exact_prefix_continuations(trace, exact_candidate_paths, max_suffixes=transfer_limit)
+        if exact:
+            merged: list[dict[str, Any]] = []
+            seen_suffixes: set[tuple[tuple[int, ...], ...]] = set()
+            for row in list(exact) + list(ranked):
+                key = tuple(tuple(a) for a in row.get("suffix", []))
+                if key not in seen_suffixes:
+                    merged.append(dict(row))
+                    seen_suffixes.add(key)
+            ranked = merged[:transfer_limit]
         (stage_dir / "ranked_suffixes.json").write_text(json.dumps(ranked, indent=2) + "\n")
 
         if ranked:

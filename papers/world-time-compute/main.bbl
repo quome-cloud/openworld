@@ -1,0 +1,308 @@
+\begin{thebibliography}{10}
+
+\bibitem{optuna2019}
+Takuya Akiba, Shotaro Sano, Toshihiko Yanase, Takeru Ohta, and Masanori Koyama.
+\newblock Optuna: A next-generation hyperparameter optimization framework.
+\newblock In {\em Proceedings of the 25th ACM SIGKDD International Conference
+  on Knowledge Discovery and Data Mining}, 2019.
+
+\bibitem{akyurek2024ttt}
+Ekin Aky{\"u}rek, Mehul Damani, Linlu Qiu, Han Guo, Yoon Kim, and Jacob
+  Andreas.
+\newblock The surprising effectiveness of test-time training for abstract
+  reasoning.
+\newblock {\em arXiv preprint arXiv:2411.07279}, 2024.
+
+\bibitem{diamond2024}
+Eloi Alonso, Adam Jelley, Vincent Micheli, et~al.
+\newblock Diffusion for world modeling: Visual details matter in {Atari}.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2024.
+
+\bibitem{expertiteration2017}
+Thomas Anthony, Zheng Tian, and David Barber.
+\newblock Thinking fast and slow with deep learning and tree search.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2017.
+
+\bibitem{vjepa2025}
+Mido Assran et~al.
+\newblock {V-JEPA 2}: Self-supervised video models enable understanding,
+  prediction and planning.
+\newblock arXiv preprint arXiv:2506.09985, 2025.
+\newblock Joint-embedding predictive world model; predicts in representation
+  space, not pixels.
+
+\bibitem{genie2024}
+Jake Bruce, Michael Dennis, Ashley Edwards, et~al.
+\newblock Genie: Generative interactive environments.
+\newblock {\em arXiv preprint arXiv:2402.15391}, 2024.
+
+\bibitem{humaneval2021}
+Mark Chen, Jerry Tworek, Heewoo Jun, et~al.
+\newblock Evaluating large language models trained on code.
+\newblock {\em arXiv preprint arXiv:2107.03374}, 2021.
+
+\bibitem{chollet2019arc}
+Fran{\c{c}}ois Chollet.
+\newblock On the measure of intelligence.
+\newblock {\em arXiv preprint arXiv:1911.01547}, 2019.
+
+\bibitem{arcprize2024}
+Fran{\c{c}}ois Chollet, Mike Knoop, Gregory Kamradt, and Bryan Landers.
+\newblock {ARC} prize 2024: Technical report.
+\newblock arXiv preprint arXiv:2412.04604, 2024.
+
+\bibitem{chollet2025arcagi2}
+Fran{\c{c}}ois Chollet, Mike Knoop, Gregory Kamradt, Bryan Landers, and Henry
+  Pinkard.
+\newblock {ARC-AGI-2}: A new challenge for frontier {AI} reasoning systems.
+\newblock arXiv preprint arXiv:2505.11831, 2025.
+
+\bibitem{cobbe2020procgen}
+Karl Cobbe, Christopher Hesse, Jacob Hilton, and John Schulman.
+\newblock Leveraging procedural generation to benchmark reinforcement learning.
+\newblock In {\em International Conference on Machine Learning (ICML)}, 2020.
+
+\bibitem{metacwm2025}
+Jade Copet et~al.
+\newblock {CWM}: An open-weights {LLM} for research on code generation with
+  world models.
+\newblock {\em arXiv preprint arXiv:2510.02387}, 2025.
+\newblock 32B open-weights neural code world model; mid-trained on Python
+  execution and Docker container traces, then multi-task RL.
+
+\bibitem{gifmcts2024}
+Nicola Dainese, Matteo Merler, Minttu Alakuijala, and Pekka Marttinen.
+\newblock Generating code world models with large language models guided by
+  {Monte Carlo} tree search.
+\newblock {\em arXiv preprint arXiv:2405.15383}, 2024.
+
+\bibitem{omniepic2024}
+Maxence Faldor, Jenny Zhang, Antoine Cully, and Jeff Clune.
+\newblock {OMNI-EPIC}: Open-endedness via models of human notions of
+  interestingness with environments programmed in code.
+\newblock {\em arXiv preprint arXiv:2405.15568}, 2024.
+
+\bibitem{worldlabs2025}
+{Fei-Fei Li and World Labs}.
+\newblock Large world models and spatial intelligence.
+\newblock World Labs, 2025.
+
+\bibitem{rest2023}
+Caglar Gulcehre, Tom~Le Paine, Srivatsan Srinivasan, Ksenia Konyushkova, Lotte
+  Weerts, Abhishek Sharma, Aditya Siddhant, Alex Ahern, Miaosen Wang, Chenjie
+  Gu, et~al.
+\newblock Reinforced self-training ({ReST}) for language modeling.
+\newblock {\em arXiv preprint arXiv:2308.08998}, 2023.
+
+\bibitem{deepseekr1}
+Daya Guo, Dejian Yang, Haowei Zhang, et~al.
+\newblock {DeepSeek-R1}: Incentivizing reasoning capability in {LLMs} via
+  reinforcement learning.
+\newblock {\em arXiv preprint arXiv:2501.12948}, 2025.
+
+\bibitem{ha2018world}
+David Ha and J{\"u}rgen Schmidhuber.
+\newblock World models.
+\newblock {\em arXiv preprint arXiv:1803.10122}, 2018.
+
+\bibitem{dreamerv3}
+Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, and Timothy Lillicrap.
+\newblock Mastering diverse domains through world models.
+\newblock {\em arXiv preprint arXiv:2301.04104}, 2023.
+
+\bibitem{kang2024how}
+Bingyi Kang, Yang Yue, Rui Lu, et~al.
+\newblock How far is video generation from world model: {A} physical law
+  perspective.
+\newblock {\em arXiv preprint arXiv:2411.02385}, 2024.
+
+\bibitem{rlvr2024}
+Nathan Lambert, Jacob Morrison, Valentina Pyatkin, Shengyi Huang, Hamish
+  Ivison, Faeze Brahman, Lester James~V. Miranda, Alisa Liu, Nouha Dziri, Shane
+  Lyu, et~al.
+\newblock {T\"ulu} 3: Pushing frontiers in open language model post-training.
+\newblock {\em arXiv preprint arXiv:2411.15124}, 2024.
+
+\bibitem{cwmgames2025}
+Wolfgang Lehrach et~al.
+\newblock Code world models for general game playing.
+\newblock {\em arXiv preprint arXiv:2510.04542}, 2025.
+
+\bibitem{li2025what}
+Kenneth Li, Fernanda Vi{\'e}gas, Martin Wattenberg, et~al.
+\newblock What does it mean for a neural network to learn a ``world model''?
+\newblock {\em arXiv preprint arXiv:2507.21513}, 2025.
+
+\bibitem{li2024barc}
+Wen-Ding Li, Keya Hu, Carter Larsen, Yuqing Wu, Simon Alford, Caleb Woo,
+  Spencer~M. Dunn, Hao Tang, Wei-Long Zheng, Yewen Pu, and Kevin Ellis.
+\newblock Combining induction and transduction for abstract reasoning.
+\newblock {\em arXiv preprint arXiv:2411.02272}, 2024.
+
+\bibitem{markeeva2024clrstext}
+Larisa Markeeva, Sean McLeish, Borja Ibarz, Wilfried Bounsi, Olga Kozlova, Alex
+  Vitvitskyi, Charles Blundell, Tom Goldstein, Avi Schwarzschild, and Petar
+  Veli{\v{c}}kovi{\'c}.
+\newblock The {CLRS-Text} algorithmic reasoning language benchmark.
+\newblock {\em arXiv preprint arXiv:2406.04229}, 2024.
+
+\bibitem{iris2023}
+Vincent Micheli, Eloi Alonso, and Fran{\c{c}}ois Fleuret.
+\newblock Transformers are sample-efficient world models.
+\newblock In {\em International Conference on Learning Representations (ICLR)},
+  2023.
+
+\bibitem{deltairis2024}
+Vincent Micheli, Eloi Alonso, and Fran{\c{c}}ois Fleuret.
+\newblock Efficient world models with context-aware tokenization.
+\newblock {\em arXiv preprint arXiv:2406.19320}, 2024.
+
+\bibitem{nie2020bongard}
+Weili Nie, Zhiding Yu, Lei Mao, Ankit~B. Patel, Yuke Zhu, and Anima Anandkumar.
+\newblock Bongard-{LOGO}: A new benchmark for human-level concept learning and
+  reasoning.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2020.
+
+\bibitem{openended2021xland}
+{Open-Ended Learning Team}, Adam Stooke, Anuj Mahajan, et~al.
+\newblock Open-ended learning leads to generally capable agents.
+\newblock {\em arXiv preprint arXiv:2107.12808}, 2021.
+
+\bibitem{openai2024o1}
+{OpenAI}.
+\newblock Learning to reason with {LLMs}.
+\newblock OpenAI technical report, 2024.
+
+\bibitem{sora2024}
+{OpenAI}.
+\newblock Video generation models as world simulators.
+\newblock OpenAI technical report, 2024.
+
+\bibitem{poeworld2025}
+Wasu~Top Piriyakulkij, Yichao Liang, Hao Tang, et~al.
+\newblock {PoE-World}: Compositional world modeling with products of
+  programmatic experts.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2025.
+
+\bibitem{quevedo2025worldgym}
+Julian Quevedo, Ansh~Kumar Sharma, Yixiang Sun, et~al.
+\newblock {WorldGym}: World model as an environment for policy evaluation.
+\newblock {\em arXiv preprint arXiv:2506.00613}, 2025.
+
+\bibitem{mas2025}
+Santhosh~Kumar Ravindran.
+\newblock Moral anchor system: A predictive framework for {AI} value alignment
+  and drift prevention.
+\newblock {\em arXiv preprint arXiv:2510.04073}, 2025.
+
+\bibitem{scanlon1998}
+Thomas~M. Scanlon.
+\newblock {\em What We Owe to Each Other}.
+\newblock Harvard University Press, 1998.
+
+\bibitem{muzero}
+Julian Schrittwieser, Ioannis Antonoglou, Thomas Hubert, et~al.
+\newblock Mastering {Atari}, {Go}, chess and shogi by planning with a learned
+  model.
+\newblock {\em Nature}, 588:604--609, 2020.
+
+\bibitem{openworld_framework}
+James Schwoebel, Ingrida Semenec, Jenia Rousseva, Marcos Ortiz, Collin Overbay,
+  Manish Bhatt, Rome Thorstenson, and Martin~G. Frasch.
+\newblock {OpenWorld}: A zero-dependency framework for authoring, verifying,
+  composing, and serving symbolic code world models, 2026.
+\newblock Companion paper.
+
+\bibitem{restem2024}
+Avi Singh, John~D. Co-Reyes, Rishabh Agarwal, Ankesh Anand, Piyush Patil,
+  Xavier Garcia, Peter~J. Liu, James Harrison, Jaehoon Lee, Kelvin Xu, et~al.
+\newblock Beyond human data: Scaling self-training for problem-solving with
+  language models.
+\newblock {\em Transactions on Machine Learning Research (TMLR)}, 2024.
+
+\bibitem{snell2024testtime}
+Charlie Snell, Jaehoon Lee, Kelvin Xu, and Aviral Kumar.
+\newblock Scaling {LLM} test-time compute optimally can be more effective than
+  scaling model parameters.
+\newblock {\em arXiv preprint arXiv:2408.03314}, 2024.
+
+\bibitem{spectrap2025}
+Austin Spizzirri.
+\newblock The specification trap: Why static value alignment alone is
+  insufficient for robust alignment.
+\newblock {\em arXiv preprint arXiv:2512.03048}, 2025.
+
+\bibitem{srivastava2022bigbench}
+Aarohi Srivastava et~al.
+\newblock Beyond the imitation game: Quantifying and extrapolating the
+  capabilities of language models.
+\newblock {\em Transactions on Machine Learning Research (TMLR)}, 2023.
+
+\bibitem{worldcoder2024}
+Hao Tang, Darren Key, and Kevin Ellis.
+\newblock {WorldCoder}, a model-based {LLM} agent: Building world models by
+  writing code and interacting with the environment.
+\newblock {\em arXiv preprint arXiv:2402.12275}, 2024.
+
+\bibitem{tobin2017dr}
+Josh Tobin, Rachel Fong, Alex Ray, Jonas Schneider, Wojciech Zaremba, and
+  Pieter Abbeel.
+\newblock Domain randomization for transferring deep neural networks from
+  simulation to the real world.
+\newblock In {\em IEEE/RSJ International Conference on Intelligent Robots and
+  Systems (IROS)}, 2017.
+
+\bibitem{vafa2024evaluating}
+Keyon Vafa, Justin~Y. Chen, Ashesh Rambachan, et~al.
+\newblock Evaluating the world model implicit in a generative model.
+\newblock {\em arXiv preprint arXiv:2406.03689}, 2024.
+
+\bibitem{velickovic2022clrs}
+Petar Veli{\v{c}}kovi{\'c}, Adri{\`a}~Puigdom{\`e}nech Badia, David Budden,
+  Razvan Pascanu, Andrea Banino, Misha Dashevskiy, Raia Hadsell, and Charles
+  Blundell.
+\newblock The {CLRS} algorithmic reasoning benchmark.
+\newblock In {\em International Conference on Machine Learning (ICML)}, 2022.
+
+\bibitem{ivml2025}
+Zhouliang Yu, Yuhuan Yuan, Tim~Z. Xiao, et~al.
+\newblock Generating symbolic world models via test-time scaling of large
+  language models.
+\newblock {\em arXiv preprint arXiv:2502.04728}, 2025.
+
+\bibitem{rft2023}
+Zheng Yuan, Hongyi Yuan, Chengpeng Li, Guanting Dong, Keming Lu, Chuanqi Tan,
+  Chang Zhou, and Jingren Zhou.
+\newblock Scaling relationship on learning mathematical reasoning with large
+  language models.
+\newblock {\em arXiv preprint arXiv:2308.01825}, 2023.
+
+\bibitem{star2022}
+Eric Zelikman, Yuhuai Wu, Jesse Mu, and Noah~D. Goodman.
+\newblock {STaR}: Bootstrapping reasoning with reasoning.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2022.
+
+\bibitem{llmjudge2023}
+Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, et~al.
+\newblock Judging {LLM}-as-a-judge with {MT-Bench} and chatbot arena.
+\newblock In {\em Advances in Neural Information Processing Systems (NeurIPS)},
+  2023.
+
+\bibitem{agentasjudge2024}
+Mingchen Zhuge, Changsheng Zhao, Dylan Ashley, et~al.
+\newblock Agent-as-a-judge: Evaluate agents with agents.
+\newblock {\em arXiv preprint arXiv:2410.10934}, 2024.
+
+\bibitem{ttrl2025}
+Yuxin Zuo, Kaiyan Zhang, Li~Sheng, Shang Qu, Ganqu Cui, Xuekai Zhu, Haozhan Li,
+  Yuchen Zhang, Xinwei Long, Ermo Hua, Biqing Qi, Youbang Sun, Zhiyuan Ma,
+  Lifan Yuan, Ning Ding, and Bowen Zhou.
+\newblock {TTRL}: Test-time reinforcement learning.
+\newblock {\em arXiv preprint arXiv:2504.16084}, 2025.
+
+\end{thebibliography}

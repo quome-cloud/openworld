@@ -218,3 +218,34 @@ def test_sourcefree_primitives_skip_crashing_candidate(monkeypatch, tmp_path):
     failures = (tmp_path / "primitive_failures.jsonl").read_text()
     assert "center" in failures
     assert "bad terminal frame" in failures
+
+
+def test_macro_score_composition_accumulates_search_evidence():
+    left = sourcefree_primitives.MacroScore(
+        level_delta=0,
+        alive=1,
+        novelty=2,
+        object_progress=3,
+        activation_delta=-1,
+        reversible_control=1,
+        cost=5,
+    )
+    right = sourcefree_primitives.MacroScore(
+        level_delta=1,
+        alive=1,
+        novelty=4,
+        object_progress=-2,
+        activation_delta=3,
+        reversible_control=0,
+        cost=7,
+    )
+
+    combined = left.compose(right)
+
+    assert combined.level_delta == 1
+    assert combined.alive == 1
+    assert combined.novelty == 6
+    assert combined.object_progress == 1
+    assert combined.activation_delta == 2
+    assert combined.reversible_control == 1
+    assert combined.cost == 12

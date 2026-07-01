@@ -160,40 +160,45 @@
 {\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
 \fontsize{9.2}{10.5}\selectfont
-\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped
-into an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
-frontier agents score near zero. Our central contribution is a \textbf{diagnosis}: the bottleneck is
-\emph{not} modeling but \textbf{goal discovery}, because ARC-AGI-3 wins are \textbf{goal-as-procedure}
-(an ordered protocol), not goal-as-state. \emph{Modeling is largely solved}---all \NumArcGames{} games
-are replay-deterministic (\ArcDeterminismAll{}) and exactly code-expressible; a frontier synthesizer
-writes verified \texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
-(\ArcNNearPerfect{} near-perfect). \emph{Yet on top of those models, multiple principled, automated
-goal-discovery methods} (atomic objectives, frontier-LLM hypotheses, Bayesian sub-world planning, typed
-navigation, a formal solving cycle, spectral exploration) solve \textbf{zero} hard games, several
-\emph{even on a fidelity-$1.0$ model}: a goal scored over a single \emph{state} cannot rank an ordered
-\emph{procedure}. The walls fall only to a \textbf{reasoning agent} that writes, \emph{reasons} the
-win condition for, and replay-verifies its own world model.
+\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped into
+an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
+frontier agents score near zero. We report a \textbf{source-free result that beats the prior SOTA on
+every axis.} Under the benchmark's intended \textbf{source-free} protocol---process-isolated, no game
+code; rules discovered by acting; per-run leakage audit; every solve replay-verified and round-tripped
+through a verified OpenWorld \texttt{World}---a reasoning agent that writes, \emph{reasons the win
+condition for}, and verifies its own world model completes \textbf{\ArcSFGames/\ArcUnionGames{} games}
+(\ArcSFLevels/\ArcTotalLevels{} levels) at \textbf{\ArcRhaeSFGame{} per-game action-efficiency} (RHAE),
+versus prior SOTA \emph{baseline1}'s source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames{}}
+(145 levels, \ArcRhaeBaselineOne{} RHAE)~\cite{baseline1_ewm}---ahead on games, levels, and, most
+decisively, \textbf{efficiency}: $\sim$54\% fewer actions per game, \ArcRhaeSFPerLevel{} per level, with
+\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} solved levels pinned at the human-efficiency cap (about a
+\emph{third} of the human action count where we solve).
 
-\textbf{Headline numbers, read honestly.} Under the benchmark's intended \textbf{source-free} protocol
-(process-isolated, no game code; rules discovered by acting, leakage-audited, round-tripped through an
-OpenWorld \texttt{World}) we complete \textbf{\ArcSFGames/\ArcUnionGames{}} games
-(\ArcSFLevels/\ArcTotalLevels{} levels) at a per-game action-efficiency of \textbf{\ArcRhaeSFGame{}}
-(RHAE)---\emph{beating the prior SOTA, baseline1, on all three axes}: its source-free-intended
-\textbf{\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm} (145 levels, \ArcRhaeBaselineOne{} per-game
-RHAE). The decisive margin is \textbf{efficiency}: \ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per game
-($\sim$54\% more action-efficient), and \ArcRhaeSFPerLevel{} per level with
-\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} solved levels pinned at the human-efficiency cap.
+\textbf{Why it is hard---and the scientific contribution.} The bottleneck is \emph{not} modeling but
+\textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
+goal-as-state. \emph{Modeling is largely solved}---all \NumArcGames{} games are replay-deterministic
+(\ArcDeterminismAll{}) and exactly code-expressible; a frontier synthesizer writes verified
+\texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
+(\ArcNNearPerfect{} near-perfect). Yet on top of those models, \emph{six} principled automated
+goal-discovery methods (atomic objectives, frontier-LLM hypotheses, Bayesian sub-world planning, typed
+navigation, a formal solving cycle, spectral exploration) solve \textbf{zero} hard games---several
+\emph{even on a fidelity-$1.0$ model}---because a goal scored over a single \emph{state} cannot rank an
+ordered \emph{procedure}. Only a reasoning agent crosses the walls, and only at \emph{fair budget}: the
+same recipe trailed baseline1 until four \emph{harness/budget} confounds were removed (a frame-decode
+crash, a per-game time cap, reasoning left at its default, and API rate-limit throttling); run fairly,
+it overtakes prior SOTA.
+
 Granting the agent \textbf{read access to each game's own source} (mechanics \emph{and} win condition)
 lifts completion to \textbf{\ArcFullGames/\ArcUnionGames{}}; we present this not as the headline but as a
-\textbf{source-access upper bound}---and a \emph{security-relevant} capability, since most critical
-infrastructure is open-source. The \ArcSourceGapGames-game gap between the two protocols is the measured
-\emph{cost of discovery}. Solves are offline with unbounded resets ($N{=}1$ per game); random play alone
-clears $\ArcRandomGeqOne/\ArcUnionGames$ first levels, so we also report \textbf{\ArcAboveRandom/\ArcUnionGames{}
-above random}. \textbf{Contributions:} (i)~the goal-as-procedure diagnosis; (ii)~a map of which method
-\emph{class} solves what, negatives as first-class results; (iii)~an auditable source-free protocol whose
-telemetry makes leakage \emph{detectable}---fixing \ArcSFGames/\ArcUnionGames{} as the attested source-free
-result and \ArcFullGames/\ArcUnionGames{} as a source-access upper bound; every solver a serveable, verified
-OpenWorld \texttt{World}.
+\textbf{source-access upper bound}---a security-relevant capability, since most critical infrastructure
+is open-source. The \ArcSourceGapGames-game gap between protocols is the measured \emph{cost of
+discovery}. Solves are offline with unbounded resets ($N{=}1$ per game); this is a \emph{fresh
+fair-budget result and may be slightly revised}; random play alone clears $\ArcRandomGeqOne/\ArcUnionGames$
+first levels, so we also report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random}.
+\textbf{Contributions:} (i)~the goal-as-procedure diagnosis, negatives as first-class results;
+(ii)~a source-free result that \textbf{beats prior SOTA on games, levels, and---decisively---action
+efficiency}; (iii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable},
+every solver a serveable, verified OpenWorld \texttt{World}.
 
 \smallskip
 \noindent\textbf{Keywords:}~%

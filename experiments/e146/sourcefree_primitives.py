@@ -1043,6 +1043,9 @@ def sandbox_frontier_explore_candidate(
     def action_key(action: Sequence[int]) -> tuple[int, ...]:
         return tuple(int(x) for x in action)
 
+    def macro_key(macro: Sequence[Sequence[int]]) -> tuple[tuple[int, ...], ...]:
+        return tuple(action_key(action) for action in macro)
+
     def click_actions(frame: Any) -> list[list[int]]:
         if frame is None:
             return []
@@ -1073,10 +1076,21 @@ def sandbox_frontier_explore_candidate(
         click_cache[cache_key] = [list(a) for a in out]
         return out
 
-    def base_actions(frame: Any) -> list[list[int]]:
-        actions = [[1], [2], [3], [4], [5], [7]]
-        actions.extend(click_actions(frame))
-        return actions
+    def fibonacci_direction_macros() -> list[list[list[int]]]:
+        lengths = sorted({1, 2, 3, 5, 8, 13} | {4, 6, 7, 12, 14})
+        macros: list[list[list[int]]] = []
+        for action in (1, 2, 3, 4):
+            for length in lengths:
+                macros.append([[action] for _ in range(length)])
+        return macros
+
+    direction_macros = fibonacci_direction_macros()
+
+    def base_macros(frame: Any) -> list[list[list[int]]]:
+        macros = list(direction_macros)
+        macros.extend([[[5]], [[7]]])
+        macros.extend([[action] for action in click_actions(frame)])
+        return macros
 
     game = SandboxGame(game_id)
     try:
@@ -1087,7 +1101,7 @@ def sandbox_frontier_explore_candidate(
                 return None
         start_level = int(game.levels)
         win = int(game.win)
-        initial_actions = base_actions(game.frame)
+        initial_macros = base_macros(game.frame)
 
         while expansions < budget:
             game.reset()
@@ -1100,49 +1114,53 @@ def sandbox_frontier_explore_candidate(
 
             seq: list[list[int]] = []
             frame = game.frame
-            actions = list(initial_actions)
+            macros = list(initial_macros)
             for _depth in range(max_steps):
                 state = frame_key(frame)
                 tried = tested.setdefault(state, set())
-                untried = [a for a in actions if action_key(a) not in tried]
+                untried = [macro for macro in macros if macro_key(macro) not in tried]
                 if untried:
-                    action = rng.choice(untried)
+                    macro = rng.choice(untried)
                 else:
-                    clicks = [a for a in actions if int(a[0]) == 6]
-                    action = rng.choice(clicks if clicks and rng.random() < 0.45 else actions)
-                tried.add(action_key(action))
-                try:
-                    _act(game, action)
-                except Exception:
-                    break
-                expansions += 1
-                seq.append(list(action))
-                if int(game.levels) > start_level:
-                    all_actions = prefix + seq
-                    verified = _fresh_verified_level(
-                        scratch,
-                        game_id,
-                        all_actions,
-                        must_exceed=start_level,
-                    )
-                    if verified is None:
+                    clicks = [macro for macro in macros if len(macro) == 1 and int(macro[0][0]) == 6]
+                    macro = rng.choice(clicks if clicks and rng.random() < 0.45 else macros)
+                tried.add(macro_key(macro))
+                for action in macro:
+                    try:
+                        _act(game, action)
+                    except Exception:
                         break
-                    level, verify_win = verified
-                    return {
-                        "game": game_id,
-                        "actions": all_actions,
-                        "levels": level,
-                        "win": verify_win,
-                        "primitive": "sandbox_frontier_explore",
-                        "searched_steps": len(seq),
-                        "expansions": expansions,
-                        "states": len(tested),
-                        "elapsed_s": round(time.time() - start_time, 3),
-                    }
+                    expansions += 1
+                    seq.append(list(action))
+                    if int(game.levels) > start_level:
+                        all_actions = prefix + seq
+                        verified = _fresh_verified_level(
+                            scratch,
+                            game_id,
+                            all_actions,
+                            must_exceed=start_level,
+                        )
+                        if verified is None:
+                            break
+                        level, verify_win = verified
+                        return {
+                            "game": game_id,
+                            "actions": all_actions,
+                            "levels": level,
+                            "win": verify_win,
+                            "primitive": "sandbox_frontier_explore",
+                            "search_prior": "fibonacci_direction_macros",
+                            "searched_steps": len(seq),
+                            "expansions": expansions,
+                            "states": len(tested),
+                            "elapsed_s": round(time.time() - start_time, 3),
+                        }
+                    if bool(game.done) or int(game.levels) < start_level or expansions >= budget:
+                        break
                 if bool(game.done) or int(game.levels) < start_level or expansions >= budget:
                     break
                 frame = game.frame
-                actions = base_actions(frame)
+                macros = base_macros(frame)
 
         return best
     finally:

@@ -247,7 +247,7 @@ consolidated in \S\ref{sec:limitations}.)
 
 \paragraph{Three numbers, read carefully.} ARC-AGI-3 games have \emph{multiple} levels ($6$--$10$
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
-reachability (reachability is nearly free---random play alone reaches one level on
+reachability (which is nearly free---random play alone reaches one level on
 $\ArcRandomGeqOne/\ArcUnionGames$). On completion we report \textbf{\ArcSFGames/\ArcUnionGames{}
 source-free} (the benchmark's intended condition; beating baseline1's
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} on games, levels, and efficiency) and
@@ -834,7 +834,7 @@ a perfect (fidelity-1.0) model}, sharpening the diagnosis that a single-state go
 ordered procedure.
 
 \textbf{Source-\emph{simulated} reconstruction (E127).} Rather than read a game's code, can two models
-\emph{reconstruct} its engine from source-free play---synthesising a stateful \texttt{Engine}, converging
+\emph{reconstruct} its engine from source-free play---synthesizing a stateful \texttt{Engine}, converging
 them by differential CEGIS with the \emph{real environment} as the oracle, and \emph{certifying} the
 result by a Clopper--Pearson lower bound on held-out next-frame accuracy? On the easy game \texttt{ar25}
 this works cleanly: the certified engine reproduces \ArcSimEasyExact{} held-out transitions exactly
@@ -1056,7 +1056,7 @@ model) is the one worth studying further.
 \textbf{Two axes of ``multi,'' not one.} The consensus above runs along the \emph{action-modality} axis
 (keys vs.\ clicks), with the state read by one perceptor (the masked frame). A second, orthogonal axis is
 \emph{perceptual perspective}: fusing several \emph{lenses} that read the same frame differently---object
-configuration, salience, the step-counter as a \emph{value} rather than a masked nuisance, symmetry, colour
+configuration, salience, the step-counter as a \emph{value} rather than a masked nuisance, symmetry, color
 algebra, coarse regions---and selecting the highest-fidelity \emph{view} per state. The two are
 complementary: multi-modality adds \emph{interaction} coverage (some games respond only to clicks), while
 multi-perspective adds \emph{representational} coverage (some wins hinge on a feature a single lens aliases
@@ -1213,7 +1213,7 @@ change (the active regime is recorded in state, visible in the rollout).}
 Every method above is, structurally, an \openworld{} world model: a \textbf{perceptor} turns the replay-only
 frame into a discrete state $\sigma(s)$, the agent's exploration builds the $(s,a)\!\to\!s'$
 \texttt{FunctionTransition} \textbf{dynamics}, an \textbf{objective} scores progress, and the result
-serialises (\textbf{emit}) to a map and atlas card. The goal-inference wall (\S\ref{sec:solvewall}) is
+serializes (\textbf{emit}) to a map and atlas card. The goal-inference wall (\S\ref{sec:solvewall}) is
 precisely a missing \emph{objective}: a static state score cannot express an ordered \emph{procedure}, so
 blind search banks $0$. E124's design keeps the world model intact and swaps only the objective's
 \emph{source}. A strong external coder (OpenAI Codex) compiles the goal \emph{source-free}---as an ordered
@@ -1231,7 +1231,7 @@ deterministic replay. The build is in progress and gated on that lift.
 \centering
 \includegraphics[width=\textwidth]{figs/e124_openworld_flow.png}
 \caption{\textbf{The ARC-AGI-3 solver as an \openworld{} world model, with Codex as the objective compiler
-(E124, design).} Three roles are colour-coded. The \textbf{environment} (ground truth, ochre) is replay-only
+(E124, design).} Three roles are color-coded. The \textbf{environment} (ground truth, ochre) is replay-only
 and decides correctness---a level-up is a verified solve. \textbf{\openworld{} primitives} (teal/blue)
 supply the perceptor $\sigma(s)$, the discovered \texttt{FunctionTransition} dynamics the search builds by
 acting, the \texttt{PhasedTransition}/\texttt{ConsensusTransition} composition that rebuilds the world when
@@ -1361,7 +1361,7 @@ we then re-verify it independently against the live game. Full launcher: \texttt
 \section{Solved-level replay trajectories}
 \label{app:replay}
 \paragraph{What these figures show (in plain terms).} ARC-AGI-3 is a set of tiny video-game puzzles. A
-player sees only the screen---a $64{\times}64$ grid of coloured squares---and a few buttons (arrow keys,
+player sees only the screen---a $64{\times}64$ grid of colored squares---and a few buttons (arrow keys,
 and on some games a mouse click), and is told \emph{nothing}: no rules and no goal in words. It must work
 out, purely by pressing buttons and watching how the screen changes, how to finish each of the game's
 levels. As our solver explores, it builds a \emph{world model}: an internal map of how the game works
@@ -1392,8 +1392,8 @@ visibly transforming as level after level is cleared. Figures regenerate from
 \end{itemize}
 
 \paragraph{How to read the replay (bottom strip).} Each panel is an actual game screenshot in the ARC
-16-colour palette. The first is the starting screen; each later one is the board at the moment a level is
-completed (labelled with the move number that did it). The scattered coloured blocks are the game's real
+16-color palette. The first is the starting screen; each later one is the board at the moment a level is
+completed (labeled with the move number that did it). The scattered colored blocks are the game's real
 pieces---walls, keys, goal markers---not noise.
 
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ar25.png}

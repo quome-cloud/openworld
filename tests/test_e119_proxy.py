@@ -84,7 +84,6 @@ def test_probe_game_reports_signals_on_corridor():
     # this exercises the no-gradient / novelty-headroom path, not the guided-search loop.
     g = CorridorGame(L=8)
     # monkeypatch perception/candidates to the corridor's 1-D state via proxy_probe seams:
-    import numpy as np
     from e119 import proxy_probe as pp
     row = pp.probe_game(g, {"max_nodes": 500, "max_depth": 20}, max_preds=10)
     assert row["game"] == "corridor"

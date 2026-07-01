@@ -1,7 +1,7 @@
 """E119 reproducibility: provenance capture + a runs.jsonl-style per-run trace logger.
 The SLM arm is not bit-reproducible (sampling + Metal); this pins everything that IS fixed and
 records every run so a draw can be audited and anchored to its replayable action sequence."""
-import json, hashlib, sys, platform
+import json, hashlib, platform
 
 
 def prompt_digest(text):

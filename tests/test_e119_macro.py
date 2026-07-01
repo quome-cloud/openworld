@@ -1,6 +1,6 @@
 import json, random, numpy as np
 from openworld import MockLLM
-from e119 import macro, slm
+from e119 import macro
 
 
 OJ = {"bg": 0, "objects": [{"id": 0, "color": 5, "centroid": (10, 20)},
@@ -84,7 +84,6 @@ def test_propose_macros_abstains_on_disagreement():
 
 
 def test_rank_macros_subgoal_satisfier_first():
-    g = StepGame()
     # subgoal: reach color 5. StepGame never produces color 5, so make a game variant:
     class ColorAtThree(StepGame):
         def _r(self):

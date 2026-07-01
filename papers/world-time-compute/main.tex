@@ -435,7 +435,7 @@ local models, the regime where learned world models are least accessible and tra
 approaches matter most.
 
 % ============================================================================
-\section{Problem Setting and Positioning}
+\section{Problem Setting}
 We target symbolic-state environments: worlds whose state is a
 JSON-serializable structure, whose action set is discrete, and whose dynamics
 follow declarable rules. This covers operational simulations (triage,
@@ -451,52 +451,34 @@ silently wrong code, reward misspecification, and value drift.
 \[
   W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(g_i, w_i)\}_i,\ \mathcal{I}\bigr),
 \]
-where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
-JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
-discrete action set, $s_0 \in \mathcal{S}$ is a distinguished initial state, and
-the dynamics $\tau : \mathcal{S} \times \mathcal{A} \to \mathcal{S}$ is a
-\emph{deterministic program} returning the successor state (an action illegal in
-a state acts as a no-op, so $\tau$ is total). A stochastic world threads an
-explicit pseudo-random seed through the state, so $\tau$ stays a pure function
-and every rollout is replayable; \openworld{} thus models stochasticity as
-replayable seeded determinism rather than a transition kernel $\mathcal{S} \times
-\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $g_i : \mathcal{S} \times
-\mathcal{A} \times \mathcal{S} \to \mathbb{R}$ score a transition $(s, a, s')$,
-are combined as $\sum_i w_i g_i$, and are weighted by \emph{dials} $w_i$ (fixed
-or tunable); invariants $\mathcal{I}$ are predicates $\iota : \mathcal{S} \to
-\{\top, \bot\}$ required (by specification) to hold on every state reachable from
-$s_0$ under $\tau$, though the acceptance gate below checks them only on the probe
-set $P$.
-The practitioner declares a \emph{spec}
-$\sigma = (s_0, \mathcal{A}, R, \{(g_i, w_i)\}_i, \mathcal{I})$---an initial
-state, the actions, natural-language rules $R$, objectives with their dials, and
-invariants; the schema of $s_0$ induces $\mathcal{S}$, and the framework
-\emph{compiles} $\sigma$ into the world model $W$ by \emph{producing} $\tau$ from
-$R$ (the one component $\sigma$ leaves to synthesis).
+with symbolic states $\mathcal{S}$ (JSON-serializable maps), a discrete action set
+$\mathcal{A}$, an initial state $s_0$, a \emph{deterministic} transition program
+$\tau : \mathcal{S} \times \mathcal{A} \to \mathcal{S}$ (illegal actions are no-ops, so $\tau$
+is total; stochastic worlds thread a seed, keeping rollouts replayable), weighted objectives
+$\sum_i w_i o_i$ that score transitions, and invariants $\mathcal{I}$ required on every
+reachable state. The practitioner declares everything but $\tau$---the schema of $s_0$, the
+actions, natural-language rules $R$, the objectives with their \emph{dials}, and the
+invariants---and the framework must \emph{produce} $\tau$.
 
-It produces $\tau$ by \emph{synthesis under verification}, not by learning. An
-LLM proposes a program $\hat\tau$ from $R$; $\hat\tau$ is accepted only if it
-(i)~parses with the required signature, (ii)~executes in a sandbox over a probe
-set $P \subseteq \mathcal{S} \times \mathcal{A}$ (in our implementation, each
-action applied at $s_0$) and satisfies every $\iota \in \mathcal{I}$ on the
-resulting states, and optionally (iii)~survives a second-model critique against
-$R$. Verification therefore certifies signature-conformance and
-invariant-consistency on $P$; it does \emph{not} certify $\hat\tau = \tau^\star$
-against a ground truth---it bounds and surfaces error rather than eliminating it.
-The accepted $\hat\tau$ is then \emph{fixed}: a depth-$t$ rollout $s_t =
-\hat\tau(\cdot, a_t) \circ \cdots \circ \hat\tau(\cdot, a_1)(s_0)$ is computed by
-executing code, so \emph{if} $\hat\tau = \tau^\star$ on the reachable set, it is
-exact at \emph{every} depth, bit-exactly. Contrast a learned or
-per-step-predicted transition $\tilde\tau$ resampled each step: writing
-$\epsilon = \Pr_{(s,a)\sim\pi}[\tilde\tau(s, a) \neq \tau^\star(s, a)]$ for its
-single-step error rate over states visited under a policy $\pi$, the probability
-that a full $t$-step rollout is exact is $\prod_{k<t}(1 - \epsilon_k) \approx
-(1 - \epsilon)^t$ under independent, constant-$\epsilon$ steps---and strictly
-lower once an early error pushes the rollout off-distribution, where $\epsilon$
-grows. A symbolic world fixes its error \emph{once}, at synthesis time, where it
-is systematic and auditable; a learned world risks a fresh error every step,
-where it compounds. This tuple, and that property, are what the rest of the paper
-measures.
+World-time compute does not roll the transition forward. The agent instead treats a world
+model \emph{it built and verified} as ground truth, and trains on the exactly-labeled examples
+that world supplies: an input $o$ paired with the answer $y$ the world fixes---the disease a
+generative world drew (E74), the output a real task's hidden rule determines (List Functions,
+ARC), or the next state a verified program computes (program repair). The label is exact
+because it is read off the agent's own verified world rather than estimated---exact
+\emph{relative to} that world. The question this paper sets out to measure is how far an agent
+that synthesizes its own worlds and learns from them can then grapple with wide-ranging
+problems.
+
+\openworld{} produces $\tau$ by \emph{synthesis under verification}, not learning. An LLM
+proposes a program $\hat\tau$ from $R$; it is accepted only if it parses with the required
+signature, runs in a sandbox preserving every invariant on a probe set, and optionally survives
+a second-model critique. This certifies invariant-consistency, not equality to the true
+dynamics $\tau^\star$. But once accepted, $\hat\tau$ is fixed code: wherever it matches
+$\tau^\star$ on the reachable set, a $t$-step rollout is exact at every depth, bit-for-bit. A
+per-step-predicted transition with single-step error rate $\epsilon$ instead stays exact for
+only about $(1-\epsilon)^t$ of a $t$-step rollout, decaying with depth---the compounding error
+a fixed program avoids by construction.
 
 % ============================================================================
 \section{Experimental Setup}

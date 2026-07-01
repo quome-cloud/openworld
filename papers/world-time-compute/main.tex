@@ -163,11 +163,11 @@
 Large language models generalize across a domain only after seeing many real, labeled
 examples of it, and in most domains that experience is scarce. We study a way to
 manufacture it cheaply. When a domain's dynamics can be written as code, one template
-instantiates into many \emph{world models}---simulators whose dynamics are executable,
-verifiable programs over symbolic state---each an inexhaustible source of \emph{exactly}%
+instantiates into many \emph{world models} (simulators whose dynamics are executable,
+verifiable programs over symbolic state), each an inexhaustible source of \emph{exactly}%
 -labeled trajectories. Fine-tuning an LLM on trajectories traversed through many such world
-models of a domain---which we call \textbf{world-time compute}, a training-time analogue of
-test-time compute---lifts its generalization to \emph{held-out} worlds it never trained on (demonstrated on
+models of a domain (\textbf{world-time compute}, a training-time analogue of
+test-time compute) lifts its generalization to \emph{held-out} worlds it never trained on (demonstrated on
 synthesized world families), with the largest gains where model capability is scarcest
 ($+\WTSmallGain$ points at \WTSmallName; the largest model's lift is within noise, consistent
 with task saturation). The labels can be trusted because the worlds are \emph{verified code}, not
@@ -176,7 +176,10 @@ learned approximations: synthesized-then-checked dynamics are exact over
 (\CodeOODRate), whereas per-step LLM prediction and a trained MLP compound error and
 collapse. Unlike domain randomization (varying one simulator's parameters), each world is
 independently authored and verified; a corrupted-label control shows label \emph{exactness}, not
-task variety, drives the held-out gains. On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
+task variety, drives the held-out gains.
+
+\smallskip\noindent
+On real, human-authored benchmarks (ARC-AGI grids, List Functions, CLRS
 algorithms) the same lever holds as \emph{per-world} test-time training, scaling with compute
 and collapsing under label corruption. On a coherent real family (List Functions) the harder
 \emph{cross-world} form holds too: one adapter trained on \CrossWorldNTrain{} \emph{disjoint}
@@ -188,7 +191,7 @@ models, and fades for long reasoning chains, for tasks induced from rich percept
 task saturates; cross-task transfer is weak where worlds share no skill.
 The worlds are authored and served by \textbf{\openworld}, a zero-dependency framework that makes
 assembling the \emph{many} worlds a domain needs cheap (the framework is a companion paper).
-\textbf{Scope: the symbolic-state regime}---where dynamics are writable, verified code makes a
+\textbf{Scope: the symbolic-state regime}: where dynamics are writable, verified code makes a
 \emph{correct} world model a zero-training prototype; pixel-native domains remain the territory of
 learned models. All code, recipes, and this manuscript regenerate from one repository.
 
@@ -231,7 +234,7 @@ imagination'' rather than by trial in the world~\cite{ha2018world}. That
 model represents state and how it is obtained}, and the term today names two largely
 disjoint \emph{species}. The dominant, most visible one is \emph{perceptual and
 generative}: a neural network learned from large amounts of data whose state is a
-continuous latent---or pixels, video, or a 3D scene---and whose output is a
+continuous latent (or pixels, video, or a 3D scene) and whose output is a
 \emph{generated observation}. It runs from the V--M--C triad of Ha and
 Schmidhuber~\cite{ha2018world} through the RSSM-based Dreamer
 family~\cite{dreamerv3}, value-equivalent planning in MuZero~\cite{muzero},
@@ -273,14 +276,14 @@ separate dissolves much of the remaining confusion. A \emph{world} is the
 environment-as-simulator: a symbolic state, a discrete set of \emph{actions}, and
 the verified transition that maps a $(\textrm{state}, \textrm{action})$ pair to the
 next state (plus optional perception/emit boundaries). An \emph{agent} is a
-\emph{separate} policy---an LLM planner or a fixed rule---that chooses actions
+\emph{separate} policy (an LLM planner or a fixed rule) that chooses actions
 toward a goal; it is a \emph{user} of a world, not a part of it, so one world serves
 any agent and a planner can be swapped without re-synthesizing dynamics. A
 \emph{simulation} closes the loop: it places agents in a world and repeatedly
 observes, chooses an action, and steps the world, producing a trajectory scored by
 objectives. The textbook definition puts the world model \emph{inside} the agent
 (the simulator it plans with) and distinguishes it from the true environment; the
-gap between the two---model bias, sim-to-real error---is exactly what bounds learned
+gap between the two (model bias, sim-to-real error) is exactly what bounds learned
 world models. A verified code world model does not so much eliminate that gap as
 \emph{relocate} it: once the dynamics are declared symbolically and the accepted
 program reproduces them exactly, the agent's internal model and the (symbolic)
@@ -292,7 +295,7 @@ modification, both as the ground-truth environment and as the model an agent pla
 through in our planning experiments; it is also why this paper is scoped to
 \emph{specifiable} domains, where that relocation is a genuine win.
 
-This Code World Model bargain---programs instead of weights---buys verifiability,
+This Code World Model bargain (programs instead of weights) buys verifiability,
 compute-cheap rollouts,
 and out-of-distribution generalization by construction~\cite{worldcoder2024,
 gifmcts2024, poeworld2025, cwmgames2025}. Yet CWM research has remained a set
@@ -325,8 +328,10 @@ ground-truth-instrumented world, dynamics synthesized and verified once as
 code (blue) match the oracle exactly at every depth of a \RolloutSteps-step
 rollout, while per-step LLM next-state prediction (orange)---a structural
 stand-in for learned neural dynamics---first diverges at step
-\LLMFirstDivergence{} on average and never completes an exact rollout. Programs
-encode rules, not statistics, so the compounding-error failure mode of learned
+\LLMFirstDivergence{} on average and never completes an exact rollout. (Panel A is the
+per-depth exact-match rate over $n{=}3$ rollouts---hence the orange trace is noisy and
+non-monotonic; the robust claim is the contrast with code's exact-at-every-depth line, not
+the orange shape.) Programs encode rules, not statistics, so the compounding-error failure mode of learned
 world models is eliminated by construction, at zero training cost. \emph{B
 (payoff):} what that exactness unlocks---\emph{world-time compute}. Fine-tuning
 an LLM on trajectories traversed through \WTNumTrainWorlds{} verified
@@ -365,7 +370,7 @@ efficiency, and steerability on the other (Table~\ref{tab:related}).
   rule-correctness (on a weak 3B generator the gate accepts every program yet none is
   branch-exact). Handed the dynamics, planning through the verified model beats planning through a
   hallucinating one and solves $0$-shot what trained DreamerV3 / V-JEPA-2 need $10^4$--$10^5$
-  steps to learn (a scope property, not a contest; \S\ref{sec:bakeoff}).
+  steps to learn~\cite{dreamerv3} (a scope property, not a contest; \S\ref{sec:bakeoff}).
   \item \textbf{The substrate, and full reproducibility.} \openworld, a zero-dependency framework,
   makes authoring and serving the \emph{many} verified worlds world-time compute needs a
   minutes-scale activity; the framework, its \ProtoNumWorlds-world prototyping benchmark, and the
@@ -408,7 +413,7 @@ silently wrong code, reward misspecification, and value drift.
 
 \paragraph{A world model, formally.} An \openworld{} world model is a tuple
 \[
-  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(o_i, w_i)\}_i,\ \mathcal{I}\bigr),
+  W \;=\; \bigl(\mathcal{S},\ \mathcal{A},\ s_0,\ \tau,\ \{(g_i, w_i)\}_i,\ \mathcal{I}\bigr),
 \]
 where $\mathcal{S}$ is a space of \emph{symbolic states} (each $s \in \mathcal{S}$ a
 JSON-serializable map of named fields to values), $\mathcal{A}$ is a finite,
@@ -419,15 +424,19 @@ a state acts as a no-op, so $\tau$ is total). A stochastic world threads an
 explicit pseudo-random seed through the state, so $\tau$ stays a pure function
 and every rollout is replayable; \openworld{} thus models stochasticity as
 replayable seeded determinism rather than a transition kernel $\mathcal{S} \times
-\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $o_i : \mathcal{S} \times
+\mathcal{A} \to \Delta(\mathcal{S})$. Objectives $g_i : \mathcal{S} \times
 \mathcal{A} \times \mathcal{S} \to \mathbb{R}$ score a transition $(s, a, s')$,
-are combined as $\sum_i w_i o_i$, and are weighted by \emph{dials} $w_i$ (fixed
+are combined as $\sum_i w_i g_i$, and are weighted by \emph{dials} $w_i$ (fixed
 or tunable); invariants $\mathcal{I}$ are predicates $\iota : \mathcal{S} \to
-\{\top, \bot\}$ required to hold on every state reachable from $s_0$ under $\tau$.
-The practitioner declares $(s_0, \mathcal{A}, R, \{(o_i, w_i)\}_i,
-\mathcal{I})$---an initial state, the actions, natural-language rules $R$,
-objectives with their dials, and invariants; the schema of $s_0$ induces
-$\mathcal{S}$, and the framework must \emph{produce} $\tau$ from $R$.
+\{\top, \bot\}$ required (by specification) to hold on every state reachable from
+$s_0$ under $\tau$, though the acceptance gate below checks them only on the probe
+set $P$.
+The practitioner declares a \emph{spec}
+$\sigma = (s_0, \mathcal{A}, R, \{(g_i, w_i)\}_i, \mathcal{I})$---an initial
+state, the actions, natural-language rules $R$, objectives with their dials, and
+invariants; the schema of $s_0$ induces $\mathcal{S}$, and the framework
+\emph{compiles} $\sigma$ into the world model $W$ by \emph{producing} $\tau$ from
+$R$ (the one component $\sigma$ leaves to synthesis).
 
 It produces $\tau$ by \emph{synthesis under verification}, not by learning. An
 LLM proposes a program $\hat\tau$ from $R$; $\hat\tau$ is accepted only if it
@@ -642,8 +651,9 @@ generator. Totals carry 95\% Wilson CIs.}
 \subsection{The central result}\label{sec:central-result}
 \emph{Verified code synthesis eliminates compounding rollout error at zero
 training cost.} The mechanism is structural, not statistical. A learned (or
-per-step predicted) transition is sampled each step, so per-step error
-$\epsilon$ compounds roughly as $1-(1-\epsilon)^{t}$: with the measured
+per-step predicted) transition is sampled each step, so with per-step error
+$\epsilon$ the probability that a $t$-step rollout has \emph{diverged} grows as
+$1-(1-\epsilon)^{t}$ (one minus the exactness probability $(1-\epsilon)^t$): with the measured
 single-transition error of the LLM engine (\LLMProbeErrorRate{} of probes wrong),
 divergence by step \LLMFirstDivergence{} is exactly what the arithmetic
 predicts, and twenty-step plans are fiction (final $L^1$ error
@@ -671,9 +681,10 @@ rules, so an agent can \emph{traverse} many worlds of a domain and distill the s
 We call spending compute this way---fine-tuning a model on trajectories drawn from traversed,
 verified world models rather than on scarce real examples---\textbf{world-time compute}, a
 training-time analogue of test-time compute~\cite{snell2024testtime,openai2024o1,deepseekr1}
-(and, when spent per world at inference, of test-time training~\cite{akyurek2024ttt}).
+(and, when spent per world at inference, of test-time training (TTT)~\cite{akyurek2024ttt}).
 
-We test it on a \emph{family} of diagnosis worlds (E74): one POMDP template (a hidden
+We test it on a \emph{family} of diagnosis worlds (E74): one partially observable Markov decision
+process (POMDP) template (a hidden
 disease; order tests to reveal symptoms; commit a diagnosis) instantiated as
 \WTNumTrainWorlds{}${+}$\WTNumTestWorlds{} specialties that share a goal and action grammar
 but differ in their symptom\,$\to$\,disease structure. We hold out whole specialties (a
@@ -747,7 +758,7 @@ does it hold on a \emph{different} use case authored as real verified-code world
 \paragraph{World-count scaling (E76).} We fix the model (7B) and the hard family and vary
 only the number of train specialties traversed, holding the test specialties fixed
 (Figure~\ref{fig:world-count}). Too few worlds \emph{hurt} (the fine-tune overfits a narrow
-slice, below the \WCBase{} base); the gain then rises monotonically and is \emph{still
+slice, below the \WCBase{} base); after an initial dip the gain rises monotonically and is \emph{still
 climbing at \WCMaxWorlds{} worlds} (\WCMaxAcc, $+\WCMaxGain$ points), heading toward the
 \WCOracle{} oracle---no plateau. So world-time compute is a genuine scaling lever in the
 number of worlds, when the task has headroom; the offline empirical-Bayes prior saturated at
@@ -762,7 +773,7 @@ a confusable disease drawn from the posterior over the others---the structured e
 non-verified or learned world model makes when its rules are slightly wrong. The held-out
 test labels stay exact. Held-out accuracy declines monotonically with corruption, from
 \AblVerified{} at $p{=}0$ (verified) down to \AblNoisyFull{} at $p{=}1$---a fully-wrong world
-yields \emph{no} generalization gain (back to the no-fine-tune base), with a smooth penalty in
+yields \emph{no} generalization gain---in fact at or below the prior-only floor (\AblFloorHard)---with a smooth penalty in
 between (Figure~\ref{fig:noise-ablation}). So it is label \emph{exactness}, not task variety,
 that drives the effect---the property that separates world-time compute from domain
 randomization, and the reason the worlds must be \emph{verified} code (\AblSeeds{} seeds per
@@ -843,7 +854,7 @@ LoRA), with the two strict train/test splits---and Figure~\ref{fig:arc} reports 
 rule-preserving augmentation (dihedral $\times$ color) turns it into unlimited
 \emph{exactly}-labeled rows (the transition is code, so the oracle is execution), which
 LoRA-SFT a frozen 4-bit Qwen2.5-7B---only the small adapters train. \emph{Bottom:} two
-strict world-level holdouts---(A) the cross-task ladder trains on 25--400 worlds and is scored
+strict world-level holdouts---(A) the cross-task ladder trains on 25--200 worlds and is scored
 on \emph{disjoint} held-out worlds; (B) test-time training fits a fresh adapter on a single
 held-out world's demos (its test pair excluded) and predicts that test. The payoff bars track
 exact-match vs.\ world-time compute, with a corrupted-label arm as the discriminator: if the
@@ -854,7 +865,7 @@ lift survives label corruption it is not the verified labels---not the optimizer
 \emph{(i) Cross-task transfer is weak.} Training one LoRA on $N$ real training worlds and
 evaluating zero-shot on disjoint held-out worlds barely moves exact-match
 (\ArcLadderBase{} base $\to$ \ArcLadderTop{} at \ArcLadderTopN{} worlds). This is the
-expected, honest boundary: every ARC rule is novel by construction, so a single shared policy
+expected boundary: every ARC rule is novel by construction, so a single shared policy
 has little to transfer---consistent with E76/E77, where transfer turns strong only well above
 the world counts we can afford here.
 
@@ -901,7 +912,7 @@ concept-induction problems, via frozen DINOv2 features + a per-world head).
 
 \paragraph{The trend replicates on every symbolic domain.} Held-out exact-match \emph{scales}
 with world-time compute and \emph{collapses} to the floor when the demonstrations' labels are
-randomised: List Functions \LfZero$\to$\LfLight$\to$\LfHeavy{} (heavy 95\% bootstrap CI over
+randomized: List Functions \LfZero$\to$\LfLight$\to$\LfHeavy{} (heavy 95\% bootstrap CI over
 worlds \LfHeavyCI), corrupt \LfCorrupt; CLRS \ClrsZero$\to$\ClrsLight$\to$\ClrsHeavy, corrupt
 \ClrsCorrupt; ARC \ArcZeroShot$\to$\ArcTTTLight$\to$\ArcTTTHeavy{} (CI \ArcHeavyCI), corrupt
 \ArcTTTCorrupt. Same mechanism, three independent real benchmarks, and in each the lift is owed
@@ -916,7 +927,7 @@ out at \ClrsHeavy, the lowest of the three. This is the same boundary as the com
 in \emph{few reasoning steps} and degrade as the required chain lengthens. It is also exactly
 where they beat data-hungry learned world models---on the short-horizon \textbf{MiniGrid DoorKey}
 planning task (\S\ref{sec:minigrid}) the verified model solves \emph{zero-shot} while DreamerV3
-needs $10^4$--$10^5$ interactions and V-JEPA-2 cannot control at all.
+needs ${\sim}10^4$ interactions (\MGDreamerFirstSolve{} to first solve; E65) and V-JEPA-2 cannot control at all.
 
 \paragraph{The boundary: rich perceptual abstraction.} Bongard-RWR is the honest negative: per-world
 test-time training over frozen visual features stays at chance (base \BongBase, heavy \BongHeavy,
@@ -934,7 +945,8 @@ base $\to$ light $\to$ heavy world-time compute, plus a corrupted-label control;
 95\% bootstrap CIs over worlds. The three symbolic domains (ARC grids, List Functions lists,
 CLRS algorithms) all \emph{scale} with compute and \emph{collapse} under corruption---the lift
 requires verified labels. Bongard-RWR (vision, right) stays at chance: the boundary where a
-latent concept must be induced from rich perception, not symbolic input.}
+latent concept must be induced from rich perception, not symbolic input. (The ARC bars
+reproduce Fig.~\ref{fig:arc}, left, shown here for cross-domain comparison.)}
 \label{fig:worldtime-domains}
 \end{figure}
 
@@ -973,16 +985,18 @@ formatting: an adapter that learned to infer list-function rules from one set of
 generalization---demonstrated on a real, human-authored domain, the result E83 left open.
 
 \paragraph{It scales with worlds traversed.} The cross-world lift grows with the number of
-held-in worlds---from \CrossWorldLadderLo{} at \CrossWorldLadderLoN{} worlds to
-\CrossWorldLadderHi{} by 64, then saturating---while the corrupted-label control stays flat
-(Figure~\ref{fig:crossworld_ladder}): a saturating scaling curve for the novel axis, on real data.
+held-in worlds---from \CrossWorldLadderLo{} at \CrossWorldLadderLoN{} worlds to a
+\CrossWorldLadderHi{} peak by 64 worlds, then plateauing---while the corrupted-label control stays flat
+(Figure~\ref{fig:crossworld_ladder}): a rising-then-plateauing scaling curve for the novel axis, on real data.
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.56\linewidth]{figs/crossworld_ladder.png}
 \caption{\textbf{Cross-world transfer scales with \#worlds (E84, List Functions).} Held-out
 accuracy rises with the number of disjoint held-in worlds traversed
-(\CrossWorldLadderLo$\to$\CrossWorldLadderHi) and saturates; the corrupted-label control stays
-flat. More verified worlds $\to$ more transfer.}\label{fig:crossworld_ladder}
+(\CrossWorldLadderLo$\to$\CrossWorldLadderHi), peaking near 64 worlds then plateauing; the
+corrupted-label control stays flat. (Single-seed ladder; the \CrossWorldNSeeds-seed headline of
+Fig.~\ref{fig:crossworld} is \CrossWorldMean{} at \CrossWorldNTrain{} held-in worlds.) More verified
+worlds $\to$ more transfer.}\label{fig:crossworld_ladder}
 \end{figure}
 
 \subsection{A descriptive regularity for world-time compute (E80)}\label{sec:world-time-law}
@@ -991,7 +1005,8 @@ predictive law. It is fit over \LawNDomains{} domains with single-seed runs and 
 out-of-sample check, the constants are learner-specific, and the fit is sensitive to domain
 selection (a sibling fit over a different subset is anti-predictive). We report the \emph{shape}
 as a compact summary, not a forecast. World-time compute follows a
-\textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\tau})$,
+\textbf{saturating learning curve}, $\mathrm{acc}(c)=\mathrm{base}+(C-\mathrm{base})(1-e^{-c/\kappa})$
+(with compute-scale constant $\kappa$, distinct from the transition function $\tau$),
 whose asymptote $C$ tracks \textbf{identifiability $\times$ realizability $\times$ headroom}
 and which collapses to base without \textbf{exact labels}. We test it as a conjunction of
 falsifiable clauses over \LawNWorlds{} worlds in \LawNDomains{} domains and three modalities
@@ -1046,9 +1061,9 @@ outside the family structure the regularity scores.
 the optimal number of simulated worlds is its knee. From the per-world compute curve, $N_{90}$
 (worlds for 90\% of the asymptotic gain) is \WCListfn{} for List Functions, \WCArc{} for ARC, and
 \WCClrs{} for CLRS---\emph{harder domains need more simulated worlds}, but only a handful, not
-thousands. The honest scope: the curve's \emph{form} appears to recur across the verifiable-world problems
-and learners we tested; the constants ($\tau$, the depth cap) are learner-specific; and the predictor is
-cheap but not free---a small probe, localising the genuinely hard part where it belongs, in
+thousands. The scope: the curve's \emph{form} appears to recur across the verifiable-world problems
+and learners we tested; the constants ($\kappa$, the depth cap) are learner-specific; and the predictor is
+cheap but not free---a small probe, localizing the genuinely hard part where it belongs, in
 choosing a representation that makes a world's rule identifiable.
 
 \subsection{Composites with varying rules: language frames and the invariant principle (E81)}\label{sec:frame-invariance}
@@ -1247,12 +1262,12 @@ capability limit.}
 \end{figure}
 
 \subsubsection{Acting closes the gap that scale cannot (E43)}\label{sec:active-induction}
-E38 names the bottleneck---identifiability, not capability---and points to the
+E38 names the bottleneck (identifiability, not capability) and points to the
 fix: \emph{informative} transitions rather than a bigger generator. E43 tests
 that fix directly. We cast dynamics recovery as version-space elimination over a
 candidate family of \ActiveCands{} sprint rules that parameterize the unknowns
 (ship's debt increment, the divisor $k$ in the subtle $\textrm{bugs} \mathrel{+}=
-\textrm{debt} \div k$ interaction, and the fix/refactor magnitudes); a candidate
+\lfloor\textrm{debt}/k\rfloor$ interaction, and the fix/refactor magnitudes); a candidate
 is eliminated the moment its predicted next state disagrees with an observed
 transition. We compare three probing policies on \ActiveRules{} hidden true
 rules: a \emph{passive} random policy (the E38 setting), an \emph{active} policy
@@ -1304,7 +1319,7 @@ whole 12-step episode planned in \PlanCodeSeconds\,s. Planning through the
 LLM next-state engine is confined to depth 2 by cost (\PlanLLMSeconds\,s per
 episode) and scores \PlanLLM---\emph{worse than no model at all}: lookahead
 through hallucinated transitions steered the agent away from productive
-actions entirely. We note one honest caveat: the LLM engine falls back to a
+actions entirely. We note one caveat: the LLM engine falls back to a
 no-op when a reply does not parse as a next state, so this score conflates
 genuinely hallucinated transitions with unparseable outputs; the script now
 logs the parse-failure rate so the two can be separated on re-run, but the
@@ -1427,7 +1442,7 @@ model, which generates unlimited examples and labels them \emph{exactly} for fre
 transition is code and the oracle is execution. In one line: a correct world model turns
 compute into unlimited correct training data. Whether the ``verified'' qualifier is
 load-bearing---rather than decoration on plain SFT---is an empirical question with a clean
-discriminator, the \textbf{corrupted-label ablation}: randomising the labels keeps the
+discriminator, the \textbf{corrupted-label ablation}: randomizing the labels keeps the
 fine-tuning and the world's structure but destroys their correctness, so if accuracy is
 unchanged the framing adds nothing. It does collapse to the no-fine-tune floor: the
 corrupted-demonstration arm on real ARC worlds falls to \ArcTTTCorrupt{} against the verified
@@ -1467,7 +1482,7 @@ reintroduces compounding on the learned side.
 world-time compute win where a task reduces to \emph{few reasoning steps} over a state that can
 be \emph{told} symbolically: shallow rule induction (List Functions, the largest lift), small
 grid transforms (ARC), and short-horizon planning (MiniGrid DoorKey, solved zero-shot while
-DreamerV3 needs $10^4$--$10^5$ interactions). Performance degrades along two axes---as the
+DreamerV3 needs $10^4$--$10^5$ interactions~\cite{dreamerv3}). Performance degrades along two axes---as the
 required reasoning \emph{lengthens} (CLRS algorithm traces, the lowest of the symbolic domains;
 and the E20 complexity cliff past $\sim$8 composed rules), and as the latent rule must be
 \emph{induced from rich perception} rather than read from symbolic state (Bongard-RWR vision,
@@ -1490,6 +1505,7 @@ exact tool as a fallback for high-stakes queries---the tool bootstraps the data,
 amortizes it, and exactness is recoverable on demand.
 
 \begin{table}[t]\centering\small
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
 Route & Exact? & Training & Tool at inference & Generalizes to new worlds \\
@@ -1500,6 +1516,7 @@ Route & Exact? & Training & Tool at inference & Generalizes to new worlds \\
 Hybrid & on fallback & QLoRA & only when unsure & yes, with exact backstop \\
 \bottomrule
 \end{tabular}
+}
 \caption{\textbf{Three routes to use a verified world model}, plus the hybrid. Need
 exactness/audit $\to$ Route 1; amortize one world $\to$ Route 2; generalize a family $\to$
 Route 3; best of both $\to$ Hybrid.}
@@ -1651,19 +1668,20 @@ This work received no specific external funding.
 % ============================================================================
 \appendix
 \section{Index of experiments}\label{app:experiment-index}
-The experiments E1--E84 are introduced across the Results section in thematic
+The experiments E1--E85 are introduced across the Results section in thematic
 rather than numeric order; this index lists each by number with a one-line
 description and the section, figure, or table where it appears, as a navigation
 aid. Numbers are non-contiguous: E14 and E53 are retired (absorbed or cut) and
 do not appear in the text; E28--E29 are described in the Experimental Setup but
-their dedicated results section was cut; and E66, E69--E73, E75, E78, and E79
-were not used (a superseded probe or a negative result excluded from the paper).
-The world-time-compute family E74--E82 (E80 spans several real-data domains and
+their dedicated results section was cut; and E66, E69--E73, E75, E78 (its E78b
+variant \emph{is} used), and E79 were not used (a superseded probe or a negative
+result excluded from the paper).
+The world-time-compute family E74--E85 (E80 spans several real-data domains and
 the descriptive regularity) carries the central result.
 
 \begingroup\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{@{}r p{0.62\textwidth} l@{}}
-\caption{Index of experiments E1--E84. E14, E53 retired and E66/E69--E73/E75/E78/E79
+\caption{Index of experiments E1--E85. E14, E53 retired and E66/E69--E73/E75/E78/E79
 unused (absent from the text); E28--E29 are described in the Experimental Setup but
 their results section was cut.}\label{tab:experiment-index}\\
 \toprule
@@ -1714,6 +1732,8 @@ E80 & A descriptive regularity: LODO fit, tabular out-of-sample, learner-invaria
 E81 & Frame-invariance across language frames (clean negative) & \S\ref{sec:frame-invariance} \\
 E82 & The hybrid loop: verified world as generator + inference backstop & \S\ref{sec:hybrid-loop} \\
 E83 & Real-data cross-world transfer on CLRS-Text (weak null) & \S\ref{sec:world-time-law} \\
+E84 & Cross-world transfer on a real domain (List Functions); generalize to held-out worlds & \S\ref{sec:crossworld} \\
+E85 & Trajectory vs.\ answer training unit on iterated worlds & \S\ref{sec:discussion} \\
 \end{longtable}
 \endgroup
 

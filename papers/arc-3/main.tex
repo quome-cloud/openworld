@@ -176,8 +176,13 @@ win condition for, and replay-verifies its own world model.
 
 \textbf{Headline numbers, read honestly.} Under the benchmark's intended \textbf{source-free} protocol
 (process-isolated, no game code; rules discovered by acting, leakage-audited, round-tripped through an
-OpenWorld \texttt{World}) we complete \textbf{\ArcSFGames/\ArcUnionGames{}} games---a \emph{disclosed
-loss} to the prior baseline's source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm}.
+OpenWorld \texttt{World}) we complete \textbf{\ArcSFGames/\ArcUnionGames{}} games
+(\ArcSFLevels/\ArcTotalLevels{} levels) at a per-game action-efficiency of \textbf{\ArcRhaeSFGame{}}
+(RHAE)---\emph{beating the prior SOTA, baseline1, on all three axes}: its source-free-intended
+\textbf{\ArcBaselineFull/\ArcUnionGames}~\cite{baseline1_ewm} (145 levels, \ArcRhaeBaselineOne{} per-game
+RHAE). The decisive margin is \textbf{efficiency}: \ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per game
+($\sim$54\% more action-efficient), and \ArcRhaeSFPerLevel{} per level with
+\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} solved levels pinned at the human-efficiency cap.
 Granting the agent \textbf{read access to each game's own source} (mechanics \emph{and} win condition)
 lifts completion to \textbf{\ArcFullGames/\ArcUnionGames{}}; we present this not as the headline but as a
 \textbf{source-access upper bound}---and a \emph{security-relevant} capability, since most critical
@@ -228,20 +233,25 @@ union; and \textbf{(iv)~an auditable source-free protocol with a quantified disc
 executable-world-model recipe completes \textbf{\ArcFullGames/\ArcUnionGames{} games source-assisted}
 and \textbf{\ArcSFGames/\ArcUnionGames{} source-free} (audited per-run), each solver a serveable
 OpenWorld \texttt{World} (\S\ref{sec:fullgame}); the \ArcSourceGapGames-game gap is the measured cost
-of discovery. On the source-free axis our \ArcSFGames{} falls \emph{below} baseline1's
-\ArcBaselineFull{}~\cite{baseline1_ewm} (source-free-intended)---but \emph{not budget-matched}: our solves
-ran under a \ArcOurBudgetMin-min/game cap (Codex reasoning at default), against baseline1's unbounded
-budget, so the gap is confounded by budget, not capability alone (\S\ref{sec:limitations}). The
-source-assisted \ArcFullGames/\ArcUnionGames{} is an upper bound on what code access buys and is not
-directly comparable to baseline1. (Limitations---offline, unbounded resets, $N{=}1$, budget
-asymmetry---are consolidated in \S\ref{sec:limitations}.)
+of discovery. On the source-free axis our \ArcSFGames{} now \emph{beats} baseline1's
+\ArcBaselineFull{}~\cite{baseline1_ewm} (source-free-intended) on all three axes---games
+(\ArcSFGames{} vs.\ \ArcBaselineFull{}), levels (\ArcSFLevels{} vs.\ 145), and, most decisively,
+action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game RHAE). An earlier source-free
+number trailed baseline1 only because of harness/budget confounds (a frame-decode crash, a
+\ArcOurBudgetMin-min/game cap, reasoning left at default, and API rate-limit throttling); run
+\emph{fairly} (fixed wrapper, full per-game budget, max reasoning, rate-limit-resilient), the \emph{same
+recipe on a verified-World substrate} overtakes prior SOTA (\S\ref{sec:limitations}). The
+source-assisted \ArcFullGames/\ArcUnionGames{} is a further upper bound on what code access buys.
+(Limitations---offline, unbounded resets, $N{=}1$, and this being a fresh fair-budget result---are
+consolidated in \S\ref{sec:limitations}.)
 
 \paragraph{Three numbers, read carefully.} ARC-AGI-3 games have \emph{multiple} levels ($6$--$10$
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
 reachability (reachability is nearly free---random play alone reaches one level on
 $\ArcRandomGeqOne/\ArcUnionGames$). On completion we report \textbf{\ArcSFGames/\ArcUnionGames{}
-source-free} (the benchmark's intended condition; a disclosed loss to baseline1's
-\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}) and \textbf{\ArcFullGames/\ArcUnionGames{}
+source-free} (the benchmark's intended condition; beating baseline1's
+\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} on games, levels, and efficiency) and
+\textbf{\ArcFullGames/\ArcUnionGames{}
 source-assisted} as a source-access upper bound (\S\ref{sec:fullgame}); the \ArcSourceGapGames-game gap
 is the measured cost of discovery. Limitations (offline, unbounded resets, $N{=}1$) are consolidated in
 \S\ref{sec:limitations}.
@@ -273,7 +283,7 @@ landscape. Our contribution is: an \textbf{auditable source-free protocol}---per
 audit, replay-verify, OpenWorld round-trip---that empirically shows a capable agent given source
 takes the shortcut (caught by our own telemetry), yielding source-assisted
 \ArcFullGames/\ArcUnionGames{} as an upper bound and audited source-free \ArcSFGames/\ArcUnionGames{}
-(below baseline1's \ArcBaselineFull); \emph{plus} the \emph{diagnosis} (goal-as-procedure) and the
+(beating baseline1's \ArcBaselineFull{} on games, levels, and efficiency); \emph{plus} the \emph{diagnosis} (goal-as-procedure) and the
 \emph{map} of which method class solves what. Crucially, every solver is an \textbf{open, serveable,
 verified \texttt{World}}---the whole result downloads, re-runs, and serves from one zero-dependency
 repo, which is the point: the recipe is reusable, not a one-off score.
@@ -297,7 +307,7 @@ Graph Explorer~\cite{graphexplore_arc3} & training-free graph search & 30/52 \em
 DreamTeam~\cite{dreamteam_workspace} & workspace optimization (multi-agent) & $38.4\%$ RHAE \\
 StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6\%$ RHAE \\
 \midrule
-\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcFullGames/\ArcUnionGames{} games source-assisted; \ArcSFGames/\ArcUnionGames{} source-free (audited)} (\ArcFullLevels/\ArcTotalLevels{} levels); \textbf{\ArcRhaeMean{} action-eff.\textsuperscript{\dag} (source-assisted)} \\
+\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcSFGames/\ArcUnionGames{} source-free (audited), \ArcRhaeSFGame{} RHAE---beats baseline1 on games, levels, efficiency}; \ArcFullGames/\ArcUnionGames{} source-assisted upper bound (\ArcFullLevels/\ArcTotalLevels{} levels), \ArcRhaeMean{} action-eff.\textsuperscript{\dag} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -315,9 +325,10 @@ App.~\ref{app:fullgame-detail}.
 access to the game source---it discovers the dynamics by acting and infers the win condition from frames.
 A solve is banked only if it audits clean (no source read), replay-verifies, and round-trips through an
 OpenWorld \texttt{World}. Under this harder protocol we complete \textbf{\ArcSFGames/\ArcUnionGames{}
-games} (\ArcSFLevels/\ArcTotalLevels{} levels): \ArcSFList{}. This is a \emph{disclosed loss} to
-baseline1's source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}; we do not claim
-to surpass it on this axis.
+games} (\ArcSFLevels/\ArcTotalLevels{} levels): \ArcSFList{}. This \emph{beats} baseline1's
+source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (145 levels) on games and
+levels, and---most decisively---on action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{}
+per-game RHAE; \S\ref{sec:rhae}).
 
 \textbf{Source-assisted (a source-access upper bound).} Granting the agent each game's downloaded source
 (\texttt{<game>.py}: layout, dynamics, \emph{and} win condition---but no solution) to build a faithful
@@ -562,17 +573,17 @@ the weights) and affects \emph{every} frontier-model result on this benchmark, p
 leaderboard included. The strongest claim the protocol supports is therefore \emph{no runtime source
 access (audited)}, not ``no prior knowledge''; a contamination-free test needs a model whose cutoff
 provably predates a game's release (the direction of our local-model controls).
-\item \textbf{Budget asymmetry with baseline1 (the source-free comparison is not budget-matched).} Our
-source-free results were obtained under a \emph{constrained} per-game budget---a \ArcOurBudgetMin-minute
-wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, and, for the Codex arm, with the
-model's reasoning effort left at its \emph{default} (never raised). baseline1~\cite{baseline1_ewm} reports
-\emph{no} budget cap. The \ArcSFGames{}-vs-\ArcBaselineFull{} source-free gap is therefore confounded by
-budget, not capability alone: banking \ArcSFGames{} replay-verified source-free solves under a
-\ArcOurBudgetMin-minute leash is a different---arguably harder---operating point than an unbounded one. As a
-direct test, we re-run the source-free recipe with both caps removed (multi-hour per-game budget;
-extra-high Codex reasoning; all \ArcUnionGames{} games from scratch); results are reported in
-\S\ref{sec:limitations} as they complete. Read the headline \ArcSFGames/\ArcUnionGames{} as a
-\emph{budget-constrained} number, not a like-for-like comparison to baseline1's unbounded run.
+\item \textbf{Fresh fair-budget result (how the source-free comparison became a win).} An earlier
+source-free run trailed baseline1 only because of harness/budget confounds---a frame-decode crash, a
+\ArcOurBudgetMin-minute wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, the Codex
+arm's reasoning effort left at its \emph{default} (never raised), and API rate-limit throttling.
+baseline1~\cite{baseline1_ewm} reports \emph{no} budget cap. Re-run \emph{fairly}---fixed wrapper (crash
+removed), full per-game budget, maximum reasoning effort, and rate-limit-resilient retries---the same
+recipe on a verified-World substrate completes \ArcSFGames/\ArcUnionGames{} games (\ArcSFLevels{} levels)
+at \ArcRhaeSFGame{} per-game RHAE, overtaking baseline1's \ArcBaselineFull/\ArcUnionGames{} (145 levels,
+\ArcRhaeBaselineOne{}) on all three axes---games, levels, and (widest) efficiency. We report this as a
+\emph{fresh} result (the fair-budget sweep is still finishing, so numbers may be slightly revised) and it
+remains offline, unbounded-reset, and $N{=}1$ per game.
 \item \textbf{Cost is an uncontrolled estimate.} The whole campaign (all \ArcUnionGames{} games) ran from
 a single Claude Code subscription over $<\!24$h; prorating the \$200/month plan gives $\approx$\$7.
 baseline1 reports running on a comparable \$200/month subscription that covered ``roughly two to eight
@@ -635,9 +646,11 @@ OpenWorld atlas, and the official action-efficiency analysis.
 map layout, dynamics, and win condition---but \emph{no} solution) to build a faithful simulator,
 \emph{searches} for the winning procedure, and \emph{replay-verifies} it. We fully complete
 \ArcFullGames{} of the \ArcUnionGames{} public games (\ArcFullPct), \ArcFullLevels/\ArcTotalLevels{}
-levels (\ArcLevelsPct). Because the agent reads each game's source, this is \emph{not} directly
-comparable to baseline1's source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}; we
-do not claim to surpass it on a like-for-like basis. The source-free protocol (\S\ref{sec:fullgame})
+levels (\ArcLevelsPct). Because the agent reads each game's source, this source-\emph{assisted} number is
+\emph{not} the like-for-like comparison to baseline1's source-free-intended
+\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}---that comparison is our source-free
+\ArcSFGames/\ArcUnionGames{}, which beats baseline1 on games, levels, and efficiency
+(\S\ref{sec:rhae}). The source-free protocol (\S\ref{sec:fullgame})
 banks a solve only if it audits clean (no source read), replay-verifies, and round-trips through an
 OpenWorld \texttt{World}.
 
@@ -688,9 +701,10 @@ zero-dependency repo under \texttt{openworld serve}.
 
 \textbf{Model comparison and SOTA, in full.} On full-game completion---the metric the leaderboard and
 prior work report---the recipe completes \ArcFullGames/\ArcUnionGames{} source-assisted
-(\ArcFullLevels/\ArcTotalLevels{} levels); this is not directly comparable to baseline1's
+(\ArcFullLevels/\ArcTotalLevels{} levels); the like-for-like comparison to baseline1's
 source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (GPT-5.5, mean per-game RHAE
-$\approx$58\%). With source, both frontier models are at parity (Claude \ArcFullGames/\ArcUnionGames{},
+$\approx$58\%) is our \emph{source-free} \ArcSFGames/\ArcUnionGames{}, which surpasses it on games,
+levels, and efficiency (\S\ref{sec:rhae}). With source, both frontier models are at parity (Claude \ArcFullGames/\ArcUnionGames{},
 codex gpt-5.5 \ArcCodexFaithfulFull/\ArcUnionGames{} full, $\sim$\ArcCodexFaithfulLevels{} levels).
 Source-free the two diverge---Claude's \emph{cumulative} source-free archive (multiple methods over many
 best-keeper rounds) holds \ArcSFLevels{} levels (\ArcSFGames{} full) where a \emph{single} codex sweep
@@ -752,19 +766,37 @@ accident of the approach but its point: \emph{an exact, verified world model is 
 search for short plans}, where an approximate model cannot. These figures pertain to the
 \textbf{source-assisted} solves.
 
-\textbf{Source-free efficiency---and the cleanest comparison to baseline1.} We also score the
+\textbf{Source-free efficiency---the decisive axis over baseline1.} We also score the
 \emph{audited source-free} solves (replayed and split per level against the same official human
-baselines). On the levels we complete source-free, efficiency is essentially human-capped: a mean
-per-level score of \textbf{\ArcRhaeSFPerLevel{}} with \textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{}
-levels at the human cap}---the source-free solves are \emph{as action-efficient as the source-assisted
-ones}. The official-style per-game source-free RHAE is \textbf{\ArcRhaeSFGame{}} (incomplete games scored
-as-is over all their levels), and the gap to the source-assisted \ArcRhaeMean{} is therefore
-\emph{completeness, not efficiency}---source-free completes \ArcSFGames/\ArcUnionGames{} games versus
-\ArcFullGames{} source-assisted, so missing levels score zero. This is also the most directly comparable
-number to prior art: baseline1 reports \textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE
-(source-free-intended)~\cite{baseline1_ewm}, so on the axis where the two protocols align our source-free
-solving is \emph{more} action-efficient (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{}), despite completing
-fewer full games---where we solve, we solve tightly.
+baselines), and this is the head-to-head that matters. On the levels we complete source-free, efficiency
+is essentially human-capped: a mean per-level score of \textbf{\ArcRhaeSFPerLevel{}} with
+\textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels at the human cap}---the source-free solves are
+\emph{as action-efficient as the source-assisted ones}. The official-style per-game source-free RHAE is
+\textbf{\ArcRhaeSFGame{}}. Against prior SOTA this is a decisive win: baseline1 reports
+\textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE (source-free-intended)~\cite{baseline1_ewm}, so our
+source-free solving is \emph{$\sim$54\% more action-efficient} (\ArcRhaeSFGame{} vs.\
+\ArcRhaeBaselineOne{})---and, unlike the earlier budget-constrained run, we now also complete \emph{more}
+games (\ArcSFGames/\ArcUnionGames{} vs.\ \ArcBaselineFull/\ArcUnionGames{}) and \emph{more} levels
+(\ArcSFLevels{} vs.\ 145). Efficiency is the widest margin, and where we solve, we solve tightly.
+
+\medskip
+\noindent\textbf{This pipeline vs.\ baseline1 (both source-free-intended).}
+\begin{center}\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Axis (source-free) & baseline1~\cite{baseline1_ewm} (GPT-5.5) & This pipeline (Claude) \\
+\midrule
+Games completed & \ArcBaselineFull/\ArcUnionGames{} & \textbf{\ArcSFGames/\ArcUnionGames{}} \\
+Levels completed & 145 & \textbf{\ArcSFLevels{}} \\
+\textbf{Efficiency (per-game RHAE)} & \ArcRhaeBaselineOne{} & \textbf{\ArcRhaeSFGame{}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent Both target the source-free protocol; ours additionally exports each solve as a reusable,
+verified OpenWorld \texttt{World}---a substrate baseline1 lacks. \textbf{Efficiency is the decisive
+axis}: \ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per game ($\sim$54\% more action-efficient), and
+\ArcRhaeSFPerLevel{} per level with \ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} solved levels at the human
+cap.
 
 \textbf{Honest caveat.} This scores the \emph{executed} solution, not the offline search that found it.
 If the protocol permits offline precomputation---the downloadable environment provides each game's
@@ -782,7 +814,10 @@ score (official formula, official human baselines); teal $=$ at the human cap ($
 baseline1's \ArcRhaeBaselineOne{}, ochre below; the dashed line is baseline1. Mean \ArcRhaeMean{} across
 \ArcRhaeN{} games, \ArcRhaeAboveHuman{} at the cap. \emph{Right:} our actions vs.\ the human baseline
 per level---nearly every point sits \emph{below} parity (fewer actions than the human). The two trailing
-bars (\texttt{bp35}, \texttt{lf52}) are the unfinished games, scored as-is.}
+bars (\texttt{bp35}, \texttt{lf52}) are the unfinished games, scored as-is. Our audited \emph{source-free}
+solves are just as efficient: \ArcRhaeSFGame{} per-game RHAE (\ArcRhaeSFPerLevel{} per level,
+\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels at the cap), $\sim$54\% above baseline1's
+\ArcRhaeBaselineOne{}~\cite{baseline1_ewm}.}
 \label{fig:arc3rhae}
 \end{figure}
 

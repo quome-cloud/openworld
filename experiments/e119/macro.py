@@ -1,0 +1,137 @@
+"""E119 macro slot: object/action-referential op grammar + compiler, SLM proposer (best-of-N +
+behavioral clustering + abstention), subgoal-proxy ranker, and a seeded random-macro baseline.
+The env decides correctness; macros only ORDER/extend search and are replay-verified before banking."""
+import json, re
+from collections import defaultdict
+from e119 import planner, solve, slm
+
+_MAX_REPEAT = 4
+
+
+def _parse_op(op):
+    """'a3 x2' -> ('a', 3, 2); 'click #1 x2' -> ('click', 1, 2); times defaults to 1."""
+    m = re.match(r"\s*a(\d+)(?:\s*x\s*(\d+))?\s*$", op)
+    if m:
+        return ("a", int(m.group(1)), min(int(m.group(2) or 1), _MAX_REPEAT))
+    m = re.match(r"\s*click\s*#(\d+)(?:\s*x\s*(\d+))?\s*$", op)
+    if m:
+        return ("click", int(m.group(1)), min(int(m.group(2) or 1), _MAX_REPEAT))
+    return None
+
+
+def compile_macro(ops, obj_json, avail):
+    """Compile object/action-referential ops to primitive action tuples. Unresolvable ops dropped."""
+    objs = {o["id"]: o for o in obj_json.get("objects", [])}
+    out = []
+    for op in ops:
+        parsed = _parse_op(op) if isinstance(op, str) else None
+        if parsed is None:
+            continue
+        kind, idx, times = parsed
+        if kind == "a":
+            if idx in avail and idx != 6:
+                out += [(idx,)] * times
+        else:  # click
+            if 6 in avail and idx in objs:
+                cy, cx = objs[idx]["centroid"]
+                out += [(6, int(round(cx)), int(round(cy)))] * times
+    return out
+
+
+_PROMPT = (
+    "Blind search STALLED on an interactive puzzle. Propose ONE short action PROCEDURE (a macro) "
+    "to make progress. Relational scene:\n{oj}\nWhat each action did from the current state:\n{diffs}\n"
+    "Goal to pursue: {subgoal}\n"
+    "{avail}\n"
+    'Reply ONLY a JSON list of {k} ops max, using ONLY the actions listed above. '
+    'Ops: "aN" (do action N), "aN xK" (repeat K){click}. Example: {example}.'
+)
+
+
+def _avail_desc(avail):
+    """Prompt fragment naming the ONLY valid actions, so the SLM never proposes nonexistent ops
+    (e.g. clicks on a directional game). Returns (avail_line, click_op_fragment, example)."""
+    dirs = [a for a in avail if a != 6]
+    names = ", ".join(f"a{a}" for a in dirs)
+    if 6 in avail:
+        avail_line = f'Available actions: {names} and "click #I" (click object I by id).'
+        click = ', "click #I" (click object I)'
+        example = '["click #0","a1"]' if dirs else '["click #0","click #1"]'
+    else:
+        avail_line = f"Available actions ONLY: {names}. This game has NO click action — NEVER use click."
+        click = ""
+        example = "[\"%s\",\"%s\",\"%s\"]" % (f"a{dirs[0]}", f"a{dirs[0]}", f"a{dirs[-1]}") if dirs else "[]"
+    return avail_line, click, example
+
+
+def _endpoint(game, prefix, macro_actions, key_fn):
+    """Replay prefix+macro from reset on a FRESH _PrefixGame view; return (masked key, level delta)."""
+    pg = solve._PrefixGame(game, prefix)
+    base = pg.levels
+    frame, levels, _ = planner._frame_after(pg, list(macro_actions))
+    return key_fn(frame), levels - base
+
+
+def rank_macros(macros, game, prefix, subgoal, key_fn, seen):
+    """Order macros: subgoal-satisfying endpoints first, then novel (unseen) endpoints."""
+    pred = slm.compile_predicate(subgoal) if subgoal else (lambda f: False)
+    scored = []
+    for i, m in enumerate(macros):
+        pg = solve._PrefixGame(game, prefix)
+        frame, _, _ = planner._frame_after(pg, list(m))
+        sat = 1 if pred(frame) else 0
+        novel = 1 if key_fn(frame) not in seen else 0
+        scored.append((-sat, -novel, i, m))         # stable within tier via original index i
+    scored.sort(key=lambda t: t[:3])
+    return [t[3] for t in scored]
+
+
+def propose_macros(llm, game, prefix, obj_json, diffs, subgoal, avail, key_fn,
+                   k_max=8, n=6, tau=0.5, tracer=None):
+    """Sample n op-lists from LLM, compile, cluster by behavioral effect (endpoint key + level delta).
+    Return cluster representatives sorted by cluster mass, or [] (abstain) if top cluster doesn't clear tau.
+    If `tracer` is given, it is called once per sampled call with {prompt, completion, compiled} for audit."""
+    avail_line, click_op, example = _avail_desc(avail)
+    prompt = _PROMPT.format(oj=json.dumps(obj_json)[:1200], diffs=json.dumps(diffs)[:800],
+                            subgoal=json.dumps(subgoal), k=k_max,
+                            avail=avail_line, click=click_op, example=example)
+    clusters = defaultdict(list)      # behavioral signature -> [compiled macro, ...]
+    drawn = 0
+    for _ in range(n):
+        raw = ""
+        try:
+            raw = llm.ask(prompt)
+            ops = json.loads(re.search(r"\[.*\]", raw, re.S).group(0))
+            m = compile_macro(ops, obj_json, avail)[:k_max]
+        except Exception:
+            if tracer: tracer({"prompt": prompt, "completion": raw, "compiled": None})
+            continue
+        if tracer: tracer({"prompt": prompt, "completion": raw, "compiled": m})
+        drawn += 1
+        if not m:                     # empty/ungradeable macro discarded, not fatal
+            continue
+        try:
+            sig = _endpoint(game, prefix, m, key_fn)
+        except Exception:
+            continue
+        clusters[sig].append(m)
+    if not clusters:
+        return []
+    ranked = sorted(clusters.values(), key=len, reverse=True)
+    top = len(ranked[0])
+    if drawn == 0 or top / drawn < tau:    # no consensus -> abstain
+        return []
+    return [reps[0] for reps in ranked if len(reps) >= 1]
+
+
+def propose_random_macros(avail, obj_json, k_max, count, rng):
+    """Matched-budget baseline: `count` random op-lists (len 2..k_max), compiled. Seeded by `rng`."""
+    dirs = [f"a{a}" for a in avail if a != 6]
+    clicks = [f"click #{o['id']}" for o in obj_json.get("objects", [])] if 6 in avail else []
+    vocab = dirs + clicks
+    out = []
+    for _ in range(count):
+        length = rng.randint(2, k_max)
+        ops = [rng.choice(vocab) for _ in range(length)] if vocab else []
+        out.append(compile_macro(ops, obj_json, avail))
+    return out

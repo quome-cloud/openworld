@@ -39,7 +39,7 @@ def main():
         ollama = ("require_ollama" in src) or ("OllamaLLM" in src) or bool(models_in(data, set()))
         mode = "Ollama" if ollama else "offline"
         mods = sorted(models_in(data, set())) or ["--"]
-        prov = data.get("provenance", "live run")
+        prov = data.get("provenance", "live run") if isinstance(data, dict) else "live run"
         if len(prov) > 70:
             prov = prov[:67] + "..."
         rows.append((name, "yes" if has_script else "NO", mode, ", ".join(mods), prov))

@@ -1,0 +1,1050 @@
+{
+  "summary": "Neuro-symbolic SLM solver for ARC-AGI-3. Control (blind BFS) vs SLM-ordered best-first search; all correctness from env replay-verification. Measured delta on the pilot = 0 (SLM neither helps nor hurts); harness alone solves 10/25 games.",
+  "config": {
+    "budget": {
+      "max_nodes": 6000,
+      "max_depth": 60
+    },
+    "pilot": [
+      "tn36",
+      "ar25",
+      "vc33",
+      "lp85",
+      "sk48"
+    ],
+    "models": [
+      "qwen2.5-coder:7b",
+      "qwen2.5:7b",
+      "gemma3",
+      "llama3.1:8b"
+    ],
+    "env": "arc_agi+arcengine (PyPI), local OFFLINE-capable engine; Ollama app backend"
+  },
+  "reachability": {
+    "n_solved": 10,
+    "n_total": 25,
+    "by_modality": {
+      "click": "4/6",
+      "dir": "2/6",
+      "mixed": "4/13"
+    },
+    "games": [
+      {
+        "game": "tn36",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 0,
+        "win": 7,
+        "verified": false
+      },
+      {
+        "game": "ls20",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "levels": 1,
+        "win": 7,
+        "verified": true
+      },
+      {
+        "game": "vc33",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 2,
+        "win": 7,
+        "verified": true
+      },
+      {
+        "game": "sk48",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          7
+        ],
+        "levels": 0,
+        "win": 8,
+        "verified": false
+      },
+      {
+        "game": "lp85",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 1,
+        "win": 8,
+        "verified": true
+      },
+      {
+        "game": "ar25",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "levels": 0,
+        "win": 8,
+        "verified": false
+      },
+      {
+        "game": "r11l",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 1,
+        "win": 6,
+        "verified": true
+      },
+      {
+        "game": "sp80",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "levels": 1,
+        "win": 6,
+        "verified": true
+      },
+      {
+        "game": "sc25",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "levels": 0,
+        "win": 6,
+        "verified": false
+      },
+      {
+        "game": "lf52",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          7
+        ],
+        "levels": 1,
+        "win": 10,
+        "verified": true
+      },
+      {
+        "game": "re86",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "levels": 0,
+        "win": 8,
+        "verified": false
+      },
+      {
+        "game": "s5i5",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 0,
+        "win": 8,
+        "verified": false
+      },
+      {
+        "game": "ft09",
+        "modality": "click",
+        "avail": [
+          6
+        ],
+        "levels": 1,
+        "win": 6,
+        "verified": true
+      },
+      {
+        "game": "m0r0",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "levels": 0,
+        "win": 6,
+        "verified": false
+      },
+      {
+        "game": "cn04",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "levels": 0,
+        "win": 6,
+        "verified": false
+      },
+      {
+        "game": "wa30",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "levels": 0,
+        "win": 9,
+        "verified": false
+      },
+      {
+        "game": "su15",
+        "modality": "mixed",
+        "avail": [
+          6,
+          7
+        ],
+        "levels": 1,
+        "win": 9,
+        "verified": true
+      },
+      {
+        "game": "tr87",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "levels": 0,
+        "win": 6,
+        "verified": false
+      },
+      {
+        "game": "tu93",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "levels": 1,
+        "win": 9,
+        "verified": true
+      },
+      {
+        "game": "bp35",
+        "modality": "mixed",
+        "avail": [
+          3,
+          4,
+          6,
+          7
+        ],
+        "levels": 0,
+        "win": 9,
+        "verified": false
+      },
+      {
+        "game": "dc22",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "levels": 0,
+        "win": 6,
+        "verified": false
+      },
+      {
+        "game": "g50t",
+        "modality": "dir",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "levels": 0,
+        "win": 7,
+        "verified": false
+      },
+      {
+        "game": "cd82",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "levels": 1,
+        "win": 6,
+        "verified": true
+      },
+      {
+        "game": "sb26",
+        "modality": "mixed",
+        "avail": [
+          5,
+          6,
+          7
+        ],
+        "levels": 0,
+        "win": 8,
+        "verified": false
+      },
+      {
+        "game": "ka59",
+        "modality": "mixed",
+        "avail": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "levels": 0,
+        "win": 7,
+        "verified": false
+      }
+    ]
+  },
+  "pilot_sweep": {
+    "per_rung_totals": {
+      "search": 3,
+      "slm_qwen2_5-coder_7b": 3,
+      "slm_qwen2_5_7b": 3,
+      "slm_gemma3": 3,
+      "slm_llama3_1_8b": 3
+    },
+    "delta_table": [
+      {
+        "game": "tn36",
+        "search": 0,
+        "slm_qwen2_5-coder_7b": 0,
+        "slm_qwen2_5_7b": 0,
+        "slm_gemma3": 0,
+        "slm_llama3_1_8b": 0
+      },
+      {
+        "game": "ar25",
+        "search": 0,
+        "slm_qwen2_5-coder_7b": 0,
+        "slm_qwen2_5_7b": 0,
+        "slm_gemma3": 0,
+        "slm_llama3_1_8b": 0
+      },
+      {
+        "game": "vc33",
+        "search": 2,
+        "slm_qwen2_5-coder_7b": 2,
+        "slm_qwen2_5_7b": 2,
+        "slm_gemma3": 2,
+        "slm_llama3_1_8b": 2
+      },
+      {
+        "game": "lp85",
+        "search": 1,
+        "slm_qwen2_5-coder_7b": 1,
+        "slm_qwen2_5_7b": 1,
+        "slm_gemma3": 1,
+        "slm_llama3_1_8b": 1
+      },
+      {
+        "game": "sk48",
+        "search": 0,
+        "slm_qwen2_5-coder_7b": 0,
+        "slm_qwen2_5_7b": 0,
+        "slm_gemma3": 0,
+        "slm_llama3_1_8b": 0
+      }
+    ],
+    "delta_total": 0,
+    "rungs": {
+      "search": {
+        "mode": "search",
+        "n_games": 5,
+        "levels_solved": 3,
+        "full_games": 0,
+        "results": [
+          {
+            "game": "tn36",
+            "mode": "search",
+            "levels": 0,
+            "win": 7,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "ar25",
+            "mode": "search",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "vc33",
+            "mode": "search",
+            "levels": 2,
+            "win": 7,
+            "actions": [
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "lp85",
+            "mode": "search",
+            "levels": 1,
+            "win": 8,
+            "actions": [
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "sk48",
+            "mode": "search",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          }
+        ]
+      },
+      "slm_qwen2_5-coder_7b": {
+        "mode": "slm",
+        "n_games": 5,
+        "levels_solved": 3,
+        "full_games": 0,
+        "results": [
+          {
+            "game": "tn36",
+            "mode": "slm",
+            "levels": 0,
+            "win": 7,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "ar25",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "vc33",
+            "mode": "slm",
+            "levels": 2,
+            "win": 7,
+            "actions": [
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "lp85",
+            "mode": "slm",
+            "levels": 1,
+            "win": 8,
+            "actions": [
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "sk48",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          }
+        ]
+      },
+      "slm_qwen2_5_7b": {
+        "mode": "slm",
+        "n_games": 5,
+        "levels_solved": 3,
+        "full_games": 0,
+        "results": [
+          {
+            "game": "tn36",
+            "mode": "slm",
+            "levels": 0,
+            "win": 7,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "ar25",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "vc33",
+            "mode": "slm",
+            "levels": 2,
+            "win": 7,
+            "actions": [
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "lp85",
+            "mode": "slm",
+            "levels": 1,
+            "win": 8,
+            "actions": [
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "sk48",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          }
+        ]
+      },
+      "slm_gemma3": {
+        "mode": "slm",
+        "n_games": 5,
+        "levels_solved": 3,
+        "full_games": 0,
+        "results": [
+          {
+            "game": "tn36",
+            "mode": "slm",
+            "levels": 0,
+            "win": 7,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "ar25",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "vc33",
+            "mode": "slm",
+            "levels": 2,
+            "win": 7,
+            "actions": [
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "lp85",
+            "mode": "slm",
+            "levels": 1,
+            "win": 8,
+            "actions": [
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "sk48",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          }
+        ]
+      },
+      "slm_llama3_1_8b": {
+        "mode": "slm",
+        "n_games": 5,
+        "levels_solved": 3,
+        "full_games": 0,
+        "results": [
+          {
+            "game": "tn36",
+            "mode": "slm",
+            "levels": 0,
+            "win": 7,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "ar25",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          },
+          {
+            "game": "vc33",
+            "mode": "slm",
+            "levels": 2,
+            "win": 7,
+            "actions": [
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                62,
+                34
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                26
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ],
+              [
+                6,
+                2,
+                46
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "lp85",
+            "mode": "slm",
+            "levels": 1,
+            "win": 8,
+            "actions": [
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ],
+              [
+                6,
+                5,
+                32
+              ]
+            ],
+            "verified": true
+          },
+          {
+            "game": "sk48",
+            "mode": "slm",
+            "levels": 0,
+            "win": 8,
+            "actions": [],
+            "verified": false
+          }
+        ]
+      }
+    }
+  },
+  "bugs_fixed": [
+    "honest zero-solve tripped the verification assert (driver _is_honest)",
+    "checkpoint-retaining env.reset() made replay_levels' delta collapse to 0; verify on a fresh env"
+  ],
+  "experiment": "e119_slm_solver",
+  "timestamp": "2026-06-28T16:22:04",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.13.5",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

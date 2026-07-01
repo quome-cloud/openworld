@@ -1,0 +1,99 @@
+{
+  "phase": "e119_phase0_proxy",
+  "n_games": 5,
+  "rows": [
+    {
+      "game": "g50t",
+      "modality": "dir",
+      "n_satisfiable": 20,
+      "n_gradient": 0,
+      "blind": {
+        "nodes": 4100,
+        "states": 843,
+        "max_depth": 60,
+        "frontier_exhausted": true,
+        "solved": false
+      },
+      "best_depth_gain": 0,
+      "best_novel_gain": 0.0,
+      "novelty_headroom": false
+    },
+    {
+      "game": "tr87",
+      "modality": "dir",
+      "n_satisfiable": 42,
+      "n_gradient": 9,
+      "blind": {
+        "nodes": 6000,
+        "states": 3491,
+        "max_depth": 8,
+        "frontier_exhausted": false,
+        "solved": false
+      },
+      "best_depth_gain": 52,
+      "best_novel_gain": 0.243,
+      "novelty_headroom": true
+    },
+    {
+      "game": "re86",
+      "modality": "dir",
+      "n_satisfiable": 42,
+      "n_gradient": 10,
+      "blind": {
+        "nodes": 6000,
+        "states": 2501,
+        "max_depth": 7,
+        "frontier_exhausted": false,
+        "solved": false
+      },
+      "best_depth_gain": 24,
+      "best_novel_gain": 0.251,
+      "novelty_headroom": true
+    },
+    {
+      "game": "sb26",
+      "modality": "mixed",
+      "n_satisfiable": 56,
+      "n_gradient": 12,
+      "blind": {
+        "nodes": 6006,
+        "states": 999,
+        "max_depth": 5,
+        "frontier_exhausted": false,
+        "solved": false
+      },
+      "best_depth_gain": 3,
+      "best_novel_gain": 0.011,
+      "novelty_headroom": true
+    },
+    {
+      "game": "cn04",
+      "modality": "mixed",
+      "n_satisfiable": 36,
+      "n_gradient": 9,
+      "blind": {
+        "nodes": 6002,
+        "states": 1452,
+        "max_depth": 5,
+        "frontier_exhausted": false,
+        "solved": false
+      },
+      "best_depth_gain": 5,
+      "best_novel_gain": 0.064,
+      "novelty_headroom": true
+    }
+  ],
+  "decision": {
+    "go": false,
+    "signal": "none",
+    "reason": "g50t: subgoal=False (depth_gain=0, novel_gain=0.0, n_sat=20), novelty_headroom=False"
+  },
+  "experiment": "e119_proxy_probe",
+  "timestamp": "2026-06-28T20:58:28",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.13.5",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

@@ -8,6 +8,7 @@ return executable action candidates for the controller to replay-verify.
 from __future__ import annotations
 
 from collections import deque
+from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -17,6 +18,43 @@ import time
 from typing import Any, Iterable, Sequence
 
 from experiments.e143.transition_miner import action_list
+
+
+@dataclass(frozen=True)
+class MacroScore:
+    level_delta: int
+    alive: int
+    novelty: int
+    object_progress: int
+    activation_delta: int
+    reversible_control: int
+    cost: int
+
+    def rank(self) -> tuple[int, int, int, int, int, int, int]:
+        return (
+            self.level_delta,
+            self.alive,
+            self.novelty,
+            self.object_progress,
+            self.activation_delta,
+            self.reversible_control,
+            -self.cost,
+        )
+
+    def compose(self, other: "MacroScore") -> "MacroScore":
+        return MacroScore(
+            level_delta=self.level_delta + other.level_delta,
+            alive=min(self.alive, other.alive),
+            novelty=self.novelty + other.novelty,
+            object_progress=self.object_progress + other.object_progress,
+            activation_delta=self.activation_delta + other.activation_delta,
+            reversible_control=self.reversible_control + other.reversible_control,
+            cost=self.cost + other.cost,
+        )
+
+
+ZERO_SCORE = MacroScore(-9999, 0, -9999, -9999, -9999, -9999, 10**9)
+ONE_SCORE = MacroScore(0, 1, 0, 0, 0, 0, 0)
 
 
 def _act(game: Any, action: Sequence[int]) -> None:
@@ -1046,51 +1084,8 @@ def sandbox_frontier_explore_candidate(
     def macro_key(macro: Sequence[Sequence[int]]) -> tuple[tuple[int, ...], ...]:
         return tuple(action_key(action) for action in macro)
 
-    def click_actions(frame: Any) -> list[list[int]]:
-        if frame is None:
-            return []
-        cache_key = frame_key(frame)
-        if cache_key in click_cache:
-            return [list(a) for a in click_cache[cache_key]]
-        rows: list[tuple[int, int, int, int, list[int]]] = []
-        for component in _component_records(_frame_list(frame)):
-            color = int(component["c"])
-            size = int(component["n"])
-            x = int(component["x"])
-            y = int(component["y"])
-            if y <= 0 or y >= 63 or size <= 0 or size > 144:
-                continue
-            priority = 0 if color in (8, 9, 10, 11, 12, 13, 14, 15) else 1
-            rows.append((priority, size, color, y, [6, x, y]))
-        rows.sort()
-        seen: set[tuple[int, ...]] = set()
-        out: list[list[int]] = []
-        for *_prefix, action in rows:
-            key = action_key(action)
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append(action)
-            if len(out) >= max_clicks:
-                break
-        click_cache[cache_key] = [list(a) for a in out]
-        return out
-
-    def fibonacci_direction_macros() -> list[list[list[int]]]:
-        lengths = sorted({1, 2, 3, 5, 8, 13} | {4, 6, 7, 12, 14})
-        macros: list[list[list[int]]] = []
-        for action in (1, 2, 3, 4):
-            for length in lengths:
-                macros.append([[action] for _ in range(length)])
-        return macros
-
-    direction_macros = fibonacci_direction_macros()
-
     def base_macros(frame: Any) -> list[list[list[int]]]:
-        macros = list(direction_macros)
-        macros.extend([[[5]], [[7]]])
-        macros.extend([[action] for action in click_actions(frame)])
-        return macros
+        return _cold_macros(frame, max_clicks=max_clicks, cache=click_cache)
 
     game = SandboxGame(game_id)
     try:
@@ -1167,6 +1162,155 @@ def sandbox_frontier_explore_candidate(
         game.close()
 
 
+def semiring_macro_search_candidate(
+    scratch: Path,
+    *,
+    beam_width: int = 24,
+    macro_depth: int = 5,
+    max_clicks: int = 16,
+    max_evaluations: int = 600,
+) -> dict[str, Any] | None:
+    """Beam search over Fibonacci/click macros with semiring-composed scores."""
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    click_cache: dict[str, list[list[int]]] = {}
+    static_macros: list[list[list[int]]] = []
+    seen_global: set[str] = set()
+    evaluations = 0
+    start_time = time.time()
+
+    def replay_suffix(game: Any, suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool, list[list[int]] | None]:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        for action in suffix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        frame = None if game.frame is None else _frame_list(game.frame)
+        return int(game.levels), int(game.win), bool(game.done), frame
+
+    def score_transition(
+        before_frame: list[list[int]],
+        after_frame: list[list[int]] | None,
+        *,
+        level_before: int,
+        level_after: int,
+        done: bool,
+        macro: Sequence[Sequence[int]],
+        suffix_len: int,
+    ) -> MacroScore:
+        if after_frame is None:
+            return ZERO_SCORE
+        before_dist = _distance_to_goal(before_frame)
+        after_dist = _distance_to_goal(after_frame)
+        progress = before_dist - after_dist
+        before_active = _small_activation_count(before_frame)
+        after_active = _small_activation_count(after_frame)
+        digest = _frame_digest(after_frame)
+        return MacroScore(
+            level_delta=max(0, level_after - level_before),
+            alive=0 if done and level_after <= level_before else 1,
+            novelty=1 if digest not in seen_global else 0,
+            object_progress=int(progress),
+            activation_delta=int(after_active - before_active),
+            reversible_control=_macro_reversible_control(macro),
+            cost=suffix_len,
+        )
+
+    game = SandboxGame(game_id)
+    try:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                return None
+        start_level = int(game.levels)
+        start_frame = _frame_list(game.frame)
+        static_macros = _cold_macros(start_frame, max_clicks=max_clicks, cache=click_cache)
+        seen_global.add(_frame_digest(start_frame))
+        beam: list[tuple[MacroScore, list[list[int]], list[list[int]]]] = [(ONE_SCORE, [], start_frame)]
+
+        for _round in range(macro_depth):
+            candidates: list[tuple[MacroScore, list[list[int]], list[list[int]]]] = []
+            for score, suffix, frame in beam:
+                for macro in static_macros:
+                    if evaluations >= max_evaluations:
+                        break
+                    candidate_suffix = suffix + [list(action) for action in macro]
+                    try:
+                        level, win, done, after_frame = replay_suffix(game, candidate_suffix)
+                    except Exception:
+                        evaluations += 1
+                        continue
+                    evaluations += 1
+                    if level > start_level:
+                        all_actions = prefix + candidate_suffix
+                        verified = _fresh_verified_level(
+                            scratch,
+                            game_id,
+                            all_actions,
+                            must_exceed=start_level,
+                        )
+                        if verified is None:
+                            continue
+                        verify_level, verify_win = verified
+                        return {
+                            "game": game_id,
+                            "actions": all_actions,
+                            "levels": verify_level,
+                            "win": verify_win,
+                            "primitive": "semiring_macro_search",
+                            "search_prior": "fibonacci_macro_semiring",
+                            "searched_steps": len(candidate_suffix),
+                            "macro_depth": _round + 1,
+                            "evaluations": evaluations,
+                            "elapsed_s": round(time.time() - start_time, 3),
+                        }
+                    if done or after_frame is None or level < start_level:
+                        continue
+                    transition_score = score_transition(
+                        frame,
+                        after_frame,
+                        level_before=start_level,
+                        level_after=level,
+                        done=done,
+                        macro=macro,
+                        suffix_len=len(candidate_suffix),
+                    )
+                    if transition_score.alive <= 0:
+                        continue
+                    composed = score.compose(transition_score)
+                    candidates.append((composed, candidate_suffix, after_frame))
+                    seen_global.add(_frame_digest(after_frame))
+                if evaluations >= max_evaluations:
+                    break
+            if not candidates:
+                break
+            candidates.sort(key=lambda item: item[0].rank(), reverse=True)
+            next_beam: list[tuple[MacroScore, list[list[int]], list[list[int]]]] = []
+            seen_round: set[tuple[int, str]] = set()
+            for item in candidates:
+                key = (len(item[1]), _frame_digest(item[2]))
+                if key in seen_round:
+                    continue
+                seen_round.add(key)
+                next_beam.append(item)
+                if len(next_beam) >= beam_width:
+                    break
+            beam = next_beam
+        return None
+    finally:
+        game.close()
+
+
 def _component_records(frame: list[list[int]]) -> list[dict[str, int]]:
     records: list[dict[str, int]] = []
     colors = sorted({int(v) for row in frame for v in row})
@@ -1184,6 +1328,100 @@ def _component_records(frame: list[list[int]]) -> list[dict[str, int]]:
             )
     records.sort(key=lambda c: (c["n"], c["c"], c["y"], c["x"]))
     return records
+
+
+def _rare_goal_center(frame: list[list[int]], origin: tuple[int, int] | None) -> tuple[int, int] | None:
+    priority = (14, 8, 10, 11, 12, 13, 15)
+    for color in priority:
+        center = _closest_component_center(frame, {color}, origin)
+        if center is not None:
+            return center
+    return None
+
+
+def _player_center(frame: list[list[int]]) -> tuple[int, int] | None:
+    return _largest_component_center(frame, {4, 9})
+
+
+def _distance_to_goal(frame: list[list[int]]) -> int:
+    player = _player_center(frame)
+    goal = _rare_goal_center(frame, player)
+    if player is None or goal is None:
+        return 0
+    return abs(player[0] - goal[0]) + abs(player[1] - goal[1])
+
+
+def _small_activation_count(frame: list[list[int]]) -> int:
+    return sum(
+        1
+        for component in _component_records(frame)
+        if 1 <= int(component["n"]) <= 16 and int(component["c"]) not in (0, 2, 4, 5, 6)
+    )
+
+
+def _macro_reversible_control(macro: Sequence[Sequence[int]]) -> int:
+    values = [int(action[0]) for action in macro if len(action) == 1]
+    pairs = {(1, 2), (2, 1), (3, 4), (4, 3)}
+    return sum(1 for a, b in zip(values, values[1:]) if (a, b) in pairs)
+
+
+def _frame_click_actions(
+    frame: Any,
+    *,
+    max_clicks: int = 24,
+    cache: dict[str, list[list[int]]] | None = None,
+) -> list[list[int]]:
+    if frame is None:
+        return []
+    frame_rows = _frame_list(frame)
+    cache_key = _frame_digest(frame_rows)
+    if cache is not None and cache_key in cache:
+        return [list(a) for a in cache[cache_key]]
+    rows: list[tuple[int, int, int, int, list[int]]] = []
+    for component in _component_records(frame_rows):
+        color = int(component["c"])
+        size = int(component["n"])
+        x = int(component["x"])
+        y = int(component["y"])
+        if y <= 0 or y >= 63 or size <= 0 or size > 144:
+            continue
+        priority = 0 if color in (8, 9, 10, 11, 12, 13, 14, 15) else 1
+        rows.append((priority, size, color, y, [6, x, y]))
+    rows.sort()
+    seen: set[tuple[int, ...]] = set()
+    out: list[list[int]] = []
+    for *_prefix, action in rows:
+        key = tuple(int(x) for x in action)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(action)
+        if len(out) >= max_clicks:
+            break
+    if cache is not None:
+        cache[cache_key] = [list(a) for a in out]
+    return out
+
+
+def _fibonacci_direction_macros() -> list[list[list[int]]]:
+    lengths = sorted({1, 2, 3, 5, 8, 13} | {4, 6, 7, 12, 14})
+    macros: list[list[list[int]]] = []
+    for action in (1, 2, 3, 4):
+        for length in lengths:
+            macros.append([[action] for _ in range(length)])
+    return macros
+
+
+def _cold_macros(
+    frame: Any,
+    *,
+    max_clicks: int,
+    cache: dict[str, list[list[int]]] | None = None,
+) -> list[list[list[int]]]:
+    macros = _fibonacci_direction_macros()
+    macros.extend([[[5]], [[7]]])
+    macros.extend([[action] for action in _frame_click_actions(frame, max_clicks=max_clicks, cache=cache)])
+    return macros
 
 
 def sourcefree_primitive_candidates(
@@ -1210,6 +1448,10 @@ def sourcefree_primitive_candidates(
         explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
         if explore is not None:
             candidates.append(explore)
+            return candidates
+        semiring = _run_primitive_safely(semiring_macro_search_candidate, scratch)
+        if semiring is not None:
+            candidates.append(semiring)
             return candidates
     return candidates
 

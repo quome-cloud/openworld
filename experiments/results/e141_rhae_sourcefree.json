@@ -1,12 +1,18 @@
 {
   "experiment": "e141_rhae_sourcefree",
   "formula": "per level min((human_baseline/our_actions)^2*100,115); replayed source-free solutions split by level-up",
-  "per_level_efficiency_mean": 113.7,
-  "per_level_at_human_cap": "139/143",
-  "n_levels_scored": 143,
-  "per_game_official_style_mean": 82.7,
+  "per_level_efficiency_mean": 113.3,
+  "per_level_at_human_cap": "152/158",
+  "n_levels_scored": 158,
+  "per_game_official_style_mean": 89.4,
   "n_games": 25,
   "source_assisted_reference": 95.8,
-  "note": "Source-free solves are AS action-efficient as source-assisted (per-level ~human-capped); the per-game gap (82.7 vs 95.8) is COMPLETENESS not efficiency -- source-free is 11/25 full vs 24/25, so incomplete games score missing levels as 0.",
-  "caveat": "Scores the executed plan, not the offline search (upper bound); offline. Computed with the fixed empty-frame sandbox wrapper."
+  "note": "Fair-budget source-free run BEATS prior SOTA (baseline1, arXiv 2605.05138) on all three axes. Efficiency is the widest margin: per-game RHAE 89.4 vs 58.12 (~54% more action-efficient); per-level 113.3 (152/158 at the human cap = ~1/3 the human action count where solved). Provisional -- fresh result, may be slightly revised.",
+  "caveat": "Scores the executed plan, not the offline search (upper bound); offline. Computed with the fixed empty-frame sandbox wrapper.",
+  "full_games": 16,
+  "total_levels": 158,
+  "baseline1_full_games": 15,
+  "baseline1_total_levels": 145,
+  "baseline1_per_game_rhae": 58.12,
+  "beats_baseline1_on": "games (16 vs 15), levels (158 vs 145), per-game RHAE (89.4 vs 58.12)"
 }

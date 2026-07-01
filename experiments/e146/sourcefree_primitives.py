@@ -11,7 +11,9 @@ from collections import deque
 import hashlib
 import json
 from pathlib import Path
+import random
 import sys
+import time
 from typing import Any, Iterable, Sequence
 
 from experiments.e143.transition_miner import action_list
@@ -1003,10 +1005,174 @@ def simple_path_detour_candidate(
     return None
 
 
+def sandbox_frontier_explore_candidate(
+    scratch: Path,
+    *,
+    budget: int = 2500,
+    max_steps: int = 80,
+    max_clicks: int = 24,
+    seed: int = 0,
+) -> dict[str, Any] | None:
+    """Source-free graph-frontier exploration through ``SandboxGame`` only.
+
+    This is the cold-start rung: no prior traces and no game source. It builds a
+    small public action set from directional actions plus click centers inferred
+    from rendered connected components, then biases rollouts toward untested
+    ``(frame, action)`` pairs. Any level-up is fresh-replay verified before it
+    becomes a candidate.
+    """
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    rng = random.Random(seed)
+    tested: dict[str, set[tuple[int, ...]]] = {}
+    click_cache: dict[str, list[list[int]]] = {}
+    best: dict[str, Any] | None = None
+    expansions = 0
+    start_time = time.time()
+
+    def frame_key(frame: Any) -> str:
+        if frame is None:
+            return "none"
+        return _frame_digest(_frame_list(frame))
+
+    def action_key(action: Sequence[int]) -> tuple[int, ...]:
+        return tuple(int(x) for x in action)
+
+    def click_actions(frame: Any) -> list[list[int]]:
+        if frame is None:
+            return []
+        cache_key = frame_key(frame)
+        if cache_key in click_cache:
+            return [list(a) for a in click_cache[cache_key]]
+        rows: list[tuple[int, int, int, int, list[int]]] = []
+        for component in _component_records(_frame_list(frame)):
+            color = int(component["c"])
+            size = int(component["n"])
+            x = int(component["x"])
+            y = int(component["y"])
+            if y <= 0 or y >= 63 or size <= 0 or size > 144:
+                continue
+            priority = 0 if color in (8, 9, 10, 11, 12, 13, 14, 15) else 1
+            rows.append((priority, size, color, y, [6, x, y]))
+        rows.sort()
+        seen: set[tuple[int, ...]] = set()
+        out: list[list[int]] = []
+        for *_prefix, action in rows:
+            key = action_key(action)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(action)
+            if len(out) >= max_clicks:
+                break
+        click_cache[cache_key] = [list(a) for a in out]
+        return out
+
+    def base_actions(frame: Any) -> list[list[int]]:
+        actions = [[1], [2], [3], [4], [5], [7]]
+        actions.extend(click_actions(frame))
+        return actions
+
+    game = SandboxGame(game_id)
+    try:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                return None
+        start_level = int(game.levels)
+        win = int(game.win)
+        initial_actions = base_actions(game.frame)
+
+        while expansions < budget:
+            game.reset()
+            for action in prefix:
+                _act(game, action)
+                if bool(game.done):
+                    break
+            if bool(game.done):
+                return None
+
+            seq: list[list[int]] = []
+            frame = game.frame
+            actions = list(initial_actions)
+            for _depth in range(max_steps):
+                state = frame_key(frame)
+                tried = tested.setdefault(state, set())
+                untried = [a for a in actions if action_key(a) not in tried]
+                if untried:
+                    action = rng.choice(untried)
+                else:
+                    clicks = [a for a in actions if int(a[0]) == 6]
+                    action = rng.choice(clicks if clicks and rng.random() < 0.45 else actions)
+                tried.add(action_key(action))
+                try:
+                    _act(game, action)
+                except Exception:
+                    break
+                expansions += 1
+                seq.append(list(action))
+                if int(game.levels) > start_level:
+                    all_actions = prefix + seq
+                    verified = _fresh_verified_level(
+                        scratch,
+                        game_id,
+                        all_actions,
+                        must_exceed=start_level,
+                    )
+                    if verified is None:
+                        break
+                    level, verify_win = verified
+                    return {
+                        "game": game_id,
+                        "actions": all_actions,
+                        "levels": level,
+                        "win": verify_win,
+                        "primitive": "sandbox_frontier_explore",
+                        "searched_steps": len(seq),
+                        "expansions": expansions,
+                        "states": len(tested),
+                        "elapsed_s": round(time.time() - start_time, 3),
+                    }
+                if bool(game.done) or int(game.levels) < start_level or expansions >= budget:
+                    break
+                frame = game.frame
+                actions = base_actions(frame)
+
+        return best
+    finally:
+        game.close()
+
+
+def _component_records(frame: list[list[int]]) -> list[dict[str, int]]:
+    records: list[dict[str, int]] = []
+    colors = sorted({int(v) for row in frame for v in row})
+    for color in colors:
+        for cells in _component_cells(frame, color):
+            xs = [p[0] for p in cells]
+            ys = [p[1] for p in cells]
+            records.append(
+                {
+                    "c": color,
+                    "n": len(cells),
+                    "x": round(sum(xs) / len(xs)),
+                    "y": round(sum(ys) / len(ys)),
+                }
+            )
+    records.sort(key=lambda c: (c["n"], c["c"], c["y"], c["x"]))
+    return records
+
+
 def sourcefree_primitive_candidates(
     scratch: Path,
     *,
     include_expensive: bool = False,
+    include_cold_search: bool = False,
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     center = _run_primitive_safely(center_corridor_candidate, scratch)
@@ -1021,6 +1187,11 @@ def sourcefree_primitive_candidates(
         detour = _run_primitive_safely(simple_path_detour_candidate, scratch)
         if detour is not None:
             candidates.append(detour)
+            return candidates
+    if include_cold_search:
+        explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
+        if explore is not None:
+            candidates.append(explore)
             return candidates
     return candidates
 

@@ -510,6 +510,7 @@ def run_retrieve_discover_controller(
     discovery_timeout_s: int | None = None,
     use_sourcefree_primitives: bool = True,
     use_expensive_primitives: bool = False,
+    use_cold_search: bool = False,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
     local_memory_root = out_dir / "episodic_memory"
@@ -588,7 +589,11 @@ def run_retrieve_discover_controller(
             continue
 
         if use_sourcefree_primitives:
-            primitives = sourcefree_primitive_candidates(scratch, include_expensive=use_expensive_primitives)
+            primitives = sourcefree_primitive_candidates(
+                scratch,
+                include_expensive=use_expensive_primitives,
+                include_cold_search=use_cold_search,
+            )
             if primitives:
                 primitive_tournament = evaluate_solution_tournament(
                     scratch,
@@ -631,6 +636,17 @@ def run_retrieve_discover_controller(
                         stopped_reason = "completed_all_levels"
                         break
                     continue
+            else:
+                primitive_miss = {
+                    "stage": stage_idx,
+                    "mode": "primitive",
+                    "level_before": level_before,
+                    "candidate_count": 0,
+                    "use_expensive_primitives": bool(use_expensive_primitives),
+                    "use_cold_search": bool(use_cold_search),
+                    "outcome": "no_primitive_candidate",
+                }
+                (stage_dir / "primitive_miss.json").write_text(json.dumps(primitive_miss, indent=2) + "\n")
 
         if not discovery_command:
             stopped_reason = "memory_miss_no_discovery"
@@ -742,6 +758,7 @@ def run_retrieve_discover_controller(
         "has_discovery_command": bool(discovery_command),
         "use_sourcefree_primitives": bool(use_sourcefree_primitives),
         "use_expensive_primitives": bool(use_expensive_primitives),
+        "use_cold_search": bool(use_cold_search),
         "solve_time_llm_calls": "external_command_dependent",
         "levels": final_level,
         "actions": actions,
@@ -777,6 +794,11 @@ def main() -> int:
         action="store_true",
         help="Enable slower deterministic timing/detour primitives before LLM discovery.",
     )
+    parser.add_argument(
+        "--use-cold-search",
+        action="store_true",
+        help="Enable bounded sandbox-only graph-frontier exploration when memory and cheap primitives miss.",
+    )
     parser.add_argument("--max-stages", type=int, default=12)
     parser.add_argument("--transfer-limit", type=int, default=24)
     parser.add_argument("--signature-threshold", type=float, default=1000.0)
@@ -803,6 +825,7 @@ def main() -> int:
         discovery_timeout_s=args.discovery_timeout_s,
         use_sourcefree_primitives=not args.no_sourcefree_primitives,
         use_expensive_primitives=args.use_expensive_primitives,
+        use_cold_search=args.use_cold_search,
     )
     print(
         json.dumps(

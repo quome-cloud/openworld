@@ -35,21 +35,30 @@ WD="$E146_STAGE_DIR/judge_schema_discovery"
 mkdir -p "$WD"
 
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"
-cp "$ROOT/experiments/e125/objstate.py" "$WD/"
-cp "$ROOT/experiments/e133/ewm_toolkit.py" "$WD/"
-cp "$ROOT/experiments/e134/perceptors.py" "$WD/"
-cp "$ROOT/experiments/e134/composite.py" "$WD/"
-cp "$ROOT/experiments/e137/goal_condition.py" "$WD/"
-cp "$ROOT/experiments/e137/schema_induction.py" "$WD/"
-cp "$ROOT/experiments/e137/extract_demos.py" "$WD/"
-cp "$ROOT/experiments/e138/judge_schema.py" "$WD/"
-cp "$ROOT/experiments/e139/manyworld_semiring.py" "$WD/"
-cp "$ROOT/experiments/e139/hybrid_rank.py" "$WD/"
+for helper in \
+  "$ROOT/experiments/e125/objstate.py" \
+  "$ROOT/experiments/e133/ewm_toolkit.py" \
+  "$ROOT/experiments/e134/perceptors.py" \
+  "$ROOT/experiments/e134/composite.py" \
+  "$ROOT/experiments/e137/goal_condition.py" \
+  "$ROOT/experiments/e137/schema_induction.py" \
+  "$ROOT/experiments/e137/extract_demos.py" \
+  "$ROOT/experiments/e138/judge_schema.py" \
+  "$ROOT/experiments/e139/manyworld_semiring.py" \
+  "$ROOT/experiments/e139/hybrid_rank.py"; do
+  if [[ -f "$helper" ]]; then
+    cp "$helper" "$WD/"
+  fi
+done
 cp "$E146_FRONTIER" "$WD/frontier.json"
 
 cd "$WD"
-"$AGENT_PY" extract_demos.py "$GAME" frontier.json schema_packet.json \
-  --priority "ka59,su15,bp35,dc22,g50t,wa30,tu93,m0r0" > schema.out 2> schema.err || true
+if [[ -f extract_demos.py ]]; then
+  "$AGENT_PY" extract_demos.py "$GAME" frontier.json schema_packet.json \
+    --priority "ka59,su15,bp35,dc22,g50t,wa30,tu93,m0r0" > schema.out 2> schema.err || true
+else
+  printf '{"available": false, "reason": "extract_demos.py not present in this branch"}\n' > schema_packet.json
+fi
 
 read -r N W < <("$AGENT_PY" - <<'PY'
 import json
@@ -86,10 +95,8 @@ Required workflow:
 3. Write at least $N_PROPOSALS structured \`proposal_*.json\` files with:
    \`proposal_id\`, \`schema_id\`, \`goal_schema_id\`, \`hypothesis\`,
    \`role_bindings\`, \`probe_plan\`, \`expected_deltas\`, \`fallback_repairs\`, \`confidence\`.
-4. Rank before execution:
-   \`$AGENT_PY judge_schema.py schema_packet.json tournament.json proposal_*.json\`
-   and after counterexamples:
-   \`$AGENT_PY hybrid_rank.py schema_packet.json hybrid_tournament.json proposal_*.json --counterexample counter*.json\`
+4. If \`judge_schema.py\` or \`hybrid_rank.py\` are present, use them to rank proposals. If they
+   are absent, rank proposals yourself by source-free evidence and short replay probes.
 5. Execute small source-free probes. If a probe raises \`levels\`, save:
    \`solved.json = {"game":"$GAME","actions":[...full actions from reset...],"levels":M,"win":$W}\`
 

@@ -1115,7 +1115,7 @@ def sandbox_frontier_explore_candidate(
                 tried = tested.setdefault(state, set())
                 untried = [macro for macro in macros if macro_key(macro) not in tried]
                 if untried:
-                    macro = rng.choice(untried)
+                    macro = rng.choice(untried[:32])
                 else:
                     clicks = [macro for macro in macros if len(macro) == 1 and int(macro[0][0]) == 6]
                     macro = rng.choice(clicks if clicks and rng.random() < 0.45 else macros)
@@ -1144,7 +1144,7 @@ def sandbox_frontier_explore_candidate(
                             "levels": level,
                             "win": verify_win,
                             "primitive": "sandbox_frontier_explore",
-                            "search_prior": "fibonacci_direction_macros",
+                            "search_prior": "fibonacci_zeckendorf_macros",
                             "searched_steps": len(seq),
                             "expansions": expansions,
                             "states": len(tested),
@@ -1403,12 +1403,46 @@ def _frame_click_actions(
     return out
 
 
+def _zeckendorf_parts(n: int, fibs: Sequence[int] = (13, 8, 5, 3, 2, 1)) -> tuple[int, ...]:
+    parts: list[int] = []
+    remaining = int(n)
+    last_idx = -10
+    ordered = list(fibs)
+    for idx, fib in enumerate(ordered):
+        if fib <= remaining and abs(idx - last_idx) > 1:
+            parts.append(int(fib))
+            remaining -= int(fib)
+            last_idx = idx
+        if remaining <= 0:
+            break
+    return tuple(parts) if remaining == 0 else (int(n),)
+
+
 def _fibonacci_direction_macros() -> list[list[list[int]]]:
-    lengths = sorted({1, 2, 3, 5, 8, 13} | {4, 6, 7, 12, 14})
+    lengths = sorted({1, 2, 3, 5, 8, 13} | {4, 6, 7, 9, 10, 11, 12, 14, 16})
     macros: list[list[list[int]]] = []
     for action in (1, 2, 3, 4):
         for length in lengths:
             macros.append([[action] for _ in range(length)])
+            parts = _zeckendorf_parts(length)
+            if len(parts) > 1:
+                macro: list[list[int]] = []
+                for part in parts:
+                    macro.extend([[action] for _ in range(part)])
+                macros.append(macro)
+    for first, second in ((1, 2), (2, 1), (3, 4), (4, 3)):
+        for length in (2, 3, 5, 8):
+            macro = []
+            for idx in range(length):
+                macro.append([first if idx % 2 == 0 else second])
+            macros.append(macro)
+        for total in (6, 9, 11):
+            macro = []
+            for part in _zeckendorf_parts(total):
+                pair = (first, second) if len(macro) % 2 == 0 else (second, first)
+                for idx in range(part):
+                    macro.append([pair[idx % 2]])
+            macros.append(macro)
     return macros
 
 
@@ -1420,8 +1454,26 @@ def _cold_macros(
 ) -> list[list[list[int]]]:
     macros = _fibonacci_direction_macros()
     macros.extend([[[5]], [[7]]])
-    macros.extend([[action] for action in _frame_click_actions(frame, max_clicks=max_clicks, cache=cache)])
-    return macros
+    clicks = _frame_click_actions(frame, max_clicks=max_clicks, cache=cache)
+    macros.extend([[action] for action in clicks])
+    for click in clicks[:4]:
+        for direction in (1, 2, 3, 4):
+            for length in (3, 5):
+                run = [[direction] for _ in range(length)]
+                macros.append([click] + run)
+                macros.append(run + [click])
+            for total in (6, 9):
+                run = [[direction] for part in _zeckendorf_parts(total) for _ in range(part)]
+                macros.append([click] + run + [click])
+    seen: set[tuple[tuple[int, ...], ...]] = set()
+    unique: list[list[list[int]]] = []
+    for macro in macros:
+        key = tuple(tuple(int(v) for v in action) for action in macro)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(macro)
+    return unique
 
 
 def sourcefree_primitive_candidates(
@@ -1448,10 +1500,6 @@ def sourcefree_primitive_candidates(
         explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
         if explore is not None:
             candidates.append(explore)
-            return candidates
-        semiring = _run_primitive_safely(semiring_macro_search_candidate, scratch)
-        if semiring is not None:
-            candidates.append(semiring)
             return candidates
     return candidates
 

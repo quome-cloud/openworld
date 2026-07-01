@@ -249,3 +249,20 @@ def test_macro_score_composition_accumulates_search_evidence():
     assert combined.activation_delta == 2
     assert combined.reversible_control == 1
     assert combined.cost == 12
+
+
+def test_zeckendorf_parts_use_nonconsecutive_fibonacci_terms():
+    assert sourcefree_primitives._zeckendorf_parts(4) == (3, 1)
+    assert sourcefree_primitives._zeckendorf_parts(10) == (8, 2)
+    assert sourcefree_primitives._zeckendorf_parts(16) == (13, 3)
+
+
+def test_cold_macros_include_zeckendorf_and_click_compositions():
+    frame = [[0 for _ in range(8)] for _ in range(8)]
+    frame[2][2] = 14
+
+    macros = sourcefree_primitives._cold_macros(frame, max_clicks=4)
+    keys = {tuple(tuple(action) for action in macro) for macro in macros}
+
+    assert ((4,),) * 16 in keys
+    assert ((6, 2, 2), (1,), (1,), (1,), (1,), (1,)) in keys

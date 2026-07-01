@@ -1009,17 +1009,27 @@ def sourcefree_primitive_candidates(
     include_expensive: bool = False,
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
-    center = center_corridor_candidate(scratch)
+    center = _run_primitive_safely(center_corridor_candidate, scratch)
     if center is not None:
         candidates.append(center)
         return candidates
-    lattice = lattice_corridor_candidate(scratch)
+    lattice = _run_primitive_safely(lattice_corridor_candidate, scratch)
     if lattice is not None:
         candidates.append(lattice)
         return candidates
     if include_expensive:
-        detour = simple_path_detour_candidate(scratch)
+        detour = _run_primitive_safely(simple_path_detour_candidate, scratch)
         if detour is not None:
             candidates.append(detour)
             return candidates
     return candidates
+
+
+def _run_primitive_safely(fn: Any, scratch: Path) -> dict[str, Any] | None:
+    try:
+        return fn(scratch)
+    except Exception as exc:
+        failures_path = scratch / "primitive_failures.jsonl"
+        with failures_path.open("a") as f:
+            f.write(json.dumps({"primitive": getattr(fn, "__name__", str(fn)), "error": str(exc)[:500]}) + "\n")
+        return None

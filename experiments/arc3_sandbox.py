@@ -43,8 +43,11 @@ def _worker(gid):
     def obs(o):
         if o is None or getattr(o, "frame", None) is None:
             return {"frame": None, "levels": last["levels"], "win": last["win"], "avail": [], "done": True}
-        f = np.asarray(o.frame); f = (f[-1] if f.ndim == 3 else f).reshape(64, 64)
         last["levels"] = int(o.levels_completed); last["win"] = int(o.win_levels)
+        f = np.asarray(o.frame)
+        if f.size == 0:
+            return {"frame": None, "levels": last["levels"], "win": last["win"], "avail": [], "done": True}
+        f = (f[-1] if f.ndim == 3 else f).reshape(64, 64)
         return {"frame": f.astype(int).tolist(), "levels": last["levels"], "win": last["win"],
                 "avail": list(o.available_actions), "done": str(o.state) != "GameState.NOT_FINISHED"}
 
@@ -101,6 +104,8 @@ class SandboxGame:
             raise RuntimeError(r["error"])
         if r["frame"] is not None:
             self.frame = self._np.array(r["frame"])
+        else:
+            self.frame = None
         self.levels = r["levels"]; self.win = r["win"]; self.avail = r["avail"]; self.done = r["done"]
         return self.frame
 

@@ -3,6 +3,7 @@ import time
 
 from experiments.e145.sourcefree_controller import eligible_solution_paths
 from experiments.e146.retrieve_discover_controller import (
+    canonical_solution_actions,
     discovery_environment,
     exact_prefix_continuations,
     memory_paths,
@@ -13,6 +14,28 @@ from experiments.e146.retrieve_discover_controller import (
     write_local_memory_record,
 )
 from experiments.e146 import sourcefree_primitives
+
+
+def test_canonical_solution_actions_normalizes_bare_directional_ints():
+    assert canonical_solution_actions([1, [2], [6, 3, 4], 7]) == [[1], [2], [6, 3, 4], [7]]
+
+
+def test_canonical_solution_actions_rejects_ambiguous_click_without_coordinates():
+    try:
+        canonical_solution_actions([[1], [6]])
+    except ValueError as exc:
+        assert "click opcode without coordinates" in str(exc)
+    else:
+        raise AssertionError("expected ambiguous click action to be rejected")
+
+
+def test_canonical_solution_actions_rejects_malformed_click_coordinates():
+    try:
+        canonical_solution_actions([[6, 64, 0]])
+    except ValueError as exc:
+        assert "out of bounds" in str(exc)
+    else:
+        raise AssertionError("expected out-of-bounds click action to be rejected")
 
 
 def test_write_local_memory_record_is_eligible_for_retrieval(tmp_path):

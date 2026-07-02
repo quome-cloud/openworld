@@ -86,6 +86,149 @@ def _frame_digest(frame: list[list[int]]) -> str:
     return h.hexdigest()
 
 
+def _dominant_color(frame: list[list[int]]) -> int:
+    counts: dict[int, int] = {}
+    for row in frame:
+        for value in row:
+            color = int(value)
+            counts[color] = counts.get(color, 0) + 1
+    return max(counts, key=counts.get) if counts else 0
+
+
+def _world_modality(
+    frame: list[list[int]],
+    *,
+    available_actions: Sequence[int] | None = None,
+) -> str:
+    """Route a frame to a compact state representation family."""
+
+    actions = {int(a) for a in (available_actions or [])}
+    components = _component_records(frame)
+    small = sum(1 for component in components if int(component["n"]) <= 24 and int(component["c"]) != 0)
+    player = _player_center(frame)
+    if actions == {6}:
+        return "click_layout"
+    if player is not None and {1, 2, 3, 4} & actions:
+        return "navigation"
+    if len(components) > 90 or small > 48:
+        return "dense_grid"
+    return "sparse_objects"
+
+
+def _component_lens(
+    frame: list[list[int]],
+    *,
+    exact: bool,
+    limit: int,
+) -> tuple[tuple[int, int, int, int], ...]:
+    rows = []
+    for component in _component_records(frame):
+        color = int(component["c"])
+        size = int(component["n"])
+        if color == 0:
+            continue
+        x = int(component["x"])
+        y = int(component["y"])
+        if exact:
+            rows.append((color, min(size, 256), x, y))
+        elif color in (4, 8, 9, 10, 11, 12, 13, 14, 15) or size <= 24:
+            rows.append((color, min(size, 64), x // 2, y // 2))
+    return tuple(sorted(rows)[:limit])
+
+
+def _row_col_lens(objects: Sequence[tuple[int, int, int, int]]) -> dict[str, tuple[tuple[int, ...], ...]]:
+    rows: dict[int, list[tuple[int, int]]] = {}
+    cols: dict[int, list[tuple[int, int]]] = {}
+    for color, _size, x, y in objects:
+        rows.setdefault(int(y), []).append((int(x), int(color)))
+        cols.setdefault(int(x), []).append((int(y), int(color)))
+    row_sig = tuple((y, tuple(color for _x, color in sorted(values))) for y, values in sorted(rows.items()))
+    col_sig = tuple((x, tuple(color for _y, color in sorted(values))) for x, values in sorted(cols.items()))
+    return {"rows": row_sig[:16], "cols": col_sig[:16]}
+
+
+def _region_lens(frame: list[list[int]], *, grid: int = 8) -> tuple[tuple[int, ...], ...]:
+    bg = _dominant_color(frame)
+    h = len(frame)
+    w = len(frame[0]) if h else 0
+    out: list[tuple[int, ...]] = []
+    for gy in range(grid):
+        row: list[int] = []
+        y0 = int(gy * h / grid)
+        y1 = int((gy + 1) * h / grid)
+        for gx in range(grid):
+            x0 = int(gx * w / grid)
+            x1 = int((gx + 1) * w / grid)
+            counts: dict[int, int] = {}
+            for yy in range(y0, max(y0 + 1, y1)):
+                for xx in range(x0, max(x0 + 1, x1)):
+                    if yy >= h or xx >= w:
+                        continue
+                    color = int(frame[yy][xx])
+                    if color == bg:
+                        continue
+                    counts[color] = counts.get(color, 0) + 1
+            row.append(max(counts, key=counts.get) if counts else bg)
+        out.append(tuple(row))
+    return tuple(out)
+
+
+def _composite_world_key(
+    frame: list[list[int]],
+    *,
+    modality: str | None = None,
+    available_actions: Sequence[int] | None = None,
+) -> dict[str, Any]:
+    """Small source-free world key composed from routed public-frame lenses."""
+
+    components = _component_records(frame)
+    palette: dict[int, int] = {}
+    for row in frame:
+        for value in row:
+            color = int(value)
+            palette[color] = palette.get(color, 0) + 1
+    player = _player_center(frame)
+    goal = _rare_goal_center(frame, player)
+    distance = -1 if player is None or goal is None else abs(player[0] - goal[0]) + abs(player[1] - goal[1])
+    mode = modality or _world_modality(frame, available_actions=available_actions)
+    occupancy: dict[tuple[int, int, int], int] = {}
+    for component in components:
+        color = int(component["c"])
+        size = int(component["n"])
+        x = int(component["x"])
+        y = int(component["y"])
+        if color == 0:
+            continue
+        bin_key = (color, min(7, x // 8), min(7, y // 8))
+        occupancy[bin_key] = occupancy.get(bin_key, 0) + 1
+    palette_lens = tuple(sorted((color, min(count // 8, 255)) for color, count in palette.items() if color != 0))
+    occupancy_lens = tuple(sorted((color, bx, by, min(count, 9)) for (color, bx, by), count in occupancy.items()))
+    key: dict[str, Any] = {
+        "mode": mode,
+        "player": player,
+        "goal": goal,
+        "distance": distance,
+        "active": _small_activation_count(frame),
+        "palette": palette_lens,
+    }
+    if mode == "click_layout":
+        exact_objects = _component_lens(frame, exact=True, limit=80)
+        key["objects"] = exact_objects
+        key["layout"] = _row_col_lens(exact_objects)
+        key["regions"] = _region_lens(frame, grid=8)
+    elif mode == "navigation":
+        key["objects"] = _component_lens(frame, exact=False, limit=48)
+        key["occupancy"] = occupancy_lens[:64]
+        key["regions"] = _region_lens(frame, grid=8)
+    elif mode == "dense_grid":
+        key["regions"] = _region_lens(frame, grid=8)
+        key["occupancy"] = occupancy_lens[:48]
+    else:
+        key["objects"] = _component_lens(frame, exact=True, limit=64)
+        key["occupancy"] = occupancy_lens[:64]
+    return key
+
+
 def _salient_colors_present(frame: list[list[int]], colors: set[int]) -> set[int]:
     return {int(v) for row in frame for v in row if int(v) in colors}
 
@@ -1313,6 +1456,1053 @@ def first_level_macro_tournament_candidate(
         game.close()
 
 
+def code_world_discriminator_candidate(
+    scratch: Path,
+    *,
+    budget: int = 220,
+    beam_width: int = 6,
+    max_depth: int = 4,
+    max_clicks: int = 12,
+) -> dict[str, Any] | None:
+    """Verifier-gated code-world discriminator for cold macro search.
+
+    The learned model is intentionally small and local: it only sees public
+    rendered frames, stores observed object-key transitions, and uses those
+    transitions to rank future macro branches. ``SandboxGame`` remains the only
+    source of truth for accepting a candidate.
+    """
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    click_cache: dict[str, list[list[int]]] = {}
+    transition_counts: dict[tuple[str, tuple[tuple[int, ...], ...]], dict[str, int]] = {}
+    transition_examples: dict[tuple[tuple[int, ...], ...], list[tuple[str, str, int, bool]]] = {}
+    macro_stats: dict[tuple[tuple[int, ...], ...], dict[str, int]] = {}
+    macro_catalog: dict[tuple[tuple[int, ...], ...], list[list[int]]] = {}
+    start_time = time.time()
+
+    def macro_key(macro: Sequence[Sequence[int]]) -> tuple[tuple[int, ...], ...]:
+        return tuple(tuple(int(v) for v in action) for action in macro)
+
+    def object_key(frame: Any) -> str:
+        if frame is None:
+            return "none"
+        rows = _frame_list(frame)
+        return json.dumps(_composite_world_key(rows), sort_keys=True, separators=(",", ":"))
+
+    def parse_key(key: str) -> dict[str, Any] | None:
+        try:
+            data = json.loads(key)
+        except Exception:
+            return None
+        if not isinstance(data, dict):
+            return None
+        return data
+
+    def key_distance(data: Mapping[str, Any]) -> int:
+        value = data.get("distance", -1)
+        try:
+            return int(value)
+        except Exception:
+            return 9999
+
+    def replace_player_key(
+        key: str,
+        player: tuple[int, int] | None,
+        *,
+        active_delta: int = 0,
+        level: int = 0,
+    ) -> str | None:
+        data = parse_key(key)
+        if data is None:
+            return None
+        goal_raw = data.get("goal")
+        goal: tuple[int, int] | None = None
+        if isinstance(goal_raw, (list, tuple)) and len(goal_raw) == 2:
+            try:
+                goal = (int(goal_raw[0]), int(goal_raw[1]))
+            except Exception:
+                goal = None
+        if player is not None:
+            data["player"] = [int(player[0]), int(player[1])]
+            data["distance"] = -1 if goal is None else abs(player[0] - goal[0]) + abs(player[1] - goal[1])
+        try:
+            data["active"] = int(data.get("active", 0)) + int(active_delta)
+        except Exception:
+            data["active"] = int(active_delta)
+        if level > 0:
+            data["predicted_level_delta"] = int(level)
+        return json.dumps(data, sort_keys=True, separators=(",", ":"))
+
+    probe_game = SandboxGame(game_id)
+
+    def replay_suffix(suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool, list[list[int]] | None, str]:
+        probe_game.reset()
+        for action in prefix:
+            _act(probe_game, action)
+            if bool(probe_game.done):
+                break
+        for action in suffix:
+            _act(probe_game, action)
+            if bool(probe_game.done):
+                break
+        frame = None if probe_game.frame is None else _frame_list(probe_game.frame)
+        return int(probe_game.levels), int(probe_game.win), bool(probe_game.done), frame, object_key(frame)
+
+    def macro_library(frame: Any) -> list[list[list[int]]]:
+        macros = _cold_macros(frame, max_clicks=max_clicks, cache=click_cache)
+        # A few short compositions give the discriminator something to model
+        # without exploding the raw action branching factor.
+        clicks = _frame_click_actions(frame, max_clicks=min(10, max_clicks), cache=click_cache)
+        for first in clicks[:6]:
+            for second in clicks[1:7]:
+                if first != second:
+                    macros.append([first, second])
+        seen: set[tuple[tuple[int, ...], ...]] = set()
+        unique: list[list[list[int]]] = []
+        for macro in macros:
+            key = macro_key(macro)
+            if key in seen or len(macro) > 13:
+                continue
+            seen.add(key)
+            macro_catalog.setdefault(key, [list(action) for action in macro])
+            unique.append(macro)
+        return unique
+
+    def update_model(src_key: str, macro: Sequence[Sequence[int]], dst_key: str, *, level_delta: int, done: bool) -> None:
+        mk = macro_key(macro)
+        macro_catalog.setdefault(mk, [list(action) for action in macro])
+        row = transition_counts.setdefault((src_key, mk), {})
+        row[dst_key] = row.get(dst_key, 0) + 1
+        transition_examples.setdefault(mk, []).append((src_key, dst_key, int(level_delta), bool(done)))
+        stats = macro_stats.setdefault(mk, {"uses": 0, "novel": 0, "level": 0, "dead": 0, "noop": 0})
+        stats["uses"] += 1
+        stats["level"] += max(0, int(level_delta))
+        stats["dead"] += 1 if done and level_delta <= 0 else 0
+        stats["noop"] += 1 if dst_key == src_key else 0
+
+    def model_confidence(src_key: str, macro: Sequence[Sequence[int]]) -> tuple[int, int]:
+        row = transition_counts.get((src_key, macro_key(macro)), {})
+        if not row:
+            return (0, 0)
+        counts = sorted(row.values(), reverse=True)
+        return (counts[0], sum(counts))
+
+    def branch_score(
+        before_frame: list[list[int]],
+        after_frame: list[list[int]] | None,
+        *,
+        before_key: str,
+        after_key: str,
+        macro: Sequence[Sequence[int]],
+        level_delta: int,
+        done: bool,
+        visited: set[str],
+        path_len: int,
+    ) -> tuple[int, int, int, int, int, int, int, int]:
+        if after_frame is None:
+            return (-9999, -9999, -9999, -9999, -9999, -9999, -9999, -path_len)
+        stats = macro_stats.get(macro_key(macro), {"uses": 0, "level": 0, "dead": 0, "noop": 0})
+        confidence_hits, confidence_total = model_confidence(before_key, macro)
+        before_dist = _distance_to_goal(before_frame)
+        after_dist = _distance_to_goal(after_frame)
+        progress = before_dist - after_dist
+        activation = _small_activation_count(after_frame) - _small_activation_count(before_frame)
+        novelty = 1 if after_key not in visited else 0
+        survival = 0 if done and level_delta <= 0 else 1
+        consistency = confidence_hits - max(0, confidence_total - confidence_hits)
+        prior = int(stats["level"]) * 6 - int(stats["dead"]) * 4 - int(stats["noop"])
+        return (
+            int(level_delta) * 100,
+            survival,
+            novelty,
+            int(progress),
+            int(activation),
+            int(consistency),
+            int(prior),
+            -path_len,
+        )
+
+    def induced_effects() -> dict[tuple[tuple[int, ...], ...], tuple[int, int, int, int]]:
+        effects: dict[tuple[tuple[int, ...], ...], tuple[int, int, int, int]] = {}
+        for mk, examples in transition_examples.items():
+            deltas: dict[tuple[int, int], int] = {}
+            active_deltas: dict[int, int] = {}
+            level_hits = 0
+            live = 0
+            for src_key, dst_key, level_delta, done in examples:
+                if done and level_delta <= 0:
+                    continue
+                src = parse_key(src_key)
+                dst = parse_key(dst_key)
+                if src is None or dst is None:
+                    continue
+                try:
+                    active_delta = int(dst.get("active", 0)) - int(src.get("active", 0))
+                    active_deltas[active_delta] = active_deltas.get(active_delta, 0) + 1
+                except Exception:
+                    pass
+                sp = src.get("player")
+                dp = dst.get("player")
+                if (
+                    isinstance(sp, (list, tuple))
+                    and isinstance(dp, (list, tuple))
+                    and len(sp) == 2
+                    and len(dp) == 2
+                ):
+                    dx = int(dp[0]) - int(sp[0])
+                    dy = int(dp[1]) - int(sp[1])
+                    deltas[(dx, dy)] = deltas.get((dx, dy), 0) + 1
+                level_hits += max(0, int(level_delta))
+                live += 1
+            if live <= 0:
+                continue
+            if deltas:
+                (dx, dy), count = max(deltas.items(), key=lambda item: item[1])
+                if count * 2 < live:
+                    dx, dy = 0, 0
+            else:
+                dx, dy = 0, 0
+            active_delta, active_count = (0, 0)
+            if active_deltas:
+                active_delta, active_count = max(active_deltas.items(), key=lambda item: item[1])
+            if active_count and active_count * 2 < live:
+                active_delta = 0
+            if (dx, dy) == (0, 0) and active_delta == 0 and level_hits <= 0:
+                continue
+            effects[mk] = (dx, dy, int(active_delta), min(1, level_hits))
+        return effects
+
+    def effect_model_plans(start_key: str, *, max_plans: int = 4, depth: int = 8, beam: int = 12) -> list[list[list[int]]]:
+        effects = induced_effects()
+        if not effects:
+            return []
+        start_data = parse_key(start_key)
+        if start_data is None:
+            return []
+        start_dist = key_distance(start_data)
+        nodes: list[tuple[tuple[int, int, int, int], str, list[list[int]]]] = [((0, -start_dist, 0, 0), start_key, [])]
+        best: list[tuple[tuple[int, int, int, int], list[list[int]]]] = []
+        seen: set[tuple[str, int]] = {(start_key, 0)}
+        for _ in range(depth):
+            candidates: list[tuple[tuple[int, int, int, int], str, list[list[int]]]] = []
+            for _score, key, path in nodes:
+                data = parse_key(key)
+                if data is None:
+                    continue
+                player_raw = data.get("player")
+                has_player = isinstance(player_raw, (list, tuple)) and len(player_raw) == 2
+                px, py = (int(player_raw[0]), int(player_raw[1])) if has_player else (0, 0)
+                before_dist = key_distance(data)
+                before_active = int(data.get("active", 0) or 0)
+                for mk, (dx, dy, active_delta, level_hint) in effects.items():
+                    macro = macro_catalog.get(mk)
+                    if not macro:
+                        continue
+                    next_player = (px + dx, py + dy) if has_player else None
+                    next_key = replace_player_key(key, next_player, active_delta=active_delta, level=level_hint)
+                    if next_key is None:
+                        continue
+                    after = parse_key(next_key)
+                    if after is None:
+                        continue
+                    after_dist = key_distance(after)
+                    after_active = int(after.get("active", 0) or 0)
+                    progress = before_dist - after_dist
+                    next_path = path + [list(action) for action in macro]
+                    score = (
+                        int(level_hint) * 100,
+                        -after_dist,
+                        max(int(progress), int(after_active - before_active)),
+                        -len(next_path),
+                    )
+                    if (
+                        level_hint > 0
+                        or after_dist <= 1
+                        or (start_dist > 0 and after_dist < start_dist)
+                        or after_active > before_active
+                    ):
+                        best.append((score, next_path))
+                    visit_key = (next_key, len(next_path))
+                    if visit_key in seen:
+                        continue
+                    seen.add(visit_key)
+                    candidates.append((score, next_key, next_path))
+            if not candidates:
+                break
+            candidates.sort(key=lambda item: item[0], reverse=True)
+            nodes = candidates[:beam]
+        best.sort(key=lambda item: item[0], reverse=True)
+        plans: list[list[list[int]]] = []
+        plan_seen: set[tuple[tuple[int, ...], ...]] = set()
+        for _score, plan in best:
+            key = tuple(tuple(int(v) for v in action) for action in plan)
+            if key in plan_seen:
+                continue
+            plan_seen.add(key)
+            plans.append(plan)
+            if len(plans) >= max_plans:
+                break
+        return plans
+
+    evaluations = 0
+    effect_plan_checks = 0
+    verified_effect_plan_keys: set[tuple[tuple[int, ...], ...]] = set()
+    best: dict[str, Any] | None = None
+    try:
+        start_level, _, start_done, start_frame, start_key = replay_suffix([])
+        if start_done or start_frame is None:
+            return None
+
+        beam: list[tuple[tuple[int, ...], list[list[int]], list[list[int]], str, set[str]]] = [
+            ((0, 1, 0, 0, 0, 0, 0, 0), [], start_frame, start_key, {start_key})
+        ]
+
+        for depth in range(max_depth):
+            branches: list[tuple[tuple[int, ...], list[list[int]], list[list[int]], str, set[str]]] = []
+            for _score, suffix, frame, key, visited in beam:
+                macros = macro_library(frame)
+                macros.sort(
+                    key=lambda macro: (
+                        model_confidence(key, macro)[0],
+                        macro_stats.get(macro_key(macro), {}).get("level", 0),
+                        -macro_stats.get(macro_key(macro), {}).get("dead", 0),
+                        -len(macro),
+                    ),
+                    reverse=True,
+                )
+                for macro in macros[:28]:
+                    if evaluations >= budget:
+                        break
+                    candidate_suffix = suffix + [list(action) for action in macro]
+                    try:
+                        level, win, done, after_frame, after_key = replay_suffix(candidate_suffix)
+                    except Exception:
+                        evaluations += 1
+                        continue
+                    evaluations += 1
+                    level_delta = level - start_level
+                    update_model(key, macro, after_key, level_delta=level_delta, done=done)
+                    if level_delta > 0:
+                        all_actions = prefix + candidate_suffix
+                        verified = _fresh_verified_level(
+                            scratch,
+                            game_id,
+                            all_actions,
+                            must_exceed=start_level,
+                        )
+                        if verified is None:
+                            continue
+                        verify_level, verify_win = verified
+                        candidate = {
+                            "game": game_id,
+                            "actions": all_actions,
+                            "levels": verify_level,
+                            "win": verify_win,
+                            "primitive": "code_world_discriminator",
+                            "search_prior": "object_key_world_model",
+                            "searched_steps": len(candidate_suffix),
+                            "depth": depth + 1,
+                            "evaluations": evaluations,
+                            "model_transitions": len(transition_counts),
+                            "elapsed_s": round(time.time() - start_time, 3),
+                        }
+                        if best is None or len(candidate["actions"]) < len(best["actions"]):
+                            best = candidate
+                        continue
+                    if done or after_frame is None or level < start_level:
+                        continue
+                    score = branch_score(
+                        frame,
+                        after_frame,
+                        before_key=key,
+                        after_key=after_key,
+                        macro=macro,
+                        level_delta=level_delta,
+                        done=done,
+                        visited=visited,
+                        path_len=len(candidate_suffix),
+                    )
+                    if score[1] <= 0:
+                        continue
+                    branches.append((score, candidate_suffix, after_frame, after_key, visited | {after_key}))
+                if evaluations >= budget:
+                    break
+            if best is not None:
+                return best
+            for plan in effect_model_plans(start_key):
+                plan_key = tuple(tuple(int(v) for v in action) for action in plan)
+                if plan_key in verified_effect_plan_keys:
+                    continue
+                verified_effect_plan_keys.add(plan_key)
+                effect_plan_checks += 1
+                all_actions = prefix + plan
+                verified = _fresh_verified_level(
+                    scratch,
+                    game_id,
+                    all_actions,
+                    must_exceed=start_level,
+                )
+                if verified is None:
+                    continue
+                verify_level, verify_win = verified
+                best = {
+                    "game": game_id,
+                    "actions": all_actions,
+                    "levels": verify_level,
+                    "win": verify_win,
+                    "primitive": "code_world_discriminator",
+                    "search_prior": "induced_object_effect_model",
+                    "searched_steps": len(plan),
+                    "depth": depth + 1,
+                        "evaluations": evaluations,
+                        "effect_plan_checks": effect_plan_checks,
+                        "model_transitions": len(transition_counts),
+                    "induced_effects": len(induced_effects()),
+                    "elapsed_s": round(time.time() - start_time, 3),
+                }
+                return best
+            if not branches:
+                break
+            branches.sort(key=lambda item: item[0], reverse=True)
+            next_beam: list[tuple[tuple[int, ...], list[list[int]], list[list[int]], str, set[str]]] = []
+            seen_round: set[tuple[int, str]] = set()
+            for item in branches:
+                round_key = (len(item[1]), item[3])
+                if round_key in seen_round:
+                    continue
+                seen_round.add(round_key)
+                next_beam.append(item)
+                if len(next_beam) >= beam_width:
+                    break
+            beam = next_beam
+        return best
+    finally:
+        stats_path = scratch / "code_world_discriminator_stats.json"
+        try:
+            stats_path.write_text(
+                json.dumps(
+                    {
+                        "primitive": "code_world_discriminator",
+                        "game": game_id,
+                        "evaluations": evaluations,
+                        "transition_keys": len(transition_counts),
+                        "induced_effects": len(induced_effects()),
+                        "effect_plan_checks": effect_plan_checks,
+                        "macro_keys": len(macro_stats),
+                        "found_candidate": best is not None,
+                        "budget": budget,
+                        "beam_width": beam_width,
+                        "max_depth": max_depth,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+        except Exception:
+            pass
+        probe_game.close()
+
+
+def go_explore_archive_candidate(
+    scratch: Path,
+    *,
+    budget: int = 350,
+    max_suffix_len: int = 120,
+    max_clicks: int = 18,
+    archive_limit: int = 96,
+    seed: int = 17,
+    max_fresh_checks: int = 2,
+) -> dict[str, Any] | None:
+    """Go-Explore style archive search over public sandbox observations.
+
+    The frontier explorer samples rollouts from the same start repeatedly. This
+    primitive stores replayable suffixes to novel public states, then branches
+    from those states. It is still source-free: every cell is a rendered-frame
+    digest/object summary and every accepted route is fresh replay verified.
+    """
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    rng = random.Random(seed)
+    click_cache: dict[str, list[list[int]]] = {}
+    start_time = time.time()
+    expansions = 0
+    level_hits = 0
+    rejected_hits = 0
+    modality = "sparse_objects"
+
+    def replay(game: Any, suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool, list[list[int]] | None]:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        for action in suffix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        frame = None if game.frame is None else _frame_list(game.frame)
+        return int(game.levels), int(game.win), bool(game.done), frame
+
+    def base_state_key(frame: list[list[int]] | None) -> str:
+        if frame is None:
+            return "none"
+        return json.dumps(_composite_world_key(frame, modality=modality), sort_keys=True, separators=(",", ":"))
+
+    def state_key(
+        frame: list[list[int]] | None,
+        suffix: Sequence[Sequence[int]],
+        *,
+        include_machine: bool = False,
+    ) -> str:
+        if frame is None:
+            return "none"
+        return base_state_key(frame)
+
+    def cell_metrics(frame: list[list[int]]) -> tuple[int, int]:
+        return _distance_to_goal(frame), _small_activation_count(frame)
+
+    def cell_score(cell: Mapping[str, Any]) -> tuple[int, int, int, int]:
+        return (
+            -int(cell["visits"]),
+            -int(cell["distance"]),
+            int(cell["active"]),
+            -len(cell["suffix"]),
+        )
+
+    def macro_pool(frame: list[list[int]], suffix: Sequence[Sequence[int]]) -> list[list[list[int]]]:
+        macros = _cold_macros(frame, max_clicks=max_clicks, cache=click_cache)
+        # Local continuation macros are cheap and help when the avatar/object is
+        # already near an interesting state.
+        for action in (1, 2, 3, 4, 5, 7):
+            for length in (1, 2, 3):
+                macros.append([[action] for _ in range(length)])
+        clicks = _frame_click_actions(frame, max_clicks=min(8, max_clicks), cache=click_cache)
+        if suffix:
+            last = list(suffix[-1])
+            if last and int(last[0]) == 6:
+                for direction in (1, 2, 3, 4):
+                    macros.append([last] + [[direction] for _ in range(2)])
+        for first in clicks[:5]:
+            for second in clicks[:5]:
+                if first != second:
+                    macros.append([first, second])
+        seen: set[tuple[tuple[int, ...], ...]] = set()
+        unique: list[list[list[int]]] = []
+        for macro in macros:
+            key = tuple(tuple(int(v) for v in action) for action in macro)
+            if key in seen:
+                continue
+            seen.add(key)
+            unique.append(macro)
+        return unique
+
+    game = SandboxGame(game_id)
+    try:
+        start_level, _, done, start_frame = replay(game, [])
+        if done or start_frame is None:
+            return None
+        modality = _world_modality(start_frame, available_actions=getattr(game, "avail", []))
+        start_base_key = base_state_key(start_frame)
+        start_key = state_key(start_frame, [], include_machine=False)
+        start_dist, start_active = cell_metrics(start_frame)
+        archive: dict[str, dict[str, Any]] = {
+            start_key: {
+                "base_key": start_base_key,
+                "suffix": [],
+                "frame": start_frame,
+                "visits": 0,
+                "level": start_level,
+                "distance": start_dist,
+                "active": start_active,
+            }
+        }
+        frontier_keys: list[str] = [start_key]
+        seen_suffixes: set[tuple[tuple[int, ...], ...]] = {()}
+
+        while expansions < budget and frontier_keys:
+            frontier_keys.sort(
+                key=lambda key: cell_score(archive[key]),
+                reverse=True,
+            )
+            # Sample among the top cells to avoid deterministic tunnel vision.
+            top = frontier_keys[: min(18, len(frontier_keys))]
+            key = rng.choice(top)
+            cell = archive[key]
+            cell["visits"] = int(cell["visits"]) + 1
+            suffix = [list(action) for action in cell["suffix"]]
+            frame = cell["frame"]
+            macros = macro_pool(frame, suffix)
+            rng.shuffle(macros)
+            for macro in macros[:24]:
+                if expansions >= budget:
+                    break
+                candidate_suffix = suffix + [list(action) for action in macro]
+                if len(candidate_suffix) > max_suffix_len:
+                    continue
+                suffix_key = tuple(tuple(int(v) for v in action) for action in candidate_suffix)
+                if suffix_key in seen_suffixes:
+                    continue
+                seen_suffixes.add(suffix_key)
+                try:
+                    level, win, done, next_frame = replay(game, candidate_suffix)
+                except Exception:
+                    expansions += 1
+                    continue
+                expansions += 1
+                if level > start_level:
+                    level_hits += 1
+                    if level_hits > max_fresh_checks:
+                        continue
+                    all_actions = prefix + candidate_suffix
+                    verified = _fresh_verified_level(
+                        scratch,
+                        game_id,
+                        all_actions,
+                        must_exceed=start_level,
+                    )
+                    if verified is None:
+                        rejected_hits += 1
+                        continue
+                    verify_level, verify_win = verified
+                    return {
+                        "game": game_id,
+                        "actions": all_actions,
+                        "levels": verify_level,
+                        "win": verify_win,
+                        "primitive": "go_explore_archive",
+                        "search_prior": "public_state_archive",
+                        "searched_steps": len(candidate_suffix),
+                        "expansions": expansions,
+                        "archive_size": len(archive),
+                        "level_hits": level_hits,
+                        "rejected_hits": rejected_hits,
+                        "elapsed_s": round(time.time() - start_time, 3),
+                    }
+                if done or next_frame is None or level < start_level:
+                    continue
+                next_base_key = base_state_key(next_frame)
+                next_key = state_key(next_frame, candidate_suffix, include_machine=False)
+                previous = archive.get(next_key)
+                if previous is None or len(candidate_suffix) < len(previous["suffix"]):
+                    dist, active = cell_metrics(next_frame)
+                    archive[next_key] = {
+                        "base_key": next_base_key,
+                        "suffix": candidate_suffix,
+                        "frame": next_frame,
+                        "visits": 0,
+                        "level": level,
+                        "distance": dist,
+                        "active": active,
+                    }
+                    if next_key not in frontier_keys:
+                        frontier_keys.append(next_key)
+                    if len(archive) > archive_limit:
+                        frontier_keys.sort(
+                            key=lambda item: cell_score(archive[item]),
+                            reverse=True,
+                        )
+                        for old_key in frontier_keys[archive_limit:]:
+                            archive.pop(old_key, None)
+                        frontier_keys = frontier_keys[:archive_limit]
+        stats_path = scratch / "go_explore_archive_stats.json"
+        stats_path.write_text(
+            json.dumps(
+                {
+                    "primitive": "go_explore_archive",
+                    "game": game_id,
+                    "expansions": expansions,
+                    "archive_size": len(archive),
+                    "found_candidate": False,
+                    "level_hits": level_hits,
+                    "rejected_hits": rejected_hits,
+                    "budget": budget,
+                    "max_suffix_len": max_suffix_len,
+                    "max_fresh_checks": max_fresh_checks,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        return None
+    finally:
+        game.close()
+
+
+def hidden_click_state_candidate(
+    scratch: Path,
+    *,
+    max_expansions: int = 2200,
+    max_depth: int = 12,
+    max_clicks: int = 28,
+    beam_width: int = 96,
+) -> dict[str, Any] | None:
+    """Click-only hidden-state search with bounded click-history state.
+
+    Some click games intentionally keep the visible frame unchanged while a
+    selection/register changes. A visible-state archive collapses those paths.
+    This primitive treats short click history as a latent machine state, but
+    only for click-only frontiers and with strict beam/expansion bounds.
+    """
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    start_time = time.time()
+    expansions = 0
+    level_hits = 0
+    rejected_hits = 0
+
+    probe_game = SandboxGame(game_id)
+
+    def replay(suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool, list[list[int]] | None, list[int]]:
+        probe_game.reset()
+        for action in prefix:
+            _act(probe_game, action)
+            if bool(probe_game.done):
+                break
+        for action in suffix:
+            _act(probe_game, action)
+            if bool(probe_game.done):
+                break
+        frame = None if probe_game.frame is None else _frame_list(probe_game.frame)
+        return (
+            int(probe_game.levels),
+            int(probe_game.win),
+            bool(probe_game.done),
+            frame,
+            [int(a) for a in getattr(probe_game, "avail", [])],
+        )
+
+    try:
+        start_level, _win, done, start_frame, avail = replay([])
+    except Exception:
+        probe_game.close()
+        return None
+    if done or start_frame is None or set(avail) != {6}:
+        probe_game.close()
+        return None
+
+    components = _component_records(start_frame)
+    click_rows: list[tuple[int, int, int, int, list[int]]] = []
+    for component in components:
+        color = int(component["c"])
+        size = int(component["n"])
+        x = int(component["x"])
+        y = int(component["y"])
+        if size <= 0 or size > 32 or y >= 63:
+            continue
+        # Hidden click puzzles often use tiny top-row markers as registers or
+        # clues; include them here even though the generic salience clicker
+        # ranks them low.
+        top_priority = 0 if y <= 3 and size <= 8 else 1
+        color_priority = 0 if color in (8, 9, 10, 11, 12, 13, 14, 15) else 1
+        click_rows.append((top_priority, color_priority, size, y, [6, x, y]))
+    click_rows.sort()
+    clicks = [row[-1] for row in click_rows]
+    for action in _frame_click_actions(start_frame, max_clicks=max_clicks):
+        if action not in clicks:
+            clicks.append(action)
+    clicks = clicks[:max_clicks]
+    if not clicks:
+        return None
+    click_to_index = {tuple(action): idx for idx, action in enumerate(clicks)}
+
+    def click_rank(action: Sequence[int]) -> tuple[int, int, int, int]:
+        x = int(action[1])
+        y = int(action[2])
+        match = None
+        for component in components:
+            if int(component["x"]) == x and int(component["y"]) == y:
+                match = component
+                break
+        if match is None:
+            return (9, y, x, 999)
+        color = int(match["c"])
+        size = int(match["n"])
+        # Prefer small colored widgets before broad background/rails.
+        color_priority = 0 if color in (8, 9, 10, 11, 12, 13, 14, 15) else 1
+        return (color_priority, size, y, x)
+
+    clicks = sorted(clicks, key=click_rank)[:max_clicks]
+    click_to_index = {tuple(action): idx for idx, action in enumerate(clicks)}
+
+    def latent_key(frame: list[list[int]] | None, suffix: Sequence[Sequence[int]]) -> tuple[Any, ...]:
+        visible = "none" if frame is None else base_key(frame)
+        history = tuple(click_to_index.get(tuple(action), -1) for action in suffix if int(action[0]) == 6)
+        # Order matters for registers; keep the recent suffix and a coarse set
+        # so combinations are not collapsed to the same visible state.
+        return (visible, history[-8:], tuple(sorted(set(history))))
+
+    def base_key(frame: list[list[int]]) -> str:
+        return json.dumps(
+            _composite_world_key(frame, modality="click_layout", available_actions=[6]),
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+    def candidate_actions(suffix: Sequence[Sequence[int]], frame: list[list[int]] | None) -> list[list[int]]:
+        used = [click_to_index.get(tuple(action), -1) for action in suffix if int(action[0]) == 6]
+        used_set = {idx for idx in used if idx >= 0}
+        actions: list[list[int]] = []
+        # New targets first; then a few repeats because toggle/select games
+        # often require confirming the same widget.
+        for idx, click in enumerate(clicks):
+            if idx not in used_set:
+                actions.append(list(click))
+        for idx in used[-3:]:
+            if 0 <= idx < len(clicks):
+                actions.append(list(clicks[idx]))
+        # If the hidden selection may have unlocked directional controls, test
+        # short runs sparingly without making them persistent branches.
+        if suffix:
+            for action in (1, 2, 3, 4):
+                actions.append([action])
+        seen: set[tuple[int, ...]] = set()
+        out: list[list[int]] = []
+        for action in actions:
+            key = tuple(int(v) for v in action)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(action)
+        return out[:20]
+
+    start_key = latent_key(start_frame, [])
+    queue: list[tuple[tuple[int, int, int], list[list[int]], list[list[int]] | None]] = [((0, 0, 0), [], start_frame)]
+    seen: set[tuple[Any, ...]] = {start_key}
+
+    while queue and expansions < max_expansions:
+        queue.sort(key=lambda item: item[0])
+        _score, suffix, frame = queue.pop(0)
+        if len(suffix) >= max_depth:
+            continue
+        for action in candidate_actions(suffix, frame):
+            if expansions >= max_expansions:
+                break
+            candidate_suffix = suffix + [list(action)]
+            try:
+                level, win, done, next_frame, _avail = replay(candidate_suffix)
+            except Exception:
+                expansions += 1
+                continue
+            expansions += 1
+            if level > start_level:
+                level_hits += 1
+                all_actions = prefix + candidate_suffix
+                verified = _fresh_verified_level(scratch, game_id, all_actions, must_exceed=start_level)
+                if verified is None:
+                    rejected_hits += 1
+                    continue
+                verify_level, verify_win = verified
+                probe_game.close()
+                return {
+                    "game": game_id,
+                    "actions": all_actions,
+                    "levels": verify_level,
+                    "win": verify_win,
+                    "primitive": "hidden_click_state",
+                    "search_prior": "bounded_click_history_machine_state",
+                    "searched_steps": len(candidate_suffix),
+                    "expansions": expansions,
+                    "level_hits": level_hits,
+                    "rejected_hits": rejected_hits,
+                    "elapsed_s": round(time.time() - start_time, 3),
+                }
+            if done or next_frame is None or level < start_level:
+                continue
+            key = latent_key(next_frame, candidate_suffix)
+            if key in seen:
+                continue
+            seen.add(key)
+            active = _small_activation_count(next_frame)
+            score = (len(candidate_suffix), -active, sum(click_to_index.get(tuple(a), 0) for a in candidate_suffix) % 17)
+            queue.append((score, candidate_suffix, next_frame))
+            if len(queue) > beam_width:
+                queue.sort(key=lambda item: item[0])
+                queue = queue[:beam_width]
+
+    stats_path = scratch / "hidden_click_state_stats.json"
+    stats_path.write_text(
+        json.dumps(
+            {
+                "primitive": "hidden_click_state",
+                "game": game_id,
+                "expansions": expansions,
+                "states": len(seen),
+                "clicks": len(clicks),
+                "found_candidate": False,
+                "level_hits": level_hits,
+                "rejected_hits": rejected_hits,
+                "max_depth": max_depth,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    probe_game.close()
+    return None
+
+
+def react_world_tool_candidate(
+    scratch: Path,
+    *,
+    max_sequences: int = 192,
+    max_actions: int = 96,
+) -> dict[str, Any] | None:
+    """Synthesize small world-representation tools and verify their actions.
+
+    This is the deterministic shell of a ReAct rung: observe a composite public
+    world, choose compact tool shapes over that representation, run those tools
+    to produce action sequences, and accept only fresh sandbox-verified level-ups.
+    """
+
+    sys.path.insert(0, str(scratch))
+    from arc3_sandbox import SandboxGame  # type: ignore
+
+    frontier = json.loads((scratch / "frontier.json").read_text())
+    prefix = action_list(frontier.get("actions", []))
+    game_id = frontier["game"]
+    start_time = time.time()
+    tested = 0
+    rejected_hits = 0
+
+    def replay_candidate(game: Any, suffix: Sequence[Sequence[int]]) -> tuple[int, int, bool]:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                return int(game.levels), int(game.win), bool(game.done)
+        for action in suffix:
+            _act(game, action)
+            if bool(game.done):
+                break
+        return int(game.levels), int(game.win), bool(game.done)
+
+    def normalize_sequences(
+        rows: Sequence[tuple[str, Sequence[Sequence[int]], str]],
+    ) -> list[tuple[str, list[list[int]], str]]:
+        out: list[tuple[str, list[list[int]], str]] = []
+        seen: set[tuple[tuple[int, ...], ...]] = set()
+        for name, actions, rationale in rows:
+            seq: list[list[int]] = []
+            for action in actions:
+                item = [int(v) for v in action]
+                if not item:
+                    continue
+                if item[0] == 6 and len(item) != 3:
+                    continue
+                if item[0] != 6 and len(item) != 1:
+                    continue
+                seq.append(item)
+                if len(seq) >= max_actions:
+                    break
+            if not seq:
+                continue
+            seq_key = tuple(tuple(action) for action in seq)
+            if seq_key in seen:
+                continue
+            seen.add(seq_key)
+            out.append((name, seq, rationale))
+            if len(out) >= max_sequences:
+                break
+        return out
+
+    game = SandboxGame(game_id)
+    try:
+        game.reset()
+        for action in prefix:
+            _act(game, action)
+            if bool(game.done):
+                return None
+        start_level = int(game.levels)
+        start_frame = _frame_list(game.frame)
+        modality = _world_modality(start_frame, available_actions=getattr(game, "avail", []))
+        world = _composite_world_key(
+            start_frame,
+            modality=modality,
+            available_actions=getattr(game, "avail", []),
+        )
+        if modality == "click_layout":
+            raw_sequences = _react_click_tool_sequences(start_frame, max_actions=max_actions)
+        else:
+            raw_sequences = _react_navigation_tool_sequences(start_frame, max_actions=max_actions)
+        sequences = normalize_sequences(raw_sequences)
+
+        for tool_name, suffix, rationale in sequences:
+            tested += 1
+            try:
+                level, _win, _done = replay_candidate(game, suffix)
+            except Exception:
+                continue
+            if level <= start_level:
+                continue
+            all_actions = prefix + suffix
+            verified = _fresh_verified_level(
+                scratch,
+                game_id,
+                all_actions,
+                must_exceed=start_level,
+            )
+            if verified is None:
+                rejected_hits += 1
+                continue
+            verify_level, verify_win = verified
+            return {
+                "game": game_id,
+                "actions": all_actions,
+                "levels": verify_level,
+                "win": verify_win,
+                "primitive": "react_world_tool",
+                "search_prior": "composite_world_tool_synthesis",
+                "tool": tool_name,
+                "rationale": rationale,
+                "modality": modality,
+                "world_mode": world.get("mode"),
+                "searched_steps": len(suffix),
+                "tool_sequences_tested": tested,
+                "rejected_hits": rejected_hits,
+                "elapsed_s": round(time.time() - start_time, 3),
+            }
+
+        (scratch / "react_world_tool_stats.json").write_text(
+            json.dumps(
+                {
+                    "primitive": "react_world_tool",
+                    "game": game_id,
+                    "modality": modality,
+                    "world_mode": world.get("mode"),
+                    "tool_sequences": len(sequences),
+                    "tool_sequences_tested": tested,
+                    "found_candidate": False,
+                    "rejected_hits": rejected_hits,
+                    "elapsed_s": round(time.time() - start_time, 3),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        return None
+    finally:
+        game.close()
+
+
 def semiring_macro_search_candidate(
     scratch: Path,
     *,
@@ -1460,6 +2650,164 @@ def semiring_macro_search_candidate(
         return None
     finally:
         game.close()
+
+
+def _unique_action_sequence(actions: Sequence[Sequence[int]], *, limit: int) -> list[list[int]]:
+    out: list[list[int]] = []
+    for action in actions:
+        item = [int(v) for v in action]
+        out.append(item)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _react_click_tool_sequences(
+    frame: list[list[int]],
+    *,
+    max_actions: int,
+) -> list[tuple[str, list[list[int]], str]]:
+    """Generate ReAct-style click tools from the composite component world."""
+
+    background = _dominant_color(frame)
+    components = [
+        c
+        for c in _component_records(frame)
+        if int(c["c"]) not in (0, background) and 0 < int(c["y"]) < 63 and 1 <= int(c["n"]) <= 160
+    ]
+    objects = [c for c in components if int(c["n"]) >= 2]
+    if not objects:
+        return []
+
+    def click(component: Mapping[str, int]) -> list[int]:
+        return [6, int(component["x"]), int(component["y"])]
+
+    def add(
+        rows: list[tuple[str, list[list[int]], str]],
+        name: str,
+        ordered: Sequence[Mapping[str, int]],
+        rationale: str,
+    ) -> None:
+        rows.append((name, _unique_action_sequence([click(c) for c in ordered], limit=max_actions), rationale))
+
+    rows: list[tuple[str, list[list[int]], str]] = []
+    by_y: dict[int, list[Mapping[str, int]]] = {}
+    by_x: dict[int, list[Mapping[str, int]]] = {}
+    by_color: dict[int, list[Mapping[str, int]]] = {}
+    for component in objects:
+        by_y.setdefault(int(component["y"]), []).append(component)
+        by_x.setdefault(int(component["x"]), []).append(component)
+        by_color.setdefault(int(component["c"]), []).append(component)
+
+    ys = sorted(by_y)
+    xs = sorted(by_x)
+    colors = sorted(by_color)
+    row_lr = [c for y in ys for c in sorted(by_y[y], key=lambda item: (int(item["x"]), int(item["c"]), int(item["n"])))]
+    row_rl = [c for y in ys for c in sorted(by_y[y], key=lambda item: (-int(item["x"]), int(item["c"]), int(item["n"])))]
+    row_bottom_lr = [
+        c for y in reversed(ys) for c in sorted(by_y[y], key=lambda item: (int(item["x"]), int(item["c"]), int(item["n"])))
+    ]
+    row_bottom_rl = [
+        c for y in reversed(ys) for c in sorted(by_y[y], key=lambda item: (-int(item["x"]), int(item["c"]), int(item["n"])))
+    ]
+    col_tb = [c for x in xs for c in sorted(by_x[x], key=lambda item: (int(item["y"]), int(item["c"]), int(item["n"])))]
+    col_bt = [c for x in xs for c in sorted(by_x[x], key=lambda item: (-int(item["y"]), int(item["c"]), int(item["n"])))]
+    col_right_tb = [
+        c for x in reversed(xs) for c in sorted(by_x[x], key=lambda item: (int(item["y"]), int(item["c"]), int(item["n"])))
+    ]
+    col_right_bt = [
+        c for x in reversed(xs) for c in sorted(by_x[x], key=lambda item: (-int(item["y"]), int(item["c"]), int(item["n"])))
+    ]
+    add(rows, "tool_rows_top_left", row_lr, "scan component rows from top-left")
+    add(rows, "tool_rows_top_right", row_rl, "scan component rows from top-right")
+    add(rows, "tool_rows_bottom_left", row_bottom_lr, "scan component rows from bottom-left")
+    add(rows, "tool_rows_bottom_right", row_bottom_rl, "scan component rows from bottom-right")
+    add(rows, "tool_cols_left_top", col_tb, "scan component columns from upper-left")
+    add(rows, "tool_cols_left_bottom", col_bt, "scan component columns from lower-left")
+    add(rows, "tool_cols_right_top", col_right_tb, "scan component columns from upper-right")
+    add(rows, "tool_cols_right_bottom", col_right_bt, "scan component columns from lower-right")
+
+    for name, ordered_colors in (
+        ("tool_color_ascending", colors),
+        ("tool_color_descending", list(reversed(colors))),
+        ("tool_color_rare_first", sorted(colors, key=lambda color: (len(by_color[color]), color))),
+        ("tool_color_common_first", sorted(colors, key=lambda color: (-len(by_color[color]), color))),
+    ):
+        ordered: list[Mapping[str, int]] = []
+        for color in ordered_colors:
+            ordered.extend(sorted(by_color[color], key=lambda item: (int(item["y"]), int(item["x"]), int(item["n"]))))
+        add(rows, name, ordered, "group clicks by component color")
+
+    outer = [
+        c
+        for c in objects
+        if int(c["x"]) in (xs[0], xs[-1]) or int(c["y"]) in (ys[0], ys[-1])
+    ]
+    cx = sum(int(c["x"]) for c in objects) / max(1, len(objects))
+    cy = sum(int(c["y"]) for c in objects) / max(1, len(objects))
+    outer_cw = sorted(
+        outer,
+        key=lambda item: (
+            0
+            if int(item["y"]) == ys[0]
+            else 1
+            if int(item["x"]) == xs[-1]
+            else 2
+            if int(item["y"]) == ys[-1]
+            else 3,
+            int(item["x"]) if int(item["y"]) == ys[0] else int(item["y"]),
+        ),
+    )
+    radial = sorted(objects, key=lambda item: (abs(int(item["x"]) - cx) + abs(int(item["y"]) - cy), int(item["y"]), int(item["x"])))
+    add(rows, "tool_perimeter_clockwise", outer_cw, "click the visible component perimeter")
+    add(rows, "tool_perimeter_counterclockwise", list(reversed(outer_cw)), "click the visible component perimeter in reverse")
+    add(rows, "tool_radial_center_out", radial, "click components from layout center outward")
+    add(rows, "tool_radial_outside_in", list(reversed(radial)), "click components from layout outside inward")
+
+    top_markers = sorted([c for c in objects if int(c["y"]) <= min(12, ys[0] + 4)], key=lambda item: int(item["x"]))
+    lower_objects = [c for c in objects if c not in top_markers]
+    if top_markers and lower_objects:
+        projected: list[Mapping[str, int]] = []
+        for marker in top_markers:
+            projected.extend(
+                sorted(
+                    lower_objects,
+                    key=lambda item: (abs(int(item["x"]) - int(marker["x"])), int(item["y"]), int(item["x"])),
+                )[:4]
+            )
+        add(rows, "tool_marker_projection_left", projected, "project top markers onto nearest lower components")
+        add(rows, "tool_marker_projection_right", list(reversed(projected)), "project top markers onto nearest lower components in reverse")
+
+    for color in colors:
+        group = sorted(by_color[color], key=lambda item: (int(item["y"]), int(item["x"])))
+        if len(group) >= 2:
+            add(rows, f"tool_color_pair_{color}", [group[0], group[-1]], "test matching endpoints for a repeated color")
+
+    return rows
+
+
+def _react_navigation_tool_sequences(
+    frame: list[list[int]],
+    *,
+    max_actions: int,
+) -> list[tuple[str, list[list[int]], str]]:
+    """Generate compact movement tools from perceived player/goal geometry."""
+
+    player = _player_center(frame)
+    goal = _rare_goal_center(frame, player)
+    sequences: list[tuple[str, list[list[int]], str]] = []
+    if player is not None and goal is not None:
+        dx = goal[0] - player[0]
+        dy = goal[1] - player[1]
+        horizontal = [[4] if dx > 0 else [3] for _ in range(min(abs(dx), max_actions))]
+        vertical = [[2] if dy > 0 else [1] for _ in range(min(abs(dy), max_actions))]
+        sequences.append(("tool_nav_xy", (horizontal + vertical)[:max_actions], "move toward perceived goal on x then y"))
+        sequences.append(("tool_nav_yx", (vertical + horizontal)[:max_actions], "move toward perceived goal on y then x"))
+    for action in (1, 2, 3, 4):
+        for length in (1, 2, 3, 5, 8, 13, 21):
+            if length <= max_actions:
+                sequences.append((f"tool_nav_run_{action}_{length}", [[action] for _ in range(length)], "try a Fibonacci-length movement run"))
+    return sequences
 
 
 def _component_records(frame: list[list[int]]) -> list[dict[str, int]]:
@@ -1652,11 +3000,62 @@ def sourcefree_primitive_candidates(
         if first_level is not None:
             candidates.append(first_level)
             return candidates
+        click_only = _frontier_is_click_only(scratch)
+        if click_only:
+            archive = _run_primitive_safely(go_explore_archive_candidate, scratch)
+            if archive is not None:
+                candidates.append(archive)
+                return candidates
+            react_tool = _run_primitive_safely(react_world_tool_candidate, scratch)
+            if react_tool is not None:
+                candidates.append(react_tool)
+                return candidates
+            if include_expensive:
+                hidden_click = _run_primitive_safely(hidden_click_state_candidate, scratch)
+                if hidden_click is not None:
+                    candidates.append(hidden_click)
+                    return candidates
+            return candidates
+        discriminator = _run_primitive_safely(code_world_discriminator_candidate, scratch)
+        if discriminator is not None:
+            candidates.append(discriminator)
+            return candidates
+        react_tool = _run_primitive_safely(react_world_tool_candidate, scratch)
+        if react_tool is not None:
+            candidates.append(react_tool)
+            return candidates
+        if not click_only:
+            explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
+            if explore is not None:
+                candidates.append(explore)
+                return candidates
+            return candidates
         explore = _run_primitive_safely(sandbox_frontier_explore_candidate, scratch)
         if explore is not None:
             candidates.append(explore)
             return candidates
     return candidates
+
+
+def _frontier_is_click_only(scratch: Path) -> bool:
+    try:
+        sys.path.insert(0, str(scratch))
+        from arc3_sandbox import SandboxGame  # type: ignore
+
+        frontier = json.loads((scratch / "frontier.json").read_text())
+        prefix = action_list(frontier.get("actions", []))
+        game = SandboxGame(str(frontier["game"]))
+        try:
+            game.reset()
+            for action in prefix:
+                _act(game, action)
+                if bool(game.done):
+                    break
+            return set(int(a) for a in getattr(game, "avail", [])) == {6}
+        finally:
+            game.close()
+    except Exception:
+        return False
 
 
 def _run_primitive_safely(fn: Any, scratch: Path) -> dict[str, Any] | None:

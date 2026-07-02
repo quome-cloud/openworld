@@ -1,0 +1,46 @@
+{
+ "experiment": "E146",
+ "description": "Retrieve-discover-writeback controller: audited source-free memory first; source-free discovery fallback on miss; sandbox replay verification; local episodic memory writeback.",
+ "controller": "experiments/e146/retrieve_discover_controller.py",
+ "discovery_adapters": {
+  "codex_judge_schema": "scripts/run_e146_judge_schema_discovery.sh",
+  "claude_ewm_agent": "scripts/run_e146_agent_discovery.sh"
+ },
+ "provenance_policy": {
+  "global_archive_inputs": "E145 eligible traces only: source_free, untainted, audit-clean, replay-verified, positive-depth",
+  "local_writeback": "sandbox replay-verified immediately; recorded as e146_local_provisional until promoted through archive-grade finalize/audit tooling",
+  "global_archive_mutation": false
+ },
+ "validation": [
+  {
+   "name": "memory_only_tu93",
+   "game": "tu93",
+   "levels": 9,
+   "action_count": 185,
+   "stopped_reason": "completed_level_9",
+   "note": "Memory retrieval + chaining + replay verification end-to-end from the audited archive (re-run 2026-07-01)."
+  },
+  {
+   "name": "controlled_discovery_writeback_m0r0",
+   "game": "m0r0",
+   "levels": 5,
+   "action_count": 143,
+   "stopped_reason": "max_stages",
+   "note": "Plumbing test only: memory retrieval was disabled by threshold, a known source-free trace was supplied through the discovery-command interface, E146 replay-verified it and wrote it to local episodic memory."
+  },
+  {
+   "name": "agent_discovery_adapter_contract",
+   "note": "scripts/run_e146_agent_discovery.sh validated by stubbed contract tests (tests/e146/test_agent_discovery_adapter.py): env contract -> frontier replay -> TASK.md generation -> solved.json harvest."
+  }
+ ],
+ "negative_result": {
+  "claim": "Deterministic cold-start discovery primitives crack 0 new source-free levels.",
+  "evidence": "experiments/e146/sourcefree_primitives.py grew to 3,068 lines / 57 top-level callables / 13 candidate generators (lattice/center corridors, bounded-preserving and fresh-replay-survivor searches, temporal phase corridors, path detours, sandbox frontier exploration, first-level macro tournaments, code-world discriminators, go-explore archives, hidden-click-state probes, ReAct-style tool sequences, semiring macro search with Fibonacci/Zeckendorf priors). None produced a replay-verified level gain on any unsolved frontier.",
+  "interpretation": "Confirms E131/E132: the binding constraint is DISCOVERY. ARC-AGI-3 wins are goal-as-procedure (ordered protocols), not states reachable by blind macro/prior enumeration. The only solver to break the wall source-free is the live coding agent (16/25 opus arm), so E146's discovery fallback is now wired to it (claude_ewm_agent adapter); the primitive pile is frozen as this documented boundary.",
+  "status": "frozen -- kept as searchable prior art; cheap primitives may still serve as fast pre-checks before paying for an agent stage"
+ },
+ "tests": {
+  "command": "python -m pytest tests/e146/ tests/e145/test_sourcefree_controller.py tests/e144/test_full_run_controller.py tests/e143/test_transition_miner.py -q",
+  "result": "31 passed"
+ }
+}

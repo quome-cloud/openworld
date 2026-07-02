@@ -109,6 +109,29 @@ TASK
   "$(cat TASK.md)" > agent.log 2>&1 || true
 
 if [[ -f "$WD/solved.json" ]]; then
+  "$AGENT_PY" - "$WD/solved.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = json.loads(path.read_text())
+normalized = []
+for raw in payload.get("actions", []):
+    if isinstance(raw, int):
+        normalized.append([int(raw)])
+        continue
+    if isinstance(raw, (list, tuple)):
+        if len(raw) == 1:
+            normalized.append([int(raw[0])])
+            continue
+        if len(raw) == 3 and int(raw[0]) == 6:
+            normalized.append([6, int(raw[1]), int(raw[2])])
+            continue
+    raise SystemExit(f"malformed action in solved.json: {raw!r}")
+payload["actions"] = normalized
+path.write_text(json.dumps(payload, indent=2) + "\n")
+PY
   mkdir -p "$(dirname "$E146_SOLVED_OUT")"
   cp "$WD/solved.json" "$E146_SOLVED_OUT"
 fi

@@ -43,6 +43,46 @@ def utc_id() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
 
 
+def canonical_solution_actions(raw_actions: Sequence[Any]) -> list[list[int]]:
+    """Normalize solved.json actions at the verifier boundary.
+
+    Model-written candidates sometimes encode directional actions as bare ints.
+    That is unambiguous and safe to canonicalize to ``[a]``. Ambiguous or
+    malformed clicks are rejected loudly so replay accounting cannot silently
+    drift.
+    """
+
+    actions: list[list[int]] = []
+    for idx, raw in enumerate(raw_actions):
+        if isinstance(raw, bool):
+            raise ValueError(f"action {idx} is not a valid action: {raw!r}")
+        if isinstance(raw, int):
+            if raw in (1, 2, 3, 4, 5, 7):
+                actions.append([int(raw)])
+                continue
+            raise ValueError(f"action {idx} has invalid directional opcode: {raw!r}")
+        if not isinstance(raw, (list, tuple)):
+            raise ValueError(f"action {idx} is not a list/tuple/int: {raw!r}")
+        try:
+            item = [int(v) for v in raw]
+        except Exception as exc:
+            raise ValueError(f"action {idx} contains non-integer values: {raw!r}") from exc
+        if len(item) == 1:
+            if item[0] == 6:
+                raise ValueError(f"action {idx} is click opcode without coordinates: {raw!r}")
+            if item[0] in (1, 2, 3, 4, 5, 7):
+                actions.append(item)
+                continue
+            raise ValueError(f"action {idx} has invalid directional opcode: {raw!r}")
+        if len(item) == 3 and item[0] == 6:
+            if 0 <= item[1] <= 63 and 0 <= item[2] <= 63:
+                actions.append(item)
+                continue
+            raise ValueError(f"action {idx} click coordinates out of bounds: {raw!r}")
+        raise ValueError(f"action {idx} is malformed: {raw!r}")
+    return actions
+
+
 def replay_solution(scratch: Path, solved_path: Path) -> dict[str, Any]:
     """Replay a candidate solved.json through the scratch SandboxGame."""
 
@@ -51,7 +91,7 @@ def replay_solution(scratch: Path, solved_path: Path) -> dict[str, Any]:
 
     data = json.loads(solved_path.read_text())
     game_id = str(data["game"])
-    actions = action_list(data.get("actions", []))
+    actions = canonical_solution_actions(data.get("actions", []))
     game = SandboxGame(game_id)
     try:
         game.reset()

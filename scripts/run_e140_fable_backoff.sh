@@ -26,6 +26,7 @@ MIN_SESSION_S="${MIN_SESSION_S:-300}"          # a session shorter than this = r
 STALL_LIMIT="${STALL_LIMIT:-3}"                # give up a game after this many real attempts with no gain
 MAX_BACKOFF="${MAX_BACKOFF:-1800}"             # cap a single backoff at 30 min
 IDLE_LIMIT="${IDLE_LIMIT:-480}"                # a session that streams NO output for this long = hung (throttle/contention), not a real try
+HUNG_LIMIT="${HUNG_LIMIT:-4}"                # give up a game after this many consecutive hangs/short-deaths (throttle) and advance
 TRACES="$ROOT/experiments/results/arc3_traces"
 
 # recursively kill a process and all its descendants (subshell -> runner -> claude -> sandbox workers)
@@ -51,7 +52,7 @@ echo "[e140-fable] START $(date) model=$MODEL effort=$EFFORT prefix=$WD_PREFIX g
 echo "[e140-fable] initial cooldown ${INITIAL_COOLDOWN}s to clear the throttle..."; sleep "$INITIAL_COOLDOWN"
 
 for g in $GAMES; do
-  w=$(win "$g"); start_lvl=$(lvl "$g"); stall=0; backoff=300
+  w=$(win "$g"); start_lvl=$(lvl "$g"); stall=0; backoff=300; hung_streak=0
   echo "[e140-fable] === $g (start $start_lvl/$w) ==="
   while :; do
     w=$(win "$g")                                    # re-read each iteration (target is known once solved.json exists)
@@ -76,11 +77,14 @@ for g in $GAMES; do
     if [ "$w" -gt 0 ] && [ "$after" -ge "$w" ]; then     # just completed it -> stop retrying, go bank + advance
       echo "[e140-fable] $g gained $before->$after, FULL ($after/$w) -> done"; break; fi
     if [ "$hung" = 1 ] || [ "$dur" -lt "$MIN_SESSION_S" ]; then
-      echo "[e140-fable] $g not a real attempt (hung=$hung, ${dur}s) -> backoff ${backoff}s, retry (not counted)"
+      hung_streak=$(( hung_streak+1 ))
+      if [ "$hung_streak" -ge "$HUNG_LIMIT" ]; then
+        echo "[e140-fable] $g gave up after $HUNG_LIMIT non-productive sessions (hangs/short-deaths -- likely throttle) at $(lvl "$g")/$w -> bank + advance"; break; fi
+      echo "[e140-fable] $g not a real attempt (hung=$hung, ${dur}s, streak ${hung_streak}/${HUNG_LIMIT}) -> backoff ${backoff}s, retry (not counted)"
       sleep "$backoff"; backoff=$(( backoff*2 )); [ "$backoff" -gt "$MAX_BACKOFF" ] && backoff=$MAX_BACKOFF
       continue
     fi
-    backoff=300
+    hung_streak=0; backoff=300
     if [ "$after" -gt "$before" ]; then echo "[e140-fable] $g gained $before->$after (real attempt, ${dur}s)"; stall=0
     else stall=$(( stall+1 )); echo "[e140-fable] $g no gain (real attempt ${stall}/$STALL_LIMIT, ${dur}s)"; fi
     [ "$stall" -ge "$STALL_LIMIT" ] && { echo "[e140-fable] $g stalled at $(lvl "$g")/$w after $STALL_LIMIT real tries"; break; }

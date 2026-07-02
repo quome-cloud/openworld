@@ -1,0 +1,144 @@
+{
+  "description": "AutoMem memory-structure mechanism test: structure (P0 context -> P1 append -> P2 keyed dedup) lifts long-horizon recall with the task policy fixed; built + verified as introspectable OpenWorld Worlds.",
+  "paper": {
+    "title": "AutoMem: Automated Learning of Memory as a Cognitive Skill",
+    "arxiv": "2607.01224",
+    "claim_tested": "loop-1 (memory structure) only; loop-2 LoRA proficiency out of scope"
+  },
+  "config": {
+    "n_keys": 8,
+    "window_W": 8,
+    "budget_B": 8,
+    "seeds": 8,
+    "horizons_gap_scale": [
+      0.25,
+      0.5,
+      1.0,
+      2.0,
+      4.0,
+      8.0
+    ],
+    "dup_rates": [
+      0.0,
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ]
+  },
+  "horizon_sweep": {
+    "0.25": {
+      "p0_context": 1.0,
+      "p1_append": 1.0,
+      "p2_keyed": 1.0
+    },
+    "0.5": {
+      "p0_context": 1.0,
+      "p1_append": 1.0,
+      "p2_keyed": 1.0
+    },
+    "1.0": {
+      "p0_context": 0.0,
+      "p1_append": 1.0,
+      "p2_keyed": 1.0
+    },
+    "2.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.8281,
+      "p2_keyed": 1.0
+    },
+    "4.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.3125,
+      "p2_keyed": 1.0
+    },
+    "8.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.125,
+      "p2_keyed": 1.0
+    }
+  },
+  "dup_sweep": {
+    "0.0": {
+      "p0_context": 0.0,
+      "p1_append": 1.0,
+      "p2_keyed": 1.0
+    },
+    "0.5": {
+      "p0_context": 0.0,
+      "p1_append": 0.3125,
+      "p2_keyed": 1.0
+    },
+    "1.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.125,
+      "p2_keyed": 1.0
+    },
+    "2.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.125,
+      "p2_keyed": 1.0
+    },
+    "4.0": {
+      "p0_context": 0.0,
+      "p1_append": 0.125,
+      "p2_keyed": 1.0
+    }
+  },
+  "paper_regime": {
+    "gap_scale": 4.0,
+    "dup_rate": 1.0,
+    "progression": {
+      "p0_context": 0.0,
+      "p1_append": 0.125,
+      "p2_keyed": 1.0
+    },
+    "structure_gain_p2_over_p1": 8.0,
+    "memory_vs_none_p2_over_p0": null
+  },
+  "structure_gain_by_dup": {
+    "0.0": 1.0,
+    "0.5": 3.2,
+    "1.0": 8.0,
+    "2.0": 8.0,
+    "4.0": 8.0
+  },
+  "structure_gain_in_2to4x_band_at_dup": [
+    0.5
+  ],
+  "openworld_introspection": {
+    "p0_context": {
+      "spec_valid": true,
+      "roundtrip_exact": true,
+      "world_equals_sim": true,
+      "progression": 0.0,
+      "graph_nodes": 6,
+      "graph_edges": 5
+    },
+    "p1_append": {
+      "spec_valid": true,
+      "roundtrip_exact": true,
+      "world_equals_sim": true,
+      "progression": 0.125,
+      "graph_nodes": 6,
+      "graph_edges": 5
+    },
+    "p2_keyed": {
+      "spec_valid": true,
+      "roundtrip_exact": true,
+      "world_equals_sim": true,
+      "progression": 1.0,
+      "graph_nodes": 6,
+      "graph_edges": 5
+    }
+  },
+  "card_svg_written": true,
+  "experiment": "e147_automem_memory_structure",
+  "timestamp": "2026-07-02T14:04:52",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.6",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

@@ -82,6 +82,41 @@ Predicts which tools are load-bearing for the win rate. Not a lift itself, but a
 
 Cost: 1 day. Runs on the same 25 games.
 
+### Proposal L7 — Decouple reasoning effort from wall-clock (the confound nobody has isolated)
+
+Every headline lift in E140 moved BOTH knobs at once: capped runs were `default effort + 45 min`,
+uncapped runs are `max/xhigh effort + 4 hr`. So the opus 11→16 lift is time + effort entangled —
+the paper currently cannot say whether smarter-per-token or more-tokens is the driver, and
+"reasoning effort matters" is exactly the kind of claim a reviewer will ask to see isolated.
+Note also that no model has ever been run at more than one effort level within E140 (opus @ max,
+fable @ max, codex @ xhigh) — the arms are effort-matched for model comparison, but there is
+zero within-model effort variation anywhere in the results.
+
+Design: 2×2 on opus — effort ∈ {default, max} × wall-clock ∈ {45 min, 4 hr}. Two cells already
+exist (default/45min = 11, max/4hr = 16). The two missing cells:
+
+1. **`default effort + 4 hr`** — the cheap decisive cell. Run on the ~5 games opus gained in the
+   lift first; extend to 25 only if the answer is ambiguous.
+2. **`max effort + 45 min`** — the interaction cell. Max effort burns wall-clock on thinking, so
+   under a tight cap high effort may actually HURT. If it does, that's a novel, publishable
+   interaction effect ("reasoning effort has a budget-dependent sign") and directly informs the
+   cascade's routing policy (route by budget, not just by game).
+
+Same 2×2 on fable (once its archive stabilises) answers a different question: if fable@default
+degrades LESS than opus@default, fable's edge is architectural rather than effort-driven — which
+matters for the cost story, since default-effort tokens are the cheap ones. E148 already hints
+at the mechanism: the success-correlated strategies (simulate +0.25, goal_infer +0.19) are the
+token-expensive deliberative ones, while probe (−0.20) is cheap-and-reactive. So "more effort"
+plausibly works *because* it shifts the strategy mix toward simulation. Run the E148 lexicon
+over the new transcripts to test that mechanistically, not just at the scoreboard.
+
+Predicted outcomes (committed before the runs):
+- **P4.** `default + 4hr` lands 13–14: both knobs contribute, effort worth ~2–3 games.
+- **P5.** `max + 45min` lands ≤11: under a tight cap, effort does not help and may hurt.
+
+Cost: cell 1 ≈ 5 games × 4 hr; cell 2 ≈ 25 games × 45 min ≈ 19 hr. Both fit one weekend on one
+agent slot, reusing `run_e140_backoff.sh` with two env overrides.
+
 ## Consolidated recommendation
 
 For the paper's next revision:
@@ -102,5 +137,8 @@ Sonnet is Anthropic's mid-tier reasoning model — cheaper than Opus, better tha
 - **P1.** Sonnet + E140 will land between Codex-xhigh (7) and Opus-max (16), probably 11–13.
 - **P2.** Fable will add at least 1 unique win vs Opus (otherwise the paper's 3-arm framing is a distraction).
 - **P3.** Cross-arm CEGIS will crack ≥1 of the 6 shared walls (lf52 is the likeliest candidate — its long chain suggests procedure-not-state, so disagreement should localise the missing predicate).
+
+- **P4.** Opus `default effort + 4hr` lands 13–14 full games (both budget knobs contribute; effort worth ~2–3 games on its own).
+- **P5.** Opus `max effort + 45min` lands ≤11 (under a tight cap, extra reasoning effort does not help and may hurt — see L7).
 
 If any of these are wrong, the paper's story tightens (or shifts) around the actual result. Either way it's cheap to run.

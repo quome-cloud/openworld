@@ -1,0 +1,212 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "arc3-regimes-sk48",
+  "description": "Self-rebuilding world model of ARC-AGI-3 sk48: openworld.PhasedTransition over 2 SURPRISE-detected regimes (rule changes at steps [0, 13]); dynamics advance irreversibly as the rules change.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "Self-rebuilding world model of ARC-AGI-3 sk48: openworld.PhasedTransition over 2 SURPRISE-detected regimes (rule changes at steps [0, 13]); dynamics advance irreversibly as the rules change."
+  },
+  "state_schema": {
+    "sig": "str"
+  },
+  "initial_state": {
+    "sig": "q0"
+  },
+  "actions": [
+    "s1",
+    "s2",
+    "s3",
+    "s4"
+  ],
+  "rules": [],
+  "transition": {
+    "kind": "phased",
+    "record_key": "_phase",
+    "phases": [
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 0
+      },
+      {
+        "transition": {
+          "kind": "code",
+          "func_name": "fn",
+          "code": "def fn(state, action):\n    nm = action.get(\"name\") if isinstance(action, dict) else getattr(action, \"name\", action)\n    return {\"sig\": tbl.get(state.get(\"sig\"), {}).get(nm, state.get(\"sig\"))}\n",
+          "from_function": true
+        },
+        "trigger": 13
+      }
+    ]
+  },
+  "preview": {
+    "steps": 18,
+    "action": "s1",
+    "series": {
+      "_phase": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "_phase_steps": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0,
+        13.0,
+        14.0,
+        15.0,
+        16.0,
+        17.0,
+        18.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "s0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "_phase 0",
+            "_phase_steps 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "_phase 0",
+            "_phase_steps 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "s1"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "s2"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "s3"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "s4"
+        },
+        {
+          "src": 1,
+          "dst": 3,
+          "action": "s1"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "s2"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "s3"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "s4"
+        },
+        {
+          "src": 2,
+          "dst": 4,
+          "action": "s1"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "s2"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "s3"
+        },
+        {
+          "src": 2,
+          "dst": 5,
+          "action": "s4"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

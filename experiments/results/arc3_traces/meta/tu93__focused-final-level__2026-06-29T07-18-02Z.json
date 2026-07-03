@@ -1,0 +1,134 @@
+{
+ "run_id": "tu93__focused-final-level__2026-06-29T07-18-02Z",
+ "game": "tu93",
+ "tier": "focused-final-level",
+ "method": "focused-final-level",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_final_level.sh",
+ "started_at": "2026-06-29T07:18:02Z",
+ "ended_at": "2026-06-29T07:42:32Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": 9,
+  "win": 9,
+  "full": true,
+  "wrote_solution": true
+ },
+ "action_stats": {
+  "n_actions": 185,
+  "n_click": 0,
+  "n_directional": 185
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.195",
+  "session_id": "9c09889b-3a9d-4467-9c2b-c4c62a36f44b",
+  "num_turns": 61,
+  "n_messages": 620,
+  "n_tool_calls": 60,
+  "cost_usd": 4.8537004999999995,
+  "usage": {
+   "input_tokens": 10812,
+   "cache_creation_input_tokens": 98714,
+   "cache_read_input_tokens": 4775851,
+   "output_tokens": 56983,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 98714,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 704,
+     "cache_read_input_tokens": 111847,
+     "cache_creation_input_tokens": 1024,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 1024
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "is_error": false,
+  "result_text": "The final level of **tu93 is solved \u2014 9/9, source-free, verified.**\n\n## What I did\n\n1. **Replayed `frontier.json`** to the level-8 start (156 actions) and perceived the maze via the object perceptor: a 6px-cell maze with player (color 9) at cell (5,5), goal (14) at (6,5), two static **lunger** guards (8) at (6,4)/(7,4), a chasing **charger** (13), and oscillating **bouncers** (12).\n\n2. **Diagnosed a subtle trap** that made naive search fail: the env carries a **hidden tick counter = f(total steps)** that `reset()` doesn't clear. Only the *first* PRE-replay in a *fresh process* is faithful \u2014 and **batched stepping is cadence-unfaithful**, so I used individual `g.step` only. I confirmed this empirically (identical visible positions, different death outcomes after a reset).\n\n3. **Structured a sound search around it:** since the L8 start is byte-identical in every fresh process, forward play from it is deterministic. So each candidate path is evaluated in its own fresh `SandboxGame` (replay `PRE+path` forward, never reset mid-search), with state keyed by `(depth, positions)` \u2014 Markov because tick = f(depth).\n\n4. **Ran a complete BFS** over survivor states (frontier stayed 1\u20136 wide). The player is forced up into the top corridor, re-phases the bouncer, descends, **crushes both lungers** (depth 26\u219227), then enters the goal \u2014 **WIN at depth 29**.\n\n5. **Verified** `solved.json` (185 actions) end-to-end **3/3 times** in independent fresh processes: `levels=9, win_total=9, done=True` at action 184.\n\nThe harness helpers (`bfs.py`, `verify.py`) and the verified `solved.json` are in `scratch_arc/fl_tu93/`. The 29 final-level moves: `[3,3,1,1,4,2,2,3,1,1,4,1,1,4,4,4,2,2,4,2,3,2,3,2,2,3,3,1,4]`.",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_thinking_blocks": 41,
+  "tool_calls_by_name": {
+   "Bash": 46,
+   "Read": 6,
+   "Edit": 8
+  },
+  "n_user_msgs": 60,
+  "n_text_blocks": 39,
+  "api_error_status": null,
+  "duration_ms": 1440872,
+  "duration_api_ms": 901785,
+  "ttft_ms": 4473,
+  "tokens": {
+   "input": 10812,
+   "output": 56983,
+   "cache_creation": 98714,
+   "cache_read": 4775851,
+   "total": 4942360,
+   "source": "result_block"
+  },
+  "cost_basis": "result_block"
+ },
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.195",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 2146,
+  "lines": 29,
+  "sha256": "7e92b8366933aaa817b6babd35d3b5df46cfdb3a30d4125ad0dc87975182ef04",
+  "approx_tokens": 536
+ },
+ "prompt_file": "prompts/tu93__focused-final-level__2026-06-29T07-18-02Z.md",
+ "solution_file": "solutions/tu93__focused-final-level__2026-06-29T07-18-02Z.json",
+ "transcript_file": "transcripts/tu93__focused-final-level__2026-06-29T07-18-02Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "97121b595d35f1ba5b999e26afad8023ab832da0",
+   "branch": "arc-ongoing-updates",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_final_level.sh": {
+    "sha256": "3ece3f5d64461253e13bb2be2afc5563e5203dedc17c4016f7c4c4b938d74b2d",
+    "bytes": 5143,
+    "mtime": "2026-06-29T08:24:00Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-29T08:24:15Z"
+}

@@ -1,0 +1,101 @@
+{
+  "arms": [
+    "search",
+    "random-macro",
+    "macro"
+  ],
+  "games": [
+    "tr87",
+    "re86"
+  ],
+  "by_game_arm": {
+    "tr87": {
+      "search": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 1
+      },
+      "random-macro": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 5
+      },
+      "macro": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 5
+      }
+    },
+    "re86": {
+      "search": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 1
+      },
+      "random-macro": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 5
+      },
+      "macro": {
+        "levels_mean": 0.0,
+        "levels_var": 0.0,
+        "k_solved": 0,
+        "m": 5
+      }
+    }
+  },
+  "provenance": {
+    "model": "qwen2.5-coder:7b",
+    "options": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "repeat_penalty": 1.05,
+      "num_predict": 1024
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "budget": {
+      "max_nodes": 6000,
+      "max_depth": 60
+    },
+    "digest": null,
+    "versions": {
+      "python": "3.13.5",
+      "numpy": "2.5.0",
+      "arc_agi": "0.9.9",
+      "arcengine": "0.9.3"
+    }
+  },
+  "summary": {
+    "tr87": {
+      "search": 0,
+      "random-macro": 0,
+      "macro": 0
+    },
+    "re86": {
+      "search": 0,
+      "random-macro": 0,
+      "macro": 0
+    }
+  },
+  "experiment": "e119_macro_sweep",
+  "timestamp": "2026-06-28T23:15:27",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.13.5",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

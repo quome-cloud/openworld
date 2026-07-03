@@ -1,0 +1,660 @@
+{
+  "experiment": "e123_online_resynth",
+  "method": "per-regime replay-to-boundary + fresh model -> PhasedTransition; round-trip verified",
+  "games": {
+    "ar25": {
+      "game": "ar25",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        14,
+        25,
+        65,
+        87,
+        115,
+        168,
+        205,
+        252
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        14,
+        11,
+        40,
+        22,
+        28,
+        53,
+        37,
+        47,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/ar25_resynth.svg"
+    },
+    "bp35": {
+      "game": "bp35",
+      "n_regimes": 29,
+      "boundaries": [
+        0,
+        9,
+        14,
+        18,
+        28,
+        36,
+        49,
+        54,
+        59,
+        67,
+        75,
+        83,
+        88,
+        101,
+        107,
+        112,
+        124,
+        133,
+        138,
+        145,
+        157,
+        165,
+        175,
+        181,
+        187,
+        196,
+        205,
+        213,
+        224
+      ],
+      "replay_to_boundary_landed": "29/29",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        9,
+        5,
+        4,
+        10,
+        8,
+        13,
+        5,
+        5,
+        8,
+        8,
+        8,
+        5,
+        13,
+        6,
+        5,
+        12,
+        9,
+        5,
+        7,
+        12,
+        8,
+        10,
+        6,
+        6,
+        9,
+        9,
+        8,
+        11,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/bp35_resynth.svg"
+    },
+    "cd82": {
+      "game": "cd82",
+      "n_regimes": 7,
+      "boundaries": [
+        0,
+        13,
+        20,
+        36,
+        58,
+        74,
+        94
+      ],
+      "replay_to_boundary_landed": "7/7",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        13,
+        7,
+        16,
+        22,
+        16,
+        19,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/cd82_resynth.svg"
+    },
+    "cn04": {
+      "game": "cn04",
+      "n_regimes": 7,
+      "boundaries": [
+        0,
+        13,
+        46,
+        71,
+        107,
+        161,
+        205
+      ],
+      "replay_to_boundary_landed": "7/7",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        13,
+        33,
+        25,
+        36,
+        54,
+        44,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/cn04_resynth.svg"
+    },
+    "dc22": {
+      "game": "dc22",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        19,
+        32,
+        54,
+        66,
+        77,
+        86,
+        111,
+        173
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        19,
+        13,
+        21,
+        12,
+        11,
+        9,
+        25,
+        62,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/dc22_resynth.svg"
+    },
+    "ft09": {
+      "game": "ft09",
+      "n_regimes": 6,
+      "boundaries": [
+        0,
+        10,
+        24,
+        45,
+        66,
+        79
+      ],
+      "replay_to_boundary_landed": "6/6",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        10,
+        14,
+        21,
+        21,
+        13,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/ft09_resynth.svg"
+    },
+    "g50t": {
+      "game": "g50t",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        16,
+        47
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        16,
+        31,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/g50t_resynth.svg"
+    },
+    "ka59": {
+      "game": "ka59",
+      "n_regimes": 8,
+      "boundaries": [
+        0,
+        10,
+        66,
+        103,
+        157,
+        177,
+        225,
+        312
+      ],
+      "replay_to_boundary_landed": "8/8",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        10,
+        56,
+        37,
+        54,
+        20,
+        48,
+        87,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/ka59_resynth.svg"
+    },
+    "lf52": {
+      "game": "lf52",
+      "n_regimes": 16,
+      "boundaries": [
+        0,
+        7,
+        41,
+        52,
+        75,
+        87,
+        95,
+        112,
+        137,
+        159,
+        167,
+        226,
+        246,
+        269,
+        288,
+        317
+      ],
+      "replay_to_boundary_landed": "16/16",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        7,
+        34,
+        11,
+        23,
+        12,
+        8,
+        17,
+        25,
+        22,
+        8,
+        59,
+        20,
+        23,
+        19,
+        29,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/lf52_resynth.svg"
+    },
+    "lp85": {
+      "game": "lp85",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        4,
+        12,
+        28,
+        40,
+        49,
+        68,
+        73,
+        78
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        4,
+        8,
+        16,
+        12,
+        9,
+        19,
+        5,
+        5,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/lp85_resynth.svg"
+    },
+    "ls20": {
+      "game": "ls20",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        14,
+        61
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        14,
+        47,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/ls20_resynth.svg"
+    },
+    "m0r0": {
+      "game": "m0r0",
+      "n_regimes": 6,
+      "boundaries": [
+        0,
+        14,
+        37,
+        92,
+        103,
+        142
+      ],
+      "replay_to_boundary_landed": "6/6",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        14,
+        23,
+        55,
+        11,
+        39,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/m0r0_resynth.svg"
+    },
+    "r11l": {
+      "game": "r11l",
+      "n_regimes": 1,
+      "boundaries": [
+        0
+      ],
+      "replay_to_boundary_landed": "1/1",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        4
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/r11l_resynth.svg"
+    },
+    "re86": {
+      "game": "re86",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        19,
+        57,
+        106,
+        148,
+        211,
+        258,
+        409,
+        601
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        19,
+        38,
+        49,
+        42,
+        63,
+        47,
+        151,
+        192,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/re86_resynth.svg"
+    },
+    "s5i5": {
+      "game": "s5i5",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        12,
+        38
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        12,
+        26,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/s5i5_resynth.svg"
+    },
+    "sb26": {
+      "game": "sb26",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        8,
+        23,
+        38,
+        53,
+        70,
+        89,
+        106,
+        123
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        8,
+        15,
+        15,
+        15,
+        17,
+        19,
+        17,
+        17,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/sb26_resynth.svg"
+    },
+    "sc25": {
+      "game": "sc25",
+      "n_regimes": 5,
+      "boundaries": [
+        0,
+        16,
+        21,
+        32,
+        67
+      ],
+      "replay_to_boundary_landed": "5/5",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        15,
+        5,
+        11,
+        35,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/sc25_resynth.svg"
+    },
+    "sk48": {
+      "game": "sk48",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        8,
+        13
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        8,
+        5,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/sk48_resynth.svg"
+    },
+    "sp80": {
+      "game": "sp80",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        19,
+        30
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        19,
+        11,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/sp80_resynth.svg"
+    },
+    "su15": {
+      "game": "su15",
+      "n_regimes": 2,
+      "boundaries": [
+        0,
+        6
+      ],
+      "replay_to_boundary_landed": "2/2",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        6,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/su15_resynth.svg"
+    },
+    "tn36": {
+      "game": "tn36",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        6,
+        16
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        6,
+        10,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/tn36_resynth.svg"
+    },
+    "tr87": {
+      "game": "tr87",
+      "n_regimes": 7,
+      "boundaries": [
+        0,
+        27,
+        57,
+        96,
+        125,
+        153,
+        210
+      ],
+      "replay_to_boundary_landed": "7/7",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        27,
+        30,
+        39,
+        29,
+        28,
+        57,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/tr87_resynth.svg"
+    },
+    "tu93": {
+      "game": "tu93",
+      "n_regimes": 9,
+      "boundaries": [
+        0,
+        17,
+        27,
+        46,
+        63,
+        92,
+        120,
+        134,
+        155
+      ],
+      "replay_to_boundary_landed": "9/9",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        17,
+        10,
+        19,
+        17,
+        29,
+        28,
+        14,
+        21,
+        26
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/tu93_resynth.svg"
+    },
+    "vc33": {
+      "game": "vc33",
+      "n_regimes": 3,
+      "boundaries": [
+        0,
+        9,
+        32
+      ],
+      "replay_to_boundary_landed": "3/3",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        9,
+        23,
+        1
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/vc33_resynth.svg"
+    },
+    "wa30": {
+      "game": "wa30",
+      "n_regimes": 8,
+      "boundaries": [
+        0,
+        26,
+        83,
+        163,
+        243,
+        367,
+        417,
+        472
+      ],
+      "replay_to_boundary_landed": "8/8",
+      "roundtrip_fidelity": 1.0,
+      "regime_states": [
+        26,
+        57,
+        80,
+        80,
+        124,
+        50,
+        55,
+        18
+      ],
+      "recall_vs_levelups": 1.0,
+      "card_svg": "maps/wa30_resynth.svg"
+    }
+  }
+}

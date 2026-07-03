@@ -7,8 +7,8 @@
 #   caffeinate -i nohup bash scripts/overnight_arc.sh > scratch_arc/overnight.log 2>&1 &
 set -uo pipefail
 ROOT=/Users/jim/Desktop/openworld
-VENV=/private/tmp/claude-501/-Users-jim-Desktop-openworld/71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python
-PY=/Users/jim/.pyenv/versions/3.9.18/bin/python
+VENV=/Users/jim/.arcv/bin/python
+PY=/Users/jim/.pyenv/versions/3.14.6/bin/python
 GAMES="dc22 bp35 lf52"            # dc22 first: it is closest to full (5/6)
 HOURS="${1:-9}"
 DEADLINE=$(( $(date +%s) + HOURS*3600 ))

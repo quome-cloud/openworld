@@ -4,8 +4,9 @@
 
 # OpenWorld
 
-**Build, optimize, and deploy *verified symbolic world models* — simulated environments whose dynamics are explicit, auditable Python code instead of opaque neural weights.**
+**The *PyTorch for code world models*: describe a world, let an LLM write and _verify_ its dynamics as plain Python, and deploy it in one line — no training, no GPU, no dataset.**
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quome-cloud/openworld/blob/main/notebooks/quickstart.ipynb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-1d4ed8.svg)](LICENSE)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-1d4ed8.svg)](https://www.python.org/)
 [![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
@@ -13,6 +14,15 @@
 [![Experiments: 62](https://img.shields.io/badge/experiments-62-b45309.svg)](#-empirical-baselines)
 [![GitHub stars](https://img.shields.io/github/stars/quome-cloud/openworld?style=social)](https://github.com/quome-cloud/openworld/stargazers)
 [![Cite](https://img.shields.io/badge/cite-this%20work-purple.svg)](#-citation)
+
+<br/>
+
+<a href="#arc3"><img src="assets/arc3/su15.gif" width="230" alt="OpenWorld solving ARC-AGI-3 game su15 source-free — 9 of 9 levels"/></a>
+
+**Source-free, it beats the prior SOTA on ARC-AGI-3 → [16/25 games · 158/183 levels · ~54% more action-efficient](#arc3).**
+Every solve is a *verified, serveable* world model the agent built by acting — the map **is** the model.
+
+**⭐ [Star the repo](https://github.com/quome-cloud/openworld) if this is useful · 📄 [Cite the work](#-citation)**
 
 </div>
 
@@ -22,33 +32,72 @@
 > needs **0 training data**. Then `openworld serve` turns any spec into a FastAPI
 > inference server with a live, animated React Flow view.
 
+> **Who's it for?** Agent & RL researchers who need an *auditable* simulator instead of a
+> black box · LLM builders who want a world model as a *verifier / planner* · anyone tired
+> of learned dynamics that hallucinate and compound error.
+
+**Prototype a world model in minutes, not months.** The same `World` object you sketch in a
+notebook serializes to a portable spec, renders to a model card, composes into bigger
+worlds, and deploys as an inference server — one zero-dependency core, no training loop.
+
 ---
 
 ## ⚡ The 30-second mental model
 
-```
-        BUILD                       OPTIMIZE                       DEPLOY
-  ┌────────────────┐          ┌─────────────────┐         ┌─────────────────────┐
-  │ describe it;   │          │ tune dials &    │         │ FastAPI server +    │
-  │ Claude Code    │  ─spec─▶ │ dynamics vs a   │ ─spec─▶  │ live React Flow     │
-  │ writes+verifies│          │ goal (Study /   │         │ /step /predict      │
-  │ the dynamics   │          │ sweep / dials)  │         │ /run /observe  + WS │
-  └────────────────┘          └─────────────────┘         └─────────────────────┘
-            │                                                        │
-            ▼    one portable JSON spec  ·  one self-contained SVG card    ▼
-
-   perceive ──▶  W O R L D  (verified symbolic state + code dynamics)  ──▶ emit
-   (text in)        ▲ compose: worlds-within-worlds, bridges, roll-ups       (report out)
-```
+<div align="center">
+<img src="assets/pipeline.png" alt="BUILD → OPTIMIZE → DEPLOY. BUILD: describe it in plain terms; Claude Code writes and verifies the code dynamics (0 training data). OPTIMIZE: tune dials and dynamics against a goal (Study, sweep, dials). DEPLOY: FastAPI server plus live React Flow — /step /predict /run /observe, WS /live (stateless forward pass). Between them: one portable JSON spec, one self-contained SVG card. The boundary: perceive (text in) → WORLD (verified symbolic state plus code dynamics; compose worlds-within-worlds, bridges, roll-ups) → emit (report out)." width="920"/>
+</div>
 
 Every world serializes to a **lossless JSON spec** and renders to a **stunning,
 self-contained SVG model card** (a HuggingFace-style card — but the artifact is a
 *runnable world*). Composition is closed: worlds nest into worlds, coupled by
 *bridges* and rolled up by *aggregators*.
 
+<div align="center">
+<img src="assets/sample-card.png" width="620" alt="A generated OpenWorld model card for the 'sprint' world: a header with tags and version, a BFS state-transition graph, the inferred state schema, the declared actions, the verified code dynamics, a sample rollout chart, metrics (round-trip exact, reachable states, spec size), and the natural-language rule contract."/>
+<br/><sub>A generated <b>model card</b> — one self-contained SVG per world: state graph · schema · verified dynamics · rollout · metrics · declared rules. Just <code>render_card(world)</code>.</sub>
+</div>
+
+---
+
+<a id="arc3"></a>
+
+## 🎮 Watch it solve ARC-AGI-3 — *source-free, beats prior SOTA*
+
+Each loop is a **verified, source-free solution** to an ARC-AGI-3 game: the agent discovered
+the rules *by acting* (no game code), built and verified its own `predict(frame, action)` world
+model, reasoned the win condition, and replayed the winning move sequence. **Every solve
+round-trips to a serveable OpenWorld `World`** — the map *is* the model.
+
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src="assets/arc3/su15.gif" width="150" alt="su15"/><br/><sub><b>su15</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/g50t.gif" width="150" alt="g50t"/><br/><sub><b>g50t</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/dc22.gif" width="150" alt="dc22"/><br/><sub><b>dc22</b> · 6/6</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/arc3/ka59.gif" width="150" alt="ka59"/><br/><sub><b>ka59</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/s5i5.gif" width="150" alt="s5i5"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/lp85.gif" width="150" alt="lp85"/><br/><sub><b>lp85</b> · 8/8</sub></td>
+</tr>
+</table>
+</div>
+
+> **Source-free result (audited, replay-verified): 16/25 games · 158/183 levels · ~54% more
+> action-efficient than the prior SOTA** — beating baseline1 (15/25, 145 levels, 58.12% RHAE) on
+> games, levels, and, decisively, efficiency. Frames render in the official ARC-AGI palette; the
+> label shows the level reached. Full write-up in [`papers/arc-3/`](papers/arc-3/) (animated
+> appendix of all 25 games).
+
 ---
 
 ## 🧠 Why OpenWorld
+
+<div align="center">
+<img src="assets/why-verified.png" width="820" alt="Two result panels from the OpenWorld prototyping paper. Left: verified code stays exact (accuracy 1.0) at every rollout depth, while an LLM next-state proxy's exact-match rate collapses as depth grows. Right: adding world-time compute — traversing your own verified worlds — lifts held-out accuracy on unseen worlds across model sizes, +29 points at 0.5B, approaching an oracle handed the true rules."/>
+<br/><sub><b>Why code, not weights:</b> verified dynamics are <b>exact at every depth</b> (no compounding error), and <b>world-time compute</b> lifts generalization on unseen worlds — biggest lift where models are smallest.</sub>
+</div>
 
 - **Training-free & deterministic.** Dynamics are *synthesized, verified code*, not
   learned latents — no datasets, no GPUs, bit-exact rollouts, **zero compounding
@@ -76,6 +125,11 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 ## 🧭 Three ways to use a world model — pick your path
 
 A verified world model is a reusable artifact, and it is useful **whether or not you ever fine-tune**. There are **three routes to spend it**, plus a hybrid that combines them.
+
+<div align="center">
+<img src="assets/three-routes.png" width="900" alt="One verified world is a reusable artifact you can spend three ways. Route 1, Use it as a tool (no training): serve and call it — exact, tool at inference, works on any world. Route 2, Distill one world (test-time training): QLoRA-tune its skill into weights — approximate, no tool at inference, within the world. Route 3, Train across many (world-time compute): traverse a family of worlds and generalize to held-out worlds — approximate, no tool at inference, generalizes across the family. Hybrid: the tool makes exact data, training amortizes it, and the tool stays the exact oracle for high-stakes queries."/>
+</div>
+
 
 **Route 1 — Use it as a tool (no training).** Serve the world and call it: plan through it, query exact next-states, or use it as a verifier. Exact, auditable, zero training.
 ```bash
@@ -105,6 +159,11 @@ openworld serve specs/*.json --allow-code --open
 
 Verified-code dynamics vs. learned / LLM dynamics on the framework's own benchmark
 suite (numbers from the bundled, reproducible experiments — see [`experiments/`](experiments/)).
+
+<div align="center">
+<img src="assets/baselines.png" width="900" alt="Two panels from experiment E36. Left: exact accuracy on unseen part-combinations at K=5 — OpenWorld verified code scores 1.00 with zero training samples, while all nine monolithic learned families, trained on thousands of samples, collapse; the strongest (hist gradient boosting) reaches only 0.20 and the rest sit near chance. Right: swept over task size K from 2 to 5, verified code holds flat at 1.00 while the best learned model erodes from 0.48 to 0.20 and the monolithic MLP stays near zero."/>
+<br/><sub>Generated from <code>experiments/results/e36_representations.json</code> by <code>scripts/make_readme_baselines_fig.py</code>. <b>Structure, not scale:</b> verified symbolic composition needs only per-part marginals; monolithic learners need the full joint and never see it.</sub>
+</div>
 
 | Approach | Rollout exact-match | Generalization to novel combos | Training data | Determinism |
 |---|:--:|:--:|:--:|:--:|
@@ -339,7 +398,7 @@ adversarial code).
 
 ---
 
-## 🧭 Design principles
+## 📐 Design principles
 
 - **The core is zero-dependency.** `import openworld` and everything it pulls in uses
   only the standard library. The CLI/server are the one batteries-included layer.

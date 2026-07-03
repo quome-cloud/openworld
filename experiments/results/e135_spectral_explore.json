@@ -1,0 +1,12 @@
+{
+  "experiment": "e135_spectral_explore",
+  "title": "Graph/spectral exploration does not beat a blind walk (negative)",
+  "game": "g50t", "seed_level": 5, "budget_steps": 220,
+  "policies": {
+    "blind":          {"states": 104, "edges": 130, "max_level": 5, "level_gains": 0},
+    "graph_novelty":  {"states": 98,  "edges": 130, "max_level": 5, "level_gains": 0},
+    "graph_spectral": {"states": 98,  "edges": 130, "max_level": 5, "level_gains": 0}
+  },
+  "finding": "Graph-aware frontier prioritization and Fiedler (graph-Laplacian) bottleneck ranking gave NO lift over a blind forward walk: slightly fewer states and identical zero level-gains. Consistent with ARC-AGI-3 being engineered against blind exploration (state-space explosion on later levels + an action-efficiency score against a median human baseline). The lever is active hypothesis testing + predictive world modeling + test-time planning, not smarter exploration.",
+  "caveats": "Single representative run; the env is not fully deterministic. The change-mask probe found 0 high-change cells on g50t, so its counter is not a per-cell flip."
+}

@@ -117,8 +117,8 @@ def ci_str(ci):
 def fig_hero(e01, scaling):
     """The paper in one figure: A = verified code is exact (no compounding error, the
     foundation); B = what that exactness unlocks -- world-time compute lifts an LLM's
-    generalization to held-out worlds (the payoff). Panel B is a compact teaser of
-    fig:world-time (E74); the full per-size detail lives in that figure."""
+    generalization to held-out worlds (the payoff), with the full E74 per-size detail
+    (bootstrap CIs, prior-only floor, per-size gains) folded in here."""
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
 
     ax = axes[0]
@@ -141,28 +141,37 @@ def fig_hero(e01, scaling):
     base = [s["base"] for s in sizes]
     ft = [s["ft"] for s in sizes]
     names = [s["name"] for s in sizes]
-    oracle = scaling["offline_oracle"]
+    oracle, floor = scaling["offline_oracle"], scaling["offline_floor"]
+
+    def _yerr(key):  # asymmetric 95% bootstrap CI half-widths
+        lo = [s[key][0] for s in sizes]
+        hi = [s[key][1] for s in sizes]
+        vals = base if key == "base_ci" else ft
+        return [[v - l for v, l in zip(vals, lo)], [h - v for v, h in zip(vals, hi)]]
+
     ax.set_xscale("log")
     ax.fill_between(xb, base, ft, color=ORANGE, alpha=0.13, zorder=1)
-    ax.plot(xb, base, "o-", color=SLATE, lw=1.8, markersize=3.5, zorder=3,
-            label="base LLM (zero-shot)")
-    ax.plot(xb, ft, "s-", color=ORANGE, lw=2.1, markersize=3.5, zorder=3,
-            label="+ world-time compute")
+    ax.errorbar(xb, base, yerr=_yerr("base_ci"), fmt="o-", color=SLATE, lw=1.8, markersize=3.5,
+                capsize=2.5, elinewidth=0.9, zorder=3, label="base LLM (zero-shot)")
+    ax.errorbar(xb, ft, yerr=_yerr("ft_ci"), fmt="s-", color=ORANGE, lw=2.1, markersize=3.5,
+                capsize=2.5, elinewidth=0.9, zorder=3, label="+ world-time compute")
     ax.axhline(oracle, ls="--", color=TEAL, lw=1.2)
     ax.text(xb[-1], oracle + 0.008, "oracle (handed the rules)", ha="right", va="bottom",
             fontsize=7.5, color=TEAL)
-    # label the extremes -> "largest lift for the smallest models"
-    for xi, b, f in [(xb[0], base[0], ft[0]), (xb[-1], base[-1], ft[-1])]:
+    ax.axhline(floor, ls=":", color="#999999", lw=1.1)
+    ax.annotate("prior-only floor", (xb[0], floor), xytext=(10, 2), textcoords="offset points",
+                ha="left", va="bottom", fontsize=7.5, color="#777777")
+    for xi, b, f in zip(xb, base, ft):  # per-size gain labels (full detail)
         ax.annotate(f"+{100 * (f - b):.0f}", (xi, (b + f) / 2),
                     xytext=(5, 0), textcoords="offset points",
-                    fontsize=9, ha="left", va="center", color="#9a4d00", weight="bold")
+                    fontsize=8, ha="left", va="center", color="#9a4d00", weight="bold")
     ax.set_xticks(xb)
     ax.set_xticklabels(names, fontsize=8)
     ax.minorticks_off()
     ax.set_xlim(right=xb[-1] * 1.22)  # room for the rightmost gain label
     ax.set_xlabel("Model size (Qwen2.5-Instruct, params)")
     ax.set_ylabel("Held-out accuracy (unseen worlds)")
-    ax.set_ylim(min(base) - 0.05, 0.9)
+    ax.set_ylim(min(floor, min(base)) - 0.04, 0.9)
     ax.set_title("B. World-time compute lifts generalization", fontsize=10, loc="left")
     ax.legend(fontsize=8, loc="lower right")
     ax.grid(alpha=0.25, axis="y")
@@ -366,10 +375,11 @@ def table_synthesis(e02, e16):
             f"{s['mean_probe_accuracy_accepted']:.2f} & {s['mean_wall_seconds']:.0f}s \\\\"
         )
     (TABLES / "synthesis.tex").write_text(
+        "\\resizebox{\\linewidth}{!}{%\n"
         "\\begin{tabular}{lcccc}\n\\toprule\n"
         "Generator (family) & Runs & Verified acceptance (95\\% CI) & "
         "Probe acc.\\ of accepted & Mean synthesis time \\\\\n"
-        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabular}\n}\n"
     )
 
 
@@ -1108,8 +1118,11 @@ def fig_path_integral(e49):
     betas = e49["betas"]
     fe = [e49["free_energy_by_beta"][str(bb)] for bb in betas]
     c.plot(betas, fe, "-o", color=BLUE, lw=2, markersize=4, label=r"$-\frac{1}{\beta}\log Z$")
-    c.axhline(e49["transfer"]["least_action_cost"], color=RED, lw=1.5, ls="--",
-              label="least action")
+    lac = e49["transfer"]["least_action_cost"]
+    c.axhline(lac, color=RED, lw=1.5, ls="--", label="least action")
+    # Headroom so the least-action line sits below the top spine (not flush/clipped).
+    _ymin = min(fe)
+    c.set_ylim(_ymin - 0.05 * (lac - _ymin), lac + 0.12 * (lac - _ymin))
     c.set_xscale("log")
     c.set_xlabel(r"inverse temperature $\beta$"); c.set_ylabel("free energy")
     c.set_title("C. Path integral → least action", fontsize=9.5, loc="left")
@@ -1973,7 +1986,7 @@ def fig_noise_ablation(abl):
     if xs:
         ax.annotate("verified\n(exact labels)", (xs[0], ys[0]), xytext=(12, 8),
                     textcoords="offset points", fontsize=8.5, color="#9a4d00", weight="bold")
-        ax.annotate("fully wrong\n$\\approx$ no gain", (xs[-1], ys[-1]), xytext=(-4, 14),
+        ax.annotate("fully wrong:\n$\\leq$ prior floor", (xs[-1], ys[-1]), xytext=(-4, 14),
                     textcoords="offset points", ha="right", fontsize=8, color="#9a4d00")
     ax.set_xlabel("training-label corruption (%)")
     ax.set_ylabel("held-out diagnostic accuracy")
@@ -3130,7 +3143,7 @@ def numbers_tex(d):
         macro("ManyWorldsEnumMax", f"${sci(e46['enum_max_worlds'])}$"),
         macro("ManyWorldsConsistent", f"{big['consistent']:,}"),
         macro("ManyWorldsCoupleWidth", str(coup[-1]["w"])),
-        macro("ManyWorldsCoupleFactor", str(coup[-1]["factor_size"])),
+        macro("ManyWorldsCoupleFactor", f"{coup[-1]['factor_size']:,}"),
         macro("ManyWorldsCoupleIdeal", str(coup[-1]["ideal_factored"])),
     ]
     # E45 (next-token world models: length generalization)
@@ -3854,13 +3867,17 @@ def fig_arc(ttt, ladder):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.6, 4.0))
     if bars:
         xs = list(range(len(bars)))
-        ax1.bar(xs, [b[1] for b in bars], color=[b[2] for b in bars], alpha=0.9, width=0.66)
+        vals = [b[1] for b in bars]
+        ymax = max(vals) * 1.22
+        label_pad = ymax * 0.035
+        ax1.bar(xs, vals, color=[b[2] for b in bars], alpha=0.9, width=0.66)
         for i, b in zip(xs, bars):
-            ax1.text(i, b[1] + 0.004, f"{100 * b[1]:.0f}", ha="center", va="bottom", fontsize=9)
+            ax1.text(i, b[1] + label_pad, f"{100 * b[1]:.0f}%", ha="center", va="bottom", fontsize=9)
         if acc("zeroshot") is not None:
             ax1.axhline(acc("zeroshot"), ls=":", color="#999999", lw=1.1)
         ax1.set_xticks(xs)
         ax1.set_xticklabels([b[0].replace("\\n", "\n") for b in bars], fontsize=8.5)
+        ax1.set_ylim(0, ymax)
     ax1.set_ylabel("held-out exact-match accuracy")
     ax1.set_title("Test-time training on real ARC worlds", fontsize=10.5)
     ax1.grid(True, axis="y", alpha=0.25)
@@ -3976,7 +3993,7 @@ def fig_arc_method(ttt):
 
     # ---- Row 2: regimes + payoff -------------------------------------------------------
     _panel(ax, 0.2, 0.35, 4.55, 3.3, "(A)  Cross-task ladder — transfer to unseen worlds", BLUE)
-    _card(ax, 0.5, 2.3, 1.95, 0.95, "TRAIN worlds", ["25 → 400", "real ARC tasks"], face="#EFF6FF")
+    _card(ax, 0.5, 2.3, 1.95, 0.95, "TRAIN worlds", ["25 → 200", "real ARC tasks"], face="#EFF6FF")
     arrow(2.55, 2.78, 3.15, 2.78)
     ax.text(2.85, 2.92, "SFT", fontsize=7, color=SL, ha="center")
     _card(ax, 3.2, 2.3, 1.35, 0.95, "LoRA", ["one", "adapter"], face="#FFF7ED")
@@ -4016,7 +4033,7 @@ def fig_arc_method(ttt):
         else:
             h = (v / vmax) * bh
             ax.add_patch(Rectangle((x, by0), bw, h, fc=c, ec="none", alpha=0.9, zorder=5))
-            ax.text(x + bw / 2, by0 + h + 0.06, f"{100 * v:.0f}", fontsize=7.5, ha="center",
+            ax.text(x + bw / 2, by0 + h + 0.06, f"{100 * v:.0f}%", fontsize=7.5, ha="center",
                     color=c, fontweight="bold", zorder=6)
         ax.text(x + bw / 2, by0 - 0.28, lbl, fontsize=6.3, ha="center", va="top", color="#334155")
     ax.plot([bx0 - 0.05, bx0 + 4 * 0.85 - 0.2], [by0, by0], color="#CBD5E1", lw=0.9, zorder=4)
@@ -4054,6 +4071,7 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
     arms = [("base", SLATE), ("light TTT", "#F4B860"), ("heavy TTT", ORANGE), ("corrupt", RED)]
     fig, ax = plt.subplots(figsize=(10.6, 4.6))
     gw = 0.20
+    label_tops = []
     for gi, (label, d, base_key) in enumerate(doms):
         pw = d.get("per_world") or d.get("per_task") or {}
         keys = [base_key, "light", "heavy", "corrupt"]
@@ -4064,14 +4082,18 @@ def fig_worldtime_domains(arc, lf, clrs, bong):
             x = gi + (ai - 1.5) * gw
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[m - lo], [hi - m]], capsize=2, error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.012, f"{100 * m:.0f}", ha="center", va="bottom", fontsize=6.6, color=col)
+            label_y = hi + 0.012
+            label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom", fontsize=6.6, color=col)
     ax.axhline(0.5, ls=":", lw=0.8, color="#BBBBBB")
-    ax.text(3.0, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
+    ax.text(2.45, 0.515, "chance (binary)", fontsize=6.5, color="#999999", ha="center")
     ax.set_xticks(range(len(doms)))
     ax.set_xticklabels([d[0] for d in doms], fontsize=8.5)
     ax.set_ylabel("held-out exact-match accuracy")
     ax.set_title("World-time compute across real domains: scales, and collapses under "
                  "label corruption", fontsize=10.5)
+    if label_tops:
+        ax.set_ylim(0, max(0.82, max(label_tops) + 0.04))
     from matplotlib.patches import Patch
     ax.legend(handles=[Patch(fc=c, label=n) for n, c in arms], fontsize=7.5,
               loc="upper left", ncol=2, framealpha=0.9)
@@ -4102,9 +4124,11 @@ def fig_frame_invariance(qwen, llama):
             ("corrupt", "corrupt", RED)]
     fig, ax = plt.subplots(figsize=(7.4, 4.4))
     gw = 0.24
+    label_tops = []
     for gi, (label, d) in enumerate(groups):
         per = d.get("per", {})
         arm_vals = d.get("arms", {})
+        group_label_tops = []
         for ai, (an, key, col) in enumerate(arms):
             m = arm_vals.get(key)
             if m is None:
@@ -4115,19 +4139,22 @@ def fig_frame_invariance(qwen, llama):
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
                    error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+            label_y = hi + 0.008
+            label_tops.append(label_y)
+            group_label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom",
                     fontsize=7.5, color=col)
         # annotate the frame-TTT delta vs zero-shot (signed: it is ~0 / negative here)
         z, t = arm_vals.get("zeroshot"), arm_vals.get("frame_ttt")
         if z is not None and t is not None:
-            top = max(arm_vals.values()) + 0.045
+            top = (max(group_label_tops) + 0.035) if group_label_tops else max(arm_vals.values()) + 0.045
             col = ORANGE if t >= z else RED
             ax.annotate(f"{100 * (t - z):+.0f} vs zero-shot", xy=(gi, top), ha="center",
                         fontsize=9, fontweight="bold", color=col)
     ax.set_xticks(range(len(groups)))
     ax.set_xticklabels([g[0] for g in groups], fontsize=9)
     ax.set_ylabel("held-out language-frame pass rate")
-    ax.set_ylim(0, max(0.5, max(max(d.get("arms", {}).values()) for _, d in groups) + 0.1))
+    ax.set_ylim(0, max(0.5, max(label_tops or [0]) + 0.09))
     ax.set_title("Frame-invariance (E81): cross-language TTT gives no lift over zero-shot;\n"
                  "only matched$>$corrupt (exactness) survives, on the weak base", fontsize=10.5)
     from matplotlib.patches import Patch
@@ -4149,6 +4176,7 @@ def fig_hybrid_loop(qwen, llama):
             ("hybrid (+ verifier)", "hybrid_pass", TEAL)]
     fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10.4, 4.4), gridspec_kw={"width_ratios": [2.4, 1]})
     gw = 0.26
+    label_tops = []
     for gi, (label, d) in enumerate(groups):
         r = d.get("results", {})
         n = d.get("n_eval", 40)
@@ -4162,17 +4190,20 @@ def fig_hybrid_loop(qwen, llama):
             ax.bar(x, m, gw * 0.92, color=col, alpha=0.9,
                    yerr=[[max(0, m - lo)], [max(0, hi - m)]], capsize=2,
                    error_kw=dict(lw=0.8, alpha=0.6))
-            ax.text(x, m + 0.006, f"{100 * m:.0f}", ha="center", va="bottom",
+            label_y = hi + 0.012
+            label_tops.append(label_y)
+            ax.text(x, label_y, f"{100 * m:.0f}%", ha="center", va="bottom",
                     fontsize=7.5, color=col)
             if key != "base_pass1" and base is not None:  # signed delta vs base
                 dlt = m - base
-                ax.text(x, 0.02, f"{100 * dlt:+.0f}", ha="center", va="bottom",
-                        fontsize=8, fontweight="bold", color=(TEAL if dlt >= 0 else RED))
+                ax.text(x, 0.045, f"{100 * dlt:+.0f}", ha="center", va="bottom",
+                        fontsize=8, fontweight="bold", color=(TEAL if dlt >= 0 else RED),
+                        bbox=dict(facecolor="white", edgecolor="none", alpha=0.75, pad=0.7))
     ax.axhline(0, color="#999", lw=0.6)
     ax.set_xticks(range(len(groups)))
     ax.set_xticklabels([g[0] for g in groups], fontsize=9)
     ax.set_ylabel("held-out pass@1 (HumanEval-X Python)")
-    ax.set_ylim(0, 1.0)
+    ax.set_ylim(0, min(1.08, max(1.0, max(label_tops or [0]) + 0.04)))
     ax.set_title("The hybrid loop (E82): amortization helps the strong base, hurts the weak;\n"
                  "the verifier backstop lifts both", fontsize=10)
     from matplotlib.patches import Patch
@@ -4413,7 +4444,7 @@ def main():
     TABLES.mkdir(exist_ok=True)
     fig_prototyping()
     data = {name: load(name) for name in EXPERIMENTS}
-    fig_world_time_compute(data["e74_scaling"], load("e74_diagnosis"))
+    # fig:world-time merged into the hero figure's panel B (Fig 1b); standalone cut.
     fig_world_count(data["e76_world_count"])
     fig_diagnosis_world()
     fig_noise_ablation(load("e78b_ablation"))

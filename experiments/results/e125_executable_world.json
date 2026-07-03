@@ -1,0 +1,25 @@
+{
+  "experiment": "e125_executable_world",
+  "mode": "traverse",
+  "games": {
+    "dc22": {
+      "levels_solved": 0,
+      "real_actions": 40,
+      "macros_used": 0,
+      "levels": [
+        {
+          "level": 0,
+          "solved": false,
+          "reason": "no verified predict()"
+        }
+      ]
+    }
+  },
+  "timestamp": "2026-06-28T01:07:01",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.6",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

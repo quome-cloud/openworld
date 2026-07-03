@@ -16,7 +16,7 @@ import openworld as O
 ROOT=Path("/Users/jim/Desktop/openworld")
 HARNESS=ROOT/"scratch_arc"/"agent"/"arc3_harness.py"
 LOGDIR=ROOT/"experiments"/"results"/"qwen_agent_logs"; LOGDIR.mkdir(parents=True,exist_ok=True)
-VENV="/private/tmp/claude-501/-Users-jim-Desktop-openworld/71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python"
+VENV="/Users/jim/.arcv/bin/python"
 
 TASK = """You are solving the interactive ARC-AGI-3 game **{game}** by writing Python. Each round you
 output ONE self-contained Python script; we run it and give you its stdout; you iterate. Goal: complete
@@ -38,9 +38,28 @@ or [6,x,y]); keep updating it to your deepest progress. PRINT what you learned e
 
 Output ONLY a single ```python code block (no prose).
 
-[round {r} -- previous script's stdout]:
+[round {r} -- TRANSCRIPT of your previous rounds: each shows the script YOU wrote and its stdout.
+BUILD ON what you already learned -- do NOT repeat the same exploration; extend toward raising g.levels]:
 {history}
 """
+
+def build_history(log, budget=24000):
+    """Accumulate a rolling transcript of prior rounds (your code + its stdout), newest kept first,
+    trimmed to a char budget so it fits num_ctx. This is the cross-round memory the agent needs to
+    iterate a world model instead of restarting from scratch every round."""
+    if not log: return "(none yet -- start by exploring)"
+    parts=[]
+    for rec in log:
+        code=rec["script"][:1800]
+        out=rec["stdout"][-1800:]
+        parts.append(f"===== round {rec['round']} (best_levels after this round = {rec.get('best_after',0)}) =====\n"
+                     f"--- YOUR SCRIPT ---\n{code}\n--- ITS STDOUT ---\n{out}")
+    kept=[]; total=0
+    for p in reversed(parts):           # keep the most recent rounds that fit the budget
+        total+=len(p)
+        if total>budget and kept: break
+        kept.append(p)
+    return "\n\n".join(reversed(kept))
 
 def extract_code(text):
     m=re.search(r"```(?:python)?\s*(.*?)```", text, re.S)
@@ -78,8 +97,9 @@ def solve(game, model, rounds, num_ctx, timeout):
             try:
                 d=json.loads(sj.read_text()); best=max(best,int(d.get("levels",0))); win=int(d.get("win",win) or win)
             except Exception: pass
-        history=out[-2500:]
-        print(f"  [{game}] round {r}: {dt:.0f}s, best_levels={best}, code={len(code)}ch",flush=True)
+        rec["best_after"]=best
+        history=build_history(log)
+        print(f"  [{game}] round {r}: {dt:.0f}s, best_levels={best}, code={len(code)}ch, hist={len(history)}ch",flush=True)
         if win and best>=win: break
     (LOGDIR/f"{game}.jsonl").write_text("\n".join(json.dumps(x) for x in log))
     return {"game":game,"model":model,"best_levels":best,"win":win,"rounds":len(log),
@@ -89,7 +109,7 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--model",default="qwen2.5-coder:32b")
     ap.add_argument("--game",default=""); ap.add_argument("--games",default="")
-    ap.add_argument("--rounds",type=int,default=14); ap.add_argument("--num_ctx",type=int,default=8192)
+    ap.add_argument("--rounds",type=int,default=24); ap.add_argument("--num_ctx",type=int,default=32768)
     ap.add_argument("--timeout",type=int,default=1800); ap.add_argument("--out",default="results/e118_qwen_agent.json")
     a=ap.parse_args()
     games=[a.game] if a.game else (a.games.split(",") if a.games else [])

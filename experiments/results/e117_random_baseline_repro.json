@@ -1,0 +1,168 @@
+{
+  "random_geq1_level": [
+    "ar25",
+    "cd82",
+    "cn04",
+    "ft09",
+    "lp85",
+    "ls20",
+    "m0r0",
+    "r11l",
+    "sk48",
+    "sp80",
+    "vc33"
+  ],
+  "n": 11,
+  "results": {
+    "ar25": {
+      "game": "ar25",
+      "random_levels": 2,
+      "win": 8,
+      "click": true
+    },
+    "bp35": {
+      "game": "bp35",
+      "random_levels": 0,
+      "win": 9,
+      "click": true
+    },
+    "cd82": {
+      "game": "cd82",
+      "random_levels": 2,
+      "win": 6,
+      "click": true
+    },
+    "cn04": {
+      "game": "cn04",
+      "random_levels": 1,
+      "win": 6,
+      "click": true
+    },
+    "dc22": {
+      "game": "dc22",
+      "random_levels": 0,
+      "win": 6,
+      "click": true
+    },
+    "ft09": {
+      "game": "ft09",
+      "random_levels": 2,
+      "win": 6,
+      "click": true
+    },
+    "g50t": {
+      "game": "g50t",
+      "random_levels": 0,
+      "win": 7,
+      "click": false
+    },
+    "ka59": {
+      "game": "ka59",
+      "random_levels": 0,
+      "win": 7,
+      "click": true
+    },
+    "lf52": {
+      "game": "lf52",
+      "random_levels": 0,
+      "win": 10,
+      "click": true
+    },
+    "lp85": {
+      "game": "lp85",
+      "random_levels": 1,
+      "win": 8,
+      "click": true
+    },
+    "ls20": {
+      "game": "ls20",
+      "random_levels": 1,
+      "win": 7,
+      "click": false
+    },
+    "m0r0": {
+      "game": "m0r0",
+      "random_levels": 1,
+      "win": 6,
+      "click": true
+    },
+    "r11l": {
+      "game": "r11l",
+      "random_levels": 1,
+      "win": 6,
+      "click": true
+    },
+    "re86": {
+      "game": "re86",
+      "random_levels": 0,
+      "win": 8,
+      "click": false
+    },
+    "s5i5": {
+      "game": "s5i5",
+      "random_levels": 0,
+      "win": 8,
+      "click": true
+    },
+    "sb26": {
+      "game": "sb26",
+      "random_levels": 0,
+      "win": 8,
+      "click": true
+    },
+    "sc25": {
+      "game": "sc25",
+      "random_levels": 0,
+      "win": 6,
+      "click": true
+    },
+    "sk48": {
+      "game": "sk48",
+      "random_levels": 1,
+      "win": 8,
+      "click": true
+    },
+    "sp80": {
+      "game": "sp80",
+      "random_levels": 2,
+      "win": 6,
+      "click": true
+    },
+    "su15": {
+      "game": "su15",
+      "random_levels": 0,
+      "win": 9,
+      "click": true
+    },
+    "tn36": {
+      "game": "tn36",
+      "random_levels": 0,
+      "win": 7,
+      "click": true
+    },
+    "tr87": {
+      "game": "tr87",
+      "random_levels": 0,
+      "win": 6,
+      "click": false
+    },
+    "tu93": {
+      "game": "tu93",
+      "random_levels": 0,
+      "win": 9,
+      "click": false
+    },
+    "vc33": {
+      "game": "vc33",
+      "random_levels": 1,
+      "win": 7,
+      "click": true
+    },
+    "wa30": {
+      "game": "wa30",
+      "random_levels": 0,
+      "win": 9,
+      "click": false
+    }
+  }
+}

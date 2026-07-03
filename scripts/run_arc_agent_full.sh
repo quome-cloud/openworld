@@ -2,7 +2,7 @@
 # FULL-GAME live coding-agent solver: Claude Code builds an executable world model and solves EVERY
 # level of one ARC-AGI-3 game (chaining level by level to g.win). Usage: run_arc_agent_full.sh <game>
 set -uo pipefail
-GAME="$1"; VENV="/private/tmp/claude-501/-Users-jim-Desktop-openworld/71e8c8de-fcca-4c0d-b13e-d3aae6071546/scratchpad/arcv/bin/python"
+GAME="$1"; VENV="/Users/jim/.arcv/bin/python"
 ROOT="/Users/jim/Desktop/openworld"; WD="$ROOT/scratch_arc/full_$GAME"
 mkdir -p "$WD"; cp "$ROOT/scratch_arc/agent/arc3_harness.py" "$WD/"
 cat > "$WD/TASK.md" <<TASK

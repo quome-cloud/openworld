@@ -1,0 +1,214 @@
+{
+  "source": "additive contribution on top of experiments/e148_strategy_space.py",
+  "author": "researchy team (A001)",
+  "n_sessions_e148": 261,
+  "n_meta_files_scanned": 913,
+  "n_meta_with_model": 721,
+  "strategy_correlation_with_levels": {
+    "simulate": 0.247,
+    "search": -0.004,
+    "state_graph": -0.136,
+    "perceive": -0.077,
+    "verify": 0.05,
+    "goal_infer": 0.189,
+    "mechanic": 0.177,
+    "memory": -0.02,
+    "probe": -0.195
+  },
+  "per_model_strategy_rate_per_1k_tokens": {
+    "opus": {
+      "n": 229,
+      "simulate": 0.734,
+      "search": 4.658,
+      "state_graph": 2.779,
+      "perceive": 25.914,
+      "verify": 11.18,
+      "goal_infer": 8.963,
+      "mechanic": 3.136,
+      "memory": 9.157,
+      "probe": 4.743
+    },
+    "codex": {
+      "n": 14,
+      "simulate": 0.009,
+      "search": 2.743,
+      "state_graph": 0.277,
+      "perceive": 23.337,
+      "verify": 7.186,
+      "goal_infer": 3.914,
+      "mechanic": 0.225,
+      "memory": 2.713,
+      "probe": 2.228
+    },
+    "fable": {
+      "n": 18,
+      "simulate": 1.165,
+      "search": 2.586,
+      "state_graph": 0.785,
+      "perceive": 9.709,
+      "verify": 12.359,
+      "goal_infer": 8.726,
+      "mechanic": 4.44,
+      "memory": 12.982,
+      "probe": 3.459
+    }
+  },
+  "strategy_divergence_from_centroid": {
+    "opus": 0.0037559086557634735,
+    "codex": 0.057748437352217796,
+    "fable": 0.10845355275902213
+  },
+  "game_model_max_levels": {
+    "ar25": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "bp35": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "cd82": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "cn04": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "dc22": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "ft09": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "g50t": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "ka59": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "lf52": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "lp85": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "ls20": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "m0r0": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "r11l": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "re86": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "s5i5": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "sb26": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "sc25": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "sk48": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "sp80": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "su15": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "tn36": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "tr87": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "tu93": {
+      "opus": 9,
+      "codex": 0,
+      "fable": 0
+    },
+    "vc33": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    },
+    "wa30": {
+      "opus": 0,
+      "codex": 0,
+      "fable": 0
+    }
+  },
+  "model_tier_efficiency": {
+    "opus::agent": {
+      "n": 705,
+      "mean_wall_s": 394.3645390070922,
+      "total_levels": 0,
+      "mean_levels": 0.0
+    },
+    "other::cheap": {
+      "n": 192,
+      "mean_wall_s": 13.255208333333334,
+      "total_levels": 0,
+      "mean_levels": 0.0
+    },
+    "opus::expert": {
+      "n": 15,
+      "mean_wall_s": 323.3333333333333,
+      "total_levels": 0,
+      "mean_levels": 0.0
+    },
+    "opus::focused-final-level": {
+      "n": 1,
+      "mean_wall_s": 1470.0,
+      "total_levels": 9,
+      "mean_levels": 9.0
+    }
+  }
+}

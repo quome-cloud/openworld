@@ -1,0 +1,278 @@
+{
+  "arms": [
+    "opus",
+    "codex"
+  ],
+  "per_arm_totals": {
+    "opus": {
+      "n_full_games": 16,
+      "total_levels": 158,
+      "possible": 183
+    },
+    "codex": {
+      "n_full_games": 7,
+      "total_levels": 108,
+      "possible": 183
+    }
+  },
+  "per_game": {
+    "ar25": {
+      "opus": 8,
+      "codex": 8
+    },
+    "bp35": {
+      "opus": 7,
+      "codex": 2
+    },
+    "cd82": {
+      "opus": 6,
+      "codex": 2
+    },
+    "cn04": {
+      "opus": 6,
+      "codex": 4
+    },
+    "dc22": {
+      "opus": 6,
+      "codex": 6
+    },
+    "ft09": {
+      "opus": 6,
+      "codex": 6
+    },
+    "g50t": {
+      "opus": 7,
+      "codex": 6
+    },
+    "ka59": {
+      "opus": 7,
+      "codex": 7
+    },
+    "lf52": {
+      "opus": 6,
+      "codex": 5
+    },
+    "lp85": {
+      "opus": 8,
+      "codex": 8
+    },
+    "ls20": {
+      "opus": 5,
+      "codex": 4
+    },
+    "m0r0": {
+      "opus": 6,
+      "codex": 2
+    },
+    "r11l": {
+      "opus": 4,
+      "codex": 4
+    },
+    "re86": {
+      "opus": 8,
+      "codex": 6
+    },
+    "s5i5": {
+      "opus": 8,
+      "codex": 2
+    },
+    "sb26": {
+      "opus": 8,
+      "codex": 4
+    },
+    "sc25": {
+      "opus": 6,
+      "codex": 2
+    },
+    "sk48": {
+      "opus": 5,
+      "codex": 1
+    },
+    "sp80": {
+      "opus": 4,
+      "codex": 3
+    },
+    "su15": {
+      "opus": 9,
+      "codex": 9
+    },
+    "tn36": {
+      "opus": 2,
+      "codex": 2
+    },
+    "tr87": {
+      "opus": 6,
+      "codex": 1
+    },
+    "tu93": {
+      "opus": 9,
+      "codex": 9
+    },
+    "vc33": {
+      "opus": 4,
+      "codex": 3
+    },
+    "wa30": {
+      "opus": 7,
+      "codex": 2
+    }
+  },
+  "win_levels": {
+    "ar25": 8,
+    "bp35": 9,
+    "cd82": 6,
+    "cn04": 6,
+    "dc22": 6,
+    "ft09": 6,
+    "g50t": 7,
+    "ka59": 7,
+    "lf52": 10,
+    "lp85": 8,
+    "ls20": 7,
+    "m0r0": 6,
+    "r11l": 6,
+    "re86": 8,
+    "s5i5": 8,
+    "sb26": 8,
+    "sc25": 6,
+    "sk48": 8,
+    "sp80": 6,
+    "su15": 9,
+    "tn36": 7,
+    "tr87": 6,
+    "tu93": 9,
+    "vc33": 7,
+    "wa30": 9
+  },
+  "full_by_arm": {
+    "opus": [
+      "ar25",
+      "cd82",
+      "cn04",
+      "dc22",
+      "ft09",
+      "g50t",
+      "ka59",
+      "lp85",
+      "m0r0",
+      "re86",
+      "s5i5",
+      "sb26",
+      "sc25",
+      "su15",
+      "tr87",
+      "tu93"
+    ],
+    "codex": [
+      "ar25",
+      "dc22",
+      "ft09",
+      "ka59",
+      "lp85",
+      "su15",
+      "tu93"
+    ]
+  },
+  "arm_unique_full": {
+    "opus": [
+      "cd82",
+      "cn04",
+      "g50t",
+      "m0r0",
+      "re86",
+      "s5i5",
+      "sb26",
+      "sc25",
+      "tr87"
+    ],
+    "codex": []
+  },
+  "shared_walls": [
+    {
+      "game": "lf52",
+      "per_arm": {
+        "opus": 6,
+        "codex": 5
+      },
+      "win": 10
+    },
+    {
+      "game": "ls20",
+      "per_arm": {
+        "opus": 5,
+        "codex": 4
+      },
+      "win": 7
+    },
+    {
+      "game": "r11l",
+      "per_arm": {
+        "opus": 4,
+        "codex": 4
+      },
+      "win": 6
+    },
+    {
+      "game": "sp80",
+      "per_arm": {
+        "opus": 4,
+        "codex": 3
+      },
+      "win": 6
+    },
+    {
+      "game": "tn36",
+      "per_arm": {
+        "opus": 2,
+        "codex": 2
+      },
+      "win": 7
+    },
+    {
+      "game": "vc33",
+      "per_arm": {
+        "opus": 4,
+        "codex": 3
+      },
+      "win": 7
+    }
+  ],
+  "e140_budget_asymmetry": {
+    "experiment": "e140_budget_asymmetry",
+    "note": "Our prior source-free results were obtained under a CONSTRAINED per-game budget; baseline1 (arXiv 2605.05138) reports no budget cap. The 11 vs 15 gap is confounded by budget, not only capability.",
+    "our_prior_budget": {
+      "per_game_wall_clock_s": 2700,
+      "per_game_minutes": 45,
+      "rounds": 3,
+      "hard_killed_on_timeout": true,
+      "codex_reasoning": "DEFAULT (model_reasoning_effort never set)"
+    },
+    "baseline1_budget": {
+      "cap": "none reported (unlimited)",
+      "model": "gpt-5.5",
+      "source": "arXiv 2605.05138"
+    },
+    "results_under_our_capped_budget": {
+      "claude_source_free": {
+        "full_games": 11,
+        "levels": 140,
+        "possible": 183
+      },
+      "codex_source_free": {
+        "full_games": 2,
+        "levels": 71,
+        "possible": 183
+      }
+    },
+    "e140_uncapped": {
+      "per_game_backstop_s": 14400,
+      "per_game_hours": 4,
+      "codex_reasoning": "xhigh",
+      "claude_effort": "max",
+      "rounds": 2,
+      "games": 25,
+      "status": "in_progress",
+      "purpose": "test whether removing BOTH caps (time + reasoning) closes the gap to baseline1 15/25"
+    }
+  }
+}

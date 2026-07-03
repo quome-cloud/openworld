@@ -10,12 +10,13 @@ set -o pipefail   # NOT -u: macOS bash 3.2 errors on empty-array expansion under
 GAME="$1"
 TIER="${2:-agent}"
 ROOT="/Users/jim/Desktop/openworld"
-AGENT_PY="/Users/jim/.pyenv/versions/3.9.18/bin/python"   # has numpy, CANNOT import arc_agi
+AGENT_PY="/Users/jim/.pyenv/versions/3.14.6/bin/python"   # has numpy, CANNOT import arc_agi
 CLAUDE="/Users/jim/.local/bin/claude"
 MODEL="${MODEL:-claude-opus-4-8}"                          # pinned for artifact isolation
 EFFORT="${EFFORT:-high}"
 FALLBACK_MODEL="${FALLBACK_MODEL:-}"
-WD="$ROOT/scratch_arc/sb_$GAME"
+WD_PREFIX="${WD_PREFIX:-sb_}"                              # override to isolate an arm's workspace (e.g. sbfable_)
+WD="$ROOT/scratch_arc/${WD_PREFIX}$GAME"
 TRACES="$ROOT/experiments/results/arc3_traces"
 mkdir -p "$WD" "$TRACES/prompts" "$TRACES/transcripts" "$TRACES/meta" "$TRACES/solutions"
 cp "$ROOT/experiments/arc3_sandbox.py" "$WD/"             # the ONLY harness the agent gets (no source)
@@ -53,6 +54,30 @@ DO NOT attempt to read the game source, import arc_agi, or build an env yourself
 and every run is AUDITED for source access; a tainted run is discarded. Solve it the fair way.
 TASK
 
+# --- WALL PROTOCOL variant (labeled condition, default OFF): set WALL=1 to append a persistent-workspace
+#     + frontier-focus + sim-then-search addendum for games stalled at a deep wall. General methodology
+#     only (no game specifics) -- still source-free, still audited. Relabels the tier so captured runs are
+#     a distinct condition (rid <game>__agent-wall__...), never mixed with the base-prompt measurement. ---
+if [ -n "${WALL:-}" ]; then
+  cat >> "$WD/TASK.md" <<'WALLTASK'
+
+WALL PROTOCOL (this game is stalled at a deep level -- work differently):
+- Your workspace PERSISTS across sessions. FIRST ACTION: inventory it (ls; read your prior notes,
+  toolkits, probe scripts, solved.json) and build on what previous sessions established instead of
+  re-deriving it. Maintain NOTES.md (mechanics learned, hypotheses falsified) for the next session.
+- FRONTIER FOCUS: immediately replay solved.json to your deepest level; spend this ENTIRE session on
+  the NEXT uncompleted level. Do not spend budget re-verifying earlier levels beyond that one replay.
+- WHEN THE LEVEL RESISTS direct probing: stop hand-probing the slow real env. Build a VERIFIED
+  simulator of THIS level (your predict(frame, action) must reproduce every held-out observed
+  transition exactly), then SEARCH IT OFFLINE at scale -- batched BFS/beam/random-restart over action
+  macros, thousands of rollouts -- and replay-verify each candidate winner in the real env before
+  trusting it. Walls here have historically fallen to faithful-sim search, not to more manual probes.
+- Wins are typically ordered PROCEDURES (multi-step protocols): search for sequences that change
+  persistent state (things opened/held/toggled/moved), not just immediate frame deltas.
+WALLTASK
+  TIER="agent-wall"
+fi
+
 # --- expert-panel strategy lens (Bayesian-experts router tier): when a game is STUCK the orchestrator
 #     sets EXPERT=<name|index> to inject a DIFFERENT framing instead of repeating the same prompt.
 #     Source-free (a general hypothesis lens, not an answer); the run is still audited + env-verified. ---
@@ -84,7 +109,7 @@ ENDED=$("$AGENT_PY" -c "import sys; sys.path.insert(0,'$ROOT/scripts'); import c
 
 # write the meta sidecar (the finalizer merges it with the verified outcome later)
 "$AGENT_PY" - "$GAME" "$TIER" "$RID" "$MODEL" "$EFFORT" "$FALLBACK_MODEL" "$STARTED" "$ENDED" "$RC" "$PROMPT_FILE" "$TRANSCRIPT" <<'PY'
-import sys, json
+import sys, json, os
 sys.path.insert(0, "/Users/jim/Desktop/openworld/scripts")
 import capture_lib as c
 from audit_sandbox import audit_knowledge
@@ -97,7 +122,7 @@ kfind = audit_knowledge(memory_dir=mem_dir, claude_md="/Users/jim/Desktop/openwo
 rec = {
   "run_id": rid, "game": game, "tier": tier, "method": "live-coding-agent-sandbox",
   "source_free": True, "fairness": "by-construction (process-isolated SandboxGame)",
-  "audit_dir": f"scratch_arc/sb_{game}", "audit_mode": "strict",
+  "audit_dir": f"scratch_arc/{os.environ.get('WD_PREFIX','sb_')}{game}", "audit_mode": "strict",
   "knowledge_audit": {"clean": (kfind == []), "findings": kfind,
                       "scanned": ["memory/*.md", "CLAUDE.md"]},
   "memory_tainted": (kfind != []),

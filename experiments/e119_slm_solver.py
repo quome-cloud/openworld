@@ -18,12 +18,19 @@ def _real_make(gid):
     return g
 
 
+def _is_honest(r):
+    """A result is honest iff it errored, claimed no solve (levels==0), or its claimed
+    levels are replay-verified. A zero-solve is the expected control-rung baseline, not a
+    failure; only a non-zero solve that was never replay-verified is dishonest."""
+    return ("error" in r) or r["levels"] == 0 or r["verified"]
+
+
 def run_pilot(games, mode="search", make=_real_make, llm=None, budget=None, logdir=None):
     results = []
     for gid in games:
         try:
             g = make(gid)
-            r = solve.solve_game(g, llm=llm, mode=mode, budget=budget, logdir=logdir)
+            r = solve.solve_game(g, llm=llm, mode=mode, budget=budget, logdir=logdir, make=make)
         except Exception as e:
             r = {"game": gid, "mode": mode, "levels": 0, "win": 0,
                  "actions": [], "verified": False, "error": str(e)[:160]}
@@ -36,12 +43,12 @@ def run_pilot(games, mode="search", make=_real_make, llm=None, budget=None, logd
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["search", "slm"], default="search")
+    ap.add_argument("--mode", choices=["search", "slm", "macro", "macro+slm"], default="search")
     ap.add_argument("--model", default="qwen2.5-coder:7b")
     ap.add_argument("--games", default=",".join(PILOT))
     a = ap.parse_args()
     llm = None
-    if a.mode == "slm":
+    if a.mode != "search":
         import openworld as O
         from e119 import slm as _slm
         llm = O.OllamaLLM(model=a.model, options=_slm.llm_options(a.model))
@@ -50,7 +57,7 @@ def main():
                         budget={"max_nodes": 6000, "max_depth": 60}, logdir=logdir)
     save_results("e119_slm_solver", payload)          # SAVE before asserts (CLAUDE.md)
     assert payload["levels_solved"] >= 0
-    assert all(("error" in r) or r["verified"] for r in payload["results"]), "unverified non-error solve"
+    assert all(_is_honest(r) for r in payload["results"]), "unverified non-zero solve"
     print(f"[e119] mode={a.mode} levels={payload['levels_solved']} full={payload['full_games']}")
 
 

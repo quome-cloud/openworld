@@ -86,3 +86,21 @@ def test_converges_on_click_game():
     # Faithful click champion (A == reality) -> common-holdout gap is ~0, the clean baseline.
     assert abs(res["ab_vs_real_gap"]) < 0.05
     assert res["real_steps"] > 0
+
+
+def test_prompt_renders_observed_frames_and_contract():
+    # The data-bearing prompt must show the model the reset board + per-step changed cells + the contract.
+    from experiments.e127 import reconstruct as R
+    from experiments.e127 import engine as E
+    from tests.e127.toy import ToyGame
+    obs = [E.play(ToyGame(), [(1, None, None), (3, None, None), (7, None, None)])]
+    p = R._prompt("dirs 1-5,7; grid 8x8", obs, [], 0)
+    assert "class Engine" in p and "is_win" in p          # the contract
+    assert "RESET board" in p and "changed:" in p          # rendered observed play
+    assert "STRICT JSON" in p
+    # a counterexample with real/engine frames renders a cell-diff
+    import numpy as np
+    a = np.zeros((8, 8), dtype=int); b = a.copy(); b[2, 3] = 5
+    cex = [{"actions": [(1, None, None)], "real_frame": b, "engine_frame": a, "kind": "diff"}]
+    p2 = R._prompt("x", obs, cex, 1)
+    assert "WRONG" in p2 and "(2,3)" in p2

@@ -44,15 +44,20 @@ def audit(wd, mode="strict"):
 
 
 # Source-DERIVED knowledge: content in memory notes / CLAUDE.md extracted from a game's source (a
-# laundered answer key). PRECISE signals only -- must NOT false-positive on legit project scripts
-# (serve.py, card.py, solver files) or openworld's own `inspect.getsource` spec serialization, or
-# ENGINE/harness notes (`arcengine`, `_game.full_reset()`). The decisive signals: the game-source dir,
-# loading a specific game's <gameid>.py, or explicit "source-derived/faithful / read ... source" labels.
+# laundered answer key). HARD SIGNALS ONLY: the game-source dir loader, or a specific game's <gameid>.py.
+#
+# Deliberately NOT flagged: the DISCUSSION words 'source-faithful' / 'source-derived' / 'read source'.
+# Those are methodology/integrity *labels* -- the very notes that DEFINE and FORBID source access
+# (arc3-no-banked-solutions, arc3-falsify-unwinnable, arc3-reconstruct-simulator) contain them, so
+# matching the words flags the controls themselves. That false positive mislabeled 200+ genuinely
+# source-free runs as memory_tainted. Laundered mechanics that name no code signature are not
+# regex-catchable and are out of scope for this self-check (human/LLM review covers that boundary).
 _GAME_IDS = ("ar25|bp35|cd82|cn04|dc22|ft09|g50t|ka59|lf52|lp85|ls20|m0r0|r11l|re86|s5i5|sb26|sc25|"
              "sk48|sp80|su15|tn36|tr87|tu93|vc33|wa30")
 KNOWLEDGE_TAINT = re.compile(
-    r"environment_files|spec_from_file_location|source-derived|source-faithful|"
-    rf"(?:{_GAME_IDS})\.py\b|read (?:the |env )?(?:game )?source", re.IGNORECASE)
+    rf"environment_files|spec_from_file_location|(?:{_GAME_IDS})\.py\b", re.IGNORECASE)
+# forbidding/negating context: a hard signal named only to say "don't do this" is not taint
+_NEG_CONTEXT = ("never", "do not", "don't", "not read", "must not", "forbidden", "skip", "without", "no real")
 
 
 def audit_knowledge(memory_dir=None, claude_md=None):
@@ -71,10 +76,9 @@ def audit_knowledge(memory_dir=None, claude_md=None):
             txt = open(p, errors="ignore").read()
         except Exception:
             continue
-        # ignore the explicit source-free RULE line in CLAUDE.md (it names the patterns to forbid)
+        # skip a hard signal that appears in a forbidding/negating context (a rule naming what NOT to do)
         hits = set(m.group(0) for m in KNOWLEDGE_TAINT.finditer(txt)
-                   if "never read" not in txt[max(0, m.start() - 60):m.start()].lower()
-                   and "do not" not in txt[max(0, m.start() - 40):m.start()].lower())
+                   if not any(n in txt[max(0, m.start() - 60):m.start()].lower() for n in _NEG_CONTEXT))
         for h in sorted(hits):
             findings.append(f"{os.path.basename(p)}: source-derived knowledge '{h}'")
     return findings

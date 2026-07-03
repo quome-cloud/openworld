@@ -1,0 +1,3 @@
+{"level_index": 1, "subgoal": null, "found": true, "ts": null}
+{"level_index": 2, "subgoal": null, "found": true, "ts": null}
+{"level_index": 2, "subgoal": {"type": "reach", "color": 5}, "found": false, "ts": null}

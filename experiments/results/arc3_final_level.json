@@ -1,0 +1,110 @@
+{
+ "experiment": "E129 focused final-level source-free solver",
+ "per_game": {
+  "m0r0": {
+   "win": 6,
+   "banked_levels": 6,
+   "agent_best": 6,
+   "full": true
+  },
+  "tu93": {
+   "win": 9,
+   "banked_levels": 9,
+   "agent_best": 9,
+   "full": true
+  },
+  "ka59": {
+   "win": 7,
+   "banked_levels": 6,
+   "agent_best": 6,
+   "full": false
+  },
+  "wa30": {
+   "win": 9,
+   "banked_levels": 7,
+   "agent_best": 7,
+   "full": false
+  },
+  "bp35": {
+   "win": 9,
+   "banked_levels": 7,
+   "agent_best": -1,
+   "full": false
+  },
+  "dc22": {
+   "win": 6,
+   "banked_levels": 4,
+   "agent_best": 4,
+   "full": false
+  },
+  "sc25": {
+   "win": 6,
+   "banked_levels": 6,
+   "agent_best": -1,
+   "full": true
+  },
+  "lf52": {
+   "win": 10,
+   "banked_levels": 6,
+   "agent_best": -1,
+   "full": false
+  },
+  "g50t": {
+   "win": 7,
+   "banked_levels": 5,
+   "agent_best": 5,
+   "full": false
+  },
+  "su15": {
+   "win": 9,
+   "banked_levels": 8,
+   "agent_best": 8,
+   "full": false
+  },
+  "ls20": {
+   "win": 7,
+   "banked_levels": 2,
+   "agent_best": -1,
+   "full": false
+  },
+  "s5i5": {
+   "win": 8,
+   "banked_levels": 2,
+   "agent_best": 2,
+   "full": false
+  },
+  "sk48": {
+   "win": 8,
+   "banked_levels": 2,
+   "agent_best": 2,
+   "full": false
+  },
+  "sp80": {
+   "win": 6,
+   "banked_levels": 3,
+   "agent_best": 3,
+   "full": false
+  },
+  "tn36": {
+   "win": 7,
+   "banked_levels": 2,
+   "agent_best": 2,
+   "full": false
+  },
+  "vc33": {
+   "win": 7,
+   "banked_levels": 4,
+   "agent_best": 4,
+   "full": false
+  },
+  "r11l": {
+   "win": 6,
+   "banked_levels": 3,
+   "agent_best": 3,
+   "full": false
+  }
+ },
+ "n_full_sourcefree": 11,
+ "total_levels": 138,
+ "total_possible": 183
+}

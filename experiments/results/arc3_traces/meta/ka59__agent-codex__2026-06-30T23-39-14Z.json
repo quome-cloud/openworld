@@ -8,5 +8,7 @@
  "transcript_format": "codex_exec_plaintext_gz",
  "levels": 3,
  "win": 7,
- "experiment": "e140_fullbudget"
+ "experiment": "e140_fullbudget",
+ "env_version": "38d34dbb",
+ "env_version_source": "backfill:arc3_env_versions.json (baseline 2026-07-03T22:44:50Z)"
 }

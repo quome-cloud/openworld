@@ -111,6 +111,8 @@
   "actions": "directional 1-5,7 + click ACTION6(x,y)"
  },
  "dataset_version": "1.0",
+ "env_version": "305b61c3",
+ "env_version_source": "backfill:arc3_env_versions.json (baseline 2026-07-03T22:44:50Z)",
  "outcome": null,
  "memory_tainted": true,
  "memory_tainted_reason": "agent loaded source-derived memory note (purged 2026-06-26); excluded from fair source-free count"

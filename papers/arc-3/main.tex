@@ -883,6 +883,21 @@ apples-to-apples: both pipelines are scored on the identical official metric ove
 baselines, and neither side's RHAE folds in discovery cost, so the $\sim$54\% path-efficiency margin is
 a like-for-like comparison of the \emph{same} economy axis.
 
+\medskip
+\noindent A deeper caveat follows from \emph{how} a code-world-model agent perceives. Its native
+modality is the code it writes: it does not observe the board the way a human sees a screen, but
+\emph{through} the parser and simulator it synthesizes, and it ``acts'' by searching that simulator
+offline. The replayed action sequence is therefore the compiled \emph{readout} of a search, not a
+stream of embodied decisions commensurable with a human's---and it is produced at a code-writing
+throughput no human approaches. Read as a comparison of \emph{process} (how efficiently a solver
+\emph{thinks}), a human-action-relative score is a category error for such an agent: the units are
+incommensurable by construction. RHAE survives only as an \emph{artifact} comparator---a
+method-agnostic measure of how tight the submitted \emph{path} is, indifferent to the process that
+produced it (which is exactly why a leaderboard can score humans, RL nets, and code-world-model agents
+on it uniformly). The efficiency axis that \emph{is} commensurable for these agents is the discovery
+cost itself (Fig.~\ref{fig:disccost}), measured in their own currency---LLM tokens, simulator rollouts,
+dollars---rather than in human-action equivalents.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/arc3_rhae_scope.png}

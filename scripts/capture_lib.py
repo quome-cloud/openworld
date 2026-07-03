@@ -192,6 +192,23 @@ def git_info(root=ROOT):
             "dirty": dirty, "remote": _q(["config", "--get", "remote.origin.url"])}
 
 
+def env_version(game, root=ROOT):
+    """The ARC-AGI-3 engine version hash for `game` -- the `environment_files/<game>/<hash>/` directory
+    name the engine loaded this run. HARNESS METADATA ONLY: reads the directory NAME, never the game
+    source (source-free is preserved). Recording it per run lets a later 'did the game change?' question
+    be answered by a hash diff instead of memory (the env source is regenerable/reversionable upstream)."""
+    import glob
+    r = str(root)
+    for base in (os.path.join(r, "experiments", ".sandbox_env", game, "environment_files", game),
+                 os.path.join(r, "experiments", "environment_files", game),
+                 os.path.join(r, "environment_files", game)):
+        dirs = sorted(d for d in glob.glob(base + "/*/") if os.path.isdir(d))
+        if dirs:
+            return os.path.basename(dirs[-1].rstrip("/"))
+    dirs = sorted(glob.glob(os.path.join(r, "scratch_arc", "*", "environment_files", game, "*/")))
+    return os.path.basename(dirs[-1].rstrip("/")) if dirs else None
+
+
 def file_provenance(paths):
     """sha256 + size + mtime for the scripts that produced a run (pipeline reproducibility)."""
     out = {}

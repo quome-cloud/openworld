@@ -140,7 +140,7 @@ rec = {
     "/Users/jim/Desktop/openworld/scripts/run_arc_agent_sandbox.sh",
     "/Users/jim/Desktop/openworld/experiments/arc3_sandbox.py",
     "/Users/jim/Desktop/openworld/scripts/audit_sandbox.py"]),
-  "benchmark": c.BENCHMARK, "dataset_version": c.DATASET_VERSION,
+  "benchmark": c.BENCHMARK, "dataset_version": c.DATASET_VERSION, "env_version": c.env_version(game),
   "outcome": None,   # filled by the OpenWorld-verified banker/finalizer
 }
 c.write_meta(rid, rec)

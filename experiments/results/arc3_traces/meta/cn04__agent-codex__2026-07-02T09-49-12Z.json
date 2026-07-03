@@ -1,0 +1,16 @@
+{
+ "run_id": "cn04__agent-codex__2026-07-02T09-49-12Z",
+ "game": "cn04",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782984598,
+ "ended": 1782985752,
+ "wall_s": 1154,
+ "exit_code": 0,
+ "levels": 6,
+ "win": 6,
+ "experiment": "e140_fullbudget"
+}

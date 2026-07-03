@@ -1,0 +1,16 @@
+{
+ "run_id": "m0r0__agent-codex__2026-07-01T10-20-45Z",
+ "game": "m0r0",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782894160,
+ "ended": 1782901245,
+ "wall_s": 7085,
+ "exit_code": 0,
+ "levels": 2,
+ "win": 6,
+ "experiment": "e140_fullbudget"
+}

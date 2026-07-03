@@ -1,0 +1,136 @@
+{
+ "run_id": "su15__ewm-toolkit__2026-06-30T08-12-36Z",
+ "game": "su15",
+ "tier": "ewm-toolkit",
+ "method": "ewm-toolkit",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_ewm_toolkit.sh",
+ "started_at": "2026-06-30T08:12:36Z",
+ "ended_at": "2026-06-30T09:01:55Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": null,
+  "win": null,
+  "full": false,
+  "wrote_solution": false
+ },
+ "action_stats": {
+  "n_actions": 0,
+  "n_click": 0,
+  "n_directional": 0
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.196",
+  "session_id": "40ac16dc-3844-4a8c-b73d-30a8e86f3b4b",
+  "num_turns": 126,
+  "n_messages": 1498,
+  "n_tool_calls": 125,
+  "cost_usd": 17.15223,
+  "usage": {
+   "input_tokens": 9194,
+   "cache_creation_input_tokens": 264748,
+   "cache_read_input_tokens": 20252264,
+   "output_tokens": 167140,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 264748,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 2121,
+     "cache_read_input_tokens": 269855,
+     "cache_creation_input_tokens": 375,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 375
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "is_error": false,
+  "result_text": "I've run an extensive investigation (44 experiments) on su15 L8\u2192L9. Here's the honest outcome.\n\n## Result: L8 not cracked \u2014 but the wall is now precisely characterized\n\nI did **not** raise `g.levels` to 9. Per research-integrity rules I did **not** fabricate a `solved.json` \u2014 `frontier.json` (verified, still reaches L8) remains the deepest solution.\n\n## What I discovered (substantial new mechanics, recorded in memory)\n\n**Movement is a teleport, not a drift.** A click makes the nearest piece *jump exactly to the clicked cell* (grab radius \u22489). Merge = click exactly on one tier1's cell \u2192 the other tier1 jumps onto it. This corrects the old \"pulls ~7 toward\" model.\n\n**The goal-spoil mechanic (new, decisive).** All three color-9 goals flip to **color-2 simultaneously** the moment an enemy crosses the goal row (~row 41) \u2014 which normally coincides with the block being demoted (enemies converge to eat it). If you keep the block *alive* (lure it + enemies upward), goals stay color-9 for 10+ clicks. Since the win-frame invariant has color-9 goals, but the cc-indicator wants tier4 (only obtainable by demoting), there's a genuine tension.\n\n**2-goal is definitively NOT a win.** I placed tier4@TL **and** tier2@BL *both cleanly confirmed in-frame* (goals read `[12,15,9]`, only 7 clicks used) \u2014 no level-up. Same for tier4@BR+tier2@BL. The third goal (the sparse color-13 glyph) is mandatory.\n\n**The budget is NOT the binding constraint.** The two makeable pieces (tier2 via merge, tier4 via demote) land in ~7 clicks with ~8 to spare. The sole wall is the **impossible color-13 piece**.\n\n**color-13 cannot be manufactured.** Enemy 7\u219214 is reproducible (ram a *small* piece through an enemy; a block-ram doesn't even work). But 14\u219213 failed across **9 distinct triggers** (ram-push, blob-merge, starvation, 14-onto-block/goal, 7\u219414 collision, force-14-eats-piece, block-ram, wall-pinned re-ram). color-14 is a slow pushable piece that blobs (8\u219216px) and chases pieces.\n\n## Best lead for next se",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_thinking_blocks": 67,
+  "n_text_blocks": 53,
+  "tool_calls_by_name": {
+   "Bash": 64,
+   "Read": 7,
+   "Write": 48,
+   "Edit": 6
+  },
+  "n_user_msgs": 125,
+  "api_error_status": null,
+  "duration_ms": 2957948,
+  "duration_api_ms": 2732842,
+  "ttft_ms": 2235,
+  "tokens": {
+   "input": 9194,
+   "output": 167140,
+   "cache_creation": 264748,
+   "cache_read": 20252264,
+   "total": 20693346,
+   "source": "result_block"
+  },
+  "cost_basis": "result_block"
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.196",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 4987,
+  "lines": 62,
+  "sha256": "a23efef7848ef252440162880569e29c042ef3cde4f70ea999e0ff45e942c42f",
+  "approx_tokens": 1246
+ },
+ "prompt_file": "prompts/su15__ewm-toolkit__2026-06-30T08-12-36Z.md",
+ "solution_file": null,
+ "transcript_file": "transcripts/su15__ewm-toolkit__2026-06-30T08-12-36Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "34e69397050f0b08df4e8df3dcd5ba5b8ce8b5cb",
+   "branch": "e137-schema-induction",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_ewm_toolkit.sh": {
+    "sha256": "e92b533006a5b5909c29a0ce6f5901a666aaf6a176344638aaaa52537f5f6cc6",
+    "bytes": 8968,
+    "mtime": "2026-06-30T08:11:59Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T09:01:55Z"
+}

@@ -1,0 +1,16 @@
+{
+ "run_id": "ls20__agent-codex__2026-07-03T18-07-36Z",
+ "game": "ls20",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1783092239,
+ "ended": 1783102056,
+ "wall_s": 9817,
+ "exit_code": 0,
+ "levels": 4,
+ "win": 7,
+ "experiment": "e140_fullbudget"
+}

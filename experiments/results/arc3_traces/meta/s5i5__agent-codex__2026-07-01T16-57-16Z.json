@@ -1,0 +1,16 @@
+{
+ "run_id": "s5i5__agent-codex__2026-07-01T16-57-16Z",
+ "game": "s5i5",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782915657,
+ "ended": 1782925036,
+ "wall_s": 9379,
+ "exit_code": 137,
+ "levels": 4,
+ "win": 8,
+ "experiment": "e140_fullbudget"
+}

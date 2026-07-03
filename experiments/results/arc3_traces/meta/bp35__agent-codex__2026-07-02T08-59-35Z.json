@@ -1,0 +1,16 @@
+{
+ "run_id": "bp35__agent-codex__2026-07-02T08-59-35Z",
+ "game": "bp35",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782976068,
+ "ended": 1782982775,
+ "wall_s": 6707,
+ "exit_code": 0,
+ "levels": 9,
+ "win": 9,
+ "experiment": "e140_fullbudget"
+}

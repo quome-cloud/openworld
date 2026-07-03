@@ -1,0 +1,18 @@
+=== E140 source-free full-games overlap ===
+Games fully solved by EVERY arm (7):
+  ar25, dc22, ft09, ka59, lp85, su15, tu93
+opus-only full (9):
+  cd82, cn04, g50t, m0r0, re86, s5i5, sb26, sc25, tr87
+codex-only full (0):
+  (none)
+
+Union (any arm full): 16
+  ar25, cd82, cn04, dc22, ft09, g50t, ka59, lp85, m0r0, re86, s5i5, sb26, sc25, su15, tr87, tu93
+
+Shared walls (no arm full, within ±1 level, 6):
+  lf52   — 6/5 of 10
+  ls20   — 5/4 of 7
+  r11l   — 4/4 of 6
+  sp80   — 4/3 of 6
+  tn36   — 2/2 of 7
+  vc33   — 4/3 of 7

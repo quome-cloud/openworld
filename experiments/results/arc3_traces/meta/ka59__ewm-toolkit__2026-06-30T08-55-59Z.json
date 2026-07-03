@@ -1,0 +1,135 @@
+{
+ "run_id": "ka59__ewm-toolkit__2026-06-30T08-55-59Z",
+ "game": "ka59",
+ "tier": "ewm-toolkit",
+ "method": "ewm-toolkit",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_ewm_toolkit.sh",
+ "started_at": "2026-06-30T08:55:59Z",
+ "ended_at": "2026-06-30T09:04:01Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": 6,
+  "win": 7,
+  "full": false,
+  "wrote_solution": true
+ },
+ "action_stats": {
+  "n_actions": 313,
+  "n_click": 10,
+  "n_directional": 303
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.196",
+  "session_id": "2ae83447-7746-41ab-84eb-886744ed19dc",
+  "num_turns": 22,
+  "n_messages": 252,
+  "n_tool_calls": 21,
+  "cost_usd": 2.527818,
+  "usage": {
+   "input_tokens": 6620,
+   "cache_creation_input_tokens": 94084,
+   "cache_read_input_tokens": 1596256,
+   "output_tokens": 30230,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 94084,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 937,
+     "cache_read_input_tokens": 97001,
+     "cache_creation_input_tokens": 1161,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 1161
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "is_error": false,
+  "result_text": "## Summary\n\nI worked the final level (L7) of **ka59** using the executable-world-model recipe with the new E137/E134 tooling, and re-confirmed the wall \u2014 now for the 10th independent time, but this session added the genuinely-new angles prior sessions lacked.\n\n**What I verified (all fresh-process, source-free):**\n\n1. **Frontier \u2192 L6 valid.** The 313-action frontier reproduces `levels=6, win=7, done=False`. Saved `solved.json` at the verified deepest level (L6/7). reset()+replay is faithful for the frontier, but stepping *past* it poisons the next replay \u2014 fresh process per branch, as memory recorded.\n\n2. **Multi-lens (the one new tool) adds no signal.** Used `composite_key`/`meter`/`palette` lenses that all 9 prior object-only sessions lacked. The `meter` lens shows no row-0 timer; the `+` (color 11) never moves and no wall cell ever opens under any probe; the color-13 d-blocks only *animate* in place (size cycles 36\u21926\u219236), never relocate when pushed \u2014 so the L6 round-trip (\"push the d-block to redirect the conduit\") is unavailable here.\n\n3. **Per-column ceiling sweep (real env).** The active ring traverses the row-60 corridor across cols 55\u21921 freely, but in the `+` columns (cols 4\u201322) it's walled at **row 54** \u2014 no path up toward box B (rows 35\u201345) or the `+` (row 13).\n\n4. **Static flood proof \u2014 three disjoint components.** An optimistic single-cell flood (a superset of any ring's reach) from the active ring covers **only rows 39\u201363**, with zero `+` cells and zero box-B cells. The `+` lives in a *separate* component (rows 0\u201317), and box B is unreachable. The only bridging mechanic (conduits) sits at cols 42\u201350 and preserves column \u2014 it never lands in the `+`/box-B columns (8\u201318).\n\n**On the new E137 hint:** the `goal_condition_schema` win-invariant is colours `[0,4,14]` (no 11). But that's just the all-levels invariant (not every prior level had a `+`), and it cuts both ways: the `+` is provably undeliverable **and** the prior 8\u00d7 result (\"both rings placed \u2192 still l",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_thinking_blocks": 16,
+  "n_text_blocks": 15,
+  "tool_calls_by_name": {
+   "Bash": 15,
+   "Edit": 2,
+   "Read": 4
+  },
+  "n_user_msgs": 21,
+  "api_error_status": null,
+  "duration_ms": 481061,
+  "duration_api_ms": 442638,
+  "ttft_ms": 2981,
+  "tokens": {
+   "input": 6620,
+   "output": 30230,
+   "cache_creation": 94084,
+   "cache_read": 1596256,
+   "total": 1727190,
+   "source": "result_block"
+  },
+  "cost_basis": "result_block"
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.196",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 4987,
+  "lines": 62,
+  "sha256": "9a56cd381977f5785c66dbb655ecfee5c76464790d80836878fe7b605763756e",
+  "approx_tokens": 1246
+ },
+ "prompt_file": "prompts/ka59__ewm-toolkit__2026-06-30T08-55-59Z.md",
+ "solution_file": "solutions/ka59__ewm-toolkit__2026-06-30T08-55-59Z.json",
+ "transcript_file": "transcripts/ka59__ewm-toolkit__2026-06-30T08-55-59Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "34e69397050f0b08df4e8df3dcd5ba5b8ce8b5cb",
+   "branch": "e137-schema-induction",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_ewm_toolkit.sh": {
+    "sha256": "e92b533006a5b5909c29a0ce6f5901a666aaf6a176344638aaaa52537f5f6cc6",
+    "bytes": 8968,
+    "mtime": "2026-06-30T08:11:59Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T09:04:01Z"
+}

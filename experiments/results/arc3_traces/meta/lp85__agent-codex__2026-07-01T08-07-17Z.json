@@ -1,0 +1,16 @@
+{
+ "run_id": "lp85__agent-codex__2026-07-01T08-07-17Z",
+ "game": "lp85",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782888024,
+ "ended": 1782893237,
+ "wall_s": 5213,
+ "exit_code": 0,
+ "levels": 8,
+ "win": 8,
+ "experiment": "e140_fullbudget"
+}

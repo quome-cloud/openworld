@@ -1,0 +1,16 @@
+{
+ "run_id": "ft09__agent-codex__2026-07-01T01-30-26Z",
+ "game": "ft09",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782866194,
+ "ended": 1782869426,
+ "wall_s": 3232,
+ "exit_code": 0,
+ "levels": 6,
+ "win": 6,
+ "experiment": "e140_fullbudget"
+}

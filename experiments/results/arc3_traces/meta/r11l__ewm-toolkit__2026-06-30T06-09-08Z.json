@@ -1,0 +1,119 @@
+{
+ "run_id": "r11l__ewm-toolkit__2026-06-30T06-09-08Z",
+ "game": "r11l",
+ "tier": "ewm-toolkit",
+ "method": "ewm-toolkit",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_ewm_toolkit.sh",
+ "started_at": "2026-06-30T06:09:08Z",
+ "ended_at": "2026-06-30T07:39:08Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": null,
+  "win": null,
+  "full": false,
+  "wrote_solution": false
+ },
+ "action_stats": {
+  "n_actions": 0,
+  "n_click": 0,
+  "n_directional": 0
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.196",
+  "session_id": "d156824b-98e5-4934-b92b-f906cb477123",
+  "num_turns": null,
+  "n_messages": 2128,
+  "n_tool_calls": 161,
+  "cost_usd": null,
+  "usage": {
+   "input_tokens": 34378,
+   "output_tokens": 5101,
+   "cache_creation_input_tokens": 761992,
+   "cache_read_input_tokens": 62657316,
+   "n_calls": 330
+  },
+  "is_error": null,
+  "result_text": null,
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_thinking_blocks": 97,
+  "n_text_blocks": 72,
+  "tool_calls_by_name": {
+   "Bash": 102,
+   "Write": 22,
+   "Edit": 30,
+   "ToolSearch": 1,
+   "TaskStop": 4,
+   "Read": 2
+  },
+  "n_user_msgs": 161,
+  "tokens": {
+   "input": 34378,
+   "output": 5101,
+   "cache_creation": 761992,
+   "cache_read": 62657316,
+   "total": 63458787,
+   "source": "reconstructed_from_messages"
+  },
+  "cost_basis": "estimated_from_tokens",
+  "cost_usd_estimated": 109.1716,
+  "pricing_assumed": {
+   "model": "claude-opus-4-x",
+   "input": 15.0,
+   "output": 75.0,
+   "cache_write": 18.75,
+   "cache_read": 1.5
+  }
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.196",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 4268,
+  "lines": 53,
+  "sha256": "dfd106002722a1ea0c7ddfa31023d07a993c0d0a870958be2e5b4d2ab1ecce65",
+  "approx_tokens": 1067
+ },
+ "prompt_file": "prompts/r11l__ewm-toolkit__2026-06-30T06-09-08Z.md",
+ "solution_file": null,
+ "transcript_file": "transcripts/r11l__ewm-toolkit__2026-06-30T06-09-08Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "15fea114b3c3e8653c36abf492e19d025e1ae329",
+   "branch": "e135-forming-figure",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_ewm_toolkit.sh": {
+    "sha256": "5f4ece3b56b3aec27e41c5aa259aee51b0eaee3df8d73418fb67c06f202d76e2",
+    "bytes": 7505,
+    "mtime": "2026-06-30T06:52:07Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T07:39:09Z"
+}

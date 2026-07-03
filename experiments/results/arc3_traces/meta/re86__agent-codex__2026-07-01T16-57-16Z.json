@@ -1,0 +1,16 @@
+{
+ "run_id": "re86__agent-codex__2026-07-01T16-57-16Z",
+ "game": "re86",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782907644,
+ "ended": 1782925036,
+ "wall_s": 17392,
+ "exit_code": 137,
+ "levels": 6,
+ "win": 8,
+ "experiment": "e140_fullbudget"
+}

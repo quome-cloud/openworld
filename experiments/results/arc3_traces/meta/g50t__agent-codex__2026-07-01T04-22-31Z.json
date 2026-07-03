@@ -1,0 +1,16 @@
+{
+ "run_id": "g50t__agent-codex__2026-07-01T04-22-31Z",
+ "game": "g50t",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782869429,
+ "ended": 1782879751,
+ "wall_s": 10322,
+ "exit_code": 0,
+ "levels": 6,
+ "win": 7,
+ "experiment": "e140_fullbudget"
+}

@@ -1,0 +1,117 @@
+{
+ "run_id": "s5i5__ewm-toolkit__2026-06-30T16-05-14Z",
+ "game": "s5i5",
+ "tier": "ewm-toolkit",
+ "method": "ewm-toolkit",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_ewm_toolkit.sh",
+ "started_at": "2026-06-30T16:05:14Z",
+ "ended_at": "2026-06-30T16:05:17Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": null,
+  "win": null,
+  "full": false,
+  "wrote_solution": false
+ },
+ "action_stats": {
+  "n_actions": 0,
+  "n_click": 0,
+  "n_directional": 0
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.196",
+  "session_id": "009e9d3c-0368-4295-a6a7-f23585b8292f",
+  "num_turns": 1,
+  "n_messages": 6,
+  "n_tool_calls": 0,
+  "cost_usd": 0,
+  "usage": {
+   "input_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 0,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "",
+   "iterations": [],
+   "speed": "standard"
+  },
+  "is_error": true,
+  "result_text": "API Error: Server is temporarily limiting requests (not your usage limit) \u00b7 Rate limited",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_text_blocks": 1,
+  "api_error_status": 429,
+  "duration_ms": 2165,
+  "duration_api_ms": 0,
+  "ttft_ms": null,
+  "tool_calls_by_name": {},
+  "tokens": {
+   "input": 0,
+   "output": 0,
+   "cache_creation": 0,
+   "cache_read": 0,
+   "total": 0,
+   "source": "result_block"
+  },
+  "cost_basis": "result_block"
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.196",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 4269,
+  "lines": 54,
+  "sha256": "626b8cfca97a09f53058df2926d1cc414940b38d5818842f0df76e2e34f20a76",
+  "approx_tokens": 1067
+ },
+ "prompt_file": "prompts/s5i5__ewm-toolkit__2026-06-30T16-05-14Z.md",
+ "solution_file": null,
+ "transcript_file": "transcripts/s5i5__ewm-toolkit__2026-06-30T16-05-14Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "39065ba54db4e8e80b30d36f9ebefe5304f2f23c",
+   "branch": "e137-schema-induction",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_ewm_toolkit.sh": {
+    "sha256": "e92b533006a5b5909c29a0ce6f5901a666aaf6a176344638aaaa52537f5f6cc6",
+    "bytes": 8968,
+    "mtime": "2026-06-30T08:11:59Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T16:05:17Z"
+}

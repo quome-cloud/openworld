@@ -1,0 +1,16 @@
+{
+ "run_id": "cd82__agent-codex__2026-07-02T09-29-46Z",
+ "game": "cd82",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "started": 1782982795,
+ "ended": 1782984586,
+ "wall_s": 1791,
+ "exit_code": 0,
+ "levels": 6,
+ "win": 6,
+ "experiment": "e140_fullbudget"
+}

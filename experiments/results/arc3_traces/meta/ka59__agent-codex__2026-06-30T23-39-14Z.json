@@ -1,0 +1,12 @@
+{
+ "run_id": "ka59__agent-codex__2026-06-30T23-39-14Z",
+ "game": "ka59",
+ "tier": "agent-codex",
+ "model": "gpt-5.5",
+ "reasoning_effort": "xhigh",
+ "source_free": true,
+ "transcript_format": "codex_exec_plaintext_gz",
+ "levels": 3,
+ "win": 7,
+ "experiment": "e140_fullbudget"
+}

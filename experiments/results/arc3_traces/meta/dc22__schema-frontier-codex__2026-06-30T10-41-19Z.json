@@ -1,0 +1,95 @@
+{
+ "run_id": "dc22__schema-frontier-codex__2026-06-30T10-41-19Z",
+ "game": "dc22",
+ "tier": "schema-frontier-codex",
+ "method": "schema-frontier-codex",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_schema_codex.sh",
+ "started_at": "2026-06-30T10:41:19Z",
+ "ended_at": "2026-06-30T11:32:50Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": null,
+  "win": null,
+  "full": false,
+  "wrote_solution": false
+ },
+ "action_stats": {
+  "n_actions": 0,
+  "n_click": 0,
+  "n_directional": 0
+ },
+ "transcript_summary": {
+  "model": null,
+  "claude_code_version": null,
+  "session_id": null,
+  "num_turns": null,
+  "n_messages": 0,
+  "n_tool_calls": 0,
+  "cost_usd": null,
+  "usage": null,
+  "is_error": null,
+  "result_text": null,
+  "fast_mode_state": null,
+  "permission_mode": null,
+  "tool_calls_by_name": {},
+  "tokens": {
+   "input": null,
+   "output": null,
+   "cache_creation": null,
+   "cache_read": null,
+   "total": null,
+   "source": "none"
+  },
+  "cost_basis": "unknown"
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": null,
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": null,
+  "fast_mode_state": null,
+  "permission_mode": null
+ },
+ "prompt_stats": {
+  "chars": 2570,
+  "lines": 43,
+  "sha256": "1cb237f3f15550ef833e4eedbf9a0485c83c04bfbd8a5ecaf476b2a0a2ef0345",
+  "approx_tokens": 642
+ },
+ "prompt_file": "prompts/dc22__schema-frontier-codex__2026-06-30T10-41-19Z.md",
+ "solution_file": null,
+ "transcript_file": "transcripts/dc22__schema-frontier-codex__2026-06-30T10-41-19Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "39065ba54db4e8e80b30d36f9ebefe5304f2f23c",
+   "branch": "e137-schema-induction",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_schema_codex.sh": {
+    "sha256": "8bf7e638bb05402ce0807cf558197786522733a259bda2c8398fdd413ee1c17f",
+    "bytes": 5581,
+    "mtime": "2026-06-30T07:53:02Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T11:32:51Z"
+}

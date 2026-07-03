@@ -1,0 +1,136 @@
+{
+ "run_id": "sp80__ewm-toolkit__2026-06-30T16-43-27Z",
+ "game": "sp80",
+ "tier": "ewm-toolkit",
+ "method": "ewm-toolkit",
+ "source_free": true,
+ "fairness": "source-free (process-isolated SandboxGame; audit-gated)",
+ "runner": "run_arc_agent_ewm_toolkit.sh",
+ "started_at": "2026-06-30T16:43:27Z",
+ "ended_at": "2026-06-30T17:36:58Z",
+ "dataset_version": "1.0",
+ "benchmark": {
+  "name": "ARC-AGI-3",
+  "grid": "64x64",
+  "colors": 16,
+  "actions": "directional 1-5,7 + click ACTION6(x,y)"
+ },
+ "outcome": {
+  "levels": null,
+  "win": null,
+  "full": false,
+  "wrote_solution": false
+ },
+ "action_stats": {
+  "n_actions": 0,
+  "n_click": 0,
+  "n_directional": 0
+ },
+ "transcript_summary": {
+  "model": "claude-opus-4-8",
+  "claude_code_version": "2.1.196",
+  "session_id": "98bf2663-223f-457f-9d78-731fe53f6b8d",
+  "num_turns": 60,
+  "n_messages": 1942,
+  "n_tool_calls": 59,
+  "cost_usd": 13.524972499999995,
+  "usage": {
+   "input_tokens": 7329,
+   "cache_creation_input_tokens": 305048,
+   "cache_read_input_tokens": 8988845,
+   "output_tokens": 237737,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 305048,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "not_available",
+   "iterations": [
+    {
+     "input_tokens": 2,
+     "output_tokens": 13261,
+     "cache_read_input_tokens": 308243,
+     "cache_creation_input_tokens": 429,
+     "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 429
+     },
+     "type": "message"
+    }
+   ],
+   "speed": "standard"
+  },
+  "is_error": true,
+  "result_text": "You've hit your session limit \u00b7 resets 11:50am (America/Los_Angeles)",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions",
+  "n_thinking_blocks": 33,
+  "n_text_blocks": 31,
+  "tool_calls_by_name": {
+   "Read": 7,
+   "Bash": 30,
+   "Write": 21,
+   "Edit": 1
+  },
+  "n_user_msgs": 59,
+  "api_error_status": 429,
+  "duration_ms": 3208032,
+  "duration_api_ms": 3112521,
+  "ttft_ms": null,
+  "tokens": {
+   "input": 7329,
+   "output": 237737,
+   "cache_creation": 305048,
+   "cache_read": 8988845,
+   "total": 9538959,
+   "source": "result_block"
+  },
+  "cost_basis": "result_block"
+ },
+ "solver_meta": null,
+ "model_config": {
+  "requested_model": "claude-opus-4-8",
+  "resolved_model": "claude-opus-4-8",
+  "effort": "high",
+  "fallback_model": null,
+  "claude_code_version": "2.1.196",
+  "fast_mode_state": "off",
+  "permission_mode": "bypassPermissions"
+ },
+ "prompt_stats": {
+  "chars": 4269,
+  "lines": 54,
+  "sha256": "9e647bdd4a24a483b69995b02201f3d8502af53fb537e9609126e5bed46c0b5a",
+  "approx_tokens": 1067
+ },
+ "prompt_file": "prompts/sp80__ewm-toolkit__2026-06-30T16-43-27Z.md",
+ "solution_file": null,
+ "transcript_file": "transcripts/sp80__ewm-toolkit__2026-06-30T16-43-27Z.jsonl",
+ "provenance": {
+  "host": {
+   "hostname": "Mac.lan",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "system": "Darwin",
+   "machine": "arm64",
+   "python": "3.14.6"
+  },
+  "git": {
+   "commit": "39065ba54db4e8e80b30d36f9ebefe5304f2f23c",
+   "branch": "e137-schema-induction",
+   "dirty": true,
+   "remote": "https://github.com/quome-cloud/openworld.git"
+  },
+  "scripts": {
+   "run_arc_agent_ewm_toolkit.sh": {
+    "sha256": "e92b533006a5b5909c29a0ce6f5901a666aaf6a176344638aaaa52537f5f6cc6",
+    "bytes": 8968,
+    "mtime": "2026-06-30T08:11:59Z"
+   }
+  }
+ },
+ "captured_at": "2026-06-30T17:36:59Z"
+}

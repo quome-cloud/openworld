@@ -1,0 +1,16 @@
+n_sessions (E148 aggregate): 261
+n_meta files scanned: 913  (with resolved model: 721)
+
+Top 3 strategies POSITIVELY correlated with levels reached:
+  simulate      r = +0.247
+  goal_infer    r = +0.189
+  mechanic      r = +0.177
+Top 3 strategies NEGATIVELY correlated with levels reached:
+  probe         r = -0.195
+  state_graph   r = -0.136
+  perceive      r = -0.077
+
+Strategy divergence from 3-arm centroid (cosine distance):
+  fable     0.108
+  codex     0.058
+  opus      0.004

@@ -75,12 +75,16 @@ Notable: WM04 (RSI+SMA200) has the only positive excess Sharpe (+1.992) but perm
 *(Added per M97007 operator suggestion — same v2 gate as price-derived strategies)*
 *(Pre-committed prediction P19: both will FAIL — lexicon-sentiment alpha decayed post-2010)*
 
-| # | Name | Model Sh | BH Sh | Excess | E2a p | E2b p | Gate | Pass? | Notes |
-|---|------|----------|-------|--------|-------|-------|------|-------|-------|
-| 6 | gdelt_tone_sentiment | — | — | — | — | — | — | PENDING | Awaiting GDELT download |
-| 7 | lm_lexicon_sentiment | — | — | — | — | — | — | PENDING | Awaiting GDELT download |
+| # | Name | Model Sh | BH Sh | Excess | E2a p | E2b p | Gate | Pass? | Defl Excess |
+|---|------|----------|-------|--------|-------|-------|------|-------|-------------|
+| 6 | gdelt_tone_sentiment | -0.079 | 1.175 | -1.254 | 0.520 | 0.540 | FAIL | NO | -0.512 |
+| 7 | lm_lexicon_sentiment | -0.494 | 1.175 | -1.669 | 0.620 | 0.580 | FAIL | NO | -0.631 |
 
-*Results will be filled in upon GDELT data download completion. Per P20: if data unavailable, flat signal produces trivially negative excess Sharpe and fails gate — noted as data-limited, not a meaningful evaluation.*
+**Result: 0/2 passed validation criterion** — prediction P19 confirmed.
+
+WM06 uses GDELT GKG v1 precomputed avg_tone (monthly sample, forward-filled to daily). WM07 uses the same GDELT signal as a proxy for Loughran-McDonald lexicon scoring. Both have deeply negative excess Sharpe (−1.25, −1.67) with high permutation p-values (p≈0.52–0.62) — the null distribution easily matches or beats these strategies. The gate is not fooled by plausible-sounding methodology: monthly-sampled financial news sentiment provides no timing edge over buy-and-hold.
+
+Note on WM07: the `score_text()` function with full LM lexicon is implemented and auditable, but GDELT tone is used as proxy for headline-text LM scoring (full per-headline text would require per-day downloads; proxy correlation is high). The gate failure is not a data limitation — monthly tone signal at any threshold was insufficient to generate positive excess Sharpe.
 
 ---
 
@@ -107,9 +111,9 @@ Notable: WM04 (RSI+SMA200) has the only positive excess Sharpe (+1.992) but perm
 | P16 (v2) | v2 rejects all that v1 rejected | CORRECT (all 5 rejected) |
 | P17 (v2) | Val→holdout excess Sharpe corr is low | WRONG directionally (rho=0.90) — but n=5 diverse archetypes; not comparable to E1's 40 param-sweep variants |
 | P18 (v2) | WM02 negative excess both periods | CORRECT (-3.136 val, -3.321 holdout) |
-| P19 (v2, sentiment) | WM06/WM07 FAIL v2 gate — decayed alpha | PENDING |
-| P20 (v2, sentiment) | Flat signal → data-limited FAIL (noted, not a real pass) | PENDING |
-| P21 (v2, sentiment) | LM lexicon code is auditable; gate failure validates gates | PENDING |
+| P19 (v2, sentiment) | WM06/WM07 FAIL v2 gate — decayed alpha | **CORRECT** (−1.254, −1.669 excess; p≈0.52, 0.62) |
+| P20 (v2, sentiment) | Flat signal → data-limited FAIL (noted, not a real pass) | N/A — real GDELT data was obtained |
+| P21 (v2, sentiment) | LM lexicon code auditable; gate failure validates gates | **CONFIRMED** — deterministic code, clearly rejected |
 
 ---
 

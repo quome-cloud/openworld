@@ -1,0 +1,17 @@
+{
+  "name": "rsi_momentum_divergence",
+  "file": "wm_04_rsi_divergence.py",
+  "val_sharpe_cost_adj": 3.1664397092656515,
+  "val_bh_sharpe": 1.1749324075514136,
+  "val_excess_sharpe": 1.991507301714238,
+  "gate_e2a_passed": false,
+  "gate_e2a_pvalue": 0.52,
+  "gate_e2b_passed": false,
+  "gate_e2b_pvalue": 0.74,
+  "perturbation_gate_passed": false,
+  "passes_validation_criterion": false,
+  "deflated_excess_sharpe": 0.995753650857119,
+  "n_trades": 64,
+  "total_return": 0.3988496862014981,
+  "max_drawdown": -0.029471285895299803
+}

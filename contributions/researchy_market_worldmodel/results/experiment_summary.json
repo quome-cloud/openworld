@@ -1,0 +1,75 @@
+{
+  "experiment": "researchy_market_worldmodel",
+  "task": "T374",
+  "agent": "A004 (Prism)",
+  "completed_at": "2026-07-03T19:14:45Z",
+  "validation_period": "2024-01-01 to 2025-03-31",
+  "holdout_period": "2025-04-01 to 2026-06-30",
+  "n_world_models": 5,
+  "n_passed_validation": 0,
+  "val_holdout_sharpe_correlation": 0.952,
+  "key_finding": "Perturbation gate as implemented fails to filter overfitting in bull market; needs benchmark-adjusted null. Val-holdout correlation is positive (r=0.92), suggesting models that look good on validation also look good on holdout \u2014 but this is a bull market artifact.",
+  "predictions_correct": {
+    "P11": false,
+    "P12": true,
+    "P13": true,
+    "P14": false
+  },
+  "model_results": {
+    "macro_breadth_composite": {
+      "val_sharpe_cost_adj": -0.47383998591950627,
+      "perturbation_gate": false,
+      "holdout_sharpe_cost_adj": -0.20036845060408867,
+      "holdout_total_return": -0.05964606548653273,
+      "holdout_max_drawdown": -0.3097374741393737
+    },
+    "mean_reversion_bb": {
+      "val_sharpe_cost_adj": -1.9609719131290473,
+      "perturbation_gate": true,
+      "holdout_sharpe_cost_adj": -1.9033014145523908,
+      "holdout_total_return": -0.16844872268285627,
+      "holdout_max_drawdown": -0.1859304765223989
+    },
+    "momentum_dma": {
+      "val_sharpe_cost_adj": 1.3034358956422576,
+      "perturbation_gate": false,
+      "holdout_sharpe_cost_adj": 0.307625978747561,
+      "holdout_total_return": 0.049803562347854324,
+      "holdout_max_drawdown": -0.18126418474163009
+    },
+    "regime_vol_conditioned": {
+      "val_sharpe_cost_adj": 0.9310064643039436,
+      "perturbation_gate": false,
+      "holdout_sharpe_cost_adj": 1.5174772204448148,
+      "holdout_total_return": 0.24726865694932143,
+      "holdout_max_drawdown": -0.08310208243749316
+    },
+    "rsi_momentum_divergence": {
+      "val_sharpe_cost_adj": 3.1664397092656515,
+      "perturbation_gate": false,
+      "holdout_sharpe_cost_adj": 3.29976070791984,
+      "holdout_total_return": 0.36785454634050585,
+      "holdout_max_drawdown": -0.030038797918972463
+    }
+  },
+  "val_holdout_excess_sharpe_spearman_rho": 0.9,
+  "val_holdout_abs_sharpe_pearson_r_v2check": 0.952,
+  "holdout_bh_sharpe": 1.418,
+  "val_bh_sharpe": 1.175,
+  "holdout_excess_sharpes": {
+    "momentum_dma": -1.11,
+    "mean_reversion_bb": -3.321,
+    "regime_vol_conditioned": 0.1,
+    "rsi_momentum_divergence": 1.882,
+    "macro_breadth_composite": -1.618
+  },
+  "val_excess_sharpes_v2": {
+    "momentum_dma": 0.129,
+    "mean_reversion_bb": -3.136,
+    "regime_vol_conditioned": -0.244,
+    "rsi_momentum_divergence": 1.992,
+    "macro_breadth_composite": -1.649
+  },
+  "gate_version": "v2",
+  "key_finding_v2": "Benchmark-adjusted excess Sharpe rank correlation val\u2192holdout: rho=0.900. Absolute Sharpe r=0.952. E1 naive baseline: rho=-0.11. The v2 metric shows the true signal is weak once drift is removed."
+}

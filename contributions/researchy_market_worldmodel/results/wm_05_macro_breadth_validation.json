@@ -1,0 +1,17 @@
+{
+  "name": "macro_breadth_composite",
+  "file": "wm_05_macro_breadth.py",
+  "val_sharpe_cost_adj": -0.47383998591950627,
+  "val_bh_sharpe": 1.1749324075514136,
+  "val_excess_sharpe": -1.64877239347092,
+  "gate_e2a_passed": false,
+  "gate_e2a_pvalue": 0.82,
+  "gate_e2b_passed": false,
+  "gate_e2b_pvalue": 0.78,
+  "perturbation_gate_passed": false,
+  "passes_validation_criterion": false,
+  "deflated_excess_sharpe": -0.7373534302452015,
+  "n_trades": 14,
+  "total_return": -0.07605360574685782,
+  "max_drawdown": -0.22222012324611168
+}

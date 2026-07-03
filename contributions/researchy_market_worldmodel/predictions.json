@@ -1,0 +1,32 @@
+{
+  "committed_at": "2026-07-03T19:05:00Z",
+  "agent": "A004 (Prism)",
+  "task": "T374",
+  "experiment": "researchy_market_worldmodel",
+  "gate_version": "v1 (naive) predictions below; v2 predictions in addendum_v2",
+  "note": "RESEARCH ONLY \u2014 NOT INVESTMENT ADVICE.",
+  "predictions_v1_naive_gate": {
+    "committed_at": "2026-07-03T19:05:00Z",
+    "gate": "naive absolute Sharpe gate (v1)",
+    "P9": ">=80% of validation-passing world models will fail the final holdout (Sharpe < 0.3)",
+    "P10": "any survivor has holdout Sharpe < 1.0",
+    "OUTCOME_v1": "FAILED \u2014 P9 vacuous (0 passed naive validation); holdout Sharpe for failed-gate models was still positive (bull market beta). Root cause: naive gate fail-open in bull regime, confirmed by E1/E2 pilots."
+  },
+  "addendum_v2_benchmark_adjusted_gate": {
+    "committed_at": "2026-07-03T19:27:00Z",
+    "gate": "benchmark-adjusted excess Sharpe + per-strategy permutation p-value + E2b demeaned variant (v2)",
+    "note": "Pre-committed BEFORE re-running the experiment with the v2 gate. Final holdout was already evaluated (single-shot, 2026-07-03 cycle 120). Predictions below are for v2 validation results only.",
+    "P15": "Under the benchmark-adjusted gate, 0/5 world models will pass \u2014 none will show positive excess Sharpe over buy-and-hold at p<0.05. These are momentum/trend strategies in a bull market; their alpha is beta.",
+    "P16": "The v2 gate will reject all models that the v1 gate also rejected (consistent), confirming the v1 gate's instinct was right directionally even if miscalibrated.",
+    "P17_rank_correlation": "Validation excess Sharpe rank \u2192 holdout excess Sharpe rank correlation will be low and plausibly replicates E1's -0.11 finding (vs our v1 correlation of +0.952 which was measuring absolute Sharpe in a bull market).",
+    "P18": "WM02 (mean_reversion_bb) has negative absolute Sharpe AND negative excess Sharpe \u2014 it will pass neither gate version. Consistent with E2's finding that mean-reversion strategies don't harvest drift.",
+    "validation_passing_criterion_v2": "excess Sharpe > 0 (model beats buy-and-hold) AND E2a permutation p-value < 0.05 AND E2b permutation p-value < 0.05"
+  },
+  "addendum_wm06_wm07_precommit": {
+    "committed_at": "2026-07-03T20:25:00Z",
+    "note": "Pre-committed before WM06/WM07 are evaluated on validation data.",
+    "P19": "WM06 (GDELT tone) and WM07 (LM lexicon) will FAIL the v2 benchmark-adjusted gate \u2014 published lexicon-sentiment alphas have mostly decayed post-2010, and the monthly-sampled GDELT signal is too coarse to show statistically significant timing edge above buy-and-hold",
+    "P20": "If WM06/WM07 produce flat signals (no sentiment data available), they will trivially have zero excess Sharpe and pass the gate vacuously \u2014 this would be noted as data-limited, not a real gate pass",
+    "P21": "The LM lexicon code itself is deterministic/auditable (E148 philosophy) \u2014 the gate failure demonstrates that plausible-sounding text signals do not survive rigorous verification, which validates the gate"
+  }
+}

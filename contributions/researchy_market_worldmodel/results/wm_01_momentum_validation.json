@@ -1,0 +1,17 @@
+{
+  "name": "momentum_dma",
+  "file": "wm_01_momentum.py",
+  "val_sharpe_cost_adj": 1.3034358956422576,
+  "val_bh_sharpe": 1.1749324075514136,
+  "val_excess_sharpe": 0.128503488090844,
+  "gate_e2a_passed": false,
+  "gate_e2a_pvalue": 0.06,
+  "gate_e2b_passed": false,
+  "gate_e2b_pvalue": 0.16,
+  "perturbation_gate_passed": false,
+  "passes_validation_criterion": false,
+  "deflated_excess_sharpe": 0.128503488090844,
+  "n_trades": 5,
+  "total_return": 0.22630758950185648,
+  "max_drawdown": -0.0840562353743823
+}

@@ -1,0 +1,17 @@
+{
+  "name": "mean_reversion_bb",
+  "file": "wm_02_mean_reversion.py",
+  "val_sharpe_cost_adj": -1.9609719131290473,
+  "val_bh_sharpe": 1.1749324075514136,
+  "val_excess_sharpe": -3.135904320680461,
+  "gate_e2a_passed": false,
+  "gate_e2a_pvalue": 0.06,
+  "gate_e2b_passed": false,
+  "gate_e2b_pvalue": 0.24,
+  "perturbation_gate_passed": false,
+  "passes_validation_criterion": false,
+  "deflated_excess_sharpe": -2.217419210305348,
+  "n_trades": 26,
+  "total_return": -0.19936181292590627,
+  "max_drawdown": -0.22078856965325144
+}

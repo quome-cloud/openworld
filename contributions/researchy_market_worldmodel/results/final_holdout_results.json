@@ -1,0 +1,82 @@
+{
+  "momentum_dma": {
+    "sharpe": 0.3382062874319922,
+    "cost_adj_sharpe": 0.307625978747561,
+    "total_return": 0.049803562347854324,
+    "max_drawdown": -0.18126418474163009,
+    "n_trades": 7,
+    "avg_daily_return": 0.00022263792186593995,
+    "volatility": 0.18237977344643133,
+    "win_rate": 0.5209003215434084,
+    "cost_bps": 10.0,
+    "n_days": 312,
+    "dates": {
+      "start": "2025-04-02",
+      "end": "2026-06-30"
+    }
+  },
+  "mean_reversion_bb": {
+    "sharpe": -1.6868505939075231,
+    "cost_adj_sharpe": -1.9033014145523908,
+    "total_return": -0.16844872268285627,
+    "max_drawdown": -0.1859304765223989,
+    "n_trades": 24,
+    "avg_daily_return": -0.0005793805351521983,
+    "volatility": 0.0767108634197545,
+    "win_rate": 0.40789473684210525,
+    "cost_bps": 10.0,
+    "n_days": 312,
+    "dates": {
+      "start": "2025-04-02",
+      "end": "2026-06-30"
+    }
+  },
+  "regime_vol_conditioned": {
+    "sharpe": 1.6028455494207248,
+    "cost_adj_sharpe": 1.5174772204448148,
+    "total_return": 0.24726865694932143,
+    "max_drawdown": -0.08310208243749316,
+    "n_trades": 13,
+    "avg_daily_return": 0.0007381881556594455,
+    "volatility": 0.12258728679409872,
+    "win_rate": 0.541958041958042,
+    "cost_bps": 10.0,
+    "n_days": 312,
+    "dates": {
+      "start": "2025-04-02",
+      "end": "2026-06-30"
+    }
+  },
+  "rsi_momentum_divergence": {
+    "sharpe": 3.6990404227168123,
+    "cost_adj_sharpe": 3.29976070791984,
+    "total_return": 0.36785454634050585,
+    "max_drawdown": -0.030038797918972463,
+    "n_trades": 42,
+    "avg_daily_return": 0.0010163907733442706,
+    "volatility": 0.0776209239257898,
+    "win_rate": 0.6308724832214765,
+    "cost_bps": 10.0,
+    "n_days": 312,
+    "dates": {
+      "start": "2025-04-02",
+      "end": "2026-06-30"
+    }
+  },
+  "macro_breadth_composite": {
+    "sharpe": -0.10639873192631162,
+    "cost_adj_sharpe": -0.20036845060408867,
+    "total_return": -0.05964606548653273,
+    "max_drawdown": -0.3097374741393737,
+    "n_trades": 20,
+    "avg_daily_return": -0.00013723053307711374,
+    "volatility": 0.17259251259952096,
+    "win_rate": 0.46691176470588236,
+    "cost_bps": 10.0,
+    "n_days": 312,
+    "dates": {
+      "start": "2025-04-02",
+      "end": "2026-06-30"
+    }
+  }
+}

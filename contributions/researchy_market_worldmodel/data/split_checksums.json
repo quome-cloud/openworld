@@ -1,0 +1,29 @@
+{
+  "train": {
+    "path": "train.csv",
+    "sha256": "0db055f93c62f235c857f6d9ed8896f0361f2cfb72dfbad78933882b871004a3",
+    "start": "2010-01-01",
+    "end": "2023-12-31",
+    "rows": 41665,
+    "symbols": 12,
+    "description": "Training split \u2014 use for world model fitting"
+  },
+  "validation": {
+    "path": "validation.csv",
+    "sha256": "11c79901e44b2fd8e808adb700936bcaa0ec014fcbbf2daa855a4029473b1aa7",
+    "start": "2024-01-01",
+    "end": "2025-03-31",
+    "rows": 3744,
+    "symbols": 12,
+    "description": "Validation split \u2014 use for strategy selection and perturbation gate"
+  },
+  "final_holdout": {
+    "path": "final_holdout.csv",
+    "sha256": "fe7dd32d8f1667acf9a310d43725e183cde8e3f0624c0d84874e3a5947df241d",
+    "start": "2025-04-01",
+    "end": "2026-06-30",
+    "rows": 3756,
+    "symbols": 12,
+    "description": "LOCKED \u2014 do not read during strategy development. Evaluate ONCE at the end."
+  }
+}

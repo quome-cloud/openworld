@@ -1,0 +1,17 @@
+{
+  "name": "regime_vol_conditioned",
+  "file": "wm_03_regime_vol.py",
+  "val_sharpe_cost_adj": 0.9310064643039436,
+  "val_bh_sharpe": 1.1749324075514136,
+  "val_excess_sharpe": -0.24392594324746997,
+  "gate_e2a_passed": false,
+  "gate_e2a_pvalue": 0.42,
+  "gate_e2b_passed": false,
+  "gate_e2b_pvalue": 0.7,
+  "perturbation_gate_passed": false,
+  "passes_validation_criterion": false,
+  "deflated_excess_sharpe": -0.14083070899626016,
+  "n_trades": 15,
+  "total_return": 0.1496390385835462,
+  "max_drawdown": -0.08899942435024073
+}

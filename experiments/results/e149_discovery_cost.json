@@ -1,0 +1,146 @@
+{
+  "description": "Discovery cost -- the LLM effort (USD/tokens/turns) to FIND each solve, the axis RHAE (solution-path economy) does not measure. Companion to E120/E141 RHAE.",
+  "relation_to_rhae": "RHAE = min((human_baseline/replay_actions)^2*100,115) per level -> scores ONLY the banked path length. E149 reports the orthogonal cost-to-discover.",
+  "codex_note": "codex (gpt-5.5) discovery cost is NOT captured (plaintext-log capture lacks token stats); reported as unknown, not zero.",
+  "per_arm": {
+    "opus": {
+      "sessions": 776,
+      "sessions_with_cost": 120,
+      "total_cost_usd": 1375.16,
+      "total_tokens": 2031266186,
+      "total_turns": 8058,
+      "n_full_solved": 16,
+      "cost_usd_over_solved_games": 568.53,
+      "mean_cost_usd_per_solved_game": 35.53,
+      "cost_captured": true
+    },
+    "codex": {
+      "sessions": 14,
+      "sessions_with_cost": 0,
+      "total_cost_usd": 0.0,
+      "total_tokens": 0,
+      "total_turns": 0,
+      "n_full_solved": 11,
+      "cost_usd_over_solved_games": 0.0,
+      "mean_cost_usd_per_solved_game": 0.0,
+      "cost_captured": false
+    },
+    "fable": {
+      "sessions": 24,
+      "sessions_with_cost": 19,
+      "total_cost_usd": 587.42,
+      "total_tokens": 314429139,
+      "total_turns": 1606,
+      "n_full_solved": 9,
+      "cost_usd_over_solved_games": 544.91,
+      "mean_cost_usd_per_solved_game": 60.55,
+      "cost_captured": true
+    }
+  },
+  "per_game_cost_usd": {
+    "ar25": {
+      "opus": 0.0,
+      "fable": 20.74
+    },
+    "bp35": {
+      "opus": 208.93,
+      "fable": 87.41,
+      "codex": 0.0
+    },
+    "cd82": {
+      "opus": 28.6,
+      "fable": 5.53,
+      "codex": 0.0
+    },
+    "cn04": {
+      "opus": 37.16,
+      "fable": 4.99,
+      "codex": 0.0
+    },
+    "dc22": {
+      "opus": 167.53,
+      "fable": 75.7
+    },
+    "ft09": {
+      "opus": 14.15,
+      "codex": 0.0
+    },
+    "g50t": {
+      "opus": 25.61,
+      "codex": 0.0
+    },
+    "ka59": {
+      "opus": 124.45,
+      "codex": 0.0
+    },
+    "lf52": {
+      "opus": 150.01
+    },
+    "lp85": {
+      "opus": 28.82,
+      "codex": 0.0
+    },
+    "ls20": {
+      "opus": 100.54,
+      "fable": 16.81
+    },
+    "m0r0": {
+      "opus": 15.54,
+      "codex": 0.0
+    },
+    "r11l": {
+      "opus": 39.92,
+      "fable": 28.32
+    },
+    "re86": {
+      "opus": 0.67,
+      "codex": 0.0
+    },
+    "s5i5": {
+      "opus": 55.41,
+      "codex": 0.0
+    },
+    "sb26": {
+      "opus": 8.39
+    },
+    "sc25": {
+      "opus": 7.71
+    },
+    "sk48": {
+      "opus": 45.19,
+      "fable": 41.99
+    },
+    "sp80": {
+      "opus": 77.67,
+      "fable": 220.54
+    },
+    "su15": {
+      "opus": 15.43
+    },
+    "tn36": {
+      "opus": 65.52
+    },
+    "tr87": {
+      "opus": 18.93
+    },
+    "tu93": {
+      "opus": 20.14
+    },
+    "vc33": {
+      "opus": 49.7,
+      "fable": 47.87
+    },
+    "wa30": {
+      "opus": 69.15,
+      "fable": 37.52
+    }
+  },
+  "experiment": "e149_discovery_cost",
+  "timestamp": "2026-07-02T20:45:06",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "env": {
+    "python": "3.14.6",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.0"
+  }
+}

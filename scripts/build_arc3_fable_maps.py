@@ -1,0 +1,117 @@
+"""Render an OpenWorld atlas card (papers/arc-3/maps/<game>.svg) for every game from the CLAUDE FABLE
+25/25 source-free solve, so the maps gallery reflects the landmark run (not the earlier primary solves).
+
+For each game we replay Fable's banked solution in the real engine, treat the discovered masked-frame
+state-transition graph as a World (masked-frame perceptor -> symbolic state, learned-table
+FunctionTransition, induced CodeObjective), and render_card it -- the exact recipe of
+experiments/e121_openworld_roundtrip.py, pointed at the Fable archive instead of the primary solves.
+
+Run with the arcv interpreter (has arc_agi); openworld is imported from the repo root:
+    /Users/jim/.arcv/bin/python scripts/build_arc3_fable_maps.py
+Then regenerate the gallery composite with scripts/make_arc3_assets.py.
+"""
+import os, sys, json, hashlib
+from pathlib import Path
+import numpy as np
+
+ROOT = Path(__file__).resolve().parent.parent
+SCR = ROOT / "scratch_arc"
+MAPS = ROOT / "papers" / "arc-3" / "maps"
+FABLE = ROOT / "experiments" / "results" / "arc3_fullgame_sourcefree_fable.json"
+sys.path.insert(0, str(SCR / "full_lf52"))          # arc3_harness
+sys.path.insert(0, str(ROOT))                        # openworld core
+os.chdir(ROOT)                                       # environment_files/ resolves here
+
+from openworld import World, Action, FunctionTransition, CodeObjective, render_card  # noqa: E402
+
+GAMES = ("ar25 bp35 cd82 cn04 dc22 ft09 g50t ka59 lf52 lp85 ls20 m0r0 r11l re86 s5i5 sb26 sc25 sk48 "
+         "sp80 su15 tn36 tr87 tu93 vc33 wa30").split()
+
+
+def act_key(a):
+    if isinstance(a, int):
+        return str(a), {}, str(a)
+    a = list(a)
+    if a[0] == 6:
+        return "6", {"x": int(a[1]), "y": int(a[2])}, f"6:{int(a[1])},{int(a[2])}"
+    return str(a[0]), {}, str(a[0])
+
+
+def trace(game, actions):
+    from arc3_harness import Game
+    g = Game(game); g.reset()
+    frames = [g.frame.copy()]; deltas = []; keys = []; base = g.levels; last = g.levels
+    for a in actions:
+        name, params, key = act_key(a)
+        g.step(*([int(name)] if not params else [6, params["x"], params["y"]]))
+        frames.append(g.frame.copy()); deltas.append(g.levels - last); keys.append((name, params, key))
+        last = g.levels
+        if g.done:
+            break
+    return frames, deltas, keys, g.levels - base
+
+
+def state_ids(frames, indexed=False):
+    F = np.stack([f.reshape(64, 64) for f in frames])
+    if not indexed:
+        mask = (F[1:] != F[:-1]).mean(axis=0) <= 0.95
+        m = (F * mask).astype(np.int16)
+        return [hashlib.blake2b(m[i].tobytes(), digest_size=8).hexdigest() for i in range(len(F))]
+    return [f"{hashlib.blake2b(F[i].tobytes(), digest_size=8).hexdigest()}#{i}" for i in range(len(F))]
+
+
+def build_table(sids, deltas, keys):
+    table, ok = {}, True
+    for i, (_, _, k) in enumerate(keys):
+        key = (sids[i], k); val = (sids[i + 1], int(deltas[i]))
+        if key in table and table[key] != val:
+            ok = False
+        table[key] = val
+    return table, ok
+
+
+def make_world(game, init_sid, table):
+    def fn(state, action):
+        name, params = action["name"], action.get("params") or {}
+        k = name if not params else f"{name}:{params['x']},{params['y']}"
+        nxt = table.get((state["sid"], k))
+        if nxt is None:
+            return {"sid": state["sid"], "levels": state["levels"], "miss": state.get("miss", 0) + 1}
+        return {"sid": nxt[0], "levels": state["levels"] + nxt[1], "miss": state.get("miss", 0)}
+    actions = sorted({k for (_, k) in table.keys()})
+    w = World(name=f"arc3-{game}",
+              description=f"Discovered world model for ARC-AGI-3 game {game} (Claude Fable source-free "
+                          f"solve): masked-frame state, learned-table dynamics, reward = levels_completed.",
+              initial_state={"sid": init_sid, "levels": 0, "miss": 0},
+              actions=actions, transition=FunctionTransition(fn))
+    w._objective = CodeObjective("def reward(state):\n    return float(state.get('levels', 0))\n",
+                                 name="levels_completed", func_name="reward",
+                                 description="induced reward: ARC-AGI-3 levels completed")
+    return w
+
+
+def main():
+    sols = json.load(open(FABLE)).get("solutions", {})
+    MAPS.mkdir(parents=True, exist_ok=True)
+    ok = 0
+    for g in GAMES:
+        acts = sols.get(g)
+        if not acts:
+            print(f"  {g}: no Fable solution, skip"); continue
+        try:
+            frames, deltas, keys, depth = trace(g, acts)
+            sids = state_ids(frames, indexed=False)
+            table, det = build_table(sids, deltas, keys)
+            if not det:                                        # masking too coarse -> path world
+                sids = state_ids(frames, indexed=True); table, _ = build_table(sids, deltas, keys)
+            world = make_world(g, sids[0], table)
+            render_card(world, path=str(MAPS / f"{g}.svg"))    # write the atlas card SVG
+            ok += 1
+            print(f"  {g}: depth={depth} states={len(set(sids))} -> maps/{g}.svg", flush=True)
+        except Exception as e:
+            print(f"  {g}: ERROR {e}", flush=True)
+    print(f"rendered {ok}/{len(GAMES)} Fable atlas cards")
+
+
+if __name__ == "__main__":
+    main()

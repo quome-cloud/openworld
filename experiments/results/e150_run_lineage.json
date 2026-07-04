@@ -1,0 +1,80 @@
+{
+ "n_runs": 267,
+ "n_opus": 229,
+ "n_fable": 38,
+ "median_code_kb": 37.7885,
+ "cardiogram": {
+  "g50t": 7,
+  "dc22": 6,
+  "ka59": 7,
+  "sk48": 8,
+  "vc33": 7,
+  "tr87": 6
+ },
+ "concepts": {
+  "n_concepts": 28,
+  "concepts": [
+   "player",
+   "box",
+   "ring",
+   "green",
+   "goal",
+   "goto",
+   "mean",
+   "seed",
+   "comp",
+   "active",
+   "frontier",
+   "plan",
+   "flush",
+   "visited",
+   "env",
+   "pieces",
+   "walk",
+   "wins",
+   "lib",
+   "spawn",
+   "parse",
+   "push",
+   "piece",
+   "blocked",
+   "blk",
+   "nodes",
+   "slots",
+   "cfg"
+  ]
+ },
+ "signatures": {
+  "n_games": 25,
+  "max_len": 852
+ },
+ "activity": {
+  "n_runs": 212,
+  "median_start": 0.0,
+  "median_end": 0.0
+ },
+ "surprise": {
+  "n_levelups": 724
+ },
+ "buildup": {
+  "n_runs": 260
+ },
+ "clicks": {
+  "n_click_games": 6,
+  "click_games": [
+   "ft09",
+   "lf52",
+   "lp85",
+   "r11l",
+   "s5i5",
+   "sb26"
+  ]
+ },
+ "galaxy": {
+  "n_runs": 267,
+  "var_pc12": 0.11269969833402148
+ },
+ "contrast": {
+  "n_shared": 25
+ }
+}

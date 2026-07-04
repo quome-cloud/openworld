@@ -606,6 +606,18 @@ def main():
                         + f"\\newcommand{{\\ArcAuditWebCalls}}{{{ta['web_tool_calls']}}}\n")
         print(f"appended leak-audit macros (transcripts={scanned}, net={ta['network_hits']}, web={ta['web_tool_calls']})")
 
+    # ---- E150 run-lineage figures (experiments/e150_run_lineage.py): nine views that characterize HOW
+    #      the agents solve, mined from the captured transcripts. Figures are produced by that script;
+    #      here we only surface the headline counts as macros. ----
+    ll = jload("e150_run_lineage.json")
+    if ll:
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcLineageRuns}}{{{ll['n_runs']}}}\n"
+                        + f"\\newcommand{{\\ArcLineageCodeKB}}{{{round(ll['median_code_kb'])}}}\n"
+                        + f"\\newcommand{{\\ArcLineageConcepts}}{{{ll['concepts']['n_concepts']}}}\n"
+                        + f"\\newcommand{{\\ArcLineageClickGames}}{{{ll['clicks']['n_click_games']}}}\n")
+        print(f"appended run-lineage macros (runs={ll['n_runs']}, code_kb={round(ll['median_code_kb'])})")
+
     # figure: capability ladder (mean fidelity bars) + per-game Claude-vs-qwen32B scatter
     import matplotlib
     matplotlib.use("Agg")

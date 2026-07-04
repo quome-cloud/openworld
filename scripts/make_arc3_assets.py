@@ -592,6 +592,20 @@ def main():
                         + f"\\newcommand{{\\ArcOWIndexed}}{{{n_indexed}}}\n")
         print(f"appended OpenWorld round-trip macros ({ow['n_pass']}/{ow['n_total']})")
 
+    # ---- Leak-channel audit (scripts/audit_network_tools.py): did any source-free run reach the
+    #      internet or call a web tool? Scans every captured Claude-arm (opus+fable) transcript's tool
+    #      calls + every Bash command for network activity. Clean == the leak channel was unused. ----
+    ta = jload("arc3_tool_audit.json")
+    if ta:
+        scanned = sum(a["transcripts"] for a in ta.get("arms", {}).values())
+        bashcmds = f"{ta['n_bash_commands']:,}".replace(",", "{,}")   # LaTeX thousands
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcAuditTranscripts}}{{{scanned}}}\n"
+                        + f"\\newcommand{{\\ArcAuditBashCmds}}{{{bashcmds}}}\n"
+                        + f"\\newcommand{{\\ArcAuditNetHits}}{{{ta['network_hits']}}}\n"
+                        + f"\\newcommand{{\\ArcAuditWebCalls}}{{{ta['web_tool_calls']}}}\n")
+        print(f"appended leak-audit macros (transcripts={scanned}, net={ta['network_hits']}, web={ta['web_tool_calls']})")
+
     # figure: capability ladder (mean fidelity bars) + per-game Claude-vs-qwen32B scatter
     import matplotlib
     matplotlib.use("Agg")

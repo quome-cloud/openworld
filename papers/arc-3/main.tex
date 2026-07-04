@@ -654,6 +654,7 @@ estimate, not a controlled figure.
 \end{enumerate}
 
 \section{Reproducibility}
+\label{sec:reproducibility}
 The agent, the per-game transition logs, and every number regenerate from one repository; the
 ARC-AGI-3 environments are the official public games accessed via the \texttt{arc-agi} toolkit. Each
 experiment is a self-contained script under \texttt{experiments/}: synthesis (\texttt{e86\_arc3.py},
@@ -748,6 +749,22 @@ escalation) is a concrete cyber-offensive capability, not an artifact of our set
 result therefore measures a genuinely consequential agentic skill for the present era, even as the
 defensible, human-relevant evaluation condition is source-free---which is exactly the harder protocol
 where performance drops by \ArcSourceGapGames{} games.
+
+\textbf{Audited leak channel: no network, no web tools.} The source-free protocol forbids the agent from
+\emph{fetching} anything---the rules must be discovered by acting, so a single network call (to a
+walkthrough, the game's source, or a solution) would void the result. We audit that channel directly
+rather than asserting it. A read-only pass over every captured source-free transcript
+(\ArcAuditTranscripts{} runs across the opus and fable arms) scans two things: every tool invocation, and
+every one of the \ArcAuditBashCmds{} shell commands the agents issued. The tool inventory is entirely
+local---\texttt{Bash}, \texttt{Read}/\texttt{Write}/\texttt{Edit}, task and skill calls---with
+\ArcAuditWebCalls{} invocations of any \texttt{WebSearch}/\texttt{WebFetch}/browser tool; and across all
+\ArcAuditBashCmds{} commands there are \ArcAuditNetHits{} unambiguous network operations (no
+\texttt{curl}/\texttt{wget}, URL, HTTP client, socket connect, package install, or \texttt{git} remote
+op). The agents solve entirely offline: reading frames from the process-isolated sandbox, writing and
+running local Python, and reasoning---consistent with the harness design (the agent's interpreter cannot
+even \texttt{import arc\_agi}). This is the leakage channel made \emph{measurable}: the same telemetry
+would name any offending run, and here it names none (\S\ref{sec:reproducibility}; auditor
+\texttt{scripts/audit\_network\_tools.py}).
 
 \textbf{Every solve is a verified, serveable artifact.} Each game's solver is an \openworld{}
 \texttt{World}: a masked-frame perceptor maps pixels to symbolic state, a \texttt{FunctionTransition} over

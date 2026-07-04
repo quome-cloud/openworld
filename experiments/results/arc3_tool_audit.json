@@ -1,0 +1,56 @@
+{
+ "note": "Source-free ARC-AGI-3 leak-channel audit. Scanned every source-free run's captured transcript for internet access (network commands in Bash / codex logs) and web-tool invocations (WebSearch/WebFetch/browser). Read-only over the immutable per-run records.",
+ "n_runs": 1053,
+ "n_transcripts_scanned": 844,
+ "n_bash_commands": 11652,
+ "network_hits": 0,
+ "web_tool_calls": 0,
+ "network_examples": [],
+ "tool_inventory": {
+  "Bash": 11652,
+  "Write": 1757,
+  "Read": 1010,
+  "Edit": 758,
+  "TaskUpdate": 119,
+  "TaskCreate": 88,
+  "ToolSearch": 64,
+  "Monitor": 42,
+  "TaskStop": 22,
+  "Skill": 12,
+  "Agent": 12,
+  "SendMessage": 9,
+  "ScheduleWakeup": 4,
+  "TaskGet": 1
+ },
+ "arms": {
+  "opus": {
+   "runs": 780,
+   "bash_cmds": 10091,
+   "web_tool_calls": 0,
+   "network_hits": 0,
+   "transcripts": 780
+  },
+  "fable": {
+   "runs": 64,
+   "bash_cmds": 1561,
+   "web_tool_calls": 0,
+   "network_hits": 0,
+   "transcripts": 64
+  },
+  "other": {
+   "runs": 209,
+   "bash_cmds": 0,
+   "web_tool_calls": 0,
+   "network_hits": 0,
+   "transcripts": 0
+  }
+ },
+ "web_tools_watched": [
+  "browser",
+  "fetch",
+  "navigate",
+  "webbrowser",
+  "webfetch",
+  "websearch"
+ ]
+}

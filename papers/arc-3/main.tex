@@ -787,13 +787,16 @@ and the action-efficiency analysis, \S\ref{sec:rhae}) pertain to the source-free
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth,height=0.88\textheight,keepaspectratio]{figs/arc3_maps_gallery.png}
-\caption{\textbf{The OpenWorld atlas: one verified, serveable world model per game.} All
-\ArcFableFull{} games from the \textbf{Claude Fable \ArcFableFull/\ArcUnionGames{} source-free solve}, each
-an \openworld{} \texttt{World} whose spec renders a self-contained card (numeric rollout \texttt{series}
-$+$ a bounded state-transition \texttt{graph}, the ``map''), viewable live in \texttt{openworld serve
-/view}. Each card is built by replaying the game's banked Fable solution in the real engine and treating
-the discovered masked-frame state graph as a \texttt{World} (\texttt{scripts/build\_arc3\_fable\_maps.py}).
-The same artifact that solves the game is the artifact you download and build on.}
+\caption{\textbf{The 25 ARC-AGI-3 games, each solved into a verified, serveable OpenWorld world model.}
+A representative solved-board frame (ARC 16-colour palette) from the \textbf{Claude Fable
+\ArcFableFull/\ArcUnionGames{} source-free solve} of every game, labelled game~$\cdot$~modality~$\cdot$~levels
+completed---25 visibly distinct worlds spanning directional, click, sokoban, mirror, synthesis and
+rewriting mechanics. Each solve is an \openworld{} \texttt{World} (masked-frame perceptor $\to$ symbolic
+state, learned-table \texttt{FunctionTransition}, induced \texttt{CodeObjective}) that serialises to a
+self-contained card and serves live in \texttt{openworld serve /view}; the full per-game world-model card
+(state graph $+$ level-rollout $+$ schema) appears with its solve filmstrip in
+App.~\ref{app:replay}. The board is built by replaying the banked Fable solution in the real engine
+(\texttt{scripts/build\_arc3\_board\_gallery.py}).}
 \label{fig:arc3gallery}
 \end{figure}
 
@@ -1416,81 +1419,79 @@ we then re-verify it independently against the live game. Full launcher: \texttt
 \section{Solved-level replay trajectories}
 \label{app:replay}
 \paragraph{What these figures show (in plain terms).} ARC-AGI-3 is a set of tiny video-game puzzles. A
-player sees only the screen---a $64{\times}64$ grid of colored squares---and a few buttons (arrow keys,
+player sees only the screen---a $64{\times}64$ grid of coloured squares---and a few buttons (arrow keys,
 and on some games a mouse click), and is told \emph{nothing}: no rules and no goal in words. It must work
-out, purely by pressing buttons and watching how the screen changes, how to finish each of the game's
-levels. As our solver explores, it builds a \emph{world model}: an internal map of how the game works
----which distinct \emph{screens} the game can show, and which \emph{button} moves it from one screen to the
-next. That map is the whole point of the paper: once you have it you can \emph{plan} a route to the goal
-instead of stumbling around. For each of the eight games the solver finished completely, the top of the
-figure is the map it built and the bottom is a \emph{replay}---real screenshots of the game at the start
-and at the instant each level is cleared, played back from the exact sequence of button presses the solver
-found (which we re-ran against the real game to confirm). Read left to right, the replay shows the game
-visibly transforming as level after level is cleared. Figures regenerate from
+out, purely by pressing buttons and watching the screen change, how to finish each of the game's levels.
+As it explores, our solver writes a verified \emph{world model} and uses it to \emph{plan} a route to the
+goal instead of stumbling around. All \ArcFableFull{} games were completed source-free by Claude~Fable; for
+each, the top of the figure is the discovered world-model card and the bottom is a \emph{replay}---real
+screenshots at the start and at the instant each level is cleared, played back from the exact button
+sequence the solver found (re-run against the real game to confirm). Figures regenerate from
 \texttt{scripts/make\_arc3\_replay\_figs.py}.
 
-\paragraph{How to read the map (top panel).} Think of it as a subway map of the game.
-\begin{itemize}\setlength{\itemsep}{1pt}
-  \item Each \textbf{box} (\texttt{q0}, \texttt{q1}, \dots) is one \emph{distinct screen} the solver
-  found. The solver cannot store every pixel, so it boils each screen down to a fingerprint and gives
-  identical fingerprints the same name; \texttt{q0,q1,\dots} are therefore just labels---``screen~A,
-  screen~B''---and neither the \emph{number} nor a box's \emph{position} carries meaning (the layout is
-  arranged automatically for readability).
-  \item Each \textbf{arrow} (\texttt{s1}, \texttt{s2}, \dots) is a \emph{button}: an arrow from one screen
-  to another reads ``pressing this button on this screen takes you to that screen.'' The \texttt{start} tag
-  marks the screen the game begins on.
-  \item The small print at the bottom of the card (\textsc{state schema}, \textsc{actions},
-  \textsc{dynamics}, \textsc{sample rollout}) is the same world model written out as data: the one
-  fingerprint variable, the button vocabulary, the learned look-up table that powers the arrows, and a tiny
-  preview. A card showing just one self-looping box means the fingerprints collapsed the explored region to
-  a single screen---the solution still comes from the verified button sequence, not the picture.
-\end{itemize}
+\paragraph{How to read the world-model card (top panel).} The card is the serveable \openworld{}
+\texttt{World} for that game. Its \textsc{state-transition graph} is drawn as the solve's \emph{level
+trajectory}: a chain from \texttt{start} (\texttt{level 0}) through each level completed to \texttt{win},
+every edge labelled by the number of button-presses it took to clear that level---so a long edge is a hard
+level. Beneath it, \textsc{sample rollout} plots levels-completed rising over the solve, and
+\textsc{state schema}/\textsc{actions}/\textsc{dynamics} give the fingerprint variable, the button
+vocabulary (directional ids, or \texttt{6:x,y} clicks), and the learned look-up table that powers the model.
 
 \paragraph{How to read the replay (bottom strip).} Each panel is an actual game screenshot in the ARC
-16-color palette. The first is the starting screen; each later one is the board at the moment a level is
-completed (labeled with the move number that did it). The scattered colored blocks are the game's real
+16-colour palette. The first is the starting screen; each later one is the board at the moment a level is
+completed (labelled with the move number that did it). The scattered coloured blocks are the game's real
 pieces---walls, keys, goal markers---not noise.
 
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_lf52.png}
+\caption{\texttt{lf52} solved source-free (10/10): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:lf52}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_bp35.png}
+\caption{\texttt{bp35} solved source-free (9/9): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:bp35}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_su15.png}
+\caption{\texttt{su15} solved source-free (9/9): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:su15}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_tu93.png}
+\caption{\texttt{tu93} solved source-free (9/9): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:tu93}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_wa30.png}
+\caption{\texttt{wa30} solved source-free (9/9): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:wa30}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ar25.png}
-\caption{\texttt{ar25} solved trajectory (8/8): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:ar25}\end{figure}
-\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_re86.png}
-\caption{\texttt{re86} solved trajectory (8/8): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:re86}\end{figure}
+\caption{\texttt{ar25} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:ar25}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_lp85.png}
-\caption{\texttt{lp85} solved trajectory (8/8): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:lp85}\end{figure}
+\caption{\texttt{lp85} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:lp85}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_re86.png}
+\caption{\texttt{re86} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:re86}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_s5i5.png}
+\caption{\texttt{s5i5} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:s5i5}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_sb26.png}
-\caption{\texttt{sb26} solved trajectory (8/8): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:sb26}\end{figure}
-\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_cn04.png}
-\caption{\texttt{cn04} solved trajectory (6/6): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:cn04}\end{figure}
-\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ft09.png}
-\caption{\texttt{ft09} solved trajectory (6/6): discovered map + level-completion replay (icon-ring $\to$ lights-out). \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:ft09}\end{figure}
+\caption{\texttt{sb26} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:sb26}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_sk48.png}
+\caption{\texttt{sk48} solved source-free (8/8): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:sk48}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_g50t.png}
+\caption{\texttt{g50t} solved source-free (7/7): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:g50t}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ka59.png}
+\caption{\texttt{ka59} solved source-free (7/7): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:ka59}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ls20.png}
+\caption{\texttt{ls20} solved source-free (7/7): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:ls20}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_tn36.png}
+\caption{\texttt{tn36} solved source-free (7/7): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:tn36}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_vc33.png}
+\caption{\texttt{vc33} solved source-free (7/7): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:vc33}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_cd82.png}
-\caption{\texttt{cd82} solved trajectory (6/6): discovered map + level-completion replay. \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:cd82}\end{figure}
+\caption{\texttt{cd82} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:cd82}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_cn04.png}
+\caption{\texttt{cn04} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:cn04}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_dc22.png}
+\caption{\texttt{dc22} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:dc22}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_ft09.png}
+\caption{\texttt{ft09} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:ft09}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_m0r0.png}
+\caption{\texttt{m0r0} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:m0r0}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_r11l.png}
+\caption{\texttt{r11l} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:r11l}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_sc25.png}
+\caption{\texttt{sc25} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:sc25}\end{figure}
+\begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_sp80.png}
+\caption{\texttt{sp80} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:sp80}\end{figure}
 \begin{figure}[p]\centering\includegraphics[width=0.96\textwidth,height=0.9\textheight,keepaspectratio]{figs/arc3_replay_tr87.png}
-\caption{\texttt{tr87} solved trajectory (6/6): discovered map + level-completion replay (solved this run). \textbf{Top:} the game-map the solver built by exploring---each box is a distinct game
-\emph{screen} it discovered and each arrow a \emph{button} that moves between screens. \textbf{Bottom:}
-actual screenshots at the start and at each level-completion. (Box labels \texttt{q0,q1,\dots} are just
-names for screens---their numbers and positions carry no meaning; the preamble explains both panels.)}\label{app:replay:tr87}\end{figure}
+\caption{\texttt{tr87} solved source-free (6/6): the discovered OpenWorld world-model card (top) and the level-completion replay filmstrip (bottom). \textbf{Top:} the solve's level trajectory---\texttt{start}~$\to$~\texttt{level 1}~$\to\cdots\to$~\texttt{win}, each edge labelled by the button-presses that cleared that level---with the level-rollout, state schema, action vocabulary and learned dynamics beneath. \textbf{Bottom:} actual screenshots (ARC 16-colour palette) at the start and at each level-completion, replayed from the banked Fable trace and re-verified against the live engine.}\label{app:replay:tr87}\end{figure}
 
 \section*{Declaration of generative AI use}
 During the preparation of this work the authors used \emph{Claude 4.8}

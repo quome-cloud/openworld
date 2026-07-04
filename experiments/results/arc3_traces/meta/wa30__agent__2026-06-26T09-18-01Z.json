@@ -108,5 +108,7 @@
   "actions": "directional 1-5,7 + click ACTION6(x,y)"
  },
  "dataset_version": "1.0",
+ "env_version": "ee6fef47",
+ "env_version_source": "backfill:arc3_env_versions.json (baseline 2026-07-03T22:44:50Z)",
  "outcome": null
 }

@@ -12,5 +12,7 @@
  "exit_code": 0,
  "levels": 6,
  "win": 6,
- "experiment": "e140_fullbudget"
+ "experiment": "e140_fullbudget",
+ "env_version": "0d8bbf25",
+ "env_version_source": "backfill:arc3_env_versions.json (baseline 2026-07-03T22:44:50Z)"
 }

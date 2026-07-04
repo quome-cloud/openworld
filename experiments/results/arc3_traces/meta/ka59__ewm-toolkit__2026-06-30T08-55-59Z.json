@@ -9,6 +9,8 @@
  "started_at": "2026-06-30T08:55:59Z",
  "ended_at": "2026-06-30T09:04:01Z",
  "dataset_version": "1.0",
+ "env_version": "38d34dbb",
+ "env_version_source": "backfill:arc3_env_versions.json (baseline 2026-07-03T22:44:50Z)",
  "benchmark": {
   "name": "ARC-AGI-3",
   "grid": "64x64",

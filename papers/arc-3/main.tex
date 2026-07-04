@@ -982,8 +982,9 @@ shape and length (\texttt{lf52} the longest at 852 actions).
 
 \textbf{Process shape and self-correction (Figs.~\ref{fig:lineage-activity},~\ref{fig:lineage-surprise}).}
 Tool-activity entropy is low at both ends of a run (single-mode: build, then verify) and high in the
-middle (mixed search)---the exploration$\to$exploitation collapse. Self-correction markers in the code and
-narration cluster where the model breaks, ahead of the level-ups they unblock.
+middle (mixed search)---the exploration$\to$exploitation collapse. Self-correction markers (in the code
+and narration) grow in intensity through a run---later levels demand more debugging, peaking in the final
+verify---while the easy early levels fall fast, so level-ups are front-loaded.
 
 \textbf{Modeling burden and click structure
 (Figs.~\ref{fig:lineage-buildup},~\ref{fig:lineage-clicks}).} Cumulative code written grows live as the
@@ -1030,9 +1031,9 @@ mixed-search middle.}
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.82\textwidth]{figs/e150_surprise.png}
-\caption{\textbf{Self-correction vs. breakthroughs.} Median self-correction-marker rate over run progress
-(ochre) against the distribution of level-up times (teal). Model-breaks cluster ahead of the levels they
-unblock.}
+\caption{\textbf{Self-correction vs. breakthroughs.} Self-correction-marker rate (ochre) and level-up
+density (teal) over run progress, each normalized to its own maximum (one shared axis). Self-correction
+intensity rises through a run---peaking in the final verify/repair---while level-ups are densest early.}
 \label{fig:lineage-surprise}
 \end{figure}
 

@@ -1,8 +1,8 @@
 {
- "n_runs": 267,
+ "n_runs": 270,
  "n_opus": 229,
- "n_fable": 38,
- "median_code_kb": 37.7885,
+ "n_fable": 41,
+ "median_code_kb": 37.9,
  "cardiogram": {
   "g50t": 7,
   "dc22": 6,
@@ -24,32 +24,32 @@
    "seed",
    "comp",
    "active",
-   "frontier",
    "plan",
+   "frontier",
    "flush",
    "visited",
    "env",
-   "pieces",
    "walk",
-   "wins",
+   "pieces",
    "lib",
+   "wins",
    "spawn",
-   "parse",
    "push",
-   "piece",
+   "parse",
    "blocked",
+   "piece",
    "blk",
    "nodes",
    "slots",
-   "cfg"
+   "band"
   ]
  },
  "signatures": {
   "n_games": 25,
-  "max_len": 852
+  "max_len": 914
  },
  "activity": {
-  "n_runs": 212,
+  "n_runs": 215,
   "median_start": 0.0,
   "median_end": 0.0
  },
@@ -57,7 +57,7 @@
   "n_levelups": 724
  },
  "buildup": {
-  "n_runs": 260
+  "n_runs": 263
  },
  "clicks": {
   "n_click_games": 6,
@@ -71,8 +71,8 @@
   ]
  },
  "galaxy": {
-  "n_runs": 267,
-  "var_pc12": 0.11269969833402148
+  "n_runs": 270,
+  "var_pc12": 0.11243235827278876
  },
  "contrast": {
   "n_shared": 25

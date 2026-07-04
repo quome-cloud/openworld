@@ -197,8 +197,7 @@ def source_matrix_assets(fg, sfg, fab=None):
     def nfull(store):
         return sum(1 for v in store.values() if isinstance(v, dict) and v.get("win")
                    and (v.get("levels", 0) or 0) >= v.get("win", 99))
-    cols = [(fg["games"], f"source-faithful\n{fg['n_full']}/25"),
-            (sfg["per_game"], f"source-free\n(primary) {sfg['n_full_games']}/25")]
+    cols = [(sfg["per_game"], f"source-free\n(primary) {sfg['n_full_games']}/25")]
     if fab:
         cols.append((fab["per_game"], f"source-free\n(Fable) {nfull(fab['per_game'])}/25"))
     games = sorted(fg["games"], key=lambda g: (-(fg["games"][g].get("levels") or 0), g))
@@ -219,7 +218,7 @@ def source_matrix_assets(fg, sfg, fab=None):
     ax.invert_yaxis(); ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
-    ax.set_title("with vs without game source (replay-verified)", fontsize=9.5)
+    ax.set_title("source-free completion, per game (replay-verified)", fontsize=9.5)
     fig.savefig(FIGS / "arc3_source_matrix.png", dpi=200, bbox_inches="tight")
     plt.close(fig); print(f"wrote arc3_source_matrix.png ({len(cols)} cols)")
 

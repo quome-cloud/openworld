@@ -90,6 +90,28 @@ def make_world(game, init_sid, table):
     return w
 
 
+
+def _levelup_graph(deltas):
+    """A level-milestone trajectory: start -> level 1 -> ... -> win, edges labeled by step count.
+    Distinct per game (unlike the bounded BFS from the initial state, which is generic)."""
+    lu = [i for i, d in enumerate(deltas) if d > 0]
+    nodes = [{"id": 0, "label": ["start", "level 0"], "initial": True}]
+    edges = []; prev = -1
+    for k, idx in enumerate(lu):
+        win = (k == len(lu) - 1)
+        nodes.append({"id": k + 1, "label": (["win", f"level {k+1}"] if win else [f"level {k+1}"]),
+                      "initial": False})
+        edges.append({"src": k, "dst": k + 1, "action": f"{idx - prev} steps"}); prev = idx
+    return {"kind": "state", "nodes": nodes, "edges": edges, "truncated": False}
+
+
+def _level_curve(deltas, npts=40):
+    import numpy as np
+    cum = np.cumsum([int(d) for d in deltas]) if deltas else np.array([0])
+    idxs = np.linspace(0, len(cum) - 1, min(npts, len(cum))).astype(int)
+    return [int(cum[i]) for i in idxs]
+
+
 def main():
     sols = json.load(open(FABLE)).get("solutions", {})
     MAPS.mkdir(parents=True, exist_ok=True)
@@ -105,7 +127,12 @@ def main():
             if not det:                                        # masking too coarse -> path world
                 sids = state_ids(frames, indexed=True); table, _ = build_table(sids, deltas, keys)
             world = make_world(g, sids[0], table)
-            render_card(world, path=str(MAPS / f"{g}.svg"))    # write the atlas card SVG
+            from openworld import to_spec
+            spec = to_spec(world)
+            spec["preview"] = {"steps": len(deltas), "action": "solve trace",
+                               "series": {"levels": _level_curve(deltas)},
+                               "graph": _levelup_graph(deltas)}
+            render_card(spec, path=str(MAPS / f"{g}.svg"))     # write the atlas card SVG (milestone map)
             ok += 1
             print(f"  {g}: depth={depth} states={len(set(sids))} -> maps/{g}.svg", flush=True)
         except Exception as e:

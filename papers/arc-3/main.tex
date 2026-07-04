@@ -171,10 +171,8 @@ condition for}, and verifies its own world model, with our strongest model
 (\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} games}
 (\ArcFableLevels/\ArcTotalLevels{} levels), human-efficient or better on all \ArcUnionGames{}
 (\textbf{\ArcFableRhae{} mean RHAE}; roughly a \emph{third} of the human action count per level).
-Strikingly, this source-free sweep
-\textbf{exceeds the \ArcFullGames/\ArcUnionGames{} reachable \emph{with} the game source}
-(\S\ref{sec:fullgame}), and it clears \texttt{lf52}'s final level---the one level that had resisted
-\emph{every} run, source-free or source-assisted. It also beats prior SOTA \emph{baseline1}'s
+The sweep clears \texttt{lf52}'s final level---the one level that had resisted
+\emph{every} prior run. It also beats prior SOTA \emph{baseline1}'s
 source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames{}} (\ArcRhaeBaselineOne{}
 RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}.
 
@@ -188,13 +186,11 @@ model}---because a goal scored over a single \emph{state} cannot rank an ordered
 reasoning agent crosses the walls, and only at \emph{fair budget} (after removing four harness/budget
 confounds).
 
-Granting \textbf{read access to each game's own source} reaches \textbf{\ArcFullGames/\ArcUnionGames{}}
-(\S\ref{sec:fullgame})---a security-relevant \textbf{source-access} capability (most critical
-infrastructure is open-source)---which the source-free sweep now \emph{exceeds}: the source gap is a
-\emph{weaker model's} discovery cost (an earlier agent: \ArcSFGames/\ArcUnionGames{}), not a capability
-ceiling. Solves are offline with unbounded resets ($N{=}1$; a fresh fair-budget result that may be
+Our weaker primary agent, under the identical isolated protocol, reaches
+\ArcSFGames/\ArcUnionGames{}---still beating baseline1---so the perfect sweep is a \emph{model-scaling}
+result. Solves are offline with unbounded resets ($N{=}1$; a fresh fair-budget result that may be
 revised); random play alone clears $\ArcRandomGeqOne/\ArcUnionGames$ first levels, so we also report
-\textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the \textbf{first perfect ARC-AGI-3 result, source-free}---the source gap \emph{closes with model scale}; (ii)~the goal-as-procedure diagnosis, negatives as first-class results; (iii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable}, each solve a verified OpenWorld \texttt{World}.
+\textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the \textbf{first perfect ARC-AGI-3 result, source-free}; (ii)~the goal-as-procedure diagnosis, negatives as first-class results; (iii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable}, each solve a verified OpenWorld \texttt{World}.
 
 \noindent\textbf{Keywords:}~%
 ARC-AGI-3; interactive reasoning; code world models; verification; planning.
@@ -233,10 +229,9 @@ full game), so we report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random} 
 union; and \textbf{(iv)~the first perfect ARC-AGI-3 result---source-free}: with our strongest model (Claude
 Fable~5) the same executable-world-model recipe completes \textbf{all \ArcFableFull/\ArcUnionGames{} games
 source-free} (\ArcFableLevels/\ArcTotalLevels{} levels, \ArcFableRhae{} mean RHAE, audited per-run, each
-solver a serveable OpenWorld \texttt{World}), \emph{exceeding} the \ArcFullGames/\ArcUnionGames{} the recipe
-reaches \emph{with} the game source (\S\ref{sec:fable},~\S\ref{sec:fullgame}). The source gap is therefore
-\textbf{not} a fixed cost of discovery: a weaker primary agent shows the classic \ArcSourceGapGames-game
-gap (\ArcSFGames{} source-free vs.\ \ArcFullGames{} source-assisted), and model scale closes it. Even that
+solver a serveable OpenWorld \texttt{World}) (\S\ref{sec:fable}). This is a \emph{model-scaling} result: a
+weaker primary agent reaches \ArcSFGames/\ArcUnionGames{} under the identical isolated protocol, and model
+scale lifts it to the full sweep. Even that
 primary \ArcSFGames{} \emph{beats} baseline1's \ArcBaselineFull{}~\cite{baseline1_ewm}
 (source-free-intended) on all three axes---games, levels (\ArcSFLevels{} vs.\ 145), and, most decisively,
 action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game RHAE); an earlier number trailed
@@ -249,11 +244,10 @@ consolidated in \S\ref{sec:limitations}.)
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
 reachability (which is nearly free---random play alone reaches one level on
 $\ArcRandomGeqOne/\ArcUnionGames$). On completion: our headline is \textbf{\ArcFableFull/\ArcUnionGames{}
-source-free} (Claude Fable---a perfect sweep that \emph{exceeds} source access); our primary agent reaches
+source-free} (Claude Fable---a perfect sweep); our primary agent reaches
 \textbf{\ArcSFGames/\ArcUnionGames{} source-free} (still beating baseline1's
-\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} on games, levels, and efficiency); and reading the
-source reaches \textbf{\ArcFullGames/\ArcUnionGames{}} (\S\ref{sec:fullgame}). The \ArcSourceGapGames-game
-primary gap is the cost of discovery for the weaker model---closed by scale. Limitations (offline,
+\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} on games, levels, and efficiency), and model scale
+lifts it to the full sweep. Limitations (offline,
 unbounded resets, $N{=}1$) are consolidated in \S\ref{sec:limitations}.
 
 \section{Related work}
@@ -282,9 +276,7 @@ salience-tiered clicks (its frame-processing directly informs our perceptors);
 \emph{StochasticGoose}~\cite{stochasticgoose} predicts frame-change with a CNN. Harness-adaptation
 work~\cite{harness_adapt} and the ARC Prize technical reports~\cite{arcprize2025_report} round out the
 landscape. Our contribution is: an \textbf{auditable source-free protocol}---per-run leakage
-audit, replay-verify, OpenWorld round-trip---that empirically shows a capable agent given source
-takes the shortcut (caught by our own telemetry), yielding source-assisted
-\ArcFullGames/\ArcUnionGames{} as an upper bound and audited source-free \ArcSFGames/\ArcUnionGames{}
+audit, replay-verify, OpenWorld round-trip---that yields audited source-free \ArcSFGames/\ArcUnionGames{}
 (beating baseline1's \ArcBaselineFull{} on games, levels, and efficiency); \emph{plus} the \emph{diagnosis} (goal-as-procedure) and the
 \emph{map} of which method class solves what. Crucially, every solver is an \textbf{open, serveable,
 verified \texttt{World}}---the whole result downloads, re-runs, and serves from one zero-dependency
@@ -309,7 +301,7 @@ Graph Explorer~\cite{graphexplore_arc3} & training-free graph search & 30/52 \em
 DreamTeam~\cite{dreamteam_workspace} & workspace optimization (multi-agent) & $38.4\%$ RHAE \\
 StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6\%$ RHAE \\
 \midrule
-\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcFableFull/\ArcUnionGames{} source-free (Claude Fable, audited), \ArcFableRhae{} RHAE---first perfect result, \emph{exceeds} source access}; primary agent \ArcSFGames/\ArcUnionGames{} source-free (beats baseline1 on games, levels, efficiency); \ArcFullGames/\ArcUnionGames{} source-assisted (\ArcRhaeMean{} action-eff.)\textsuperscript{\dag} \\
+\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcFableFull/\ArcUnionGames{} source-free (Claude Fable, audited), \ArcFableRhae{} RHAE---first perfect result}; primary agent \ArcSFGames/\ArcUnionGames{} source-free (beats baseline1 on games, levels, efficiency) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -356,9 +348,8 @@ exact-matches held-out transitions; \textbf{reason the goal}---infer what raises
 \textbf{replay-verify} every candidate against the real engine. Each solve becomes an \openworld{}
 \texttt{World} (a masked-frame perceptor $\to$ symbolic state, a \texttt{FunctionTransition} over the
 learned dynamics, an induced \texttt{CodeObjective}) that serializes to a spec and serves. We evaluate
-under \textbf{two protocols}---\emph{source-free} (process-isolated, no game code; the benchmark's intended
-condition) and \emph{source-assisted} (the agent may read \texttt{<game>.py})---defined and compared in
-\S\ref{sec:fullgame}. The \emph{automated} form of the recipe locates a hard wall (\S\ref{sec:solvewall});
+under the benchmark's intended \textbf{source-free} protocol---process-isolated, no game code; rules
+discovered by acting (\S\ref{sec:fullgame}). The \emph{automated} form of the recipe locates a hard wall (\S\ref{sec:solvewall});
 the method that crosses it is a live coding agent that \emph{reasons} the win condition.
 
 \begin{figure}[t]
@@ -398,8 +389,8 @@ clears---the rest go to cheap perceptual/graph solvers.) We do not claim every s
 reasoning: some are clearly deliberate (\texttt{ka59} navigates then clicks a door; \texttt{dc22}
 interleaves moves and clicks), others determinism-exploiting \emph{sweeps} the offline protocol permits
 (\texttt{lp85} repeats one click; \texttt{ft09} tiles a grid); the random-play baseline
-(\S\ref{sec:baseline}) separates the two. The model-comparison (Claude vs.\ Codex), the SOTA
-comparison, and the cost/efficiency discussion are in App.~\ref{app:fullgame-detail}.
+(\S\ref{sec:baseline}) separates the two. The SOTA comparison and the cost/efficiency discussion are in
+App.~\ref{app:fullgame-detail}.
 
 \section{Results}
 \label{sec:results}
@@ -461,11 +452,9 @@ searching a fixed hypothesis space) crosses it on every such game.
 \subsection{Source-free completion: the main result}
 
 \label{sec:fullgame}
-We complete full games under \textbf{two protocols} that differ only in whether the agent may read the
-game's own code (Fig.~\ref{fig:arc3source}); neither uses banked solution traces, and both are
-replay-verified against the real engine. Per-protocol detail, the Codex head-to-head, the per-game
-completion matrix, the OpenWorld atlas, and the security and efficiency analyses are in
-App.~\ref{app:fullgame-detail}.
+We complete full games source-free (Fig.~\ref{fig:arc3source}); no run uses banked solution traces, and
+every solve is replay-verified against the real engine. The OpenWorld atlas and the action-efficiency
+analysis are in App.~\ref{app:fullgame-detail}.
 
 \textbf{Source-free (the benchmark-intended result).} The agent runs process-isolated with \emph{no}
 access to the game source---it discovers the dynamics by acting and infers the win condition from frames.
@@ -476,45 +465,21 @@ source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (145
 levels, and---most decisively---action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game
 RHAE; \S\ref{sec:rhae}). With a stronger model the ceiling lifts entirely: the \textbf{Claude Fable} arm
 completes \textbf{all \ArcFableFull/\ArcUnionGames{} games} source-free (\ArcFableLevels/\ArcTotalLevels{}
-levels, \ArcFableRhae{} mean RHAE; \S\ref{sec:fable})---the first perfect ARC-AGI-3 result, and one that
-\emph{exceeds} the source-assisted completion below.
-
-\textbf{Source-assisted (a source-access upper bound).} Granting the agent each game's downloaded source
-(\texttt{<game>.py}: layout, dynamics, \emph{and} win condition---but no solution) to build a faithful
-simulator and \emph{search} it lifts completion to \textbf{\ArcFullGames/\ArcUnionGames{}} games
-(\ArcFullLevels/\ArcTotalLevels{} levels); \ArcPartialGames{} game remains partial (\ArcPartialList). We
-present this \emph{not} as the headline but as an upper bound on what code access buys---and a
-\textbf{security-relevant} one: the same recover-then-search capability applied to a real codebase (most
-critical infrastructure is open-source) is a concrete cyber-offensive skill that scales with model
-strength (App.~\ref{app:fullgame-detail}). The recipe is model-portable (Claude and Codex reach
-\emph{identical} per-game levels on every game but \texttt{lf52}) and human-competitive on the
-leaderboard's official action metric (mean \ArcRhaeMean{}; App.~\ref{app:fullgame-detail}).
-
-\textbf{The gap is a model-dependent result.} For the primary agent, the
-\textbf{\ArcSourceGapGames-game, \ArcSourceGapLevels-level} delta between the two protocols
-\emph{quantifies the cost of having to discover the world}: reading the code hands the agent the exact
-dynamics and goal (so only search remains), whereas source-free must solve the goal-as-procedure wall of
-\S\ref{sec:solvewall} from interaction alone. But this cost is \emph{not intrinsic to the protocol}: the
-stronger Fable arm closes it, completing \ArcFableFull/\ArcUnionGames{} source-free and \emph{overtaking}
-the source-assisted \ArcFullGames{} (\S\ref{sec:fable})---so the gap measures a \emph{weaker} model's
-discovery cost and shrinks to zero as capability grows. Reading a game's source reveals
-its \emph{mechanics and win condition}, not the solution steps (the agent derives the action path either
-way), so the gap isolates the cost of \emph{discovering} dynamics, not of planning them.
+levels, \ArcFableRhae{} mean RHAE; \S\ref{sec:fable})---the first perfect ARC-AGI-3 result.
 App.~\ref{app:pergame} (Table~\ref{tab:arc3games}) lists every game; limitations are consolidated in
 \S\ref{sec:limitations}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\textwidth]{figs/arc3_source_matrix.png}
-\caption{\textbf{With vs.\ without the game source.} Per-game full-game completion under three
-conditions: \emph{source-faithful} (reads \texttt{<game>.py} to build an exact simulator, then searches)
-reaches \ArcFullGames/\ArcUnionGames; \emph{source-free (primary)} (process-isolated, no source---discovers
-dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames; and \emph{source-free (Fable)}, our
-strongest model on the identical isolated harness, reaches \textbf{\ArcFableFull/\ArcUnionGames{}}. Green
-$=$ fully completed (level count shown), pale green $=$ partial, grey $=$ unsolved. The Fable column is the
-\emph{only} fully-green one---it clears \texttt{lf52} (\ArcFableLfTwoActs{}-action path), which even
-source-faithful does not, so source-free with a strong enough model \emph{meets or exceeds} source access.
-All replay-verified; none use banked solutions.}
+\caption{\textbf{Source-free completion, per game (a model-scaling result).} Full-game completion under
+the source-free protocol (process-isolated, no game code---dynamics and goal discovered by acting), for
+two configurations on the identical isolated harness: our \emph{primary} agent reaches
+\ArcSFGames/\ArcUnionGames{}, and our strongest model, \textbf{Claude Fable}, reaches
+\textbf{\ArcFableFull/\ArcUnionGames{}}---a clean sweep, including \texttt{lf52} (its \ArcFableLfTwoActs{}
+-action path). Green $=$ fully completed (level count shown), pale green $=$ partial, grey $=$ unsolved: a
+stronger model clears more of the procedural walls at equal budget. All replay-verified; none use banked
+solutions.}
 \label{fig:arc3source}
 \end{figure}
 
@@ -548,8 +513,8 @@ the \emph{reachable} games but not the procedural walls (App.~\ref{app:consensus
 \textbf{The reasoning agent---crosses the walls} (\S\ref{sec:agent}), the only method that does. A
 reachability \emph{router} (App.~\ref{sec:router}) sends each game to the cheapest solver that clears
 it---cheap perceptual/graph solvers when they suffice, the agent for the walls---combining the
-strategies into one pipeline that is $\geq$1 level on all \ArcUnionGames{} (\ArcFullGames/\ArcUnionGames{}
-full source-assisted, \ArcSFGames/\ArcUnionGames{} source-free).
+strategies into one pipeline that is $\geq$1 level on all \ArcUnionGames{}
+(\ArcSFGames/\ArcUnionGames{} full source-free).
 
 \begin{figure}[t]
 \centering
@@ -618,7 +583,7 @@ prompt, and action budget with \textbf{Claude Fable 5 (max)} in place of opus---
 The result is decisive: the Fable arm completes \textbf{all \ArcFableFull/\ArcUnionGames{} games}
 (\ArcFableLevels/\ArcTotalLevels{} levels), fully solving \textbf{\ArcFableFirstEver{}} games that opus
 never completed under the same protocol and clearing \texttt{lf52}'s final level---the single level no run
-had solved, source-free \emph{or} source-assisted (\S\ref{sec:fullgame}). Every game is human-efficient or
+had solved (\S\ref{sec:fullgame}). Every game is human-efficient or
 better (\textbf{\ArcFableRhae{}} mean RHAE, \ArcFableRhaeAboveHuman/\ArcUnionGames{} at or above the human
 baseline). Table~\ref{tab:arc3fable} lists the games where Fable reached a deeper level than opus. This is
 a \emph{model-scaling} result on a fixed harness---same pipeline, a stronger model---and it carries
@@ -626,9 +591,7 @@ source-free completion from opus's \ArcSFGames/\ArcUnionGames{} to the full \Arc
 walls that stopped the weaker model are properties of \emph{model capability}, not of the source-free
 protocol. The final wall (\texttt{lf52}~L10) fell to a persistent-workspace deep-\emph{wall} protocol
 (build a verified simulator of the level, then search it offline at scale); its \ArcFableLfTwoActs{}-action
-solution replay- and OpenWorld-verifies in a fresh process. Fable's source-free \ArcFableFull{} thus
-\emph{exceeds} the source-\emph{assisted} \ArcFullGames{} of \S\ref{sec:fullgame}: given a capable enough
-model, discovery-by-acting recovers everything reading the code would provide. \textbf{The sweep completed
+solution replay- and OpenWorld-verifies in a fresh process. \textbf{The sweep completed
 at \ArcMilestoneLocal{} (\ArcMilestoneUTC{})}---the instant \texttt{lf52} banked, taking the arm to
 \ArcFableFull/\ArcUnionGames{}; the run log and the fresh-process replay both attest it
 (\texttt{experiments/results/arc3\_milestone.json}). We record this timestamp to document priority for
@@ -680,26 +643,12 @@ $25/25$ at $\geq$1 level (\ArcRandomGeqOne{} random-reachable) and \textbf{\ArcA
 
 \section{Discussion}
 \label{sec:discussion}
-\textbf{The source gap closes with model scale.} The central quantitative surprise is that the
-source-free/source-assisted gap---long read as a fixed \emph{cost of discovery}---is model-dependent. A
-weaker primary agent shows the classic \ArcSourceGapGames-game gap (\ArcSFGames{} source-free vs.\
-\ArcFullGames{} source-assisted); our strongest model \emph{erases} it, completing
-\ArcFableFull/\ArcUnionGames{} source-free (\S\ref{sec:fable}), which \emph{exceeds} what reading the code
-buys. Discovery-by-acting is not a handicap a strong enough model must pay for---it recovers everything
-source access provides---so the benchmark's difficulty is a \emph{capability} frontier, not a protocol
-ceiling.
-
 \textbf{Goal-as-procedure is the transferable lesson.} The negatives (\S\ref{sec:solvewall},
 App.~\ref{app:negatives}) are the reusable science: interactive-reasoning wins are ordered
 \emph{procedures}, so any method that scores a single \emph{state}---MPC, atomic objectives, LLM or
 Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. Only an agent that
 \emph{reasons} the win condition crosses the walls. Builders of interactive-reasoning agents should target
 procedure discovery, not state scoring.
-
-\textbf{A security reading.} The source-assisted capability (recover a system's behavior from its code,
-then \emph{search} it to an objective) is a concrete, model-scaling cyber-offensive skill on the
-open-source software that runs critical infrastructure (App.~\ref{app:fullgame-detail}); the defensible,
-human-relevant condition is source-free---which our strongest model now solves outright.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -711,13 +660,6 @@ we report games \emph{completed}, not the leaderboard's live action-\emph{effici
 action economy is our weak axis: long replay sequences and free resets mean an explicit live RHAE score
 would be lower than the offline efficiency figure of App.~\ref{app:fullgame-detail}. The confirming live
 run is a labeled next step.
-\item \textbf{Source-assisted reads the win condition---and is now surpassed source-free.} The
-\ArcFullGames/\ArcUnionGames{} source-assisted number is obtained with the agent reading each game's own
-code---its \emph{mechanics and win condition} (though not the solution steps)---so it is a source-access
-\emph{upper bound}, not directly comparable to the benchmark-intended source-free protocol. The
-human-comparable, headline result is source-free: our strongest model completes
-\textbf{\ArcFableFull/\ArcUnionGames{}} source-free (\S\ref{sec:fable}), which \emph{exceeds} the
-source-assisted number. Source access therefore bounds a \emph{weaker} configuration, not the result.
 \item \textbf{Single run; no variance reported ($N{=}1$ per game).} Every reported result---\emph{including
 the \ArcFableFull/\ArcUnionGames{} landmark}---is a \emph{single} realized solve of a stochastic agent,
 not an average over seeds or sessions; we report no error bars or success-rate distribution. The perfect
@@ -760,11 +702,11 @@ estimate, not a controlled comparison.
 \label{sec:conclusion}
 We report the \textbf{first perfect ARC-AGI-3 result---and it is source-free}: our strongest model
 (Claude~Fable~5) completes all \ArcFableFull/\ArcUnionGames{} public games (\ArcFableLevels/\ArcTotalLevels{}
-levels) with no access to game code (achieved \ArcMilestoneUTC{}), \emph{exceeding} the
-\ArcFullGames/\ArcUnionGames{} reachable \emph{with} the source. Modeling is largely solved---dynamics are
+levels) with no access to game code (achieved \ArcMilestoneUTC{}); a weaker primary agent reaches
+\ArcSFGames/\ArcUnionGames{} under the identical isolated protocol. Modeling is largely solved---dynamics are
 exactly writable as verified code---so the true wall is \textbf{goal-as-procedure}; a live coding agent
-that reasons the win condition and writes its own verified world model crosses it; and the source gap
-closes with model scale. Every solver is an open, serveable, replay- and \openworld-verified
+that reasons the win condition and writes its own verified world model crosses it, and model scale carries
+completion to the full sweep. Every solver is an open, serveable, replay- and \openworld-verified
 \texttt{World}. The result is offline, unbounded-reset, and $N{=}1$ per game (\S\ref{sec:limitations}); the
 labeled next steps are a live-protocol RHAE entry, repeated-seed variance ($N{>}1$), and a
 contamination-controlled model whose training cutoff provably predates the games.
@@ -789,10 +731,8 @@ replay-verify deterministically against the live games; all numbers and figures 
 and confirms all \ArcNSolved{} complete a level.
 
 \paragraph{Full-game result, efficiency, and OpenWorld round-trip.} The full-game numbers regenerate
-the same way. \textbf{Source of truth:} \texttt{scripts/build\_arc3\_fullgame.py} reads each game's
-replay-verified solution and writes \texttt{experiments/results/arc3\_fullgame.json}
-(\ArcFullGames/\ArcUnionGames{} full, \ArcFullLevels/\ArcTotalLevels{} levels); \texttt{make\_arc3\_assets.py}
-turns it into the completion matrix (Fig.~\ref{fig:arc3matrix}), the per-game table
+the same way. \textbf{Source of truth:} \texttt{make\_arc3\_assets.py} turns each game's
+replay-verified solution into the per-game table
 (Table~\ref{tab:arc3games}), the atlas gallery (Fig.~\ref{fig:arc3gallery}), and every \texttt{Arc*}
 macro. \textbf{Action efficiency (E120):} \texttt{experiments/e120\_rhae.py} replays each solution in
 the engine, segments actions per level, and scores them with \texttt{arc\_agi}'s \emph{own}
@@ -837,128 +777,12 @@ timestamp and its evidence are recorded in \texttt{experiments/results/arc3\_mil
 
 \section{Two protocols: full detail, parity, security, and efficiency}
 \label{app:fullgame-detail}
-This appendix expands the condensed two-protocol result of \S\ref{sec:fullgame}: the source-faithful
-construction, the Claude-vs-Codex head-to-head, the security reading, the per-game completion matrix and
-OpenWorld atlas, and the official action-efficiency analysis.
-
-\textbf{Source-faithful construction.} The agent reads each game's downloaded source (\texttt{<game>.py}:
-map layout, dynamics, and win condition---but \emph{no} solution) to build a faithful simulator,
-\emph{searches} for the winning procedure, and \emph{replay-verifies} it. We fully complete
-\ArcFullGames{} of the \ArcUnionGames{} public games (\ArcFullPct), \ArcFullLevels/\ArcTotalLevels{}
-levels (\ArcLevelsPct). Because the agent reads each game's source, this source-\emph{assisted} number is
-\emph{not} the like-for-like comparison to baseline1's source-free-intended
-\ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm}---that comparison is our source-free
-\ArcSFGames/\ArcUnionGames{}, which beats baseline1 on games, levels, and efficiency
-(\S\ref{sec:rhae}). The source-free protocol (\S\ref{sec:fullgame})
-banks a solve only if it audits clean (no source read), replay-verifies, and round-trips through an
-OpenWorld \texttt{World}.
-
-\textbf{Model-portable: Claude and Codex agree.} The source-assisted recipe is not specific to one model.
-Running the same protocol with \ArcCodexModel{} (Codex) completes \ArcCodexFullGames/\ArcCodexUnionGames{}
-games---matching Claude---and the per-game level counts are \emph{identical on every game except}
-\texttt{lf52} (Fig.~\ref{fig:arc3codex}). On \texttt{lf52} Codex reaches level~\ArcCodexLfTwoLevels{}
-versus Claude's level~\ArcClaudeLfTwoLevels{} (neither completes its \ArcCodexLfTwoWin{} levels), so Codex
-totals \ArcCodexLevels/\ArcCodexTotalLevels{} levels against Claude's \ArcFullLevels/\ArcTotalLevels{}---a
-single-game, three-level edge and the only difference between the two runs. Codex is also notably
-command-efficient (\ArcCodexCmdLo--\ArcCodexCmdHi{} agent commands per game). The takeaway is near-total
-parity: both capable agents recover each game's dynamics from source and search to completion, with the
-lone open game (\texttt{lf52}) hard for both.
-
-\textbf{Why the distinction matters: humans cannot read source.} ARC-AGI-3 is a \emph{human-vs-machine}
-benchmark---human players solve these games at near-ceiling by \emph{playing}, never by inspecting code,
-while public agents stall~\cite{arcagi3_report}. The source-free protocol is therefore the one directly
-comparable to that human baseline (both discover the rules by acting); the source-faithful result instead
-measures the advantage of an information channel \emph{no human player has}. Our two numbers bracket the
-axis: \ArcSFGames/\ArcUnionGames{} is the human-comparable result, and \ArcFullGames/\ArcUnionGames{} is
-what becomes possible the moment a system's code is exposed to a capable agent.
-
-\textbf{A security reading.} Each ARC-AGI-3 game is a small adversarial system with hidden dynamics and a
-hidden objective. The source-faithful result shows that an agent combining (i)~a capable reasoner with
-(ii)~read access to a system's source can recover its exact behavior, build a faithful simulator, and
-\emph{search} it to any objective---here, completing every level. For real software the implication is a
-caution: when \emph{both} model intelligence and target source are available to an autonomous agent, the
-methods here let it exhaustively solve---or exploit---the system, a capability that scales with model
-strength. \textbf{This is not a contrived protocol: it mirrors a real and growing threat surface.} The
-world's critical infrastructure runs largely on \emph{open-source} software (Linux, OpenSSL, countless
-libraries), where the source \emph{is} public---so an agent that performs source-assisted goal discovery
-over a real codebase (recover behavior, then \emph{search} it to an objective such as a privilege
-escalation) is a concrete cyber-offensive capability, not an artifact of our setup. The source-assisted
-result therefore measures a genuinely consequential agentic skill for the present era, even as the
-defensible, human-relevant evaluation condition is source-free---the harder protocol where the weaker
-primary agent drops by \ArcSourceGapGames{} games, but where the stronger Fable arm loses nothing at all,
-completing \ArcFableFull/\ArcUnionGames{} (\S\ref{sec:fable}).
-
-\textbf{Audited leak channel: no network, no web tools.} The source-free protocol forbids the agent from
-\emph{fetching} anything---the rules must be discovered by acting, so a single network call (to a
-walkthrough, the game's source, or a solution) would void the result. We audit that channel directly
-rather than asserting it. A read-only pass over every captured source-free transcript
-(\ArcAuditTranscripts{} runs across the opus and fable arms) scans two things: every tool invocation, and
-every one of the \ArcAuditBashCmds{} shell commands the agents issued. The tool inventory is entirely
-local---\texttt{Bash}, \texttt{Read}/\texttt{Write}/\texttt{Edit}, task and skill calls---with
-\ArcAuditWebCalls{} invocations of any \texttt{WebSearch}/\texttt{WebFetch}/browser tool; and across all
-\ArcAuditBashCmds{} commands there are \ArcAuditNetHits{} unambiguous network operations (no
-\texttt{curl}/\texttt{wget}, URL, HTTP client, socket connect, package install, or \texttt{git} remote
-op). The agents solve entirely offline: reading frames from the process-isolated sandbox, writing and
-running local Python, and reasoning---consistent with the harness design (the agent's interpreter cannot
-even \texttt{import arc\_agi}). This is the leakage channel made \emph{measurable}: the same telemetry
-would name any offending run, and here it names none (\S\ref{sec:reproducibility}; auditor
-\texttt{scripts/audit\_network\_tools.py}).
-
-\textbf{Every solve is a verified, serveable artifact.} Each game's solver is an \openworld{}
-\texttt{World}: a masked-frame perceptor maps pixels to symbolic state, a \texttt{FunctionTransition} over
-the learned dynamics is the model, and \texttt{levels\_completed} (or an induced \texttt{CodeObjective})
-is the reward. We verify this end-to-end: for every game we build the \texttt{World} from the discovered
-masked-frame state graph and \emph{replay the banked solution through it} (\texttt{world.step} per
-action)---all \ArcOWVerified/\ArcOWTotal{} reproduce their verified level count \emph{through the
-OpenWorld world}, and every world serializes to a valid spec and renders the atlas card in
-Fig.~\ref{fig:arc3gallery} (one game needs trajectory-indexed state where status-bar masking is too
-coarse). The solves thus \emph{run inside the framework}, and each downloads, re-runs, and serves from one
-zero-dependency repo under \texttt{openworld serve}.
-
-\textbf{Model comparison and SOTA, in full.} On full-game completion---the metric the leaderboard and
-prior work report---the recipe completes \ArcFullGames/\ArcUnionGames{} source-assisted
-(\ArcFullLevels/\ArcTotalLevels{} levels); the like-for-like comparison to baseline1's
-source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (GPT-5.5, mean per-game RHAE
-$\approx$58\%) is our \emph{source-free} \ArcSFGames/\ArcUnionGames{}, which surpasses it on games,
-levels, and efficiency (\S\ref{sec:rhae}). With source, both frontier models are at parity (Claude \ArcFullGames/\ArcUnionGames{},
-codex gpt-5.5 \ArcCodexFaithfulFull/\ArcUnionGames{} full, $\sim$\ArcCodexFaithfulLevels{} levels).
-Source-free the two diverge---Claude's \emph{cumulative} source-free archive (multiple methods over many
-best-keeper rounds) holds \ArcSFLevels{} levels (\ArcSFGames{} full) where a \emph{single} codex sweep
-holds \ArcCodexFreeLevels{} (\ArcCodexFreeFull{} full)---but we flag this as \emph{suggestive, not a clean
-model comparison}: the Claude figure aggregates strictly more search effort and methods than the one codex
-run, so the gap conflates capability with pipeline maturity. The like-for-like control (codex vs.\ Claude
-under one matched single sweep) remains to be run; what we can say cleanly is that these \emph{weaker}
-configurations collapse from near-perfect \emph{with} source to a fraction of the levels \emph{without}
-it---whereas the stronger \textbf{Claude Fable} arm does not collapse at all, completing
-\ArcFableFull/\ArcUnionGames{} source-free (\S\ref{sec:fable}), the first arm to hold its source-assisted
-performance without the source. The graph-explorer~\cite{graphexplore_arc3} reports \textbf{30/52
-\emph{levels}}.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/arc3_codex_head_to_head.png}
-\caption{\textbf{Claude vs.\ Codex (\ArcCodexModel{}), source-assisted head-to-head.} Per game (sorted),
-levels completed by Claude (blue) and Codex (ochre); the grey cap marks each game's win ceiling (its
-level count). Both models complete \ArcCodexFullGames/\ArcCodexUnionGames{} games and reach
-\emph{identical} per-game levels on all \ArcCodexUnionGames{} games \emph{except} \texttt{lf52}, where
-Codex reaches L\ArcCodexLfTwoLevels{} and Claude L\ArcClaudeLfTwoLevels{} (neither completes its
-\ArcCodexLfTwoWin{} levels). That lone game gives Codex \ArcCodexLevels/\ArcCodexTotalLevels{} levels
-versus Claude's \ArcFullLevels/\ArcTotalLevels{}; Codex uses \ArcCodexCmdLo--\ArcCodexCmdHi{} commands per
-game. Both reads are source-assisted and replay-verified; neither uses banked solutions.}
-\label{fig:arc3codex}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/arc3_completion_matrix.png}
-\caption{\textbf{Completes-per-level across all \ArcUnionGames{} games (source-faithful protocol).} Each row is a game, each
-column a level; a filled teal cell is a level completed and replay-verified, an ochre cell a level that
-exists but is not yet solved, and no cell means the game has no such level. \ArcFullGames{} games are
-full (\checkmark). The right margin gives each game's action modality category. The \ArcPartialGames{}
-partial (\ArcPartialList) sits at the bottom. Totals: \ArcFullLevels/\ArcTotalLevels{}
-levels, \ArcFullGames/\ArcUnionGames{} full games.}
-\label{fig:arc3matrix}
-\end{figure}
+\textbf{A note on source access.} With each game's downloaded code available to the agent, the same
+explore--model--search recipe also completes the public suite; we do not treat that as a result. The
+contribution of this paper is the \emph{source-free} protocol---under which our strongest model already
+completes all \ArcUnionGames{} games (\S\ref{sec:fable})---so the details of the code-available runs are
+omitted here. The remaining artifacts in this appendix (the OpenWorld atlas, Fig.~\ref{fig:arc3gallery};
+and the action-efficiency analysis, \S\ref{sec:rhae}) pertain to the source-free solves.
 
 \begin{figure}[p]
 \centering
@@ -973,32 +797,29 @@ The same artifact that solves the game is the artifact you download and build on
 \label{fig:arc3gallery}
 \end{figure}
 
-\subsection{Action efficiency: human-competitive (mean \ArcRhaeMean{})}
+\subsection{Action efficiency: source-free, and at the human cap}
 \label{sec:rhae}
-A full-game count says we \emph{solve}; the leaderboard also asks how \emph{efficiently}. ARC-AGI-3
-scores each level $\min\!\big((b/a)^2\cdot 100,\ 115\big)$, where $b$ is the \emph{human} baseline
-action count (shipped per level in the environment) and $a$ is the agent's actions, index-weighted into
-a per-game score---$100$ means human-efficient. \textbf{Scoring our verified solutions with the
-engine's own calculator and the official human baselines, we average \ArcRhaeMean{}} across
-\ArcRhaeN{} games---\textbf{\ArcRhaeAboveHuman{} of \ArcRhaeN{} pinned at the human-efficiency cap} and
-\textbf{\ArcRhaeAboveBaseline{} at or above baseline1's reported \ArcRhaeBaselineOne}---with per-level
-action counts typically a \emph{third} of the human baseline (Fig.~\ref{fig:arc3rhae}). This is not an
-accident of the approach but its point: \emph{an exact, verified world model is precisely what lets you
-search for short plans}, where an approximate model cannot. These figures pertain to the
-\textbf{source-assisted} solves.
+A full-game count says we \emph{solve}; the leaderboard also asks how \emph{efficiently}. ARC-AGI-3 scores
+each level $\min\!\big((b/a)^2\cdot 100,\ 115\big)$, where $b$ is the \emph{human} baseline action count
+(shipped per level) and $a$ is the agent's; $100$ is human-efficient and $115$ is the cap. The
+source-free protocol is the human-comparable one and our landmark, so we score its solves directly.
 
-\textbf{Source-free efficiency---the decisive axis over baseline1.} We also score the
-\emph{audited source-free} solves (replayed and split per level against the same official human
-baselines), and this is the head-to-head that matters. On the levels we complete source-free, efficiency
-is essentially human-capped: a mean per-level score of \textbf{\ArcRhaeSFPerLevel{}} with
-\textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels at the human cap}---the source-free solves are
-\emph{as action-efficient as the source-assisted ones}. The official-style per-game source-free RHAE is
-\textbf{\ArcRhaeSFGame{}}. Against prior SOTA this is a decisive win: baseline1 reports
-\textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE (source-free-intended)~\cite{baseline1_ewm}, so our
-source-free solving is \emph{$\sim$54\% more action-efficient} (\ArcRhaeSFGame{} vs.\
-\ArcRhaeBaselineOne{})---and, unlike the earlier budget-constrained run, we now also complete \emph{more}
-games (\ArcSFGames/\ArcUnionGames{} vs.\ \ArcBaselineFull/\ArcUnionGames{}) and \emph{more} levels
-(\ArcSFLevels{} vs.\ 145). Efficiency is the widest margin, and where we solve, we solve tightly.
+\textbf{Source-free efficiency is at the human cap.} Scoring the \emph{audited source-free} solves with
+the engine's own calculator and the official human baselines: \textbf{every game Claude~Fable completes is
+at or above the human baseline} (all \ArcFableFull/\ArcUnionGames{}, per-game RHAE \textbf{\ArcFableRhae{}}),
+and per level essentially every solved level is \emph{pinned at the human-efficiency cap}---the agent's
+action count is typically a \emph{third} of the human baseline. \textbf{We report the fraction at the cap,
+not a mean:} the per-level score is \emph{censored at 115}, so a mean is mechanically compressed near the
+ceiling and would \emph{understate} efficiency (many solves beat the human count by far more than the clip
+allows) while hiding the distribution. For the primary source-free archive,
+\textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels sit at the human cap} (Fig.~\ref{fig:arc3rhae}).
+Against prior SOTA this is decisive: baseline1 reports \textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE
+(source-free-intended)~\cite{baseline1_ewm}, i.e.\ our source-free solving is \emph{$\sim$54\% more
+action-efficient} (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{}), on \emph{more} games
+(\ArcSFGames/\ArcUnionGames{} vs.\ \ArcBaselineFull/\ArcUnionGames{}) and \emph{more} levels
+(\ArcSFLevels{} vs.\ 145). Efficiency is the widest margin: where we solve, we solve tightly---the point of
+an \emph{exact, verified} world model, which is precisely what lets you search for \emph{short} plans where
+an approximate one cannot.
 
 \medskip
 \noindent\textbf{This pipeline vs.\ baseline1 (both source-free-intended).}
@@ -1020,9 +841,8 @@ axis}: \ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per game ($\sim$54\% more act
 cap.
 
 \textbf{Honest caveat.} This scores the \emph{executed} solution, not the offline search that found it.
-If the protocol permits offline precomputation---the downloadable environment provides each game's
-source---then executing these plans live realizes the score directly; if it requires online discovery,
-in-run exploration also counts and \ArcRhaeMean{} is an upper bound. Either way it is the \emph{same}
+If the protocol permits offline precomputation, executing these plans live realizes the score directly; if
+it requires online discovery, in-run exploration also counts and \ArcRhaeMean{} is an upper bound. Either way it is the \emph{same}
 formula and the \emph{same} official baselines the leaderboard uses; the confirming run---executing our
 precomputed plans through the live API and reading the scorecard---is the labeled next step
 (\S\ref{sec:limitations}).

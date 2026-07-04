@@ -952,6 +952,119 @@ solves are just as efficient: \ArcRhaeSFGame{} per-game RHAE (\ArcRhaeSFPerLevel
 \label{fig:arc3rhae}
 \end{figure}
 
+\section{Characterizing solutions: run lineages (E150)}
+\label{app:lineage}
+What does a source-free solve actually \emph{look like}? The agents' chain-of-thought is redacted from the
+captured transcripts, so we characterize the process by what the agents \emph{do}: the code they write (a
+median of \ArcLineageCodeKB{}\,KB per run), the tool/timestamp trajectory, and the banked action sequences.
+Mining \ArcLineageRuns{} captured source-free runs (opus $+$ fable) yields nine views
+(experiments/e150\_run\_lineage.py). The recurring story is a shared shape---\emph{explore by acting, write
+a world model, search it, verify}---overlaid on per-game structure that the vocabulary and action mix make
+legible.
+
+\textbf{Anatomy of a solve (Fig.~\ref{fig:lineage-cardiogram}).} Per game, tool activity over wall-clock
+with level-ups marked: an early burst of \texttt{Read}/\texttt{Write} (perceiving, then building a
+simulator), a long \texttt{Bash}-dominated middle (searching it), and \texttt{Edit} repairs, with levels
+falling as punctuated events---modeling then search, not steady progress.
+
+\textbf{The vocabulary each game forces (Fig.~\ref{fig:lineage-concepts}).} Clustering the code
+\emph{identifiers} the agents write (\ArcLineageConcepts{} discriminative concepts $\times$ games) recovers
+each game's mechanics unsupervised: \texttt{ka59} lights up on \texttt{box}/\texttt{push}/\texttt{ring}
+(sokoban), \texttt{ft09} on \texttt{blk}/\texttt{slots} (a stencil grid), \texttt{cn04} on
+\texttt{piece}/\texttt{pieces} (connector-mating), \texttt{g50t} on \texttt{visited}/\texttt{player}/\texttt{env}
+(a traversal). The concepts an agent \emph{had to invent} characterize the solution class.
+
+\textbf{Solution signatures (Fig.~\ref{fig:lineage-signatures}).} Every banked path drawn as an action
+strip makes the modality visible at a glance: solid-ochre pure-click games
+(\texttt{ft09}/\texttt{lp85}/\texttt{r11l}/\texttt{s5i5}/\texttt{su15}/\texttt{vc33}), blue directional
+treks (\texttt{ka59}/\texttt{re86}/\texttt{tu93}), and mixed protocols---a visual taxonomy of solution
+shape and length (\texttt{lf52} the longest at 852 actions).
+
+\textbf{Process shape and self-correction (Figs.~\ref{fig:lineage-activity},~\ref{fig:lineage-surprise}).}
+Tool-activity entropy is low at both ends of a run (single-mode: build, then verify) and high in the
+middle (mixed search)---the exploration$\to$exploitation collapse. Self-correction markers in the code and
+narration cluster where the model breaks, ahead of the level-ups they unblock.
+
+\textbf{Modeling burden and click structure
+(Figs.~\ref{fig:lineage-buildup},~\ref{fig:lineage-clicks}).} Cumulative code written grows live as the
+world model is authored, and final code size tracks depth reached; for the \ArcLineageClickGames{}
+click-heavy games, the density of banked click coordinates on the $64\times64$ board reveals the sprite
+targets the agent inferred from pixels alone.
+
+\textbf{Solution fingerprints and model contrast
+(Figs.~\ref{fig:lineage-galaxy},~\ref{fig:lineage-contrast}).} Embedding each run by the code it wrote
+(code-token PCA) clusters runs of the same game---and shows opus and fable reaching the same games by
+different routes, which a per-game turn/code comparison makes explicit.
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/e150_cardiogram.png}
+\caption{\textbf{Anatomy of a solve.} Tool activity (stacked, per time window) over each run's normalized
+wall-clock for six games, with level-ups marked. Read/Write-heavy start (perceive + build a simulator)
+$\to$ Bash-heavy middle (search) $\to$ Edit repairs; levels fall as punctuated events.}
+\label{fig:lineage-cardiogram}
+\end{figure}
+
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{figs/e150_concepts.png}
+\caption{\textbf{The vocabulary each game forces the agent to invent.} Games $\times$ code-identifier
+heatmap (column-normalized rate), rows and columns PCA-ordered. The mechanics vocabulary the agent writes
+recovers each game's structure unsupervised (sokoban, stencil, connector, traversal clusters).}
+\label{fig:lineage-concepts}
+\end{figure}
+
+\begin{figure}[p]\centering
+\includegraphics[width=\textwidth]{figs/e150_signatures.png}
+\caption{\textbf{Solution signatures.} Every banked solution as an action strip (ochre $=$ click ACTION6,
+blue $=$ directional 1--5,7); trailing number is the action count. Pure-click, pure-directional, and mixed
+solution classes are immediately legible.}
+\label{fig:lineage-signatures}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.82\textwidth]{figs/e150_activity.png}
+\caption{\textbf{Exploration $\to$ exploitation.} Windowed tool-activity entropy over run progress (thin
+lines: runs; band: IQR; heavy line: median). Low at both ends (single-mode build then verify), high in the
+mixed-search middle.}
+\label{fig:lineage-activity}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.82\textwidth]{figs/e150_surprise.png}
+\caption{\textbf{Self-correction vs. breakthroughs.} Median self-correction-marker rate over run progress
+(ochre) against the distribution of level-up times (teal). Model-breaks cluster ahead of the levels they
+unblock.}
+\label{fig:lineage-surprise}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/e150_buildup.png}
+\caption{\textbf{Modeling burden.} Left: cumulative code bytes over a run---the world model authored live.
+Right: total code written vs. deepest level reached, per arm.}
+\label{fig:lineage-buildup}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/e150_clicks.png}
+\caption{\textbf{Inferred click targets.} Density of banked click coordinates on the $64\times64$ board for
+click-heavy games---the sprite targets the agent inferred from pixels, with no privileged target list.}
+\label{fig:lineage-clicks}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=0.86\textwidth]{figs/e150_galaxy.png}
+\caption{\textbf{Solution fingerprints.} Each run embedded by a TF-IDF of the code identifiers it wrote,
+projected to 2-D (PCA); colored by arm. Same-game runs cluster; a few game centroids are labeled.}
+\label{fig:lineage-galaxy}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{figs/e150_contrast.png}
+\caption{\textbf{Same games, different routes.} Median tool calls and median code written per shared game,
+opus (blue) vs. fable (ochre); each line is one game. The models reach the same games with different
+process budgets.}
+\label{fig:lineage-contrast}
+\end{figure}
+
 \section{Goal-discovery negatives in detail}
 \label{app:negatives}
 The category-level summary of \S\ref{sec:landscape} is expanded here per experiment. All are

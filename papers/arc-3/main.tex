@@ -1289,7 +1289,7 @@ synthesized code is the better world model.}\label{fig:arc3fid}
 \emph{dynamics}, not level completion ($0$ levels here, by design); solving is taken up from
 \S\ref{sec:landscape} onward. (ii) The densest game (\texttt{cn04}, $\sim$174 changed cells/step)
 defeats even Claude (fidelity $0$). (iii) On one game (\texttt{tr87}) qwen edged Claude. (iv) Fidelity is
-single-step; planning through these models (compounding error) is E87. These bound the claim to what we
+single-step; planning through these models (compounding error) is left to future work. These bound the claim to what we
 measured: \emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---the
 foundation on which the solving results of \S\ref{sec:landscape}ff are built.
 
@@ -1317,16 +1317,6 @@ Claude & \ArcOneShotClaudeB & \ArcAgenticClaude \\
 \hline
 \end{tabular}
 \end{table}
-
-\section{Planning through the model (E87)}
-A verified model is only useful if you can \emph{search} it. We test \textbf{controllability}: sample
-a reachable target (a short random action sequence from reset), plan a sequence \emph{through the
-verified code} to reach it, then execute in the real environment. On a perfect model (\texttt{sb26},
-fidelity $1.0$) planning reaches the target \ArcCtrlPlan{} of the time vs.\ \ArcCtrlRand{} for
-random---the model is plannable. But success is \textbf{fidelity-gated}: below fidelity $1$ the plan,
-correct \emph{in the model}, diverges in reality as single-step error compounds over the horizon, so
-partial models do not yet support reliable multi-step control. \emph{Exact models admit search;
-approximate ones mislead it}---reinforcing why verification, not just learning, is the point.
 
 \section{Solving a level (E93): directed beats random}
 Closing the loop from modeling to a genuine completion. A reachability sweep finds \texttt{\ArcSolveGame{}}
@@ -1475,149 +1465,6 @@ classifier end-to-end---a natural optimization (a small search probe should pred
 since walls never fire a reward) that we leave to future work. We present this honestly as a simple
 \emph{try-cheap-then-escalate} dispatch, not a novel routing algorithm; its only claim is that it
 turns the union into one pipeline that invokes the expensive reasoning agent on barely half the suite.
-
-\section{On-demand goal synthesis: a Bayesian SLM rung (E119)}
-\label{sec:e119}
-The goal-inference wall (\S\ref{sec:solvewall}) showed that scoring a static \emph{state} cannot express an
-ordered \emph{procedure}. A complementary response, drawn from the Model Synthesis Architecture
-(MSA; Wong et al., \texttt{arXiv:2507.12547}), is to treat the goal itself as something a model
-\emph{synthesizes on demand} rather than scores: a small language model (SLM) emits the level's
-objective as an executable \textbf{predicate-program} ($\texttt{reach}\,/\,\texttt{count}\,/\,\texttt{align}$),
-and we keep a \textbf{posterior over these programs}---sample best-of-$N$, cluster by \emph{observed
-behavioral effect} on probed frames, weight by cluster mass, and \textbf{abstain} when no hypothesis
-clears a threshold~$\tau$ (Fig.~\ref{fig:e119}). The synthesized program is used \emph{only} to order an
-env-ground-truth search (a \texttt{score\_fn} priority); correctness comes entirely from deterministic
-replay, so the SLM can make search \emph{faster} but never \emph{wrong}. The invariant gives a free
-control: a \emph{search-only} rung (no SLM) lower-bounds the \emph{slm} rung over the identical
-reachable set, isolating ``does on-demand model synthesis speed search?'' as the measured effect. The
-solved path is emitted as an \openworld{} \texttt{World} (masked-frame state, a \texttt{FunctionTransition}
-over the learned $(s,a)\!\to\!s'$ table, an induced \texttt{CodeObjective}), so the Bayesian rung
-inhabits the same structure as every other method here. We present E119 as a \emph{design with a verified
-control rung}, not a solved-count claim: the deterministic core and abstaining proposer are implemented
-and unit-tested; the search-only control banks $0$ levels on the directional pilot games (blind BFS does
-not crack procedure goals, as expected), and the SLM-in-loop measurement is left as the immediate next
-run.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/e119_msa_strategy.png}
-\caption{\textbf{The MSA Bayesian loop inside an \openworld{} solver (E119).} \openworld{} primitives are
-teal, the MSA Bayesian core indigo. \textbf{Perceptors} turn the replay-only ARC frame into a discrete
-masked-frame state $\sigma(s)$ and a \emph{relational} \texttt{object\_json} scene (the only perceptor
-that conditions the proposer). The \textbf{Bayesian subgoal} synthesizes $N$ goal-programs
-$\pi_i\!\sim\!p(\pi\mid\texttt{object\_json})$, forms a posterior by clustering on behavioral effect
-(cluster mass $\approx\hat p(\pi\mid\text{obs})$), and either commits the $\arg\max$ program $\pi^*$ once
-its mass clears $\tau$ or \emph{abstains}. $\pi^*$ supplies a \texttt{score\_fn} that \emph{orders}
-env-ground-truth search; a child that raises \texttt{levels\_completed} is a replay-verified solve, which
-is banked and emitted as an \openworld{} \texttt{World} map. \textbf{Invariant:} the synthesized model
-only orders search---the env decides correctness---so a wrong or abstained subgoal costs speed, never a
-false solve.}
-\label{fig:e119}
-\end{figure}
-
-\section{Multi-world dynamics: voting experts and a self-rebuilding world model (E120--E123)}
-\label{sec:selfrebuild}
-E119 keeps a posterior over \emph{goal-programs}; the complementary object is a posterior---and a
-structural response---over \emph{dynamics}. Two pressures motivate it. First, when repeated attempts on a
-game \emph{plateau}, the agent has tunnelled on one framing of the mechanic; a single proposer cannot
-diversify itself. Second, ARC-AGI-3's compositionality cliff means the rules literally \emph{change} at
-level boundaries, so any one fixed transition model is wrong past the next level. Both are answered by
-treating the world model as \emph{plural and revisable}, using only primitives already in the framework.
-
-\textbf{E120 --- a committee of expert worlds.} A stuck game is routed to a panel of differently-primed
-coding agents---one \emph{lens} each (topology, temporal/phase, force-transmission, color-algebra,
-symmetry, perception-reframe, counting)---so the diversity is in \emph{framing}, not model size; the panel
-\emph{replaces} the repeated identical prompt, so it is cost-neutral. Each lens that produces a
-replay-verified trace is reconstructed into its own \openworld{} \texttt{World} (a \texttt{FunctionTransition}
-over that run's discovered $(s,a)\!\to\!s'$ table), and the lenses are combined with
-\texttt{ConsensusTransition}$(\text{mode}{=}\texttt{vote})$: a per-state majority over the members'
-predicted next-states, each weighted by its env-verified levels reached (Fig.~\ref{fig:selfrebuild}A). A
-shared per-game status-mask and a global state-id map make identical physical states vote on the same
-node, so the vote is well-posed. The frames are thus genuine \openworld{} worlds, not prompts: $N$ experts
-$\to$ $N$ worlds $\to$ one consensus world.
-
-\textbf{E121 --- a world model that notices when the rules change.} Replaying a verified trace, we
-online-learn the dynamics and watch the model's own \textbf{surprise}: an anomalously large masked-board
-delta---a level-up reloads the board---signals that the rules just changed. We segment the trace at those
-surprise spikes, build a per-regime world model, and compose them forward with \texttt{PhasedTransition},
-whose dynamics advance \emph{irreversibly} and record the active regime in state (Fig.~\ref{fig:selfrebuild}C):
-a single \openworld{} \texttt{World} that rebuilds its own dynamics at each detected change. The segmenter
-the solver uses takes \emph{every observable signal}: an observed level-up (\texttt{levels\_completed}
-increments---the solver's own reward, seen each step) \textbf{union} a board-surprise spike. Because every
-rule change either bumps the level counter or is caught by surprise, this is \textbf{complete: recall $1.0$
-on all $25$ games} (Fig.~\ref{fig:selfrebuild}D). Surprise then \emph{adds} within-level regime shifts the
-counter alone would miss. As an \emph{ablation}, we ask how much is visible \emph{from frames alone}---the
-board-delta cue with the level signal withheld: it recovers a mean of $0.84$ (median $1.0$, $16/25$ perfect;
-\texttt{ka59} all six, precision $0.857$, Fig.~\ref{fig:selfrebuild}B), failing only where a level-up does
-\emph{not} reload the board---incremental ``build'' games like \texttt{cd82} and \texttt{bp35}, whose rule
-changes the level counter still captures. This is the MSA on-demand-synthesis loop (\texttt{arXiv:2507.12547})
-realized over \emph{dynamics}: surprise (plus the reward) is the trigger to synthesize a new sub-world and
-carry it forward.
-
-\textbf{E122/E123 --- the loop made online.} Two further steps close it. An \emph{online} monitor (E122)
-runs the same segmenter \emph{causally}, from signals available each step: a running baseline of the
-in-regime board delta (warmup $+$ refractory gap) union the observed level-up. Combined, it is again
-complete---\textbf{recall $1.0$ on all $25$ games}, online; the frames-alone ablation recovers a causal mean
-of $0.74$ (strictly harder than retrospective, under-firing on very short traces). The reset itself (E123)
-respects the replay-only env: on a boundary we \textbf{replay from \texttt{reset()} to the last completed
-frame} (a fresh env, since \texttt{reset()} pollutes a progressed game) and build a \emph{fresh, independent}
-model for the new regime, appending it to the \texttt{PhasedTransition} chain while earlier regimes stay
-frozen. This mechanism is \textbf{robust across all 25 games}: the replay lands on the exact boundary frame
-for \emph{every} regime ($25/25$ games), and the resynthesized composite reproduces play \emph{exactly}---%
-round-trip fidelity $\mathbf{1.0}$ on all $25$. What remains open is therefore not the re-synthesis
-mechanism but the autonomous deep \emph{search} that would discover the actions in the first place (the
-goal-inference wall of \S\ref{sec:solvewall}); here exploration is trace-guided to isolate the
-mechanism. The same surprise-driven reset is wired into the live expert panel as a prompt instruction
-(reject a stale model rather than the level---a wall is often a stale model, not an impossible level).
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/arc3_selfrebuild.png}
-\caption{\textbf{Plural, revisable world models in \openworld{} (E120--E121).}
-\textbf{(A)} The expert-\emph{consensus} world for \texttt{ka59}: each strategy lens that solved becomes a
-\texttt{World}, combined by \texttt{ConsensusTransition} hard-voting weighted by env-verified depth.
-\textbf{(B)} \emph{Surprise detects every rule change from frames alone.} The masked-board delta per step
-(blue) spikes exactly when the board reloads; surprise-detected regime boundaries (orange) land on the
-ground-truth level-ups (green markers)---recall $1.0$, precision $0.857$ on \texttt{ka59}---with the level
-signal used only to score, never to detect. \textbf{(C)} The resulting self-rebuilding world: an
-\texttt{PhasedTransition} over the detected regimes, its dynamics advancing irreversibly as the rules
-change (the active regime is recorded in state, visible in the rollout).}
-\label{fig:selfrebuild}
-\end{figure}
-
-\section{Codex-steered autonomous deep search (E124, design)}
-\label{sec:e124}
-Every method above is, structurally, an \openworld{} world model: a \textbf{perceptor} turns the replay-only
-frame into a discrete state $\sigma(s)$, the agent's exploration builds the $(s,a)\!\to\!s'$
-\texttt{FunctionTransition} \textbf{dynamics}, an \textbf{objective} scores progress, and the result
-serializes (\textbf{emit}) to a map and atlas card. The goal-inference wall (\S\ref{sec:solvewall}) is
-precisely a missing \emph{objective}: a static state score cannot express an ordered \emph{procedure}, so
-blind search banks $0$. E124's design keeps the world model intact and swaps only the objective's
-\emph{source}. A strong external coder (OpenAI Codex) compiles the goal \emph{source-free}---as an ordered
-list of subgoal predicates plus macro-actions (multi-step options that collapse search depth)---and a
-best-first search uses them to \emph{order} exploration while the environment \emph{decides} correctness (a
-replay-verified \texttt{levels\_completed} bump). On a level-up the surprise monitor (E122) fires, the world
-replays to the boundary and rebuilds (E123), and Codex re-compiles the goal for the new regime; competing
-hypotheses combine by \texttt{ConsensusTransition} (E120). Figure~\ref{fig:e124flow} traces how each stage
-fills an \openworld{} world slot. As with E119, we present this as a \emph{design with a fair control}: the
-measured claim is whether Codex-ordered search beats an \emph{identical} blind-BFS loop on the same budget
-and reachable set; every Codex call is source-free-audited (it never reads a game's code) and captured for
-deterministic replay. The build is in progress and gated on that lift.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/e124_openworld_flow.png}
-\caption{\textbf{The ARC-AGI-3 solver as an \openworld{} world model, with Codex as the objective compiler
-(E124, design).} Three roles are color-coded. The \textbf{environment} (ground truth, ochre) is replay-only
-and decides correctness---a level-up is a verified solve. \textbf{\openworld{} primitives} (teal/blue)
-supply the perceptor $\sigma(s)$, the discovered \texttt{FunctionTransition} dynamics the search builds by
-acting, the \texttt{PhasedTransition}/\texttt{ConsensusTransition} composition that rebuilds the world when
-the rules change, and the emitted map/atlas. The \textbf{Codex brain} (indigo) supplies the one missing
-piece---the \emph{objective}, as ordered subgoals $+$ macros---source-free. The left loop is
-env-verification (act/verify); the per-regime rebuild makes the search autonomous and \emph{deep}. Right:
-the four-slot anatomy of an \openworld{} world and which stage fills each.}
-\label{fig:e124flow}
-\end{figure}
 
 \section{Primer: what is a ``world'' in a world model?}
 \label{app:primer}

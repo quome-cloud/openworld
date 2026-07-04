@@ -352,6 +352,26 @@ condition) and \emph{source-assisted} (the agent may read \texttt{<game>.py})---
 \S\ref{sec:fullgame}. The \emph{automated} form of the recipe locates a hard wall (\S\ref{sec:solvewall});
 the method that crosses it is a live coding agent that \emph{reasons} the win condition.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_worldmodel_arch.pdf}
+\caption{\textbf{How the agent solves ARC-AGI-3: a verified-code world model, built by acting.} The agent
+is process-isolated behind a \emph{source-free boundary} (its Python cannot import the engine; no game
+code crosses). It \textbf{(1)~perceives}---a masked-frame perceptor maps pixels to a symbolic state (the
+status bar is masked so the state space does not explode); \textbf{(2)~explores}---acting to gather
+$(s,a,s')$ transitions, with the environment as ground truth; \textbf{(3)~synthesizes} the world model by
+\emph{generating a program}, \texttt{predict(frame,action)}, accepted \emph{only} if it exact-matches
+held-out transitions (\emph{gate~1}), retrying on counterexamples; \textbf{(4)~reasons} what raises
+\texttt{levels\_completed} into an induced \texttt{CodeObjective}; \textbf{(5)~plans} action sequences
+\emph{through} the verified model ``in imagination''; and \textbf{(6)~verifies} by replaying the plan on
+the real engine (\emph{gate~2}). On a verified win the solve is banked as a serveable \openworld{}
+\texttt{World}---a \texttt{Perceptor} (the perception boundary), a \texttt{FunctionTransition} (the
+generated \texttt{predict} code \emph{is} the dynamics), and a \texttt{CodeObjective} (reward)---which
+round-trips and serves at \texttt{openworld serve /view}. Unsolved games loop back to explore more and
+re-synthesize.}
+\label{fig:arch}
+\end{figure}
+
 \subsection{The reasoning agent that writes its own world model}
 
 \label{sec:agent}

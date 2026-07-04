@@ -954,11 +954,13 @@ levels, \ArcFullGames/\ArcUnionGames{} full games.}
 \begin{figure}[p]
 \centering
 \includegraphics[width=\textwidth,height=0.88\textheight,keepaspectratio]{figs/arc3_maps_gallery.png}
-\caption{\textbf{The OpenWorld atlas: one verified, serveable world model per game.} Every ARC-AGI-3
-solver is an \openworld{} \texttt{World} whose spec renders a self-contained card (numeric rollout
-\texttt{series} $+$ a bounded state-transition \texttt{graph}, the ``map''), viewable live in
-\texttt{openworld serve /view}. The same artifact that solves the game is the artifact you download and
-build on. (Cards shown for the 24 games with a generated map; \texttt{sc25}'s is pending.)}
+\caption{\textbf{The OpenWorld atlas: one verified, serveable world model per game.} All
+\ArcFableFull{} games from the \textbf{Claude Fable \ArcFableFull/\ArcUnionGames{} source-free solve}, each
+an \openworld{} \texttt{World} whose spec renders a self-contained card (numeric rollout \texttt{series}
+$+$ a bounded state-transition \texttt{graph}, the ``map''), viewable live in \texttt{openworld serve
+/view}. Each card is built by replaying the game's banked Fable solution in the real engine and treating
+the discovered masked-frame state graph as a \texttt{World} (\texttt{scripts/build\_arc3\_fable\_maps.py}).
+The same artifact that solves the game is the artifact you download and build on.}
 \label{fig:arc3gallery}
 \end{figure}
 

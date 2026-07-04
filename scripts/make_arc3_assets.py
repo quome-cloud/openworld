@@ -618,6 +618,25 @@ def main():
                         + f"\\newcommand{{\\ArcLineageClickGames}}{{{ll['clicks']['n_click_games']}}}\n")
         print(f"appended run-lineage macros (runs={ll['n_runs']}, code_kb={round(ll['median_code_kb'])})")
 
+    # ---- Per-arm RHAE (experiments/e120_rhae_arms.py): the Fable arm's action-efficiency on its 25/25
+    #      source-free sweep, scored with the OFFICIAL arc_agi formula + human baselines. Every game is a
+    #      full solve, so each caps at 100 -> mean 100.0 (human-efficient or better on all 25). ----
+    ra = jload("arc3_rhae_arms.json")
+    if ra and ra.get("arms", {}).get("fable"):
+        fb = ra["arms"]["fable"]
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcFableRhae}}{{{fb['mean_all']:.1f}}}\n"
+                        + f"\\newcommand{{\\ArcFableRhaeAboveHuman}}{{{fb['n_above_human']}}}\n")
+        print(f"appended Fable-RHAE macros (mean={fb['mean_all']}, >=human={fb['n_above_human']}/{fb['n_scored']})")
+
+    # ---- lf52 final-level solution length: the one level no run cleared even with source; Fable's
+    #      source-free 10/10 path (from the fable archive). ----
+    fab = jload("arc3_fullgame_sourcefree_fable.json")
+    lf = (fab.get("solutions") or {}).get("lf52") if fab else None
+    if isinstance(lf, list) and lf:
+        NUMS.write_text(NUMS.read_text() + f"\\newcommand{{\\ArcFableLfTwoActs}}{{{len(lf)}}}\n")
+        print(f"appended lf52 solution length ({len(lf)})")
+
     # figure: capability ladder (mean fidelity bars) + per-game Claude-vs-qwen32B scatter
     import matplotlib
     matplotlib.use("Agg")

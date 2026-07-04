@@ -1,0 +1,29 @@
+{
+  "task_id": "env/make_win",
+  "episode": 2,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 17,
+  "method": "bfs",
+  "actions": [
+    "right",
+    "right",
+    "down",
+    "down",
+    "left",
+    "left",
+    "left",
+    "left",
+    "down",
+    "left",
+    "up",
+    "up",
+    "up",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 2216,
+  "elapsed_s": 17.85
+}

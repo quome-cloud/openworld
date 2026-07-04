@@ -326,6 +326,15 @@ game as a \emph{world}: a deterministic transition function over the symbolic gr
 Fig.~\ref{fig:example} shows one game (\texttt{ka59}) and a verified solution end-to-end, to ground
 what follows.
 
+\textbf{Scope and versioning---for reproducibility.} All results are on the \NumArcGames{} \emph{public}
+ARC-AGI-3 games, \emph{not} the held-out \emph{private} validation set (which we do not access), so that
+follow-on work can reproduce and extend against the same games. ARC-AGI-3 games are also
+\emph{versioned}: the ARC Prize authors periodically rotate or regenerate a game, changing its
+engine-version hash (games load from \texttt{environment\_files/<game>/<hash>/}). To pin exactly what we
+solved, we record every game's hash---per run in the trace metadata and as a full snapshot in
+\texttt{arc3\_env\_versions.json}---so a later hash diff detects any upstream change and our solutions are
+reproducible against the exact game versions used here (\S\ref{sec:reproducibility}).
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/arc3_example_ka59.png}

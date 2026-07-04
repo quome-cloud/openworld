@@ -131,9 +131,11 @@ def fullgame_assets(fg):
             "OpenWorld atlas cards — one verified, serveable world model per ARC-AGI-3 game",
             fontsize=10, y=0.995)
         figg.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.01, wspace=0.08, hspace=0.18)
-        figg.savefig(FIGS / "arc3_maps_gallery.png", dpi=180, bbox_inches="tight")
+        # NOTE: the paper's arc3_maps_gallery.png is the BOARD gallery (scripts/build_arc3_board_gallery.py);
+        # this card composite is written under a separate name so it does not clobber it.
+        figg.savefig(FIGS / "arc3_cards_gallery.png", dpi=180, bbox_inches="tight")
         plt.close(figg)
-        print(f"wrote arc3_maps_gallery.png ({len(svgs)} cards)")
+        print(f"wrote arc3_cards_gallery.png ({len(svgs)} cards)")
     except Exception as e:
         print("maps gallery skipped:", e)
 
@@ -189,18 +191,23 @@ def rhae_assets(rh):
     print("wrote arc3_rhae.png")
 
 
-def source_matrix_assets(fg, sfg, fab=None):
-    """With/without-source completion matrix: per game, source-faithful (reads code), source-free primary
-    (isolated), and---the landmark---source-free Fable, which completes all 25, meeting/exceeding the
-    source-faithful column with NO source access."""
+def source_matrix_assets(opus, codex, fable):
+    """Source-free full-game completion across the three arms (the title already says source-free, so the
+    column labels are just the models): Claude Opus 4.8 (primary), GPT-5.5 (codex), and---the landmark---
+    Claude Fable, which completes all 25. Every arm ran the identical process-isolated, no-code harness."""
     import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
+    def pg(a):
+        return (a or {}).get("per_game", a or {})
     def nfull(store):
         return sum(1 for v in store.values() if isinstance(v, dict) and v.get("win")
                    and (v.get("levels", 0) or 0) >= v.get("win", 99))
-    cols = [(sfg["per_game"], f"source-free\n(primary) {sfg['n_full_games']}/25")]
-    if fab:
-        cols.append((fab["per_game"], f"source-free\n(Fable) {nfull(fab['per_game'])}/25"))
-    games = sorted(fg["games"], key=lambda g: (-(fg["games"][g].get("levels") or 0), g))
+    arms = [(pg(opus), "Claude Opus 4.8"), (pg(codex), "GPT-5.5"), (pg(fable), "Claude Fable")]
+    arms = [(store, name) for store, name in arms if store]
+    cols = [(store, f"{name}\n{nfull(store)}/25") for store, name in arms]
+    allgames = set().union(*[set(s) for s, _ in arms]) if arms else set()
+    op = pg(opus)
+    games = sorted(allgames, key=lambda g: (-(op.get(g, {}).get("levels") or 0),
+                                            -(pg(fable).get(g, {}).get("win") or 0), g))
     fig, ax = plt.subplots(figsize=(len(cols) * 2.0 + 0.4, 8.2))
     for ci, (store, _) in enumerate(cols):
         for ri, g in enumerate(games):
@@ -564,7 +571,8 @@ def main():
     if fg:
         fullgame_assets(fg)
         if sfg:
-            source_matrix_assets(fg, sfg, jload("arc3_fullgame_sourcefree_fable.json"))
+            # three source-free arms: Claude Opus 4.8 (primary), GPT-5.5 (codex), Claude Fable
+            source_matrix_assets(sfg, csf, jload("arc3_fullgame_sourcefree_fable.json"))
 
     # ---- E120 action-efficiency (official RHAE-style score) ----
     rh = jload("arc3_rhae.json")

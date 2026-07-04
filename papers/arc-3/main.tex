@@ -163,51 +163,39 @@
 \textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped into
 an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
 frontier agents score near zero. We report the \textbf{first perfect ARC-AGI-3 result---and it is
-source-free.} Under the benchmark's intended \textbf{source-free} protocol---process-isolated, no game
+source-free} (achieved \ArcMilestoneUTC{}; \S\ref{sec:fable}). Under the benchmark's intended
+\textbf{source-free} protocol---process-isolated, no game
 code; rules discovered by acting; per-run leakage audit; every solve replay-verified and round-tripped
 through a verified OpenWorld \texttt{World}---a reasoning agent that writes, \emph{reasons the win
-condition for}, and verifies its own world model, run at full budget with our strongest model
-(\textbf{Claude~Fable~5}), completes \textbf{all \ArcFableFull/\ArcUnionGames{} games}
-(\ArcFableLevels/\ArcTotalLevels{} levels), human-efficient or better on every one (\textbf{\ArcFableRhae{}
-mean RHAE}; \ArcFableRhaeAboveHuman/\ArcUnionGames{} at or above the human baseline---roughly a
-\emph{third} of the human action count per solved level). Strikingly, this source-free sweep
+condition for}, and verifies its own world model, with our strongest model
+(\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} games}
+(\ArcFableLevels/\ArcTotalLevels{} levels), human-efficient or better on all \ArcUnionGames{}
+(\textbf{\ArcFableRhae{} mean RHAE}; roughly a \emph{third} of the human action count per level).
+Strikingly, this source-free sweep
 \textbf{exceeds the \ArcFullGames/\ArcUnionGames{} reachable \emph{with} the game source}
 (\S\ref{sec:fullgame}), and it clears \texttt{lf52}'s final level---the one level that had resisted
 \emph{every} run, source-free or source-assisted. It also beats prior SOTA \emph{baseline1}'s
 source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames{}} (\ArcRhaeBaselineOne{}
-RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}. A single earlier agent
-had reached \ArcSFGames/\ArcUnionGames{} source-free; model scale carries the result to the full
-\ArcFableFull.
+RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}.
 
 \textbf{Why it is hard---and the scientific contribution.} The bottleneck is \emph{not} modeling but
 \textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
-goal-as-state. \emph{Modeling is largely solved}---all \NumArcGames{} games are replay-deterministic
-(\ArcDeterminismAll{}) and exactly code-expressible; a frontier synthesizer writes verified
-\texttt{predict(frame,action)} code reaching \ArcClaudeFid{} mean held-out exact-match
-(\ArcNNearPerfect{} near-perfect). Yet on top of those models, \emph{six} principled automated
-goal-discovery methods (atomic objectives, frontier-LLM hypotheses, Bayesian sub-world planning, typed
-navigation, a formal solving cycle, spectral exploration) solve \textbf{zero} hard games---several
-\emph{even on a fidelity-$1.0$ model}---because a goal scored over a single \emph{state} cannot rank an
-ordered \emph{procedure}. Only a reasoning agent crosses the walls, and only at \emph{fair budget}: the
-same recipe trailed baseline1 until four \emph{harness/budget} confounds were removed (a frame-decode
-crash, a per-game time cap, reasoning left at its default, and API rate-limit throttling); run fairly,
-it overtakes prior SOTA.
+goal-as-state. \emph{Modeling is largely solved} (all \NumArcGames{} games are replay-deterministic and
+exactly code-expressible; a synthesizer writes verified \texttt{predict(frame,action)} code reaching
+\ArcClaudeFid{} held-out exact-match). Yet on top of those models, \emph{six} principled automated
+goal-discovery methods solve \textbf{zero} hard games---several \emph{even on a fidelity-$1.0$
+model}---because a goal scored over a single \emph{state} cannot rank an ordered \emph{procedure}. Only a
+reasoning agent crosses the walls, and only at \emph{fair budget} (after removing four harness/budget
+confounds).
 
-Granting an agent \textbf{read access to each game's own source} (mechanics \emph{and} win condition)
-reaches \textbf{\ArcFullGames/\ArcUnionGames{}} (\S\ref{sec:fullgame})---a security-relevant
-\textbf{source-access} capability, since most critical infrastructure is open-source. But the source-free
-sweep now \emph{exceeds} it: the gap between protocols---long read as a fixed \emph{cost of
-discovery}---is \textbf{not a capability ceiling}. A weaker configuration pays that cost (an earlier
-agent: \ArcSFGames/\ArcUnionGames{} source-free); a strong enough model \emph{erases} it, discovering by
-acting what source access would hand over for free. Solves are offline with unbounded resets ($N{=}1$ per
-game) and this is a \emph{fresh fair-budget result that may be revised}; random play alone clears
-$\ArcRandomGeqOne/\ArcUnionGames$ first levels, so we also report \textbf{\ArcAboveRandom/\ArcUnionGames{}
-above random}. \textbf{Contributions:} (i)~the \textbf{first perfect ARC-AGI-3 result, source-free}, with
-evidence the source gap \emph{closes with model scale}; (ii)~the goal-as-procedure diagnosis, negatives as
-first-class results; (iii)~an auditable source-free protocol whose telemetry makes leakage
-\emph{detectable}, every solver a serveable, verified OpenWorld \texttt{World}.
+Granting \textbf{read access to each game's own source} reaches \textbf{\ArcFullGames/\ArcUnionGames{}}
+(\S\ref{sec:fullgame})---a security-relevant \textbf{source-access} capability (most critical
+infrastructure is open-source)---which the source-free sweep now \emph{exceeds}: the source gap is a
+\emph{weaker model's} discovery cost (an earlier agent: \ArcSFGames/\ArcUnionGames{}), not a capability
+ceiling. Solves are offline with unbounded resets ($N{=}1$; a fresh fair-budget result that may be
+revised); random play alone clears $\ArcRandomGeqOne/\ArcUnionGames$ first levels, so we also report
+\textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the \textbf{first perfect ARC-AGI-3 result, source-free}---the source gap \emph{closes with model scale}; (ii)~the goal-as-procedure diagnosis, negatives as first-class results; (iii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable}, each solve a verified OpenWorld \texttt{World}.
 
-\smallskip
 \noindent\textbf{Keywords:}~%
 ARC-AGI-3; interactive reasoning; code world models; verification; planning.
 \end{tcolorbox}
@@ -370,13 +358,16 @@ App.~\ref{app:pergame} (Table~\ref{tab:arc3games}) lists every game; limitations
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.6\textwidth]{figs/arc3_source_matrix.png}
-\caption{\textbf{With vs.\ without the game source.} Per-game full-game completion under the two
-protocols: \emph{source-faithful} (reads \texttt{<game>.py} to build an exact simulator, then searches)
-reaches \ArcFullGames/\ArcUnionGames; \emph{source-free} (process-isolated, no source---discovers
-dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames. Green $=$ fully completed (level count
-shown), pale green $=$ partial, grey $=$ unsolved. The \ArcSourceGapGames-game gap is the measured cost
-of discovery. Both replay-verified; neither uses banked solutions.}
+\includegraphics[width=0.72\textwidth]{figs/arc3_source_matrix.png}
+\caption{\textbf{With vs.\ without the game source.} Per-game full-game completion under three
+conditions: \emph{source-faithful} (reads \texttt{<game>.py} to build an exact simulator, then searches)
+reaches \ArcFullGames/\ArcUnionGames; \emph{source-free (primary)} (process-isolated, no source---discovers
+dynamics and goal by acting) reaches \ArcSFGames/\ArcUnionGames; and \emph{source-free (Fable)}, our
+strongest model on the identical isolated harness, reaches \textbf{\ArcFableFull/\ArcUnionGames{}}. Green
+$=$ fully completed (level count shown), pale green $=$ partial, grey $=$ unsolved. The Fable column is the
+\emph{only} fully-green one---it clears \texttt{lf52} (\ArcFableLfTwoActs{}-action path), which even
+source-faithful does not, so source-free with a strong enough model \emph{meets or exceeds} source access.
+All replay-verified; none use banked solutions.}
 \label{fig:arc3source}
 \end{figure}
 
@@ -562,7 +553,11 @@ protocol. The final wall (\texttt{lf52}~L10) fell to a persistent-workspace deep
 (build a verified simulator of the level, then search it offline at scale); its \ArcFableLfTwoActs{}-action
 solution replay- and OpenWorld-verifies in a fresh process. Fable's source-free \ArcFableFull{} thus
 \emph{exceeds} the source-\emph{assisted} \ArcFullGames{} of \S\ref{sec:fullgame}: given a capable enough
-model, discovery-by-acting recovers everything reading the code would provide.
+model, discovery-by-acting recovers everything reading the code would provide. \textbf{The sweep completed
+at \ArcMilestoneLocal{} (\ArcMilestoneUTC{})}---the instant \texttt{lf52} banked, taking the arm to
+\ArcFableFull/\ArcUnionGames{}; the run log and the fresh-process replay both attest it
+(\texttt{experiments/results/arc3\_milestone.json}). We record this timestamp to document priority for
+what we believe is the first perfect ARC-AGI-3 result.
 
 \begin{table}[t]
 \centering
@@ -637,22 +632,28 @@ we report games \emph{completed}, not the leaderboard's live action-\emph{effici
 action economy is our weak axis: long replay sequences and free resets mean an explicit live RHAE score
 would be lower than the offline efficiency figure of App.~\ref{app:fullgame-detail}. The confirming live
 run is a labeled next step.
-\item \textbf{Source-assisted reads the win condition.} The \ArcFullGames/\ArcUnionGames{} source-assisted
-number is obtained with the agent reading each game's own code---its \emph{mechanics and win condition}
-(though not the solution steps). It is a source-access \emph{upper bound}, not directly comparable to the
-benchmark-intended source-free protocol; the human-comparable result is the source-free
-\ArcSFGames/\ArcUnionGames{}.
-\item \textbf{Single run; no variance reported ($N{=}1$ per game).} Each game's reported result is a
-\emph{single} solve, not an average over seeds or agent sessions; we report no error bars or success-rate
-distribution. Per-game outcomes may vary across runs of the stochastic agent, and the headline counts
-should be read as one realized run, not an expectation.
+\item \textbf{Source-assisted reads the win condition---and is now surpassed source-free.} The
+\ArcFullGames/\ArcUnionGames{} source-assisted number is obtained with the agent reading each game's own
+code---its \emph{mechanics and win condition} (though not the solution steps)---so it is a source-access
+\emph{upper bound}, not directly comparable to the benchmark-intended source-free protocol. The
+human-comparable, headline result is source-free: our strongest model completes
+\textbf{\ArcFableFull/\ArcUnionGames{}} source-free (\S\ref{sec:fable}), which \emph{exceeds} the
+source-assisted number. Source access therefore bounds a \emph{weaker} configuration, not the result.
+\item \textbf{Single run; no variance reported ($N{=}1$ per game).} Every reported result---\emph{including
+the \ArcFableFull/\ArcUnionGames{} landmark}---is a \emph{single} realized solve of a stochastic agent,
+not an average over seeds or sessions; we report no error bars or success-rate distribution. The perfect
+sweep is one run of one model (Claude~Fable~5) at full budget; a repeat may differ, and the primary/opus
+arm under the identical protocol reached \ArcSFGames/\ArcUnionGames{}. Read the headline counts as one
+realized run, not an expectation. Per-game repeated-seed success rates are a labeled next step.
 \item \textbf{Training-memory contamination is unmeasured.} The protocol audits that the agent never
 \emph{reads} game source \emph{at run time}; it cannot rule out that a game---public on GitHub and the
 leaderboard---sits in the \emph{model's training data}. This channel is unverifiable (one cannot inspect
 the weights) and affects \emph{every} frontier-model result on this benchmark, prior SOTA and the live
 leaderboard included. The strongest claim the protocol supports is therefore \emph{no runtime source
 access (audited)}, not ``no prior knowledge''; a contamination-free test needs a model whose cutoff
-provably predates a game's release (the direction of our local-model controls).
+provably predates a game's release (the direction of our local-model controls). This applies in full to
+the \ArcFableFull/\ArcUnionGames{} Claude Fable landmark: a stronger model may have seen more, so the
+milestone is best read as \emph{no runtime source access, audited}---not \emph{no prior exposure}.
 \item \textbf{Fresh fair-budget result (how the source-free comparison became a win).} An earlier
 source-free run trailed baseline1 only because of harness/budget confounds---a frame-decode crash, a
 \ArcOurBudgetMin-minute wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, the Codex
@@ -660,16 +661,20 @@ arm's reasoning effort left at its \emph{default} (never raised), and API rate-l
 baseline1~\cite{baseline1_ewm} reports \emph{no} budget cap. Re-run \emph{fairly}---fixed wrapper (crash
 removed), full per-game budget, maximum reasoning effort, and rate-limit-resilient retries---the same
 recipe on a verified-World substrate completes \ArcSFGames/\ArcUnionGames{} games (\ArcSFLevels{} levels)
-at \ArcRhaeSFGame{} per-game RHAE, overtaking baseline1's \ArcBaselineFull/\ArcUnionGames{} (145 levels,
-\ArcRhaeBaselineOne{}) on all three axes---games, levels, and (widest) efficiency. We report this as a
-\emph{fresh} result (the fair-budget sweep is still finishing, so numbers may be slightly revised) and it
-remains offline, unbounded-reset, and $N{=}1$ per game.
-\item \textbf{Cost is an uncontrolled estimate.} The whole campaign (all \ArcUnionGames{} games) ran from
-a single Claude Code subscription over $<\!24$h; prorating the \$200/month plan gives $\approx$\$7.
-baseline1 reports running on a comparable \$200/month subscription that covered ``roughly two to eight
-games''---so at the same subscription price our run covers the full suite---but we did not meter tokens
-and the engines and accounting differ, so we avoid a per-run dollar multiple and treat this as an
-estimate, not a controlled figure.
+at \ArcRhaeSFGame{} per-game RHAE (primary agent), overtaking baseline1's
+\ArcBaselineFull/\ArcUnionGames{} (145 levels, \ArcRhaeBaselineOne{}) on all three axes; and, with our
+strongest model, the fair-budget sweep \emph{completed} the full \ArcFableFull/\ArcUnionGames{} (achieved
+\ArcMilestoneUTC{}, \S\ref{sec:fable}). We report this as a \emph{fresh} result; it remains offline,
+unbounded-reset, and $N{=}1$ per game, and a repeat or a live-protocol run may revise it.
+\item \textbf{Cost is an uncontrolled estimate---and the landmark was not the cheap run.} The primary
+(opus) campaign over all \ArcUnionGames{} games ran from a single Claude Code subscription in $<\!24$h
+($\approx$\$7 prorating the \$200/month plan; baseline1 reports a comparable \$200/month subscription
+covering ``roughly two to eight games,'' so at the same price our run covers the full suite). The
+\ArcFableFull/\ArcUnionGames{} Fable sweep, by contrast, used \emph{substantially more} compute---maximum
+reasoning effort, full per-game budget, and rate-limit-resilient retries over a longer wall-clock---so the
+perfect result is \emph{not} that low-cost figure. We did not meter tokens precisely, engines and
+accounting differ, and we report no controlled per-run dollar amount; treat every cost figure as an
+estimate, not a controlled comparison.
 \end{enumerate}
 
 \section{Reproducibility}
@@ -713,6 +718,27 @@ under the \texttt{arc-agi} interpreter; the world round-trip imports the zero-de
 \texttt{openworld} core. In short:
 \texttt{build\_arc3\_fullgame.py $\to$ e120\_rhae.py $\to$ e121\_openworld\_roundtrip.py $\to$
 make\_arc3\_assets.py} regenerates every full-game number, figure, and verification in this paper.
+
+\paragraph{Source-free sweep (the landmark).} The \ArcFableFull/\ArcUnionGames{} source-free result
+reproduces the same way, from immutable per-run records. \textbf{Harness:} the agent plays only through
+the process-isolated \texttt{experiments/arc3\_sandbox.py} (a \texttt{SandboxGame} whose interpreter
+\emph{cannot} \texttt{import arc\_agi}---fair by construction), driven by
+\texttt{scripts/run\_arc\_agent\_sandbox.sh} under the resilient wrapper
+\texttt{scripts/run\_e140\_fable\_backoff.sh} (full budget, max reasoning, rate-limit-resilient).
+\textbf{Banked solutions:} \texttt{experiments/results/arc3\_fullgame\_sourcefree\_fable.json} holds every
+game's action path (\ArcFableFull/\ArcUnionGames{} full, \ArcFableLevels/\ArcTotalLevels{} levels;
+\texttt{arc3\_fullgame\_sourcefree.json} holds the primary agent's \ArcSFGames{}). Each path
+\emph{replays deterministically against the live game in a fresh process} (e.g.\ \texttt{lf52} reaches
+\texttt{levels=10/10, done=True} from its \ArcFableLfTwoActs{}-action path), and each banked solve
+additionally round-trips through an \openworld{} \texttt{World}. \textbf{Leakage audit:}
+\texttt{scripts/audit\_network\_tools.py} confirms \ArcAuditNetHits{} network operations and
+\ArcAuditWebCalls{} web-tool calls across \ArcAuditTranscripts{} captured source-free transcripts; each run
+also carries a per-run knowledge audit and the engine-version hash
+(\texttt{scripts/snapshot\_env\_versions.py} $\to$ \texttt{arc3\_env\_versions.json}).
+\textbf{Efficiency:} \texttt{experiments/e120\_rhae\_arms.py} scores the Fable arm with \texttt{arc\_agi}'s
+own calculator (mean \ArcFableRhae{}; \texttt{arc3\_rhae\_arms.json}). \textbf{Priority:} the milestone
+timestamp and its evidence are recorded in \texttt{experiments/results/arc3\_milestone.json}
+(\ArcMilestoneUTC{}). All \texttt{Arc*} macros and figures regenerate via \texttt{make\_arc3\_assets.py}.
 
 \clearpage
 \appendix

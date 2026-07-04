@@ -189,13 +189,21 @@ def rhae_assets(rh):
     print("wrote arc3_rhae.png")
 
 
-def source_matrix_assets(fg, sfg):
-    """With/without-source completion matrix: per game, source-faithful (reads code) vs source-free (isolated)."""
+def source_matrix_assets(fg, sfg, fab=None):
+    """With/without-source completion matrix: per game, source-faithful (reads code), source-free primary
+    (isolated), and---the landmark---source-free Fable, which completes all 25, meeting/exceeding the
+    source-faithful column with NO source access."""
     import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
-    gf, sfp = fg["games"], sfg["per_game"]
-    games = sorted(gf, key=lambda g: (-(gf[g].get("levels") or 0), g))
-    fig, ax = plt.subplots(figsize=(4.6, 8.2))
-    for ci, store in enumerate((gf, sfp)):
+    def nfull(store):
+        return sum(1 for v in store.values() if isinstance(v, dict) and v.get("win")
+                   and (v.get("levels", 0) or 0) >= v.get("win", 99))
+    cols = [(fg["games"], f"source-faithful\n{fg['n_full']}/25"),
+            (sfg["per_game"], f"source-free\n(primary) {sfg['n_full_games']}/25")]
+    if fab:
+        cols.append((fab["per_game"], f"source-free\n(Fable) {nfull(fab['per_game'])}/25"))
+    games = sorted(fg["games"], key=lambda g: (-(fg["games"][g].get("levels") or 0), g))
+    fig, ax = plt.subplots(figsize=(len(cols) * 2.0 + 0.4, 8.2))
+    for ci, (store, _) in enumerate(cols):
         for ri, g in enumerate(games):
             d = store.get(g, {}); lv = d.get("levels", 0) or 0; wn = d.get("win", 0) or 0
             full = bool(wn and lv >= wn)
@@ -204,16 +212,16 @@ def source_matrix_assets(fg, sfg):
             if wn:
                 ax.text(ci + 0.46, ri + 0.46, f"{lv}/{wn}", ha="center", va="center",
                         fontsize=6.2, color="white" if full else "#333")
-    ax.set_xlim(-0.05, 2.0); ax.set_ylim(-0.4, len(games))
+    ax.set_xlim(-0.05, len(cols)); ax.set_ylim(-0.4, len(games))
     ax.set_yticks([r + 0.46 for r in range(len(games))]); ax.set_yticklabels(games, fontsize=7)
-    ax.set_xticks([0.46, 1.46]); ax.set_xticklabels([f"source-faithful\n{fg['n_full']}/25",
-                                                     f"source-free\n{sfg['n_full_games']}/25"], fontsize=8.5)
+    ax.set_xticks([c + 0.46 for c in range(len(cols))])
+    ax.set_xticklabels([c[1] for c in cols], fontsize=8.5)
     ax.invert_yaxis(); ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
     ax.set_title("with vs without game source (replay-verified)", fontsize=9.5)
     fig.savefig(FIGS / "arc3_source_matrix.png", dpi=200, bbox_inches="tight")
-    plt.close(fig); print("wrote arc3_source_matrix.png")
+    plt.close(fig); print(f"wrote arc3_source_matrix.png ({len(cols)} cols)")
 
 
 def codex_head_to_head_assets(claude_pg, codex):
@@ -557,7 +565,7 @@ def main():
     if fg:
         fullgame_assets(fg)
         if sfg:
-            source_matrix_assets(fg, sfg)
+            source_matrix_assets(fg, sfg, jload("arc3_fullgame_sourcefree_fable.json"))
 
     # ---- E120 action-efficiency (official RHAE-style score) ----
     rh = jload("arc3_rhae.json")
@@ -628,6 +636,16 @@ def main():
                         + f"\\newcommand{{\\ArcFableRhae}}{{{fb['mean_all']:.1f}}}\n"
                         + f"\\newcommand{{\\ArcFableRhaeAboveHuman}}{{{fb['n_above_human']}}}\n")
         print(f"appended Fable-RHAE macros (mean={fb['mean_all']}, >=human={fb['n_above_human']}/{fb['n_scored']})")
+
+    # ---- Milestone timestamp (priority record): when the 25/25 source-free sweep was achieved. ----
+    ms = jload("arc3_milestone.json")
+    if ms:
+        loc = ms["achieved_at_local"].replace("T", " ").rsplit("-", 1)[0] + " PDT"
+        utc = ms["achieved_at_utc"].replace("T", " ").replace("Z", " UTC")
+        NUMS.write_text(NUMS.read_text()
+                        + f"\\newcommand{{\\ArcMilestoneLocal}}{{{loc}}}\n"
+                        + f"\\newcommand{{\\ArcMilestoneUTC}}{{{utc}}}\n")
+        print(f"appended milestone macros ({utc})")
 
     # ---- lf52 final-level solution length: the one level no run cleared even with source; Fable's
     #      source-free 10/10 path (from the fable archive). ----

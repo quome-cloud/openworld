@@ -1,0 +1,13 @@
+{
+ "milestone": "First perfect ARC-AGI-3: all 25/25 public games (183/183 levels) completed SOURCE-FREE",
+ "arm": "claude-fable-5 (max reasoning)",
+ "protocol": "source-free (process-isolated SandboxGame, no game code; discovered by acting; per-run leakage-audited; replay- and OpenWorld-World-verified)",
+ "final_game": "lf52",
+ "final_game_note": "lf52 level 10 -- the single level no run had cleared under any protocol, source-free OR source-assisted",
+ "achieved_at_local": "2026-07-04T02:05:14-07:00",
+ "achieved_at_utc": "2026-07-04T09:05:14Z",
+ "timezone": "America/Los_Angeles (PDT)",
+ "evidence_log": "scratch_arc/e140_fable.log -- '[sf-bank] banked: lf52 9->10/10  =>  25 full, 183/183 levels' ; '[e140-fable] now: 25/25 full, 183/183 levels' ; '[e140-fable] DONE Sat Jul  4 02:05:14 PDT 2026'",
+ "verification": "fresh-process replay reproduces lf52 levels=10/10 done=True from its 914-action banked path",
+ "note": "Timestamp recorded to document priority. It is the moment the 25th game (lf52) was banked, taking the Claude Fable source-free arm to 25/25."
+}

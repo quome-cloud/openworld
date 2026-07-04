@@ -427,22 +427,21 @@ def fig_surprise(runs):
         for t, lvl in r["levels"]:
             lvl_times.append(t / r["dur"] if r["dur"] else 0)
     S = np.array(srate, float)
-    med = np.nanmedian(S, axis=0)
+    mean = np.nanmean(S, axis=0)                       # mean, not median: markers are sparse (median=0)
+    mean_n = mean / (mean.max() + 1e-9)                # each series to its OWN max -> one shared 0..1 axis
+    lv_hist, _ = np.histogram(lvl_times, bins=nb, range=(0, 1))
+    lv_n = lv_hist / (lv_hist.max() + 1e-9)
     fig, ax = plt.subplots(figsize=(7.6, 4.2))
     _spines(ax)
-    ax.plot(xs, med, color=OCHRE, lw=2.4, label="median self-correction rate")
-    ax.fill_between(xs, 0, med, color=OCHRE, alpha=0.14, lw=0)
-    ax2 = ax.twinx()   # allowed: histogram density on a SEPARATE panel-like overlay, not a competing y for the same series
-    ax2.hist(lvl_times, bins=nb, range=(0, 1), color=TEAL, alpha=0.28, label="level-ups")
-    ax2.set_yticks([]); _spines(ax2); ax2.spines["right"].set_visible(False)
+    ax.bar(xs, lv_n, width=(1.0 / nb) * 0.9, color=TEAL, alpha=0.30, lw=0, label="level-ups (relative)")
+    ax.plot(xs, mean_n, color=OCHRE, lw=2.4, label="self-correction rate (relative)")
+    ax.fill_between(xs, 0, mean_n, color=OCHRE, alpha=0.12, lw=0)
     ax.set_xlabel("normalized wall-clock (start→end)")
-    ax.set_ylabel("self-correction markers / tool call")
+    ax.set_ylabel("relative intensity (each series ÷ its own max)")
     ax.set_title("When the model breaks (self-correction) vs. when levels fall", fontsize=10,
                  loc="left", color=INK)
-    ax.set_xlim(0, 1)
-    h1, l1 = ax.get_legend_handles_labels()
-    ax.legend(h1 + [Patch(facecolor=TEAL, alpha=0.4, label="level-ups (all runs)")],
-              [*l1, "level-ups (all runs)"], frameon=False, fontsize=7.5, loc="upper right")
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1.05)
+    ax.legend(frameon=False, fontsize=7.5, loc="upper right")
     fig.tight_layout()
     fig.savefig(FIGS / "e150_surprise.png", bbox_inches="tight")
     plt.close(fig)

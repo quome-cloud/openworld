@@ -413,22 +413,28 @@ status-bar and simple game rules are captured exactly, and even where a dense fr
 matched the underlying mechanic (e.g.\ \texttt{dc22}'s directional move) is recovered.}
 \label{fig:codefig}
 \end{figure}
-The recipe is the \openworld{} loop (Fig.~\ref{fig:arch}). \textbf{Explore:} a budgeted policy (random, then change-seeking)
-gathers $(s,a,s')$ transitions, each verified by construction (the environment is ground truth).
-\textbf{Synthesize verified code:} an LLM writes a Python \texttt{predict(frame,action)}, accepted
-\emph{only if} it exact-matches held-out transitions (a per-frame gate; it emits local update rules and
-retries with counterexamples; Fig.~\ref{fig:codefig} shows three discovered programs). \textbf{Plan:} the agent searches action sequences through the verified
-code (BFS / CEM lookahead) ``in imagination'' at native speed. Run on all \NumArcGames{} games with three
-synthesizers (qwen2.5-coder 7B/32B, Claude), this establishes that modeling is \emph{not} the wall.
-\emph{The precondition is universal}: replay-determinism is \ArcDeterminismAll{} on every game, so the
-dynamics are exactly writable as code. \emph{A frontier synthesizer recovers them}: Claude reaches
-\ArcClaudeFid{} mean held-out exact-match on the \ArcNReal{} real-dynamics games (excluding trivial
-no-change games), beating a copy-frame baseline on \ArcClaudeBeatsCopy/\ArcNReal{} with
-\ArcNNearPerfect{} near-perfect ($\geq$90\%) world models, including dense games where copy is near-zero.
-\emph{Capability is decisive}: the local model captures almost nothing (qwen-32B \ArcQwenThirtyTwoFid{},
-qwen-7B \ArcQwenSevenFid{}), so the bottleneck is \emph{generation}, not determinism or verification
-(detail, the fidelity figure, and honest limits in App.~\ref{app:modeling}). Fidelity is single-step and
-is not solving ($0$ levels here, by design); solving is the rest of the paper.
+The recipe is the \openworld{} loop (Fig.~\ref{fig:arch}), in three plain steps. \textbf{Look around:} the
+agent presses buttons and watches how the screen changes, collecting little facts of the form ``from
+\emph{this} screen, \emph{this} button leads to \emph{that} next screen.'' \textbf{Write the rule as
+code:} an LLM writes a short Python function, \texttt{predict(frame,action)}, that tries to say what the
+next screen will be---and we keep it \emph{only} if it reproduces held-back examples \emph{exactly}, every
+pixel right; when it gets one wrong we hand back the mistake and it tries again (Fig.~\ref{fig:codefig}
+shows three it wrote). \textbf{Plan inside the code:} once the code is a faithful copy of the game, the
+agent tries move sequences \emph{in its head}---running the fast code instead of the slow real game.
+
+This section asks one question: is the hard part \emph{building that copy of the game}, or \emph{figuring
+out what you are trying to do}? Building the copy is \emph{not} the hard part, for two reasons. First, the
+games are perfectly repeatable---press the same buttons and you always get the same screens (determinism
+\ArcDeterminismAll{})---so the rules \emph{can} be written down exactly as code. Second, a strong model
+actually writes them: Claude's code names the next screen exactly right \ArcClaudeFid{} of the time on the
+\ArcNReal{} games whose screens really change---beating ``just guess it stays the same'' on
+\ArcClaudeBeatsCopy/\ArcNReal{} of them, and getting \ArcNNearPerfect{} nearly perfect. And it is the
+\emph{model} that matters, not the trick: a small local model gets almost nothing (qwen-32B
+\ArcQwenThirtyTwoFid{}, qwen-7B \ArcQwenSevenFid{}). So what limits us is \emph{writing} the rule---not the
+game being unpredictable, and not our check being weak (details in App.~\ref{app:modeling}).
+
+One caution, so we do not oversell it: this is the code's accuracy on a \emph{single} step, which is not
+the same as winning---$0$ games are solved here, by design. Winning is the rest of the paper.
 
 \subsection{The goal-inference wall}
 

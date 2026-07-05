@@ -30,7 +30,7 @@ import e122_online_regimes as E122
 import e119.perceive as P
 
 ARCH = json.loads((ROOT / "experiments/results/arc3_fullgame_sourcefree.json").read_text())
-MAPS = ROOT / "papers/arc-3/maps"; MAPS.mkdir(parents=True, exist_ok=True)
+MAPS = ROOT / "papers/arc-3/maps/multiworld"; MAPS.mkdir(parents=True, exist_ok=True)
 OUT = ROOT / "experiments/results/e123_online_resynth.json"
 
 

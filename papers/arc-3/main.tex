@@ -468,7 +468,12 @@ source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (145
 levels, and---most decisively---action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game
 RHAE; \S\ref{sec:rhae}). With a stronger model the ceiling lifts entirely: the \textbf{Claude Fable} arm
 completes \textbf{all \ArcFableFull/\ArcUnionGames{} games} source-free (\ArcFableLevels/\ArcTotalLevels{}
-levels, \ArcFableRhae{} mean RHAE; \S\ref{sec:fable})---the first perfect ARC-AGI-3 result.
+levels, \ArcFableRhae{} mean RHAE; \S\ref{sec:fable})---the first perfect ARC-AGI-3 result. Every solved
+game becomes a serveable OpenWorld world model (the atlas, Fig.~\ref{fig:arc3gallery}), and the solves are
+\emph{tight}: per level Fable is \emph{more efficient than the human} on
+\textbf{\ArcRhaeLevelsOverHuman/\ArcRhaeNLevels{} levels} (\ArcRhaeLevelsAtCap{} at the metric's $115$ cap;
+Fig.~\ref{fig:arc3rhae})---found at a discovery cost of tens of millions of tokens per game, where Fable is
+also ${\sim}3.5{\times}$ more token-efficient than the primary agent (Fig.~\ref{fig:disccost}).
 App.~\ref{app:pergame} (Table~\ref{tab:arc3games}) lists every game; limitations are consolidated in
 \S\ref{sec:limitations}.
 
@@ -898,25 +903,31 @@ verified code world model. RHAE is thus a solution-path economy metric, not a co
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{figs/arc3_discovery_cost.png}
-\caption{\textbf{Discovery cost per solved game---the axis RHAE does not measure.} Mean LLM spend to
-\emph{find} each source-free full solve: \$\ArcDiscCostOpus{} (opus) and \$\ArcDiscCostFable{} (fable),
-over \ArcDiscTokOpus{}M vs.\ \ArcDiscTokFable{}M tokens respectively (codex discovery cost is not
-captured from plaintext logs and is reported as unknown, not zero). This effort is entirely orthogonal
-to---and uncounted by---the replay-path RHAE of Fig.~\ref{fig:arc3rhae}.}
+\caption{\textbf{Discovery cost per solved game (token effort)---the axis RHAE does not measure.} The LLM
+\emph{token} effort to \emph{find} each source-free full solve, reconstructed per-message from the session
+transcripts so it covers \emph{all} \ArcUnionGames{} games for both arms. (The \emph{dollar} cost is only
+logged in a session's final result event, which the overnight kill-and-resume harness usually pre-empted;
+tokens survive because they are summed from every message.) \emph{Left:} mean tokens per solved
+game---\textbf{Claude~Fable finds a solve in ${\sim}3.5{\times}$ fewer tokens} than the primary opus agent
+($23$M vs.\ $81$M; ${\sim}\$44$ vs.\ ${\sim}\$67$ estimated) \emph{while solving more games}. \emph{Right:}
+per-game tokens for all \ArcUnionGames{} games (opus $2{,}031$M total, Fable $569$M). Codex (GPT-5.5) ran
+via plaintext logs that record no token stats, so its discovery cost is unknown (not zero). This effort is
+entirely orthogonal to---and uncounted by---the replay-path RHAE of Fig.~\ref{fig:arc3rhae}.}
 \label{fig:disccost}
 \end{figure}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figs/arc3_rhae.png}
-\caption{\textbf{Action efficiency on the official metric.} \emph{Left:} per-game action-efficiency
-score (official formula, official human baselines); teal $=$ at the human cap ($\geq\!100$), blue $\geq$
-baseline1's \ArcRhaeBaselineOne{}, ochre below; the dashed line is baseline1. Mean \ArcRhaeMean{} across
-\ArcRhaeN{} games, \ArcRhaeAboveHuman{} at the cap. \emph{Right:} our actions vs.\ the human baseline
-per level---nearly every point sits \emph{below} parity (fewer actions than the human). The two trailing
-All \ArcFableFull/\ArcUnionGames{} of Claude~Fable's source-free solves sit at the human
-cap (mean \ArcRhaeMean{}), every one above baseline1's \ArcRhaeBaselineOne{}~\cite{baseline1_ewm}. Scored
-with \texttt{arc\_agi}'s own \texttt{EnvironmentScoreCalculator}; no metric is re-implemented.}
+\caption{\textbf{Action efficiency, per level (source-free, Claude~Fable).} The official per-\emph{game}
+RHAE caps at $100$ (mean \ArcRhaeMean{}), which \emph{hides} the margin; per \emph{level} the score is
+$\min\!\big((b/a)^2\cdot 100,\ 115\big)$, so using fewer actions than the human scores \emph{above} $100$.
+\emph{Left:} each game's mean per-level score---every one of Fable's \ArcFableFull/\ArcUnionGames{} games
+sits above the human line (most at the $115$ cap), far above baseline1's \ArcRhaeBaselineOne{}. \emph{Right:}
+the distribution over all \ArcRhaeNLevels{} solved levels---\textbf{\ArcRhaeLevelsOverHuman/\ArcRhaeNLevels{}
+beat the human} ($>\!100$) and \ArcRhaeLevelsAtCap{} hit the $115$ cap; Fable's action count per level is
+typically about a \emph{third} of the human's. Scored with \texttt{arc\_agi}'s own
+\texttt{EnvironmentScoreCalculator}; no metric is re-implemented.}
 \label{fig:arc3rhae}
 \end{figure}
 

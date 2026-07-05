@@ -149,54 +149,53 @@ def fullgame_assets(fg):
 
 
 def rhae_assets(rh):
-    """Action-efficiency figure: official ARC-AGI-3 score per game vs the baseline1 reference, and a
-    per-level scatter of our actions vs the human baseline (points below the diagonal = more efficient)."""
+    """Action-efficiency figure, PER LEVEL. The official per-GAME RHAE caps at 100, which hides how far
+    the solutions beat the human baseline; per level the score is min((b/a)^2*100, 115), so a level where we
+    use fewer actions than the human scores >100 (up to the 115 cap). Left: each game's mean per-level score
+    (bars rise above 100 = more efficient than the human). Right: the distribution over ALL solved levels."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import numpy as np
     gms = rh["games"]
-    order = sorted(gms, key=lambda g: -gms[g]["score"])
-    scores = [gms[g]["score"] for g in order]
     base1 = rh["baseline1_rhae"]
 
-    fig, (axb, axs) = plt.subplots(1, 2, figsize=(10.4, 4.4),
-                                   gridspec_kw={"width_ratios": [1.55, 1]})
-    cols = [TEAL if s >= 100 else (BLUE if s >= base1 else OCHRE) for s in scores]
-    axb.bar(range(len(order)), scores, color=cols, width=0.78)
-    axb.axhline(base1, ls="--", color="#b00", lw=1.2)
-    axb.text(len(order) - 0.4, base1 + 1.5, f"baseline1 = {base1}", color="#b00", ha="right", fontsize=8.5)
-    axb.axhline(100, ls=":", color="#333", lw=1.0)
-    axb.text(0.1, 101.5, "human-efficient = 100", color="#333", fontsize=8.5)
+    def lvscores(g):
+        return list(gms[g].get("level_scores") or [gms[g].get("score", 0)])
+    order = sorted(gms, key=lambda g: -(sum(lvscores(g)) / max(1, len(lvscores(g)))))
+    means = [sum(lvscores(g)) / max(1, len(lvscores(g))) for g in order]
+    alllv = [s for g in order for s in lvscores(g)]
+    nL = len(alllv)
+    n_over = sum(1 for s in alllv if s > 100)
+    n_cap = sum(1 for s in alllv if s >= 114.9)
+
+    fig, (axb, axh) = plt.subplots(1, 2, figsize=(10.6, 4.4), gridspec_kw={"width_ratios": [1.65, 1]})
+    # left: per-game mean per-level score -- reveals the >100 margin the per-game cap hides
+    cols = [TEAL if m >= 100 else (BLUE if m >= base1 else OCHRE) for m in means]
+    axb.bar(range(len(order)), means, color=cols, width=0.8)
+    axb.axhline(115, ls=":", color="#2a8a3e", lw=1.0); axb.text(len(order) - 0.3, 116, "cap 115", color="#2a8a3e", ha="right", fontsize=8)
+    axb.axhline(100, ls="--", color="#333", lw=1.0); axb.text(0.0, 95.5, "human = 100", color="#333", fontsize=8, va="top")
+    axb.axhline(base1, ls="--", color="#b00", lw=1.0); axb.text(len(order) - 0.3, base1 + 1.5, f"baseline1 = {base1}", color="#b00", ha="right", fontsize=8)
     axb.set_xticks(range(len(order)))
     axb.set_xticklabels(order, rotation=90, fontsize=7, family="monospace")
-    axb.set_ylabel("official ARC-AGI-3 action-efficiency score")
-    axb.set_ylim(0, 118)
-    axb.set_title(f"Action efficiency of our verified solutions\n"
-                  f"mean {rh['mean_score']:.1f} (vs baseline1 {base1}); "
-                  f"{rh['n_above_human']}/{rh['n_scored']} at the human cap", fontsize=9.5)
+    axb.set_ylabel("mean per-level action-efficiency score")
+    axb.set_ylim(0, 124)
+    axb.set_title("Per-level efficiency, mean per game\n(above 100 $=$ more efficient than the human)", fontsize=9.5)
     axb.grid(axis="y", alpha=0.25)
 
-    # per-level scatter: our actions vs human baseline
-    xs, ys = [], []
-    for g in order:
-        ours = gms[g]["our_actions"]; base = gms[g]["baseline_actions"]
-        for i in range(min(len(ours), len(base))):
-            if ours[i] > 0:
-                xs.append(base[i]); ys.append(ours[i])
-    mx = max(xs + ys + [1])
-    axs.scatter(xs, ys, s=18, color=TEAL, alpha=0.65, edgecolor="white", linewidth=0.4, zorder=3)
-    axs.plot([0, mx], [0, mx], "--", color="black", alpha=0.45, lw=1)
-    axs.text(mx * 0.96, mx * 0.9, "y=x\n(human parity)", fontsize=7.5, ha="right", color="#555")
-    axs.set_xlabel("human baseline actions / level")
-    axs.set_ylabel("our actions / level")
-    axs.set_title("Per level: below the line = fewer\nactions than the human baseline", fontsize=9.5)
-    axs.set_xlim(0, mx * 1.03); axs.set_ylim(0, mx * 1.03)
-    axs.grid(alpha=0.25)
+    # right: distribution over ALL solved levels
+    axh.hist(alllv, bins=np.arange(30, 121, 5), color=TEAL, edgecolor="white")
+    axh.axvline(100, ls="--", color="#333", lw=1.1); axh.text(100, axh.get_ylim()[1] * 0.5, " human=100", color="#333", fontsize=8, rotation=90, va="center")
+    axh.axvline(115, ls=":", color="#2a8a3e", lw=1.1)
+    axh.set_xlabel("per-level action-efficiency score")
+    axh.set_ylabel("number of levels")
+    axh.set_title(f"All {nL} solved levels\n{n_over}/{nL} beat the human ($>$100); {n_cap} at the 115 cap", fontsize=9.5)
+    axh.grid(axis="y", alpha=0.25)
 
     fig.tight_layout()
     fig.savefig(FIGS / "arc3_rhae.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print("wrote arc3_rhae.png")
+    print(f"wrote arc3_rhae.png (per-level: {n_over}/{nL} >100, {n_cap} at cap)")
 
 
 def source_matrix_assets(opus, codex, fable):
@@ -586,13 +585,18 @@ def main():
     rh = jload("arc3_rhae.json")
     if rh:
         rhae_assets(rh)
+        _lv = [s for g in rh["games"].values() for s in (g.get("level_scores") or [])]
+        _over = sum(1 for s in _lv if s > 100); _cap = sum(1 for s in _lv if s >= 114.9)
         NUMS.write_text(NUMS.read_text()
                         + f"\\newcommand{{\\ArcRhaeMean}}{{{rh['mean_score']:.1f}}}\n"
                         + f"\\newcommand{{\\ArcRhaeAboveHuman}}{{{rh['n_above_human']}}}\n"
                         + f"\\newcommand{{\\ArcRhaeAboveBaseline}}{{{rh['n_above_baseline1']}}}\n"
                         + f"\\newcommand{{\\ArcRhaeBaselineOne}}{{{rh['baseline1_rhae']}}}\n"
-                        + f"\\newcommand{{\\ArcRhaeN}}{{{rh['n_scored']}}}\n")
-        print("appended RHAE macros")
+                        + f"\\newcommand{{\\ArcRhaeN}}{{{rh['n_scored']}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeLevelsOverHuman}}{{{_over}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeLevelsAtCap}}{{{_cap}}}\n"
+                        + f"\\newcommand{{\\ArcRhaeNLevels}}{{{len(_lv)}}}\n")
+        print(f"appended RHAE macros (per-level: {_over}/{len(_lv)} >100, {_cap} at cap)")
 
     # ---- source-free RHAE (E141): efficiency of the audited source-free solves vs the human baseline ----
     rsf = jload("e141_rhae_sourcefree.json")

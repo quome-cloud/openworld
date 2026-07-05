@@ -31,7 +31,7 @@ import e119.perceive as P
 
 ARCH = ROOT / "experiments/results/arc3_fullgame_sourcefree.json"
 TRACES = ROOT / "experiments/results/arc3_traces"
-MAPS = ROOT / "papers/arc-3/maps"; MAPS.mkdir(parents=True, exist_ok=True)
+MAPS = ROOT / "papers/arc-3/maps/multiworld"; MAPS.mkdir(parents=True, exist_ok=True)
 OUT = ROOT / "experiments/results/e120_expert_consensus.json"
 SIMPLE = {1: GameAction.ACTION1, 2: GameAction.ACTION2, 3: GameAction.ACTION3,
           4: GameAction.ACTION4, 5: GameAction.ACTION5, 7: GameAction.ACTION7}

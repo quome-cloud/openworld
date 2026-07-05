@@ -25,7 +25,7 @@ import arc_agi
 import e121_surprise_regimes as E121
 import e119.perceive as P
 
-MAPS = ROOT / "papers/arc-3/maps"
+MAPS = ROOT / "papers/arc-3/maps/multiworld"
 FIGS = ROOT / "papers/assets/figs"; FIGS.mkdir(parents=True, exist_ok=True)
 GAME_B = "ka59"   # the alignment panel uses the deepest game (6 rule changes)
 

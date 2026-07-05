@@ -187,8 +187,9 @@ when handed a \emph{perfect} model---because scoring one screen at a time cannot
 following the right \emph{sequence}. Only a reasoning agent gets past this, and only once it is given a
 fair compute budget.
 
-A weaker model on the identical setup reaches only \ArcSFGames/\ArcUnionGames{} (still ahead of
-baseline1), so the perfect run is really a \emph{model-scaling} result: a stronger model wins more games.
+Our primary agent, the weaker \textbf{Claude~Opus~4.8}, reaches only \ArcSFGames/\ArcUnionGames{} on the
+identical setup (still ahead of baseline1), so the perfect run is really a \emph{model-scaling} result: a
+stronger model wins more games.
 Two caveats we put up front: the runs are offline with unlimited retries ($N{=}1$, a fresh result that may
 be revised), and random play alone reaches \ArcRandomGeqOne/\ArcUnionGames{} first levels, so we also
 report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the first
@@ -236,9 +237,10 @@ with our strongest model (Claude~Fable~5) the same recipe completes \textbf{all
 \ArcFableFull/\ArcUnionGames{} games} (\ArcFableLevels/\ArcTotalLevels{} levels, \ArcFableRhae{} mean RHAE,
 audited per run, each solve a runnable OpenWorld \texttt{World}; \S\ref{sec:fable}).
 
-This is a \emph{model-scaling} result: a weaker primary agent reaches \ArcSFGames/\ArcUnionGames{} on the
-identical protocol, and a stronger model lifts it to the full sweep. Even that weaker agent \emph{beats}
-baseline1 (\ArcBaselineFull/\ArcUnionGames{}, source-free-intended~\cite{baseline1_ewm}) on all three axes:
+This is a \emph{model-scaling} result: our primary agent, the weaker \textbf{Claude~Opus~4.8}, reaches
+\ArcSFGames/\ArcUnionGames{} on the identical protocol, and the stronger Claude~Fable~5 lifts it to the
+full sweep. Even Claude~Opus \emph{beats} baseline1 (\ArcBaselineFull/\ArcUnionGames{},
+source-free-intended~\cite{baseline1_ewm}) on all three axes:
 games, levels (\ArcSFLevels{} vs.\ 145), and, most clearly, action-efficiency (\ArcRhaeSFGame{} vs.\
 \ArcRhaeBaselineOne{} per-game RHAE). An earlier run trailed baseline1, but only because of budget and
 harness handicaps we later removed for a fair run. All limitations---offline, unbounded resets, $N{=}1$,
@@ -601,9 +603,9 @@ had solved (\S\ref{sec:fullgame}). Every game is human-efficient or
 better (\textbf{\ArcFableRhae{}} mean RHAE, \ArcFableRhaeAboveHuman/\ArcUnionGames{} at or above the human
 baseline). Table~\ref{tab:arc3fable} lists the games where Fable reached a deeper level than opus. This is
 a \emph{model-scaling} result on a fixed harness (Fig.~\ref{fig:scaling})---same pipeline, a stronger model---and it carries
-source-free completion from opus's \ArcSFGames/\ArcUnionGames{} to the full \ArcFableFull: the procedural
-walls that stopped the weaker model are properties of \emph{model capability}, not of the source-free
-protocol. The final wall (\texttt{lf52}~L10) fell to a persistent-workspace deep-\emph{wall} protocol
+source-free completion from Claude~Opus~4.8's \ArcSFGames/\ArcUnionGames{} to the full \ArcFableFull: the
+procedural walls that stopped Claude~Opus are properties of \emph{model capability}, not of the
+source-free protocol. The final wall (\texttt{lf52}~L10) fell to a persistent-workspace deep-\emph{wall} protocol
 (build a verified simulator of the level, then search it offline at scale); its \ArcFableLfTwoActs{}-action
 solution replay- and OpenWorld-verifies in a fresh process. \textbf{The sweep completed
 at \ArcMilestoneLocal{} (\ArcMilestoneUTC{})}---the instant \texttt{lf52} banked, taking the arm to
@@ -733,8 +735,8 @@ estimate, not a controlled comparison.
 \label{sec:conclusion}
 We report the \textbf{first perfect ARC-AGI-3 result---and it is source-free}: our strongest model
 (Claude~Fable~5) completes all \ArcFableFull/\ArcUnionGames{} public games (\ArcFableLevels/\ArcTotalLevels{}
-levels) with no access to game code (achieved \ArcMilestoneUTC{}); a weaker primary agent reaches
-\ArcSFGames/\ArcUnionGames{} under the identical isolated protocol. Modeling is not the binding wall---dynamics are
+levels) with no access to game code (achieved \ArcMilestoneUTC{}); our primary agent, the weaker
+\textbf{Claude~Opus~4.8}, reaches \ArcSFGames/\ArcUnionGames{} under the identical isolated protocol. Modeling is not the binding wall---dynamics are
 exactly writable as verified code---so the true wall is \textbf{goal-as-procedure}; a live coding agent
 that reasons the win condition and writes its own verified world model crosses it, and model scale carries
 completion to the full sweep. Every solver is an open, serveable, replay- and \openworld-verified

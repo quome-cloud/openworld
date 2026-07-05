@@ -168,8 +168,9 @@ source-free} (achieved \ArcMilestoneUTC{}; \S\ref{sec:fable}). Under the benchma
 code; rules discovered by acting; per-run leakage audit; every solve replay-verified and round-tripped
 through a verified OpenWorld \texttt{World}---a reasoning agent that writes, \emph{reasons the win
 condition for}, and verifies its own world model, with our strongest model
-(\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} games}
-(\ArcFableLevels/\ArcTotalLevels{} levels), human-efficient or better on all \ArcUnionGames{}
+(\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} \emph{public} games}
+(\ArcFableLevels/\ArcTotalLevels{} levels; the held-out private set is not accessible offline,
+\S\ref{sec:limitations}), human-efficient or better on all \ArcUnionGames{}
 (\textbf{\ArcFableRhae{} mean RHAE}; roughly a \emph{third} of the human action count per level).
 The sweep clears \texttt{lf52}'s final level---the one level that had resisted
 \emph{every} prior run. It also beats prior SOTA \emph{baseline1}'s
@@ -277,7 +278,7 @@ salience-tiered clicks (its frame-processing directly informs our perceptors);
 work~\cite{harness_adapt} and the ARC Prize technical reports~\cite{arcprize2025_report} round out the
 landscape. Our contribution is: an \textbf{auditable source-free protocol}---per-run leakage
 audit, replay-verify, OpenWorld round-trip---that yields audited source-free \ArcSFGames/\ArcUnionGames{}
-(beating baseline1's \ArcBaselineFull{} on games, levels, and efficiency); \emph{plus} the \emph{diagnosis} (goal-as-procedure) and the
+(beating baseline1's \ArcBaselineFull{}); \emph{plus} the \emph{diagnosis} (goal-as-procedure) and the
 \emph{map} of which method class solves what. Crucially, every solver is an \textbf{open, serveable,
 verified \texttt{World}}---the whole result downloads, re-runs, and serves from one zero-dependency
 repo, which is the point: the recipe is reusable, not a one-off score.
@@ -565,37 +566,6 @@ exploration of the left graph does not produce the right one.}
 \label{fig:forming}
 \end{figure}
 
-\subsubsection{How the models solve: a strategy-space fingerprint (exploratory)}
-\label{sec:strategy}
-The heatmap says \emph{which} methods solve; a complementary question is \emph{how} a given model gets
-there. We fingerprint each solving session from its observable behavior---agent narration, issued
-commands, and script names---deliberately \emph{redacting} extended-thinking traces and keying only on
-observable actions, then embed the sessions (Fig.~\ref{fig:strategy}). Distinct model signatures emerge:
-opus is \textbf{perception-heavy}, while Fable leans on \textbf{memory/workspace recall plus explicit
-verification}. Across sessions, the behaviors that correlate with going \emph{deeper} are
-\emph{simulation}, \emph{goal-inference}, and \emph{mechanic-discovery}; \emph{aimless probing} does not.
-We report this as \textbf{exploratory} rather than confirmatory: the per-arm session counts are small and
-uneven (opus $229$, codex $14$, Fable $18$), and the fingerprints are correlational, not a controlled
-ablation.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{figs/arc3_strategy_space.png}
-\\[0.6em]
-\includegraphics[width=\textwidth]{figs/arc3_strategy_bars.png}
-\caption{\textbf{Session-strategy fingerprints (exploratory).} \emph{Top:} a PCA embedding of solving
-sessions, colored by model and by level-depth reached (fingerprints built from agent narration, issued
-commands, and script names; extended thinking is redacted, so only observable actions are used).
-\emph{Bottom:} per-model strategy usage and each strategy's correlation with success. opus is
-perception-heavy; Fable leans on memory/workspace recall plus verification. Simulation, goal-inference,
-and mechanic-discovery correlate with reaching deeper levels; aimless probing does not. Exploratory:
-opus $n=229$, codex $n=14$, Fable $n=18$ sessions. \emph{The $n$ imbalance reflects capture volume, not
-selection}: opus is the long-running arm with far more logged sessions, while the codex and Fable arms
-are newer and shorter. Per-model comparisons use rate \emph{means} (robust to $n$), and the map fades
-the dense opus cloud so the small-$n$ arms stay legible.}
-\label{fig:strategy}
-\end{figure}
-
 \subsubsection{The model-scaling result: Claude Fable completes \ArcFableFull/\ArcUnionGames{} source-free}
 \label{sec:fable}
 \begin{figure}[t]
@@ -691,12 +661,19 @@ we report games \emph{completed}, not the leaderboard's live action-\emph{effici
 action economy is our weak axis: long replay sequences and free resets mean an explicit live RHAE score
 would be lower than the offline efficiency figure of App.~\ref{app:fullgame-detail}. The confirming live
 run is a labeled next step.
-\item \textbf{Single run; no variance reported ($N{=}1$ per game).} Every reported result---\emph{including
-the \ArcFableFull/\ArcUnionGames{} landmark}---is a \emph{single} realized solve of a stochastic agent,
-not an average over seeds or sessions; we report no error bars or success-rate distribution. The perfect
-sweep is one run of one model (Claude~Fable~5) at full budget; a repeat may differ, and the primary/opus
-arm under the identical protocol reached \ArcSFGames/\ArcUnionGames{}. Read the headline counts as one
-realized run, not an expectation. Per-game repeated-seed success rates are a labeled next step.
+\item \textbf{Best-of-$N$ per game; single-attempt reliability is low.} Each reported solve is the
+\emph{verified best of many attempts}, not a single draw. The source-free live-coding agent ran
+$\approx$823 sessions across the \ArcUnionGames{} games (mean $\approx$33/game), and full wins occurred on
+only a small fraction of them---of order $\approx$6\% of attempts overall, and as low as $\approx$2\% on
+the hardest games (\texttt{bp35}, \texttt{lf52}, one full solve in $\sim$50 tries). We report the verified
+best-of-$N$ solve per game and make \emph{no} claim of single-attempt reliability. This rate is a
+\emph{loose lower bound}, not a clean estimate: the sessions span a multi-day sweep with \emph{evolving}
+prompts and protocol (weaker early approaches mixed with the later WALL protocol) and are dominated by the
+opus arm, so a fixed-prompt, fixed-protocol repeated-seed variance study---the correct
+measurement---remains a labeled next step. We report no error bars or success-rate distribution. The
+perfect \ArcFableFull/\ArcUnionGames{} sweep is likewise one realized run of one model (Claude~Fable~5) at
+full budget; a repeat may differ, and the primary/opus arm under the identical protocol reached
+\ArcSFGames/\ArcUnionGames{}. Read the headline counts as one realized best-of-$N$ run, not an expectation.
 \item \textbf{Training-memory contamination is unmeasured.} The protocol audits that the agent never
 \emph{reads} game source \emph{at run time}; it cannot rule out that a game---public on GitHub and the
 leaderboard---sits in the \emph{model's training data}. This channel is unverifiable (one cannot inspect
@@ -956,6 +933,38 @@ typically about a \emph{third} of the human's. Scored with \texttt{arc\_agi}'s o
 
 \section{Characterizing solutions: run lineages (E150)}
 \label{app:lineage}
+
+\subsection{How the models solve: a strategy-space fingerprint (exploratory)}
+\label{sec:strategy}
+The heatmap says \emph{which} methods solve; a complementary question is \emph{how} a given model gets
+there. We fingerprint each solving session from its observable behavior---agent narration, issued
+commands, and script names---deliberately \emph{redacting} extended-thinking traces and keying only on
+observable actions, then embed the sessions (Fig.~\ref{fig:strategy}). Distinct model signatures emerge:
+opus is \textbf{perception-heavy}, while Fable leans on \textbf{memory/workspace recall plus explicit
+verification}. Across sessions, the behaviors that correlate with going \emph{deeper} are
+\emph{simulation}, \emph{goal-inference}, and \emph{mechanic-discovery}; \emph{aimless probing} does not.
+We report this as \textbf{exploratory} rather than confirmatory: the per-arm session counts are small and
+uneven (opus $229$, codex $14$, Fable $18$), and the fingerprints are correlational, not a controlled
+ablation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/arc3_strategy_space.png}
+\\[0.6em]
+\includegraphics[width=\textwidth]{figs/arc3_strategy_bars.png}
+\caption{\textbf{Session-strategy fingerprints (exploratory).} \emph{Top:} a PCA embedding of solving
+sessions, colored by model and by level-depth reached (fingerprints built from agent narration, issued
+commands, and script names; extended thinking is redacted, so only observable actions are used).
+\emph{Bottom:} per-model strategy usage and each strategy's correlation with success. opus is
+perception-heavy; Fable leans on memory/workspace recall plus verification. Simulation, goal-inference,
+and mechanic-discovery correlate with reaching deeper levels; aimless probing does not. Exploratory:
+opus $n=229$, codex $n=14$, Fable $n=18$ sessions. \emph{The $n$ imbalance reflects capture volume, not
+selection}: opus is the long-running arm with far more logged sessions, while the codex and Fable arms
+are newer and shorter. Per-model comparisons use rate \emph{means} (robust to $n$), and the map fades
+the dense opus cloud so the small-$n$ arms stay legible.}
+\label{fig:strategy}
+\end{figure}
+
 What does a source-free solve actually \emph{look like}? The agents' chain-of-thought is redacted from the
 captured transcripts, so we characterize the process by what the agents \emph{do}: the code they write (a
 median of \ArcLineageCodeKB{}\,KB per run), the tool/timestamp trajectory, and the banked action sequences.

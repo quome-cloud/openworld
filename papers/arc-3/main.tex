@@ -250,7 +250,7 @@ and this being a fresh fair-budget result---are gathered in \S\ref{sec:limitatio
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
 reachability (which is nearly free---random play alone reaches one level on
 $\ArcRandomGeqOne/\ArcUnionGames$). On completion: our headline is \textbf{\ArcFableFull/\ArcUnionGames{}
-source-free} (Claude Fable---a perfect sweep); our primary agent reaches
+source-free} (Claude Fable---a perfect sweep); our primary agent, Claude~Opus~4.8, reaches
 \textbf{\ArcSFGames/\ArcUnionGames{} source-free} (still beating baseline1's
 \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} on games, levels, and efficiency), and model scale
 lifts it to the full sweep. Limitations (offline,
@@ -305,7 +305,7 @@ Graph Explorer~\cite{graphexplore_arc3} & training-free graph search & 30/52 \em
 DreamTeam~\cite{dreamteam_workspace} & workspace optimization (multi-agent) & $38.4\%$ RHAE \\
 StochasticGoose~\cite{stochasticgoose} & deep change prediction (CNN/RL) & $12.6\%$ RHAE \\
 \midrule
-\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcFableFull/\ArcUnionGames{} source-free (Claude Fable, audited), \ArcFableRhae{} RHAE---first perfect result}; primary agent \ArcSFGames/\ArcUnionGames{} source-free (beats baseline1 on games, levels, efficiency) \\
+\textbf{This paper} & executable world models in \openworld{} (Claude); offline, replay-verified & \textbf{\ArcFableFull/\ArcUnionGames{} source-free (Claude Fable, audited), \ArcFableRhae{} RHAE---first perfect result}; primary agent (Claude~Opus~4.8) \ArcSFGames/\ArcUnionGames{} source-free (beats baseline1 on games, levels, efficiency) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -486,7 +486,7 @@ analysis are in App.~\ref{app:fullgame-detail}.
 \textbf{Source-free (the benchmark-intended result).} The agent runs process-isolated with \emph{no}
 access to the game source---it discovers the dynamics by acting and infers the win condition from frames.
 A solve is banked only if it audits clean (no source read), replay-verifies, and round-trips through an
-OpenWorld \texttt{World}. Under this harder protocol our primary agent completes \textbf{\ArcSFGames/\ArcUnionGames{}
+OpenWorld \texttt{World}. Under this harder protocol our primary agent, \textbf{Claude~Opus~4.8}, completes \textbf{\ArcSFGames/\ArcUnionGames{}
 games} (\ArcSFLevels/\ArcTotalLevels{} levels): \ArcSFList{}---already \emph{beating} baseline1's
 source-free-intended \ArcBaselineFull/\ArcUnionGames{}~\cite{baseline1_ewm} (145 levels) on games,
 levels, and---most decisively---action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game

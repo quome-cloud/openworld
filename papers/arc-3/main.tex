@@ -1381,41 +1381,43 @@ Primitive & What it is & Role here \\
 \begin{center}\small
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-game & win levels & random & our best & router tier \\
+game & win levels & random & Claude Fable & router tier \\
 \midrule
-\texttt{ar25} & 8 & 2 & 1 & cheap \\
-\texttt{bp35} & 9 & 0 & 1 & agent \\
-\texttt{cd82} & 6 & 2 & 1 & cheap \\
-\texttt{cn04} & 6 & 1 & 1 & cheap \\
-\texttt{dc22} & 6 & 0 & 1 & agent \\
+\texttt{ar25} & 8 & 2 & 8 & cheap \\
+\texttt{bp35} & 9 & 0 & 9 & agent \\
+\texttt{cd82} & 6 & 2 & 6 & cheap \\
+\texttt{cn04} & 6 & 1 & 6 & cheap \\
+\texttt{dc22} & 6 & 0 & 6 & agent \\
 \texttt{ft09} & 6 & 2 & 6 & agent \\
-\texttt{g50t} & 7 & 0 & 1 & agent \\
-\texttt{ka59} & 7 & 0 & 1 & agent \\
-\texttt{lf52} & 10 & 0 & 1 & cheap \\
-\texttt{lp85} & 8 & 1 & 1 & agent \\
-\texttt{ls20} & 7 & 1 & 1 & cheap \\
-\texttt{m0r0} & 6 & 1 & 1 & cheap \\
+\texttt{g50t} & 7 & 0 & 7 & agent \\
+\texttt{ka59} & 7 & 0 & 7 & agent \\
+\texttt{lf52} & 10 & 0 & 10 & cheap \\
+\texttt{lp85} & 8 & 1 & 8 & agent \\
+\texttt{ls20} & 7 & 1 & 7 & cheap \\
+\texttt{m0r0} & 6 & 1 & 6 & cheap \\
 \texttt{r11l} & 6 & 1 & 6 & agent \\
-\texttt{re86} & 8 & 0 & 1 & agent \\
-\texttt{s5i5} & 8 & 0 & 1 & cheap \\
-\texttt{sb26} & 8 & 0 & 1 & agent \\
-\texttt{sc25} & 6 & 0 & 1 & agent \\
-\texttt{sk48} & 8 & 1 & 1 & cheap \\
-\texttt{sp80} & 6 & 2 & 1 & cheap \\
-\texttt{su15} & 9 & 0 & 1 & agent \\
-\texttt{tn36} & 7 & 0 & 1 & agent \\
-\texttt{tr87} & 6 & 0 & 1 & cheap \\
-\texttt{tu93} & 9 & 0 & 1 & cheap \\
-\texttt{vc33} & 7 & 1 & 1 & cheap \\
-\texttt{wa30} & 9 & 0 & 1 & agent \\
+\texttt{re86} & 8 & 0 & 8 & agent \\
+\texttt{s5i5} & 8 & 0 & 8 & cheap \\
+\texttt{sb26} & 8 & 0 & 8 & agent \\
+\texttt{sc25} & 6 & 0 & 6 & agent \\
+\texttt{sk48} & 8 & 1 & 8 & cheap \\
+\texttt{sp80} & 6 & 2 & 6 & cheap \\
+\texttt{su15} & 9 & 0 & 9 & agent \\
+\texttt{tn36} & 7 & 0 & 7 & agent \\
+\texttt{tr87} & 6 & 0 & 6 & cheap \\
+\texttt{tu93} & 9 & 0 & 9 & cheap \\
+\texttt{vc33} & 7 & 1 & 7 & cheap \\
+\texttt{wa30} & 9 & 0 & 9 & agent \\
 \bottomrule
 \end{tabular}
 \end{center}
-\noindent ``our best'' is the deepest level any method completed (replay-verified); ``router tier'' is
-which solver the cascade dispatches to. Random reaches $\geq$1 level on $\ArcRandomGeqOne/\ArcUnionGames$; our best is strictly
-above random on \ArcAboveRandom/\ArcUnionGames{} (the $14$ games random never reaches, plus \texttt{ft09} and \texttt{r11l}
-where we go deeper). On \texttt{ar25}/\texttt{cd82}/\texttt{sp80} random chains to level~2 while our
-non-chaining solvers stop at level~1---an honest loss.
+\noindent The \emph{Claude~Fable} column is each game's fully-completed level count---all
+\ArcFableFull/\ArcUnionGames{} games solved source-free (its depth equals the win column), \emph{at or
+above} random on every game. Random reaches $\geq$1 level on only $\ArcRandomGeqOne/\ArcUnionGames$ games
+and never chains past level~2. (``router tier'' is which solver the automated cascade dispatches to; the
+cheap single-pass tier \emph{alone} can stop at level~1 where random chains to~2 on
+\texttt{ar25}/\texttt{cd82}/\texttt{sp80}---chaining levels through the verified world model is what
+completes them.)
 
 \section{The live coding agent: harness and protocol}
 \label{app:agent}

@@ -271,14 +271,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large The arc, and what's next\par}\vfill\end{frame}
-\begin{frame}{Three ways to use a verified world model}
-\begin{itemize}
-  \item Tool: serve, plan, verify -- exact, auditable, no training
-  \item Per-world test-time training: distill one world's trajectories
-  \item World-time compute: traverse a family, generalize to new worlds
-  \item Hybrid: generate exact data, internalize it, exact backstop on demand
-\end{itemize}
-\end{frame}
+\begin{frame}{Three ways to use a verified world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Tool}\par\smallskip{\small Serve, plan, verify — exact, auditable, no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Per-world TTT}\par\smallskip{\small Distill one world's trajectories}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small Traverse a family; generalize to new worlds}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Hybrid}\par\smallskip{\small Generate exact data, internalize it, exact backstop on demand}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The transferable lessons}
 \begin{itemize}
   \item Verified code is bit-exact where learned dynamics compound error

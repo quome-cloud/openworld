@@ -159,6 +159,15 @@ def beamer_slide(s):
 \begin{column}{0.46\textwidth}%s\end{column}
 \begin{column}{0.46\textwidth}%s\end{column}
 \end{columns}\vfill\end{frame}""" % (title, side(s["left"], "owmuted"), side(s["right"], "owteal")))
+    if t == "cards":
+        cards = s["cards"]; w = 0.95 / len(cards)
+        accent = ["owteal", "owochre", "owblue", "owmuted"]
+        cols = "".join(
+            (r"\begin{column}{%.3f\textwidth}{\color{%s}\rule{20pt}{3pt}}\par\smallskip"
+             r"{\color{owdeep}\bfseries %s}\par\smallskip{\small %s}\end{column}"
+             % (w, accent[i % 4], _btext(c["head"]), _btext(c.get("text", ""))))
+            for i, c in enumerate(cards))
+        return r"\begin{frame}{%s}\vfill\begin{columns}[T]%s\end{columns}\vfill\end{frame}" % (title, cols)
     return ""
 
 def build_beamer(deck):
@@ -211,6 +220,25 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .section .st{color:var(--deep);font-size:5vh;font-weight:800;max-width:24ch;line-height:1.15}
 .section .rule,.title .rule{width:54px;height:6px;background:var(--ochre);border-radius:3px}
 .statement .big{color:var(--deep);font-size:4.6vh;font-weight:800;line-height:1.24;max-width:26ch}
+/* section kicker (small label above the title) */
+.kick{flex:0 0 auto;color:var(--teal);font-size:1.8vh;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;margin-bottom:.7vh}
+/* bullet slides -> centred stack of card-rows (balanced margins, not jammed left) */
+.slide:has(.blist)>h2,.slide:has(.blist)>.kick{width:100%%;max-width:72rem;margin-left:auto;margin-right:auto}
+.blist{gap:0;justify-content:center}
+.blist>ul{display:flex;flex-direction:column;gap:1.5vh;max-width:72rem;width:100%%;margin:0 auto}
+.blist li{background:#ffffff;border-radius:12px;border-left:6px solid var(--teal);
+  padding:1.9vh 2.2vw;font-size:2.75vh;line-height:1.34;color:var(--ink);box-shadow:0 3px 15px rgba(11,46,79,.06)}
+.blist li::before{display:none}
+/* card grid (2-4 parallel points as cards) */
+.cards{display:flex;gap:2.2vw;width:100%%;align-items:stretch}
+.card{flex:1;min-width:0;background:#ffffff;border-radius:14px;padding:2.6vh 1.7vw;
+  box-shadow:0 5px 22px rgba(11,46,79,.08);border-top:6px solid var(--teal)}
+.card h4{color:var(--deep);font-size:2.6vh;font-weight:800;margin-bottom:1vh;line-height:1.15}
+.card p{color:var(--ink);font-size:2.1vh;line-height:1.36}
+.card:nth-child(2){border-top-color:var(--ochre)}
+.card:nth-child(3){border-top-color:var(--blue)}
+.card:nth-child(4){border-top-color:var(--muted)}
 /* hero stats */
 .stats{display:flex;gap:2.6vw;justify-content:center;align-items:stretch;width:100%%}
 .stat{flex:1 1 0;min-width:0;text-align:center;padding:3vh 1vw;border-radius:14px;background:#ffffff;
@@ -281,49 +309,63 @@ HTML_JS = """
 def _h(s):
     return html.escape(str(s), quote=True)
 
-def html_slide(s):
+def html_slide(s, kicker=""):
     t = s.get("type")
     if t == "section":
         return f'<section class="slide section"><div class="rule"></div><div class="st">{_h(s["title"])}</div></section>'
     if t == "statement":
         return f'<section class="slide statement"><div class="big">{_h(s["text"])}</div></section>'
-    title = f'<h2>{_h(s.get("title",""))}</h2>'
+    kick = f'<div class="kick">{_h(kicker)}</div>' if kicker else ""
+    head = kick + f'<h2>{_h(s.get("title",""))}</h2>'
     def ul(bs):
         if not bs: return ""
         return "<ul>" + "".join(f"<li>{_h(b)}</li>" for b in bs) + "</ul>"
     if t == "bullets":
-        return f'<section class="slide">{title}<div class="body">{ul(s.get("bullets",[]))}</div></section>'
+        return f'<section class="slide">{head}<div class="body blist">{ul(s.get("bullets",[]))}</div></section>'
     if t == "figure":
         cap = f'<div class="cap">{_h(s["caption"])}</div>' if s.get("caption") else ""
         bl = ul(s.get("bullets", []))
         img = f'<div class="fig"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("caption") or s.get("title",""))}"></div>'
         hasb = " hasbul" if s.get("bullets") else ""
-        return f'<section class="slide">{title}<div class="body figbody{hasb}">{img}{cap}{bl}</div></section>'
+        return f'<section class="slide">{head}<div class="body figbody{hasb}">{img}{cap}{bl}</div></section>'
     if t == "twocol":
-        return (f'<section class="slide">{title}<div class="body"><div class="two">'
+        return (f'<section class="slide">{head}<div class="body"><div class="two">'
                 f'<div class="col">{ul(s.get("bullets",[]))}</div>'
                 f'<div class="col img"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("title",""))}"></div>'
                 f'</div></div></section>')
+    if t == "cards":
+        cs = "".join(f'<div class="card"><h4>{_h(c["head"])}</h4><p>{_h(c.get("text",""))}</p></div>'
+                     for c in s["cards"])
+        return f'<section class="slide">{head}<div class="body"><div class="cards">{cs}</div></div></section>'
     if t == "stats":
         tiles = "".join(
             f'<div class="stat{" hi" if it.get("hi") else ""}">'
             f'<div class="v">{_h(it["value"])}</div><div class="l">{_h(it["label"])}</div></div>'
             for it in s["items"])
-        return f'<section class="slide">{title}<div class="body"><div class="stats">{tiles}</div></div></section>'
+        return f'<section class="slide">{head}<div class="body"><div class="stats">{tiles}</div></div></section>'
     if t == "flow":
         parts = []
         for i, st in enumerate(s["steps"]):
             if i:
                 parts.append('<span class="arw">&rarr;</span>')
             parts.append(f'<div class="step"><span class="n">{i+1}</span>{_h(st)}</div>')
-        return f'<section class="slide">{title}<div class="body"><div class="flow">{"".join(parts)}</div></div></section>'
+        return f'<section class="slide">{head}<div class="body"><div class="flow">{"".join(parts)}</div></div></section>'
     if t == "compare":
         def side(d, cls):
             items = "".join(f"<li>{_h(x)}</li>" for x in d["items"])
             return f'<div class="side {cls}"><h3>{_h(d["head"])}</h3><ul>{items}</ul></div>'
-        return (f'<section class="slide">{title}<div class="body"><div class="compare">'
+        return (f'<section class="slide">{head}<div class="body"><div class="compare">'
                 f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
     return ""
+
+def _with_kickers(slides):
+    """Yield (slide, kicker) pairs; content slides carry the most recent section title."""
+    section = ""
+    for s in slides:
+        if s.get("type") == "section":
+            yield s, ""; section = s["title"]
+        else:
+            yield s, section
 
 def build_html(deck):
     title_slide = (f'<section class="slide title on">{_mark_html(1.3)}'
@@ -332,7 +374,7 @@ def build_html(deck):
                    f'<div class="s">{_h(deck["subtitle"])}</div>'
                    f'<div class="a">{_h(deck["author"])}</div>'
                    f'<div class="v">{_h(deck["venue"])}</div></section>')
-    body = title_slide + "".join(html_slide(s) for s in deck["slides"])
+    body = title_slide + "".join(html_slide(s, k) for s, k in _with_kickers(deck["slides"]))
     css = subst(HTML_CSS, C)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

@@ -269,12 +269,12 @@ slides = [
          "Shallow rule induction, small grid transforms, short-horizon planning",
          "Degrades as reasoning lengthens (CLRS traces, >8 composed rules)",
          "Cedes long-horizon, perception-heavy regimes to learned models"]},
-    {"type": "bullets", "title": "Three routes to use a verified world model",
-     "bullets": [
-         "Route 1 -- Tool: serve, plan, verify; exact, auditable, no training",
-         "Route 2 -- Per-world TTT: distill one world's trajectories (approx.)",
-         "Route 3 -- World-time compute: traverse a family, generalize to new worlds",
-         "Hybrid: generate exact data, internalize it, exact backstop on demand"]},
+    {"type": "cards", "title": "Three routes to use a verified world model",
+     "cards": [
+         {"head": "Tool", "text": "Serve, plan, verify — exact, auditable, no training"},
+         {"head": "Per-world TTT", "text": "Distill one world's trajectories (approximate)"},
+         {"head": "World-time compute", "text": "Traverse a family; generalize to new worlds"},
+         {"head": "Hybrid", "text": "Generate exact data, internalize it, exact backstop on demand"}]},
     {"type": "bullets", "title": "Limitations (selected)",
      "bullets": [
          "Scope: symbolic-state worlds; pixel-native stays learned models' territory",

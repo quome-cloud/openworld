@@ -176,12 +176,12 @@ slides = [
          "Exports to Mermaid and React Flow; a marketplace unit for worlds"]},
 
     {"type": "section", "title": "The arc, and what's next"},
-    {"type": "bullets", "title": "Three ways to use a verified world model",
-     "bullets": [
-         "Tool: serve, plan, verify -- exact, auditable, no training",
-         "Per-world test-time training: distill one world's trajectories",
-         "World-time compute: traverse a family, generalize to new worlds",
-         "Hybrid: generate exact data, internalize it, exact backstop on demand"]},
+    {"type": "cards", "title": "Three ways to use a verified world model",
+     "cards": [
+         {"head": "Tool", "text": "Serve, plan, verify — exact, auditable, no training"},
+         {"head": "Per-world TTT", "text": "Distill one world's trajectories"},
+         {"head": "World-time compute", "text": "Traverse a family; generalize to new worlds"},
+         {"head": "Hybrid", "text": "Generate exact data, internalize it, exact backstop on demand"}]},
     {"type": "bullets", "title": "The transferable lessons",
      "bullets": [
          "Verified code is bit-exact where learned dynamics compound error",

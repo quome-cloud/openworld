@@ -111,13 +111,11 @@ slides = [
          "Directed search and graph exploration each reach 6 games",
          "Multi-perception consensus reaches 10 (best automated tier)",
          "The live coding agent lights up the procedural walls no method touches"]},
-    {"type": "bullets", "title": "Three categories of approach",
-     "bullets": [
-         "Goal-discovery methods: all fail (0 walled games)",
-         "Perception and search: partial coverage (reachable games only)",
-         "The reasoning agent: the only method that crosses the walls",
-         "A router sends each game to the cheapest solver that clears it",
-         "12 games to the cheap tier, 13 escalated to the agent"]},
+    {"type": "cards", "title": "Three categories of approach",
+     "cards": [
+         {"head": "Goal-discovery", "text": "All fail — 0 walled games, even on a perfect model"},
+         {"head": "Perception & search", "text": "Partial coverage — only reachable games"},
+         {"head": "Reasoning agent", "text": "The only method that crosses the walls; the router escalates 13 hard games to it"}]},
     {"type": "bullets", "title": "The reasoning agent that writes its own world model",
      "bullets": [
          "Claude Code: one agentic session per game, no repeated sampling",

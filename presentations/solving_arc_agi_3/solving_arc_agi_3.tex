@@ -191,15 +191,7 @@
   \item The live coding agent lights up the procedural walls no method touches
 \end{itemize}}
 \end{frame}
-\begin{frame}{Three categories of approach}
-\begin{itemize}
-  \item Goal-discovery methods: all fail (0 walled games)
-  \item Perception and search: partial coverage (reachable games only)
-  \item The reasoning agent: the only method that crosses the walls
-  \item A router sends each game to the cheapest solver that clears it
-  \item 12 games to the cheap tier, 13 escalated to the agent
-\end{itemize}
-\end{frame}
+\begin{frame}{Three categories of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goal-discovery}\par\smallskip{\small All fail — 0 walled games, even on a perfect model}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Perception \& search}\par\smallskip{\small Partial coverage — only reachable games}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only method that crosses the walls; the router escalates 13 hard games to it}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The reasoning agent that writes its own world model}
 \begin{itemize}
   \item Claude Code: one agentic session per game, no repeated sampling

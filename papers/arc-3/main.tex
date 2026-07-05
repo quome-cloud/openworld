@@ -171,11 +171,11 @@ condition for}, and verifies its own world model, with our strongest model
 (\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} \emph{public} games}
 (\ArcFableLevels/\ArcTotalLevels{} levels; the held-out private set is not accessible offline,
 \S\ref{sec:limitations}), human-efficient or better on all \ArcUnionGames{}
-(\textbf{\ArcFableRhae{} mean RHAE}; roughly a \emph{third} of the human action count per level).
+(per-game RHAE at the human-efficiency \emph{cap} of \ArcFableRhae{}; per level, about a \emph{third} of the human action count).
 The sweep clears \texttt{lf52}'s final level---the one level that had resisted
 \emph{every} prior run. It also beats prior SOTA \emph{baseline1}'s
 source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames{}} (\ArcRhaeBaselineOne{}
-RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}.
+RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}. These are \emph{best-of-$N$} results over repeated attempts---not single-attempt guarantees---and single-attempt success is low (\S\ref{sec:limitations}).
 
 \textbf{Why it is hard---and the scientific contribution.} The bottleneck is \emph{not} modeling but
 \textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
@@ -408,7 +408,7 @@ App.~\ref{app:fullgame-detail}.
 programs (banked, verbatim) for different games---a step counter, a progress bar, a paint rule---each a
 distinct dynamics rule the LLM discovered by acting. A program is banked \emph{only if} it exact-matches
 every held-out $(s,a,s')$ transition when \emph{executed} against the real engine (green badge; fidelity
-$=$ exact-match fraction). Mean exact-match across the suite is ${\approx}0.87$: the deterministic
+$=$ exact-match fraction). Mean held-out exact-match is \ArcClaudeFid{} on the \ArcNReal{} real-dynamics games (\ArcNNearPerfect{} near-perfect; the full-suite mean is higher only because trivial no-change games score perfectly by copying): the deterministic
 status-bar and simple game rules are captured exactly, and even where a dense frame is only partially
 matched the underlying mechanic (e.g.\ \texttt{dc22}'s directional move) is recovered.}
 \label{fig:codefig}
@@ -575,7 +575,7 @@ exploration of the left graph does not produce the right one.}
 rises---GPT-5.5 \ArcCodexFreeFull{}, Claude~Opus~4.8 \ArcSFGames{}, Claude~Fable \ArcFableFull{} of
 \ArcUnionGames{} games (\ArcCodexFreeLevels{}/\ArcSFLevels{}/\ArcTotalLevels{} levels)---while the
 \emph{discovery cost falls}: Fable finds each solve in ${\sim}3.5{\times}$ fewer tokens than opus ($23$M
-vs.\ $81$M per game). A stronger model wins more games \emph{and} solves each more cheaply. (GPT-5.5 ran
+vs.\ $81$M per game). A stronger model wins more games \emph{and} solves each more cheaply---consistent with capability scaling, though we cannot exclude that a stronger model memorised more of the \emph{public} suite (\S\ref{sec:limitations}). (GPT-5.5 ran
 via plaintext logs with no token telemetry.)}
 \label{fig:scaling}
 \end{figure}
@@ -647,7 +647,7 @@ $25/25$ at $\geq$1 level (\ArcRandomGeqOne{} random-reachable) and \textbf{\ArcA
 \textbf{Goal-as-procedure is the transferable lesson.} The negatives (\S\ref{sec:solvewall},
 App.~\ref{app:negatives}) are the reusable science: interactive-reasoning wins are ordered
 \emph{procedures}, so any method that scores a single \emph{state}---MPC, atomic objectives, LLM or
-Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. Only an agent that
+Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. This is an instance of the known difficulty of \emph{non-Markovian}, temporally-extended objectives---rewards defined over trajectories rather than single states, as in the options framework~\cite{sutton1999options} and reward machines~\cite{icarte2018reward}; our contribution is the empirical finding that it is the \emph{binding} wall for interactive-reasoning agents here, defeating even fidelity-$1.0$ models. Only an agent that
 \emph{reasons} the win condition crosses the walls. Builders of interactive-reasoning agents should target
 procedure discovery, not state scoring.
 
@@ -871,7 +871,7 @@ each game cost \$\ArcDiscCostOpus{} (opus) and \$\ArcDiscCostFable{} (fable) on 
 of which RHAE counts. So RHAE should be read as ``given a solution, how tight is its executed path,''
 not ``how cheap is it to reach a solution.'' The head-to-head against baseline1 remains
 apples-to-apples: both pipelines are scored on the identical official metric over the same human
-baselines, and neither side's RHAE folds in discovery cost, so the $\sim$54\% path-efficiency margin is
+baselines, and neither side's RHAE folds in discovery cost, so this path-efficiency margin is
 a like-for-like comparison of the \emph{same} economy axis.
 
 \medskip

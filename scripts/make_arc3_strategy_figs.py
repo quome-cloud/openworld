@@ -56,6 +56,9 @@ STRATS=[
     ("Bayes goal-synth\n(E119)",          set()),
     ("Codex deep search\n(E124)",         set()),
     ("Lookahead search\n(E131/E132)",     set()),
+    # E146: a 13-generator deterministic cold-search battery (Fibonacci/Zeckendorf/semiring macro priors,
+    # go-explore, ReAct, first-level tournaments) -> 0 new source-free levels on any unsolved frontier.
+    ("Cold-search battery\n(E146)",       set()),
 ]
 ALL=["ar25","bp35","cd82","cn04","dc22","ft09","g50t","ka59","lf52","lp85","ls20","m0r0","r11l",
      "re86","s5i5","sb26","sc25","sk48","sp80","su15","tn36","tr87","tu93","vc33","wa30"]
@@ -63,7 +66,7 @@ union=set().union(*[s for _,s in STRATS])
 # Category per strategy (same index order as STRATS) -> groups the columns so the figure shows HOW the
 # goal-directed methods fail: the "Goal-discovery" block is a contiguous, almost-empty band.
 SP="Search & perception"; GD="Goal-discovery (fails)"; RA="Reasoning agent"
-CATS=[SP,SP,SP, GD,GD,GD, SP,SP, GD, RA, GD, RA, RA, GD,GD,GD]   # one per STRATS entry
+CATS=[SP,SP,SP, GD,GD,GD, SP,SP, GD, RA, GD, RA, RA, GD,GD,GD,GD]   # one per STRATS entry
 CAT_ORDER=[SP,GD,RA]
 CAT_COLOR={SP:"#2563eb", GD:"#c2410c", RA:"#15803d"}
 # column order = group by category (CAT_ORDER), preserving narrative order within each group

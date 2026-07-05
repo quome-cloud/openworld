@@ -525,7 +525,13 @@ ordered \emph{procedure}, so undirected search occasionally stumbles into a win 
 planning never does---and a \emph{forming} world model (many distinguished states) is worthless until it
 contains a \emph{verified} win-terminating path (Fig.~\ref{fig:forming}). Per-experiment detail---and the
 methodological dividend that the engine-reconstruction certificate yields a shared-prior-bias
-diagnostic---is in App.~\ref{app:negatives}. The canonical hard-exploration baseline, \emph{Go-Explore}, fits the same pattern: across \ArcGoExploreN{} games and \ArcGoExploreSteps{} exploration steps it gained only \ArcGoExploreGain{} level total---undirected cell-visitation, like random play, does not discover the ordered win procedures.
+diagnostic---is in App.~\ref{app:negatives}. Most tellingly, a deliberately \emph{exhaustive} deterministic
+cold-search battery (E146) reinforces the point by \emph{combination}: Fibonacci/Zeckendorf and semiring
+direction-macro priors, first-level macro tournaments, Go-Explore archives (\ArcGoExploreN{}~games,
+\ArcGoExploreSteps{}~steps), and ReAct-style tool sequences---$13$ candidate generators in all---together
+crack \textbf{$0$ new source-free levels on any unsolved frontier}. That such varied, hand-engineered blind
+enumeration finds \emph{nothing} the cheap solvers miss is our strongest evidence that the wall is
+\emph{discovery} of the ordered win procedure, not search coverage; only the reasoning agent crosses it.
 
 \textbf{Perception and search---partial coverage.} Directed search and graph exploration each reach $6$
 games; multi-perception consensus reaches $10$ (uniquely \texttt{cn04, lf52, m0r0, s5i5}). These solve

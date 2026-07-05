@@ -1,0 +1,189 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "world_time_compute",
+  "description": "An elementary cellular automaton (Rule 110) as a verified compute substrate. Each step applies the rule exactly; rolling the world forward is WORLD-TIME COMPUTE --- spend inference steps traversing your own verified world for an exact multi-step answer, with zero compounding error. Distills the world-time-compute paper: verified code stays exact at every rollout depth, where a learned proxy drifts.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "An elementary cellular automaton (Rule 110) as a verified compute substrate. Each step applies the rule exactly; rolling the world forward is WORLD-TIME COMPUTE --- spend inference steps traversing your own verified world for an exact multi-step answer, with zero compounding error. Distills the world-time-compute paper: verified code stays exact at every rollout depth, where a learned proxy drifts."
+  },
+  "state_schema": {
+    "row": "list[int]",
+    "gen": "int",
+    "rule": "int",
+    "population": "int"
+  },
+  "initial_state": {
+    "row": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "gen": 0,
+    "rule": 110,
+    "population": 1
+  },
+  "actions": [
+    "step"
+  ],
+  "rules": [
+    "Each `step` applies elementary cellular-automaton Rule 110 to the whole row at once.",
+    "The world is a deterministic, verified compute substrate: rolling it forward N steps computes generation N exactly.",
+    "WORLD-TIME COMPUTE (the lesson): traversing your own verified world is exact at EVERY depth --- no compounding error --- so inference-time rollout buys reliable multi-step prediction, unlike an LLM next-state proxy whose exact-match rate collapses with depth.",
+    "Verified code, zero data, bit-exact rollouts --- reproducible on any machine."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    s = dict(state)\n    if action[\"name\"] != \"step\":\n        return s\n    rule = int(s.get(\"rule\", 110))\n    row = list(s.get(\"row\", []))\n    n = len(row)\n    nxt = []\n    for i in range(n):                          # wrap-around neighborhood\n        left = row[(i - 1) % n]; center = row[i]; right = row[(i + 1) % n]\n        idx = (left << 2) | (center << 1) | right    # 0..7\n        nxt.append((rule >> idx) & 1)                # the rule's output bit\n    s[\"row\"] = nxt\n    s[\"gen\"] = int(s.get(\"gen\", 0)) + 1\n    s[\"population\"] = sum(nxt)\n    return s\n"
+  },
+  "objectives": [
+    {
+      "name": "exact rollout (world-time compute)",
+      "goal": "step the world forward --- each generation is exact"
+    },
+    {
+      "name": "grow structure",
+      "goal": "evolve the row; population = number of live cells"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "step",
+    "series": {
+      "gen": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "population": [
+        1.0,
+        2.0,
+        3.0,
+        3.0,
+        5.0,
+        3.0,
+        5.0,
+        6.0,
+        8.0,
+        5.0,
+        6.0,
+        8.0,
+        8.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "gen 0",
+            "population 1"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "gen 1",
+            "population 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "gen 2",
+            "population 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "gen 3",
+            "population 3"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "gen 4",
+            "population 5"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "gen 5",
+            "population 3"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "step"
+        },
+        {
+          "src": 1,
+          "dst": 2,
+          "action": "step"
+        },
+        {
+          "src": 2,
+          "dst": 3,
+          "action": "step"
+        },
+        {
+          "src": 3,
+          "dst": 4,
+          "action": "step"
+        },
+        {
+          "src": 4,
+          "dst": 5,
+          "action": "step"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

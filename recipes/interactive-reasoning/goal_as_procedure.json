@@ -1,0 +1,208 @@
+{
+  "openworld_spec_version": "1.0",
+  "name": "goal_as_procedure",
+  "description": "A hidden-order button panel: the win is an ordered PROCEDURE (press the four buttons in the right sequence), not a state to maximize. Distills the ARC-AGI-3 paper's central lesson --- a reward scored over a single state cannot rank an ordered protocol, so state-scoring and blind search fail; only reasoning the sequence wins.",
+  "card": {
+    "version": "0.1",
+    "license": null,
+    "authors": [],
+    "tags": [],
+    "lineage": null,
+    "metrics": {},
+    "description": "A hidden-order button panel: the win is an ordered PROCEDURE (press the four buttons in the right sequence), not a state to maximize. Distills the ARC-AGI-3 paper's central lesson --- a reward scored over a single state cannot rank an ordered protocol, so state-scoring and blind search fail; only reasoning the sequence wins."
+  },
+  "state_schema": {
+    "progress": "int",
+    "unlocked": "bool",
+    "presses": "int",
+    "lit": "int",
+    "broke": "int"
+  },
+  "initial_state": {
+    "progress": 0,
+    "unlocked": false,
+    "presses": 0,
+    "lit": 0,
+    "broke": 0
+  },
+  "actions": [
+    "press_0",
+    "press_1",
+    "press_2",
+    "press_3"
+  ],
+  "rules": [
+    "The win is an ordered PROCEDURE: press the buttons in a fixed hidden sequence.",
+    "A correct next press advances progress; any wrong press resets progress to 0.",
+    "Button 1 always lights the `lit` lamp --- a decoy that looks like progress.",
+    "GOAL-AS-PROCEDURE (the ARC-AGI-3 lesson): maximizing the visible state `lit` presses button 1 forever and never unlocks; only the ordered sequence [2,0,3,1] wins. A reward over a single frame cannot rank a procedure --- reason the sequence, do not score a state.",
+    "Dynamics are deterministic, verified code --- discoverable by acting (source-free)."
+  ],
+  "transition": {
+    "kind": "code",
+    "func_name": "transition",
+    "code": "\ndef transition(state, action):\n    ORDER = [2, 0, 3, 1]                       # the hidden correct press sequence\n    s = dict(state)\n    if s.get(\"unlocked\"):\n        return s                               # solved: absorbing state\n    name = action[\"name\"]\n    if not name.startswith(\"press_\"):\n        return s\n    btn = int(name.split(\"_\", 1)[1])\n    s[\"presses\"] = s.get(\"presses\", 0) + 1\n    if btn == 1:\n        s[\"lit\"] = s.get(\"lit\", 0) + 1         # decoy: button 1 always lights the lamp\n    p = s.get(\"progress\", 0)\n    if btn == ORDER[p]:                         # correct next step -> advance the procedure\n        p += 1\n        s[\"progress\"] = p\n        if p >= len(ORDER):\n            s[\"unlocked\"] = True\n    else:                                       # wrong step -> the procedure resets\n        s[\"progress\"] = 0\n        s[\"broke\"] = s.get(\"broke\", 0) + 1\n    return s\n"
+  },
+  "objectives": [
+    {
+      "name": "unlock (ordered procedure)",
+      "goal": "reach unlocked == True by pressing the ordered sequence"
+    },
+    {
+      "name": "do not chase the decoy",
+      "goal": "note: maximizing lit never unlocks --- lit is not the goal"
+    },
+    {
+      "name": "efficiency",
+      "goal": "minimize presses"
+    }
+  ],
+  "preview": {
+    "steps": 12,
+    "action": "press_1",
+    "series": {
+      "presses": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "lit": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ],
+      "broke": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0,
+        9.0,
+        10.0,
+        11.0,
+        12.0
+      ]
+    },
+    "graph": {
+      "kind": "state",
+      "nodes": [
+        {
+          "id": 0,
+          "label": [
+            "broke 0",
+            "lit 0",
+            "presses 0"
+          ],
+          "initial": true
+        },
+        {
+          "id": 1,
+          "label": [
+            "broke 1",
+            "lit 0",
+            "presses 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 2,
+          "label": [
+            "broke 1",
+            "lit 1",
+            "presses 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 3,
+          "label": [
+            "broke 0",
+            "lit 0",
+            "presses 1"
+          ],
+          "initial": false
+        },
+        {
+          "id": 4,
+          "label": [
+            "broke 2",
+            "lit 0",
+            "presses 2"
+          ],
+          "initial": false
+        },
+        {
+          "id": 5,
+          "label": [
+            "broke 2",
+            "lit 1",
+            "presses 2"
+          ],
+          "initial": false
+        }
+      ],
+      "edges": [
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "press_0"
+        },
+        {
+          "src": 0,
+          "dst": 2,
+          "action": "press_1"
+        },
+        {
+          "src": 0,
+          "dst": 3,
+          "action": "press_2"
+        },
+        {
+          "src": 0,
+          "dst": 1,
+          "action": "press_3"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "press_0"
+        },
+        {
+          "src": 1,
+          "dst": 5,
+          "action": "press_1"
+        },
+        {
+          "src": 1,
+          "dst": 4,
+          "action": "press_3"
+        }
+      ],
+      "truncated": true
+    }
+  }
+}

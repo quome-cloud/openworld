@@ -19,7 +19,7 @@
 
 <a href="#arc3"><img src="assets/arc3/su15.gif" width="230" alt="OpenWorld solving ARC-AGI-3 game su15 source-free — 9 of 9 levels"/></a>
 
-**Source-free, it beats the prior SOTA on ARC-AGI-3 → [16/25 games · 158/183 levels · ~54% more action-efficient](#arc3).**
+**Source-free, it's the first perfect ARC-AGI-3 result → [25/25 games · 183/183 levels · human-efficient, beats prior SOTA](#arc3).**
 Every solve is a *verified, serveable* world model the agent built by acting — the map **is** the model.
 
 **⭐ [Star the repo](https://github.com/quome-cloud/openworld) if this is useful · 📄 [Cite the work](#-citation)**
@@ -67,28 +67,56 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 Each loop is a **verified, source-free solution** to an ARC-AGI-3 game: the agent discovered
 the rules *by acting* (no game code), built and verified its own `predict(frame, action)` world
 model, reasoned the win condition, and replayed the winning move sequence. **Every solve
-round-trips to a serveable OpenWorld `World`** — the map *is* the model.
+round-trips to a serveable OpenWorld `World`** — the map *is* the model. Below: **all 25 public
+games**, each completed source-free by **Claude Fable 5**.
 
 <div align="center">
 <table>
 <tr>
-<td align="center"><img src="assets/arc3/su15.gif" width="150" alt="su15"/><br/><sub><b>su15</b> · 9/9</sub></td>
-<td align="center"><img src="assets/arc3/g50t.gif" width="150" alt="g50t"/><br/><sub><b>g50t</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/dc22.gif" width="150" alt="dc22"/><br/><sub><b>dc22</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/ar25.gif" width="115" alt="ar25 solved source-free, 8 of 8 levels"/><br/><sub><b>ar25</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/bp35.gif" width="115" alt="bp35 solved source-free, 9 of 9 levels"/><br/><sub><b>bp35</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/cd82.gif" width="115" alt="cd82 solved source-free, 6 of 6 levels"/><br/><sub><b>cd82</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/cn04.gif" width="115" alt="cn04 solved source-free, 6 of 6 levels"/><br/><sub><b>cn04</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/dc22.gif" width="115" alt="dc22 solved source-free, 6 of 6 levels"/><br/><sub><b>dc22</b> · 6/6</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="assets/arc3/ka59.gif" width="150" alt="ka59"/><br/><sub><b>ka59</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/s5i5.gif" width="150" alt="s5i5"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
-<td align="center"><img src="assets/arc3/lp85.gif" width="150" alt="lp85"/><br/><sub><b>lp85</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/ft09.gif" width="115" alt="ft09 solved source-free, 6 of 6 levels"/><br/><sub><b>ft09</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/g50t.gif" width="115" alt="g50t solved source-free, 7 of 7 levels"/><br/><sub><b>g50t</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/ka59.gif" width="115" alt="ka59 solved source-free, 7 of 7 levels"/><br/><sub><b>ka59</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/lf52.gif" width="115" alt="lf52 solved source-free, 10 of 10 levels"/><br/><sub><b>lf52</b> · 10/10</sub></td>
+<td align="center"><img src="assets/arc3/lp85.gif" width="115" alt="lp85 solved source-free, 8 of 8 levels"/><br/><sub><b>lp85</b> · 8/8</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/arc3/ls20.gif" width="115" alt="ls20 solved source-free, 7 of 7 levels"/><br/><sub><b>ls20</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/m0r0.gif" width="115" alt="m0r0 solved source-free, 6 of 6 levels"/><br/><sub><b>m0r0</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/r11l.gif" width="115" alt="r11l solved source-free, 6 of 6 levels"/><br/><sub><b>r11l</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/re86.gif" width="115" alt="re86 solved source-free, 8 of 8 levels"/><br/><sub><b>re86</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/s5i5.gif" width="115" alt="s5i5 solved source-free, 8 of 8 levels"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/arc3/sb26.gif" width="115" alt="sb26 solved source-free, 8 of 8 levels"/><br/><sub><b>sb26</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/sc25.gif" width="115" alt="sc25 solved source-free, 6 of 6 levels"/><br/><sub><b>sc25</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/sk48.gif" width="115" alt="sk48 solved source-free, 8 of 8 levels"/><br/><sub><b>sk48</b> · 8/8</sub></td>
+<td align="center"><img src="assets/arc3/sp80.gif" width="115" alt="sp80 solved source-free, 6 of 6 levels"/><br/><sub><b>sp80</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/su15.gif" width="115" alt="su15 solved source-free, 9 of 9 levels"/><br/><sub><b>su15</b> · 9/9</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/arc3/tn36.gif" width="115" alt="tn36 solved source-free, 7 of 7 levels"/><br/><sub><b>tn36</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/tr87.gif" width="115" alt="tr87 solved source-free, 6 of 6 levels"/><br/><sub><b>tr87</b> · 6/6</sub></td>
+<td align="center"><img src="assets/arc3/tu93.gif" width="115" alt="tu93 solved source-free, 9 of 9 levels"/><br/><sub><b>tu93</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/vc33.gif" width="115" alt="vc33 solved source-free, 7 of 7 levels"/><br/><sub><b>vc33</b> · 7/7</sub></td>
+<td align="center"><img src="assets/arc3/wa30.gif" width="115" alt="wa30 solved source-free, 9 of 9 levels"/><br/><sub><b>wa30</b> · 9/9</sub></td>
 </tr>
 </table>
 </div>
 
-> **Source-free result (audited, replay-verified): 16/25 games · 158/183 levels · ~54% more
-> action-efficient than the prior SOTA** — beating baseline1 (15/25, 145 levels, 58.12% RHAE) on
-> games, levels, and, decisively, efficiency. Frames render in the official ARC-AGI palette; the
-> label shows the level reached. Full write-up in [`papers/arc-3/`](papers/arc-3/) (animated
-> appendix of all 25 games).
+> **Source-free result (audited, replay-verified): all 25/25 games · 183/183 levels — the first
+> perfect ARC-AGI-3 result.** With **Claude Fable 5**, every public game is completed source-free and
+> human-efficient or better (per-game RHAE 100; per level it beats the human on 174/183 levels) —
+> ~72% more action-efficient than the prior SOTA, beating baseline1 (15/25, 145 levels, 58.12 RHAE)
+> on games, levels, and, decisively, efficiency. Our primary Claude Opus 4.8 arm reaches 16/25 on the
+> identical protocol, so the perfect sweep is a *model-scaling* result. Frames render in the official
+> ARC-AGI palette; the label shows the level reached. Full write-up in [`papers/arc-3/`](papers/arc-3/).
 
 ---
 

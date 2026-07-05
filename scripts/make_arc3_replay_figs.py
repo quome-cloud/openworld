@@ -19,10 +19,14 @@ from PIL import Image
 
 ROOT = "/Users/jim/Desktop/openworld"
 sys.path.insert(0, os.path.join(ROOT, "experiments"))
+sys.path.insert(0, os.path.join(ROOT, "scratch_arc", "full_lf52"))
 sys.path.insert(0, os.path.join(ROOT, "scratch_arc", "agent"))
 from arc3_harness import Game
 
-ARCH = json.load(open(os.path.join(ROOT, "experiments/results/arc3_fullgame_sourcefree.json")))
+# ARC3_ARCHIVE selects which source-free run to build filmstrips from; default = the Claude Fable
+# 25/25 solve (arc3_fullgame_sourcefree_fable.json) so every game gets a replay figure.
+ARCH = json.load(open(os.environ.get(
+    "ARC3_ARCHIVE", os.path.join(ROOT, "experiments/results/arc3_fullgame_sourcefree_fable.json"))))
 MAPS = os.path.join(ROOT, "papers/arc-3/maps")
 FIGS = os.path.join(ROOT, "papers/assets/figs"); os.makedirs(FIGS, exist_ok=True)
 
@@ -120,7 +124,7 @@ def figure(gid):
 def main():
     signal.signal(signal.SIGALRM, lambda s, f: (_ for _ in ()).throw(TimeoutError("replay timeout")))
     signal.alarm(900)
-    order = [g for g in ["ar25", "re86", "lp85", "sb26", "cn04", "ft09", "cd82", "tr87"] if g in FULL]
+    order = sorted(FULL)                          # every fully-solved game (all 25 for the Fable archive)
     print(f"building replay figures for {len(order)} full games: {order}")
     for gid in order:
         try:

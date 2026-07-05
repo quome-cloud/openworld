@@ -1160,29 +1160,31 @@ inference is the open question we are currently evaluating.
 
 \section{Verified-code fidelity in detail (E86)}
 \label{app:modeling}
-Fidelity is \emph{held-out transition exact-match}: the fraction of unseen $(\text{frame},\text{action})$
-pairs whose \emph{entire} next $64\times64$ frame the synthesized \texttt{predict} reproduces exactly. We
-report on the \ArcNReal{} \emph{real-dynamics} games---excluding \ArcNTrivial{} games where random actions
-trigger no state change (so ``predict no-change'' trivially scores $1.0$) and \ArcNExcluded{} game
-(\texttt{tn36}) where random play never produced a valid step. Claude's mean lift over copy-frame is
-\ArcClaudeLift{}, and Claude beats qwen-32B on \ArcClaudeBeatsQwen/\ArcRealForQwen{} games
-(Fig.~\ref{fig:arc3fid}).
+We grade each written rule the strict way. Show the code a screen-and-button it has never seen, ask it
+what the next screen looks like, and it only counts if it gets the \emph{whole} $64\times64$ picture
+exactly right---one wrong cell fails. We test on the \ArcNReal{} games whose screens actually change,
+setting aside \ArcNTrivial{} games where nothing moves (there ``the screen stays the same'' would earn a
+free perfect score) and \ArcNExcluded{} game (\texttt{tn36}), where random play never even made a legal
+move. Claude's code is right \ArcClaudeLift{} more often than that lazy ``it just stays the same'' guess,
+and it writes the better rule than the small local model (qwen-32B) on \ArcClaudeBeatsQwen{} of the
+\ArcRealForQwen{} games (Fig.~\ref{fig:arc3fid}).
 
 \begin{figure}[t]\centering
 \includegraphics[width=0.96\linewidth]{figs/arc3_fidelity.png}
-\caption{\textbf{E86 verified-code fidelity on ARC-AGI-3 (\ArcNReal{} real-dynamics games).}
-\emph{Left:} mean held-out exact-match by synthesizer---qwen-7B $\approx$ qwen-32B $\ll$ Claude.
-\emph{Right:} per-game Claude vs.\ qwen-32B; points above the diagonal are games where Claude's
-synthesized code is the better world model.}\label{fig:arc3fid}
+\caption{\textbf{How well each model's code copies the game rules (\ArcNReal{} games that really change).}
+\emph{Left:} how often the next screen comes out exactly right, by model---the two small local models are
+far behind Claude. \emph{Right:} game by game, Claude vs.\ the small model; a point above the line is a
+game where Claude's code is the better copy of the rules.}\label{fig:arc3fid}
 \end{figure}
 
-\paragraph{Honest limits.} (i) \textbf{Fidelity is not solving}: this experiment measures
-\emph{dynamics}, not level completion ($0$ levels here, by design); solving is taken up from
-\S\ref{sec:landscape} onward. (ii) The densest game (\texttt{cn04}, $\sim$174 changed cells/step)
-defeats even Claude (fidelity $0$). (iii) On one game (\texttt{tr87}) qwen edged Claude. (iv) Fidelity is
-single-step; planning through these models (compounding error) is left to future work. These bound the claim to what we
-measured: \emph{ARC-AGI-3 dynamics are recoverable as verified code by a capable synthesizer}---the
-foundation on which the solving results of \S\ref{sec:landscape}ff are built.
+\paragraph{Being honest about the limits.} (i) This measures how well the code copies the game's
+\emph{rules}, not whether anyone \emph{wins}---no games are solved here, on purpose; winning starts in
+\S\ref{sec:landscape}. (ii) The busiest game (\texttt{cn04}, about $174$ cells change every step) beats
+even Claude---its code gets \emph{nothing} exactly right (a score of $0$). (iii) On one game
+(\texttt{tr87}) the small model narrowly wrote the better rule. (iv) We only check \emph{one} step at a
+time; whether small errors pile up when you run the code many steps forward is left for later. So the
+honest takeaway is just this: \emph{a capable model can re-write ARC-AGI-3's rules as working code}---the
+ground the solving results (\S\ref{sec:landscape} onward) stand on.
 
 \section{Agentic synthesis and the capability ceiling (E86b)}
 Does a better \emph{harness} close the synthesizer gap? We replace one-shot prompting with a

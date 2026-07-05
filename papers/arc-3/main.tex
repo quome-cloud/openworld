@@ -384,15 +384,17 @@ reasoning}, not search over a fixed hypothesis space. Handing each game to a \te
 crosses them: Claude Code, given the deterministic harness and the OpenWorld recipe---explore
 $(s,a,s')$, write a verified \texttt{predict(frame,action)} model, \emph{reason} what raises
 \texttt{levels\_completed}, plan, and replay-verify (a synthesized \texttt{CodeTransition} plus a
-reasoned \texttt{CodeObjective}). The agent solves \textbf{15/25} games on its own---every wall the
+reasoned \texttt{CodeObjective}). \emph{On its own}, the live coding agent solves \textbf{15/25} games---including every wall the
 automated methods missed (\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36,
-wa30})---lifting the union across all strategies to $\geq$1 level on every public game; chaining levels
-then yields the full-game completions of \S\ref{sec:fullgame}. Those completions \emph{scale with the
-model} on the identical source-free harness: our primary agent \textbf{Claude~Opus~4.8} completes
+wa30})---which lifts the union across all strategies to $\geq$1 level on every public game. Adding the
+cheap perceptual/graph solvers (which crack a few games the live agent does not) and chaining levels into
+full games (\S\ref{sec:fullgame}) gives the source-free \emph{arm} totals---and these \emph{scale with the
+model} on the identical harness: our primary \textbf{Claude~Opus~4.8} arm completes
 \ArcSFGames/\ArcUnionGames{} games, \textbf{GPT-5.5} \ArcCodexFreeFull/\ArcUnionGames{}, and
-\textbf{Claude~Fable} all \ArcFableFull/\ArcUnionGames{} (Fig.~\ref{fig:arc3source}). (The agent solves 15 standalone; the
-deployed router, App.~\ref{sec:router}, invokes it only on the \textbf{13} games no cheaper solver
-clears---the rest go to cheap perceptual/graph solvers.) We do not claim every solve reflects deep
+\textbf{Claude~Fable} all \ArcFableFull/\ArcUnionGames{} (Fig.~\ref{fig:arc3source}). (So the two counts
+measure different things: the live agent alone solves \textbf{15}, while the full Opus arm---agent plus
+cheap solvers---completes \textbf{\ArcSFGames{}}. The deployed router, App.~\ref{sec:router}, invokes the
+agent only on the \textbf{13} games no cheaper solver clears; the rest go to the cheap solvers.) We do not claim every solve reflects deep
 reasoning: some are clearly deliberate (\texttt{ka59} navigates then clicks a door; \texttt{dc22}
 interleaves moves and clicks), others determinism-exploiting \emph{sweeps} the offline protocol permits
 (\texttt{lp85} repeats one click; \texttt{ft09} tiles a grid); the random-play baseline

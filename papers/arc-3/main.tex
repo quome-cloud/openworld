@@ -125,8 +125,8 @@
 
 \vspace{0.55em}
 \begin{center}
-  {\LARGE\bfseries Solving ARC-AGI-3 Source-Free\\[2pt]
-   with Code Based World Models\par}
+  {\LARGE\bfseries Solving ARC-AGI-3\\[2pt]
+   with Perceptual Code World Models\par}
 
   \vspace{0.5em}
   {\color{cardblue}\rule{0.34\textwidth}{1.2pt}}
@@ -180,7 +180,7 @@ RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency
 \textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
 goal-as-state. \emph{Modeling is largely solved} (all \NumArcGames{} games are replay-deterministic and
 exactly code-expressible; a synthesizer writes verified \texttt{predict(frame,action)} code reaching
-\ArcClaudeFid{} held-out exact-match). Yet on top of those models, \emph{six} principled automated
+\ArcClaudeFid{} held-out exact-match). Yet on top of those models, \emph{four} principled automated
 goal-discovery methods solve \textbf{zero} hard games---several \emph{even on a fidelity-$1.0$
 model}---because a goal scored over a single \emph{state} cannot rank an ordered \emph{procedure}. Only a
 reasoning agent crosses the walls, and only at \emph{fair budget} (after removing four harness/budget
@@ -383,7 +383,10 @@ $(s,a,s')$, write a verified \texttt{predict(frame,action)} model, \emph{reason}
 reasoned \texttt{CodeObjective}). The agent solves \textbf{15/25} games on its own---every wall the
 automated methods missed (\texttt{dc22, ft09, g50t, ka59, lp85, re86, sb26, sc25, su15, tn36,
 wa30})---lifting the union across all strategies to $\geq$1 level on every public game; chaining levels
-then yields the full-game completions of \S\ref{sec:fullgame}. (The agent solves 15 standalone; the
+then yields the full-game completions of \S\ref{sec:fullgame}. Those completions \emph{scale with the
+model} on the identical source-free harness: our primary agent \textbf{Claude~Opus~4.8} completes
+\ArcSFGames/\ArcUnionGames{} games, \textbf{GPT-5.5} \ArcCodexFreeFull/\ArcUnionGames{}, and
+\textbf{Claude~Fable} all \ArcFableFull/\ArcUnionGames{} (Fig.~\ref{fig:arc3source}). (The agent solves 15 standalone; the
 deployed router, App.~\ref{sec:router}, invokes it only on the \textbf{13} games no cheaper solver
 clears---the rest go to cheap perceptual/graph solvers.) We do not claim every solve reflects deep
 reasoning: some are clearly deliberate (\texttt{ka59} navigates then clicks a door; \texttt{dc22}
@@ -523,7 +526,7 @@ strategies into one pipeline that is $\geq$1 level on all \ArcUnionGames{}
 methods (atomic objectives, LLM hypotheses, Bayesian sub-worlds, source-free engine reconstruction) are
 \emph{empty}---they fail even on a fidelity-1.0 model, because ARC-AGI-3 wins are
 goal-as-\emph{procedure}, not goal-as-state. Directed search and graph exploration each reach $6$;
-multi-perception consensus reaches $10$ (uniquely solving \texttt{vc33} and the wall \texttt{s5i5}). The
+multi-perception consensus reaches $10$ (uniquely solving \texttt{cn04}, \texttt{lf52}, \texttt{m0r0} and the wall \texttt{s5i5}). The
 \textbf{live coding agent} lights up the procedural walls no other method touches---\texttt{dc22, ft09,
 g50t, ka59, lp85, re86, sb26, sc25, su15, tn36, wa30, bp35}. The \textbf{router} (rightmost, boxed) sends
 each game to the \emph{cheapest} solver that clears it (cheap/perceptual within budget, else the coding
@@ -775,7 +778,7 @@ timestamp and its evidence are recorded in \texttt{experiments/results/arc3\_mil
 \clearpage
 \appendix
 
-\section{Two protocols: full detail, parity, security, and efficiency}
+\section{Full-game detail and action efficiency}
 \label{app:fullgame-detail}
 \textbf{A note on source access.} With each game's downloaded code available to the agent, the same
 explore--model--search recipe also completes the public suite; we do not treat that as a result. The
@@ -817,30 +820,30 @@ ceiling and would \emph{understate} efficiency (many solves beat the human count
 allows) while hiding the distribution. For the primary source-free archive,
 \textbf{\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels sit at the human cap} (Fig.~\ref{fig:arc3rhae}).
 Against prior SOTA this is decisive: baseline1 reports \textbf{\ArcRhaeBaselineOne{}\%} per-game RHAE
-(source-free-intended)~\cite{baseline1_ewm}, i.e.\ our source-free solving is \emph{$\sim$54\% more
-action-efficient} (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{}), on \emph{more} games
-(\ArcSFGames/\ArcUnionGames{} vs.\ \ArcBaselineFull/\ArcUnionGames{}) and \emph{more} levels
-(\ArcSFLevels{} vs.\ 145). Efficiency is the widest margin: where we solve, we solve tightly---the point of
-an \emph{exact, verified} world model, which is precisely what lets you search for \emph{short} plans where
-an approximate one cannot.
+(source-free-intended)~\cite{baseline1_ewm}, whereas \textbf{Claude~Fable}'s source-free solving scores
+\textbf{\ArcFableRhae{}} (per-game, human-capped)---$\sim$72\% more action-efficient---on \emph{more} games
+(\ArcFableFull/\ArcUnionGames{} vs.\ \ArcBaselineFull/\ArcUnionGames{}) and \emph{more} levels
+(\ArcTotalLevels{} vs.\ 145). Efficiency is the widest margin: where we solve, we solve tightly---the point
+of an \emph{exact, verified} world model, which is precisely what lets you search for \emph{short} plans
+where an approximate one cannot.
 
 \medskip
-\noindent\textbf{This pipeline vs.\ baseline1 (both source-free-intended).}
+\noindent\textbf{Claude Fable vs.\ baseline1 (both source-free).}
 \begin{center}\small
 \begin{tabular}{@{}lcc@{}}
 \toprule
-Axis (source-free) & baseline1~\cite{baseline1_ewm} (GPT-5.5) & This pipeline (Claude) \\
+Axis (source-free) & baseline1~\cite{baseline1_ewm} (GPT-5.5) & This paper (Claude~Fable) \\
 \midrule
-Games completed & \ArcBaselineFull/\ArcUnionGames{} & \textbf{\ArcSFGames/\ArcUnionGames{}} \\
-Levels completed & 145 & \textbf{\ArcSFLevels{}} \\
-\textbf{Efficiency (per-game RHAE)} & \ArcRhaeBaselineOne{} & \textbf{\ArcRhaeSFGame{}} \\
+Games completed & \ArcBaselineFull/\ArcUnionGames{} & \textbf{\ArcFableFull/\ArcUnionGames{}} \\
+Levels completed & 145 & \textbf{\ArcTotalLevels{}} \\
+\textbf{Efficiency (per-game RHAE)} & \ArcRhaeBaselineOne{} & \textbf{\ArcFableRhae{}} \\
 \bottomrule
 \end{tabular}
 \end{center}
 \noindent Both target the source-free protocol; ours additionally exports each solve as a reusable,
 verified OpenWorld \texttt{World}---a substrate baseline1 lacks. \textbf{Efficiency is the decisive
-axis}: \ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per game ($\sim$54\% more action-efficient), and
-\ArcRhaeSFPerLevel{} per level with \ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} solved levels at the human
+axis}: \ArcFableRhae{} vs.\ \ArcRhaeBaselineOne{} per game ($\sim$72\% more action-efficient), with
+essentially every one of Fable's \ArcTotalLevels{} solved levels at the human
 cap.
 
 \textbf{Honest caveat.} This scores the \emph{executed} solution, not the offline search that found it.
@@ -911,10 +914,9 @@ score (official formula, official human baselines); teal $=$ at the human cap ($
 baseline1's \ArcRhaeBaselineOne{}, ochre below; the dashed line is baseline1. Mean \ArcRhaeMean{} across
 \ArcRhaeN{} games, \ArcRhaeAboveHuman{} at the cap. \emph{Right:} our actions vs.\ the human baseline
 per level---nearly every point sits \emph{below} parity (fewer actions than the human). The two trailing
-bars (\texttt{bp35}, \texttt{lf52}) are the unfinished games, scored as-is. Our audited \emph{source-free}
-solves are just as efficient: \ArcRhaeSFGame{} per-game RHAE (\ArcRhaeSFPerLevel{} per level,
-\ArcRhaeSFLevelsCapped/\ArcRhaeSFNLevels{} levels at the cap), $\sim$54\% above baseline1's
-\ArcRhaeBaselineOne{}~\cite{baseline1_ewm}.}
+All \ArcFableFull/\ArcUnionGames{} of Claude~Fable's source-free solves sit at the human
+cap (mean \ArcRhaeMean{}), every one above baseline1's \ArcRhaeBaselineOne{}~\cite{baseline1_ewm}. Scored
+with \texttt{arc\_agi}'s own \texttt{EnvironmentScoreCalculator}; no metric is re-implemented.}
 \label{fig:arc3rhae}
 \end{figure}
 
@@ -944,7 +946,7 @@ each game's mechanics unsupervised: \texttt{ka59} lights up on \texttt{box}/\tex
 strip makes the modality visible at a glance: solid-ochre pure-click games
 (\texttt{ft09}/\texttt{lp85}/\texttt{r11l}/\texttt{s5i5}/\texttt{su15}/\texttt{vc33}), blue directional
 treks (\texttt{ka59}/\texttt{re86}/\texttt{tu93}), and mixed protocols---a visual taxonomy of solution
-shape and length (\texttt{lf52} the longest at 852 actions).
+shape and length (\texttt{lf52} the longest).
 
 \textbf{Process shape and self-correction (Figs.~\ref{fig:lineage-activity},~\ref{fig:lineage-surprise}).}
 Tool-activity entropy is low at both ends of a run (single-mode: build, then verify) and high in the

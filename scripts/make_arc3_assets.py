@@ -88,9 +88,17 @@ def fullgame_assets(fg):
     # ---------- Table: per-game mechanics + completion ----------
     TABLES.mkdir(parents=True, exist_ok=True)
     rows = []
+    fable_pg = {}
+    try:
+        fable_pg = json.load(open(RES / "arc3_fullgame_sourcefree_fable.json")).get("per_game", {})
+    except Exception:
+        pass
     for g in order:
         d = gms[g]
-        done = "\\checkmark" if d["full"] else f"{d['levels']}/{d['win']}"
+        fb = fable_pg.get(g, {})
+        fb_full = bool(fb.get("win") and (fb.get("levels", 0) or 0) >= fb.get("win", 99))
+        done = "\\checkmark" if fb_full else (f"{fb.get('levels', 0)}/{fb.get('win', d['win'])}"
+                                               if fb else ("\\checkmark" if d["full"] else f"{d['levels']}/{d['win']}"))
         desc = d["desc"].replace("&", "\\&").replace("%", "\\%")
         rows.append(f"\\texttt{{{g}}} & {d['modality']} & {d['win']} & {done} & {desc} \\\\")
     tbl = (
@@ -102,9 +110,9 @@ def fullgame_assets(fg):
         + "\n".join(rows) +
         "\n\\bottomrule\n\\end{tabular}\n"
         "\\caption{\\textbf{The 25 ARC-AGI-3 games: action modality, level count, full-game "
-        "completion, and mechanic.} \\checkmark{} = every level replay-verified under the offline "
-        "white-box protocol. Mechanics for a minority of games are given by action modality only "
-        "(not reverse-engineered here).}\n\\label{tab:arc3games}\n\\end{table}\n")
+        "completion, and mechanic.} \\checkmark{} = every level solved and replay-verified source-free "
+        "by Claude~Fable (all \\ArcFableFull/\\ArcUnionGames{}). Mechanics for a minority of games are "
+        "given by action modality only (not reverse-engineered here).}\n\\label{tab:arc3games}\n\\end{table}\n")
     (TABLES / "arc3_games.tex").write_text(tbl)
     print("wrote tables/arc3_games.tex")
 

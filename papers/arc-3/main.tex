@@ -1216,11 +1216,14 @@ the goal-as-procedure walls---which is precisely the boundary a \emph{reasoning}
 (\S\ref{sec:agent}). Leaderboard comparisons and the offline-replay caveat are stated precisely in
 \S\ref{sec:agent}.
 
-\section{Multi-perception consensus world models (the winning method)}
+\section{Multi-perception consensus world models (the strongest \emph{automated} solver)}
 \label{app:consensus}
-The method that moves the needle perceives each game through \emph{multiple modalities} and
-synthesizes their discovered world models by consensus---all in the \openworld{} structure
-(Fig.~\ref{fig:arch}).
+Among the \emph{automated} strategies (no live reasoning agent), the one that reaches furthest perceives
+each game through \emph{multiple modalities} and synthesizes their discovered world models by
+consensus---all in the \openworld{} structure (Fig.~\ref{fig:arch})---clearing $10$ of the
+\ArcUnionGames{} games. It is \emph{not} the overall winning method: the procedural walls, and the perfect
+\ArcFableFull/\ArcUnionGames{} source-free solve, fall to the live coding agent that \emph{reasons} the win
+condition (\S\ref{sec:agent},~\S\ref{sec:fable}).
 
 \begin{figure}[t]
 \centering

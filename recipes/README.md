@@ -43,12 +43,22 @@ The two families below aren't domain scenarios — they are **reusable patterns*
 authored as clean, interpretable worlds you can load, serve, and reuse.
 Regenerate both with `python scripts/build_paper_recipes.py`.
 
+Each ships with a **model card** — a self-contained SVG (`<name>.svg`, the "atlas" aesthetic) rendered
+by `render_card` next to its spec: the world's state-transition graph, state schema, actions, verified
+dynamics, objectives, and rules on one page. (The 25 *real* winning ARC-AGI-3 solves are rendered the
+same way in [`papers/arc-3/maps/`](../papers/arc-3/maps) — e.g. `arc3-su15`, the discovered
+`start → level 1 → … → win` map of a source-free solve.)
+
 ### `interactive-reasoning/goal_as_procedure.json` — the ARC-AGI-3 lesson
 
 A four-button panel with a hidden correct press **order**. The win is an ordered *procedure*
 (press the buttons in sequence), **not a state to maximize**: a wrong press resets progress,
 and button 1 always lights a shiny `lit` decoy. A method that scores the visible state
 (maximize `lit`) presses button 1 forever and never unlocks — only reasoning the sequence wins.
+
+<div align="center">
+<img src="interactive-reasoning/goal_as_procedure.svg" width="680" alt="OpenWorld model card for goal_as_procedure: state-transition graph of the ordered-protocol panel, state schema (progress, unlocked, presses, lit, broke), the four press actions, verified-code dynamics, objectives, and the goal-as-procedure rules."/>
+</div>
 
 > **The transferable lesson (goal-as-procedure).** An interactive-reasoning win is an ordered
 > protocol, so a reward scored over a single state cannot rank it — state-scoring and blind
@@ -66,6 +76,10 @@ verified win banks as a serveable OpenWorld `World`.
 
 An elementary cellular automaton (Rule 110). Each `step` applies the rule exactly; rolling the
 world forward N generations **is** the computation.
+
+<div align="center">
+<img src="world-time-compute/cellular_automaton.svg" width="680" alt="OpenWorld model card for the world-time-compute cellular automaton: the Rule 110 state-transition graph, state schema (row, gen, rule, population), the step action, verified-code dynamics, objectives, and the world-time-compute rules."/>
+</div>
 
 > **The transferable lesson (world-time compute).** Verified code stays **exact at every rollout
 > depth** — zero compounding error — where a learned next-state proxy drifts as depth grows. So

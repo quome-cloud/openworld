@@ -70,6 +70,25 @@ model, reasoned the win condition, and replayed the winning move sequence. **Eve
 round-trips to a serveable OpenWorld `World`** — the map *is* the model. Below: **all 25 public
 games**, each completed source-free by **Claude Fable 5**.
 
+### The recipe — how every solve above is made
+
+Behind a **source-free boundary** (the agent's Python cannot import the engine), the same loop runs on
+every game — a reusable pattern for building verified world models by acting:
+
+<div align="center">
+<img src="assets/arc3-recipe.png" width="900" alt="The recipe: a process-isolated agent perceives pixels into a symbolic state, explores to gather (s,a,s') transitions, synthesizes a verified predict(frame,action) program (gate 1: accepted only if it exact-matches held-out transitions), reasons the win condition into a code objective, plans through the verified model in imagination, and verifies by replaying on the real engine (gate 2); each verified win banks as a serveable OpenWorld World of Perceptor plus FunctionTransition plus CodeObjective."/>
+</div>
+
+**① Perceive** pixels → a symbolic state (mask the status bar so the state space doesn't explode) · **②
+Explore** by acting to gather `(s, a, s′)`, with the environment as ground truth · **③ Synthesize** a
+`predict(frame, action)` program — kept *only* if it exact-matches held-out transitions (**gate 1**),
+retrying on counterexamples · **④ Reason** what raises `levels_completed` into a `CodeObjective` (the win
+is a *procedure*, not a state) · **⑤ Plan** action sequences *through* the verified model "in imagination"
+· **⑥ Verify** by replaying the plan on the real engine (**gate 2**). Each verified win banks as a
+serveable OpenWorld `World` — a `Perceptor` + `FunctionTransition` + `CodeObjective` you can download,
+re-run, and serve at `openworld serve /view`; unsolved games loop back and re-synthesize. (Figure 2 of the
+[paper](papers/arc-3/).)
+
 <div align="center">
 <table>
 <tr>

@@ -5,12 +5,16 @@
  "per_arm": {
   "fable": {
    "games_covered": 25,
+   "mean_cost_usd_per_solved_game": 44.45,
+   "mean_tokens_per_game": 22754419,
    "sessions": 37,
    "total_cost_usd_est": 1111.28,
    "total_tokens": 568860470
   },
   "opus": {
    "games_covered": 25,
+   "mean_cost_usd_per_solved_game": 67.22,
+   "mean_tokens_per_game": 81250647,
    "sessions": 212,
    "total_cost_usd_est": 1680.53,
    "total_tokens": 2031266186

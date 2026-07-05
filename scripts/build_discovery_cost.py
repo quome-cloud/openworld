@@ -63,6 +63,9 @@ def main():
         "per_game_cost_usd_est": {g: {a: round(per_game[g][a]["usd"], 2) for a in ARMS} for g in GAMES},
         "per_arm": {a: {"total_tokens": sum(per_game[g][a]["tok"] for g in GAMES),
                         "total_cost_usd_est": round(sum(per_game[g][a]["usd"] for g in GAMES), 2),
+                        # per game (both arms attempted all 25); kept under this key for make_paper_assets
+                        "mean_cost_usd_per_solved_game": round(sum(per_game[g][a]["usd"] for g in GAMES) / len(GAMES), 2),
+                        "mean_tokens_per_game": round(sum(per_game[g][a]["tok"] for g in GAMES) / len(GAMES)),
                         "games_covered": sum(1 for g in GAMES if per_game[g][a]["tok"] > 0),
                         "sessions": sum(per_game[g][a]["n"] for g in GAMES)} for a in ARMS},
         "codex_note": "codex (gpt-5.5) ran via codex exec plaintext logs -> no token stats captured (not zero)",
@@ -79,8 +82,8 @@ def main():
     for i, (m, e) in enumerate(zip(means, est)):
         axa.text(i, m + 1, f"{m:.0f}M\n(~${e:.0f})", ha="center", fontsize=9, fontweight="bold")
     axa.set_xticks(range(len(ARMS))); axa.set_xticklabels([a for a in ARMS])
-    axa.set_ylabel("mean tokens / solved game (millions)")
-    axa.set_title("A. Discovery cost per solved game\n(token effort; codex not captured)", fontsize=10, fontweight="bold")
+    axa.set_ylabel("mean tokens / game (millions)")
+    axa.set_title("A. Discovery cost per game\n(token effort; codex not captured)", fontsize=10, fontweight="bold")
     axa.set_ylim(0, max(means) * 1.25); axa.grid(axis="y", alpha=0.25)
     # B: per-game tokens, opus vs fable, all 25 (sorted by opus tokens desc)
     order = sorted(GAMES, key=lambda g: -per_game[g]["opus"]["tok"])

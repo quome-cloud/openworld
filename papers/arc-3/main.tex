@@ -866,7 +866,7 @@ counts \emph{none} of the cost of \emph{discovering} that plan: the exploration 
 dynamics, the LLM sampling and tokens the agent consumed while reasoning, and the build-plus-search of
 the code world model itself. Figure~\ref{fig:rhaescope} draws this boundary. That discovery cost is
 substantial and entirely orthogonal to the replay economy: on the source-free arm, \emph{discovering}
-each solved game cost \$\ArcDiscCostOpus{} (opus) and \$\ArcDiscCostFable{} (fable) on average
+each game cost \$\ArcDiscCostOpus{} (opus) and \$\ArcDiscCostFable{} (fable) on average
 (\ArcDiscTokOpus{}M vs.\ \ArcDiscTokFable{}M LLM tokens across the arms; Fig.~\ref{fig:disccost})---none
 of which RHAE counts. So RHAE should be read as ``given a solution, how tight is its executed path,''
 not ``how cheap is it to reach a solution.'' The head-to-head against baseline1 remains
@@ -907,7 +907,7 @@ verified code world model. RHAE is thus a solution-path economy metric, not a co
 \emph{token} effort to \emph{find} each source-free full solve, reconstructed per-message from the session
 transcripts so it covers \emph{all} \ArcUnionGames{} games for both arms. (The \emph{dollar} cost is only
 logged in a session's final result event, which the overnight kill-and-resume harness usually pre-empted;
-tokens survive because they are summed from every message.) \emph{Left:} mean tokens per solved
+tokens survive because they are summed from every message.) \emph{Left:} mean tokens per
 game---\textbf{Claude~Fable finds a solve in ${\sim}3.5{\times}$ fewer tokens} than the primary opus agent
 ($23$M vs.\ $81$M; ${\sim}\$44$ vs.\ ${\sim}\$67$ estimated) \emph{while solving more games}. \emph{Right:}
 per-game tokens for all \ArcUnionGames{} games (opus $2{,}031$M total, Fable $569$M). Codex (GPT-5.5) ran

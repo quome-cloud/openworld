@@ -160,38 +160,42 @@
 {\sffamily\bfseries\color{cardblue} ABSTRACT}\par
 \smallskip
 \fontsize{9.2}{10.5}\selectfont
-\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped into
-an unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps;
-frontier agents score near zero. We report the \textbf{first perfect ARC-AGI-3 result---and it is
-source-free} (achieved \ArcMilestoneUTC{}; \S\ref{sec:fable}). Under the benchmark's intended
-\textbf{source-free} protocol---process-isolated, no game
-code; rules discovered by acting; per-run leakage audit; every solve replay-verified and round-tripped
-through a verified OpenWorld \texttt{World}---a reasoning agent that writes, \emph{reasons the win
-condition for}, and verifies its own world model, with our strongest model
-(\textbf{Claude~Fable~5}) completes \textbf{all \ArcFableFull/\ArcUnionGames{} \emph{public} games}
+\textbf{ARC-AGI-3} is the ARC Prize Foundation's interactive-reasoning benchmark: an agent dropped into an
+unfamiliar grid game must discover the rules \emph{by acting} and reach goals over many steps; frontier
+agents score near zero. We report the \textbf{first perfect ARC-AGI-3 result, and it is source-free}
+(achieved \ArcMilestoneUTC{}; \S\ref{sec:fable}). The agent never reads the game's code. It discovers each
+game's rules by acting, writes them down as a small \emph{verified} world model, reasons out the win
+condition, plans through that model, and replay-verifies every solve. With our strongest model
+(\textbf{Claude~Fable~5}) it completes \textbf{all \ArcFableFull/\ArcUnionGames{} \emph{public} games}
 (\ArcFableLevels/\ArcTotalLevels{} levels; the held-out private set is not accessible offline,
-\S\ref{sec:limitations}), human-efficient or better on all \ArcUnionGames{}
-(per-game RHAE \ArcFableRhae{}---the official per-game score clips at human parity---while \emph{per level}
-it beats the human on \ArcRhaeLevelsOverHuman/\ArcRhaeNLevels{} levels, \ArcRhaeLevelsAtCap{} at the metric's
-$115$ cap, using about a \emph{third} of the human action count).
-The sweep clears \texttt{lf52}'s final level---the one level that had resisted
-\emph{every} prior run. It also beats prior SOTA \emph{baseline1}'s
-source-free-intended \textbf{\ArcBaselineFull/\ArcUnionGames{}} (\ArcRhaeBaselineOne{}
-RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency}. These are \emph{best-of-$N$} results over repeated attempts---not single-attempt guarantees---and single-attempt success is low (\S\ref{sec:limitations}).
+\S\ref{sec:limitations}). It is also efficient: on the official action-efficiency metric (RHAE) it matches
+or beats the human on every game (per-game \ArcFableRhae{}), and \emph{per level} it beats the human on
+\ArcRhaeLevelsOverHuman/\ArcRhaeNLevels{} levels, using about a \emph{third} of the human's actions. This
+beats the prior best system---\emph{baseline1}, \ArcBaselineFull/\ArcUnionGames{} games at
+\ArcRhaeBaselineOne{} RHAE~\cite{baseline1_ewm}---on games, levels, and efficiency, and it clears
+\texttt{lf52}'s final level, the one level no earlier run had solved. Stated up front: these are
+\emph{best-of-$N$} results over repeated attempts, not single-try guarantees, and the single-try success
+rate is low (\S\ref{sec:limitations}).
 
-\textbf{Why it is hard---and the scientific contribution.} The bottleneck is \emph{not} modeling but
-\textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
-goal-as-state. \emph{Modeling is not the binding wall}: all \NumArcGames{} games are replay-deterministic and thus code-expressible in principle, and a synthesizer recovers verified \texttt{predict(frame,action)} code at \ArcClaudeFid{} \emph{single-step} held-out exact-match (\ArcNNearPerfect{} near-perfect)---partial, but enough to show that goal discovery, not dynamics, blocks the automated methods. Yet on top of those models, \emph{four} principled automated
-goal-discovery methods solve \textbf{zero} hard games---several \emph{even on a fidelity-$1.0$
-model}---because a goal scored over the \emph{raw frame} cannot rank an ordered \emph{procedure}. Only a
-reasoning agent crosses the walls, and only at \emph{fair budget} (after removing four harness/budget
-confounds).
+\textbf{Why it is hard---and the science.} The hard part is not building a model of the game; it is
+figuring out \emph{what you are trying to do}. An ARC-AGI-3 win is an ordered \emph{procedure} (do this,
+then that, then that), not a single good screen to reach. Modeling is the easier half: the games are
+perfectly repeatable, so their rules can be written exactly as code, and a strong model does write them
+(\ArcClaudeFid{} single-step accuracy across the \NumArcGames{} games, \ArcNNearPerfect{} nearly perfect).
+Yet \emph{four} careful automated ways of \emph{guessing the goal} solve \textbf{zero} hard games---even
+when handed a \emph{perfect} model---because scoring one screen at a time cannot tell whether you are
+following the right \emph{sequence}. Only a reasoning agent gets past this, and only once it is given a
+fair compute budget.
 
-Our weaker primary agent, under the identical isolated protocol, reaches
-\ArcSFGames/\ArcUnionGames{}---still beating baseline1---so the perfect sweep is a \emph{model-scaling}
-result. Solves are offline with unbounded resets ($N{=}1$; a fresh fair-budget result that may be
-revised); random play alone clears $\ArcRandomGeqOne/\ArcUnionGames$ first levels, so we also report
-\textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the \textbf{first perfect ARC-AGI-3 result, source-free}; (ii)~the goal-as-procedure diagnosis, negatives as first-class results; (iii)~an auditable source-free protocol whose telemetry makes leakage \emph{detectable}, each solve a verified OpenWorld \texttt{World}.
+A weaker model on the identical setup reaches only \ArcSFGames/\ArcUnionGames{} (still ahead of
+baseline1), so the perfect run is really a \emph{model-scaling} result: a stronger model wins more games.
+Two caveats we put up front: the runs are offline with unlimited retries ($N{=}1$, a fresh result that may
+be revised), and random play alone reaches \ArcRandomGeqOne/\ArcUnionGames{} first levels, so we also
+report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random}. \textbf{Contributions:} (i)~the first
+perfect, source-free ARC-AGI-3 result; (ii)~the finding that \emph{goal discovery}, not modeling, is the
+wall---with the failed methods reported as first-class results; and (iii)~an auditable source-free
+protocol whose logs make any leakage \emph{detectable}, with every solve a downloadable, runnable world
+model.
 
 \noindent\textbf{Keywords:}~%
 ARC-AGI-3; interactive reasoning; code world models; verification; planning.
@@ -217,29 +221,28 @@ are exactly recoverable as verified code), and the true wall is \textbf{goal dis
 \emph{goal-as-procedure} (an ordered protocol), which no score over a single state can rank, so principled
 automated goal-discovery methods solve zero hard games even on a perfect model.
 
-\textbf{This paper.} We port \openworld{}'s verified-code-world-model recipe to ARC-AGI-3 and use it
-to \emph{diagnose} the benchmark. Our contributions, in order of importance: \textbf{(i)~the
-goal-as-procedure diagnosis}---four principled goal-discovery methods (atomic objectives, frontier-LLM
-hypotheses, Bayesian sub-worlds, typed navigation) solve \emph{zero} hard games, several even on a
-fidelity-$1.0$ model, because a goal scored over the \emph{raw frame} cannot express an ordered
-\emph{procedure}; \textbf{(ii)~the strategy landscape} (Fig.~\ref{fig:heatmap})---a guide to what does
-and does not solve interactive reasoning, with the negatives as first-class results; \textbf{(iii)~an
-honest above-random measure}---under the offline unbounded-reset protocol random play reaches
-the first level on $\ArcRandomGeqOne/\ArcUnionGames$ (a \ArcRandomBudget{}-step/game budget; never a
-full game), so we report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random} rather than the inflated $\geq$1-level
-union; and \textbf{(iv)~the first perfect ARC-AGI-3 result---source-free}: with our strongest model (Claude
-Fable~5) the same executable-world-model recipe completes \textbf{all \ArcFableFull/\ArcUnionGames{} games
-source-free} (\ArcFableLevels/\ArcTotalLevels{} levels, \ArcFableRhae{} mean RHAE, audited per-run, each
-solver a serveable OpenWorld \texttt{World}) (\S\ref{sec:fable}). This is a \emph{model-scaling} result: a
-weaker primary agent reaches \ArcSFGames/\ArcUnionGames{} under the identical isolated protocol, and model
-scale lifts it to the full sweep. Even that
-primary \ArcSFGames{} \emph{beats} baseline1's \ArcBaselineFull{}~\cite{baseline1_ewm}
-(source-free-intended) on all three axes---games, levels (\ArcSFLevels{} vs.\ 145), and, most decisively,
-action-efficiency (\ArcRhaeSFGame{} vs.\ \ArcRhaeBaselineOne{} per-game RHAE); an earlier number trailed
-baseline1 only because of harness/budget confounds (a frame-decode crash, a \ArcOurBudgetMin-min/game cap,
-reasoning left at default, and API rate-limit throttling), removed for the fair run (\S\ref{sec:limitations}).
-(Limitations---offline, unbounded resets, $N{=}1$, and this being a fresh fair-budget result---are
-consolidated in \S\ref{sec:limitations}.)
+\textbf{This paper.} We take \openworld{}'s verified-code-world-model recipe, apply it to ARC-AGI-3, and
+use it to \emph{diagnose} the benchmark. We make four contributions, most important first.
+\textbf{(i)~The goal-as-procedure diagnosis:} four careful goal-discovery methods (atomic objectives,
+frontier-LLM hypotheses, Bayesian sub-worlds, typed navigation) solve \emph{zero} hard games---several even
+when handed a \emph{perfect} model---because scoring the current screen cannot express an ordered
+\emph{procedure}. \textbf{(ii)~The strategy landscape} (Fig.~\ref{fig:heatmap}): a map of what does and
+does not solve interactive reasoning, with the failures reported as first-class results.
+\textbf{(iii)~An honest above-random measure:} under the offline, unbounded-reset protocol, random play
+alone reaches the first level of \ArcRandomGeqOne/\ArcUnionGames{} games (on a \ArcRandomBudget{}-step
+budget, and never a full game), so we report \textbf{\ArcAboveRandom/\ArcUnionGames{} above random} rather
+than the inflated ``$\geq$1 level'' count. \textbf{(iv)~The first perfect, source-free ARC-AGI-3 result:}
+with our strongest model (Claude~Fable~5) the same recipe completes \textbf{all
+\ArcFableFull/\ArcUnionGames{} games} (\ArcFableLevels/\ArcTotalLevels{} levels, \ArcFableRhae{} mean RHAE,
+audited per run, each solve a runnable OpenWorld \texttt{World}; \S\ref{sec:fable}).
+
+This is a \emph{model-scaling} result: a weaker primary agent reaches \ArcSFGames/\ArcUnionGames{} on the
+identical protocol, and a stronger model lifts it to the full sweep. Even that weaker agent \emph{beats}
+baseline1 (\ArcBaselineFull/\ArcUnionGames{}, source-free-intended~\cite{baseline1_ewm}) on all three axes:
+games, levels (\ArcSFLevels{} vs.\ 145), and, most clearly, action-efficiency (\ArcRhaeSFGame{} vs.\
+\ArcRhaeBaselineOne{} per-game RHAE). An earlier run trailed baseline1, but only because of budget and
+harness handicaps we later removed for a fair run. All limitations---offline, unbounded resets, $N{=}1$,
+and this being a fresh fair-budget result---are gathered in \S\ref{sec:limitations}.
 
 \paragraph{The numbers, read carefully.} ARC-AGI-3 games have \emph{multiple} levels ($6$--$10$
 each), so ``solved'' is ambiguous; we prefer \emph{full-game completion} over $\geq$1-level
@@ -257,18 +260,16 @@ unbounded resets, $N{=}1$) are consolidated in \S\ref{sec:limitations}.
 under $1\%$, while purpose-built systems do far better (Table~\ref{tab:priorart}). The state of the
 art, \emph{baseline1}~\cite{baseline1_ewm}, has a coding agent construct an \emph{executable} Python
 world model with verifiers and an MDL simplicity bias---the recipe our live coding agent reproduces in
-OpenWorld with Claude. \emph{Rigor and auditability caveats.} baseline1 is a sole-authored,
-by-its-own-description ``intentionally direct'' systems report: a scripted controller over
-\emph{predefined} world-model interfaces and verifier programs, with an unspecified ``MDL-like''
-refactor, \emph{no} ablations (the verifier, refactor, planner, and base model are not separated), and
-results on the \emph{public} set only---the private validation set, by the author's statement,
-``remains to be tested.'' It targets a source-free protocol and reports
-discarding results from an earlier, source-leaky harness version; but with the agent's ``broad
-system access,'' its leakage ``audit'' is asserted rather than per-run quantified. We do not dispute the result---we build
-on the recipe---but absent a per-run leakage audit, ablations, error bars, or reported cost, the figure
-can be neither confirmed leak-free nor attributed to its components. That is precisely the gap our
-protocol closes: per-run audited telemetry that \emph{quantifies} the leak channel (we catch our own
-agent reading source), replay $+$ OpenWorld round-trip verification, two clearly-labeled protocols, and
+OpenWorld with Claude. \emph{Rigor and auditability caveats.} baseline1 is a sole-authored, self-described ``intentionally
+direct'' systems report. It has \emph{no} ablations---the verifier, the ``MDL-like'' refactor, the
+planner, and the base model are never separated---so one cannot tell which part does the work. It reports
+\emph{public}-set results only (the private set, in the author's words, ``remains to be tested''). And
+while it targets a source-free protocol and discards an earlier source-leaky version, its leakage check is
+\emph{asserted}, not measured per run, even though the agent has ``broad system access.'' We build on the
+recipe and do not dispute the result. But without a per-run leakage audit, ablations, error bars, or
+reported cost, the number can be neither confirmed leak-free nor credited to any one component. That is the
+gap our protocol closes: per-run telemetry that actually \emph{measures} the leak channel (we catch our own
+agent reading source), replay $+$ OpenWorld round-trip verification, two clearly labeled protocols, and
 reported cost.
 \emph{DreamTeam}~\cite{dreamteam_workspace} casts the external workspace
 (prompts, files, code) as the trainable substrate; the training-free \emph{Graph
@@ -519,16 +520,16 @@ We ran a dozen increasingly sophisticated strategies and record, per game, which
 artifact for world-model research---it shows where each idea works and, just as importantly, where
 principled ideas fail. Three \emph{categories} of approach emerge.
 
-\textbf{Goal-discovery methods---all fail.} Multiple principled, automated attacks that try to
-\emph{infer the win condition} with no reasoning agent each solve \textbf{0} walled games, several
-\emph{even on a fidelity-$1.0$ model}: atomic candidate-goal objectives; frontier-LLM goal hypotheses
-(open- and closed-loop); procedure-aware Bayesian active inference over composite sub-worlds; a
-source-free engine-\emph{reconstruction} pipeline with a held-out Clopper--Pearson certificate; an
-explicit convergence-guaranteed formal solving cycle; and graph/spectral (Fiedler-bottleneck)
-exploration (a short-horizon receding-horizon variant is in progress). Together they rule out a large
-class of approaches and sharpen the diagnosis: a goal scored over the \emph{raw frame} cannot rank an
-ordered \emph{procedure}, so undirected search occasionally stumbles into a win while goal-conditioned
-planning never does---and a \emph{forming} world model (many distinguished states) is worthless until it
+\textbf{Goal-discovery methods---all fail.} We tried many automated ways to \emph{infer the win condition} without a
+reasoning agent, and every one solves \textbf{0} of the walled games---several even when handed a
+\emph{perfect} model. They cover the obvious families: scoring candidate goal-states; asking a frontier LLM
+to guess the goal (open- and closed-loop); Bayesian active inference over composite sub-worlds; rebuilding
+the game engine from play and checking it with a statistical confidence bound; a formal ``solving-cycle''
+procedure with a convergence guarantee; and graph/spectral exploration of the state space (full detail per
+method in App.~\ref{app:negatives}). Together they rule out a whole class of approaches and sharpen the
+diagnosis: a goal scored over the \emph{raw frame} cannot rank an ordered \emph{procedure}, so undirected
+search occasionally stumbles into a win while goal-guided planning never does---and a \emph{forming} world
+model (one that can already tell many states apart) is worthless until it
 contains a \emph{verified} win-terminating path (Fig.~\ref{fig:forming}). Per-experiment detail---and the
 methodological dividend that the engine-reconstruction certificate yields a shared-prior-bias
 diagnostic---is in App.~\ref{app:negatives}. Most tellingly, a deliberately \emph{exhaustive} deterministic
@@ -657,11 +658,17 @@ $25/25$ at $\geq$1 level (\ArcRandomGeqOne{} random-reachable) and \textbf{\ArcA
 \section{Discussion}
 \label{sec:discussion}
 \textbf{Goal-as-procedure is the transferable lesson.} The negatives (\S\ref{sec:solvewall},
-App.~\ref{app:negatives}) are the reusable science: interactive-reasoning wins are ordered
-\emph{procedures}, so any method that scores a single \emph{state}---MPC, atomic objectives, LLM or
-Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. This is an instance of the known difficulty of \emph{non-Markovian}, temporally-extended objectives---rewards defined over trajectories rather than single states, as in the options framework~\cite{sutton1999options} and reward machines~\cite{icarte2018reward}. An ordered procedure \emph{is} expressible as a state objective over a history- or automaton-augmented state---but constructing that automaton is precisely \emph{inferring the procedure}, i.e.\ the goal-discovery problem itself; our contribution is the empirical finding that scoring over the \emph{raw} frame fails, and that this inference is the \emph{binding} wall for interactive-reasoning agents here, defeating even fidelity-$1.0$ models. Only an agent that
-\emph{reasons} the win condition crosses the walls. Builders of interactive-reasoning agents should target
-procedure discovery, not state scoring.
+App.~\ref{app:negatives}) are the reusable science. An interactive-reasoning win is an ordered
+\emph{procedure}, so any method that scores a single \emph{screen}---MPC, atomic objectives, LLM or
+Bayesian goal guesses---cannot tell whether the agent is on the right track, and fails even on a
+\emph{perfect} model. This is a familiar difficulty in reinforcement learning: rewards that depend on the
+whole \emph{trajectory}, not one state (the options framework~\cite{sutton1999options} and reward
+machines~\cite{icarte2018reward}). In principle you \emph{can} turn a procedure back into a single-state
+goal---by enlarging the state so it remembers the history so far---but building that enlarged state \emph{is}
+working out the procedure, which is the very thing that is hard. Our finding is empirical: scoring the raw
+screen fails, and working out the procedure is the wall, even with a perfect model. Only an agent that
+\emph{reasons} out the win condition gets past it. The lesson for builders: aim at \emph{procedure
+discovery}, not state scoring.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -678,11 +685,10 @@ run is a labeled next step.
 $\approx$823 sessions across the \ArcUnionGames{} games (mean $\approx$33/game), and full wins occurred on
 only a small fraction of them---of order $\approx$6\% of attempts overall, and as low as $\approx$2\% on
 the hardest games (\texttt{bp35}, \texttt{lf52}, one full solve in $\sim$50 tries). We report the verified
-best-of-$N$ solve per game and make \emph{no} claim of single-attempt reliability. This rate is a
-\emph{loose lower bound}, not a clean estimate: the sessions span a multi-day sweep with \emph{evolving}
-prompts and protocol (weaker early approaches mixed with the later WALL protocol) and are dominated by the
-opus arm, so a fixed-prompt, fixed-protocol repeated-seed variance study---the correct
-measurement---remains a labeled next step. We report no error bars or success-rate distribution. The
+best-of-$N$ solve per game and make \emph{no} claim of single-attempt reliability. This rate is a \emph{loose lower bound}, not a clean estimate. The sessions span a multi-day sweep whose
+prompts and protocol kept changing (weaker early attempts mixed in with the later WALL protocol), and most
+were the opus arm. The clean measurement---one fixed prompt and protocol, repeated over many seeds, with
+error bars---is a labeled next step we have not yet run. The
 perfect \ArcFableFull/\ArcUnionGames{} sweep is likewise one realized run of one model (Claude~Fable~5) at
 full budget; a repeat may differ, and the primary/opus arm under the identical protocol reached
 \ArcSFGames/\ArcUnionGames{}. Read the headline counts as one realized best-of-$N$ run, not an expectation.
@@ -694,7 +700,12 @@ leaderboard included. The strongest claim the protocol supports is therefore \em
 access (audited)}, not ``no prior knowledge''; a contamination-free test needs a model whose cutoff
 provably predates a game's release (the direction of our local-model controls). This applies in full to
 the \ArcFableFull/\ArcUnionGames{} Claude Fable landmark: a stronger model may have seen more, so the
-milestone is best read as \emph{no runtime source access, audited}---not \emph{no prior exposure}. As a \emph{preliminary} probe, we asked the winning model (Claude~Fable) to describe each game from its ID alone, purely from parametric memory with no tools: it recognised \textbf{0/\ArcUnionGames{}} games with confident, specific recall---only vague ``a public developer-preview existed'' traces for three IDs, with no mechanics. This is directional evidence that the solves are not memorised, but it is \emph{not} a clean control (the probe ran in a context that still held game notes, which the model was trusted to exclude); a fresh-context or cutoff-provable-before-release probe remains the definitive test.
+milestone is best read as \emph{no runtime source access, audited}---not \emph{no prior exposure}. As a quick check, we asked the winning model (Claude~Fable) to describe each game from its ID alone, from
+memory, with no tools. It recognised \textbf{0/\ArcUnionGames{}} games---only a vague sense that ``a public
+preview existed'' for three IDs, and no mechanics at all. So the model does not appear to have the games
+memorised. This is a first check, not proof: the model was asked to set aside notes that were still in its
+context, so a clean version---fresh context, or a model whose training provably predates each game---is the
+real test.
 \item \textbf{Fresh fair-budget result (how the source-free comparison became a win).} An earlier
 source-free run trailed baseline1 only because of harness/budget confounds---a frame-decode crash, a
 \ArcOurBudgetMin-minute wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, the Codex

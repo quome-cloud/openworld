@@ -138,43 +138,51 @@ def build_beamer(deck):
 HTML_CSS = """
 :root{--paper:#@paper@;--ink:#@ink@;--deep:#@deep@;--blue:#@blue@;--teal:#@teal@;--ochre:#@ochre@;--muted:#@muted@;--line:#@line@;}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%%;background:#0a1620;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+html,body{height:100%%;background:#0a1620;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 #deck{position:fixed;inset:0}
-.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
-  padding:5.5vh 7vw;background:var(--paper);opacity:0;transition:opacity .28s ease}
+/* every slide: title anchored at top, body fills the rest, generous bottom safe-area for the chrome */
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+  padding:6vh 7vw 8vh;background:var(--paper);opacity:0;transition:opacity .25s ease}
 .slide.on{display:flex;opacity:1}
-.slide h2{color:var(--deep);font-size:4.2vh;line-height:1.12;margin-bottom:2.4vh;font-weight:800}
-.slide h2::before{content:"";display:inline-block;width:34px;height:5px;background:var(--ochre);
+.slide h2{color:var(--deep);font-size:3.7vh;line-height:1.15;font-weight:800;flex:0 0 auto;margin-bottom:2.2vh}
+.slide h2::before{content:"";display:inline-block;width:32px;height:5px;background:var(--ochre);
   border-radius:3px;margin-right:14px;vertical-align:middle}
-ul{list-style:none;max-width:64ch}
-li{position:relative;padding-left:26px;margin:1.5vh 0;font-size:3vh;line-height:1.34;color:var(--ink)}
-li::before{content:"";position:absolute;left:0;top:1.6vh;width:11px;height:11px;border-radius:3px;background:var(--teal)}
-.fig{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin-top:1vh}
-.fig img{max-width:100%%;max-height:62vh;object-fit:contain;border-radius:8px;
-  box-shadow:0 6px 30px rgba(11,46,79,.13)}
-.cap{color:var(--muted);font-size:2.2vh;margin-top:1.6vh;text-align:center}
-.two{display:flex;gap:4vw;flex:1;align-items:center;min-height:0}
+/* body: fills remaining height and vertically centres its content, never overflows */
+.body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:1.8vh}
+ul{list-style:none;max-width:74ch}
+li{position:relative;padding-left:28px;margin:1.7vh 0;font-size:3.05vh;line-height:1.34;color:var(--ink)}
+li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;border-radius:3px;background:var(--teal)}
+/* figure fits into whatever height remains after title/caption/bullets -- so nothing spills */
+.fig{display:flex;align-items:center;justify-content:center;width:100%%;min-height:0}
+.fig img{max-width:84vw;object-fit:contain;border-radius:8px;box-shadow:0 5px 26px rgba(11,46,79,.12)}
+.cap{flex:0 0 auto;color:var(--muted);font-size:2.1vh;text-align:center;line-height:1.3}
+.figbody{align-items:center}
+.figbody .fig img{max-height:64vh}
+.figbody.hasbul .fig img{max-height:44vh}
+.figbody ul{flex:0 0 auto;max-width:82ch;width:100%%}
+.figbody li{font-size:2.45vh;margin:1vh 0}
+.two{display:flex;gap:4vw;flex:1 1 auto;align-items:center;min-height:0;width:100%%}
 .two .col{flex:1;min-width:0}
 .two .col.img{display:flex;align-items:center;justify-content:center}
-.two .col.img img{max-width:100%%;max-height:70vh;object-fit:contain;border-radius:8px;box-shadow:0 6px 30px rgba(11,46,79,.13)}
+.two .col.img img{max-width:42vw;max-height:70vh;object-fit:contain;border-radius:8px;box-shadow:0 5px 26px rgba(11,46,79,.12)}
 .two li{font-size:2.7vh}
-/* title & section */
-.title,.section{align-items:center;justify-content:center;text-align:center}
-.title .t{color:var(--deep);font-size:6vh;font-weight:800;line-height:1.1;max-width:20ch;margin:2.5vh 0 1.4vh}
-.title .s{color:var(--blue);font-size:3.4vh;max-width:30ch}
-.title .a{color:var(--ink);font-size:2.6vh;margin-top:3vh}
-.title .v{color:var(--muted);font-size:2.1vh;margin-top:.6vh}
-.section .st{color:var(--deep);font-size:5.4vh;font-weight:800;max-width:22ch}
-.section .rule,.title .rule{width:56px;height:6px;background:var(--ochre);border-radius:3px}
-.statement{align-items:center;justify-content:center;text-align:center}
-.statement .big{color:var(--deep);font-size:5vh;font-weight:800;line-height:1.2;max-width:24ch}
+/* title / section / statement: full-slide centred */
+.title,.section,.statement{align-items:center;justify-content:center;text-align:center;padding-bottom:6vh}
+.title .t{color:var(--deep);font-size:5.6vh;font-weight:800;line-height:1.1;max-width:22ch;margin:2.4vh 0 1.6vh}
+.title .s{color:var(--blue);font-size:3.1vh;max-width:34ch;line-height:1.3}
+.title .a{color:var(--ink);font-size:2.5vh;margin-top:3vh}
+.title .v{color:var(--muted);font-size:2vh;margin-top:.6vh}
+.section .st{color:var(--deep);font-size:5vh;font-weight:800;max-width:24ch;line-height:1.15}
+.section .rule,.title .rule{width:54px;height:6px;background:var(--ochre);border-radius:3px}
+.statement .big{color:var(--deep);font-size:4.6vh;font-weight:800;line-height:1.24;max-width:26ch}
 /* nested-worlds mark */
 .mark{display:inline-block;position:relative}
 .mark i{position:absolute;border-radius:3px}
-/* chrome */
-#bar{position:fixed;left:0;bottom:0;height:5px;background:var(--teal);z-index:9;transition:width .28s}
-#num{position:fixed;right:14px;bottom:12px;color:var(--muted);font-size:1.9vh;z-index:9;font-variant-numeric:tabular-nums}
-#brand{position:fixed;left:16px;bottom:9px;z-index:9;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:1.8vh}
+/* chrome (kept clear of content by the slide's bottom padding) */
+#bar{position:fixed;left:0;bottom:0;height:5px;background:var(--teal);z-index:9;transition:width .25s}
+#num{position:fixed;right:16px;bottom:12px;color:var(--muted);font-size:1.8vh;z-index:9;font-variant-numeric:tabular-nums}
+#brand{position:fixed;left:16px;bottom:9px;z-index:9;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:1.7vh;opacity:.85}
 @media print{.slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}}
 """
 
@@ -224,17 +232,18 @@ def html_slide(s):
         if not bs: return ""
         return "<ul>" + "".join(f"<li>{_h(b)}</li>" for b in bs) + "</ul>"
     if t == "bullets":
-        return f'<section class="slide">{title}{ul(s.get("bullets",[]))}</section>'
+        return f'<section class="slide">{title}<div class="body">{ul(s.get("bullets",[]))}</div></section>'
     if t == "figure":
         cap = f'<div class="cap">{_h(s["caption"])}</div>' if s.get("caption") else ""
         bl = ul(s.get("bullets", []))
         img = f'<div class="fig"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("caption") or s.get("title",""))}"></div>'
-        return f'<section class="slide">{title}{img}{cap}{bl}</section>'
+        hasb = " hasbul" if s.get("bullets") else ""
+        return f'<section class="slide">{title}<div class="body figbody{hasb}">{img}{cap}{bl}</div></section>'
     if t == "twocol":
-        return (f'<section class="slide">{title}<div class="two">'
+        return (f'<section class="slide">{title}<div class="body"><div class="two">'
                 f'<div class="col">{ul(s.get("bullets",[]))}</div>'
                 f'<div class="col img"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("title",""))}"></div>'
-                f'</div></section>')
+                f'</div></div></section>')
     return ""
 
 def build_html(deck):

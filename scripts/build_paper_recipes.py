@@ -8,13 +8,13 @@ construct a verified-code world, self-check its dynamics, then to_spec -> valida
 import os, json
 from pathlib import Path
 from openworld import (World, CodeTransition, Action, to_spec, from_spec,
-                       validate_spec, spec_to_json)
+                       validate_spec, spec_to_json, render_card)
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 def emit(world, relpath):
-    """Round-trip check + validate, then write the recipe JSON."""
+    """Round-trip check + validate, then write the recipe JSON and its SVG model card."""
     spec = to_spec(world)
     problems = validate_spec(spec)
     assert not problems, problems
@@ -28,7 +28,10 @@ def emit(world, relpath):
     out = ROOT / relpath
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(spec_to_json(spec))
-    print(f"  wrote {relpath}")
+    # the model card (the atlas aesthetic): a self-contained SVG next to the spec
+    card = out.with_suffix(".svg")
+    card.write_text(render_card(spec))
+    print(f"  wrote {relpath} + {card.relative_to(ROOT)}")
 
 
 # =====================================================================================

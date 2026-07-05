@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
 \graphicspath{{figs/}}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{}
@@ -79,6 +79,13 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large The recipe: a verified code world model, built by acting\par}\vfill\end{frame}
+\begin{frame}{The loop, in six steps}\vfill\centering
+\resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
+  sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
+  text width=18mm,align=center,minimum height=17mm,font=\small,text=owdeep}]
+\node[sb] (n0) {\textbf{1}\\ Perceive};\node[sb,right=of n0] (n1) {\textbf{2}\\ Explore};\node[sb,right=of n1] (n2) {\textbf{3}\\ Synthesize};\node[sb,right=of n2] (n3) {\textbf{4}\\ Reason goal};\node[sb,right=of n3] (n4) {\textbf{5}\\ Plan};\node[sb,right=of n4] (n5) {\textbf{6}\\ Verify};
+\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n0) -- (n1);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n1) -- (n2);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n2) -- (n3);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n3) -- (n4);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n4) -- (n5);
+\end{tikzpicture}}\vfill\end{frame}
 \begin{frame}{How the agent solves a game}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify\par}
@@ -141,6 +148,17 @@
   \item Undirected search stumbles in; goal-conditioned planning never does
 \end{itemize}}
 \end{frame}
+\begin{frame}{Goal-as-state vs goal-as-procedure}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Goal-as-STATE  (fails)}\par\medskip\begin{itemize}\small \item Scores a single screen
+\item Climbs to a high-scoring configuration
+\item Blind to the ordering
+\item Banks 0 even on a perfect model\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Goal-as-PROCEDURE  (the win)}\par\medskip\begin{itemize}\small \item An ordered protocol: A then B then C
+\item No reward until the sequence completes
+\item Invisible to any single-state score
+\item Only reasoning the win crosses it\end{itemize}\end{column}
+\end{columns}\vfill\end{frame}
 \begin{frame}{Four principled goal-discovery methods -- all fail}
 \begin{itemize}
   \item Atomic candidate-goal objectives (reach/cover/collect): 0
@@ -194,6 +212,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Results: source-free completion\par}\vfill\end{frame}
+\begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small public games completed}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect ARC-AGI-3 result}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Source-free completion, per game (a model-scaling result)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
@@ -213,13 +232,13 @@
   \item Public games only; private held-out set not accessed
 \end{itemize}
 \end{frame}
-\begin{frame}{Model scaling: capability rises, cost falls}
-\begin{itemize}
-  \item Same harness, prompt, and budget -- only the model changes
+\begin{frame}{Model scaling: a stronger model clears more walls}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Same harness, prompt, and budget -- only the model changes\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item GPT-5.5 12 -> Opus 16 -> Fable 25 of 25 games
   \item Fable finds each solve in \textasciitilde{}3.5x fewer tokens (23M vs 81M)
-  \item The procedural walls are properties of model capability, not the protocol
-\end{itemize}
+\end{itemize}}
 \end{frame}
 \begin{frame}{Action efficiency, per level (source-free, Fable)}
 \centering

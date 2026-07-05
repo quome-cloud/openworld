@@ -5,6 +5,10 @@ VENUE = "github.com/quome-cloud/openworld"
 
 slides = [
     {"type": "section", "title": "Motivation: from computing to world computing"},
+    {"type": "stats", "title": "Prototyping a verified world",
+     "items": [{"value": "100", "label": "world models, 6 sectors"},
+               {"value": "2.8 min", "label": "median build time", "hi": True},
+               {"value": "47,000×", "label": "faster rollout than an LLM"}]},
     {"type": "bullets", "title": "What is a world computer?",
      "bullets": [
          "Hardware + software that instantiates, verifies, composes, runs simulated worlds",
@@ -12,13 +16,13 @@ slides = [
          "Classical computing made computation a cheap, inspectable commodity",
          "World computing aims to do the same for worlds",
          "Unit of work: a world model -- predicts next state given state and action"]},
-    {"type": "bullets", "title": "Two species of world models",
-     "bullets": [
-         "Perceptual/generative: neural nets over pixels/latents (Dreamer, MuZero, Genie, Sora)",
-         "They are data-hungry, compounding, and opaque",
-         "Code World Models (CWM): transition is a human-readable program over symbolic state",
-         "OpenWorld writes down what can be told, and verifies it",
-         "Complementary tools, not competitors"]},
+    {"type": "compare", "title": "Two species of world models",
+     "left": {"head": "Perceptual / generative",
+              "items": ["Neural nets over pixels/latents", "Dreamer, MuZero, Genie, Sora",
+                        "Data-hungry, compounding error", "Opaque weights"]},
+     "right": {"head": "Code world models",
+               "items": ["A readable program over symbolic state", "Synthesized by an LLM, then verified",
+                         "Exact at every depth, zero data", "Auditable, diffable source"]}},
     {"type": "bullets", "title": "Why verified code",
      "bullets": [
          "Value is not novel dynamics -- the model can often recite the rule",
@@ -119,13 +123,12 @@ slides = [
          "Seeds fixed; every number regenerates from one pipeline"]},
 
     {"type": "section", "title": "Results: fidelity, latency, and trust"},
-    {"type": "bullets", "title": "Performance: fidelity and latency (E04, E11)",
+    {"type": "figure", "title": "Performance: fidelity and latency (E04, E11)",
+     "image": "figs/pres_speed.png",
+     "caption": "One verified transition reused at every step -- no compounding error",
      "bullets": [
-         "7B-synthesized dynamics exact on 24/24 20-step rollouts",
-         "Answer 10x out-of-distribution probes at 100%",
-         "No compounding error -- one verified transition reused at every step",
-         "14,997 steps/s vs 0.32 for the LLM proxy (~47,000x)",
-         "Hand-written oracle is ~16x faster than synthesized code"]},
+         "7B-synthesized dynamics exact on 24/24 20-step rollouts; 100% on 10x OOD probes",
+         "14,997 steps/s vs 0.32 for the LLM proxy (~47,000x)"]},
     {"type": "figure", "title": "Verifier ablation: correctness gained per gate (E3)",
      "image": "figs/verifier.png",
      "caption": "Blind 0.46 -> behavioral 0.65 -> +critic 0.70 (a +0.24 absolute gain)",

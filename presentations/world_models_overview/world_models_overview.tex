@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
 \graphicspath{{figs/}}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{}
@@ -75,6 +75,7 @@
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE Make the model a program, verify the program, and keep the values dialable.\par}\vfill\end{frame}
+\begin{frame}{Three results, one substrate}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small verified worlds authored in minutes}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small world-time-compute lift (0.5B)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small ARC-AGI-3, source-free}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large The substrate: OpenWorld\par}\vfill\end{frame}
@@ -115,11 +116,11 @@
 \end{itemize}
 \end{frame}
 \begin{frame}{Fidelity and latency (E04, E11)}
-\begin{itemize}
-  \item 7B-synthesized dynamics exact on 24/24 twenty-step rollouts
-  \item 100\% on 10x out-of-distribution probes -- no compounding error
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_speed.png}\vskip3pt{\color{owmuted}\footnotesize Exact on 24/24 twenty-step rollouts and 10x OOD probes -- no compounding error\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item \textasciitilde{}47,000x faster rollout than a per-step LLM engine
-\end{itemize}
+\end{itemize}}
 \end{frame}
 \begin{frame}{Composition defeats the complexity cliff (E30)}
 \centering
@@ -200,7 +201,7 @@
 \end{frame}
 \begin{frame}{The first perfect source-free result (model-scaling)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item Claude Fable 5: 25/25 games, 183/183 levels -- first perfect result
   \item Opus 4.8: 16/25; GPT-5.5: 12/25; prior best baseline1: 15/25

@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
 \graphicspath{{figs/}}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{}
@@ -48,6 +48,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Motivation: from computing to world computing\par}\vfill\end{frame}
+\begin{frame}{Prototyping a verified world}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small world models, 6 sectors}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small median build time}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 47,000×}\\[6pt]{\color{owmuted}\small faster rollout than an LLM}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{What is a world computer?}
 \begin{itemize}
   \item Hardware + software that instantiates, verifies, composes, runs simulated worlds
@@ -57,15 +58,17 @@
   \item Unit of work: a world model -- predicts next state given state and action
 \end{itemize}
 \end{frame}
-\begin{frame}{Two species of world models}
-\begin{itemize}
-  \item Perceptual/generative: neural nets over pixels/latents (Dreamer, MuZero, Genie, Sora)
-  \item They are data-hungry, compounding, and opaque
-  \item Code World Models (CWM): transition is a human-readable program over symbolic state
-  \item OpenWorld writes down what can be told, and verifies it
-  \item Complementary tools, not competitors
-\end{itemize}
-\end{frame}
+\begin{frame}{Two species of world models}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Perceptual / generative}\par\medskip\begin{itemize}\small \item Neural nets over pixels/latents
+\item Dreamer, MuZero, Genie, Sora
+\item Data-hungry, compounding error
+\item Opaque weights\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Code world models}\par\medskip\begin{itemize}\small \item A readable program over symbolic state
+\item Synthesized by an LLM, then verified
+\item Exact at every depth, zero data
+\item Auditable, diffable source\end{itemize}\end{column}
+\end{columns}\vfill\end{frame}
 \begin{frame}{Why verified code}
 \begin{itemize}
   \item Value is not novel dynamics -- the model can often recite the rule
@@ -198,13 +201,12 @@
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Results: fidelity, latency, and trust\par}\vfill\end{frame}
 \begin{frame}{Performance: fidelity and latency (E04, E11)}
-\begin{itemize}
-  \item 7B-synthesized dynamics exact on 24/24 20-step rollouts
-  \item Answer 10x out-of-distribution probes at 100\%
-  \item No compounding error -- one verified transition reused at every step
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_speed.png}\vskip3pt{\color{owmuted}\footnotesize One verified transition reused at every step -- no compounding error\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item 7B-synthesized dynamics exact on 24/24 20-step rollouts; 100\% on 10x OOD probes
   \item 14,997 steps/s vs 0.32 for the LLM proxy (\textasciitilde{}47,000x)
-  \item Hand-written oracle is \textasciitilde{}16x faster than synthesized code
-\end{itemize}
+\end{itemize}}
 \end{frame}
 \begin{frame}{Verifier ablation: correctness gained per gate (E3)}
 \centering

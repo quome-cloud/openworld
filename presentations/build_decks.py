@@ -40,7 +40,7 @@ BEAMER_PREAMBLE = r"""\documentclass[aspectratio=169,11pt]{beamer}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
 \graphicspath{{figs/}}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{}
@@ -124,6 +124,41 @@ def beamer_slide(s):
 \includegraphics[width=\linewidth,height=0.72\textheight,keepaspectratio]{%s}\end{column}
 \end{columns}
 \end{frame}""" % (title, bullets(s.get("bullets", [])), Path(s["image"]).name))
+    if t == "stats":
+        items = s["items"]
+        w = 0.97 / len(items)
+        cols = "".join(
+            (r"\begin{column}{%.3f\textwidth}\centering{\color{%s}\fontsize{40}{44}\selectfont\bfseries %s}\\[6pt]"
+             r"{\color{owmuted}\small %s}\end{column}"
+             % (w, "owochre" if it.get("hi") else "owdeep", _btext(it["value"]), _btext(it["label"])))
+            for it in items)
+        return r"\begin{frame}{%s}\vfill\begin{columns}[c]%s\end{columns}\vfill\end{frame}" % (title, cols)
+    if t == "flow":
+        steps = s["steps"]
+        nodes = "".join(
+            (r"\node[sb%s] (n%d) {\textbf{%d}\\ %s};"
+             % (("" if i == 0 else ",right=of n%d" % (i - 1)), i, i + 1, _btext(st)))
+            for i, st in enumerate(steps))
+        arrows = "".join(r"\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n%d) -- (n%d);"
+                         % (i - 1, i) for i in range(1, len(steps)))
+        tw = 22 if len(steps) <= 5 else 18
+        return (r"""\begin{frame}{%s}\vfill\centering
+\resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
+  sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
+  text width=%dmm,align=center,minimum height=17mm,font=\small,text=owdeep}]
+%s
+%s
+\end{tikzpicture}}\vfill\end{frame}""" % (title, tw, nodes, arrows))
+    if t == "compare":
+        def side(d, color):
+            items = "\n".join(r"\item %s" % _btext(x) for x in d["items"])
+            return (r"{\color{%s}\bfseries\large %s}\par\medskip\begin{itemize}\small %s\end{itemize}"
+                    % (color, _btext(d["head"]), items))
+        return (r"""\begin{frame}{%s}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}%s\end{column}
+\begin{column}{0.46\textwidth}%s\end{column}
+\end{columns}\vfill\end{frame}""" % (title, side(s["left"], "owmuted"), side(s["right"], "owteal")))
     return ""
 
 def build_beamer(deck):
@@ -176,6 +211,31 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .section .st{color:var(--deep);font-size:5vh;font-weight:800;max-width:24ch;line-height:1.15}
 .section .rule,.title .rule{width:54px;height:6px;background:var(--ochre);border-radius:3px}
 .statement .big{color:var(--deep);font-size:4.6vh;font-weight:800;line-height:1.24;max-width:26ch}
+/* hero stats */
+.stats{display:flex;gap:2.6vw;justify-content:center;align-items:stretch;width:100%%}
+.stat{flex:1 1 0;min-width:0;text-align:center;padding:3vh 1vw;border-radius:14px;background:#ffffff;
+  box-shadow:0 5px 24px rgba(11,46,79,.08);border-top:6px solid var(--teal)}
+.stat .v{color:var(--deep);font-size:7vh;font-weight:800;line-height:1;letter-spacing:-1px}
+.stat .l{color:var(--muted);font-size:2.05vh;margin-top:1.4vh;line-height:1.28}
+.stat.hi{border-top-color:var(--ochre)}
+.stat.hi .v{color:var(--ochre)}
+/* flow of steps */
+.flow{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:.4vw;width:100%%}
+.flow .step{background:#ffffff;border:2px solid var(--teal);border-radius:12px;padding:2.2vh 1.1vw;
+  text-align:center;color:var(--deep);font-weight:700;font-size:2.4vh;min-width:0;
+  display:flex;flex-direction:column;justify-content:center;box-shadow:0 3px 14px rgba(11,46,79,.06)}
+.flow .step .n{display:block;color:var(--teal);font-size:1.7vh;font-weight:800;margin-bottom:.5vh}
+.flow .arw{display:flex;align-items:center;color:var(--ochre);font-size:3vh;font-weight:800;padding:0 .3vw}
+/* side-by-side comparison */
+.compare{display:flex;gap:3vw;align-items:stretch;width:100%%}
+.compare .side{flex:1;background:#ffffff;border-radius:14px;padding:2.6vh 2vw;box-shadow:0 5px 24px rgba(11,46,79,.08)}
+.compare .side.a{border-top:6px solid var(--muted)}
+.compare .side.b{border-top:6px solid var(--teal)}
+.compare .side h3{font-size:2.9vh;color:var(--muted);margin-bottom:1.8vh;font-weight:800}
+.compare .side.b h3{color:var(--teal)}
+.compare .side ul{max-width:none}
+.compare .side li{font-size:2.35vh;margin:1.2vh 0;padding-left:24px}
+.compare .side.a li::before{background:var(--muted)}
 /* nested-worlds mark */
 .mark{display:inline-block;position:relative}
 .mark i{position:absolute;border-radius:3px}
@@ -244,6 +304,25 @@ def html_slide(s):
                 f'<div class="col">{ul(s.get("bullets",[]))}</div>'
                 f'<div class="col img"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("title",""))}"></div>'
                 f'</div></div></section>')
+    if t == "stats":
+        tiles = "".join(
+            f'<div class="stat{" hi" if it.get("hi") else ""}">'
+            f'<div class="v">{_h(it["value"])}</div><div class="l">{_h(it["label"])}</div></div>'
+            for it in s["items"])
+        return f'<section class="slide">{title}<div class="body"><div class="stats">{tiles}</div></div></section>'
+    if t == "flow":
+        parts = []
+        for i, st in enumerate(s["steps"]):
+            if i:
+                parts.append('<span class="arw">&rarr;</span>')
+            parts.append(f'<div class="step"><span class="n">{i+1}</span>{_h(st)}</div>')
+        return f'<section class="slide">{title}<div class="body"><div class="flow">{"".join(parts)}</div></div></section>'
+    if t == "compare":
+        def side(d, cls):
+            items = "".join(f"<li>{_h(x)}</li>" for x in d["items"])
+            return f'<div class="side {cls}"><h3>{_h(d["head"])}</h3><ul>{items}</ul></div>'
+        return (f'<section class="slide">{title}<div class="body"><div class="compare">'
+                f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
     return ""
 
 def build_html(deck):
@@ -277,7 +356,9 @@ def copy_figs(deck, outdir):
         img = s.get("image")
         if not img: continue
         name = Path(img).name
-        src = FIGSRC / name
+        src = FIGSRC / name                          # paper figures
+        if not src.exists():
+            src = PRES / "assets" / name             # presentation-native charts
         if src.exists():
             shutil.copy(src, figs / name)
         else:

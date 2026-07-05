@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
 \graphicspath{{figs/}}
 \usefonttheme{professionalfonts}
 \setbeamertemplate{navigation symbols}{}
@@ -130,6 +130,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large The Central Result\par}\vfill\end{frame}
+\begin{frame}{World-time compute, in three numbers}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 24/24}\\[6pt]{\color{owmuted}\small exact 20-step rollouts (verified code)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 0/24}\\[6pt]{\color{owmuted}\small exact rollouts (per-step LLM)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small held-out lift at 0.5B}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Verified code eliminates compounding error}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hero.png}\vskip3pt{\color{owmuted}\footnotesize A: code exact at every depth vs LLM diverging by step \textasciitilde{}2.3. B: world-time compute payoff.\par}
@@ -141,12 +142,12 @@
 \end{itemize}}
 \end{frame}
 \begin{frame}{Head-to-head dynamics fidelity (E1/E4/E11)}
-\begin{itemize}
-  \item Verified code exact on 24/24 twenty-step rollouts (CI [0.86, 1.00])
-  \item Per-step LLM: 0/24 exact rollouts (CI [0.00, 0.14])
-  \item Code rolls out at \textasciitilde{}15,000 steps/s vs LLM's 0.32 steps/s
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_exact.png}\vskip3pt{\color{owmuted}\footnotesize Right once = exact at every depth; the per-step proxy never completes exactly\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Code rolls out at \textasciitilde{}15,000 steps/s vs the LLM's 0.32 steps/s
   \item OOD probes: code 100\% exact from zero transitions
-\end{itemize}
+\end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE The robust claim is the exact-match contrast, not the mean divergence step -- compounding depends on per-world error rate.\par}\vfill\end{frame}
@@ -171,13 +172,13 @@
   \item Forces the general skill, not memorization
 \end{itemize}}
 \end{frame}
-\begin{frame}{Two findings (E74)}
-\begin{itemize}
-  \item Generalization, not memorization: lift at every model size on unseen worlds
+\begin{frame}{Generalization, not memorization -- and a small-model multiplier}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_smallmodel.png}\vskip3pt{\color{owmuted}\footnotesize Lift at every model size on unseen worlds; the smaller the model, the bigger the gain\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item 0.5B: 37\% -> 66\%; 32B: 78\% -> 81\% toward the 86\% rules-given oracle
-  \item A small-model multiplier: +29 pts at 0.5B, shrinking to +3 at 32B
   \item Heterogeneous worlds sharing no skill (E71/E73) give no transfer
-\end{itemize}
+\end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt

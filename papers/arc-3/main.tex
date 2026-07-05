@@ -181,11 +181,9 @@ RHAE)~\cite{baseline1_ewm} on games, levels, and, decisively, \textbf{efficiency
 
 \textbf{Why it is hard---and the scientific contribution.} The bottleneck is \emph{not} modeling but
 \textbf{goal discovery}: ARC-AGI-3 wins are \textbf{goal-as-procedure} (an ordered protocol), not
-goal-as-state. \emph{Modeling is largely solved} (all \NumArcGames{} games are replay-deterministic and
-exactly code-expressible; a synthesizer writes verified \texttt{predict(frame,action)} code reaching
-\ArcClaudeFid{} held-out exact-match). Yet on top of those models, \emph{four} principled automated
+goal-as-state. \emph{Modeling is not the binding wall}: all \NumArcGames{} games are replay-deterministic and thus code-expressible in principle, and a synthesizer recovers verified \texttt{predict(frame,action)} code at \ArcClaudeFid{} \emph{single-step} held-out exact-match (\ArcNNearPerfect{} near-perfect)---partial, but enough to show that goal discovery, not dynamics, blocks the automated methods. Yet on top of those models, \emph{four} principled automated
 goal-discovery methods solve \textbf{zero} hard games---several \emph{even on a fidelity-$1.0$
-model}---because a goal scored over a single \emph{state} cannot rank an ordered \emph{procedure}. Only a
+model}---because a goal scored over the \emph{raw frame} cannot rank an ordered \emph{procedure}. Only a
 reasoning agent crosses the walls, and only at \emph{fair budget} (after removing four harness/budget
 confounds).
 
@@ -223,7 +221,7 @@ automated goal-discovery methods solve zero hard games even on a perfect model.
 to \emph{diagnose} the benchmark. Our contributions, in order of importance: \textbf{(i)~the
 goal-as-procedure diagnosis}---four principled goal-discovery methods (atomic objectives, frontier-LLM
 hypotheses, Bayesian sub-worlds, typed navigation) solve \emph{zero} hard games, several even on a
-fidelity-$1.0$ model, because a goal scored over a single \emph{state} cannot express an ordered
+fidelity-$1.0$ model, because a goal scored over the \emph{raw frame} cannot express an ordered
 \emph{procedure}; \textbf{(ii)~the strategy landscape} (Fig.~\ref{fig:heatmap})---a guide to what does
 and does not solve interactive reasoning, with the negatives as first-class results; \textbf{(iii)~an
 honest above-random measure}---under the offline unbounded-reset protocol random play reaches
@@ -400,7 +398,7 @@ App.~\ref{app:fullgame-detail}.
 
 \section{Results}
 \label{sec:results}
-\subsection{Modeling is largely solved}
+\subsection{Modeling is not the binding wall}
 
 \label{sec:modeling}
 \begin{figure}[t]
@@ -522,12 +520,18 @@ principled ideas fail. Three \emph{categories} of approach emerge.
 source-free engine-\emph{reconstruction} pipeline with a held-out Clopper--Pearson certificate; an
 explicit convergence-guaranteed formal solving cycle; and graph/spectral (Fiedler-bottleneck)
 exploration (a short-horizon receding-horizon variant is in progress). Together they rule out a large
-class of approaches and sharpen the diagnosis: a goal scored over a single \emph{state} cannot rank an
+class of approaches and sharpen the diagnosis: a goal scored over the \emph{raw frame} cannot rank an
 ordered \emph{procedure}, so undirected search occasionally stumbles into a win while goal-conditioned
 planning never does---and a \emph{forming} world model (many distinguished states) is worthless until it
 contains a \emph{verified} win-terminating path (Fig.~\ref{fig:forming}). Per-experiment detail---and the
 methodological dividend that the engine-reconstruction certificate yields a shared-prior-bias
-diagnostic---is in App.~\ref{app:negatives}.
+diagnostic---is in App.~\ref{app:negatives}. Most tellingly, a deliberately \emph{exhaustive} deterministic
+cold-search battery (E146) reinforces the point by \emph{combination}: Fibonacci/Zeckendorf and semiring
+direction-macro priors, first-level macro tournaments, Go-Explore archives (\ArcGoExploreN{}~games,
+\ArcGoExploreSteps{}~steps), and ReAct-style tool sequences---$13$ candidate generators in all---together
+crack \textbf{$0$ new source-free levels on any unsolved frontier}. That such varied, hand-engineered blind
+enumeration finds \emph{nothing} the cheap solvers miss is our strongest evidence that the wall is
+\emph{discovery} of the ordered win procedure, not search coverage; only the reasoning agent crosses it.
 
 \textbf{Perception and search---partial coverage.} Directed search and graph exploration each reach $6$
 games; multi-perception consensus reaches $10$ (uniquely \texttt{cn04, lf52, m0r0, s5i5}). These solve
@@ -649,7 +653,7 @@ $25/25$ at $\geq$1 level (\ArcRandomGeqOne{} random-reachable) and \textbf{\ArcA
 \textbf{Goal-as-procedure is the transferable lesson.} The negatives (\S\ref{sec:solvewall},
 App.~\ref{app:negatives}) are the reusable science: interactive-reasoning wins are ordered
 \emph{procedures}, so any method that scores a single \emph{state}---MPC, atomic objectives, LLM or
-Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. This is an instance of the known difficulty of \emph{non-Markovian}, temporally-extended objectives---rewards defined over trajectories rather than single states, as in the options framework~\cite{sutton1999options} and reward machines~\cite{icarte2018reward}; our contribution is the empirical finding that it is the \emph{binding} wall for interactive-reasoning agents here, defeating even fidelity-$1.0$ models. Only an agent that
+Bayesian goal hypotheses---cannot rank them, and fails even on a fidelity-$1.0$ model. This is an instance of the known difficulty of \emph{non-Markovian}, temporally-extended objectives---rewards defined over trajectories rather than single states, as in the options framework~\cite{sutton1999options} and reward machines~\cite{icarte2018reward}. An ordered procedure \emph{is} expressible as a state objective over a history- or automaton-augmented state---but constructing that automaton is precisely \emph{inferring the procedure}, i.e.\ the goal-discovery problem itself; our contribution is the empirical finding that scoring over the \emph{raw} frame fails, and that this inference is the \emph{binding} wall for interactive-reasoning agents here, defeating even fidelity-$1.0$ models. Only an agent that
 \emph{reasons} the win condition crosses the walls. Builders of interactive-reasoning agents should target
 procedure discovery, not state scoring.
 
@@ -684,7 +688,7 @@ leaderboard included. The strongest claim the protocol supports is therefore \em
 access (audited)}, not ``no prior knowledge''; a contamination-free test needs a model whose cutoff
 provably predates a game's release (the direction of our local-model controls). This applies in full to
 the \ArcFableFull/\ArcUnionGames{} Claude Fable landmark: a stronger model may have seen more, so the
-milestone is best read as \emph{no runtime source access, audited}---not \emph{no prior exposure}.
+milestone is best read as \emph{no runtime source access, audited}---not \emph{no prior exposure}. As a \emph{preliminary} probe, we asked the winning model (Claude~Fable) to describe each game from its ID alone, purely from parametric memory with no tools: it recognised \textbf{0/\ArcUnionGames{}} games with confident, specific recall---only vague ``a public developer-preview existed'' traces for three IDs, with no mechanics. This is directional evidence that the solves are not memorised, but it is \emph{not} a clean control (the probe ran in a context that still held game notes, which the model was trusted to exclude); a fresh-context or cutoff-provable-before-release probe remains the definitive test.
 \item \textbf{Fresh fair-budget result (how the source-free comparison became a win).} An earlier
 source-free run trailed baseline1 only because of harness/budget confounds---a frame-decode crash, a
 \ArcOurBudgetMin-minute wall-clock cap per game per round over \ArcOurBudgetRounds{} rounds, the Codex
@@ -713,7 +717,7 @@ estimate, not a controlled comparison.
 We report the \textbf{first perfect ARC-AGI-3 result---and it is source-free}: our strongest model
 (Claude~Fable~5) completes all \ArcFableFull/\ArcUnionGames{} public games (\ArcFableLevels/\ArcTotalLevels{}
 levels) with no access to game code (achieved \ArcMilestoneUTC{}); a weaker primary agent reaches
-\ArcSFGames/\ArcUnionGames{} under the identical isolated protocol. Modeling is largely solved---dynamics are
+\ArcSFGames/\ArcUnionGames{} under the identical isolated protocol. Modeling is not the binding wall---dynamics are
 exactly writable as verified code---so the true wall is \textbf{goal-as-procedure}; a live coding agent
 that reasons the win condition and writes its own verified world model crosses it, and model scale carries
 completion to the full sweep. Every solver is an open, serveable, replay- and \openworld-verified
@@ -744,7 +748,7 @@ and confirms all \ArcNSolved{} complete a level.
 the same way. \textbf{Source of truth:} \texttt{make\_arc3\_assets.py} turns each game's
 replay-verified solution into the per-game table
 (Table~\ref{tab:arc3games}), the atlas gallery (Fig.~\ref{fig:arc3gallery}), and every \texttt{Arc*}
-macro. \textbf{Action efficiency (E120):} \texttt{experiments/e120\_rhae.py} replays each solution in
+macro. \textbf{Action efficiency:} \texttt{experiments/e120\_rhae.py} replays each solution in
 the engine, segments actions per level, and scores them with \texttt{arc\_agi}'s \emph{own}
 \texttt{EnvironmentScoreCalculator} against the official per-level human baselines shipped in
 \texttt{EnvironmentInfo.baseline\_actions}---mean \ArcRhaeMean{} (Fig.~\ref{fig:arc3rhae},

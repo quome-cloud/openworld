@@ -15,9 +15,20 @@ figure (`figs/arc3_maps_gallery.png`) and are built by `scripts/build_arc3_fable
 `world_model_forming.{svg,pdf,json}` — the "forming vs verifiable world model" figure
 (`scripts/make_forming_figure.py`).
 
-> **No opus/codex cards.** Only the Claude Fable arm's solves are rendered as cards. The primary
-> Claude Opus 4.8 arm (16/25) and the GPT-5.5 arm (12/25) are reported by their archives
-> (`experiments/results/arc3_fullgame_sourcefree{,_codex}.json`), not as cards.
+## `opus/` and `codex/` — the other two source-free arms
+
+The same atlas cards for the two weaker arms, one card per game **each arm fully solved**
+(so a game appears only where that arm actually reached the win):
+
+- `opus/<game>.svg` — the primary **Claude Opus 4.8** arm (**16** cards). Same games as the
+  Fable atlas minus the walls Opus did not clear; step counts are Opus's own (e.g. `su15` 105 vs
+  Fable's 141).
+- `codex/<game>.svg` — the **GPT-5.5 (Codex)** arm (**12** cards).
+
+Rendered by `scripts/build_arc3_arm_maps.py {opus,codex}` from
+`experiments/results/arc3_fullgame_sourcefree{,_codex}.json` — the identical recipe as the Fable
+atlas, pointed at each arm's archive. The paper's gallery figure still uses only the top-level
+Fable cards; these subfolders are for browsing the model-scaling story arm-by-arm.
 
 ## `multiworld/` — alternative modelings (exploratory, NOT the headline solves)
 

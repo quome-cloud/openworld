@@ -1,0 +1,196 @@
+TITLE = "World Models: An Overview and Applications"
+SUBTITLE = "Verified code world models — build, verify, compose, traverse, and serve simulated worlds"
+AUTHOR = "Jim Schwoebel — Quome / OpenWorld"
+VENUE = "github.com/quome-cloud/openworld"
+
+slides = [
+    {"type": "section", "title": "What is a world model?"},
+    {"type": "bullets", "title": "The unit of world computing",
+     "bullets": [
+         "A world model predicts the next state given a state and an action",
+         "World = symbolic state + discrete actions + a transition rule",
+         "One world serves as both ground-truth environment and planning model",
+         "Agents are separate policies -- users of a world, not part of it"]},
+    {"type": "bullets", "title": "Two species of world models",
+     "bullets": [
+         "Perceptual/generative: neural nets over pixels/latents (Dreamer, Genie, Sora)",
+         "Powerful, but data-hungry, compounding, and opaque",
+         "Code World Models: the transition is a readable program over symbolic state",
+         "Synthesized by an LLM, verified before use, exact and inspectable",
+         "Complementary tools, not competitors"]},
+    {"type": "bullets", "title": "Why verified code",
+     "bullets": [
+         "Value is exact, fast, auditable execution an agent can call as a tool",
+         "Deterministic: no compounding error; learned dynamics decay as (1-e)^t",
+         "Plain code rolls out ~47,000x faster than a per-step LLM proxy",
+         "The artifact stays a diffable program at every stage"]},
+    {"type": "statement",
+     "text": "Make the model a program, verify the program, and keep the values dialable."},
+
+    {"type": "section", "title": "The substrate: OpenWorld"},
+    {"type": "figure", "title": "One agent authors validated, serveable worlds",
+     "image": "figs/world_computer.png",
+     "caption": "Benchmarked on cost, latency, and performance; verified code ~47,000x faster than an LLM",
+     "bullets": [
+         "100 worlds authored at a median of 2.8 min each",
+         "14,997 steps/s vs 0.32 for the per-step LLM proxy",
+         "100% validate structurally; 99% pass a behavioral audit"]},
+    {"type": "figure", "title": "A code world model, end to end",
+     "image": "figs/prototyping_pipeline.png",
+     "caption": "Perceive -> world -> emit/act, generated from a real spec so labels cannot drift",
+     "bullets": [
+         "Perceptors turn any-modality inputs into symbolic state",
+         "Verified transitions step inside a composite of nested worlds",
+         "Objectives (dial-retuned) score; emit/act returns reports and tool-calls"]},
+    {"type": "bullets", "title": "The plan--generate--verify relay",
+     "bullets": [
+         "Declare a world; a generator writes transition(state, action)",
+         "Gate 1: parses; Gate 2: sandboxed run respects invariants; Gate 3: a critic",
+         "Accepted code is plain, editable source -- failures loop into the next prompt",
+         "Composition is verification-preserving: verified pieces => verified whole"]},
+
+    {"type": "section", "title": "Result I — World computing"},
+    {"type": "bullets", "title": "Prototyping is minutes-scale (E68)",
+     "bullets": [
+         "100 world models across 6 regulated sectors from one-line prompts",
+         "Median 2.8 min; 100% validate; 99% behaviorally executable",
+         "Hand-authoring a comparable simulator is a days-to-weeks effort"]},
+    {"type": "bullets", "title": "Fidelity and latency (E04, E11)",
+     "bullets": [
+         "7B-synthesized dynamics exact on 24/24 twenty-step rollouts",
+         "100% on 10x out-of-distribution probes -- no compounding error",
+         "~47,000x faster rollout than a per-step LLM engine"]},
+    {"type": "figure", "title": "Composition defeats the complexity cliff (E30)",
+     "image": "figs/composition_cliff.png",
+     "caption": "16 rules: monolithic 0.31 vs four 4-rule children + bridges 0.92",
+     "bullets": [
+         "Monolithic synthesis collapses past ~8 coupled rules",
+         "Decomposition returns accuracy to near-R=4 levels",
+         "One n-rule problem becomes n small, independently verified ones"]},
+    {"type": "figure", "title": "Tunable morality: the moral dial (E8)",
+     "image": "figs/pareto.png",
+     "caption": "Welfare--fairness frontier swept by lambda; values are declared, weighted artifacts",
+     "bullets": [
+         "All sweep points Pareto-optimal; move without retraining",
+         "Vetoes and a moral parliament are distinct objects, not weights",
+         "Alignment as open specification, managed procedurally"]},
+
+    {"type": "section", "title": "Result II — World-time compute"},
+    {"type": "bullets", "title": "Manufacturing experience",
+     "bullets": [
+         "A verified world is a generator of unlimited exactly-labeled experience",
+         "Traverse many worlds of a domain; distill the shared skill",
+         "The training-time analogue of test-time compute",
+         "Two conditions: verified-label dependence and cross-world transfer"]},
+    {"type": "figure", "title": "Verified code eliminates compounding error",
+     "image": "figs/hero.png",
+     "caption": "Code exact at every depth vs LLM diverging ~step 2.3; fine-tuning on worlds lifts accuracy",
+     "bullets": [
+         "Code matches the oracle exactly across a 20-step rollout",
+         "Fine-tuning on 60 verified worlds lifts held-out accuracy",
+         "Largest gain for the smallest models: +29 pts at 0.5B"]},
+    {"type": "figure", "title": "Cross-world transfer scales with #worlds (E84)",
+     "image": "figs/crossworld_ladder.png",
+     "caption": "List Functions held-out accuracy 29% -> 49% as the number of verified worlds grows",
+     "bullets": [
+         "One adapter on 128 disjoint worlds generalizes to 60 unseen worlds",
+         "Corrupted-label control stays flat -- exact labels are the lever",
+         "A real scaling curve on data we did not generate"]},
+    {"type": "figure", "title": "Across real domains (E80)",
+     "image": "figs/worldtime_domains.png",
+     "caption": "Scales on symbolic domains (List Functions, CLRS, ARC); flat on Bongard vision",
+     "bullets": [
+         "List Functions 35% -> 69%; ARC per-world TTT +8 pts",
+         "Effect largest for shallow rules, smallest for long traces",
+         "Bongard-RWR vision stays at chance -- the perceptual boundary"]},
+
+    {"type": "section", "title": "Result III — Solving ARC-AGI-3"},
+    {"type": "figure", "title": "A source-free agent that writes its own world model",
+     "image": "figs/arc3_architecture.png",
+     "caption": "Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify",
+     "bullets": [
+         "Never reads game code; discovers the rules by acting",
+         "Each solve becomes a serveable OpenWorld World",
+         "Modeling is exact -- the wall is figuring out the goal"]},
+    {"type": "figure", "title": "The wall: goal-as-procedure",
+     "image": "figs/arc3_goal_as_procedure.png",
+     "caption": "A win is an ordered procedure A->B->C, which no single-state score can rank",
+     "bullets": [
+         "Four principled goal-discovery methods solve 0 -- even on a perfect model",
+         "State-scoring and blind search cannot rank an ordered protocol",
+         "Only a reasoning agent that reasons the win crosses the walls"]},
+    {"type": "figure", "title": "The first perfect source-free result (model-scaling)",
+     "image": "figs/arc3_source_matrix.png",
+     "caption": "Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget",
+     "bullets": [
+         "Claude Fable 5: 25/25 games, 183/183 levels -- first perfect result",
+         "Opus 4.8: 16/25; GPT-5.5: 12/25; prior best baseline1: 15/25",
+         "Capability rises and cost falls: Fable ~3.5x fewer tokens"]},
+    {"type": "figure", "title": "The atlas: 25 games, 25 serveable worlds",
+     "image": "figs/arc3_maps_gallery.png",
+     "caption": "Every source-free solve round-trips to a runnable OpenWorld World",
+     "bullets": [
+         "masked-frame perceptor -> FunctionTransition -> CodeObjective",
+         "Serves at openworld serve /view; renders as an atlas card",
+         "25 visibly distinct worlds discovered by acting"]},
+
+    {"type": "section", "title": "Applications across domains"},
+    {"type": "figure", "title": "Relativity as a verified world model (E47)",
+     "image": "figs/relativity.png",
+     "caption": "GPS correction +38.5 us/day and Hafele--Keating shifts, from declared physics",
+     "bullets": [
+         "Time dilation exact; a low-speed learned fit diverges as v -> c",
+         "Declared, verified law where learned video models miss the physics"]},
+    {"type": "figure", "title": "An emergent economy from composed rules (E44)",
+     "image": "figs/emergent_economy.png",
+     "caption": "6 agents; Gini 0.22 -> 0.001 with redistribution; books balance exactly every tick",
+     "bullets": [
+         "Macro variables are aggregators derived from verified micro leaves",
+         "Each phenomenon isolated by toggling one verified rule"]},
+    {"type": "figure", "title": "A brain as a world-of-worlds (E58)",
+     "image": "figs/brain_card.png",
+     "caption": "Conscious + unconscious + environment, coupled by retrieve/consolidate/act bridges",
+     "bullets": [
+         "Working memory + content-addressable long-term memory + environment",
+         "The whole brain serializes to a spec and round-trips losslessly"]},
+    {"type": "figure", "title": "Perceive-then-forecast an epidemic (E40)",
+     "image": "figs/perception.png",
+     "caption": "Perceived world model exact in and out of distribution; the MLP collapses at 10x scale",
+     "bullets": [
+         "Text + photo perceived into S,I,R, then rolled 14 days",
+         "Dynamics add zero error -- forecast accuracy equals perception accuracy"]},
+    {"type": "figure", "title": "A same-day trading world model (E50)",
+     "image": "figs/trading.png",
+     "caption": "Real OHLC, walk-forward, after-cost -- rigor and auditability, not alpha",
+     "bullets": [
+         "Recovers a known +40 bps synthetic edge, so a weak real result is real",
+         "Honest and cost-fragile: Sharpe 0.59 < SPY 0.77"]},
+    {"type": "figure", "title": "Portable, auditable world specs and cards (E57)",
+     "image": "figs/world_card.png",
+     "caption": "One self-contained SVG rendered from a world's spec; round-trips losslessly",
+     "bullets": [
+         "State, rules, dynamics, perception/emit, objectives -- all captured",
+         "Exports to Mermaid and React Flow; a marketplace unit for worlds"]},
+
+    {"type": "section", "title": "The arc, and what's next"},
+    {"type": "bullets", "title": "Three ways to use a verified world model",
+     "bullets": [
+         "Tool: serve, plan, verify -- exact, auditable, no training",
+         "Per-world test-time training: distill one world's trajectories",
+         "World-time compute: traverse a family, generalize to new worlds",
+         "Hybrid: generate exact data, internalize it, exact backstop on demand"]},
+    {"type": "bullets", "title": "The transferable lessons",
+     "bullets": [
+         "Verified code is bit-exact where learned dynamics compound error",
+         "Composition defeats the complexity cliff -- the boundary is measured",
+         "Interactive wins are ordered procedures; aim at procedure discovery",
+         "Traversing many verified worlds lifts generalization to held-out worlds"]},
+    {"type": "bullets", "title": "Limitations and scope",
+     "bullets": [
+         "Scope: symbolic-state worlds; pixel-native remains learned territory",
+         "Monolithic synthesis unreliable past ~8 coupled rules (use composition)",
+         "ARC-AGI-3 result is best-of-N and contamination-unmeasured (stated openly)",
+         "Next: compositional synthesis, perception-to-symbol, live-protocol evaluation"]},
+    {"type": "statement",
+     "text": "Build the world as verified code. Traverse it for experience. Reason the goal. Serve it to anyone."},
+]

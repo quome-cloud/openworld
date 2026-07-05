@@ -40,17 +40,17 @@ STRATS=[
     ("LLM hypotheses\n(E103)",            solved_set("e103_hypothesis")),
     ("Bayes subworld\n+semiring (E104)",  solved_set("e104_bayesian_subworld")),
     ("Graph explore\n(E107)",             solved_set("e107_graph_explore")),
-    ("Multi-Perception\nConsensus (E112)",solved_set("e112_arc_simulator")),
+    ("Multi-perception\n(E112)",solved_set("e112_arc_simulator")),
     ("Expert consensus\nvote (E120)",     solved_set("e120_expert_consensus")),
     ("Qwen-30B agent\n(E118)",            solved_set("e118_qwen_agent")),
     # E127 source-SIMULATED: reconstruct the engine source-free and certify vs the real env. It produces
     # CERTIFIED engines, not verified solves (the solve step was never run), and its reconstruction
     # fidelity collapses on the gap games -> 0 verified solves (empty column), a stated negative result.
     ("Source-sim\nreconstruct (E127)",    set()),
-    ("Live coding agent\n(E115, OpenWorld)", agent_solved()),
+    ("Live coding agent\n(E115)", agent_solved()),
     # E116 ROUTER: route each game to the cheapest solver that clears it (cheap/perceptual within budget,
     # else the live coding agent) -> the union as ONE pipeline. This is the headline: 25/25.
-    ("ROUTER → one pipeline\n(E116)", router_solved()),
+    ("ROUTER pipeline\n(E116)", router_solved()),
     # additional goal-discovery negatives -- each scores a static state / hypothesis and banks 0 verified
     # source-free solves (empty columns in the GD band), reinforcing the goal-as-procedure diagnosis.
     ("Bayes goal-synth\n(E119)",          set()),
@@ -76,7 +76,7 @@ ALLo=[ALL[i] for i in order]; M=M[order]
 labels=[n for n,_ in STRATS]; counts=[len(s) for _,s in STRATS]
 # contiguous [start,end] column span of each category, for brackets/separators
 spans={c:(min(j for j in range(len(CATS)) if CATS[j]==c), max(j for j in range(len(CATS)) if CATS[j]==c)) for c in CAT_ORDER}
-winner_col=labels.index("ROUTER → one pipeline\n(E116)") if any("ROUTER" in l for l in labels) else len(labels)-1
+winner_col=labels.index("ROUTER pipeline\n(E116)") if any("ROUTER" in l for l in labels) else len(labels)-1
 
 # ---- Fig 1: main bar chart (games solved per strategy) ----
 plt.figure(figsize=(8,4.2))
@@ -112,10 +112,10 @@ ax.add_patch(plt.Rectangle((winner_col-.5,-.5),1,nG,fill=False,edgecolor="#c2410
 tr=ax.get_xaxis_transform()
 for c in CAT_ORDER:
     s,e=spans[c]; mid=(s+e)/2
-    ax.plot([s-0.4,e+0.4],[-0.30,-0.30], transform=tr, color=CAT_COLOR[c], lw=2.6, clip_on=False)
-    ax.text(mid, -0.325, c, transform=tr, ha="center", va="top", fontsize=9.5, fontweight="bold",
+    ax.plot([s-0.4,e+0.4],[-0.52,-0.52], transform=tr, color=CAT_COLOR[c], lw=2.6, clip_on=False)
+    ax.text(mid, -0.55, c, transform=tr, ha="center", va="top", fontsize=9.5, fontweight="bold",
             color=CAT_COLOR[c], clip_on=False)
-ax.text((spans[GD][0]+spans[GD][1])/2, -0.365,
+ax.text((spans[GD][0]+spans[GD][1])/2, -0.60,
         "score a static state \N{RIGHTWARDS ARROW} cannot rank an ordered procedure",
         transform=tr, ha="center", va="top", fontsize=7.5, style="italic", color=CAT_COLOR[GD], clip_on=False)
 ax.set_title("What solves ARC-AGI-3: strategy \N{MULTIPLICATION SIGN} game\n"

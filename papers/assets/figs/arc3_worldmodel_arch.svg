@@ -64,9 +64,9 @@
 
   <!-- env <-> agent info flow -->
   <path d="M232,214 L300,214" stroke="#475569" stroke-width="2" fill="none" marker-end="url(#ar)"/>
-  <text x="281" y="205" text-anchor="middle" class="lbl">observe</text>
+  <text x="266" y="205" text-anchor="middle" class="lbl">observe</text>
   <path d="M300,250 L232,250" stroke="#c8881f" stroke-width="2" fill="none" marker-end="url(#arO)"/>
-  <text x="279" y="272" text-anchor="middle" class="lbl" fill="#c8881f">act step(a)</text>
+  <text x="266" y="272" text-anchor="middle" class="lbl" fill="#c8881f">act step(a)</text>
 
   <!-- ================= the agent loop: 6 pipeline stages ================= -->
   <!-- geometry: 6 boxes w=128 h=150 at y=140, x = 300,462,624,786,948,1110 (gap 34) -->
@@ -80,8 +80,8 @@
   <text x="314" y="200" class="desc">Masked-frame</text>
   <text x="314" y="216" class="desc">perceptor:</text>
   <text x="314" y="234" class="desc code" font-size="11">pixels &#187; state</text>
-  <text x="314" y="258" class="desc mut" font-size="10.5">mask the status bar</text>
-  <text x="314" y="272" class="desc mut" font-size="10.5">so states don&#8217;t explode</text>
+  <text x="314" y="258" class="desc mut" font-size="10.5">mask the status bar so</text>
+  <text x="314" y="272" class="desc mut" font-size="10.5">states don&#8217;t explode</text>
 
   <!-- S2 EXPLORE (blue) -->
   <g filter="url(#sh)"><rect x="462" y="140" width="128" height="150" rx="12" fill="#ffffff" stroke="#1f4e79" stroke-width="1.8"/></g>
@@ -142,14 +142,13 @@
   <!-- pipeline arrows between stages -->
   <path d="M428,215 L462,215" stroke="#475569" stroke-width="2.2" marker-end="url(#ar)"/>
   <path d="M590,215 L624,215" stroke="#475569" stroke-width="2.2" marker-end="url(#ar)"/>
-  <text x="607" y="207" text-anchor="middle" class="lbl" font-size="10.5">transitions</text>
+  <text x="607" y="127" text-anchor="middle" class="lbl" font-size="10.5">transitions</text>
   <path d="M752,215 L786,215" stroke="#475569" stroke-width="2.2" marker-end="url(#ar)"/>
-  <text x="769" y="207" text-anchor="middle" class="lbl" font-size="10">verified</text>
-  <text x="769" y="230" text-anchor="middle" class="lbl" font-size="10">model</text>
+  <text x="769" y="127" text-anchor="middle" class="lbl" font-size="10">verified model</text>
   <path d="M914,215 L948,215" stroke="#475569" stroke-width="2.2" marker-end="url(#ar)"/>
-  <text x="931" y="207" text-anchor="middle" class="lbl" font-size="10">goal</text>
+  <text x="931" y="127" text-anchor="middle" class="lbl" font-size="10">goal</text>
   <path d="M1076,215 L1110,215" stroke="#475569" stroke-width="2.2" marker-end="url(#ar)"/>
-  <text x="1093" y="207" text-anchor="middle" class="lbl" font-size="9.5">plan</text>
+  <text x="1093" y="127" text-anchor="middle" class="lbl" font-size="9.5">plan</text>
 
   <!-- ============ the two verification GATES ============ -->
   <g>

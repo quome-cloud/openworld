@@ -137,6 +137,21 @@ re-run, and serve at `openworld serve /view`; unsolved games loop back and re-sy
 > identical protocol, so the perfect sweep is a *model-scaling* result. Frames render in the official
 > ARC-AGI palette; the label shows the level reached. Full write-up in [`papers/arc-3/`](papers/arc-3/).
 
+**The map _is_ the model.** Every solve round-trips to a serveable OpenWorld `World`, rendered as an
+_atlas_ **model card** — its discovered `start → level 1 → … → win` state-transition graph, verified
+dynamics, and reward on one page. Three of the 25 (full atlas in
+[`papers/arc-3/maps/`](papers/arc-3/maps)):
+
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src="assets/arc3/maps/su15.png" width="300" alt="Atlas model card for the source-free solve of su15: the start to level-1 to win state-transition graph, state schema, click actions, verified learned-table dynamics, and the 141-step solve trace."/><br/><sub><b>arc3-su15</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/maps/bp35.png" width="300" alt="Atlas model card for the source-free solve of bp35: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-bp35</b> · 9/9</sub></td>
+<td align="center"><img src="assets/arc3/maps/lf52.png" width="300" alt="Atlas model card for the source-free solve of lf52: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-lf52</b> · 10/10</sub></td>
+</tr>
+</table>
+</div>
+
 ---
 
 ## 🧠 Why OpenWorld

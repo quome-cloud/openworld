@@ -74,20 +74,8 @@ slides = [
      "text": "The dynamics are exactly recoverable as verified code. Building the copy of the game is the easy half."},
 
     {"type": "part", "title": "The wall", "subtitle": "Wins are ordered procedures, not states"},
-    {"type": "figure", "title": "The diagnosis: goal-as-state vs goal-as-procedure",
-     "image": "figs/arc3_goal_as_procedure.png",
-     "caption": "A win is an ordered procedure A->B->C, which no single-state score can rank",
-     "bullets": [
-         "Left: score-one-screen methods climb to the wrong configuration",
-         "Right: the win is a specific sequence, invisible to state scoring",
-         "Undirected search stumbles in; goal-conditioned planning never does"]},
-    {"type": "compare", "title": "Goal-as-state vs goal-as-procedure",
-     "left": {"head": "Goal-as-STATE  (fails)",
-              "items": ["Scores a single screen", "Climbs to a high-scoring configuration",
-                        "Blind to the ordering", "Banks 0 even on a perfect model"]},
-     "right": {"head": "Goal-as-PROCEDURE  (the win)",
-               "items": ["An ordered protocol: A then B then C", "No reward until the sequence completes",
-                         "Invisible to any single-state score", "Only reasoning the win crosses it"]}},
+    {"type": "anim", "diagram": "procedure", "title": "Goal-as-state vs goal-as-procedure",
+     "still": "figs/arc3_goal_as_procedure.png"},
     {"type": "bullets", "title": "Four principled goal-discovery methods -- all fail",
      "bullets": [
          "Atomic candidate-goal objectives (reach/cover/collect): 0",

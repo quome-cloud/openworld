@@ -80,19 +80,10 @@ slides = [
          "Alignment as open specification, managed procedurally"]},
 
     {"type": "section", "title": "Result II — World-time compute"},
-    {"type": "bullets", "title": "Manufacturing experience",
-     "bullets": [
-         "A verified world is a generator of unlimited exactly-labeled experience",
-         "Traverse many worlds of a domain; distill the shared skill",
-         "The training-time analogue of test-time compute",
-         "Two conditions: verified-label dependence and cross-world transfer"]},
-    {"type": "figure", "title": "Verified code eliminates compounding error",
-     "image": "figs/hero.png",
-     "caption": "Code exact at every depth vs LLM diverging ~step 2.3; fine-tuning on worlds lifts accuracy",
-     "bullets": [
-         "Code matches the oracle exactly across a 20-step rollout",
-         "Fine-tuning on 60 verified worlds lifts held-out accuracy",
-         "Largest gain for the smallest models: +29 pts at 0.5B"]},
+    {"type": "anim", "diagram": "worldtime", "title": "Manufacturing experience",
+     "still": "figs/crossworld_ladder.png"},
+    {"type": "anim", "diagram": "compounding", "title": "Verified code eliminates compounding error",
+     "still": "figs/hero.png"},
     {"type": "figure", "title": "Cross-world transfer scales with #worlds (E84)",
      "image": "figs/crossworld_ladder.png",
      "caption": "List Functions held-out accuracy 29% -> 49% as the number of verified worlds grows",

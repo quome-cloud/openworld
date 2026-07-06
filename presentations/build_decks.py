@@ -62,6 +62,48 @@ def _svg(name, cls="ic"):
     return (f'<svg class="{cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
             f'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">{p}</svg>')
 
+# ---- animated concept diagrams (self-contained SVG/CSS; animations play when the slide is shown) ----
+DIAGRAMS = {
+    # verified code stays exact; a per-step LLM drifts -- the two curves draw themselves
+    "compounding": '''<svg viewBox="0 0 860 430" class="dgm" preserveAspectRatio="xMidYMid meet">
+  <line class="axis" x1="72" y1="368" x2="820" y2="368"/><line class="axis" x1="72" y1="42" x2="72" y2="368"/>
+  <text class="axl" x="446" y="410">rollout depth &#8594;</text>
+  <text class="axl" x="30" y="205" transform="rotate(-90 30 205)">state error &#8594;</text>
+  <path class="err" d="M72 250 L820 250 L820 74 C 450 158, 260 246, 72 250 Z"/>
+  <path class="code draw" pathLength="1" d="M72 250 L820 250"/>
+  <path class="llm draw" pathLength="1" d="M72 250 C 260 246, 450 158, 820 74"/>
+  <circle class="dot code-dot" cx="820" cy="250" r="7"/><circle class="dot llm-dot" cx="820" cy="74" r="7"/>
+  <text class="lbl-code" x="430" y="238">verified code &#8212; exact at every depth</text>
+  <text class="lbl-llm" x="470" y="66">per-step LLM &#8212; drifts by ~step 2.3</text>
+</svg>''',
+    # the win is an ordered procedure that lights up A->B->C->WIN; state-scoring fills a gauge and stalls
+    "procedure": '''<div class="dgmp">
+  <div class="lane">
+    <span class="plabel">Goal-as-procedure &#8212; the win</span>
+    <div class="pnodes"><span class="pnode n1">A</span><span class="parrow a1">&#8594;</span>
+      <span class="pnode n2">B</span><span class="parrow a2">&#8594;</span>
+      <span class="pnode n3">C</span><span class="parrow a3">&#8594;</span>
+      <span class="pwin">WIN &#10003;</span></div>
+    <div class="pcap">Reason the ordered sequence &#8212; the only path through</div>
+  </div>
+  <div class="lane">
+    <span class="plabel muted">Goal-as-state &#8212; fails</span>
+    <div class="gauge"><div class="gfill"></div><span class="gx">&#10007; stalls, never wins</span></div>
+    <div class="pcap">Score one screen: climbs to a high value, but cannot rank the sequence</div>
+  </div>
+</div>''',
+    # many verified worlds feed one skill, which generalises to a held-out world
+    "worldtime": '''<div class="dgmw ag">
+  <div class="wt-src"><span class="wt-w w1"></span><span class="wt-w w2"></span><span class="wt-w w3"></span>
+    <span class="wt-w w4"></span><span class="wt-w w5"></span><span class="wt-w w6"></span>
+    <div class="wt-cap">many verified worlds</div></div>
+  <div class="wt-flow"><span class="wt-arrow"></span></div>
+  <div class="wt-hub"><span class="wt-core"></span><div class="wt-cap">one distilled skill</div></div>
+  <div class="wt-flow"><span class="wt-arrow a2"></span></div>
+  <div class="wt-out"><span class="wt-new"></span><div class="wt-cap">a new, held-out world</div></div>
+</div>''',
+}
+
 # =========================================================================================
 # BEAMER
 # =========================================================================================
@@ -225,6 +267,12 @@ def beamer_slide(s, kicker="", parts=None, part_index=None):
              % (w, accent[i % 4], _btext(c["head"]), _btext(c.get("text", ""))))
             for i, c in enumerate(cards))
         return r"\begin{frame}{%s}\vfill\begin{columns}[T]%s\end{columns}\vfill\end{frame}" % (title, cols)
+    if t == "anim":
+        still = s.get("still")
+        if not still:
+            return r"\begin{frame}{%s}\end{frame}" % title
+        return (r"\begin{frame}{%s}\centering\includegraphics[width=\linewidth,"
+                r"height=0.74\textheight,keepaspectratio]{%s}\end{frame}" % (title, Path(still).name))
     return ""
 
 def build_beamer(deck):
@@ -363,7 +411,75 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 #bar{position:fixed;left:0;bottom:0;height:5px;background:var(--teal);z-index:9;transition:width .25s}
 #num{position:fixed;right:16px;bottom:12px;color:var(--muted);font-size:1.8vh;z-index:9;font-variant-numeric:tabular-nums}
 #brand{position:fixed;left:16px;bottom:9px;z-index:9;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:1.7vh;opacity:.85}
-@media print{.slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}}
+/* ---- animated concept diagrams ---- */
+.dgm{width:100%;max-width:80rem;height:58vh}
+.dgm .axis{stroke:#C9C2B4;stroke-width:2}
+.dgm .axl{fill:var(--muted);font-size:18px;text-anchor:middle}
+.dgm .code{fill:none;stroke:var(--teal);stroke-width:5;stroke-linecap:round}
+.dgm .llm{fill:none;stroke:#9E2B25;stroke-width:5;stroke-linecap:round}
+.dgm .err{fill:#9E2B25;opacity:0}
+.dgm .dot{stroke:#fff;stroke-width:2}
+.dgm .code-dot{fill:var(--teal)}.dgm .llm-dot{fill:#9E2B25}
+.dgm .lbl-code{fill:var(--teal);font-weight:700;font-size:20px}
+.dgm .lbl-llm{fill:#9E2B25;font-weight:700;font-size:20px}
+.slide.on .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dashDraw 1.5s .3s cubic-bezier(.4,.1,.2,1) forwards}
+.slide.on .err{opacity:0;animation:fadeIn .8s 1.55s both}
+.slide.on .dot{opacity:0;animation:popIn .4s 1.75s both}
+.slide.on .lbl-code,.slide.on .lbl-llm{opacity:0;animation:fadeIn .6s 1.6s both}
+.dgmp{display:flex;flex-direction:column;gap:5.5vh;width:100%;max-width:72rem;margin:0 auto}
+.plabel{font-size:1.75vh;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.plabel.muted{color:var(--muted)}
+.pnodes{display:flex;align-items:center;gap:1.3vw;margin-top:1.8vh}
+.pnode{width:8.5vh;height:8.5vh;border-radius:16px;background:#fff;border:2.5px solid var(--teal);
+  display:flex;align-items:center;justify-content:center;font-size:3.6vh;font-weight:800;color:var(--deep);
+  box-shadow:0 5px 18px rgba(11,46,79,.09)}
+.parrow{color:var(--ochre);font-size:3.2vh;font-weight:800}
+.pwin{padding:1.6vh 2vw;border-radius:14px;background:var(--teal);color:#fff;font-size:3vh;font-weight:800;
+  box-shadow:0 6px 20px rgba(15,140,140,.3)}
+.pcap{margin-top:1.5vh;color:var(--muted);font-size:2.15vh}
+.gauge{margin-top:1.8vh;height:5.4vh;background:#F0EADF;border-radius:12px;position:relative;overflow:hidden;max-width:54rem}
+.gfill{height:100%;width:0;background:#9E2B25;border-radius:12px}
+.gx{position:absolute;right:2vw;top:50%;transform:translateY(-50%);color:#fff;font-weight:800;font-size:2.1vh;opacity:0}
+.slide.on .pnode,.slide.on .parrow,.slide.on .pwin{opacity:0;animation:popIn .45s both}
+.slide.on .n1{animation-delay:.3s}.slide.on .a1{animation-delay:.55s}
+.slide.on .n2{animation-delay:.8s}.slide.on .a2{animation-delay:1.05s}
+.slide.on .n3{animation-delay:1.3s}.slide.on .a3{animation-delay:1.55s}
+.slide.on .pwin{animation-delay:1.9s}
+.slide.on .gfill{width:60%;animation:growW 1.5s .5s cubic-bezier(.3,.6,.2,1) both}
+.slide.on .gx{animation:fadeIn .5s 2.1s both}
+.dgmw{display:flex;align-items:flex-start;justify-content:center;gap:2.6vw;width:100%;max-width:82rem;margin:0 auto}
+.wt-src{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3vh 1.1vw}
+.wt-w{width:6.4vh;height:6.4vh;border-radius:10px;border:2.5px solid var(--teal);position:relative;background:#fff}
+.wt-w::after{content:"";position:absolute;inset:26%;border-radius:4px;background:var(--teal);opacity:.5}
+.wt-hub{display:flex;flex-direction:column;align-items:center;margin-top:1.5vh}
+.wt-core{width:13vh;height:13vh;border-radius:24px;background:var(--deep);position:relative;box-shadow:0 8px 30px rgba(11,46,79,.25)}
+.wt-core::after{content:"";position:absolute;inset:34%;border-radius:8px;background:var(--teal)}
+.wt-out{display:flex;flex-direction:column;align-items:center;margin-top:3vh}
+.wt-new{width:9vh;height:9vh;border-radius:14px;border:3px solid var(--ochre);background:#fff;position:relative}
+.wt-new::after{content:"";position:absolute;inset:28%;border-radius:5px;background:var(--ochre);opacity:.6}
+.wt-cap{margin-top:1.3vh;color:var(--muted);font-size:1.9vh;text-align:center;max-width:15ch}
+.wt-flow{flex:0 0 auto;align-self:flex-start;margin-top:6.5vh;color:var(--ochre);font-size:3.4vh;font-weight:800}
+.wt-flow::before{content:"\\2192"}
+.wt-arrow,.wt-src .wt-cap{}
+/* ---- entrance animations: content rises in, staggered, each time a slide is shown ---- */
+@keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+@keyframes growW{from{width:0}}
+@keyframes dashDraw{to{stroke-dashoffset:0}}
+.slide.on .ag>*{animation:riseIn .5s cubic-bezier(.2,.75,.3,1) both}
+.slide.on .ag>*:nth-child(1){animation-delay:.04s}.slide.on .ag>*:nth-child(2){animation-delay:.12s}
+.slide.on .ag>*:nth-child(3){animation-delay:.20s}.slide.on .ag>*:nth-child(4){animation-delay:.28s}
+.slide.on .ag>*:nth-child(5){animation-delay:.36s}.slide.on .ag>*:nth-child(6){animation-delay:.44s}
+.slide.on .ag>*:nth-child(7){animation-delay:.52s}.slide.on .ag>*:nth-child(8){animation-delay:.60s}
+.slide.on .ag>*:nth-child(9){animation-delay:.68s}
+.slide.on .fig,.slide.on .cap{animation:riseIn .55s both;animation-delay:.06s}
+.slide.on .parthead{animation:riseIn .6s both;animation-delay:.18s}
+.slide.on .statement .big,.slide.on .section .st{animation:riseIn .6s cubic-bezier(.2,.75,.3,1) both}
+.slide.on h2,.slide.on .kick{animation:fadeIn .45s both}
+@media (prefers-reduced-motion:reduce){.slide.on *{animation:none!important}}
+@media print{.slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}
+  .slide *{animation:none!important}}
 """
 
 def _mark_html(scale=1.0):
@@ -411,7 +527,7 @@ def _atlas_html(parts, current=None):
             nodes.append(f'<div class="{lcls}"></div>')
         nodes.append(f'<div class="station {cls}"><span class="dot">{i+1}</span>'
                      f'<span class="lbl">{_h(p)}</span></div>')
-    return f'<div class="atlas">{"".join(nodes)}</div>'
+    return f'<div class="atlas ag">{"".join(nodes)}</div>'
 
 def _wm_html():
     return ('<span class="wm">'
@@ -440,7 +556,8 @@ def html_slide(s, kicker="", parts=None, part_index=None):
         if not bs: return ""
         return "<ul>" + "".join(f"<li>{_h(b)}</li>" for b in bs) + "</ul>"
     if t == "bullets":
-        return f'<section class="slide">{head}<div class="body blist">{ul(s.get("bullets",[]))}</div></section>'
+        blist_ul = "<ul class=\"ag\">" + "".join(f"<li>{_h(b)}</li>" for b in s.get("bullets",[])) + "</ul>"
+        return f'<section class="slide">{head}<div class="body blist">{blist_ul}</div></section>'
     if t == "figure":
         cap = f'<div class="cap">{_h(s["caption"])}</div>' if s.get("caption") else ""
         bl = ul(s.get("bullets", []))
@@ -457,13 +574,13 @@ def html_slide(s, kicker="", parts=None, part_index=None):
             f'<div class="card">{_svg(c.get("icon",""))}<h4>{_h(c["head"])}</h4>'
             f'{("<p>"+_h(c["text"])+"</p>") if c.get("text") else ""}</div>'
             for c in s["cards"])
-        return f'<section class="slide">{head}<div class="body"><div class="cards">{cs}</div></div></section>'
+        return f'<section class="slide">{head}<div class="body"><div class="cards ag">{cs}</div></div></section>'
     if t == "stats":
         tiles = "".join(
             f'<div class="stat{" hi" if it.get("hi") else ""}">{_svg(it.get("icon",""))}'
             f'<div class="v">{_h(it["value"])}</div><div class="l">{_h(it["label"])}</div></div>'
             for it in s["items"])
-        return f'<section class="slide">{head}<div class="body"><div class="stats">{tiles}</div></div></section>'
+        return f'<section class="slide">{head}<div class="body"><div class="stats ag">{tiles}</div></div></section>'
     if t == "flow":
         icons = s.get("icons", [])
         parts = []
@@ -472,13 +589,15 @@ def html_slide(s, kicker="", parts=None, part_index=None):
                 parts.append('<span class="arw">&rarr;</span>')
             ic = _svg(icons[i]) if i < len(icons) else ""
             parts.append(f'<div class="step">{ic}<span class="n">{i+1}</span>{_h(st)}</div>')
-        return f'<section class="slide">{head}<div class="body"><div class="flow">{"".join(parts)}</div></div></section>'
+        return f'<section class="slide">{head}<div class="body"><div class="flow ag">{"".join(parts)}</div></div></section>'
     if t == "compare":
         def side(d, cls):
             items = "".join(f"<li>{_h(x)}</li>" for x in d["items"])
             return f'<div class="side {cls}"><h3>{_svg(d.get("icon",""))}{_h(d["head"])}</h3><ul>{items}</ul></div>'
-        return (f'<section class="slide">{head}<div class="body"><div class="compare">'
+        return (f'<section class="slide">{head}<div class="body"><div class="compare ag">'
                 f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
+    if t == "anim":
+        return f'<section class="slide">{head}<div class="body">{DIAGRAMS.get(s.get("diagram",""),"")}</div></section>'
     return ""
 
 def _part_walk(slides):
@@ -522,7 +641,7 @@ def copy_figs(deck, outdir):
     figs = outdir / "figs"; figs.mkdir(parents=True, exist_ok=True)
     missing = []
     for s in deck["slides"]:
-        img = s.get("image")
+        img = s.get("image") or s.get("still")
         if not img: continue
         name = Path(img).name
         src = FIGSRC / name                          # paper figures

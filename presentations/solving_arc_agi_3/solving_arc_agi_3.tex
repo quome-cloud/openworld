@@ -140,26 +140,7 @@
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
 {\color{owdeep}\bfseries\Large The wall}\\[10pt]{\color{owmuted}\large Wins are ordered procedures, not states}\vfill\end{frame}
-\begin{frame}{The diagnosis: goal-as-state vs goal-as-procedure}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\vskip3pt{\color{owmuted}\footnotesize A win is an ordered procedure A->B->C, which no single-state score can rank\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Left: score-one-screen methods climb to the wrong configuration
-  \item Right: the win is a specific sequence, invisible to state scoring
-  \item Undirected search stumbles in; goal-conditioned planning never does
-\end{itemize}}
-\end{frame}
-\begin{frame}{Goal-as-state vs goal-as-procedure}\vfill
-\begin{columns}[T]
-\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Goal-as-STATE  (fails)}\par\medskip\begin{itemize}\small \item Scores a single screen
-\item Climbs to a high-scoring configuration
-\item Blind to the ordering
-\item Banks 0 even on a perfect model\end{itemize}\end{column}
-\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Goal-as-PROCEDURE  (the win)}\par\medskip\begin{itemize}\small \item An ordered protocol: A then B then C
-\item No reward until the sequence completes
-\item Invisible to any single-state score
-\item Only reasoning the win crosses it\end{itemize}\end{column}
-\end{columns}\vfill\end{frame}
+\begin{frame}{Goal-as-state vs goal-as-procedure}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\end{frame}
 \begin{frame}{Four principled goal-discovery methods -- all fail}
 \begin{itemize}
   \item Atomic candidate-goal objectives (reach/cover/collect): 0

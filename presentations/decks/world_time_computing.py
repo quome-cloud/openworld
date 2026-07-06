@@ -45,12 +45,8 @@ slides = [
          "Practitioner declares everything but tau (schema, actions, rules, dials)",
          "Framework produces tau by synthesis under verification, not learning",
          "Certifies invariant-consistency, not equality to true dynamics"]},
-    {"type": "bullets", "title": "The compounding-error argument",
-     "bullets": [
-         "Fixed program: right once means exact at every rollout depth, bit-for-bit",
-         "Per-step predicted transition stays exact for only ~(1-eps)^t of a t-step rollout",
-         "Error budget paid once at synthesis time, where it is auditable",
-         "Same World serves as both ground-truth environment and planning model"]},
+    {"type": "anim", "diagram": "compounding", "title": "Verified code is exact at every depth",
+     "still": "figs/hero.png"},
 
     {"type": "section", "title": "Method & Experimental Setup"},
     {"type": "bullets", "title": "Worlds and models",
@@ -89,12 +85,8 @@ slides = [
      "text": "The robust claim is the exact-match contrast, not the mean divergence step -- compounding depends on per-world error rate."},
 
     {"type": "section", "title": "World-Time Compute: Traversing Worlds to Generalize"},
-    {"type": "bullets", "title": "What world-time compute is",
-     "bullets": [
-         "A verified world is also a generator of unlimited exactly-labeled experience",
-         "Traverse many worlds of a domain, distill the shared skill",
-         "Training-time analogue of test-time compute",
-         "Tested on a family of 60+20 diagnosis-specialty POMDP worlds (E74)"]},
+    {"type": "anim", "diagram": "worldtime", "title": "What world-time compute is",
+     "still": "figs/crossworld.png"},
     {"type": "figure", "title": "Anatomy of one diagnosis world (E74)",
      "image": "figs/diagnosis_world.png",
      "caption": "Hidden disease -> emitted symptoms; agent inverts observation to name the disease.",

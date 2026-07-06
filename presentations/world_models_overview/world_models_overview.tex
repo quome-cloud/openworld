@@ -144,23 +144,8 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Result II — World-time compute\par}\vfill\end{frame}
-\begin{frame}{Manufacturing experience}
-\begin{itemize}
-  \item A verified world is a generator of unlimited exactly-labeled experience
-  \item Traverse many worlds of a domain; distill the shared skill
-  \item The training-time analogue of test-time compute
-  \item Two conditions: verified-label dependence and cross-world transfer
-\end{itemize}
-\end{frame}
-\begin{frame}{Verified code eliminates compounding error}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hero.png}\vskip3pt{\color{owmuted}\footnotesize Code exact at every depth vs LLM diverging \textasciitilde{}step 2.3; fine-tuning on worlds lifts accuracy\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Code matches the oracle exactly across a 20-step rollout
-  \item Fine-tuning on 60 verified worlds lifts held-out accuracy
-  \item Largest gain for the smallest models: +29 pts at 0.5B
-\end{itemize}}
-\end{frame}
+\begin{frame}{Manufacturing experience}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{crossworld_ladder.png}\end{frame}
+\begin{frame}{Verified code eliminates compounding error}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{hero.png}\end{frame}
 \begin{frame}{Cross-world transfer scales with \#worlds (E84)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld_ladder.png}\vskip3pt{\color{owmuted}\footnotesize List Functions held-out accuracy 29\% -> 49\% as the number of verified worlds grows\par}

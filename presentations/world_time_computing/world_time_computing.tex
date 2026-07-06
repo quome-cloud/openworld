@@ -101,14 +101,7 @@
   \item Certifies invariant-consistency, not equality to true dynamics
 \end{itemize}
 \end{frame}
-\begin{frame}{The compounding-error argument}
-\begin{itemize}
-  \item Fixed program: right once means exact at every rollout depth, bit-for-bit
-  \item Per-step predicted transition stays exact for only \textasciitilde{}(1-eps)\textasciicircum{}t of a t-step rollout
-  \item Error budget paid once at synthesis time, where it is auditable
-  \item Same World serves as both ground-truth environment and planning model
-\end{itemize}
-\end{frame}
+\begin{frame}{Verified code is exact at every depth}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{hero.png}\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Method \& Experimental Setup\par}\vfill\end{frame}
@@ -155,14 +148,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large World-Time Compute: Traversing Worlds to Generalize\par}\vfill\end{frame}
-\begin{frame}{What world-time compute is}
-\begin{itemize}
-  \item A verified world is also a generator of unlimited exactly-labeled experience
-  \item Traverse many worlds of a domain, distill the shared skill
-  \item Training-time analogue of test-time compute
-  \item Tested on a family of 60+20 diagnosis-specialty POMDP worlds (E74)
-\end{itemize}
-\end{frame}
+\begin{frame}{What world-time compute is}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{crossworld.png}\end{frame}
 \begin{frame}{Anatomy of one diagnosis world (E74)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{diagnosis_world.png}\vskip3pt{\color{owmuted}\footnotesize Hidden disease -> emitted symptoms; agent inverts observation to name the disease.\par}

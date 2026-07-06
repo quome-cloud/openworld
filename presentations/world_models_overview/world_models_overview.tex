@@ -39,255 +39,203 @@
 \centering\vfill
 {\owmark[1.4]}\par\vskip14pt
 {\color{owdeep}\bfseries\LARGE World Models: An Overview and Applications\par}\vskip8pt
-{\color{owblue}\large Verified code world models — build, verify, compose, traverse, and serve simulated worlds\par}\vskip18pt
-{\color{owink}\normalsize Jim Schwoebel — Quome / OpenWorld\par}\vskip3pt
-{\color{owmuted}\small github.com/quome-cloud/openworld\par}
+{\color{owblue}\large Small programs we check are right that copy how a world works, so we can build them, check them, join them, walk through them, and share them\par}\vskip18pt
+{\color{owink}\normalsize Jim Schwoebel --- Quome / OpenWorld\par}\vskip3pt
+{\color{owmuted}\small github.com/quome-cloud/openworld\par}\vskip12pt
+\includegraphics[width=1.7cm]{qr_openworld.png}\par\vskip2pt
+{\color{owmuted}\scriptsize scan to open \& star the repo\par}
 \vfill
 \end{frame}
 
+\begin{frame}{The whole talk in one picture}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
+{\color{owdeep}\bfseries\Large The basics}\\[10pt]{\color{owmuted}\large What is one of these little world programs?}\vfill\end{frame}
+\begin{frame}{The building block of computing with worlds}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{prototyping_pipeline.png}\end{frame}
+\begin{frame}{Two kinds of world programs}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Picture-guessers}\par\medskip\begin{itemize}\small \item Big neural nets that dream up pixels
+\item Dreamer, Genie, Sora
+\item Need tons of data; mistakes pile up
+\item You can't see inside\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Code worlds}\par\medskip\begin{itemize}\small \item The rule for what's next is plain code
+\item An AI writes it; we check it's right
+\item Exact and easy to inspect
+\item They help each other, not rivals\end{itemize}\end{column}
+\end{columns}\vfill\end{frame}
+\begin{frame}{Why use code we check is right}\vfill\begin{center}{\color{owteal}\fontsize{58}{62}\selectfont\bfseries \textasciitilde{}47,000x}\par\vskip10pt{\color{owdeep}\large faster to play out a world than asking an LLM each step}\end{center}\vskip10pt\begin{itemize}\item Exact and auditable; callable as a tool\item No piled-up mistakes; guessed rules rot as (1-e)\textasciicircum{}t\item Always readable code you can read and diff\end{itemize}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large What is a world model?\par}\vfill\end{frame}
-\begin{frame}{The unit of world computing}
-\begin{itemize}
-  \item A world model predicts the next state given a state and an action
-  \item World = symbolic state + discrete actions + a transition rule
-  \item One world serves as both ground-truth environment and planning model
-  \item Agents are separate policies -- users of a world, not part of it
-\end{itemize}
-\end{frame}
-\begin{frame}{Two species of world models}
-\begin{itemize}
-  \item Perceptual/generative: neural nets over pixels/latents (Dreamer, Genie, Sora)
-  \item Powerful, but data-hungry, compounding, and opaque
-  \item Code World Models: the transition is a readable program over symbolic state
-  \item Synthesized by an LLM, verified before use, exact and inspectable
-  \item Complementary tools, not competitors
-\end{itemize}
-\end{frame}
-\begin{frame}{Why verified code}
-\begin{itemize}
-  \item Value is exact, fast, auditable execution an agent can call as a tool
-  \item Deterministic: no compounding error; learned dynamics decay as (1-e)\textasciicircum{}t
-  \item Plain code rolls out \textasciitilde{}47,000x faster than a per-step LLM proxy
-  \item The artifact stays a diffable program at every stage
-\end{itemize}
-\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE Make the model a program, verify the program, and keep the values dialable.\par}\vfill\end{frame}
-\begin{frame}{Three results, one substrate}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small verified worlds in minutes}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small world-time-compute lift}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small ARC-AGI-3, source-free}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The substrate: OpenWorld\par}\vfill\end{frame}
-\begin{frame}{One agent authors validated, serveable worlds}
+{\color{owdeep}\bfseries\LARGE Turn the model into code, check the code is right, and keep the values easy to turn up or down.\par}\vfill\end{frame}
+\begin{frame}{Three results, one shared idea}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small checked worlds built in minutes}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small gain from making many practice worlds}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small ARC-AGI-3, without reading the game's code}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
+{\color{owdeep}\bfseries\Large The toolkit}\\[10pt]{\color{owmuted}\large OpenWorld}\vfill\end{frame}
+\begin{frame}{One agent writes worlds that are checked and ready to share}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_computer.png}\vskip3pt{\color{owmuted}\footnotesize Benchmarked on cost, latency, and performance; verified code \textasciitilde{}47,000x faster than an LLM\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_computer.png}\vskip3pt{\color{owmuted}\footnotesize Measured on cost, speed, and quality; code we check is right ran about 47,000x faster than an LLM\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item 100 worlds authored at a median of 2.8 min each
-  \item 14,997 steps/s vs 0.32 for the per-step LLM proxy
-  \item 100\% validate structurally; 99\% pass a behavioral audit
+  \item Built 100 worlds, about 2.8 minutes each
+  \item 14,997 steps a second, versus 0.32 when asking an LLM each step
+  \item 100\% pass the structure check; 99\% behave correctly when run
 \end{itemize}}
 \end{frame}
-\begin{frame}{A code world model, end to end}
+\begin{frame}{A code world, start to finish}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{prototyping_pipeline.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> world -> emit/act, generated from a real spec so labels cannot drift\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{prototyping_pipeline.png}\vskip3pt{\color{owmuted}\footnotesize See -> world -> report/act, all built from a real spec so the labels cannot drift\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Perceptors turn any-modality inputs into symbolic state
-  \item Verified transitions step inside a composite of nested worlds
-  \item Objectives (dial-retuned) score; emit/act returns reports and tool-calls
+  \item Sensors turn any kind of input into the world as plain facts
+  \item Checked rules step forward inside big worlds made of small checked pieces
+  \item Goals (with turnable dials) give a score; the world sends back reports and tool-calls
 \end{itemize}}
 \end{frame}
-\begin{frame}{The plan--generate--verify relay}
-\begin{itemize}
-  \item Declare a world; a generator writes transition(state, action)
-  \item Gate 1: parses; Gate 2: sandboxed run respects invariants; Gate 3: a critic
-  \item Accepted code is plain, editable source -- failures loop into the next prompt
-  \item Composition is verification-preserving: verified pieces => verified whole
-\end{itemize}
-\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Result I — World computing\par}\vfill\end{frame}
-\begin{frame}{Prototyping is minutes-scale (E68)}
-\begin{itemize}
-  \item 100 world models across 6 regulated sectors from one-line prompts
-  \item Median 2.8 min; 100\% validate; 99\% behaviorally executable
-  \item Hand-authoring a comparable simulator is a days-to-weeks effort
-\end{itemize}
-\end{frame}
-\begin{frame}{Fidelity and latency (E04, E11)}
+\begin{frame}{The plan, write, check relay}\vfill\centering
+\resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
+  sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
+  text width=22mm,align=center,minimum height=17mm,font=\small,text=owdeep}]
+\node[sb] (n0) {\textbf{1}\\ You describe a world};\node[sb,right=of n0] (n1) {\textbf{2}\\ A writer produces the rule: next = f(now, action)};\node[sb,right=of n1] (n2) {\textbf{3}\\ Three checks: it parses, runs safely, and a critic reads it};\node[sb,right=of n2] (n3) {\textbf{4}\\ Accept plain editable code; failures feed back into the next try};\node[sb,right=of n3] (n4) {\textbf{5}\\ Joining keeps the checks: checked pieces make a checked whole};
+\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n0) -- (n1);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n1) -- (n2);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n2) -- (n3);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n3) -- (n4);
+\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
+{\color{owdeep}\bfseries\Large Three results}\\[10pt]{\color{owmuted}\large Building worlds, learning from many worlds, solving ARC-AGI-3}\vfill\end{frame}
+\begin{frame}{Building a world takes minutes (E68)}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small worlds across 6 regulated fields, one-line each}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small each; all pass the structure check}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 99\%}\\[6pt]{\color{owmuted}\small run correctly (by hand: days to weeks)}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{How exact and how fast (E04, E11)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_speed.png}\vskip3pt{\color{owmuted}\footnotesize Exact on 24/24 twenty-step rollouts and 10x OOD probes -- no compounding error\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_speed.png}\vskip3pt{\color{owmuted}\footnotesize Exact on all 24 of 24 twenty-step runs and 10x harder probes -- no piled-up mistakes\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item \textasciitilde{}47,000x faster rollout than a per-step LLM engine
+  \item About 47,000x faster to play out than asking an LLM each step
 \end{itemize}}
 \end{frame}
-\begin{frame}{Composition defeats the complexity cliff (E30)}
+\begin{frame}{Small checked pieces beat the difficulty wall}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{composition_cliff.png}\end{frame}
+\begin{frame}{Turnable values: the moral dial (E8)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{composition_cliff.png}\vskip3pt{\color{owmuted}\footnotesize 16 rules: monolithic 0.31 vs four 4-rule children + bridges 0.92\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pareto.png}\vskip3pt{\color{owmuted}\footnotesize A well-being vs fairness trade-off swept by one dial; the values are stated, weighted things\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Monolithic synthesis collapses past \textasciitilde{}8 coupled rules
-  \item Decomposition returns accuracy to near-R=4 levels
-  \item One n-rule problem becomes n small, independently verified ones
-\end{itemize}}
-\end{frame}
-\begin{frame}{Tunable morality: the moral dial (E8)}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pareto.png}\vskip3pt{\color{owmuted}\footnotesize Welfare--fairness frontier swept by lambda; values are declared, weighted artifacts\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item All sweep points Pareto-optimal; move without retraining
-  \item Vetoes and a moral parliament are distinct objects, not weights
-  \item Alignment as open specification, managed procedurally
+  \item Every dial setting is a best-possible trade; move it without any retraining
+  \item Hard vetoes and a voting council are separate parts, not just weights
+  \item Values are written down openly and steered by simple procedure
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Result II — World-time compute\par}\vfill\end{frame}
-\begin{frame}{Manufacturing experience}
-\begin{itemize}
-  \item A verified world is a generator of unlimited exactly-labeled experience
-  \item Traverse many worlds of a domain; distill the shared skill
-  \item The training-time analogue of test-time compute
-  \item Two conditions: verified-label dependence and cross-world transfer
-\end{itemize}
-\end{frame}
-\begin{frame}{Verified code eliminates compounding error}
+{\color{owdeep}\bfseries\Large Result II --- Learning from many practice worlds\par}\vfill\end{frame}
+\begin{frame}{Making practice experience on purpose}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{crossworld_ladder.png}\end{frame}
+\begin{frame}{Code we check is right stops mistakes from piling up}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{hero.png}\end{frame}
+\begin{frame}{Skill carries to new worlds as you add worlds (E84)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hero.png}\vskip3pt{\color{owmuted}\footnotesize Code exact at every depth vs LLM diverging \textasciitilde{}step 2.3; fine-tuning on worlds lifts accuracy\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld_ladder.png}\vskip3pt{\color{owmuted}\footnotesize Held-out List Functions score climbs 29\% -> 49\% as the number of checked worlds grows\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Code matches the oracle exactly across a 20-step rollout
-  \item Fine-tuning on 60 verified worlds lifts held-out accuracy
-  \item Largest gain for the smallest models: +29 pts at 0.5B
+  \item One learner trained on 128 separate worlds does well on 60 it never saw
+  \item A version with scrambled labels stays flat -- exact labels are what matter
+  \item A real growth curve, on data we did not make up
 \end{itemize}}
 \end{frame}
-\begin{frame}{Cross-world transfer scales with \#worlds (E84)}
+\begin{frame}{Across real subjects (E80)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld_ladder.png}\vskip3pt{\color{owmuted}\footnotesize List Functions held-out accuracy 29\% -> 49\% as the number of verified worlds grows\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{worldtime_domains.png}\vskip3pt{\color{owmuted}\footnotesize Grows on rule-based subjects (List Functions, CLRS, ARC); flat on Bongard pictures\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item One adapter on 128 disjoint worlds generalizes to 60 unseen worlds
-  \item Corrupted-label control stays flat -- exact labels are the lever
-  \item A real scaling curve on data we did not generate
-\end{itemize}}
-\end{frame}
-\begin{frame}{Across real domains (E80)}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{worldtime_domains.png}\vskip3pt{\color{owmuted}\footnotesize Scales on symbolic domains (List Functions, CLRS, ARC); flat on Bongard vision\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item List Functions 35\% -> 69\%; ARC per-world TTT +8 pts
-  \item Effect largest for shallow rules, smallest for long traces
-  \item Bongard-RWR vision stays at chance -- the perceptual boundary
+  \item List Functions 35\% -> 69\%; ARC, practicing each world, +8 pts
+  \item Biggest help for short simple rules, smallest for long ones
+  \item Bongard picture task stays at guessing level -- the seeing barrier
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Result III — Solving ARC-AGI-3\par}\vfill\end{frame}
-\begin{frame}{A source-free agent that writes its own world model}
+{\color{owdeep}\bfseries\Large Result III --- Solving ARC-AGI-3\par}\vfill\end{frame}
+\begin{frame}{An agent that writes its own world program without reading the game's code}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize See -> explore -> write code we check is right -> figure out the goal -> plan -> replay to verify\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Never reads game code; discovers the rules by acting
-  \item Each solve becomes a serveable OpenWorld World
-  \item Modeling is exact -- the wall is figuring out the goal
+  \item Never reads the game's code; learns the rules by playing
+  \item Every win becomes a shareable OpenWorld world
+  \item Copying the world is exact -- the hard part is figuring out the goal
 \end{itemize}}
 \end{frame}
-\begin{frame}{The wall: goal-as-procedure}
+\begin{frame}{The hard part: the win is a recipe of steps, not one screen}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\vskip3pt{\color{owmuted}\footnotesize A win is an ordered procedure A->B->C, which no single-state score can rank\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\vskip3pt{\color{owmuted}\footnotesize A win is an ordered recipe A->B->C, which no single-screen score can judge\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Four principled goal-discovery methods solve 0 -- even on a perfect model
-  \item State-scoring and blind search cannot rank an ordered protocol
-  \item Only a reasoning agent that reasons the win crosses the walls
+  \item Four careful ways to guess the goal solve 0 -- even with a perfect world copy
+  \item Scoring one screen or blind searching cannot rank an ordered recipe
+  \item Only an agent that reasons out the win gets past the walls
 \end{itemize}}
 \end{frame}
-\begin{frame}{The first perfect source-free result (model-scaling)}
+\begin{frame}{The first perfect result without reading the code (bigger model)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable clears all 25 games; a stronger model breaks more walls for the same budget\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Claude Fable 5: 25/25 games, 183/183 levels -- first perfect result
-  \item Opus 4.8: 16/25; GPT-5.5: 12/25; prior best baseline1: 15/25
-  \item Capability rises and cost falls: Fable \textasciitilde{}3.5x fewer tokens
+  \item Claude Fable 5: 25 of 25 games, 183 of 183 levels -- first perfect run
+  \item Opus 4.8: 16/25; GPT-5.5: 12/25; best earlier baseline1: 15/25
+  \item Gets smarter and cheaper: Fable used about 3.5x fewer tokens
 \end{itemize}}
 \end{frame}
-\begin{frame}{The atlas: 25 games, 25 serveable worlds}
+\begin{frame}{The atlas: 25 games, 25 shareable worlds}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_maps_gallery.png}\vskip3pt{\color{owmuted}\footnotesize Every source-free solve round-trips to a runnable OpenWorld World\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_maps_gallery.png}\vskip3pt{\color{owmuted}\footnotesize Every win found without reading the code turns into a runnable OpenWorld world\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item masked-frame perceptor -> FunctionTransition -> CodeObjective
-  \item Serves at openworld serve /view; renders as an atlas card
-  \item 25 visibly distinct worlds discovered by acting
+  \item hidden-status-bar sensor -> code rule from what was learned -> code goal
+  \item Runs at openworld serve /view; draws itself as an atlas card
+  \item 25 clearly different worlds, all discovered by playing
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Applications across domains\par}\vfill\end{frame}
-\begin{frame}{Relativity as a verified world model (E47)}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
+{\color{owdeep}\bfseries\Large Where it is useful}\\[10pt]{\color{owmuted}\large Physics, economies, brains, signals}\vfill\end{frame}
+\begin{frame}{Einstein's relativity as a checked world program (E47)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{relativity.png}\vskip3pt{\color{owmuted}\footnotesize GPS correction +38.5 us/day and Hafele--Keating shifts, from declared physics\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{relativity.png}\vskip3pt{\color{owmuted}\footnotesize GPS fix of +38.5 us/day and the Hafele-Keating clock shifts, from stated physics\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Time dilation exact; a low-speed learned fit diverges as v -> c
-  \item Declared, verified law where learned video models miss the physics
+  \item Time slowing is exact; a slow-speed guessed fit goes wild as speed nears light
+  \item Stated, checked law where guessed video models miss the physics
 \end{itemize}}
 \end{frame}
-\begin{frame}{An emergent economy from composed rules (E44)}
+\begin{frame}{An economy that emerges from joined rules (E44)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{emergent_economy.png}\vskip3pt{\color{owmuted}\footnotesize 6 agents; Gini 0.22 -> 0.001 with redistribution; books balance exactly every tick\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{emergent_economy.png}\vskip3pt{\color{owmuted}\footnotesize 6 people; inequality 0.22 -> 0.001 with sharing; the books balance exactly every tick\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Macro variables are aggregators derived from verified micro leaves
-  \item Each phenomenon isolated by toggling one verified rule
+  \item Big-picture numbers are just sums built from small checked parts
+  \item Each effect isolated by flipping one checked rule on or off
 \end{itemize}}
 \end{frame}
-\begin{frame}{A brain as a world-of-worlds (E58)}
+\begin{frame}{A brain as a world made of worlds (E58)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{brain_card.png}\vskip3pt{\color{owmuted}\footnotesize Conscious + unconscious + environment, coupled by retrieve/consolidate/act bridges\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{brain_card.png}\vskip3pt{\color{owmuted}\footnotesize Awake mind + hidden mind + surroundings, linked by recall, store, and act bridges\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Working memory + content-addressable long-term memory + environment
-  \item The whole brain serializes to a spec and round-trips losslessly
+  \item Short-term memory + searchable long-term memory + the world outside
+  \item The whole brain saves to a spec and rebuilds with nothing lost
 \end{itemize}}
 \end{frame}
-\begin{frame}{Perceive-then-forecast an epidemic (E40)}
+\begin{frame}{See it, then forecast an outbreak (E40)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{perception.png}\vskip3pt{\color{owmuted}\footnotesize Perceived world model exact in and out of distribution; the MLP collapses at 10x scale\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{perception.png}\vskip3pt{\color{owmuted}\footnotesize The seen world is exact both on and off familiar data; the neural-net fit falls apart at 10x scale\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Text + photo perceived into S,I,R, then rolled 14 days
-  \item Dynamics add zero error -- forecast accuracy equals perception accuracy
+  \item Text plus a photo read into healthy/sick/recovered counts, then rolled 14 days ahead
+  \item The rules add zero error -- the forecast is as good as the reading was
 \end{itemize}}
 \end{frame}
-\begin{frame}{A same-day trading world model (E50)}
+\begin{frame}{A same-day stock trading world (E50)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{trading.png}\vskip3pt{\color{owmuted}\footnotesize Real OHLC, walk-forward, after-cost -- rigor and auditability, not alpha\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{trading.png}\vskip3pt{\color{owmuted}\footnotesize Real prices, tested forward in time, after costs -- about rigor and audit, not easy money\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Recovers a known +40 bps synthetic edge, so a weak real result is real
-  \item Honest and cost-fragile: Sharpe 0.59 < SPY 0.77
+  \item It finds a known fake +40 bps edge, so a weak real result is trustworthy
+  \item Honest and fragile to costs: score 0.59 < the market's 0.77
 \end{itemize}}
 \end{frame}
 \begin{frame}{Portable, auditable world specs and cards (E57)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_card.png}\vskip3pt{\color{owmuted}\footnotesize One self-contained SVG rendered from a world's spec; round-trips losslessly\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_card.png}\vskip3pt{\color{owmuted}\footnotesize One self-contained picture drawn from a world's spec; rebuilds with nothing lost\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item State, rules, dynamics, perception/emit, objectives -- all captured
-  \item Exports to Mermaid and React Flow; a marketplace unit for worlds
+  \item Facts, rules, dynamics, seeing/reporting, goals -- all captured
+  \item Exports to Mermaid and React Flow; a tradeable unit for worlds
 \end{itemize}}
 \end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The basics};\node[stlbl] at (3.4,-1.15) {The toolkit};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Where it is useful};\node[stlbl] at (13.6,-1.15) {The big picture};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
+{\color{owdeep}\bfseries\Large The big picture}\\[10pt]{\color{owmuted}\large The story so far, and what comes next}\vfill\end{frame}
+\begin{frame}{Three ways to use a checked world program}\vfill\begin{center}{\color{owdeep}\Large\bfseries Checked world}\end{center}\vskip8pt\begin{itemize}\item As a tool\item Practice one\item Practice many\item Both together\end{itemize}\vfill\end{frame}
+\begin{frame}{The lessons that carry over}\vfill\begin{columns}[T]\begin{column}{.46\textwidth}{\color{owdeep}\bfseries Exact code}\\[2pt]{\color{owmuted}\small Exact where guessed rules pile up mistakes}\end{column}\begin{column}{.46\textwidth}{\color{owdeep}\bfseries Beat the wall}\\[2pt]{\color{owmuted}\small Small checked pieces win; we measured the wall}\end{column}\end{columns}\vskip12pt\begin{columns}[T]\begin{column}{.46\textwidth}{\color{owdeep}\bfseries Goal is a recipe}\\[2pt]{\color{owmuted}\small Wins are ordered recipes; aim at finding the recipe}\end{column}\begin{column}{.46\textwidth}{\color{owdeep}\bfseries Skill carries}\\[2pt]{\color{owmuted}\small Walking many checked worlds carries skill to unseen ones}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Limits and honesty}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries What it covers}\par\smallskip{\small Worlds of facts, not raw pixels}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries How complex}\par\smallskip{\small Joins hold to about 8 tangled rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Honesty}\par\smallskip{\small ARC-3 is best of many tries; leakage not measured}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Next}\par\smallskip{\small Join more pieces \textperiodcentered{} turn sights into facts \textperiodcentered{} live testing}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The arc, and what's next\par}\vfill\end{frame}
-\begin{frame}{Three ways to use a verified world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Tool}\par\smallskip{\small Serve, plan, verify — no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Per-world TTT}\par\smallskip{\small Distill one world's trajectories}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small Traverse a family; generalize}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Hybrid}\par\smallskip{\small Exact data + verify backstop}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{The transferable lessons}
-\begin{itemize}
-  \item Verified code is bit-exact where learned dynamics compound error
-  \item Composition defeats the complexity cliff -- the boundary is measured
-  \item Interactive wins are ordered procedures; aim at procedure discovery
-  \item Traversing many verified worlds lifts generalization to held-out worlds
-\end{itemize}
-\end{frame}
-\begin{frame}{Limitations and scope}
-\begin{itemize}
-  \item Scope: symbolic-state worlds; pixel-native remains learned territory
-  \item Monolithic synthesis unreliable past \textasciitilde{}8 coupled rules (use composition)
-  \item ARC-AGI-3 result is best-of-N and contamination-unmeasured (stated openly)
-  \item Next: compositional synthesis, perception-to-symbol, live-protocol evaluation
-\end{itemize}
-\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE Build the world as verified code. Traverse it for experience. Reason the goal. Serve it to anyone.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE Build the world as code we check is right. Walk it for practice. Reason out the goal. Share it with anyone.\par}\vfill\end{frame}
+\begin{frame}[plain]\centering\vfill{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip12pt{\color{owdeep}\bfseries\Large The code is open --- go star it\par}\vskip16pt\includegraphics[width=4.2cm]{qr_openworld.png}\par\vskip12pt{\color{owblue}\large github.com/quome-cloud/openworld\par}\vskip4pt{\color{owmuted}\small 100 world recipes \textperiodcentered\ the papers \textperiodcentered\ every experiment\par}\vfill\end{frame}
 \end{document}

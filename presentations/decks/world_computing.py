@@ -4,7 +4,8 @@ AUTHOR = "Jim Schwoebel — Quome / OpenWorld"
 VENUE = "github.com/quome-cloud/openworld"
 
 slides = [
-    {"type": "section", "title": "Motivation: from computing to world computing"},
+    {"type": "agenda", "title": "The talk in one map"},
+    {"type": "part", "title": "Motivation", "subtitle": "From computing to world computing"},
     {"type": "stats", "title": "Prototyping a verified world",
      "items": [{"value": "100", "label": "world models, 6 sectors", "icon": "nested"},
                {"value": "2.8 min", "label": "median build time", "hi": True, "icon": "flask"},
@@ -50,7 +51,7 @@ slides = [
          "Runtime: native-speed, exact, inspectable rollouts",
          "Evaluation, trust gates, and portable, auditable specs"]},
 
-    {"type": "section", "title": "The substrate: system design"},
+    {"type": "part", "title": "The system", "subtitle": "OpenWorld: components, the relay, composition"},
     {"type": "bullets", "title": "Six unit-testable components",
      "bullets": [
          "World: state ontology, actions, rules, pluggable transition engine",
@@ -116,7 +117,7 @@ slides = [
          "Rate metrics get 95% Wilson CIs; judge test is exact paired McNemar",
          "Seeds fixed; every number regenerates from one pipeline"]},
 
-    {"type": "section", "title": "Results: fidelity, latency, and trust"},
+    {"type": "part", "title": "Results", "subtitle": "Fidelity, latency, and trust"},
     {"type": "figure", "title": "Performance: fidelity and latency (E04, E11)",
      "image": "figs/pres_speed.png",
      "caption": "One verified transition reused at every step -- no compounding error",
@@ -210,7 +211,7 @@ slides = [
          "Panels list schema, actions, dynamics, objectives, rollout, metrics",
          "Also exports to Mermaid and React Flow for interactive use"]},
 
-    {"type": "section", "title": "Breadth: domains and demonstrations"},
+    {"type": "part", "title": "Applications", "subtitle": "Domains and demonstrations"},
     {"type": "figure", "title": "Emergent economy from composed verified rules (E44)",
      "image": "figs/emergent_economy.png",
      "caption": "6 agents; Gini 0.22 -> 0.001 with redistribution; cooperation lifts welfare",
@@ -345,7 +346,7 @@ slides = [
          "Adaptivity: stop re-confirming, separate worlds still in contention",
          "Exact enumerable candidates make identification principled experiment design"]},
 
-    {"type": "section", "title": "Discussion and limitations"},
+    {"type": "part", "title": "Reflection", "subtitle": "Discussion, limitations, what comes next"},
     {"type": "bullets", "title": "Interpretation: a structural trade",
      "bullets": [
          "Learned models buy pixel breadth, pay in compounding error and opacity",

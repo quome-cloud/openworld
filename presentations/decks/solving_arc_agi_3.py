@@ -4,7 +4,8 @@ AUTHOR = "Jim Schwoebel — Quome / OpenWorld"
 VENUE = "github.com/quome-cloud/openworld"
 
 slides = [
-    {"type": "section", "title": "What is ARC-AGI-3?"},
+    {"type": "agenda", "title": "The talk in one map"},
+    {"type": "part", "title": "The problem", "subtitle": "What is ARC-AGI-3 — and why it is hard"},
     {"type": "bullets", "title": "The interactive reasoning frontier",
      "bullets": [
          "ARC-AGI-1/-2: abstraction from static input-output grids",
@@ -28,7 +29,7 @@ slides = [
     {"type": "statement",
      "text": "The hard part is not modeling the game -- it is figuring out what you are trying to do."},
 
-    {"type": "section", "title": "The recipe: a verified code world model, built by acting"},
+    {"type": "part", "title": "The recipe", "subtitle": "A verified code world model, built by acting"},
     {"type": "flow", "title": "The loop, in six steps",
      "steps": ["Perceive", "Explore", "Synthesize", "Reason goal", "Plan", "Verify"],
      "icons": ["eye", "compass", "code", "target", "branch", "check"]},
@@ -72,7 +73,7 @@ slides = [
     {"type": "statement",
      "text": "The dynamics are exactly recoverable as verified code. Building the copy of the game is the easy half."},
 
-    {"type": "section", "title": "The wall: goal-as-procedure"},
+    {"type": "part", "title": "The wall", "subtitle": "Wins are ordered procedures, not states"},
     {"type": "figure", "title": "The diagnosis: goal-as-state vs goal-as-procedure",
      "image": "figs/arc3_goal_as_procedure.png",
      "caption": "A win is an ordered procedure A->B->C, which no single-state score can rank",
@@ -125,7 +126,7 @@ slides = [
          "Crosses every wall the automated methods miss (dc22, g50t, ka59, ...)",
          "Reasons the goal rather than searching a fixed hypothesis space"]},
 
-    {"type": "section", "title": "Results: source-free completion"},
+    {"type": "part", "title": "Results", "subtitle": "Source-free completion, model-scaling, the atlas"},
     {"type": "stats", "title": "The first perfect source-free result",
      "items": [{"value": "25/25", "label": "games, source-free", "hi": True, "icon": "grid"},
                {"value": "183/183", "label": "levels solved", "icon": "stack"},
@@ -234,7 +235,7 @@ slides = [
          "The sprite targets the agent inferred from pixels alone",
          "opus is perception-heavy; Fable leans on memory recall + verification"]},
 
-    {"type": "section", "title": "Honest limitations"},
+    {"type": "part", "title": "Reflection", "subtitle": "Honest limitations & what comes next"},
     {"type": "bullets", "title": "Best-of-N; single-attempt reliability is low",
      "bullets": [
          "Each solve is the verified best of many attempts, not a single draw",

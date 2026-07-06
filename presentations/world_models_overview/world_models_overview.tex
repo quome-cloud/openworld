@@ -45,9 +45,10 @@
 \vfill
 \end{frame}
 
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large What is a world model?\par}\vfill\end{frame}
+\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
+{\color{owdeep}\bfseries\Large Foundations}\\[10pt]{\color{owmuted}\large What is a world model?}\vfill\end{frame}
 \begin{frame}{The unit of world computing}
 \begin{itemize}
   \item A world model predicts the next state given a state and an action
@@ -76,9 +77,9 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE Make the model a program, verify the program, and keep the values dialable.\par}\vfill\end{frame}
 \begin{frame}{Three results, one substrate}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small verified worlds in minutes}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small world-time-compute lift}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small ARC-AGI-3, source-free}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The substrate: OpenWorld\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
+{\color{owdeep}\bfseries\Large The substrate}\\[10pt]{\color{owmuted}\large OpenWorld}\vfill\end{frame}
 \begin{frame}{One agent authors validated, serveable worlds}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_computer.png}\vskip3pt{\color{owmuted}\footnotesize Benchmarked on cost, latency, and performance; verified code \textasciitilde{}47,000x faster than an LLM\par}
@@ -105,9 +106,9 @@
   \item Composition is verification-preserving: verified pieces => verified whole
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Result I — World computing\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
+{\color{owdeep}\bfseries\Large Three results}\\[10pt]{\color{owmuted}\large World computing, world-time compute, ARC-AGI-3}\vfill\end{frame}
 \begin{frame}{Prototyping is minutes-scale (E68)}
 \begin{itemize}
   \item 100 world models across 6 regulated sectors from one-line prompts
@@ -217,9 +218,9 @@
   \item 25 visibly distinct worlds discovered by acting
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Applications across domains\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
+{\color{owdeep}\bfseries\Large Applications}\\[10pt]{\color{owmuted}\large Physics, economies, brains, signals}\vfill\end{frame}
 \begin{frame}{Relativity as a verified world model (E47)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{relativity.png}\vskip3pt{\color{owmuted}\footnotesize GPS correction +38.5 us/day and Hafele--Keating shifts, from declared physics\par}
@@ -268,9 +269,9 @@
   \item Exports to Mermaid and React Flow; a marketplace unit for worlds
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The arc, and what's next\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
+{\color{owdeep}\bfseries\Large The vision}\\[10pt]{\color{owmuted}\large The arc, and what comes next}\vfill\end{frame}
 \begin{frame}{Three ways to use a verified world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Tool}\par\smallskip{\small Serve, plan, verify — no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Per-world TTT}\par\smallskip{\small Distill one world's trajectories}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small Traverse a family; generalize}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Hybrid}\par\smallskip{\small Exact data + verify backstop}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The transferable lessons}
 \begin{itemize}

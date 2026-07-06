@@ -45,9 +45,10 @@
 \vfill
 \end{frame}
 
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Motivation: from computing to world computing\par}\vfill\end{frame}
+\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
+{\color{owdeep}\bfseries\Large Motivation}\\[10pt]{\color{owmuted}\large From computing to world computing}\vfill\end{frame}
 \begin{frame}{Prototyping a verified world}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small world models, 6 sectors}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small median build time}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 47,000×}\\[6pt]{\color{owmuted}\small faster than an LLM}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{What is a world computer?}
 \begin{itemize}
@@ -105,9 +106,9 @@
   \item Evaluation, trust gates, and portable, auditable specs
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The substrate: system design\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
+{\color{owdeep}\bfseries\Large The system}\\[10pt]{\color{owmuted}\large OpenWorld: components, the relay, composition}\vfill\end{frame}
 \begin{frame}{Six unit-testable components}
 \begin{itemize}
   \item World: state ontology, actions, rules, pluggable transition engine
@@ -195,9 +196,9 @@
   \item Seeds fixed; every number regenerates from one pipeline
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Results: fidelity, latency, and trust\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
+{\color{owdeep}\bfseries\Large Results}\\[10pt]{\color{owmuted}\large Fidelity, latency, and trust}\vfill\end{frame}
 \begin{frame}{Performance: fidelity and latency (E04, E11)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_speed.png}\vskip3pt{\color{owmuted}\footnotesize One verified transition reused at every step -- no compounding error\par}
@@ -317,9 +318,9 @@
   \item Also exports to Mermaid and React Flow for interactive use
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Breadth: domains and demonstrations\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
+{\color{owdeep}\bfseries\Large Applications}\\[10pt]{\color{owmuted}\large Domains and demonstrations}\vfill\end{frame}
 \begin{frame}{Emergent economy from composed verified rules (E44)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{emergent_economy.png}\vskip3pt{\color{owmuted}\footnotesize 6 agents; Gini 0.22 -> 0.001 with redistribution; cooperation lifts welfare\par}
@@ -491,9 +492,9 @@
   \item Exact enumerable candidates make identification principled experiment design
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Discussion and limitations\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
+{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Discussion, limitations, what comes next}\vfill\end{frame}
 \begin{frame}{Interpretation: a structural trade}
 \begin{itemize}
   \item Learned models buy pixel breadth, pay in compounding error and opacity

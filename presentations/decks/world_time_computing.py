@@ -4,7 +4,8 @@ AUTHOR = "Jim Schwoebel — Quome / OpenWorld"
 VENUE = "github.com/quome-cloud/openworld"
 
 slides = [
-    {"type": "section", "title": "Motivation: Manufacturing Experience"},
+    {"type": "agenda", "title": "The talk in one map"},
+    {"type": "part", "title": "Motivation", "subtitle": "Manufacturing experience"},
     {"type": "bullets", "title": "The problem: experience is scarce",
      "bullets": [
          "LLMs generalize only after many real, labeled examples",
@@ -65,7 +66,7 @@ slides = [
          "Exact-state match, first-divergence step, final L1 error; pass@k for repair",
          "95% Wilson CIs; every number regenerates from one script"]},
 
-    {"type": "section", "title": "The Central Result"},
+    {"type": "part", "title": "The mechanism", "subtitle": "Verified code + world-time compute"},
     {"type": "stats", "title": "World-time compute, in three numbers",
      "items": [{"value": "24/24", "label": "exact rollouts (code)", "icon": "check"},
                {"value": "0/24", "label": "exact rollouts (LLM)", "icon": "gauge"},
@@ -109,7 +110,7 @@ slides = [
          "0.5B: 37% -> 66%; 32B: 78% -> 81% toward the 86% rules-given oracle",
          "Heterogeneous worlds sharing no skill (E71/E73) give no transfer"]},
 
-    {"type": "section", "title": "Scaling the Lever"},
+    {"type": "part", "title": "Scaling & real data", "subtitle": "World-count, exact labels, real domains"},
     {"type": "figure", "title": "World-count scaling (E76)",
      "image": "figs/world_count.png",
      "caption": "Held-out accuracy vs number of train worlds; still climbing at 512 worlds.",
@@ -184,7 +185,7 @@ slides = [
          "Holds for a non-neural program synthesizer too (learner-invariance)",
          "N90 worlds: List Functions 3, ARC 9, CLRS 15 -- harder needs more"]},
 
-    {"type": "section", "title": "Boundaries & Negatives"},
+    {"type": "part", "title": "Boundaries", "subtitle": "Where it stops working, and why"},
     {"type": "figure", "title": "Frame-invariance is a negative (E81)",
      "image": "figs/frame_invariance.png",
      "caption": "Cross-language-frame TTT does not beat zero-shot on either base.",
@@ -250,7 +251,7 @@ slides = [
          "MiniGrid DoorKey: OpenWorld solves zero-shot in an 11-step plan",
          "DreamerV3 needs ~9,640 interactions to first solve; V-JEPA-2 cannot control"]},
 
-    {"type": "section", "title": "Discussion & Limitations"},
+    {"type": "part", "title": "Reflection", "subtitle": "Discussion, limitations, conclusion"},
     {"type": "bullets", "title": "Is world-time compute just fine-tuning?",
      "bullets": [
          "Mechanically yes -- LoRA-SFT; the claim is about the data source",

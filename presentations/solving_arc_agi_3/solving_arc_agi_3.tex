@@ -45,9 +45,10 @@
 \vfill
 \end{frame}
 
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large What is ARC-AGI-3?\par}\vfill\end{frame}
+\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
+{\color{owdeep}\bfseries\Large The problem}\\[10pt]{\color{owmuted}\large What is ARC-AGI-3 — and why it is hard}\vfill\end{frame}
 \begin{frame}{The interactive reasoning frontier}
 \begin{itemize}
   \item ARC-AGI-1/-2: abstraction from static input-output grids
@@ -76,9 +77,9 @@
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE The hard part is not modeling the game -- it is figuring out what you are trying to do.\par}\vfill\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The recipe: a verified code world model, built by acting\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
+{\color{owdeep}\bfseries\Large The recipe}\\[10pt]{\color{owmuted}\large A verified code world model, built by acting}\vfill\end{frame}
 \begin{frame}{The loop, in six steps}\vfill\centering
 \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
   sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
@@ -136,9 +137,9 @@
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE The dynamics are exactly recoverable as verified code. Building the copy of the game is the easy half.\par}\vfill\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The wall: goal-as-procedure\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
+{\color{owdeep}\bfseries\Large The wall}\\[10pt]{\color{owmuted}\large Wins are ordered procedures, not states}\vfill\end{frame}
 \begin{frame}{The diagnosis: goal-as-state vs goal-as-procedure}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\vskip3pt{\color{owmuted}\footnotesize A win is an ordered procedure A->B->C, which no single-state score can rank\par}
@@ -201,9 +202,9 @@
   \item Reasons the goal rather than searching a fixed hypothesis space
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Results: source-free completion\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
+{\color{owdeep}\bfseries\Large Results}\\[10pt]{\color{owmuted}\large Source-free completion, model-scaling, the atlas}\vfill\end{frame}
 \begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small games, source-free}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect result}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Source-free completion, per game (a model-scaling result)}
 \centering
@@ -340,9 +341,9 @@
   \item opus is perception-heavy; Fable leans on memory recall + verification
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Honest limitations\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
+{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Honest limitations \& what comes next}\vfill\end{frame}
 \begin{frame}{Best-of-N; single-attempt reliability is low}
 \begin{itemize}
   \item Each solve is the verified best of many attempts, not a single draw

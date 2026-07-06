@@ -4,7 +4,8 @@ AUTHOR = "Jim Schwoebel — Quome / OpenWorld"
 VENUE = "github.com/quome-cloud/openworld"
 
 slides = [
-    {"type": "section", "title": "What is a world model?"},
+    {"type": "agenda", "title": "The talk in one map"},
+    {"type": "part", "title": "Foundations", "subtitle": "What is a world model?"},
     {"type": "bullets", "title": "The unit of world computing",
      "bullets": [
          "A world model predicts the next state given a state and an action",
@@ -31,7 +32,7 @@ slides = [
                {"value": "+29 pts", "label": "world-time-compute lift", "icon": "bars"},
                {"value": "25/25", "label": "ARC-AGI-3, source-free", "hi": True, "icon": "grid"}]},
 
-    {"type": "section", "title": "The substrate: OpenWorld"},
+    {"type": "part", "title": "The substrate", "subtitle": "OpenWorld"},
     {"type": "figure", "title": "One agent authors validated, serveable worlds",
      "image": "figs/world_computer.png",
      "caption": "Benchmarked on cost, latency, and performance; verified code ~47,000x faster than an LLM",
@@ -53,7 +54,7 @@ slides = [
          "Accepted code is plain, editable source -- failures loop into the next prompt",
          "Composition is verification-preserving: verified pieces => verified whole"]},
 
-    {"type": "section", "title": "Result I — World computing"},
+    {"type": "part", "title": "Three results", "subtitle": "World computing, world-time compute, ARC-AGI-3"},
     {"type": "bullets", "title": "Prototyping is minutes-scale (E68)",
      "bullets": [
          "100 world models across 6 regulated sectors from one-line prompts",
@@ -137,7 +138,7 @@ slides = [
          "Serves at openworld serve /view; renders as an atlas card",
          "25 visibly distinct worlds discovered by acting"]},
 
-    {"type": "section", "title": "Applications across domains"},
+    {"type": "part", "title": "Applications", "subtitle": "Physics, economies, brains, signals"},
     {"type": "figure", "title": "Relativity as a verified world model (E47)",
      "image": "figs/relativity.png",
      "caption": "GPS correction +38.5 us/day and Hafele--Keating shifts, from declared physics",
@@ -175,7 +176,7 @@ slides = [
          "State, rules, dynamics, perception/emit, objectives -- all captured",
          "Exports to Mermaid and React Flow; a marketplace unit for worlds"]},
 
-    {"type": "section", "title": "The arc, and what's next"},
+    {"type": "part", "title": "The vision", "subtitle": "The arc, and what comes next"},
     {"type": "cards", "title": "Three ways to use a verified world model",
      "cards": [
          {"head": "Tool", "icon": "gear", "text": "Serve, plan, verify — no training"},

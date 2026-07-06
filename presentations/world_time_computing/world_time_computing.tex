@@ -45,9 +45,10 @@
 \vfill
 \end{frame}
 
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Motivation: Manufacturing Experience\par}\vfill\end{frame}
+\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
+{\color{owdeep}\bfseries\Large Motivation}\\[10pt]{\color{owmuted}\large Manufacturing experience}\vfill\end{frame}
 \begin{frame}{The problem: experience is scarce}
 \begin{itemize}
   \item LLMs generalize only after many real, labeled examples
@@ -127,9 +128,9 @@
   \item 95\% Wilson CIs; every number regenerates from one script
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The Central Result\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
+{\color{owdeep}\bfseries\Large The mechanism}\\[10pt]{\color{owmuted}\large Verified code + world-time compute}\vfill\end{frame}
 \begin{frame}{World-time compute, in three numbers}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 24/24}\\[6pt]{\color{owmuted}\small exact rollouts (code)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 0/24}\\[6pt]{\color{owmuted}\small exact rollouts (LLM)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small held-out lift at 0.5B}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Verified code eliminates compounding error}
 \centering
@@ -180,9 +181,9 @@
   \item Heterogeneous worlds sharing no skill (E71/E73) give no transfer
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Scaling the Lever\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
+{\color{owdeep}\bfseries\Large Scaling \& real data}\\[10pt]{\color{owmuted}\large World-count, exact labels, real domains}\vfill\end{frame}
 \begin{frame}{World-count scaling (E76)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_count.png}\vskip3pt{\color{owmuted}\footnotesize Held-out accuracy vs number of train worlds; still climbing at 512 worlds.\par}
@@ -276,9 +277,9 @@
   \item N90 worlds: List Functions 3, ARC 9, CLRS 15 -- harder needs more
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Boundaries \& Negatives\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
+{\color{owdeep}\bfseries\Large Boundaries}\\[10pt]{\color{owmuted}\large Where it stops working, and why}\vfill\end{frame}
 \begin{frame}{Frame-invariance is a negative (E81)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{frame_invariance.png}\vskip3pt{\color{owmuted}\footnotesize Cross-language-frame TTT does not beat zero-shot on either base.\par}
@@ -361,9 +362,9 @@
   \item DreamerV3 needs \textasciitilde{}9,640 interactions to first solve; V-JEPA-2 cannot control
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Discussion \& Limitations\par}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
+{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Discussion, limitations, conclusion}\vfill\end{frame}
 \begin{frame}{Is world-time compute just fine-tuning?}
 \begin{itemize}
   \item Mechanically yes -- LoRA-SFT; the claim is about the data source

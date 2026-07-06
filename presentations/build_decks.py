@@ -118,12 +118,38 @@ def _btext(s):
              .replace("_", r"\_").replace("#", r"\#").replace("$", r"\$")
              .replace("~", r"\textasciitilde{}").replace("^", r"\textasciicircum{}"))
 
-def beamer_slide(s):
+def _beamer_atlas(parts, current=None):
+    node, lbl = [], []
+    for i, p in enumerate(parts):
+        sty = "stn" if current is None else ("std" if i < current else "stc" if i == current else "stx")
+        x = i * 3.4
+        node.append(r"\node[%s] (s%d) at (%.1f,0) {%d};" % (sty, i, x, i + 1))
+        lbl.append(r"\node[stlbl] at (%.1f,-1.15) {%s};" % (x, _btext(p)))
+    lines = "".join(r"\draw[stln] (s%d)--(s%d);" % (i - 1, i) for i in range(1, len(parts)))
+    return (r"\resizebox{0.95\textwidth}{!}{\begin{tikzpicture}["
+            r"stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},"
+            r"std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},"
+            r"stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},"
+            r"stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},"
+            r"stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},"
+            r"stln/.style={draw=black!16,line width=1.4pt}]"
+            + "".join(node) + "".join(lbl) + lines + r"\end{tikzpicture}}")
+
+def beamer_slide(s, kicker="", parts=None, part_index=None):
     t = s.get("type")
     if t == "section":
         return (r"""\begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large %s\par}\vfill\end{frame}""" % _btext(s["title"]))
+    if t == "agenda":
+        return (r"\begin{frame}{%s}\vfill\centering %s\vfill\end{frame}"
+                % (_btext(s.get("title") or "Roadmap"), _beamer_atlas(parts or [], None)))
+    if t == "part":
+        sub = (r"\\[10pt]{\color{owmuted}\large %s}" % _btext(s["subtitle"])) if s.get("subtitle") else ""
+        return (r"""\begin{frame}[plain]\vfill\centering %s\\[24pt]
+{\color{owochre}\bfseries\footnotesize PART %d}\\[5pt]
+{\color{owdeep}\bfseries\Large %s}%s\vfill\end{frame}"""
+                % (_beamer_atlas(parts or [], part_index), (part_index or 0) + 1, _btext(s["title"]), sub))
     title = _btext(s.get("title", ""))
     if t == "statement":
         return (r"""\begin{frame}[plain]\centering\vfill
@@ -202,7 +228,7 @@ def beamer_slide(s):
     return ""
 
 def build_beamer(deck):
-    body = "\n".join(beamer_slide(s) for s in deck["slides"])
+    body = "\n".join(beamer_slide(s, k, parts, pi) for s, k, pi, parts in _part_walk(deck["slides"]))
     meta = {k: _btext(deck[k]) for k in ("title", "subtitle", "author", "venue")}
     return (subst(BEAMER_PREAMBLE, C) + "\n\\begin{document}\n"
             + BEAMER_TITLE % meta + "\n" + body + "\n\\end{document}\n")
@@ -213,7 +239,7 @@ def build_beamer(deck):
 HTML_CSS = """
 :root{--paper:#@paper@;--ink:#@ink@;--deep:#@deep@;--blue:#@blue@;--teal:#@teal@;--ochre:#@ochre@;--muted:#@muted@;--line:#@line@;}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%%;background:#0a1620;color:var(--ink);
+html,body{height:100%;background:#0a1620;color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
 #deck{position:fixed;inset:0}
 /* every slide: title anchored at top, body fills the rest, generous bottom safe-area for the chrome */
@@ -229,15 +255,15 @@ ul{list-style:none;max-width:74ch}
 li{position:relative;padding-left:28px;margin:1.7vh 0;font-size:3.05vh;line-height:1.34;color:var(--ink)}
 li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;border-radius:3px;background:var(--teal)}
 /* figure fits into whatever height remains after title/caption/bullets -- so nothing spills */
-.fig{display:flex;align-items:center;justify-content:center;width:100%%;min-height:0}
+.fig{display:flex;align-items:center;justify-content:center;width:100%;min-height:0}
 .fig img{max-width:84vw;object-fit:contain;border-radius:8px;box-shadow:0 5px 26px rgba(11,46,79,.12)}
 .cap{flex:0 0 auto;color:var(--muted);font-size:2.1vh;text-align:center;line-height:1.3}
 .figbody{align-items:center}
 .figbody .fig img{max-height:64vh}
 .figbody.hasbul .fig img{max-height:44vh}
-.figbody ul{flex:0 0 auto;max-width:82ch;width:100%%}
+.figbody ul{flex:0 0 auto;max-width:82ch;width:100%}
 .figbody li{font-size:2.45vh;margin:1vh 0}
-.two{display:flex;gap:4vw;flex:1 1 auto;align-items:center;min-height:0;width:100%%}
+.two{display:flex;gap:4vw;flex:1 1 auto;align-items:center;min-height:0;width:100%}
 .two .col{flex:1;min-width:0}
 .two .col.img{display:flex;align-items:center;justify-content:center}
 .two .col.img img{max-width:42vw;max-height:70vh;object-fit:contain;border-radius:8px;box-shadow:0 5px 26px rgba(11,46,79,.12)}
@@ -255,14 +281,14 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .kick{flex:0 0 auto;color:var(--teal);font-size:1.8vh;font-weight:800;letter-spacing:.14em;
   text-transform:uppercase;margin-bottom:.7vh}
 /* bullet slides -> centred stack of card-rows (balanced margins, not jammed left) */
-.slide:has(.blist)>h2,.slide:has(.blist)>.kick{width:100%%;max-width:72rem;margin-left:auto;margin-right:auto}
+.slide:has(.blist)>h2,.slide:has(.blist)>.kick{width:100%;max-width:72rem;margin-left:auto;margin-right:auto}
 .blist{gap:0;justify-content:center}
-.blist>ul{display:flex;flex-direction:column;gap:1.5vh;max-width:72rem;width:100%%;margin:0 auto}
+.blist>ul{display:flex;flex-direction:column;gap:1.5vh;max-width:72rem;width:100%;margin:0 auto}
 .blist li{background:#ffffff;border-radius:12px;border-left:6px solid var(--teal);
   padding:1.9vh 2.2vw;font-size:2.75vh;line-height:1.34;color:var(--ink);box-shadow:0 3px 15px rgba(11,46,79,.06)}
 .blist li::before{display:none}
 /* card grid (2-4 parallel points as cards) */
-.cards{display:flex;gap:2.2vw;width:100%%;align-items:stretch}
+.cards{display:flex;gap:2.2vw;width:100%;align-items:stretch}
 .card{flex:1;min-width:0;background:#ffffff;border-radius:14px;padding:3vh 1.8vw;
   box-shadow:0 5px 22px rgba(11,46,79,.08);border-top:6px solid var(--teal)}
 .card h4{color:var(--deep);font-size:2.9vh;font-weight:800;margin-bottom:1vh;line-height:1.15}
@@ -281,7 +307,7 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .stat.hi .ic{color:var(--ochre)}
 .compare .side h3 .ic{width:3.2vh;height:3.2vh;vertical-align:-.5vh;margin-right:.6vw;display:inline-block}
 /* hero stats */
-.stats{display:flex;gap:2.6vw;justify-content:center;align-items:stretch;width:100%%}
+.stats{display:flex;gap:2.6vw;justify-content:center;align-items:stretch;width:100%}
 .stat{flex:1 1 0;min-width:0;text-align:center;padding:3vh 1vw;border-radius:14px;background:#ffffff;
   box-shadow:0 5px 24px rgba(11,46,79,.08);border-top:6px solid var(--teal)}
 .stat .v{color:var(--deep);font-size:7vh;font-weight:800;line-height:1;letter-spacing:-1px}
@@ -289,14 +315,14 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .stat.hi{border-top-color:var(--ochre)}
 .stat.hi .v{color:var(--ochre)}
 /* flow of steps */
-.flow{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:.4vw;width:100%%}
+.flow{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:.4vw;width:100%}
 .flow .step{background:#ffffff;border:2px solid var(--teal);border-radius:12px;padding:2.2vh 1.1vw;
   text-align:center;color:var(--deep);font-weight:700;font-size:2.4vh;min-width:0;
   display:flex;flex-direction:column;justify-content:center;box-shadow:0 3px 14px rgba(11,46,79,.06)}
 .flow .step .n{display:block;color:var(--teal);font-size:1.7vh;font-weight:800;margin-bottom:.5vh}
 .flow .arw{display:flex;align-items:center;color:var(--ochre);font-size:3vh;font-weight:800;padding:0 .3vw}
 /* side-by-side comparison */
-.compare{display:flex;gap:3vw;align-items:stretch;width:100%%}
+.compare{display:flex;gap:3vw;align-items:stretch;width:100%}
 .compare .side{flex:1;background:#ffffff;border-radius:14px;padding:2.6vh 2vw;box-shadow:0 5px 24px rgba(11,46,79,.08)}
 .compare .side.a{border-top:6px solid var(--muted)}
 .compare .side.b{border-top:6px solid var(--teal)}
@@ -305,6 +331,31 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .compare .side ul{max-width:none}
 .compare .side li{font-size:2.35vh;margin:1.2vh 0;padding-left:24px}
 .compare .side.a li::before{background:var(--muted)}
+/* the atlas / roadmap -- a themed journey of parts with a you-are-here marker */
+.atlas{display:flex;align-items:flex-start;justify-content:center;width:100%;margin:0 auto}
+.station{display:flex;flex-direction:column;align-items:center;text-align:center;flex:0 0 auto;padding:0 .3vw}
+.station .dot{width:6.4vh;height:6.4vh;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:2.5vh;border:2.5px solid var(--teal);color:var(--teal);background:#fff;
+  box-shadow:0 3px 12px rgba(11,46,79,.08);transition:transform .2s}
+.station .lbl{margin-top:1.3vh;font-size:1.95vh;color:var(--muted);line-height:1.22;max-width:11ch}
+.atlas .line{flex:1 1 auto;height:3px;background:var(--line);border-radius:2px;margin-top:3.2vh;min-width:2rem}
+.station.done .dot{background:var(--teal);border-color:var(--teal);color:#fff}
+.station.done .lbl{color:var(--ink)}
+.station.now .dot{background:var(--ochre);border-color:var(--ochre);color:#fff;transform:scale(1.28);
+  box-shadow:0 6px 20px rgba(217,138,43,.4)}
+.station.now .lbl{color:var(--deep);font-weight:800}
+.station.next .dot{opacity:.55}.station.next .lbl{opacity:.6}
+.atlas .line.donel{background:var(--teal)}
+/* agenda slide */
+.agenda .atlas{margin-top:2vh}
+/* part divider -- map on top, big theme header below, faint mark behind */
+.partslide{justify-content:center;align-items:center;gap:5.5vh;overflow:hidden}
+.parthead{text-align:center;z-index:1}
+.parthead .pnum{color:var(--ochre);font-size:2.1vh;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1.2vh}
+.parthead .ptitle{color:var(--deep);font-size:5.4vh;font-weight:800;line-height:1.1;max-width:24ch}
+.parthead .psub{color:var(--muted);font-size:2.5vh;margin-top:1.6vh;max-width:40ch}
+.wm{position:absolute;right:-6vh;bottom:-8vh;width:44vh;height:44vh;opacity:.05;z-index:0}
+.wm i{position:absolute;border-radius:8px}
 /* nested-worlds mark */
 .mark{display:inline-block;position:relative}
 .mark i{position:absolute;border-radius:3px}
@@ -350,12 +401,39 @@ HTML_JS = """
 def _h(s):
     return html.escape(str(s), quote=True)
 
-def html_slide(s, kicker=""):
+def _atlas_html(parts, current=None):
+    """The roadmap journey: numbered stations, with done/now/next when `current` is set."""
+    nodes = []
+    for i, p in enumerate(parts):
+        cls = "" if current is None else ("done" if i < current else "now" if i == current else "next")
+        if i:
+            lcls = "line donel" if (current is not None and i <= current) else "line"
+            nodes.append(f'<div class="{lcls}"></div>')
+        nodes.append(f'<div class="station {cls}"><span class="dot">{i+1}</span>'
+                     f'<span class="lbl">{_h(p)}</span></div>')
+    return f'<div class="atlas">{"".join(nodes)}</div>'
+
+def _wm_html():
+    return ('<span class="wm">'
+            '<i style="inset:0;border:5px solid var(--deep)"></i>'
+            '<i style="inset:22%;border:5px solid var(--blue)"></i>'
+            '<i style="inset:40%;background:var(--teal)"></i></span>')
+
+def html_slide(s, kicker="", parts=None, part_index=None):
     t = s.get("type")
     if t == "section":
         return f'<section class="slide section"><div class="rule"></div><div class="st">{_h(s["title"])}</div></section>'
     if t == "statement":
         return f'<section class="slide statement"><div class="big">{_h(s["text"])}</div></section>'
+    if t == "agenda":
+        h2 = f'<h2>{_h(s.get("title") or "What we will cover")}</h2>'
+        return (f'<section class="slide agenda"><div class="kick">The roadmap</div>{h2}'
+                f'<div class="body">{_atlas_html(parts or [], None)}</div></section>')
+    if t == "part":
+        sub = f'<div class="psub">{_h(s["subtitle"])}</div>' if s.get("subtitle") else ""
+        return (f'<section class="slide partslide">{_wm_html()}{_atlas_html(parts or [], part_index)}'
+                f'<div class="parthead"><div class="pnum">Part {(part_index or 0)+1}</div>'
+                f'<div class="ptitle">{_h(s["title"])}</div>{sub}</div></section>')
     kick = f'<div class="kick">{_h(kicker)}</div>' if kicker else ""
     head = kick + f'<h2>{_h(s.get("title",""))}</h2>'
     def ul(bs):
@@ -403,14 +481,18 @@ def html_slide(s, kicker=""):
                 f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
     return ""
 
-def _with_kickers(slides):
-    """Yield (slide, kicker) pairs; content slides carry the most recent section title."""
-    section = ""
+def _part_walk(slides):
+    """Yield (slide, kicker_theme, part_index) — content slides carry the current PART (theme)."""
+    parts = [s["title"] for s in slides if s.get("type") == "part"]
+    cur, pi = "", -1
     for s in slides:
-        if s.get("type") == "section":
-            yield s, ""; section = s["title"]
+        if s.get("type") == "part":
+            pi += 1; cur = s["title"]
+            yield s, cur, pi, parts
+        elif s.get("type") == "agenda":
+            yield s, "", None, parts
         else:
-            yield s, section
+            yield s, cur, None, parts
 
 def build_html(deck):
     title_slide = (f'<section class="slide title on">{_mark_html(1.3)}'
@@ -419,7 +501,7 @@ def build_html(deck):
                    f'<div class="s">{_h(deck["subtitle"])}</div>'
                    f'<div class="a">{_h(deck["author"])}</div>'
                    f'<div class="v">{_h(deck["venue"])}</div></section>')
-    body = title_slide + "".join(html_slide(s, k) for s, k in _with_kickers(deck["slides"]))
+    body = title_slide + "".join(html_slide(s, k, parts, pi) for s, k, pi, parts in _part_walk(deck["slides"]))
     css = subst(HTML_CSS, C)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">

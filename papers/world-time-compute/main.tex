@@ -443,9 +443,9 @@ pixel-native domains; we come back to this boundary in the limitations. The
 practitioner declares a world---its state schema, its actions, and its rules
 in plain language. The framework must then build a simulator that is faithful,
 fast, and auditable, plus the tools to steer and optimize behavior inside it.
-The enemy here is not a security attacker but \emph{model error itself}:
-made-up transitions, code that is silently wrong, badly specified rewards, and
-value drift.
+What we have to guard against here is not a security attacker but \emph{model
+error itself}: made-up transitions, silently wrong code, badly specified
+rewards, and value drift.
 
 \paragraph{A world model, formally.} An \openworld{} world model is a tuple
 \[

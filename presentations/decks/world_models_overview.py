@@ -27,9 +27,9 @@ slides = [
     {"type": "statement",
      "text": "Make the model a program, verify the program, and keep the values dialable."},
     {"type": "stats", "title": "Three results, one substrate",
-     "items": [{"value": "100", "label": "verified worlds authored in minutes"},
-               {"value": "+29 pts", "label": "world-time-compute lift (0.5B)"},
-               {"value": "25/25", "label": "ARC-AGI-3, source-free", "hi": True}]},
+     "items": [{"value": "100", "label": "verified worlds in minutes", "icon": "nested"},
+               {"value": "+29 pts", "label": "world-time-compute lift", "icon": "bars"},
+               {"value": "25/25", "label": "ARC-AGI-3, source-free", "hi": True, "icon": "grid"}]},
 
     {"type": "section", "title": "The substrate: OpenWorld"},
     {"type": "figure", "title": "One agent authors validated, serveable worlds",
@@ -178,10 +178,10 @@ slides = [
     {"type": "section", "title": "The arc, and what's next"},
     {"type": "cards", "title": "Three ways to use a verified world model",
      "cards": [
-         {"head": "Tool", "text": "Serve, plan, verify — exact, auditable, no training"},
-         {"head": "Per-world TTT", "text": "Distill one world's trajectories"},
-         {"head": "World-time compute", "text": "Traverse a family; generalize to new worlds"},
-         {"head": "Hybrid", "text": "Generate exact data, internalize it, exact backstop on demand"}]},
+         {"head": "Tool", "icon": "gear", "text": "Serve, plan, verify — no training"},
+         {"head": "Per-world TTT", "icon": "flask", "text": "Distill one world's trajectories"},
+         {"head": "World-time compute", "icon": "nested", "text": "Traverse a family; generalize"},
+         {"head": "Hybrid", "icon": "atom", "text": "Exact data + verify backstop"}]},
     {"type": "bullets", "title": "The transferable lessons",
      "bullets": [
          "Verified code is bit-exact where learned dynamics compound error",

@@ -31,6 +31,37 @@ def subst(template, colors):
         template = template.replace(f"@{k}@", v)
     return template
 
+# ---- on-brand monoline icons (24x24, stroke=currentColor) for cards / flow / stats ----------
+ICONS = {
+    "eye":     '<path d="M2 12s3.6-6.5 10-6.5 10 6.5 10 6.5-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    "compass": '<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.3 4.9-4.9 2.3 2.3-4.9z"/>',
+    "code":    '<path d="M9 7l-5 5 5 5"/><path d="M15 7l5 5-5 5"/>',
+    "target":  '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    "branch":  '<circle cx="6" cy="18" r="2.4"/><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><path d="M6 8.4v7.2"/><path d="M18 8.4v1.6a4 4 0 01-4 4H6"/>',
+    "check":   '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>',
+    "shield":  '<path d="M12 3l7.5 3v5c0 5-3.7 8.7-7.5 10-3.8-1.3-7.5-5-7.5-10V6z"/><path d="M8.5 12l2.3 2.3L15.5 10"/>',
+    "bolt":    '<path d="M13 2L4 13h6l-1 9 9-11h-6z"/>',
+    "bars":    '<path d="M5 20V11M12 20V4M19 20v-6"/><path d="M4 20h16"/>',
+    "nested":  '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1.5"/>',
+    "grid":    '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/>',
+    "gear":    '<circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>',
+    "stack":   '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5"/><path d="M3 16.5L12 21l9-4.5"/>',
+    "gauge":   '<path d="M4 17a8 8 0 1116 0"/><path d="M12 17l3.4-4.4"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
+    "lock":    '<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7a4 4 0 018 0v3.5"/>',
+    "flask":   '<path d="M9 3h6M10 3v5.5l-4.6 8.1A2 2 0 007.2 20h9.6a2 2 0 001.8-3.4L14 8.5V3"/>',
+    "route":   '<circle cx="5" cy="19" r="1.8"/><circle cx="19" cy="5" r="1.8"/><path d="M5 17c0-6 8-6 8-12"/>',
+    "scan":    '<path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3"/><path d="M4 12h16"/>',
+    "cube":    '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>',
+    "atom":    '<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)"/>',
+}
+
+def _svg(name, cls="ic"):
+    p = ICONS.get(name)
+    if not p:
+        return ""
+    return (f'<svg class="{cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            f'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">{p}</svg>')
+
 # =========================================================================================
 # BEAMER
 # =========================================================================================
@@ -232,13 +263,23 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .blist li::before{display:none}
 /* card grid (2-4 parallel points as cards) */
 .cards{display:flex;gap:2.2vw;width:100%%;align-items:stretch}
-.card{flex:1;min-width:0;background:#ffffff;border-radius:14px;padding:2.6vh 1.7vw;
+.card{flex:1;min-width:0;background:#ffffff;border-radius:14px;padding:3vh 1.8vw;
   box-shadow:0 5px 22px rgba(11,46,79,.08);border-top:6px solid var(--teal)}
-.card h4{color:var(--deep);font-size:2.6vh;font-weight:800;margin-bottom:1vh;line-height:1.15}
-.card p{color:var(--ink);font-size:2.1vh;line-height:1.36}
+.card h4{color:var(--deep);font-size:2.9vh;font-weight:800;margin-bottom:1vh;line-height:1.15}
+.card p{color:var(--muted);font-size:2.1vh;line-height:1.36}
 .card:nth-child(2){border-top-color:var(--ochre)}
 .card:nth-child(3){border-top-color:var(--blue)}
 .card:nth-child(4){border-top-color:var(--muted)}
+/* icons */
+.ic{display:block;flex:0 0 auto}
+.card .ic{width:6vh;height:6vh;color:var(--teal);margin-bottom:1.6vh}
+.card:nth-child(2) .ic{color:var(--ochre)}
+.card:nth-child(3) .ic{color:var(--blue)}
+.card:nth-child(4) .ic{color:var(--muted)}
+.flow .step .ic{width:3.6vh;height:3.6vh;color:var(--teal);margin:0 auto .7vh}
+.stat .ic{width:4.4vh;height:4.4vh;color:var(--teal);margin:0 auto 1.2vh}
+.stat.hi .ic{color:var(--ochre)}
+.compare .side h3 .ic{width:3.2vh;height:3.2vh;vertical-align:-.5vh;margin-right:.6vw;display:inline-block}
 /* hero stats */
 .stats{display:flex;gap:2.6vw;justify-content:center;align-items:stretch;width:100%%}
 .stat{flex:1 1 0;min-width:0;text-align:center;padding:3vh 1vw;border-radius:14px;background:#ffffff;
@@ -334,26 +375,30 @@ def html_slide(s, kicker=""):
                 f'<div class="col img"><img src="figs/{Path(s["image"]).name}" alt="{_h(s.get("title",""))}"></div>'
                 f'</div></div></section>')
     if t == "cards":
-        cs = "".join(f'<div class="card"><h4>{_h(c["head"])}</h4><p>{_h(c.get("text",""))}</p></div>'
-                     for c in s["cards"])
+        cs = "".join(
+            f'<div class="card">{_svg(c.get("icon",""))}<h4>{_h(c["head"])}</h4>'
+            f'{("<p>"+_h(c["text"])+"</p>") if c.get("text") else ""}</div>'
+            for c in s["cards"])
         return f'<section class="slide">{head}<div class="body"><div class="cards">{cs}</div></div></section>'
     if t == "stats":
         tiles = "".join(
-            f'<div class="stat{" hi" if it.get("hi") else ""}">'
+            f'<div class="stat{" hi" if it.get("hi") else ""}">{_svg(it.get("icon",""))}'
             f'<div class="v">{_h(it["value"])}</div><div class="l">{_h(it["label"])}</div></div>'
             for it in s["items"])
         return f'<section class="slide">{head}<div class="body"><div class="stats">{tiles}</div></div></section>'
     if t == "flow":
+        icons = s.get("icons", [])
         parts = []
         for i, st in enumerate(s["steps"]):
             if i:
                 parts.append('<span class="arw">&rarr;</span>')
-            parts.append(f'<div class="step"><span class="n">{i+1}</span>{_h(st)}</div>')
+            ic = _svg(icons[i]) if i < len(icons) else ""
+            parts.append(f'<div class="step">{ic}<span class="n">{i+1}</span>{_h(st)}</div>')
         return f'<section class="slide">{head}<div class="body"><div class="flow">{"".join(parts)}</div></div></section>'
     if t == "compare":
         def side(d, cls):
             items = "".join(f"<li>{_h(x)}</li>" for x in d["items"])
-            return f'<div class="side {cls}"><h3>{_h(d["head"])}</h3><ul>{items}</ul></div>'
+            return f'<div class="side {cls}"><h3>{_svg(d.get("icon",""))}{_h(d["head"])}</h3><ul>{items}</ul></div>'
         return (f'<section class="slide">{head}<div class="body"><div class="compare">'
                 f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
     return ""

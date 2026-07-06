@@ -30,7 +30,8 @@ slides = [
 
     {"type": "section", "title": "The recipe: a verified code world model, built by acting"},
     {"type": "flow", "title": "The loop, in six steps",
-     "steps": ["Perceive", "Explore", "Synthesize", "Reason goal", "Plan", "Verify"]},
+     "steps": ["Perceive", "Explore", "Synthesize", "Reason goal", "Plan", "Verify"],
+     "icons": ["eye", "compass", "code", "target", "branch", "check"]},
     {"type": "figure", "title": "How the agent solves a game",
      "image": "figs/arc3_architecture.png",
      "caption": "Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify",
@@ -113,9 +114,9 @@ slides = [
          "The live coding agent lights up the procedural walls no method touches"]},
     {"type": "cards", "title": "Three categories of approach",
      "cards": [
-         {"head": "Goal-discovery", "text": "All fail — 0 walled games, even on a perfect model"},
-         {"head": "Perception & search", "text": "Partial coverage — only reachable games"},
-         {"head": "Reasoning agent", "text": "The only method that crosses the walls; the router escalates 13 hard games to it"}]},
+         {"head": "Goal-discovery", "icon": "target", "text": "All fail — 0 walls, even on a perfect model"},
+         {"head": "Perception & search", "icon": "compass", "text": "Reachable games only"},
+         {"head": "Reasoning agent", "icon": "gear", "text": "The only method that crosses the walls"}]},
     {"type": "bullets", "title": "The reasoning agent that writes its own world model",
      "bullets": [
          "Claude Code: one agentic session per game, no repeated sampling",
@@ -126,9 +127,9 @@ slides = [
 
     {"type": "section", "title": "Results: source-free completion"},
     {"type": "stats", "title": "The first perfect source-free result",
-     "items": [{"value": "25/25", "label": "public games completed", "hi": True},
-               {"value": "183/183", "label": "levels solved"},
-               {"value": "1st", "label": "perfect ARC-AGI-3 result"}]},
+     "items": [{"value": "25/25", "label": "games, source-free", "hi": True, "icon": "grid"},
+               {"value": "183/183", "label": "levels solved", "icon": "stack"},
+               {"value": "1st", "label": "perfect result", "icon": "check"}]},
     {"type": "figure", "title": "Source-free completion, per game (a model-scaling result)",
      "image": "figs/arc3_source_matrix.png",
      "caption": "Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget",

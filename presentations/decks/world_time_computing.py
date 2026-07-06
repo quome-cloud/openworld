@@ -67,9 +67,9 @@ slides = [
 
     {"type": "section", "title": "The Central Result"},
     {"type": "stats", "title": "World-time compute, in three numbers",
-     "items": [{"value": "24/24", "label": "exact 20-step rollouts (verified code)"},
-               {"value": "0/24", "label": "exact rollouts (per-step LLM)"},
-               {"value": "+29 pts", "label": "held-out lift at 0.5B", "hi": True}]},
+     "items": [{"value": "24/24", "label": "exact rollouts (code)", "icon": "check"},
+               {"value": "0/24", "label": "exact rollouts (LLM)", "icon": "gauge"},
+               {"value": "+29 pts", "label": "held-out lift at 0.5B", "hi": True, "icon": "bars"}]},
     {"type": "figure", "title": "Verified code eliminates compounding error",
      "image": "figs/hero.png",
      "caption": "A: code exact at every depth vs LLM diverging by step ~2.3. B: world-time compute payoff.",
@@ -271,10 +271,10 @@ slides = [
          "Cedes long-horizon, perception-heavy regimes to learned models"]},
     {"type": "cards", "title": "Three routes to use a verified world model",
      "cards": [
-         {"head": "Tool", "text": "Serve, plan, verify — exact, auditable, no training"},
-         {"head": "Per-world TTT", "text": "Distill one world's trajectories (approximate)"},
-         {"head": "World-time compute", "text": "Traverse a family; generalize to new worlds"},
-         {"head": "Hybrid", "text": "Generate exact data, internalize it, exact backstop on demand"}]},
+         {"head": "Tool", "icon": "gear", "text": "Serve, plan, verify — no training"},
+         {"head": "Per-world TTT", "icon": "flask", "text": "Distill one world's trajectories"},
+         {"head": "World-time compute", "icon": "nested", "text": "Traverse a family; generalize"},
+         {"head": "Hybrid", "icon": "atom", "text": "Exact data + verify backstop"}]},
     {"type": "bullets", "title": "Limitations (selected)",
      "bullets": [
          "Scope: symbolic-state worlds; pixel-native stays learned models' territory",

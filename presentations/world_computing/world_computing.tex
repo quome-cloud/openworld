@@ -48,7 +48,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Motivation: from computing to world computing\par}\vfill\end{frame}
-\begin{frame}{Prototyping a verified world}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small world models, 6 sectors}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small median build time}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 47,000×}\\[6pt]{\color{owmuted}\small faster rollout than an LLM}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Prototyping a verified world}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small world models, 6 sectors}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small median build time}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 47,000×}\\[6pt]{\color{owmuted}\small faster than an LLM}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{What is a world computer?}
 \begin{itemize}
   \item Hardware + software that instantiates, verifies, composes, runs simulated worlds
@@ -60,14 +60,14 @@
 \end{frame}
 \begin{frame}{Two species of world models}\vfill
 \begin{columns}[T]
-\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Perceptual / generative}\par\medskip\begin{itemize}\small \item Neural nets over pixels/latents
-\item Dreamer, MuZero, Genie, Sora
-\item Data-hungry, compounding error
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Perceptual / generative}\par\medskip\begin{itemize}\small \item Pixels / latents (Dreamer, Sora)
+\item Data-hungry
+\item Compounding error
 \item Opaque weights\end{itemize}\end{column}
-\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Code world models}\par\medskip\begin{itemize}\small \item A readable program over symbolic state
-\item Synthesized by an LLM, then verified
-\item Exact at every depth, zero data
-\item Auditable, diffable source\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Code world models}\par\medskip\begin{itemize}\small \item A readable program over state
+\item Synthesized, then verified
+\item Exact at every depth
+\item Auditable source\end{itemize}\end{column}
 \end{columns}\vfill\end{frame}
 \begin{frame}{Why verified code}
 \begin{itemize}
@@ -117,15 +117,13 @@
   \item Simulation, Tuner, Judge -- all over a local Ollama backbone, zero runtime deps
 \end{itemize}
 \end{frame}
-\begin{frame}{The plan--generate--verify relay}
-\begin{itemize}
-  \item Declare a world; the generator writes transition(state, action)
-  \item Gate 1 syntactic: parses and defines the required function
-  \item Gate 2 behavioral: sandboxed smoke-run, respects declared invariants
-  \item Gate 3 semantic (optional): a second model critiques against the rules
-  \item Failures loop back into the next prompt; accepted code is plain, editable source
-\end{itemize}
-\end{frame}
+\begin{frame}{The plan--generate--verify relay}\vfill\centering
+\resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
+  sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
+  text width=18mm,align=center,minimum height=17mm,font=\small,text=owdeep}]
+\node[sb] (n0) {\textbf{1}\\ Declare};\node[sb,right=of n0] (n1) {\textbf{2}\\ Generate};\node[sb,right=of n1] (n2) {\textbf{3}\\ Gate 1: parse};\node[sb,right=of n2] (n3) {\textbf{4}\\ Gate 2: sandbox};\node[sb,right=of n3] (n4) {\textbf{5}\\ Gate 3: critic};\node[sb,right=of n4] (n5) {\textbf{6}\\ Accept};
+\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n0) -- (n1);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n1) -- (n2);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n2) -- (n3);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n3) -- (n4);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n4) -- (n5);
+\end{tikzpicture}}\vfill\end{frame}
 \begin{frame}{A code world model, end to end}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{prototyping_pipeline.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> world -> emit/act, generated from a real spec so labels cannot drift\par}

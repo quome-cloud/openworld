@@ -191,7 +191,7 @@
   \item The live coding agent lights up the procedural walls no method touches
 \end{itemize}}
 \end{frame}
-\begin{frame}{Three categories of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goal-discovery}\par\smallskip{\small All fail — 0 walled games, even on a perfect model}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Perception \& search}\par\smallskip{\small Partial coverage — only reachable games}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only method that crosses the walls; the router escalates 13 hard games to it}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Three categories of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goal-discovery}\par\smallskip{\small All fail — 0 walls, even on a perfect model}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Perception \& search}\par\smallskip{\small Reachable games only}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only method that crosses the walls}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The reasoning agent that writes its own world model}
 \begin{itemize}
   \item Claude Code: one agentic session per game, no repeated sampling
@@ -204,7 +204,7 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Results: source-free completion\par}\vfill\end{frame}
-\begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small public games completed}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect ARC-AGI-3 result}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small games, source-free}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect result}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Source-free completion, per game (a model-scaling result)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}

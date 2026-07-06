@@ -1,0 +1,393 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning,arrows.meta}
+\graphicspath{{figs/}}
+\usefonttheme{professionalfonts}
+\setbeamertemplate{navigation symbols}{}
+\definecolor{owpaper}{HTML}{FBFAF6}
+\definecolor{owink}{HTML}{16242E}
+\definecolor{owdeep}{HTML}{0B2E4F}
+\definecolor{owblue}{HTML}{1E6FB0}
+\definecolor{owteal}{HTML}{0F8C8C}
+\definecolor{owochre}{HTML}{D98A2B}
+\definecolor{owmuted}{HTML}{5B6B78}
+\setbeamercolor{background canvas}{bg=owpaper}
+\setbeamercolor{normal text}{fg=owink}
+\setbeamercolor{frametitle}{fg=owdeep}
+\setbeamercolor{itemize item}{fg=owteal}
+\setbeamercolor{itemize subitem}{fg=owochre}
+\setbeamercolor{structure}{fg=owblue}
+\setbeamerfont{frametitle}{series=\bfseries,size=\Large}
+\setbeamertemplate{itemize item}{\small\raise0.5pt\hbox{\textbullet}}
+\setbeamertemplate{frametitle}{%
+  \vskip6pt\hbox{\color{owochre}\rule[2pt]{16pt}{2.2pt}}\hskip4pt
+  \insertframetitle\par\vskip-2pt}
+% nested-worlds mark
+\newcommand{\owmark}[1][0.5]{\begin{tikzpicture}[scale=#1]
+  \draw[owdeep,line width=1.1pt,rounded corners=1pt] (0,0) rectangle (1,1);
+  \draw[owblue,line width=1.1pt,rounded corners=1pt] (0.22,0.22) rectangle (0.78,0.78);
+  \fill[owteal,rounded corners=0.5pt] (0.40,0.40) rectangle (0.60,0.60);
+\end{tikzpicture}}
+\setbeamertemplate{footline}{\hbox{}\hfill{\color{owmuted}\tiny\insertframenumber}\hskip8pt\vskip4pt}
+
+\begin{document}
+\begin{frame}[plain]
+\centering\vfill
+{\owmark[1.4]}\par\vskip14pt
+{\color{owdeep}\bfseries\LARGE Solving ARC-AGI-3 with Code World Models\par}\vskip8pt
+{\color{owblue}\large First perfect source-free result: 25/25 games — a source-free agent writes a verified world model, then reasons the win\par}\vskip18pt
+{\color{owink}\normalsize Jim Schwoebel — Quome / OpenWorld\par}\vskip3pt
+{\color{owmuted}\small github.com/quome-cloud/openworld\par}
+\vfill
+\end{frame}
+
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large What is ARC-AGI-3?\par}\vfill\end{frame}
+\begin{frame}{The interactive reasoning frontier}
+\begin{itemize}
+  \item ARC-AGI-1/-2: abstraction from static input-output grids
+  \item ARC-AGI-3: interactive games; rules and goals revealed only by acting
+  \item Each game: a 64x64 grid, 16 colors, 6-10 levels
+  \item Isolates exploration, dynamics modeling, goal-setting, planning
+  \item By design avoids language and external knowledge
+\end{itemize}
+\end{frame}
+\begin{frame}{A worked example: the game ka59}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_example_ka59.png}\vskip3pt{\color{owmuted}\footnotesize Two rooms, a corridor, a purple door: navigate then click to clear the level\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Agent is told nothing: no rules, no goal in words
+  \item Actions are directional (1-5,7) or a coordinate click (ACTION6)
+  \item The win is an ordered procedure, not a single reachable state
+\end{itemize}}
+\end{frame}
+\begin{frame}{Why it is hard}
+\begin{itemize}
+  \item Human-calibrated: people solve 100\% of environments
+  \item Frontier LLM agents score below 1\% (March 2026)
+  \item No instructions; the win condition must be discovered
+  \item Wins span many steps with no reward until the end
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owdeep}\bfseries\LARGE The hard part is not modeling the game -- it is figuring out what you are trying to do.\par}\vfill\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large The recipe: a verified code world model, built by acting\par}\vfill\end{frame}
+\begin{frame}{The loop, in six steps}\vfill\centering
+\resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
+  sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
+  text width=18mm,align=center,minimum height=17mm,font=\small,text=owdeep}]
+\node[sb] (n0) {\textbf{1}\\ Perceive};\node[sb,right=of n0] (n1) {\textbf{2}\\ Explore};\node[sb,right=of n1] (n2) {\textbf{3}\\ Synthesize};\node[sb,right=of n2] (n3) {\textbf{4}\\ Reason goal};\node[sb,right=of n3] (n4) {\textbf{5}\\ Plan};\node[sb,right=of n4] (n5) {\textbf{6}\\ Verify};
+\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n0) -- (n1);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n1) -- (n2);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n2) -- (n3);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n3) -- (n4);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n4) -- (n5);
+\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}{How the agent solves a game}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Process-isolated behind a source-free boundary (never reads game code)
+  \item Masked-frame perceptor maps pixels to a symbolic state
+  \item Each solve becomes a serveable OpenWorld World
+\end{itemize}}
+\end{frame}
+\begin{frame}{The loop, in plain steps}
+\begin{itemize}
+  \item Look around: gather (state, action, next-state) facts by acting
+  \item Write the rule as code: an LLM writes predict(frame, action)
+  \item Keep it only if it exact-matches held-out transitions (gate 1)
+  \item Reason the goal: what raises levels\_completed?
+  \item Plan inside the code, then replay-verify on the real engine (gate 2)
+\end{itemize}
+\end{frame}
+\begin{frame}{Anatomy of a world model}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_anatomy.png}\vskip3pt{\color{owmuted}\footnotesize The model of a world is itself a World -- same five parts, and worlds nest\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item State, actions, transition, perception, reward
+  \item Modeling = building a World whose transition reproduces the game
+  \item CompositeWorld = a world inside a world
+\end{itemize}}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large Modeling is not the binding wall\par}\vfill\end{frame}
+\begin{frame}{The world model IS code}
+\begin{itemize}
+  \item Games are perfectly repeatable: determinism = 1.00
+  \item So the rules can be written down exactly as Python
+  \item A program is banked only if it exact-matches held-out transitions
+  \item Claude: 49\% single-step exact-match on 21 changing games
+  \item 3 near-perfect; small local models get almost nothing
+\end{itemize}
+\end{frame}
+\begin{frame}{Verified-code fidelity by model}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_fidelity.png}\vskip3pt{\color{owmuted}\footnotesize Claude re-writes the game's rules as working code far better than local models\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item One wrong cell in the 64x64 frame fails the check
+  \item Capability dominates: qwen-32B and qwen-7B are far behind
+  \item This is single-step fidelity -- 0 games are solved here, by design
+\end{itemize}}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owdeep}\bfseries\LARGE The dynamics are exactly recoverable as verified code. Building the copy of the game is the easy half.\par}\vfill\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large The wall: goal-as-procedure\par}\vfill\end{frame}
+\begin{frame}{The diagnosis: goal-as-state vs goal-as-procedure}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\vskip3pt{\color{owmuted}\footnotesize A win is an ordered procedure A->B->C, which no single-state score can rank\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Left: score-one-screen methods climb to the wrong configuration
+  \item Right: the win is a specific sequence, invisible to state scoring
+  \item Undirected search stumbles in; goal-conditioned planning never does
+\end{itemize}}
+\end{frame}
+\begin{frame}{Goal-as-state vs goal-as-procedure}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Goal-as-STATE  (fails)}\par\medskip\begin{itemize}\small \item Scores a single screen
+\item Climbs to a high-scoring configuration
+\item Blind to the ordering
+\item Banks 0 even on a perfect model\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Goal-as-PROCEDURE  (the win)}\par\medskip\begin{itemize}\small \item An ordered protocol: A then B then C
+\item No reward until the sequence completes
+\item Invisible to any single-state score
+\item Only reasoning the win crosses it\end{itemize}\end{column}
+\end{columns}\vfill\end{frame}
+\begin{frame}{Four principled goal-discovery methods -- all fail}
+\begin{itemize}
+  \item Atomic candidate-goal objectives (reach/cover/collect): 0
+  \item Frontier-LLM goal hypotheses, open- and closed-loop: 0
+  \item Bayesian active inference over composite sub-worlds: 0
+  \item Source-free engine reconstruction + certificate: 0
+  \item All solve 0 hard games -- even handed a perfect (fidelity-1.0) model
+\end{itemize}
+\end{frame}
+\begin{frame}{Why automated goal discovery cannot cross it}
+\begin{itemize}
+  \item Exploration saturates a tiny region (50-138 states), triggers 0 reward
+  \item One-shot goal guesses: on s5i5, a timer is mistaken for the objective
+  \item Closing the loop fails: negative feedback says wrong, not right
+  \item E146 exhaustive cold-search battery: 0 new source-free levels
+  \item The bottleneck is goal inference, not modeling/planning/coverage
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owdeep}\bfseries\LARGE A world model is worthless until it contains a verified, win-terminating path -- breadth of exploration does not help.\par}\vfill\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large The strategy landscape\par}\vfill\end{frame}
+\begin{frame}{Strategy x game: what solves what}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_strategy_heatmap.png}\vskip3pt{\color{owmuted}\footnotesize Goal-discovery columns are empty; only the reasoning agent lights the walls\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Directed search and graph exploration each reach 6 games
+  \item Multi-perception consensus reaches 10 (best automated tier)
+  \item The live coding agent lights up the procedural walls no method touches
+\end{itemize}}
+\end{frame}
+\begin{frame}{Three categories of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goal-discovery}\par\smallskip{\small All fail — 0 walls, even on a perfect model}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Perception \& search}\par\smallskip{\small Reachable games only}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only method that crosses the walls}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{The reasoning agent that writes its own world model}
+\begin{itemize}
+  \item Claude Code: one agentic session per game, no repeated sampling
+  \item Prompt gives only the harness API and recipe -- not the win condition
+  \item On its own the live agent solves 15/25 games
+  \item Crosses every wall the automated methods miss (dc22, g50t, ka59, ...)
+  \item Reasons the goal rather than searching a fixed hypothesis space
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large Results: source-free completion\par}\vfill\end{frame}
+\begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small games, source-free}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect result}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Source-free completion, per game (a model-scaling result)}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Claude Fable 5: 25/25 games, 183/183 levels -- the first perfect result
+  \item Primary Claude Opus 4.8: 16/25 (158 levels) on the identical harness
+  \item GPT-5.5: 12/25; prior best baseline1: 15/25 (145 levels)
+  \item All replay-verified; none use banked solutions
+\end{itemize}}
+\end{frame}
+\begin{frame}{The headline numbers, read carefully}
+\begin{itemize}
+  \item Fable 25/25 source-free, achieved 2026-07-04 09:05:14 UTC
+  \item Beats baseline1 on games, levels, and efficiency
+  \item Clears lf52's final level -- the one level no earlier run solved
+  \item Every solved game is a runnable, serveable OpenWorld World
+  \item Public games only; private held-out set not accessed
+\end{itemize}
+\end{frame}
+\begin{frame}{Model scaling: a stronger model clears more walls}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Same harness, prompt, and budget -- only the model changes\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item GPT-5.5 12 -> Opus 16 -> Fable 25 of 25 games
+  \item Fable finds each solve in \textasciitilde{}3.5x fewer tokens (23M vs 81M)
+\end{itemize}}
+\end{frame}
+\begin{frame}{Action efficiency, per level (source-free, Fable)}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_rhae.png}\vskip3pt{\color{owmuted}\footnotesize Every game at or above the human baseline; per-level score min((b/a)\textasciicircum{}2 * 100, 115)\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Fable per-game RHAE 100.0 vs baseline1's 58 (\textasciitilde{}72\% more efficient)
+  \item 174/183 levels beat the human; 168 hit the 115 cap
+  \item Action count per level is typically about a third of the human's
+  \item Scored with arc\_agi's own calculator -- no metric re-implemented
+\end{itemize}}
+\end{frame}
+\begin{frame}{Honest baseline: levels reached vs random play}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_above_random.png}\vskip3pt{\color{owmuted}\footnotesize Random reaches 11/25 first levels but completes 0 games in full\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Under offline unbounded resets, \textasciitilde{}half the >=1-level metric is free
+  \item One agent 'solve' (lp85, a repeated click) is no better than random
+  \item Distinctive value: 14 games random never reaches (the walls)
+  \item We report 16/25 strictly above random
+\end{itemize}}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large The atlas: every solve is a world\par}\vfill\end{frame}
+\begin{frame}{25 games, 25 verified serveable world models}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_maps_gallery.png}\vskip3pt{\color{owmuted}\footnotesize A solved-board frame from Fable's source-free solve of every game\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Each solve = masked-frame perceptor -> FunctionTransition -> CodeObjective
+  \item Serializes to a self-contained atlas card, serves at openworld serve /view
+  \item 25 visibly distinct worlds: directional, click, sokoban, mirror, synthesis
+\end{itemize}}
+\end{frame}
+\begin{frame}{Example solve: ka59 (7/7)}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_ka59.png}\vskip3pt{\color{owmuted}\footnotesize The discovered world-model card (top) + the level-completion replay (bottom)\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Card graph = the level trajectory, edges labelled by button-presses
+  \item Replay = real screenshots at each level clear, re-run against the game
+\end{itemize}}
+\end{frame}
+\begin{frame}{Example solve: dc22 (6/6) -- a procedural wall}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_dc22.png}\vskip3pt{\color{owmuted}\footnotesize Interleaves moves and clicks; only the reasoning agent crosses it\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Random never reaches level 1 here
+  \item A keybox-to-bridge protocol relocates a movable structure
+\end{itemize}}
+\end{frame}
+\begin{frame}{Example solve: g50t (7/7) -- ghost-switch}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_g50t.png}\vskip3pt{\color{owmuted}\footnotesize A rich 94-node search graph terminates in no verified win without reasoning\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Hold-plates, toggle-buttons, ring-warps, a pinball ghost echo
+  \item The value is the win-terminating chain, not the map's breadth
+\end{itemize}}
+\end{frame}
+\begin{frame}{The final wall: lf52 (10/10)}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_lf52.png}\vskip3pt{\color{owmuted}\footnotesize The single level no run had solved -- a 914-action verified path\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Fell to a persistent-workspace deep-wall protocol
+  \item Build a verified simulator of the level, then search it offline at scale
+  \item Its solve completed the perfect 25/25 sweep
+\end{itemize}}
+\end{frame}
+\begin{frame}{Example solve: su15 (9/9) -- merge and deliver}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_su15.png}\vskip3pt{\color{owmuted}\footnotesize Click-gather tiers merge and escalate; a 141-click solution\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Sprite click targets inferred from pixels alone
+  \item Round-trips through an OpenWorld World
+\end{itemize}}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large How the models actually solve (run lineages)\par}\vfill\end{frame}
+\begin{frame}{Anatomy of a solve}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_cardiogram.png}\vskip3pt{\color{owmuted}\footnotesize Read/Write-heavy start (build) -> Bash-heavy middle (search) -> Edit repairs\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Level-ups fall as punctuated events, not steady progress
+  \item Modeling then search -- the shared shape of every solve
+\end{itemize}}
+\end{frame}
+\begin{frame}{The vocabulary each game forces the agent to invent}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_concepts.png}\vskip3pt{\color{owmuted}\footnotesize Code identifiers the agent writes recover each game's mechanics unsupervised\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item ka59 -> box/push/ring (sokoban); ft09 -> blk/slots (stencil)
+  \item The concepts an agent had to invent characterize the solution class
+\end{itemize}}
+\end{frame}
+\begin{frame}{Solution signatures}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_signatures.png}\vskip3pt{\color{owmuted}\footnotesize Every banked path as an action strip: click, directional, or mixed\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item Ochre = click ACTION6; blue = directional 1-5,7
+  \item A visual taxonomy of solution shape and length (lf52 longest)
+\end{itemize}}
+\end{frame}
+\begin{frame}{Inferred click targets}
+\centering
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_clicks.png}\vskip3pt{\color{owmuted}\footnotesize Density of banked click coordinates on the 64x64 board -- no privileged target list\par}
+\flushleft \vskip3pt{\footnotesize \begin{itemize}
+  \item The sprite targets the agent inferred from pixels alone
+  \item opus is perception-heavy; Fable leans on memory recall + verification
+\end{itemize}}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large Honest limitations\par}\vfill\end{frame}
+\begin{frame}{Best-of-N; single-attempt reliability is low}
+\begin{itemize}
+  \item Each solve is the verified best of many attempts, not a single draw
+  \item \textasciitilde{}823 sessions across 25 games (mean \textasciitilde{}33/game)
+  \item Full wins on \textasciitilde{}6\% of attempts overall, as low as \textasciitilde{}2\% on bp35/lf52
+  \item Clean fixed-prompt, multi-seed variance (N>1) is a labeled next step
+\end{itemize}
+\end{frame}
+\begin{frame}{Training-memory contamination is unmeasured}
+\begin{itemize}
+  \item The protocol audits no runtime source read -- it is measured per run
+  \item It cannot rule out a public game sitting in the model's weights
+  \item This channel affects every frontier-model result, prior SOTA included
+  \item Quick check: Fable recognised 0/25 games from ID alone (not proof)
+\end{itemize}
+\end{frame}
+\begin{frame}{Offline, unbounded resets, N=1}
+\begin{itemize}
+  \item All solves computed offline with unbounded resets, deterministic replay
+  \item Not the leaderboard's live action-efficiency penalty
+  \item A fresh fair-budget result; a repeat or live run may revise it
+  \item Cost is an uncontrolled estimate; the perfect run was not the cheap one
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large Conclusion\par}\vfill\end{frame}
+\begin{frame}{What we showed}
+\begin{itemize}
+  \item First perfect ARC-AGI-3 result, and it is source-free: Fable 25/25
+  \item Modeling is not the wall -- dynamics are exactly writable as code
+  \item The true wall is goal-as-procedure: state-scoring banks 0
+  \item Only a reasoning agent that writes its own world model crosses it
+  \item Model scale carries completion from 16/25 to the full sweep
+\end{itemize}
+\end{frame}
+\begin{frame}{The transferable lesson for builders}
+\begin{itemize}
+  \item Interactive-reasoning wins are ordered procedures, not good screens
+  \item Any single-state score fails even on a perfect model
+  \item Aim at procedure discovery, not state scoring
+  \item Every solver is an open, replay- and OpenWorld-verified World
+  \item Next: live-protocol RHAE, N>1 variance, contamination-controlled model
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owdeep}\bfseries\LARGE Goal-as-procedure is the wall. Reasoning is the ladder. Every solve downloads, re-runs, and serves as a world.\par}\vfill\end{frame}
+\end{document}

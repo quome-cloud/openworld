@@ -243,15 +243,7 @@
   \item Binding injects a parent parameter into a child
 \end{itemize}}
 \end{frame}
-\begin{frame}{Composition defeats the complexity cliff (E30)}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{composition_cliff.png}\vskip3pt{\color{owmuted}\footnotesize 16 rules: monolithic 0.31 vs four 4-rule children + bridges 0.92\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Monolithic 7B synthesis collapses past \textasciitilde{}8 coupled rules
-  \item Decomposition returns accuracy to near-R=4 levels
-  \item Acceptance identical in both conditions -- the decomposition is the difference
-\end{itemize}}
-\end{frame}
+\begin{frame}{Composition defeats the complexity cliff}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{composition_cliff.png}\end{frame}
 \begin{frame}{What an agent sees (E31)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{traversal.png}\vskip3pt{\color{owmuted}\footnotesize Scoped observation: own node full, ancestors as aggregates, neighbors as summaries\par}
@@ -522,15 +514,7 @@
   \item Open spec manages the specification trap procedurally, does not resolve it
 \end{itemize}
 \end{frame}
-\begin{frame}{Limitations}
-\begin{itemize}
-  \item Scope: symbolic-state worlds only; pixel-native remains learned territory
-  \item Complexity: monolithic 7B synthesis unreliable past \textasciitilde{}8 interacting rules
-  \item Scale: 20 repair tasks, 3 handwritten worlds; judges Qwen-only
-  \item Judge margin is marginal (\textasciitilde{}4x cost); ensemble self-check is a screen, not a proof
-  \item serve is a trusted-spec local endpoint -- no auth, sandbox is best-effort
-\end{itemize}
-\end{frame}
+\begin{frame}{Limitations}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Symbolic worlds only}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small Monolithic breaks past \textasciitilde{}8 rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scale}\par\smallskip{\small 20 repair tasks, 3 oracle worlds}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Trust}\par\smallskip{\small Judge marginal; self-check is a screen}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Frozen perceptual features don't control cartpole (E67)}
 \begin{itemize}
   \item The perceptual species' best shot on cartpole still scores 0\%

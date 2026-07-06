@@ -376,14 +376,7 @@
 \end{itemize}
 \end{frame}
 \begin{frame}{Three routes to use a verified world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Tool}\par\smallskip{\small Serve, plan, verify — no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Per-world TTT}\par\smallskip{\small Distill one world's trajectories}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small Traverse a family; generalize}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Hybrid}\par\smallskip{\small Exact data + verify backstop}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{Limitations (selected)}
-\begin{itemize}
-  \item Scope: symbolic-state worlds; pixel-native stays learned models' territory
-  \item Complexity cliff past \textasciitilde{}8 rules; headline worlds sit below it
-  \item Many stochastic headline numbers are single-seed point estimates
-  \item No family-wise correction over 79 experiments -- borderline p-values exploratory
-\end{itemize}
-\end{frame}
+\begin{frame}{Limitations}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Symbolic, not pixel-native}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small Cliff past \textasciitilde{}8 rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Variance}\par\smallskip{\small Some numbers single-seed}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Stats}\par\smallskip{\small No family-wise correction}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Conclusion\par}\vfill\end{frame}

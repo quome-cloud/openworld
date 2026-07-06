@@ -268,12 +268,12 @@ slides = [
          {"head": "Per-world TTT", "icon": "flask", "text": "Distill one world's trajectories"},
          {"head": "World-time compute", "icon": "nested", "text": "Traverse a family; generalize"},
          {"head": "Hybrid", "icon": "atom", "text": "Exact data + verify backstop"}]},
-    {"type": "bullets", "title": "Limitations (selected)",
-     "bullets": [
-         "Scope: symbolic-state worlds; pixel-native stays learned models' territory",
-         "Complexity cliff past ~8 rules; headline worlds sit below it",
-         "Many stochastic headline numbers are single-seed point estimates",
-         "No family-wise correction over 79 experiments -- borderline p-values exploratory"]},
+    {"type": "cards", "title": "Limitations",
+     "cards": [
+         {"head": "Scope", "icon": "grid", "text": "Symbolic, not pixel-native"},
+         {"head": "Complexity", "icon": "lock", "text": "Cliff past ~8 rules"},
+         {"head": "Variance", "icon": "scan", "text": "Some numbers single-seed"},
+         {"head": "Stats", "icon": "bars", "text": "No family-wise correction"}]},
 
     {"type": "section", "title": "Conclusion"},
     {"type": "statement",

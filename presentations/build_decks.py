@@ -92,6 +92,13 @@ DIAGRAMS = {
     <div class="pcap">Score one screen: climbs to a high value, but cannot rank the sequence</div>
   </div>
 </div>''',
+    # a monolith cracks past ~8 rules; composed verified parts stay high -- two bars grow in
+    "cliff": '''<div class="dgmc">
+  <div class="cbar-wrap"><div class="cbar cbar-mono"><span class="cval">0.31</span></div>
+    <div class="clbl">Monolithic<br><small>one 16-rule synthesis &#8212; cracks</small></div></div>
+  <div class="cbar-wrap"><div class="cbar cbar-comp"><span class="cval">0.92</span></div>
+    <div class="clbl">Composition<br><small>four verified 4-rule parts + bridges</small></div></div>
+</div>''',
     # many verified worlds feed one skill, which generalises to a held-out world
     "worldtime": '''<div class="dgmw ag">
   <div class="wt-src"><span class="wt-w w1"></span><span class="wt-w w2"></span><span class="wt-w w3"></span>
@@ -461,6 +468,19 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .wt-flow{flex:0 0 auto;align-self:flex-start;margin-top:6.5vh;color:var(--ochre);font-size:3.4vh;font-weight:800}
 .wt-flow::before{content:"\\2192"}
 .wt-arrow,.wt-src .wt-cap{}
+.dgmc{display:flex;align-items:flex-end;justify-content:center;gap:9vw;height:54vh;max-width:56rem;
+  margin:0 auto;border-bottom:3px solid var(--line)}
+.cbar-wrap{display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.cbar{width:13vw;border-radius:14px 14px 0 0;display:flex;justify-content:center;box-shadow:0 -6px 24px rgba(11,46,79,.12)}
+.cbar-mono{background:#9E2B25;height:31%}.cbar-comp{background:var(--teal);height:92%}
+.cval{color:#fff;font-weight:800;font-size:3.2vh;margin-top:1.6vh}
+.clbl{margin-top:1.8vh;color:var(--deep);font-weight:800;font-size:2.5vh;text-align:center;line-height:1.25}
+.clbl small{display:block;color:var(--muted);font-weight:500;font-size:1.95vh;margin-top:.5vh}
+@keyframes growUp{from{height:0}}
+.slide.on .cbar-mono{animation:growUp 1s .3s cubic-bezier(.3,.6,.2,1) both}
+.slide.on .cbar-comp{animation:growUp 1.2s .5s cubic-bezier(.3,.6,.2,1) both}
+.slide.on .cval{opacity:0;animation:fadeIn .5s 1.3s both}
+.slide.on .clbl{opacity:0;animation:riseIn .5s 1.1s both}
 /* ---- entrance animations: content rises in, staggered, each time a slide is shown ---- */
 @keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -477,6 +497,8 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .slide.on .parthead{animation:riseIn .6s both;animation-delay:.18s}
 .slide.on .statement .big,.slide.on .section .st{animation:riseIn .6s cubic-bezier(.2,.75,.3,1) both}
 .slide.on h2,.slide.on .kick{animation:fadeIn .45s both}
+/* part dividers appear at once -- no staggered/delayed reveal */
+.partslide .atlas>*,.partslide .parthead,.partslide .wm{animation-delay:0s!important}
 @media (prefers-reduced-motion:reduce){.slide.on *{animation:none!important}}
 @media print{.slide{display:flex!important;opacity:1!important;position:relative;page-break-after:always;height:100vh}
   .slide *{animation:none!important}}

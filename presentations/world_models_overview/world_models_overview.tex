@@ -123,15 +123,7 @@
   \item \textasciitilde{}47,000x faster rollout than a per-step LLM engine
 \end{itemize}}
 \end{frame}
-\begin{frame}{Composition defeats the complexity cliff (E30)}
-\centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{composition_cliff.png}\vskip3pt{\color{owmuted}\footnotesize 16 rules: monolithic 0.31 vs four 4-rule children + bridges 0.92\par}
-\flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Monolithic synthesis collapses past \textasciitilde{}8 coupled rules
-  \item Decomposition returns accuracy to near-R=4 levels
-  \item One n-rule problem becomes n small, independently verified ones
-\end{itemize}}
-\end{frame}
+\begin{frame}{Composition defeats the complexity cliff}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{composition_cliff.png}\end{frame}
 \begin{frame}{Tunable morality: the moral dial (E8)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pareto.png}\vskip3pt{\color{owmuted}\footnotesize Welfare--fairness frontier swept by lambda; values are declared, weighted artifacts\par}
@@ -266,14 +258,7 @@
   \item Traversing many verified worlds lifts generalization to held-out worlds
 \end{itemize}
 \end{frame}
-\begin{frame}{Limitations and scope}
-\begin{itemize}
-  \item Scope: symbolic-state worlds; pixel-native remains learned territory
-  \item Monolithic synthesis unreliable past \textasciitilde{}8 coupled rules (use composition)
-  \item ARC-AGI-3 result is best-of-N and contamination-unmeasured (stated openly)
-  \item Next: compositional synthesis, perception-to-symbol, live-protocol evaluation
-\end{itemize}
-\end{frame}
+\begin{frame}{Limitations \& scope}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Symbolic worlds, not pixel-native}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small Compose past \textasciitilde{}8 coupled rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Honesty}\par\smallskip{\small ARC-3 best-of-N; contamination unmeasured}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Next}\par\smallskip{\small Compositional synth · perception→symbol · live eval}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE Build the world as verified code. Traverse it for experience. Reason the goal. Serve it to anyone.\par}\vfill\end{frame}
 \end{document}

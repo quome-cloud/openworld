@@ -52,15 +52,7 @@
 {\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
 {\color{owdeep}\bfseries\Large Why bother}\\[10pt]{\color{owmuted}\large From computing to computing whole worlds}\vfill\end{frame}
 \begin{frame}{Building a checked world, fast}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 100}\\[6pt]{\color{owmuted}\small toy worlds, 6 fields}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 2.8 min}\\[6pt]{\color{owmuted}\small typical time to build one}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 47,000$\times$}\\[6pt]{\color{owmuted}\small faster than asking the model each step}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{What is a world computer?}
-\begin{itemize}
-  \item A machine that builds, checks, snaps together, and runs pretend worlds
-  \item The rules are plain code you can read and test -- not a black-box trained blob
-  \item Old-style computing made math cheap and easy to inspect
-  \item World computing wants to do the same thing for whole worlds
-  \item The basic job: given where you are and what you do, say what happens next
-\end{itemize}
-\end{frame}
+\begin{frame}{What is a world computer?}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The machine}\par\smallskip{\small Builds, checks, snaps together, and runs pretend worlds}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Plain code}\par\smallskip{\small Rules you can read and test -- not a black-box trained blob}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Like old computing}\par\smallskip{\small It made math cheap and easy to inspect; we want that for whole worlds}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The core job}\par\smallskip{\small Given where you are and what you do, say what happens next}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Two kinds of world models}\vfill
 \begin{columns}[T]
 \begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large The picture-guessing kind}\par\medskip\begin{itemize}\small \item Guesses pixels (Dreamer, Sora)
@@ -72,15 +64,7 @@
 \item Right at every step, no matter how far
 \item You can read the source\end{itemize}\end{column}
 \end{columns}\vfill\end{frame}
-\begin{frame}{Why we want checked code}
-\begin{itemize}
-  \item The win isn't a clever new rule -- the model often already knows the rule
-  \item The win is running that rule exactly and fast, as a tool the agent can call
-  \item It's exact: no piling-up mistakes; a trained rule rots as (1-e)\textasciicircum{}t over time
-  \item Plain code runs way faster than asking the model at every single step
-  \item PyTorch didn't invent new models -- it made them quick to try out
-\end{itemize}
-\end{frame}
+\begin{frame}{Why we want checked code}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Not a new rule}\par\smallskip{\small The model often already knows the rule; the win is elsewhere}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Exact}\par\smallskip{\small No piling-up mistakes; a trained rule rots as (1-e)\textasciicircum{}t over time}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Fast tool}\par\smallskip{\small Runs way faster than asking the model each step; the agent just calls it}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Like PyTorch}\par\smallskip{\small It didn't invent new models -- it made them quick to try out}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{World, action, agent, and the run}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{prototyping_pipeline.png}\end{frame}
 \begin{frame}{The world computer, measured on cost, speed, and quality}
 \centering
@@ -91,27 +75,11 @@
   \item C: 100\% pass the shape check; 99\% actually run and behave
 \end{itemize}}
 \end{frame}
-\begin{frame}{What we add}
-\begin{itemize}
-  \item The idea of world computing, plus a way to snap worlds together that keeps the checking
-  \item OpenWorld: spell out the world, check the code, turn goals up or down with dials
-  \item Building: 100 worlds, 6 fields, minutes each, on an ordinary laptop
-  \item Running: full-speed, exact, readable runs
-  \item Testing, trust checks, and small shareable files anyone can inspect
-\end{itemize}
-\end{frame}
+\begin{frame}{What we add}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The idea}\par\smallskip{\small World computing, plus a way to snap worlds together that keeps the checking}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries OpenWorld}\par\smallskip{\small Spell out the world, check the code, turn goals up or down with dials}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Building}\par\smallskip{\small 100 worlds, 6 fields, minutes each, on an ordinary laptop}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Running \& sharing}\par\smallskip{\small Full-speed exact readable runs; trust checks and small shareable files}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why bother};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Where it's useful};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
 {\color{owdeep}\bfseries\Large The system}\\[10pt]{\color{owmuted}\large OpenWorld: the parts, the relay, and snapping worlds together}\vfill\end{frame}
-\begin{frame}{Six parts you can test one by one}
-\begin{itemize}
-  \item World: what the facts are, what you can do, the rules, and a swappable rules-engine
-  \item Three engines: checked code, the model guessing (our yardstick), and a known-right answer
-  \item Agent: either the model planning, or a simple fixed strategy
-  \item Goals and Dials: state what you care about and how much
-  \item The run, the tuner, and the judge -- all on a local model, no extra software needed
-\end{itemize}
-\end{frame}
+\begin{frame}{Six parts you can test one by one}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World}\par\smallskip{\small The facts, what you can do, the rules, and a swappable rules-engine}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Three engines}\par\smallskip{\small Checked code, the model guessing (our yardstick), and a known-right answer}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Agent}\par\smallskip{\small Either the model planning, or a simple fixed strategy}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goals, dials, runner}\par\smallskip{\small State what you care about and how much; run, tune, and judge on a local model}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The write, generate, check relay}\vfill\centering
 \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
   sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
@@ -128,36 +96,12 @@
   \item Goals (re-set by dials) score it; the see-and-act edge returns reports and tool calls
 \end{itemize}}
 \end{frame}
-\begin{frame}{Build big worlds from small checked pieces}
-\begin{itemize}
-  \item Worlds are just values; snap two together and you still get a world
-  \item The pieces run untouched; bridges link them, roll-ups summarize, injections pass values in
-  \item Snapping stays clean: same in, same out, and grouping doesn't matter (once names line up)
-  \item The checking carries over: checked pieces make a checked whole
-  \item Turns one big n-rule job into n small jobs you can check on their own
-\end{itemize}
-\end{frame}
-\begin{frame}{Writing the reward as checked code too}
-\begin{itemize}
-  \item Make the goal match the rules: a reward you can read and check, written as code
-  \item The reward code runs in the same safe little Python box as the rules
-  \item We only accept it when it exactly matches rewards we held back to test with
-  \item Now the whole loop is checked: seeing, rules, reward, and planning
-  \item Exactly the piece an ARC-AGI-3-style 'figure out the goal' puzzle needs
-\end{itemize}
-\end{frame}
+\begin{frame}{Build big worlds from small checked pieces}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Worlds are values}\par\smallskip{\small Snap two together and you still get a world}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The connectors}\par\smallskip{\small Pieces run untouched; bridges link, roll-ups summarize, injections pass values in}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Clean algebra}\par\smallskip{\small Same in, same out, and grouping doesn't matter (once names line up)}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Checking carries over}\par\smallskip{\small Checked pieces make a checked whole; one big n-rule job becomes n small ones}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Writing the reward as checked code too}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reward as code}\par\smallskip{\small Make the goal match the rules: a reward you can read and check}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Same safe box}\par\smallskip{\small The reward code runs in the same little Python sandbox as the rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Accept on match}\par\smallskip{\small Only when it exactly matches rewards we held back to test with}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Whole loop checked}\par\smallskip{\small Seeing, rules, reward, planning -- exactly what an ARC-AGI-3 'figure out the goal' puzzle needs}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large How much it costs and how fast it is to build\par}\vfill\end{frame}
-\begin{frame}{How fast is building? (E68)}
-\begin{itemize}
-  \item Claude Code wrote 100 world models from one-line descriptions
-  \item 6 careful fields: health, finance, law, cyber, energy, AI agents
-  \item 100\% pass the shape check; typical build 2.8 min, average 3.0, most under 3.9, worst 6.1
-  \item 99 of 100 actually run and change state under random play
-  \item Hand-building a similar simulator would take days to weeks
-\end{itemize}
-\end{frame}
+\begin{frame}{How fast is building? (E68)}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries One-line prompts}\par\smallskip{\small Claude Code wrote 100 world models from one-line descriptions}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Six fields}\par\smallskip{\small Health, finance, law, cyber, energy, AI agents}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Fast \& clean}\par\smallskip{\small 100\% pass the shape check; build 2.8 min typical, avg 3.0, most under 3.9, worst 6.1}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Actually run}\par\smallskip{\small 99 of 100 move under random play; hand-building would take days to weeks}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{A map of all 100 built worlds (E68/E68b)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_atlas.png}\vskip3pt{\color{owmuted}\footnotesize One row per world, grouped by field; every one spells out how it sees and reports\par}
@@ -172,24 +116,8 @@
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large How we set up the tests\par}\vfill\end{frame}
-\begin{frame}{Worlds where we know the true answer}
-\begin{itemize}
-  \item Three simple known-answer worlds: sprint, orchard, triage
-  \item The known answers are hand-written rules we trust
-  \item We compare the model-written and trained engines against them exactly
-  \item A coding world: 20 buggy functions with hidden tests, run-the-tests rules
-  \item Snapping, nesting, and changing rules are tested in E30 through E32
-\end{itemize}
-\end{frame}
-\begin{frame}{Models, machine, yardstick, and stats}
-\begin{itemize}
-  \item All run locally on an Apple-chip laptop -- no cloud, no extra training
-  \item qwen2.5 7b/3b/1.5b, plus llama3.1:8b and gemma2:9b to check across families
-  \item Yardstick: the same model just guessing each next step
-  \item Rates get 95\% error bars; the judge test uses a strict paired check
-  \item Seeds fixed; every number rebuilds itself from one pipeline
-\end{itemize}
-\end{frame}
+\begin{frame}{Worlds where we know the true answer}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Three known worlds}\par\smallskip{\small Sprint, orchard, triage -- with answers we trust}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Trusted answers}\par\smallskip{\small Hand-written rules; we compare the model-written and trained engines against them exactly}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries A coding world}\par\smallskip{\small 20 buggy functions with hidden tests, run-the-tests rules}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Composition tests}\par\smallskip{\small Snapping, nesting, and changing rules are tested in E30 through E32}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Models, machine, yardstick, and stats}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries All local}\par\smallskip{\small Runs on an Apple-chip laptop -- no cloud, no extra training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The models}\par\smallskip{\small qwen2.5 7b/3b/1.5b, plus llama3.1:8b and gemma2:9b across families}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The yardstick}\par\smallskip{\small The same model just guessing each next step}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Honest stats}\par\smallskip{\small 95\% error bars, a strict paired judge test, fixed seeds; every number rebuilds from one pipeline}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why bother};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Where it's useful};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
 {\color{owdeep}\bfseries\Large Results}\\[10pt]{\color{owmuted}\large Accuracy, speed, and trust}\vfill\end{frame}
@@ -210,15 +138,7 @@
   \item Checking buys extra correctness but can't make up for a weak writer
 \end{itemize}}
 \end{frame}
-\begin{frame}{Closing the 'wrongly accepted' gap (E62)}
-\begin{itemize}
-  \item A single quick test has a blind spot: states you only reach later
-  \item On 3 faults that look clean at first, the single test wrongly passes them 100\% of the time
-  \item Re-running across states that hit every branch drops wrong passes to 0\%
-  \item Across families (E16): Qwen, Llama, and Gemma all reach a checked pass
-  \item Gemma-2-9B gets the rules perfect every try; seconds per world
-\end{itemize}
-\end{frame}
+\begin{frame}{Closing the 'wrongly accepted' gap (E62)}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries The blind spot}\par\smallskip{\small A single quick test misses states you only reach later}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Wrongly passed}\par\smallskip{\small On 3 faults that look clean at first, it wrongly passes them 100\% of the time}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Full coverage fixes it}\par\smallskip{\small Re-running across states that hit every branch drops wrong passes to 0\%}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Across families}\par\smallskip{\small E16: Qwen, Llama, Gemma all reach a checked pass; Gemma-2-9B perfect every try, seconds per world}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{The model as a judge, fair test (E13+E17)}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{judge.png}\vskip3pt{\color{owmuted}\footnotesize Judge 85\% vs coin-flip 78\%, first-one 78\%, best-possible 91\% over 120 rounds\par}
@@ -481,56 +401,25 @@
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why bother};\node[stlbl] at (3.4,-1.15) {The system};\node[stlbl] at (6.8,-1.15) {Results};\node[stlbl] at (10.2,-1.15) {Where it's useful};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
 {\color{owdeep}\bfseries\Large Stepping back}\\[10pt]{\color{owmuted}\large Discussion, limits, and what's next}\vfill\end{frame}
-\begin{frame}{The big trade, plainly}
-\begin{itemize}
-  \item Trained models cover lots of pixels, but pay in piling-up mistakes and being unreadable
-  \item Checked code buys exactness, speed, working in new situations, and being inspectable
-  \item Inside the plain-facts world, the results all point one way
-  \item The workflow: state it, check it with invariants, probe intent, tighten, rebuild
-  \item At every stage the thing stays a program you can diff
-\end{itemize}
-\end{frame}
-\begin{frame}{What these worlds unlock: world-time compute}
-\begin{itemize}
-  \item Checked worlds label training runs exactly, for free
-  \item Training on many worlds of a field lifts skill on worlds it never saw
-  \item That's world-time compute -- the topic of the companion paper
-  \item Exact, snappable worlds are what make it possible
-  \item But a world computer is useful even if you never train on it
-\end{itemize}
-\end{frame}
-\begin{frame}{Values as an open, stated thing}
-\begin{itemize}
-  \item Goals are stated out loud -- the good-vs-fair trade-off is a real dial
-  \item A weighted sum is just one theory of ethics (adding up consequences)
-  \item Roll-ups, hard 'never do this' vetoes, and a moral parliament are different tools
-  \item A hard veto can't be faked by any weighting (E25)
-  \item Stating values openly handles the values problem step by step; it doesn't solve it
-\end{itemize}
-\end{frame}
+\begin{frame}{The big trade, plainly}\vfill
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}{\color{owmuted}\bfseries\large Trained models}\par\medskip\begin{itemize}\small \item Cover lots of pixels
+\item Pay in piling-up mistakes
+\item Are unreadable\end{itemize}\end{column}
+\begin{column}{0.46\textwidth}{\color{owteal}\bfseries\large Checked code}\par\medskip\begin{itemize}\small \item Exact, fast, works in new situations, inspectable
+\item In plain-facts worlds, results all point one way
+\item State it, check with invariants, probe intent, tighten, rebuild
+\item Stays a program you can diff at every stage\end{itemize}\end{column}
+\end{columns}\vfill\end{frame}
+\begin{frame}{What these worlds unlock: world-time compute}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Free exact labels}\par\smallskip{\small Checked worlds label training runs exactly, for free}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Transfer}\par\smallskip{\small Training on many worlds of a field lifts skill on worlds it never saw}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small That's the topic of the companion paper; exact, snappable worlds make it possible}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Useful either way}\par\smallskip{\small But a world computer is useful even if you never train on it}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Values as an open, stated thing}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goals out loud}\par\smallskip{\small The good-vs-fair trade-off is a real dial you can turn}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries One ethics theory}\par\smallskip{\small A weighted sum is just adding up consequences -- one theory among many}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Other tools}\par\smallskip{\small Roll-ups, hard 'never do this' vetoes, and a moral parliament}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Vetoes are special}\par\smallskip{\small A hard veto can't be faked by any weighting (E25); stating values openly handles the problem step by step, not solved}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}{Where this falls short}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Plain-facts worlds only}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small One big block breaks past about 8 rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scale}\par\smallskip{\small 20 repair tasks, 3 known-answer worlds}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Trust}\par\smallskip{\small The judge is weak; self-check is just a screen}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{Frozen picture-features can't balance a pole (E67)}
-\begin{itemize}
-  \item The picture-guessing kind's best try at balancing a pole still scores 0\%
-  \item Five ways to attach a controller to frozen V-JEPA-2/DINOv2 all score 0
-  \item Yet a simple probe can read the state: it explains 95\% of the pole's angle
-  \item Strong frozen features are needed but not enough to control
-  \item Training end-to-end on the task, not better seeing, closes the gap
-\end{itemize}
-\end{frame}
+\begin{frame}{Frozen picture-features can't balance a pole (E67)}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Can't control}\par\smallskip{\small The picture-guessing kind's best try at balancing a pole still scores 0\%}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Every attach fails}\par\smallskip{\small Five ways to bolt a controller onto frozen V-JEPA-2/DINOv2 all score 0}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries But it sees fine}\par\smallskip{\small A simple probe reads the state: it explains 95\% of the pole's angle}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Needed, not enough}\par\smallskip{\small Strong seeing isn't control; training end-to-end on the task closes the gap}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large Wrapping up\par}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owdeep}\bfseries\LARGE Make the model a program, check the program, and keep the values on dials -- a different road than just piling on parameters until the made-up answers go away.\par}\vfill\end{frame}
-\begin{frame}{Takeaways and what's next}
-\begin{itemize}
-  \item A no-training plain-code world model is exact where trained rules pile up mistakes
-  \item Snapping pieces beats the complexity wall; the limit is measured, not hidden
-  \item 100 worlds in minutes on a laptop; small, inspectable, shareable files
-  \item Next: build worlds by snapping written pieces, standard-size coding, mixing seeing with facts
-  \item All the code, 100 recipes, and 79 experiments rebuild from one repository
-\end{itemize}
-\end{frame}
+\begin{frame}{Takeaways and what's next}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Exact by construction}\par\smallskip{\small A no-training plain-code world model is exact where trained rules pile up mistakes}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Beats the wall}\par\smallskip{\small Snapping pieces beats the complexity wall; the limit is measured, not hidden}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Minutes on a laptop}\par\smallskip{\small 100 worlds in minutes; small, inspectable, shareable files}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries What's next}\par\smallskip{\small Snap written pieces, standard-size coding, mix seeing with facts; all rebuilds from one repository}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip12pt{\color{owdeep}\bfseries\Large The code is open --- go star it\par}\vskip16pt\includegraphics[width=4.2cm]{qr_openworld.png}\par\vskip12pt{\color{owblue}\large github.com/quome-cloud/openworld\par}\vskip4pt{\color{owmuted}\small 100 world recipes \textperiodcentered\ the papers \textperiodcentered\ every experiment\par}\vfill\end{frame}
 \end{document}

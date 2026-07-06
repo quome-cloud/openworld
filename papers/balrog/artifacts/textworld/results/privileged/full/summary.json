@@ -1,0 +1,15 @@
+{
+ "treasure_hunter": {
+  "episodes": 25,
+  "mean_progression": 1.0
+ },
+ "the_cooking_game": {
+  "episodes": 25,
+  "mean_progression": 1.0
+ },
+ "coin_collector": {
+  "episodes": 25,
+  "mean_progression": 1.0
+ },
+ "_overall": 1.0
+}

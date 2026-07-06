@@ -1,0 +1,182 @@
+{
+ "game": "cooking_item5_seed_21151.z8",
+ "pass": 1,
+ "won": true,
+ "transitions": [
+  {
+   "obs": "-= Kitchen =-\nYou are in a kitchen. An ordinary kind of place.\n\nLook out! It's a- oh, never mind, it's just a fridge. You make out an oven. You make out a table. You see a cookbook on the table. Now that's what I call TextWorld! You can make out a counter. The counter is vast. On the counter you make out a red apple, a raw purple potato, a raw yellow potato, a green hot pepper, a red hot pepper, a yellow apple and a knife. You see a stove. The stove is conventional. Looks like someone's already been here and taken everything off it, though. Hopefully, this discovery doesn't ruin your TextWorld experience!\n\nThere is a closed plain door leading east. There is a closed screen door leading north. There is an exit to the south. Don't worry, there is no door. There is an exit to the west.\n\n>                                                                                                                                -= Kitchen =-0/1",
+   "cmd": "open fridge",
+   "obs_next": "You open the fridge, revealing a raw pork chop, an orange bell pepper, a block of cheese, a yellow onion and a yellow bell pepper.\n\n\n>                                                                                                                                -= Kitchen =-0/2",
+   "reward": 0,
+   "done": false
+  },
+  {
+   "obs": "You open the fridge, revealing a raw pork chop, an orange bell pepper, a block of cheese, a yellow onion and a yellow bell pepper.\n\n\n>                                                                                                                                -= Kitchen =-0/2",
+   "cmd": "examine cookbook",
+   "obs_next": "You open the copy of \"Cooking: A Modern Approach (3rd Ed.)\" and start reading:\n\nRecipe #1\n---------\nGather all following ingredients and follow the directions to prepare this tasty meal.\n\nIngredients:\norange bell pepper\n  pork chop\n  red apple\n  tomato\n  white onion\n\nDirections:\ndice the orange bell pepper\n  grill the orange bell pepper\n  chop the pork chop\n  grill the pork chop\n  chop the red apple\n  grill the red apple\n  slice the tomato\n  roast the tomato\n  slice the white onion\n  fry the white onion\n  prepare meal\n\n\n\n>                                                                                                                                -= Kitchen =-0/3",
+   "reward": 0,
+   "done": false
+  },
+  {
+   "obs": "You open the copy of \"Cooking: A Modern Approach (3rd Ed.)\" and start reading:\n\nRecipe #1\n---------\nGather all following ingredients and follow the directions to prepare this tasty meal.\n\nIngredients:\norange bell pepper\n  pork chop\n  red apple\n  tomato\n  white onion\n\nDirections:\ndice the orange bell pepper\n  grill the orange bell pepper\n  chop the pork chop\n  grill the pork chop\n  chop the red apple\n  grill the red apple\n  slice the tomato\n  roast the tomato\n  slice the white onion\n  fry the white onion\n  prepare meal\n\n\n\n>                                                                                                                                -= Kitchen =-0/3",
+   "cmd": "take orange bell pepper from fridge",
+   "obs_next": "You take the orange bell pepper from the fridge.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-1/4",
+   "reward": 1,
+   "done": false
+  },
+  {
+   "obs": "You take the orange bell pepper from the fridge.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-1/4",
+   "cmd": "take pork chop from fridge",
+   "obs_next": "You take the pork chop from the fridge.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-2/5",
+   "reward": 2,
+   "done": false
+  },
+  {
+   "obs": "You take the pork chop from the fridge.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-2/5",
+   "cmd": "take red apple from counter",
+   "obs_next": "You take the red apple from the counter.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-3/6",
+   "reward": 3,
+   "done": false
+  },
+  {
+   "obs": "You take the red apple from the counter.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-3/6",
+   "cmd": "take knife from counter",
+   "obs_next": "You take the knife from the counter.\n\n\n>                                                                                                                                -= Kitchen =-3/7",
+   "reward": 3,
+   "done": false
+  },
+  {
+   "obs": "You take the knife from the counter.\n\n\n>                                                                                                                                -= Kitchen =-3/7",
+   "cmd": "open screen door",
+   "obs_next": "You open screen door.\n\n\n>                                                                                                                                -= Kitchen =-3/8",
+   "reward": 3,
+   "done": false
+  },
+  {
+   "obs": "You open screen door.\n\n\n>                                                                                                                                -= Kitchen =-3/8",
+   "cmd": "go north",
+   "obs_next": "-= Backyard =-\nYou find yourself in a backyard. A typical one.\n\nYou see a patio chair. Now why would someone leave that there? Looks like someone's already been here and taken everything off it, though. What's that over there? It looks like it's a patio table. The patio table is stylish. But the thing hasn't got anything on it. Oh! Why couldn't there just be stuff on it? You can make out a closed BBQ close by.\n\nThere is a closed wooden door leading east. There is an open screen door leading south. You need an exit without a door? You should try going north.\n\n\n>                                                                                                                                -= Backyard =-3/9",
+   "reward": 3,
+   "done": false
+  },
+  {
+   "obs": "-= Backyard =-\nYou find yourself in a backyard. A typical one.\n\nYou see a patio chair. Now why would someone leave that there? Looks like someone's already been here and taken everything off it, though. What's that over there? It looks like it's a patio table. The patio table is stylish. But the thing hasn't got anything on it. Oh! Why couldn't there just be stuff on it? You can make out a closed BBQ close by.\n\nThere is a closed wooden door leading east. There is an open screen door leading south. You need an exit without a door? You should try going north.\n\n\n>                                                                                                                                -= Backyard =-3/9",
+   "cmd": "go north",
+   "obs_next": "-= Garden =-\nYou're now in the garden.\n\n\n\nYou need an exit without a door? You should try going south.\n\nThere is a tomato, a white onion, a raw white tuna and a red onion on the floor.\n\n\n>                                                                                                                                -= Garden =-3/10",
+   "reward": 3,
+   "done": false
+  },
+  {
+   "obs": "-= Garden =-\nYou're now in the garden.\n\n\n\nYou need an exit without a door? You should try going south.\n\nThere is a tomato, a white onion, a raw white tuna and a red onion on the floor.\n\n\n>                                                                                                                                -= Garden =-3/10",
+   "cmd": "take tomato",
+   "obs_next": "You pick up the tomato from the ground.\n\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Garden =-4/11",
+   "reward": 4,
+   "done": false
+  },
+  {
+   "obs": "You pick up the tomato from the ground.\n\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Garden =-4/11",
+   "cmd": "take white onion",
+   "obs_next": "You pick up the white onion from the ground.\n\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Garden =-5/12",
+   "reward": 5,
+   "done": false
+  },
+  {
+   "obs": "You pick up the white onion from the ground.\n\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Garden =-5/12",
+   "cmd": "go south",
+   "obs_next": "-= Backyard =-\nYou find yourself in a backyard. A typical one.\n\nYou see a patio chair. Now why would someone leave that there? Looks like someone's already been here and taken everything off it, though. What's that over there? It looks like it's a patio table. The patio table is stylish. But the thing hasn't got anything on it. Oh! Why couldn't there just be stuff on it? You can make out a closed BBQ close by.\n\nThere is a closed wooden door leading east. There is an open screen door leading south. You need an exit without a door? You should try going north.\n\n\n>                                                                                                                                -= Backyard =-5/13",
+   "reward": 5,
+   "done": false
+  },
+  {
+   "obs": "-= Backyard =-\nYou find yourself in a backyard. A typical one.\n\nYou see a patio chair. Now why would someone leave that there? Looks like someone's already been here and taken everything off it, though. What's that over there? It looks like it's a patio table. The patio table is stylish. But the thing hasn't got anything on it. Oh! Why couldn't there just be stuff on it? You can make out a closed BBQ close by.\n\nThere is a closed wooden door leading east. There is an open screen door leading south. You need an exit without a door? You should try going north.\n\n\n>                                                                                                                                -= Backyard =-5/13",
+   "cmd": "cook orange bell pepper with BBQ",
+   "obs_next": "You grilled the orange bell pepper.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-6/14",
+   "reward": 6,
+   "done": false
+  },
+  {
+   "obs": "You grilled the orange bell pepper.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-6/14",
+   "cmd": "cook pork chop with BBQ",
+   "obs_next": "You grilled the pork chop.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-7/15",
+   "reward": 7,
+   "done": false
+  },
+  {
+   "obs": "You grilled the pork chop.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-7/15",
+   "cmd": "cook red apple with BBQ",
+   "obs_next": "You grilled the red apple.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-8/16",
+   "reward": 8,
+   "done": false
+  },
+  {
+   "obs": "You grilled the red apple.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Backyard =-8/16",
+   "cmd": "go south",
+   "obs_next": "-= Kitchen =-\nYou are in a kitchen. An ordinary kind of place.\n\nLook out! It's a- oh, never mind, it's just a fridge. The fridge contains a block of cheese, a yellow onion and a yellow bell pepper. Suddenly, you bump your head on the ceiling, but it's not such a bad bump that it's going to prevent you from looking at objects and even things. You make out an oven. You make out a table. You see a cookbook on the table. Now that's what I call TextWorld! You can make out a counter. The counter is vast. On the counter you make out a raw purple potato, a raw yellow potato, a green hot pepper, a red hot pepper and a yellow apple. You see a stove. The stove is conventional. Looks like someone's already been here and taken everything off it, though. Hopefully, this discovery doesn't ruin your TextWorld experience!\n\nThere is a closed plain door leading east. There is an open screen door leading north. There is an exit to the south. Don't worry, there is no door. There is an exit to the west.\n\n\n>                                                                                                                                -= Kitchen =-8/17",
+   "reward": 8,
+   "done": false
+  },
+  {
+   "obs": "-= Kitchen =-\nYou are in a kitchen. An ordinary kind of place.\n\nLook out! It's a- oh, never mind, it's just a fridge. The fridge contains a block of cheese, a yellow onion and a yellow bell pepper. Suddenly, you bump your head on the ceiling, but it's not such a bad bump that it's going to prevent you from looking at objects and even things. You make out an oven. You make out a table. You see a cookbook on the table. Now that's what I call TextWorld! You can make out a counter. The counter is vast. On the counter you make out a raw purple potato, a raw yellow potato, a green hot pepper, a red hot pepper and a yellow apple. You see a stove. The stove is conventional. Looks like someone's already been here and taken everything off it, though. Hopefully, this discovery doesn't ruin your TextWorld experience!\n\nThere is a closed plain door leading east. There is an open screen door leading north. There is an exit to the south. Don't worry, there is no door. There is an exit to the west.\n\n\n>                                                                                                                                -= Kitchen =-8/17",
+   "cmd": "cook tomato with oven",
+   "obs_next": "You roasted the tomato.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-9/18",
+   "reward": 9,
+   "done": false
+  },
+  {
+   "obs": "You roasted the tomato.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-9/18",
+   "cmd": "cook white onion with stove",
+   "obs_next": "You fried the white onion.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-10/19",
+   "reward": 10,
+   "done": false
+  },
+  {
+   "obs": "You fried the white onion.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-10/19",
+   "cmd": "dice orange bell pepper with knife",
+   "obs_next": "You dice the orange bell pepper.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-11/20",
+   "reward": 11,
+   "done": false
+  },
+  {
+   "obs": "You dice the orange bell pepper.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-11/20",
+   "cmd": "chop pork chop with knife",
+   "obs_next": "You chop the pork chop.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-12/21",
+   "reward": 12,
+   "done": false
+  },
+  {
+   "obs": "You chop the pork chop.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-12/21",
+   "cmd": "chop red apple with knife",
+   "obs_next": "You chop the red apple.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-13/22",
+   "reward": 13,
+   "done": false
+  },
+  {
+   "obs": "You chop the red apple.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-13/22",
+   "cmd": "slice tomato with knife",
+   "obs_next": "You slice the tomato.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-14/23",
+   "reward": 14,
+   "done": false
+  },
+  {
+   "obs": "You slice the tomato.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-14/23",
+   "cmd": "slice white onion with knife",
+   "obs_next": "You slice the white onion.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-15/24",
+   "reward": 15,
+   "done": false
+  },
+  {
+   "obs": "You slice the white onion.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-15/24",
+   "cmd": "prepare meal",
+   "obs_next": "Adding the meal to your inventory.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-16/25",
+   "reward": 16,
+   "done": false
+  },
+  {
+   "obs": "Adding the meal to your inventory.\n\n\nYour score has just gone up by one point.\n\n>                                                                                                                                -= Kitchen =-16/25",
+   "cmd": "eat meal",
+   "obs_next": "You eat the meal. Not bad.\n\n\nYour score has just gone up by one point.\n\n\n                                                       *** The End ***\n\nYou scored 17 out of a possible 17, in 26 turns.\n\n\nWould you like to RESTART, RESTORE a saved game, QUIT or UNDO the last command?\n>                                                                                                                                 -= Kitchen =-16/25",
+   "reward": 17,
+   "done": true
+  }
+ ]
+}

@@ -442,7 +442,7 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .dgm .lbl-llm{fill:#9E2B25;font-weight:700;font-size:20px}
 .slide.on .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:dashDraw 1.5s .3s cubic-bezier(.4,.1,.2,1) forwards}
 .slide.on .err{opacity:0;animation:fadeIn .8s 1.55s both}
-.slide.on .dot{opacity:0;animation:popIn .4s 1.75s both}
+.slide.on .dgm .dot{opacity:0;animation:popIn .4s 1.75s both}
 .slide.on .lbl-code,.slide.on .lbl-llm{opacity:0;animation:fadeIn .6s 1.6s both}
 .dgmp{display:flex;flex-direction:column;gap:5.5vh;width:100%;max-width:72rem;margin:0 auto}
 .plabel{font-size:1.75vh;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}

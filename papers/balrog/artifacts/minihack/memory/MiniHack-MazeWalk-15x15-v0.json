@@ -1,0 +1,396 @@
+{
+ "task": "MiniHack-MazeWalk-15x15-v0",
+ "episodes": [
+  {
+   "seed": 4300,
+   "progression": 1.0,
+   "steps": "0-56",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep0.json.gz"
+  },
+  {
+   "seed": 4301,
+   "progression": 1.0,
+   "steps": "0-72",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep1.json.gz"
+  },
+  {
+   "seed": 4302,
+   "progression": 1.0,
+   "steps": "0-15",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep2.json.gz"
+  },
+  {
+   "seed": 4303,
+   "progression": 1.0,
+   "steps": "0-90",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep3.json.gz"
+  },
+  {
+   "seed": 4304,
+   "progression": 1.0,
+   "steps": "0-26",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep4.json.gz"
+  },
+  {
+   "seed": 5300,
+   "progression": 1.0,
+   "steps": "0-1",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep0.json.gz"
+  },
+  {
+   "seed": 5301,
+   "progression": 1.0,
+   "steps": "0-35",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep1.json.gz"
+  },
+  {
+   "seed": 5302,
+   "progression": 1.0,
+   "steps": "0-5",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep2.json.gz"
+  },
+  {
+   "seed": 5303,
+   "progression": 1.0,
+   "steps": "0-63",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep3.json.gz"
+  },
+  {
+   "seed": 5304,
+   "progression": 1.0,
+   "steps": "0-99",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep4.json.gz"
+  },
+  {
+   "seed": 6300,
+   "progression": 1.0,
+   "steps": "0-5",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep0.json.gz"
+  },
+  {
+   "seed": 6301,
+   "progression": 1.0,
+   "steps": "0-37",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep1.json.gz"
+  },
+  {
+   "seed": 6302,
+   "progression": 1.0,
+   "steps": "0-55",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep2.json.gz"
+  },
+  {
+   "seed": 6303,
+   "progression": 1.0,
+   "steps": "0-4",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep3.json.gz"
+  },
+  {
+   "seed": 6304,
+   "progression": 1.0,
+   "steps": "0-39",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep4.json.gz"
+  }
+ ],
+ "stairs_seen": [
+  {
+   "cell": [
+    34,
+    17
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-56"
+  },
+  {
+   "cell": [
+    33,
+    17
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-56"
+  },
+  {
+   "cell": [
+    38,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+   "steps": "0-72"
+  },
+  {
+   "cell": [
+    37,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+   "steps": "0-72"
+  },
+  {
+   "cell": [
+    42,
+    15
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+   "steps": "0-15"
+  },
+  {
+   "cell": [
+    41,
+    15
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+   "steps": "0-15"
+  },
+  {
+   "cell": [
+    40,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+   "steps": "0-90"
+  },
+  {
+   "cell": [
+    39,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+   "steps": "0-90"
+  },
+  {
+   "cell": [
+    40,
+    5
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+   "steps": "0-26"
+  },
+  {
+   "cell": [
+    40,
+    6
+   ],
+   "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+   "steps": "0-26"
+  },
+  {
+   "cell": [
+    41,
+    5
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-1"
+  },
+  {
+   "cell": [
+    42,
+    5
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-1"
+  },
+  {
+   "cell": [
+    43,
+    5
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+   "steps": "0-35"
+  },
+  {
+   "cell": [
+    42,
+    9
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+   "steps": "0-5"
+  },
+  {
+   "cell": [
+    43,
+    9
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+   "steps": "0-5"
+  },
+  {
+   "cell": [
+    35,
+    17
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+   "steps": "0-63"
+  },
+  {
+   "cell": [
+    38,
+    12
+   ],
+   "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+   "steps": "0-99"
+  },
+  {
+   "cell": [
+    36,
+    7
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-5"
+  },
+  {
+   "cell": [
+    36,
+    6
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+   "steps": "0-5"
+  },
+  {
+   "cell": [
+    36,
+    16
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+   "steps": "0-37"
+  },
+  {
+   "cell": [
+    42,
+    10
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+   "steps": "0-55"
+  },
+  {
+   "cell": [
+    42,
+    11
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+   "steps": "0-4"
+  },
+  {
+   "cell": [
+    35,
+    7
+   ],
+   "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+   "steps": "0-39"
+  }
+ ],
+ "lava_cols": [],
+ "combat": {
+  "kills": 0,
+  "damage_taken": 0,
+  "deaths": 0,
+  "samples": [
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+    "steps": "0-56"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+    "steps": "0-72"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+    "steps": "0-15"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+    "steps": "0-90"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+    "steps": "0-26"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+    "steps": "0-1"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+    "steps": "0-35"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+    "steps": "0-5"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+    "steps": "0-63"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+    "steps": "0-99"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep0.json.gz",
+    "steps": "0-5"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep1.json.gz",
+    "steps": "0-37"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep2.json.gz",
+    "steps": "0-55"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep3.json.gz",
+    "steps": "0-4"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-MazeWalk-15x15-v0__ep4.json.gz",
+    "steps": "0-39"
+   }
+  ]
+ },
+ "failure_causes": [],
+ "fired": []
+}

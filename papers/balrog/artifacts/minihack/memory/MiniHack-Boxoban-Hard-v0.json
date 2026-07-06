@@ -1,0 +1,324 @@
+{
+ "task": "MiniHack-Boxoban-Hard-v0",
+ "episodes": [
+  {
+   "seed": 4000,
+   "progression": 1.0,
+   "steps": "0-87",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep0.json.gz"
+  },
+  {
+   "seed": 4001,
+   "progression": 1.0,
+   "steps": "0-69",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep1.json.gz"
+  },
+  {
+   "seed": 4002,
+   "progression": 1.0,
+   "steps": "0-55",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep2.json.gz"
+  },
+  {
+   "seed": 4003,
+   "progression": 1.0,
+   "steps": "0-63",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep3.json.gz"
+  },
+  {
+   "seed": 4004,
+   "progression": 1.0,
+   "steps": "0-32",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep4.json.gz"
+  },
+  {
+   "seed": 5000,
+   "progression": 1.0,
+   "steps": "0-35",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep0.json.gz"
+  },
+  {
+   "seed": 5001,
+   "progression": 1.0,
+   "steps": "0-66",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep1.json.gz"
+  },
+  {
+   "seed": 5002,
+   "progression": 1.0,
+   "steps": "0-67",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep2.json.gz"
+  },
+  {
+   "seed": 5003,
+   "progression": 1.0,
+   "steps": "0-34",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep3.json.gz"
+  },
+  {
+   "seed": 5004,
+   "progression": 1.0,
+   "steps": "0-34",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep4.json.gz"
+  },
+  {
+   "seed": 6000,
+   "progression": 1.0,
+   "steps": "0-59",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep0.json.gz"
+  },
+  {
+   "seed": 6001,
+   "progression": 1.0,
+   "steps": "0-43",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep1.json.gz"
+  },
+  {
+   "seed": 6002,
+   "progression": 1.0,
+   "steps": "0-69",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep2.json.gz"
+  },
+  {
+   "seed": 6003,
+   "progression": 1.0,
+   "steps": "0-72",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep3.json.gz"
+  },
+  {
+   "seed": 6004,
+   "progression": 1.0,
+   "steps": "0-73",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep4.json.gz"
+  }
+ ],
+ "stairs_seen": [
+  {
+   "cell": [
+    41,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+   "steps": "0-87"
+  },
+  {
+   "cell": [
+    36,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+   "steps": "0-55"
+  },
+  {
+   "cell": [
+    38,
+    12
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+   "steps": "0-63"
+  },
+  {
+   "cell": [
+    37,
+    14
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+   "steps": "0-32"
+  },
+  {
+   "cell": [
+    37,
+    12
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+   "steps": "0-35"
+  },
+  {
+   "cell": [
+    39,
+    11
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep1.json.gz",
+   "steps": "0-66"
+  },
+  {
+   "cell": [
+    40,
+    12
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+   "steps": "0-67"
+  },
+  {
+   "cell": [
+    36,
+    13
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+   "steps": "0-34"
+  },
+  {
+   "cell": [
+    38,
+    13
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+   "steps": "0-34"
+  },
+  {
+   "cell": [
+    36,
+    10
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+   "steps": "0-59"
+  },
+  {
+   "cell": [
+    41,
+    12
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep1.json.gz",
+   "steps": "0-43"
+  },
+  {
+   "cell": [
+    35,
+    15
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+   "steps": "0-69"
+  },
+  {
+   "cell": [
+    41,
+    15
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+   "steps": "0-72"
+  },
+  {
+   "cell": [
+    41,
+    9
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+   "steps": "0-73"
+  }
+ ],
+ "lava_cols": [],
+ "combat": {
+  "kills": 0,
+  "damage_taken": 0,
+  "deaths": 0,
+  "samples": [
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+    "steps": "0-87"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep1.json.gz",
+    "steps": "0-69"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+    "steps": "0-55"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+    "steps": "0-63"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+    "steps": "0-32"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+    "steps": "0-35"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep1.json.gz",
+    "steps": "0-66"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+    "steps": "0-67"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+    "steps": "0-34"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+    "steps": "0-34"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep0.json.gz",
+    "steps": "0-59"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep1.json.gz",
+    "steps": "0-43"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep2.json.gz",
+    "steps": "0-69"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep3.json.gz",
+    "steps": "0-72"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Boxoban-Hard-v0__ep4.json.gz",
+    "steps": "0-73"
+   }
+  ]
+ },
+ "failure_causes": [],
+ "fired": []
+}

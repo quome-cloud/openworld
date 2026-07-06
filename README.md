@@ -489,7 +489,7 @@ same results (`cd paper && tectonic main.tex`).
 ## 📚 Citation
 
 OpenWorld is described in **three companion papers** (2026 — arXiv preprints, currently under
-review). Cite the one(s) your work builds on; cite the software too if you use the code.
+review). Cite the one(s) your work builds on.
 
 | If your work uses… | Cite |
 |---|---|
@@ -498,12 +498,12 @@ review). Cite the one(s) your work builds on; cite the software too if you use t
 | The **ARC-AGI-3** source-free result — the perceptual code-world-model agent and its solve traces | **③ Solving ARC-AGI-3** |
 
 <details>
-<summary><b>BibTeX</b> — three papers + software</summary>
+<summary><b>BibTeX</b> — three papers</summary>
 
 ```bibtex
 @misc{schwoebel2026worldcomputing,
   title  = {World Computing: Prototyping and Evaluating Verified Code World Models},
-  author = {Schwoebel, Jim and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
+  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
             and Overbay, Collin and Bhatt, Manish and Thorstenson, Rome and Frasch, Martin G.},
   year   = {2026},
   note   = {arXiv preprint, under review}
@@ -511,7 +511,7 @@ review). Cite the one(s) your work builds on; cite the software too if you use t
 
 @misc{schwoebel2026worldtime,
   title  = {World-Time Compute with Verified Code World Models},
-  author = {Schwoebel, Jim and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
+  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
             and Overbay, Collin and Klaus, Christopher and Edmond, Anderson and Bhatt, Manish
             and Thorstenson, Rome and Tsai, Jessica and Frasch, Martin G.},
   year   = {2026},
@@ -520,26 +520,17 @@ review). Cite the one(s) your work builds on; cite the software too if you use t
 
 @misc{schwoebel2026arcagi3,
   title  = {Solving ARC-AGI-3 with Perceptual Code World Models},
-  author = {Schwoebel, Jim and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
+  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
             and Overbay, Collin and Klaus, Christopher and Bhatt, Manish and Thorstenson, Rome
             and Tsai, Jessica and Frasch, Martin G.},
   year   = {2026},
   note   = {arXiv preprint, under review}
 }
-
-@software{schwoebel_openworld_2026,
-  author  = {Schwoebel, Jim},
-  title   = {{OpenWorld}: A Zero-Dependency Framework for Verified Symbolic World Models},
-  year    = {2026},
-  version = {0.3.0},
-  url     = {https://github.com/quome-cloud/openworld}
-}
 ```
 </details>
 
 > **Note:** all three papers are under review; arXiv IDs / DOIs will be filled in here on
-> release. Until then please cite them as preprints (above) and cite the `@software` entry
-> for the code itself.
+> release. Until then please cite them as preprints (above).
 
 ---
 

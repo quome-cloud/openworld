@@ -39,314 +39,316 @@
 \centering\vfill
 {\owmark[1.4]}\par\vskip14pt
 {\color{owdeep}\bfseries\LARGE Solving ARC-AGI-3 with Code World Models\par}\vskip8pt
-{\color{owblue}\large First perfect source-free result: 25/25 games — a source-free agent writes a verified world model, then reasons the win\par}\vskip18pt
-{\color{owink}\normalsize Jim Schwoebel — Quome / OpenWorld\par}\vskip3pt
-{\color{owmuted}\small github.com/quome-cloud/openworld\par}
+{\color{owblue}\large First time all 25 games were solved without ever reading the game's code: the agent writes a little program that copies the game's rules, then figures out how to win\par}\vskip18pt
+{\color{owink}\normalsize Jim Schwoebel --- Quome / OpenWorld\par}\vskip3pt
+{\color{owmuted}\small github.com/quome-cloud/openworld\par}\vskip12pt
+\includegraphics[width=1.7cm]{qr_openworld.png}\par\vskip2pt
+{\color{owmuted}\scriptsize scan to open \& star the repo\par}
 \vfill
 \end{frame}
 
-\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}{The whole talk on one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
-{\color{owdeep}\bfseries\Large The problem}\\[10pt]{\color{owmuted}\large What is ARC-AGI-3 — and why it is hard}\vfill\end{frame}
-\begin{frame}{The interactive reasoning frontier}
+{\color{owdeep}\bfseries\Large The problem}\\[10pt]{\color{owmuted}\large What ARC-AGI-3 is, and why it is hard}\vfill\end{frame}
+\begin{frame}{Puzzles you can only crack by playing}
 \begin{itemize}
-  \item ARC-AGI-1/-2: abstraction from static input-output grids
-  \item ARC-AGI-3: interactive games; rules and goals revealed only by acting
-  \item Each game: a 64x64 grid, 16 colors, 6-10 levels
-  \item Isolates exploration, dynamics modeling, goal-setting, planning
-  \item By design avoids language and external knowledge
+  \item Older ARC puzzles: look at a before-and-after grid and spot the pattern
+  \item ARC-AGI-3: little video-game puzzles where you learn the rules and the goal only by playing
+  \item Each game: a 64x64 grid of dots, 16 colors, 6 to 10 levels
+  \item Tests exploring, learning how things move, guessing the goal, and planning
+  \item On purpose: no words, no outside knowledge -- just the screen
 \end{itemize}
 \end{frame}
-\begin{frame}{A worked example: the game ka59}
+\begin{frame}{A real example: the game ka59}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_example_ka59.png}\vskip3pt{\color{owmuted}\footnotesize Two rooms, a corridor, a purple door: navigate then click to clear the level\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_example_ka59.png}\vskip3pt{\color{owmuted}\footnotesize Two rooms, a hallway, a purple door: walk over, then click to clear the level\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Agent is told nothing: no rules, no goal in words
-  \item Actions are directional (1-5,7) or a coordinate click (ACTION6)
-  \item The win is an ordered procedure, not a single reachable state
+  \item The agent is told nothing: no rules, no goal in words
+  \item You can move (buttons 1-5,7) or click a spot on the grid (ACTION6)
+  \item Winning is a set of steps in the right order, not one good screen
 \end{itemize}}
 \end{frame}
 \begin{frame}{Why it is hard}
 \begin{itemize}
-  \item Human-calibrated: people solve 100\% of environments
-  \item Frontier LLM agents score below 1\% (March 2026)
-  \item No instructions; the win condition must be discovered
-  \item Wins span many steps with no reward until the end
+  \item People solve every one of these games; 100\%
+  \item The best AI agents scored under 1\% (March 2026)
+  \item No instructions; you have to discover how to win on your own
+  \item A win takes many steps, and you get nothing until the very end
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE The hard part is not modeling the game -- it is figuring out what you are trying to do.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE The hard part is not copying how the game works. It is figuring out what you are supposed to be doing.\par}\vfill\end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
-{\color{owdeep}\bfseries\Large The recipe}\\[10pt]{\color{owmuted}\large A verified code world model, built by acting}\vfill\end{frame}
+{\color{owdeep}\bfseries\Large The recipe}\\[10pt]{\color{owmuted}\large Write a rule-copy program by playing, and keep checking it}\vfill\end{frame}
 \begin{frame}{The loop, in six steps}\vfill\centering
 \resizebox{0.98\textwidth}{!}{\begin{tikzpicture}[node distance=5mm and 5mm,
   sb/.style={draw=owteal,line width=1pt,rounded corners=4pt,fill=white,inner sep=5pt,
   text width=18mm,align=center,minimum height=17mm,font=\small,text=owdeep}]
-\node[sb] (n0) {\textbf{1}\\ Perceive};\node[sb,right=of n0] (n1) {\textbf{2}\\ Explore};\node[sb,right=of n1] (n2) {\textbf{3}\\ Synthesize};\node[sb,right=of n2] (n3) {\textbf{4}\\ Reason goal};\node[sb,right=of n3] (n4) {\textbf{5}\\ Plan};\node[sb,right=of n4] (n5) {\textbf{6}\\ Verify};
+\node[sb] (n0) {\textbf{1}\\ Look};\node[sb,right=of n0] (n1) {\textbf{2}\\ Explore};\node[sb,right=of n1] (n2) {\textbf{3}\\ Write the rules};\node[sb,right=of n2] (n3) {\textbf{4}\\ Guess the goal};\node[sb,right=of n3] (n4) {\textbf{5}\\ Plan};\node[sb,right=of n4] (n5) {\textbf{6}\\ Check};
 \draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n0) -- (n1);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n1) -- (n2);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n2) -- (n3);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n3) -- (n4);\draw[-{Latex[length=2mm]},owochre,line width=1.1pt] (n4) -- (n5);
 \end{tikzpicture}}\vfill\end{frame}
 \begin{frame}{How the agent solves a game}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize Perceive -> explore -> synthesize verified code -> reason goal -> plan -> replay-verify\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_architecture.png}\vskip3pt{\color{owmuted}\footnotesize Look -> explore -> write the rules as code -> guess the goal -> plan -> re-play the moves to prove it works\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Process-isolated behind a source-free boundary (never reads game code)
-  \item Masked-frame perceptor maps pixels to a symbolic state
-  \item Each solve becomes a serveable OpenWorld World
+  \item Kept in a locked box that never reads the game's code
+  \item Turns the picture into simple facts about what is on the screen
+  \item Every solve becomes a working world you can open and play
 \end{itemize}}
 \end{frame}
-\begin{frame}{The loop, in plain steps}
+\begin{frame}{The loop, in plain words}
 \begin{itemize}
-  \item Look around: gather (state, action, next-state) facts by acting
-  \item Write the rule as code: an LLM writes predict(frame, action)
-  \item Keep it only if it exact-matches held-out transitions (gate 1)
-  \item Reason the goal: what raises levels\_completed?
-  \item Plan inside the code, then replay-verify on the real engine (gate 2)
+  \item Poke around: act, and write down 'from this screen, this button gave that screen'
+  \item Write the rule as code: the AI writes a little program that predicts the next screen
+  \item Keep it only if it gets examples it had not seen exactly right (check 1)
+  \item Guess the goal: what makes the level counter go up?
+  \item Plan inside the program, then re-play the moves against the real game to prove it (check 2)
 \end{itemize}
 \end{frame}
-\begin{frame}{Anatomy of a world model}
+\begin{frame}{What a world model is made of}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_anatomy.png}\vskip3pt{\color{owmuted}\footnotesize The model of a world is itself a World -- same five parts, and worlds nest\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_anatomy.png}\vskip3pt{\color{owmuted}\footnotesize The copy of a game is itself a little world -- same five parts, and worlds fit inside worlds\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item State, actions, transition, perception, reward
-  \item Modeling = building a World whose transition reproduces the game
-  \item CompositeWorld = a world inside a world
+  \item Where things are, what you can do, how it changes, what you see, what counts as good
+  \item Copying a game means building a world whose changes match the real one
+  \item A world can hold another world inside it
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Modeling is not the binding wall\par}\vfill\end{frame}
-\begin{frame}{The world model IS code}
+{\color{owdeep}\bfseries\Large Copying the game is not the wall\par}\vfill\end{frame}
+\begin{frame}{The copy of the game is just code}
 \begin{itemize}
-  \item Games are perfectly repeatable: determinism = 1.00
-  \item So the rules can be written down exactly as Python
-  \item A program is banked only if it exact-matches held-out transitions
-  \item Claude: 49\% single-step exact-match on 21 changing games
-  \item 3 near-perfect; small local models get almost nothing
+  \item The games repeat perfectly: same move, same result, every time (score 1.00)
+  \item So the rules can be written out exactly, as Python code
+  \item A program is kept only if it gets unseen examples exactly right
+  \item Claude: on 21 changing games, it got the whole next screen right 49\% of the time
+  \item 3 were nearly perfect; small local models got almost nothing
 \end{itemize}
 \end{frame}
-\begin{frame}{Verified-code fidelity by model}
+\begin{frame}{How well each model copies the rules}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_fidelity.png}\vskip3pt{\color{owmuted}\footnotesize Claude re-writes the game's rules as working code far better than local models\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_fidelity.png}\vskip3pt{\color{owmuted}\footnotesize Claude rewrites the game's rules as working code far better than the small local models\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item One wrong cell in the 64x64 frame fails the check
-  \item Capability dominates: qwen-32B and qwen-7B are far behind
-  \item This is single-step fidelity -- 0 games are solved here, by design
+  \item One wrong dot in the 64x64 screen and it fails the check
+  \item The smarter model wins big: qwen-32B and qwen-7B are far behind
+  \item This only tests next-screen accuracy -- no games are won here, on purpose
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE The dynamics are exactly recoverable as verified code. Building the copy of the game is the easy half.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE The rules can be copied exactly, as checked code. Building the copy of the game is the easy half.\par}\vfill\end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
-{\color{owdeep}\bfseries\Large The wall}\\[10pt]{\color{owmuted}\large Wins are ordered procedures, not states}\vfill\end{frame}
-\begin{frame}{Goal-as-state vs goal-as-procedure}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\end{frame}
-\begin{frame}{Four principled goal-discovery methods -- all fail}
+{\color{owdeep}\bfseries\Large The wall}\\[10pt]{\color{owmuted}\large A win is a recipe of steps in order, not one good screen}\vfill\end{frame}
+\begin{frame}{One good screen vs a recipe of steps}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{arc3_goal_as_procedure.png}\end{frame}
+\begin{frame}{Four careful ways to guess the goal -- all fail}
 \begin{itemize}
-  \item Atomic candidate-goal objectives (reach/cover/collect): 0
-  \item Frontier-LLM goal hypotheses, open- and closed-loop: 0
-  \item Bayesian active inference over composite sub-worlds: 0
-  \item Source-free engine reconstruction + certificate: 0
-  \item All solve 0 hard games -- even handed a perfect (fidelity-1.0) model
+  \item Try simple goals (get here / cover this / collect that): 0
+  \item Ask a top AI to guess the goal, with and without feedback: 0
+  \item Reason about goals across the nested sub-worlds: 0
+  \item Rebuild the game engine from play and prove a goal: 0
+  \item All win 0 of the hard games -- even when handed a perfect copy of the rules
 \end{itemize}
 \end{frame}
-\begin{frame}{Why automated goal discovery cannot cross it}
+\begin{frame}{Why guessing the goal by machine cannot cross it}
 \begin{itemize}
-  \item Exploration saturates a tiny region (50-138 states), triggers 0 reward
-  \item One-shot goal guesses: on s5i5, a timer is mistaken for the objective
-  \item Closing the loop fails: negative feedback says wrong, not right
-  \item E146 exhaustive cold-search battery: 0 new source-free levels
-  \item The bottleneck is goal inference, not modeling/planning/coverage
+  \item Exploring only touches a tiny corner (50-138 screens) and never trips the reward
+  \item One-shot guesses miss: on s5i5, it thinks a timer is the goal
+  \item Adding feedback does not help: it only says 'wrong', never 'warmer'
+  \item A huge cold brute-force sweep (E146): 0 new games won this way
+  \item The stuck point is guessing the goal -- not copying, planning, or exploring
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE A world model is worthless until it contains a verified, win-terminating path -- breadth of exploration does not help.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE A copy of the game is useless until it holds a proven path to the win. Exploring more of the game does not help.\par}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large The strategy landscape\par}\vfill\end{frame}
-\begin{frame}{Strategy x game: what solves what}
+{\color{owdeep}\bfseries\Large The landscape of approaches\par}\vfill\end{frame}
+\begin{frame}{Which approach solves which game}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_strategy_heatmap.png}\vskip3pt{\color{owmuted}\footnotesize Goal-discovery columns are empty; only the reasoning agent lights the walls\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_strategy_heatmap.png}\vskip3pt{\color{owmuted}\footnotesize The goal-guessing columns are empty; only the reasoning agent lights up the hard games\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Directed search and graph exploration each reach 6 games
-  \item Multi-perception consensus reaches 10 (best automated tier)
-  \item The live coding agent lights up the procedural walls no method touches
+  \item Directed search and map-building each solve 6 games
+  \item Combining several ways of seeing reaches 10 (best of the automatic tiers)
+  \item The live coding agent lights up the recipe-walls nothing else can touch
 \end{itemize}}
 \end{frame}
-\begin{frame}{Three categories of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Goal-discovery}\par\smallskip{\small All fail — 0 walls, even on a perfect model}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Perception \& search}\par\smallskip{\small Reachable games only}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only method that crosses the walls}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{The reasoning agent that writes its own world model}
+\begin{frame}{Three kinds of approach}\vfill\begin{columns}[T]\begin{column}{0.317\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Guess the goal}\par\smallskip{\small All fail -- 0 hard games, even with a perfect copy}\end{column}\begin{column}{0.317\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Seeing and searching}\par\smallskip{\small Only games you can stumble into}\end{column}\begin{column}{0.317\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Reasoning agent}\par\smallskip{\small The only way that crosses the walls}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{The reasoning agent that writes its own copy of the game}
 \begin{itemize}
-  \item Claude Code: one agentic session per game, no repeated sampling
-  \item Prompt gives only the harness API and recipe -- not the win condition
-  \item On its own the live agent solves 15/25 games
-  \item Crosses every wall the automated methods miss (dc22, g50t, ka59, ...)
-  \item Reasons the goal rather than searching a fixed hypothesis space
+  \item Claude Code: one working session per game, no trying over and over
+  \item The prompt gives only the controls and the recipe -- never how to win
+  \item On its own the live agent solves 15 of 25 games
+  \item Crosses every wall the automatic ways miss (dc22, g50t, ka59, ...)
+  \item Reasons out the goal instead of searching a fixed list of guesses
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
-{\color{owdeep}\bfseries\Large Results}\\[10pt]{\color{owmuted}\large Source-free completion, model-scaling, the atlas}\vfill\end{frame}
-\begin{frame}{The first perfect source-free result}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small games, source-free}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect result}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{Source-free completion, per game (a model-scaling result)}
+{\color{owdeep}\bfseries\Large Results}\\[10pt]{\color{owmuted}\large All 25 solved, a stronger model solves more, and the atlas}\vfill\end{frame}
+\begin{frame}{The first time every game was solved this way}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries 25/25}\\[6pt]{\color{owmuted}\small games, no code read}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 183/183}\\[6pt]{\color{owmuted}\small levels solved}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 1st}\\[6pt]{\color{owmuted}\small perfect run}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Every game solved, one by one (a stronger model solves more)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable sweeps all 25 games; a stronger model clears more walls at equal budget\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_source_matrix.png}\vskip3pt{\color{owmuted}\footnotesize Claude Fable clears all 25 games; a stronger model clears more walls for the same budget\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Claude Fable 5: 25/25 games, 183/183 levels -- the first perfect result
-  \item Primary Claude Opus 4.8: 16/25 (158 levels) on the identical harness
-  \item GPT-5.5: 12/25; prior best baseline1: 15/25 (145 levels)
-  \item All replay-verified; none use banked solutions
+  \item Claude Fable 5: 25/25 games, 183/183 levels -- the first perfect run
+  \item Main run Claude Opus 4.8: 16/25 (158 levels) on the exact same setup
+  \item GPT-5.5: 12/25; best earlier work (baseline1): 15/25 (145 levels)
+  \item All proven by re-playing the moves; none use stored answers
 \end{itemize}}
 \end{frame}
 \begin{frame}{The headline numbers, read carefully}
 \begin{itemize}
-  \item Fable 25/25 source-free, achieved 2026-07-04 09:05:14 UTC
-  \item Beats baseline1 on games, levels, and efficiency
-  \item Clears lf52's final level -- the one level no earlier run solved
-  \item Every solved game is a runnable, serveable OpenWorld World
-  \item Public games only; private held-out set not accessed
+  \item Fable 25/25 with no code read, done 2026-07-04 09:05:14 UTC
+  \item Beats the earlier best on games, levels, and how few moves it used
+  \item Clears lf52's last level -- the one level no earlier run ever solved
+  \item Every solved game is a real world you can run, open, and play
+  \item Public games only; the private hidden set was not touched
 \end{itemize}
 \end{frame}
-\begin{frame}{Model scaling: a stronger model clears more walls}
+\begin{frame}{A stronger model clears more walls}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Same harness, prompt, and budget -- only the model changes\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_arc3_scaling.png}\vskip3pt{\color{owmuted}\footnotesize Same setup, same prompt, same budget -- only the model changes\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item GPT-5.5 12 -> Opus 16 -> Fable 25 of 25 games
-  \item Fable finds each solve in \textasciitilde{}3.5x fewer tokens (23M vs 81M)
+  \item Fable finds each solve using about 3.5x less text (23M vs 81M)
 \end{itemize}}
 \end{frame}
-\begin{frame}{Action efficiency, per level (source-free, Fable)}
+\begin{frame}{How few moves it used, per level (Fable, no code read)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_rhae.png}\vskip3pt{\color{owmuted}\footnotesize Every game at or above the human baseline; per-level score min((b/a)\textasciicircum{}2 * 100, 115)\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_rhae.png}\vskip3pt{\color{owmuted}\footnotesize Every game matches or beats a person; per-level score min((b/a)\textasciicircum{}2 * 100, 115)\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Fable per-game RHAE 100.0 vs baseline1's 58 (\textasciitilde{}72\% more efficient)
-  \item 174/183 levels beat the human; 168 hit the 115 cap
-  \item Action count per level is typically about a third of the human's
-  \item Scored with arc\_agi's own calculator -- no metric re-implemented
+  \item Fable used far fewer moves than a person: score 100.0 vs the earlier best's 58 (\textasciitilde{}72\% better)
+  \item 174 of 183 levels beat the person; 168 hit the top score of 115
+  \item Moves per level are usually about a third of a person's
+  \item Scored by the game's own tool -- we did not rebuild the measure
 \end{itemize}}
 \end{frame}
-\begin{frame}{Honest baseline: levels reached vs random play}
+\begin{frame}{An honest baseline: levels reached vs random play}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_above_random.png}\vskip3pt{\color{owmuted}\footnotesize Random reaches 11/25 first levels but completes 0 games in full\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_above_random.png}\vskip3pt{\color{owmuted}\footnotesize Random play reaches the first level of 11/25, but finishes 0 games all the way\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Under offline unbounded resets, \textasciitilde{}half the >=1-level metric is free
-  \item One agent 'solve' (lp85, a repeated click) is no better than random
-  \item Distinctive value: 14 games random never reaches (the walls)
-  \item We report 16/25 strictly above random
+  \item With unlimited free restarts offline, about half the 'reached one level' count is free
+  \item One 'solve' (lp85, one click over and over) is no better than random
+  \item What really counts: 14 games random never even reaches (the walls)
+  \item So we report 16/25 as clearly better than random
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
 {\color{owdeep}\bfseries\Large The atlas: every solve is a world\par}\vfill\end{frame}
-\begin{frame}{25 games, 25 verified serveable world models}
+\begin{frame}{25 games, 25 working worlds you can open}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_maps_gallery.png}\vskip3pt{\color{owmuted}\footnotesize A solved-board frame from Fable's source-free solve of every game\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_maps_gallery.png}\vskip3pt{\color{owmuted}\footnotesize A winning screen from Fable's from-scratch solve of every game\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Each solve = masked-frame perceptor -> FunctionTransition -> CodeObjective
-  \item Serializes to a self-contained atlas card, serves at openworld serve /view
-  \item 25 visibly distinct worlds: directional, click, sokoban, mirror, synthesis
+  \item Each solve: turn the picture into facts -> a rules program -> a goal check
+  \item Saves as a one-page atlas card, and runs at openworld serve /view
+  \item 25 clearly different worlds: moving, clicking, box-pushing, mirrors, building
 \end{itemize}}
 \end{frame}
 \begin{frame}{Example solve: ka59 (7/7)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_ka59.png}\vskip3pt{\color{owmuted}\footnotesize The discovered world-model card (top) + the level-completion replay (bottom)\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_ka59.png}\vskip3pt{\color{owmuted}\footnotesize The world-model card (top) plus the level-by-level replay (bottom)\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Card graph = the level trajectory, edges labelled by button-presses
-  \item Replay = real screenshots at each level clear, re-run against the game
+  \item The card's map is the path through the levels, with each step's button on it
+  \item The replay: real screenshots at each level clear, re-run against the game
 \end{itemize}}
 \end{frame}
-\begin{frame}{Example solve: dc22 (6/6) -- a procedural wall}
+\begin{frame}{Example solve: dc22 (6/6) -- a recipe wall}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_dc22.png}\vskip3pt{\color{owmuted}\footnotesize Interleaves moves and clicks; only the reasoning agent crosses it\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_dc22.png}\vskip3pt{\color{owmuted}\footnotesize Mixes moving and clicking; only the reasoning agent crosses it\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Random never reaches level 1 here
-  \item A keybox-to-bridge protocol relocates a movable structure
+  \item Random play never even reaches level 1 here
+  \item A key-and-box routine slides a movable structure into place
 \end{itemize}}
 \end{frame}
 \begin{frame}{Example solve: g50t (7/7) -- ghost-switch}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_g50t.png}\vskip3pt{\color{owmuted}\footnotesize A rich 94-node search graph terminates in no verified win without reasoning\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_g50t.png}\vskip3pt{\color{owmuted}\footnotesize A big 94-spot map never proves a win on its own -- reasoning is what does it\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Hold-plates, toggle-buttons, ring-warps, a pinball ghost echo
-  \item The value is the win-terminating chain, not the map's breadth
+  \item Hold-down plates, toggle buttons, warp rings, a pinball ghost that copies you
+  \item The value is the proven winning chain, not how big the map is
 \end{itemize}}
 \end{frame}
-\begin{frame}{The final wall: lf52 (10/10)}
+\begin{frame}{The last wall: lf52 (10/10)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_lf52.png}\vskip3pt{\color{owmuted}\footnotesize The single level no run had solved -- a 914-action verified path\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_lf52.png}\vskip3pt{\color{owmuted}\footnotesize The one level no run had ever solved -- a proven 914-move path\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Fell to a persistent-workspace deep-wall protocol
-  \item Build a verified simulator of the level, then search it offline at scale
-  \item Its solve completed the perfect 25/25 sweep
+  \item Cracked with a keep-your-notes deep-wall routine
+  \item Build a proven copy of the level, then search it offline at full scale
+  \item Solving it completed the perfect 25/25 sweep
 \end{itemize}}
 \end{frame}
 \begin{frame}{Example solve: su15 (9/9) -- merge and deliver}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_su15.png}\vskip3pt{\color{owmuted}\footnotesize Click-gather tiers merge and escalate; a 141-click solution\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc3_replay_su15.png}\vskip3pt{\color{owmuted}\footnotesize Click to gather; matching tiers merge and grow; a 141-click solution\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Sprite click targets inferred from pixels alone
-  \item Round-trips through an OpenWorld World
+  \item The clickable targets were figured out from the pixels alone
+  \item Runs as a real, openable OpenWorld world
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large How the models actually solve (run lineages)\par}\vfill\end{frame}
-\begin{frame}{Anatomy of a solve}
+{\color{owdeep}\bfseries\Large How the models actually solve (the play-by-play)\par}\vfill\end{frame}
+\begin{frame}{The shape of a solve}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_cardiogram.png}\vskip3pt{\color{owmuted}\footnotesize Read/Write-heavy start (build) -> Bash-heavy middle (search) -> Edit repairs\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_cardiogram.png}\vskip3pt{\color{owmuted}\footnotesize Read/Write-heavy start (building) -> Bash-heavy middle (searching) -> Edit fixes\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Level-ups fall as punctuated events, not steady progress
-  \item Modeling then search -- the shared shape of every solve
+  \item Levels get cleared in sudden jumps, not steady progress
+  \item Build first, then search -- the same shape in every solve
 \end{itemize}}
 \end{frame}
-\begin{frame}{The vocabulary each game forces the agent to invent}
+\begin{frame}{The words each game made the agent invent}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_concepts.png}\vskip3pt{\color{owmuted}\footnotesize Code identifiers the agent writes recover each game's mechanics unsupervised\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_concepts.png}\vskip3pt{\color{owmuted}\footnotesize The names the agent chose in its code recover each game's mechanics, with no help\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item ka59 -> box/push/ring (sokoban); ft09 -> blk/slots (stencil)
-  \item The concepts an agent had to invent characterize the solution class
+  \item ka59 -> box/push/ring (box-pushing); ft09 -> blk/slots (stencil)
+  \item The ideas the agent had to invent tell you what kind of puzzle it was
 \end{itemize}}
 \end{frame}
-\begin{frame}{Solution signatures}
+\begin{frame}{The signature of each solution}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_signatures.png}\vskip3pt{\color{owmuted}\footnotesize Every banked path as an action strip: click, directional, or mixed\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_signatures.png}\vskip3pt{\color{owmuted}\footnotesize Each winning path as a strip of moves: clicks, moving, or a mix\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Ochre = click ACTION6; blue = directional 1-5,7
-  \item A visual taxonomy of solution shape and length (lf52 longest)
+  \item Ochre = click (ACTION6); blue = moving (1-5,7)
+  \item A picture-map of each solution's shape and length (lf52 is longest)
 \end{itemize}}
 \end{frame}
-\begin{frame}{Inferred click targets}
+\begin{frame}{Where the agent clicked}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_clicks.png}\vskip3pt{\color{owmuted}\footnotesize Density of banked click coordinates on the 64x64 board -- no privileged target list\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{e150_clicks.png}\vskip3pt{\color{owmuted}\footnotesize How thick the winning clicks land on the 64x64 board -- no hidden list of targets\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item The sprite targets the agent inferred from pixels alone
-  \item opus is perception-heavy; Fable leans on memory recall + verification
+  \item The clickable spots the agent figured out from the pixels alone
+  \item opus looks harder at the picture; Fable leans on memory plus checking
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {The problem};\node[stlbl] at (3.4,-1.15) {The recipe};\node[stlbl] at (6.8,-1.15) {The wall};\node[stlbl] at (10.2,-1.15) {Results};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
-{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Honest limitations \& what comes next}\vfill\end{frame}
-\begin{frame}{Best-of-N; single-attempt reliability is low}
+{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Honest limits and what comes next}\vfill\end{frame}
+\begin{frame}{It is the best of many tries; a single try is not reliable}
 \begin{itemize}
-  \item Each solve is the verified best of many attempts, not a single draw
-  \item \textasciitilde{}823 sessions across 25 games (mean \textasciitilde{}33/game)
-  \item Full wins on \textasciitilde{}6\% of attempts overall, as low as \textasciitilde{}2\% on bp35/lf52
-  \item Clean fixed-prompt, multi-seed variance (N>1) is a labeled next step
+  \item Each solve is the proven best of many tries, not one lucky shot
+  \item About 823 sessions across 25 games (about 33 per game)
+  \item A full win on about 6\% of tries overall, as low as about 2\% on bp35/lf52
+  \item A clean fixed-prompt, many-seed test (more than 1) is a clear next step
 \end{itemize}
 \end{frame}
-\begin{frame}{Training-memory contamination is unmeasured}
+\begin{frame}{We cannot yet measure if the model saw these games in training}
 \begin{itemize}
-  \item The protocol audits no runtime source read -- it is measured per run
-  \item It cannot rule out a public game sitting in the model's weights
-  \item This channel affects every frontier-model result, prior SOTA included
-  \item Quick check: Fable recognised 0/25 games from ID alone (not proof)
+  \item We check that no run reads the game's code -- measured every run
+  \item But we cannot rule out a public game already sitting in the model's memory
+  \item This applies to every top-model result, the earlier best included
+  \item Quick check: Fable knew 0/25 games from the name alone (not proof)
 \end{itemize}
 \end{frame}
-\begin{frame}{Offline, unbounded resets, N=1}
+\begin{frame}{Offline, unlimited restarts, one run}
 \begin{itemize}
-  \item All solves computed offline with unbounded resets, deterministic replay
-  \item Not the leaderboard's live action-efficiency penalty
-  \item A fresh fair-budget result; a repeat or live run may revise it
-  \item Cost is an uncontrolled estimate; the perfect run was not the cheap one
+  \item All solves are offline, with unlimited restarts and perfect replay
+  \item Not the live leaderboard, which docks you for extra moves
+  \item A fresh fair-budget result; a repeat or a live run might change it
+  \item The cost is a rough guess; the perfect run was not the cheap one
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
@@ -354,22 +356,23 @@
 {\color{owdeep}\bfseries\Large Conclusion\par}\vfill\end{frame}
 \begin{frame}{What we showed}
 \begin{itemize}
-  \item First perfect ARC-AGI-3 result, and it is source-free: Fable 25/25
-  \item Modeling is not the wall -- dynamics are exactly writable as code
-  \item The true wall is goal-as-procedure: state-scoring banks 0
-  \item Only a reasoning agent that writes its own world model crosses it
-  \item Model scale carries completion from 16/25 to the full sweep
+  \item First perfect ARC-AGI-3 result, and no code was ever read: Fable 25/25
+  \item Copying the game is not the wall -- the rules can be written out as code
+  \item The real wall is the win being a recipe of steps: one-screen scoring wins 0
+  \item Only a reasoning agent that writes its own copy of the game crosses it
+  \item A stronger model carries it from 16/25 to solving every game
 \end{itemize}
 \end{frame}
-\begin{frame}{The transferable lesson for builders}
+\begin{frame}{The takeaway for builders}
 \begin{itemize}
-  \item Interactive-reasoning wins are ordered procedures, not good screens
-  \item Any single-state score fails even on a perfect model
-  \item Aim at procedure discovery, not state scoring
-  \item Every solver is an open, replay- and OpenWorld-verified World
-  \item Next: live-protocol RHAE, N>1 variance, contamination-controlled model
+  \item In these games a win is a recipe of steps in order, not one good screen
+  \item Any one-screen score fails, even with a perfect copy of the game
+  \item Aim at finding the recipe, not at scoring screens
+  \item Every solver is an open, replay-proven, runnable world
+  \item Next: live-run efficiency, many-seed spread, a training-memory-controlled test
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE Goal-as-procedure is the wall. Reasoning is the ladder. Every solve downloads, re-runs, and serves as a world.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE The recipe of steps is the wall. Reasoning is the ladder. Every solve downloads, re-runs, and opens as a world.\par}\vfill\end{frame}
+\begin{frame}[plain]\centering\vfill{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip12pt{\color{owdeep}\bfseries\Large The code is open --- go star it\par}\vskip16pt\includegraphics[width=4.2cm]{qr_openworld.png}\par\vskip12pt{\color{owblue}\large github.com/quome-cloud/openworld\par}\vskip4pt{\color{owmuted}\small 100 world recipes \textperiodcentered\ the papers \textperiodcentered\ every experiment\par}\vfill\end{frame}
 \end{document}

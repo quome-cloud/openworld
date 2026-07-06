@@ -39,355 +39,358 @@
 \centering\vfill
 {\owmark[1.4]}\par\vskip14pt
 {\color{owdeep}\bfseries\LARGE World-Time Computing\par}\vskip8pt
-{\color{owblue}\large A Next Frontier for Simulated Learning — turning compute into unlimited, exactly-labeled experience\par}\vskip18pt
-{\color{owink}\normalsize Jim Schwoebel — Quome / OpenWorld\par}\vskip3pt
-{\color{owmuted}\small github.com/quome-cloud/openworld\par}
+{\color{owblue}\large A new way to learn: build practice worlds and turn computer time into endless practice with guaranteed-correct answers\par}\vskip18pt
+{\color{owink}\normalsize Jim Schwoebel --- Quome / OpenWorld\par}\vskip3pt
+{\color{owmuted}\small github.com/quome-cloud/openworld\par}\vskip12pt
+\includegraphics[width=1.7cm]{qr_openworld.png}\par\vskip2pt
+{\color{owmuted}\scriptsize scan to open \& star the repo\par}
 \vfill
 \end{frame}
 
-\begin{frame}{The talk in one map}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
-\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+\begin{frame}{The whole talk on one page}\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stn] (s0) at (0.0,0) {1};\node[stn] (s1) at (3.4,0) {2};\node[stn] (s2) at (6.8,0) {3};\node[stn] (s3) at (10.2,0) {4};\node[stn] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\vfill\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
-{\color{owdeep}\bfseries\Large Motivation}\\[10pt]{\color{owmuted}\large Manufacturing experience}\vfill\end{frame}
-\begin{frame}{The problem: experience is scarce}
+{\color{owdeep}\bfseries\Large Why we did this}\\[10pt]{\color{owmuted}\large Making practice out of thin air}\vfill\end{frame}
+\begin{frame}{The problem: real practice is hard to get}
 \begin{itemize}
-  \item LLMs generalize only after many real, labeled examples
-  \item In most domains that experience is scarce and costly
-  \item We study a way to manufacture it cheaply
-  \item Idea: when dynamics can be written as code, simulate the experience
+  \item AI gets good only after seeing many real examples with the right answers
+  \item In most areas those examples are rare and expensive
+  \item We found a cheap way to make them
+  \item The trick: when a world's rules can be written as code, we can simulate the practice
 \end{itemize}
 \end{frame}
-\begin{frame}{Two species of world model}
+\begin{frame}{Two kinds of world model}
 \begin{itemize}
-  \item Perceptual/generative: learned nets, latents/pixels/video (Dreamer, Genie, Sora)
-  \item Data-hungry, compounding error, opaque weights
-  \item Code World Models (CWMs): transition is a readable program over symbolic state
-  \item Synthesized by an LLM, verified before use, exact rollouts, zero training data
-\end{itemize}
-\end{frame}
-\begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE Where spatial-intelligence systems learn what cannot be told, OpenWorld writes down what can be told -- and verifies it.\par}\vfill\end{frame}
-\begin{frame}{Two conditions make it work}
-\begin{itemize}
-  \item Worlds must not lie: dynamics are verified code, not learned approximations
-  \item Accepted only if it parses, runs sandboxed, preserves invariants, survives a critic
-  \item Need many worlds -- each must be cheap to build
-  \item OpenWorld makes authoring a verified world a minutes-scale activity
-\end{itemize}
-\end{frame}
-\begin{frame}{Contributions}
-\begin{itemize}
-  \item World-time compute on real domains, with cross-world transfer
-  \item Why it must be verified code: exact rollouts, no compounding error
-  \item OpenWorld substrate + full reproducibility (79 experiments, seed-fixed)
+  \item The picture kind: big learned networks that guess pixels or video (Dreamer, Genie, Sora)
+  \item They need tons of data, small mistakes pile up, and you can't read what's inside
+  \item The code kind (CWMs): the rules are a plain program you can read, over simple facts
+  \item An AI writes the program, we check it is right, then it runs exactly and needs no training data
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Problem Setting\par}\vfill\end{frame}
-\begin{frame}{Symbolic-state worlds}
+{\color{owdeep}\bfseries\LARGE Picture-based systems try to learn things nobody can put into words. OpenWorld writes down the rules that CAN be put into words -- and then checks them.\par}\vfill\end{frame}
+\begin{frame}{Two things have to be true for this to work}
 \begin{itemize}
-  \item State is JSON-serializable; actions discrete; dynamics declarable as rules
-  \item Covers triage, negotiation, portfolios, sprints, program repair
-  \item Not pixel-native domains -- that is the scope boundary
-  \item The adversary is model error: hallucinated transitions, silently wrong code
+  \item The practice worlds must never lie: their rules are checked code, not a guess
+  \item We only keep a world if it reads cleanly, runs safely, keeps its promises, and passes a reviewer
+  \item You need many worlds -- so each one has to be cheap to build
+  \item OpenWorld lets you build a checked world in minutes
 \end{itemize}
 \end{frame}
-\begin{frame}{A world model, formally}
+\begin{frame}{What we contribute}
 \begin{itemize}
-  \item W = (states, actions, s0, transition tau, weighted objectives, invariants)
-  \item Practitioner declares everything but tau (schema, actions, rules, dials)
-  \item Framework produces tau by synthesis under verification, not learning
-  \item Certifies invariant-consistency, not equality to true dynamics
+  \item Turning computer time into practice on real tasks, plus a skill that carries to new worlds
+  \item Why it has to be checked code: it runs exactly, so small mistakes never pile up
+  \item The OpenWorld toolkit, fully repeatable (79 experiments, fixed random seeds)
 \end{itemize}
 \end{frame}
-\begin{frame}{Verified code is exact at every depth}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{hero.png}\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Method \& Experimental Setup\par}\vfill\end{frame}
-\begin{frame}{Worlds and models}
+{\color{owdeep}\bfseries\Large Setting up the problem\par}\vfill\end{frame}
+\begin{frame}{Worlds made of plain facts}
 \begin{itemize}
-  \item Three oracle worlds: sprint, orchard, triage (hand-written ground truth)
-  \item Coding world: 20 buggy-function repair tasks, transition = test execution
-  \item Local Ollama models: qwen2.5 1.5B/3B/7B, plus Llama-3.1-8B, Gemma2-9B
-  \item Fine-tuning runs: single cloud A100, 4-bit QLoRA
+  \item The state is simple data; the moves are a short list; the rules can be spelled out
+  \item Covers things like triage, bargaining, portfolios, sprints, fixing programs
+  \item Not picture-heavy worlds -- that is where this stops
+  \item The enemy is a wrong model: made-up moves, code that is quietly wrong
 \end{itemize}
 \end{frame}
-\begin{frame}{Baselines and metrics}
+\begin{frame}{What a world model is, plainly}
 \begin{itemize}
-  \item LLMTransition: same backbone predicting each next state (learned-style proxy)
-  \item Trained MLP + 1-NN on K = 100 / 1k / 10k random transitions
-  \item Exact-state match, first-divergence step, final L1 error; pass@k for repair
-  \item 95\% Wilson CIs; every number regenerates from one script
+  \item A world = its states, its moves, a start, a rule for what happens next, goals, and promises it must keep
+  \item The person spells out everything except the next-step rule (facts, moves, rules, dials)
+  \item The tool writes the next-step rule by building and checking it, not by learning it
+  \item It proves the rule keeps its promises, not that it matches the true world perfectly
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+\begin{frame}{Checked code stays right no matter how far you go}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{hero.png}\end{frame}
+\begin{frame}[plain]\centering\vfill
+{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
+{\color{owdeep}\bfseries\Large How we ran the tests\par}\vfill\end{frame}
+\begin{frame}{The worlds and the models}
+\begin{itemize}
+  \item Three known-answer worlds: sprint, orchard, triage (we wrote the true rules)
+  \item A coding world: 20 buggy functions to fix, where running the tests decides what happens
+  \item Local models: qwen2.5 1.5B/3B/7B, plus Llama-3.1-8B, Gemma2-9B
+  \item Extra-training runs: one cloud A100, low-memory 4-bit method
+\end{itemize}
+\end{frame}
+\begin{frame}{What we compared against, and how we scored}
+\begin{itemize}
+  \item Same model guessing each next step directly (stand-in for the learned way)
+  \item A trained net and a nearest-example lookup on 100 / 1k / 10k random steps
+  \item Did it match exactly, where did it first go wrong, how far off at the end; pass@k for fixing code
+  \item 95\% confidence ranges; every number comes back out of one script
+\end{itemize}
+\end{frame}
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[stc] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 2}\\[5pt]
-{\color{owdeep}\bfseries\Large The mechanism}\\[10pt]{\color{owmuted}\large Verified code + world-time compute}\vfill\end{frame}
-\begin{frame}{World-time compute, in three numbers}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 24/24}\\[6pt]{\color{owmuted}\small exact rollouts (code)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 0/24}\\[6pt]{\color{owmuted}\small exact rollouts (LLM)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small held-out lift at 0.5B}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{Verified code eliminates compounding error}
+{\color{owdeep}\bfseries\Large The core idea}\\[10pt]{\color{owmuted}\large Checked code + turning compute into practice}\vfill\end{frame}
+\begin{frame}{The whole idea in three numbers}\vfill\begin{columns}[c]\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 24/24}\\[6pt]{\color{owmuted}\small runs exactly right (code)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owdeep}\fontsize{40}{44}\selectfont\bfseries 0/24}\\[6pt]{\color{owmuted}\small runs exactly right (guessing)}\end{column}\begin{column}{0.323\textwidth}\centering{\color{owochre}\fontsize{40}{44}\selectfont\bfseries +29 pts}\\[6pt]{\color{owmuted}\small boost on new worlds at 0.5B}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Checked code stops mistakes from piling up}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hero.png}\vskip3pt{\color{owmuted}\footnotesize A: code exact at every depth vs LLM diverging by step \textasciitilde{}2.3. B: world-time compute payoff.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hero.png}\vskip3pt{\color{owmuted}\footnotesize A: code stays exact all the way; guessing drifts off by about step 2.3. B: the payoff of making practice worlds.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Code (blue) matches oracle exactly across a 20-step rollout
-  \item Per-step LLM (orange) first diverges \textasciitilde{}step 2.3, never completes exactly
-  \item B: fine-tuning on 60 verified worlds lifts held-out accuracy
-  \item Largest gain for smallest models: +29 pts at 0.5B, +3 at 32B
+  \item Code (blue) matches the true answer exactly across all 20 steps
+  \item Guessing each step (orange) first drifts around step 2.3 and never finishes exactly
+  \item B: extra training on 60 checked worlds raises the score on worlds it never trained on
+  \item The smallest models gain the most: +29 pts at 0.5B, +3 at 32B
 \end{itemize}}
 \end{frame}
-\begin{frame}{Head-to-head dynamics fidelity (E1/E4/E11)}
+\begin{frame}{Head-to-head: how true the rules stay (E1/E4/E11)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_exact.png}\vskip3pt{\color{owmuted}\footnotesize Right once = exact at every depth; the per-step proxy never completes exactly\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_exact.png}\vskip3pt{\color{owmuted}\footnotesize Right once means right at every depth; the step-by-step guesser never finishes exactly\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Code rolls out at \textasciitilde{}15,000 steps/s vs the LLM's 0.32 steps/s
-  \item OOD probes: code 100\% exact from zero transitions
+  \item Code runs at about 15,000 steps a second; the guesser at 0.32 steps a second
+  \item On surprise cases: code is 100\% exact with zero practice steps
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE The robust claim is the exact-match contrast, not the mean divergence step -- compounding depends on per-world error rate.\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\LARGE The claim you can trust is the exact-match gap, not the exact step where guessing drifts -- how fast mistakes pile up depends on each world.\par}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large World-Time Compute: Traversing Worlds to Generalize\par}\vfill\end{frame}
-\begin{frame}{What world-time compute is}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{crossworld.png}\end{frame}
-\begin{frame}{Anatomy of one diagnosis world (E74)}
+{\color{owdeep}\bfseries\Large Turning Compute Into Practice: Learning Across Many Worlds\par}\vfill\end{frame}
+\begin{frame}{What this practice-making really is}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{crossworld.png}\end{frame}
+\begin{frame}{Inside one diagnosis world (E74)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{diagnosis_world.png}\vskip3pt{\color{owmuted}\footnotesize Hidden disease -> emitted symptoms; agent inverts observation to name the disease.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{diagnosis_world.png}\vskip3pt{\color{owmuted}\footnotesize A hidden disease gives off symptoms; the agent works backwards to name the disease.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Each specialty is a small hidden-state simulator with a known label
-  \item Agent treats its own verified world as ground truth
-  \item Train on many specialties, test on held-out ones
-  \item Forces the general skill, not memorization
+  \item Each specialty is a tiny simulator with a hidden cause and a known answer
+  \item The agent uses its own checked world as the source of truth
+  \item Practice on many specialties, then test on ones it never saw
+  \item This forces it to learn the real skill, not just memorize
 \end{itemize}}
 \end{frame}
-\begin{frame}{Generalization, not memorization -- and a small-model multiplier}
+\begin{frame}{It really generalizes -- and small models gain most}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_smallmodel.png}\vskip3pt{\color{owmuted}\footnotesize Lift at every model size on unseen worlds; the smaller the model, the bigger the gain\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{pres_smallmodel.png}\vskip3pt{\color{owmuted}\footnotesize A boost at every model size on worlds it never saw; the smaller the model, the bigger the boost\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item 0.5B: 37\% -> 66\%; 32B: 78\% -> 81\% toward the 86\% rules-given oracle
-  \item Heterogeneous worlds sharing no skill (E71/E73) give no transfer
+  \item 0.5B: 37\% -> 66\%; 32B: 78\% -> 81\%, closing on the 86\% you get when told the rules
+  \item Worlds that share no common skill (E71/E73) give no carry-over
 \end{itemize}}
 \end{frame}
-\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[stc] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 3}\\[5pt]
-{\color{owdeep}\bfseries\Large Scaling \& real data}\\[10pt]{\color{owmuted}\large World-count, exact labels, real domains}\vfill\end{frame}
-\begin{frame}{World-count scaling (E76)}
+{\color{owdeep}\bfseries\Large Scaling and real data}\\[10pt]{\color{owmuted}\large More worlds, correct answers, real tasks}\vfill\end{frame}
+\begin{frame}{More worlds keeps helping (E76)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_count.png}\vskip3pt{\color{owmuted}\footnotesize Held-out accuracy vs number of train worlds; still climbing at 512 worlds.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_count.png}\vskip3pt{\color{owmuted}\footnotesize Score on unseen worlds versus how many worlds you practice on; still rising at 512.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Too few worlds hurt (below 48\% base) -- overfits a narrow slice
-  \item Gain then rises monotonically, no plateau
-  \item Still climbing at 512 worlds: 59\% (+10 pts), heading toward 69\% oracle
-  \item A genuine scaling lever in the number of worlds
+  \item Too few worlds hurts (below 48\%) -- it overfits a narrow slice
+  \item After that the score keeps climbing, no flattening out
+  \item Still rising at 512 worlds: 59\% (+10 pts), heading toward the 69\% you get when told the rules
+  \item The number of worlds is a real knob you can turn
 \end{itemize}}
 \end{frame}
-\begin{frame}{Exact labels are the lever (E78b)}
+\begin{frame}{Correct answers are the real lever (E78b)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{noise_ablation.png}\vskip3pt{\color{owmuted}\footnotesize Corrupt a fraction p of training labels; accuracy falls monotonically.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{noise_ablation.png}\vskip3pt{\color{owmuted}\footnotesize Spoil a fraction p of the training answers; the score drops steadily.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item 256 worlds fixed; only training labels corrupted at rate p
-  \item Verified (p=0): 35\%; fully wrong (p=1): 19\%, at/below floor
-  \item Label exactness -- not task variety -- drives the effect
-  \item This is what separates world-time compute from domain randomization
+  \item 256 worlds, held fixed; only the training answers get corrupted at rate p
+  \item All correct (p=0): 35\%; all wrong (p=1): 19\%, at or below the floor
+  \item Correct answers -- not just having lots of tasks -- is what drives it
+  \item This is what sets our approach apart from just shuffling the tasks
 \end{itemize}}
 \end{frame}
-\begin{frame}{A coding-world family (E77)}
+\begin{frame}{A family of coding worlds (E77)}
 \begin{itemize}
-  \item 164 function-implementation worlds, each verified by its pytest oracle
-  \item In-domain: 7B pass@5 lifts 84\% -> 95\% at every size
-  \item HumanEval (OOD): hurts greedy pass@1 (78\% -> 70\%)
-  \item But transfers positively at pass@5 (87\% -> 91\%) from only 164 worlds
+  \item 164 write-this-function worlds, each checked by its own tests
+  \item Same kind of task: 7B pass@5 rises 84\% -> 95\% at every size
+  \item On outside tasks (HumanEval), it hurts the single greedy try (78\% -> 70\%)
+  \item But it helps pass@5 (87\% -> 91\%) from just 164 worlds
 \end{itemize}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Real Data: World-Time Compute on ARC-AGI\par}\vfill\end{frame}
-\begin{frame}{How WTC fine-tunes on a verified world (E80)}
+{\color{owdeep}\bfseries\Large Real Data: Practice Worlds on ARC-AGI\par}\vfill\end{frame}
+\begin{frame}{How we train on one checked world (E80)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc_method.png}\vskip3pt{\color{owmuted}\footnotesize ARC task -> augmented exactly-labeled rows -> QLoRA on frozen 4-bit Qwen2.5-7B.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc_method.png}\vskip3pt{\color{owmuted}\footnotesize An ARC puzzle becomes many correctly-answered rows, then extra training on a frozen 4-bit Qwen2.5-7B.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Each ARC task is a world with a latent rule shown by demonstrations
-  \item Rule-preserving augmentation (dihedral x color) -> unlimited labeled rows
-  \item Two strict holdouts: cross-task ladder and per-world test-time training
-  \item Corrupted-label arm is the discriminator
+  \item Each ARC puzzle is a world with a hidden rule shown by examples
+  \item Rotating and recoloring keeps the rule but makes endless correct rows
+  \item Two strict tests: a new-puzzle ladder, and practicing on each world at answer time
+  \item The spoiled-answer version is the control that tells the difference
 \end{itemize}}
 \end{frame}
-\begin{frame}{World-time compute on real ARC-AGI (E80)}
+\begin{frame}{Practice worlds on real ARC-AGI (E80)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc.png}\vskip3pt{\color{owmuted}\footnotesize Per-world TTT lifts exact-match; cross-task transfer stays weak.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{arc.png}\vskip3pt{\color{owmuted}\footnotesize Practicing on each world at answer time raises exact matches; carrying skill to new puzzles stays weak.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Zero-shot 2\% -> light 8\% -> heavy 10\% (+8 pts) with more compute
-  \item Corrupted demos fall to 2\%, at the zero-shot floor
-  \item Lift requires verified labels -- the model learns each real rule
-  \item Cross-task transfer weak (3\% -> 5\%): every ARC rule is novel
+  \item Cold start 2\% -> light practice 8\% -> heavy practice 10\% (+8 pts) with more compute
+  \item Spoiled examples fall to 2\%, back down at the cold-start floor
+  \item The boost needs correct answers -- the model learns each real rule
+  \item Carry-over to new puzzles is weak (3\% -> 5\%): every ARC rule is brand new
 \end{itemize}}
 \end{frame}
-\begin{frame}{Across real domains and modalities (E80)}
+\begin{frame}{Across real tasks and kinds of data (E80)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{worldtime_domains.png}\vskip3pt{\color{owmuted}\footnotesize Scales and collapses on symbolic domains; Bongard vision stays at chance.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{worldtime_domains.png}\vskip3pt{\color{owmuted}\footnotesize It scales on plain-fact tasks and stalls on vision; Bongard picture puzzles stay at a coin flip.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item List Functions: 35\% -> 66\% -> 69\% (heavy); corrupt 3\%
-  \item CLRS algorithms: 9\% -> 13\% -> 17\%; corrupt 4\%
-  \item Effect largest for shallow rules, smallest for long algorithm traces
-  \item Bongard-RWR (vision): flat at chance (46/48/52\%) -- the perceptual boundary
+  \item List Functions: 35\% -> 66\% -> 69\% (heavy); spoiled 3\%
+  \item CLRS algorithms: 9\% -> 13\% -> 17\%; spoiled 4\%
+  \item Biggest gains on short rules, smallest on long step-by-step algorithms
+  \item Bongard picture puzzles: flat at a coin flip (46/48/52\%) -- the vision wall
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Cross-World Transfer on a Real Domain\par}\vfill\end{frame}
-\begin{frame}{Cross-world transfer, List Functions (E84)}
+{\color{owdeep}\bfseries\Large A Skill That Carries to New Worlds\par}\vfill\end{frame}
+\begin{frame}{One skill across many worlds, List Functions (E84)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld.png}\vskip3pt{\color{owmuted}\footnotesize One adapter on 128 disjoint worlds generalizes to 60 held-out worlds.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld.png}\vskip3pt{\color{owmuted}\footnotesize One shared add-on trained on 128 separate worlds works on 60 worlds it never saw.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Cross-world 40\% (CI [35,45]) on worlds never seen
-  \item Corrupted-label control only 6\% -- a +34-pt exactness-gated lift
-  \item Gap is rule-induction transferring across worlds, not formatting
-  \item The novel axis, demonstrated on data we did not generate
+  \item 40\% (range [35,45]) on worlds it never saw
+  \item The spoiled-answer control gets only 6\% -- a +34-pt gap that needs correct answers
+  \item The gap is real rule-figuring carrying over, not just formatting
+  \item The new idea, shown on data we did not make ourselves
 \end{itemize}}
 \end{frame}
-\begin{frame}{Cross-world transfer scales with \#worlds (E84)}
+\begin{frame}{The carry-over grows with more worlds (E84)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld_ladder.png}\vskip3pt{\color{owmuted}\footnotesize Held-out accuracy 29\% -> 49\% rising then plateauing near 64 worlds.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{crossworld_ladder.png}\vskip3pt{\color{owmuted}\footnotesize Score on unseen worlds rises 29\% -> 49\%, then levels off near 64 worlds.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item Rises from 29\% at 16 worlds to a 49\% peak by 64 worlds
-  \item Corrupted-label control stays flat
-  \item A rising-then-plateauing scaling curve on real data
-  \item More verified worlds -> more transfer
+  \item The spoiled-answer control stays flat
+  \item A rise-then-level-off curve on real data
+  \item More checked worlds means more carry-over
 \end{itemize}}
 \end{frame}
-\begin{frame}{A descriptive regularity (E80)}
+\begin{frame}{A simple pattern we noticed (E80)}
 \begin{itemize}
-  \item Saturating learning curve: acc(c) = base + (C-base)(1 - e\textasciicircum{}{-c/kappa})
-  \item Asymptote tracks identifiability x realizability x headroom
-  \item Light-dose probe predicts heavy asymptote (Spearman 0.73-0.98)
-  \item Holds for a non-neural program synthesizer too (learner-invariance)
-  \item N90 worlds: List Functions 3, ARC 9, CLRS 15 -- harder needs more
+  \item The learning curve tapers off: score(c) = base + (top - base)(1 - e\textasciicircum{}{-c/kappa})
+  \item The top it reaches depends on whether the rule can be pinned down and reached, and how much room is left
+  \item A quick small dose predicts the eventual top (Spearman 0.73-0.98)
+  \item It also holds for a non-AI program-builder (so it is not about one learner)
+  \item Worlds needed to reach 90\%: List Functions 3, ARC 9, CLRS 15 -- harder needs more
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[stc] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 4}\\[5pt]
-{\color{owdeep}\bfseries\Large Boundaries}\\[10pt]{\color{owmuted}\large Where it stops working, and why}\vfill\end{frame}
-\begin{frame}{Frame-invariance is a negative (E81)}
+{\color{owdeep}\bfseries\Large Where it breaks}\\[10pt]{\color{owmuted}\large Where it stops working, and why}\vfill\end{frame}
+\begin{frame}{Different wording doesn't carry over (E81)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{frame_invariance.png}\vskip3pt{\color{owmuted}\footnotesize Cross-language-frame TTT does not beat zero-shot on either base.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{frame_invariance.png}\vskip3pt{\color{owmuted}\footnotesize Practicing in other languages doesn't beat a cold start on either model.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item One problem in 5 languages; train on other frames, test held-out language
-  \item Strong coder flat (28\% -> 30\%); weak base drops (29\% -> 27\%)
-  \item Only weak exactness ordering survives (matched > corrupt)
-  \item A held-out language behaves as its own skill -- an honest boundary
+  \item One problem in 5 languages; practice on some, test on a held-out language
+  \item Strong coder flat (28\% -> 30\%); weak one drops (29\% -> 27\%)
+  \item Only a weak correct-answers ordering survives (correct beats spoiled)
+  \item A new language acts like its own separate skill -- an honest limit
 \end{itemize}}
 \end{frame}
-\begin{frame}{The hybrid loop (E82)}
+\begin{frame}{The mix-and-retry loop (E82)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hybrid_loop.png}\vskip3pt{\color{owmuted}\footnotesize Verified world as generator + verify-and-retry backstop on HumanEval-X.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{hybrid_loop.png}\vskip3pt{\color{owmuted}\footnotesize Use the checked world to make examples, plus a check-and-try-again safety net on HumanEval-X.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Amortization helps strong base (80\% -> 85\%) but hurts weak one (57\% -> 50\%)
-  \item Hybrid loop lifts both above base: Qwen 90\% (+10), Llama 65\% (+8)
-  \item Weak base leans on the verifier more (2.65 vs 1.45 calls/problem)
-  \item Exactness used as an oracle is sufficient -- the robust default route
+  \item Pre-baking examples helps a strong model (80\% -> 85\%) but hurts a weak one (57\% -> 50\%)
+  \item The mix-and-retry loop lifts both: Qwen 90\% (+10), Llama 65\% (+8)
+  \item The weak model leans on the checker more (2.65 vs 1.45 tries per problem)
+  \item Just using the checker as a yes/no judge is enough -- the safe default
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Against Trained \& Perceptual Dynamics\par}\vfill\end{frame}
-\begin{frame}{Trained baselines vs zero-transition program (E12)}
+{\color{owdeep}\bfseries\Large Against Trained and Picture-Based Rules\par}\vfill\end{frame}
+\begin{frame}{Trained baselines vs a zero-practice program (E12)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{learned.png}\vskip3pt{\color{owmuted}\footnotesize MLP/1-NN trained on K transitions; none transfers out of distribution.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{learned.png}\vskip3pt{\color{owmuted}\footnotesize A trained net and a nearest-example lookup on K steps; neither works on surprise cases.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item At K=10,000 the MLP reaches only 50\% in-dist, 0\% at 10x OOD
-  \item Synthesized program: 100\% on both from zero transitions
-  \item 1-NN memorizes rollouts (8/8) yet scores 30\% on branch probes
-  \item OOD + branch-covering probes, not rollout agreement, measure quality
+  \item With 10,000 steps the trained net hits only 50\% on familiar cases, 0\% on 10x-out cases
+  \item The written program: 100\% on both, from zero practice steps
+  \item Nearest-example lookup replays known runs (8/8) but scores 30\% on new branches
+  \item Surprise cases and new branches, not replaying known runs, show real quality
 \end{itemize}}
 \end{frame}
-\begin{frame}{Induction does not scale with capability (E38)}
+\begin{frame}{Bigger models don't figure rules out better from examples (E38)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{induction_scale.png}\vskip3pt{\color{owmuted}\footnotesize Trace-induction probe accuracy flat across three generator families.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{induction_scale.png}\vskip3pt{\color{owmuted}\footnotesize Figuring rules from examples alone stays flat across three model families.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item From traces alone (no rule text): 0.43 (7B), 0.33 (30B coder), 0.43 (gpt-oss)
-  \item None approaches the rule-text anchor of 1.00
-  \item Every model exactly scale-invariant (in-dist = 10x OOD)
-  \item An identifiability limit of the data, not a capability limit
+  \item From examples alone (no rule text): 0.43 (7B), 0.33 (30B coder), 0.43 (gpt-oss)
+  \item None comes near the 1.00 you get when handed the rule text
+  \item Every model does the same on familiar and 10x-out cases
+  \item The examples just don't pin the rule down -- it's not about model size
 \end{itemize}}
 \end{frame}
-\begin{frame}{Acting closes the gap scale cannot (E43)}
+\begin{frame}{Trying moves beats what size can't (E43)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{active_induction.png}\vskip3pt{\color{owmuted}\footnotesize Active version-space elimination beats passive observation.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{active_induction.png}\vskip3pt{\color{owmuted}\footnotesize Picking smart moves to test beats just watching.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
-  \item Active policy identifies the exact rule in 11.2 transitions vs 14.7 passive
-  \item Passive never resolves 2/5 high-k rules within budget
-  \item Active (knowing nothing) matches clairvoyant reference (11.2 vs 11.6)
-  \item When traces underdetermine dynamics, choose the transitions
+  \item Smart poking finds the exact rule in 11.2 steps vs 14.7 by just watching
+  \item Just watching never nails 2 of 5 tricky rules within budget
+  \item Smart poking (knowing nothing) matches a see-everything ideal (11.2 vs 11.6)
+  \item When examples aren't enough, choose which moves to test
 \end{itemize}}
 \end{frame}
 \begin{frame}{The complexity cliff (E20)}
 \centering
-\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{complexity.png}\vskip3pt{\color{owmuted}\footnotesize Synthesis accuracy vs number of declared interacting rules.\par}
+\includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{complexity.png}\vskip3pt{\color{owmuted}\footnotesize How often the build succeeds versus how many tangled rules you ask for.\par}
 \flushleft \vskip3pt{\footnotesize \begin{itemize}
   \item R=4: 1.00; R=8: 0.53; R=12: 0.25; R=16: 0.15
-  \item Monolithic 7B synthesis unreliable past \textasciitilde{}8 coupled rules
-  \item The paradigm's present boundary at this model scale
-  \item Motivates compositional synthesis -- one expert per rule
+  \item One-shot 7B building gets shaky past about 8 tangled rules
+  \item The current limit at this model size
+  \item Points to building it piece by piece -- one expert per rule
 \end{itemize}}
 \end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large From Fidelity to Decisions\par}\vfill\end{frame}
-\begin{frame}{Planning through a verified world (E22)}
+{\color{owdeep}\bfseries\Large From Getting It Right to Making Choices\par}\vfill\end{frame}
+\begin{frame}{Planning through a checked world (E22)}
 \begin{itemize}
-  \item Model-predictive depth-3 lookahead, best action executed in ground truth
-  \item Planning through verified program scores 7.5 -- identical to the oracle
-  \item Reactive heuristic 5.0; random 3.8; whole episode planned in 0.03 s
-  \item Planning through the LLM engine scores 0.0 -- worse than no model
+  \item Look 3 moves ahead, then do the best move in the real world
+  \item Planning through the checked program scores 7.5 -- same as the true world
+  \item A quick rule of thumb scores 5.0; random 3.8; a whole game planned in 0.03 s
+  \item Planning through the guessing model scores 0.0 -- worse than no model at all
 \end{itemize}
 \end{frame}
-\begin{frame}{Crossing species: bake-off (E63/E65/E67)}
+\begin{frame}{The showdown (E63/E65/E67)}
 \begin{itemize}
-  \item 6 runnable models x 2 symbolic domains: verified code exact and optimal
-  \item Every learned model collapses to 0\% exact at 10x OOD
-  \item MiniGrid DoorKey: OpenWorld solves zero-shot in an 11-step plan
-  \item DreamerV3 needs \textasciitilde{}9,640 interactions to first solve; V-JEPA-2 cannot control
+  \item 6 runnable models on 2 plain-fact tasks: the checked code is exact and best
+  \item Every learned model drops to 0\% exact on 10x-out cases
+  \item MiniGrid DoorKey: OpenWorld solves it cold in an 11-step plan
+  \item DreamerV3 needs about 9,640 tries to first solve it; V-JEPA-2 can't steer at all
 \end{itemize}
 \end{frame}
-\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Motivation};\node[stlbl] at (3.4,-1.15) {The mechanism};\node[stlbl] at (6.8,-1.15) {Scaling \& real data};\node[stlbl] at (10.2,-1.15) {Boundaries};\node[stlbl] at (13.6,-1.15) {Reflection};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
+\begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[std] (s0) at (0.0,0) {1};\node[std] (s1) at (3.4,0) {2};\node[std] (s2) at (6.8,0) {3};\node[std] (s3) at (10.2,0) {4};\node[stc] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Why we did this};\node[stlbl] at (3.4,-1.15) {The core idea};\node[stlbl] at (6.8,-1.15) {Scaling and real data};\node[stlbl] at (10.2,-1.15) {Where it breaks};\node[stlbl] at (13.6,-1.15) {Stepping back};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 5}\\[5pt]
-{\color{owdeep}\bfseries\Large Reflection}\\[10pt]{\color{owmuted}\large Discussion, limitations, conclusion}\vfill\end{frame}
-\begin{frame}{Is world-time compute just fine-tuning?}
+{\color{owdeep}\bfseries\Large Stepping back}\\[10pt]{\color{owmuted}\large Discussion, limits, wrap-up}\vfill\end{frame}
+\begin{frame}{Isn't this just extra training?}
 \begin{itemize}
-  \item Mechanically yes -- LoRA-SFT; the claim is about the data source
-  \item A correct world model turns compute into unlimited correct training data
-  \item Two things earn the name: verified-label dependence and cross-world transfer
-  \item Where neither holds, it is fairly just expensive fine-tuning -- and we say so
+  \item Under the hood, yes -- it's ordinary extra training; the point is where the data comes from
+  \item A correct world model turns compute into endless correct training data
+  \item Two things earn the name: it needs correct answers, and the skill carries to new worlds
+  \item Where neither holds, it's fairly just costly extra training -- and we say so
 \end{itemize}
 \end{frame}
-\begin{frame}{The trajectory unit, measured (E85)}
+\begin{frame}{We measured the unit of practice (E85)}
 \begin{itemize}
-  \item Training unit is a transition (s,a,s'), not a final answer
-  \item At the trained horizon: trajectory 70\% vs answer 58\% (+12 pts)
-  \item Rolled out longer than trained, answer unit catches up (75\% vs 68\%)
-  \item Composing per-step predictions reintroduces compounding on the learned side
+  \item The unit you train on is one step (state, move, next state), not a final answer
+  \item At the length it trained on: full-path 70\% vs final-answer 58\% (+12 pts)
+  \item Run longer than it trained, the final-answer way catches up (75\% vs 68\%)
+  \item Stringing together step guesses brings back the pile-up on the learned side
 \end{itemize}
 \end{frame}
-\begin{frame}{When does it pay off? Few-step reasoning}
+\begin{frame}{When is it worth it? Short reasoning}
 \begin{itemize}
-  \item Wins where a task is few steps over state that can be told symbolically
-  \item Shallow rule induction, small grid transforms, short-horizon planning
-  \item Degrades as reasoning lengthens (CLRS traces, >8 composed rules)
-  \item Cedes long-horizon, perception-heavy regimes to learned models
+  \item It wins when a task is a few steps over facts you can spell out
+  \item Short rule-figuring, small grid changes, planning a few moves ahead
+  \item It fades as the reasoning gets longer (CLRS traces, more than 8 tangled rules)
+  \item It leaves long, picture-heavy problems to the learned models
 \end{itemize}
 \end{frame}
-\begin{frame}{Three routes to use a verified world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Tool}\par\smallskip{\small Serve, plan, verify — no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Per-world TTT}\par\smallskip{\small Distill one world's trajectories}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries World-time compute}\par\smallskip{\small Traverse a family; generalize}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Hybrid}\par\smallskip{\small Exact data + verify backstop}\end{column}\end{columns}\vfill\end{frame}
-\begin{frame}{Limitations}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Symbolic, not pixel-native}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small Cliff past \textasciitilde{}8 rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Variance}\par\smallskip{\small Some numbers single-seed}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Stats}\par\smallskip{\small No family-wise correction}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Three ways to use a checked world model}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries As a tool}\par\smallskip{\small Run it, plan, check -- no training}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Practice one world}\par\smallskip{\small Learn from that world's runs}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Practice many worlds}\par\smallskip{\small Cross a family; carry the skill}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Mix}\par\smallskip{\small Correct data + a check safety net}\end{column}\end{columns}\vfill\end{frame}
+\begin{frame}{Where it falls short}\vfill\begin{columns}[T]\begin{column}{0.237\textwidth}{\color{owteal}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Scope}\par\smallskip{\small Plain facts, not pictures}\end{column}\begin{column}{0.237\textwidth}{\color{owochre}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Complexity}\par\smallskip{\small Cliff past about 8 rules}\end{column}\begin{column}{0.237\textwidth}{\color{owblue}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Wobble}\par\smallskip{\small Some numbers from one run}\end{column}\begin{column}{0.237\textwidth}{\color{owmuted}\rule{20pt}{3pt}}\par\smallskip{\color{owdeep}\bfseries Stats}\par\smallskip{\small No group-wide correction}\end{column}\end{columns}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
 {\color{owochre}\rule{40pt}{2.5pt}}\par\vskip10pt
-{\color{owdeep}\bfseries\Large Conclusion\par}\vfill\end{frame}
+{\color{owdeep}\bfseries\Large Wrap-up\par}\vfill\end{frame}
 \begin{frame}[plain]\centering\vfill
-{\color{owdeep}\bfseries\LARGE Make the model a program, verify the program, and keep the values dialable -- an orthogonal path to scaling parameters until hallucination is suppressed.\par}\vfill\end{frame}
-\begin{frame}{Takeaways}
+{\color{owdeep}\bfseries\LARGE Make the model a program, check the program, and keep its goals adjustable -- a different road than just piling on more parameters until the guessing stops.\par}\vfill\end{frame}
+\begin{frame}{What to remember}
 \begin{itemize}
-  \item Verified code world models are bit-exact where learned dynamics compound error
-  \item Plan as well as ground truth; hallucinated planning is worse than none
-  \item Traversing many verified worlds lifts generalization to held-out worlds
-  \item Next: compositional synthesis, benchmark-scale coding, perception-to-symbol pipelines
+  \item Checked code world models are exact where learned ones let mistakes pile up
+  \item They plan as well as the true world; planning through a guesser is worse than nothing
+  \item Practicing across many checked worlds helps on worlds it never saw
+  \item Next: build worlds piece by piece, scale up the coding worlds, connect pictures to plain facts
 \end{itemize}
 \end{frame}
+\begin{frame}[plain]\centering\vfill{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip12pt{\color{owdeep}\bfseries\Large The code is open --- go star it\par}\vskip16pt\includegraphics[width=4.2cm]{qr_openworld.png}\par\vskip12pt{\color{owblue}\large github.com/quome-cloud/openworld\par}\vskip4pt{\color{owmuted}\small 100 world recipes \textperiodcentered\ the papers \textperiodcentered\ every experiment\par}\vfill\end{frame}
 \end{document}

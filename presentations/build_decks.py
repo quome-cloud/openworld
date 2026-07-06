@@ -67,58 +67,58 @@ DIAGRAMS = {
     # verified code stays exact; a per-step LLM drifts -- the two curves draw themselves
     "compounding": '''<svg viewBox="0 0 860 430" class="dgm" preserveAspectRatio="xMidYMid meet">
   <line class="axis" x1="72" y1="368" x2="820" y2="368"/><line class="axis" x1="72" y1="42" x2="72" y2="368"/>
-  <text class="axl" x="446" y="410">rollout depth &#8594;</text>
-  <text class="axl" x="30" y="205" transform="rotate(-90 30 205)">state error &#8594;</text>
+  <text class="axl" x="446" y="410">steps ahead &#8594;</text>
+  <text class="axl" x="30" y="205" transform="rotate(-90 30 205)">how wrong it gets &#8594;</text>
   <path class="err" d="M72 250 L820 250 L820 74 C 450 158, 260 246, 72 250 Z"/>
   <path class="code draw" pathLength="1" d="M72 250 L820 250"/>
   <path class="llm draw" pathLength="1" d="M72 250 C 260 246, 450 158, 820 74"/>
   <circle class="dot code-dot" cx="820" cy="250" r="7"/><circle class="dot llm-dot" cx="820" cy="74" r="7"/>
-  <text class="lbl-code" x="430" y="238">verified code &#8212; exact at every depth</text>
-  <text class="lbl-llm" x="470" y="66">per-step LLM &#8212; drifts by ~step 2.3</text>
+  <text class="lbl-code" x="430" y="238">checked code &#8212; exactly right, every step</text>
+  <text class="lbl-llm" x="470" y="66">guess each step &#8212; drifts after ~2 steps</text>
 </svg>''',
     # the win is an ordered procedure that lights up A->B->C->WIN; state-scoring fills a gauge and stalls
     "procedure": '''<div class="dgmp">
   <div class="lane">
-    <span class="plabel">Goal-as-procedure &#8212; the win</span>
+    <span class="plabel">The win is a recipe of steps</span>
     <div class="pnodes"><span class="pnode n1">A</span><span class="parrow a1">&#8594;</span>
       <span class="pnode n2">B</span><span class="parrow a2">&#8594;</span>
       <span class="pnode n3">C</span><span class="parrow a3">&#8594;</span>
       <span class="pwin">WIN &#10003;</span></div>
-    <div class="pcap">Reason the ordered sequence &#8212; the only path through</div>
+    <div class="pcap">Do the steps in the right order &#8212; the only way through</div>
   </div>
   <div class="lane">
-    <span class="plabel muted">Goal-as-state &#8212; fails</span>
-    <div class="gauge"><div class="gfill"></div><span class="gx">&#10007; stalls, never wins</span></div>
-    <div class="pcap">Score one screen: climbs to a high value, but cannot rank the sequence</div>
+    <span class="plabel muted">Chasing one good screen &#8212; fails</span>
+    <div class="gauge"><div class="gfill"></div><span class="gx">&#10007; gets stuck, never wins</span></div>
+    <div class="pcap">Judging one screen climbs high, but can't find the right order</div>
   </div>
 </div>''',
     # a monolith cracks past ~8 rules; composed verified parts stay high -- two bars grow in
     "cliff": '''<div class="dgmc">
   <div class="cbar-wrap"><div class="cbar cbar-mono"><span class="cval">0.31</span></div>
-    <div class="clbl">Monolithic<br><small>one 16-rule synthesis &#8212; cracks</small></div></div>
+    <div class="clbl">One big program<br><small>16 rules at once &#8212; breaks</small></div></div>
   <div class="cbar-wrap"><div class="cbar cbar-comp"><span class="cval">0.92</span></div>
-    <div class="clbl">Composition<br><small>four verified 4-rule parts + bridges</small></div></div>
+    <div class="clbl">Small pieces<br><small>four checked 4-rule pieces, joined</small></div></div>
 </div>''',
     # what a world model IS: (state, action) -> World -> next state, agent is separate
     "worldmodel": '''<div class="dgmm">
   <div class="mm-row">
     <div class="mm-in"><span class="mm-chip mm-s">state <b>s</b></span><span class="mm-chip mm-a">action <b>a</b></span></div>
     <span class="mm-ar a1">&#8594;</span>
-    <div class="mm-world"><span class="mm-mark"></span><span class="mm-wl">World</span><small>verified transition</small></div>
+    <div class="mm-world"><span class="mm-mark"></span><span class="mm-wl">World</span><small>the checked rule</small></div>
     <span class="mm-ar a2">&#8594;</span>
     <span class="mm-chip mm-sp">next state <b>s&#8242;</b></span>
   </div>
-  <div class="mm-cap">One World is both the environment and the planning model &#8212; the agent is a separate policy</div>
+  <div class="mm-cap">The same World is both the real thing and your planning tool &#8212; the player is a separate part</div>
 </div>''',
-    # many verified worlds feed one skill, which generalises to a held-out world
+    # many checked practice worlds feed one skill, which generalises to a held-out world
     "worldtime": '''<div class="dgmw ag">
   <div class="wt-src"><span class="wt-w w1"></span><span class="wt-w w2"></span><span class="wt-w w3"></span>
     <span class="wt-w w4"></span><span class="wt-w w5"></span><span class="wt-w w6"></span>
     <div class="wt-cap">many verified worlds</div></div>
   <div class="wt-flow"><span class="wt-arrow"></span></div>
-  <div class="wt-hub"><span class="wt-core"></span><div class="wt-cap">one distilled skill</div></div>
+  <div class="wt-hub"><span class="wt-core"></span><div class="wt-cap">one skill learned from them</div></div>
   <div class="wt-flow"><span class="wt-arrow a2"></span></div>
-  <div class="wt-out"><span class="wt-new"></span><div class="wt-cap">a new, held-out world</div></div>
+  <div class="wt-out"><span class="wt-new"></span><div class="wt-cap">a brand-new world it never saw</div></div>
 </div>''',
 }
 
@@ -168,15 +168,25 @@ BEAMER_TITLE = r"""\begin{frame}[plain]
 {\color{owdeep}\bfseries\LARGE %(title)s\par}\vskip8pt
 {\color{owblue}\large %(subtitle)s\par}\vskip18pt
 {\color{owink}\normalsize %(author)s\par}\vskip3pt
-{\color{owmuted}\small %(venue)s\par}
+{\color{owmuted}\small %(venue)s\par}\vskip12pt
+\includegraphics[width=1.7cm]{qr_openworld.png}\par\vskip2pt
+{\color{owmuted}\scriptsize scan to open \& star the repo\par}
 \vfill
 \end{frame}
 """
 
 def _btext(s):
-    return (s.replace("\\", r"\textbackslash{}").replace("&", r"\&").replace("%", r"\%")
-             .replace("_", r"\_").replace("#", r"\#").replace("$", r"\$")
-             .replace("~", r"\textasciitilde{}").replace("^", r"\textasciicircum{}"))
+    s = (s.replace("\\", r"\textbackslash{}").replace("&", r"\&").replace("%", r"\%")
+          .replace("_", r"\_").replace("#", r"\#").replace("$", r"\$")
+          .replace("~", r"\textasciitilde{}").replace("^", r"\textasciicircum{}"))
+    for u, l in (("—", "---"), ("–", "--"), ("’", "'"), ("‘", "'"),
+                 ("“", "``"), ("”", "''"), ("→", r"$\rightarrow$"),
+                 ("×", r"$\times$"), ("≈", r"$\approx$"), ("−", "-"),
+                 ("·", r"\textperiodcentered{}"), ("…", "..."),
+                 ("≤", r"$\leq$"), ("≥", r"$\geq$"), ("≈", r"$\approx$"),
+                 ("é", r"\'e"), ("′", "'")):
+        s = s.replace(u, l)
+    return s
 
 def _beamer_atlas(parts, current=None):
     node, lbl = [], []
@@ -296,8 +306,15 @@ def beamer_slide(s, kicker="", parts=None, part_index=None):
 def build_beamer(deck):
     body = "\n".join(beamer_slide(s, k, parts, pi) for s, k, pi, parts in _part_walk(deck["slides"]))
     meta = {k: _btext(deck[k]) for k in ("title", "subtitle", "author", "venue")}
+    closing = (r"\begin{frame}[plain]\centering\vfill"
+               r"{\color{owochre}\rule{40pt}{2.5pt}}\par\vskip12pt"
+               r"{\color{owdeep}\bfseries\Large The code is open --- go star it\par}\vskip16pt"
+               r"\includegraphics[width=4.2cm]{qr_openworld.png}\par\vskip12pt"
+               r"{\color{owblue}\large github.com/quome-cloud/openworld\par}\vskip4pt"
+               r"{\color{owmuted}\small 100 world recipes \textperiodcentered\ the papers "
+               r"\textperiodcentered\ every experiment\par}\vfill\end{frame}")
     return (subst(BEAMER_PREAMBLE, C) + "\n\\begin{document}\n"
-            + BEAMER_TITLE % meta + "\n" + body + "\n\\end{document}\n")
+            + BEAMER_TITLE % meta + "\n" + body + "\n" + closing + "\n\\end{document}\n")
 
 # =========================================================================================
 # HTML  (self-contained: inline CSS + vendored slides.js)
@@ -343,6 +360,16 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .section .st{color:var(--deep);font-size:5vh;font-weight:800;max-width:24ch;line-height:1.15}
 .section .rule,.title .rule{width:54px;height:6px;background:var(--ochre);border-radius:3px}
 .statement .big{color:var(--deep);font-size:4.6vh;font-weight:800;line-height:1.24;max-width:26ch}
+/* title QR + closing "star us" slide */
+.tqr{margin-top:3vh;display:flex;flex-direction:column;align-items:center;gap:.7vh}
+.tqr img{width:9vh;height:9vh;border-radius:8px}
+.tqr span{color:var(--muted);font-size:1.7vh}
+.closing{align-items:center;justify-content:center;text-align:center;padding-bottom:6vh}
+.cl-title{color:var(--deep);font-size:4.4vh;font-weight:800;margin:2.2vh 0 2.6vh;max-width:22ch}
+.cl-qr{width:34vh;height:34vh;border-radius:16px;box-shadow:0 8px 30px rgba(11,46,79,.15)}
+.cl-url{color:var(--blue);font-size:2.9vh;font-weight:700;margin-top:2.4vh}
+.cl-sub{color:var(--muted);font-size:2.1vh;margin-top:.8vh}
+.closing .rule{width:54px;height:6px;background:var(--ochre);border-radius:3px}
 /* section kicker (small label above the title) */
 .kick{flex:0 0 auto;color:var(--teal);font-size:1.8vh;font-weight:800;letter-spacing:.14em;
   text-transform:uppercase;margin-bottom:.7vh}
@@ -674,8 +701,17 @@ def build_html(deck):
                    f'<div class="t">{_h(deck["title"])}</div>'
                    f'<div class="s">{_h(deck["subtitle"])}</div>'
                    f'<div class="a">{_h(deck["author"])}</div>'
-                   f'<div class="v">{_h(deck["venue"])}</div></section>')
-    body = title_slide + "".join(html_slide(s, k, parts, pi) for s, k, pi, parts in _part_walk(deck["slides"]))
+                   f'<div class="v">{_h(deck["venue"])}</div>'
+                   f'<div class="tqr"><img src="figs/qr_openworld.png" alt="QR to the repo">'
+                   f'<span>scan to open &amp; star the repo</span></div></section>')
+    closing = ('<section class="slide closing"><div class="rule"></div>'
+               '<div class="cl-title">The code is open &#8212; go star it</div>'
+               '<img class="cl-qr" src="figs/qr_openworld.png" alt="QR code to github.com/quome-cloud/openworld">'
+               '<div class="cl-url">github.com/quome-cloud/openworld</div>'
+               '<div class="cl-sub">100 world recipes &#183; the papers &#183; every experiment</div></section>')
+    body = (title_slide
+            + "".join(html_slide(s, k, parts, pi) for s, k, pi, parts in _part_walk(deck["slides"]))
+            + closing)
     css = subst(HTML_CSS, C)
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -712,6 +748,9 @@ def build(path):
     deck = load_deck(path)
     outdir = PRES / deck["slug"]; outdir.mkdir(parents=True, exist_ok=True)
     missing = copy_figs(deck, outdir)
+    qr = PRES / "assets" / "qr_openworld.png"          # repo QR for title + closing slides
+    if qr.exists():
+        shutil.copy(qr, outdir / "figs" / "qr_openworld.png")
     (outdir / f"{deck['slug']}.tex").write_text(build_beamer(deck))
     (outdir / f"{deck['slug']}.html").write_text(build_html(deck))
     n = len(deck["slides"]) + 1

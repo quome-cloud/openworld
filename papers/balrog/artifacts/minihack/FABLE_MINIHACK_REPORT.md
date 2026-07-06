@@ -3,7 +3,7 @@
 **Synthesis model:** Fable 5 (max reasoning). Runtime is LLM-free pure code (no API calls; verified: nothing in the agent/runner modules touches a network or model).
 **Claim under test:** the world-model-synthesis + classical-search recipe that saturated Baba Is AI (100%) extends to a stochastic, partially observable NLE-engine benchmark.
 **Benchmark:** BALROG MiniHack suite — 8 tasks × 5 episodes, official `minihack_kwargs` (100-step cap, `penalty_step -0.01` constant, `autopickup` off, `skip_more` on, random character `"@"`), progression = 1.0 iff the final step's reward ≥ 1.0, suite score = mean of per-task means.
-**SOTA baseline:** 90.0 ± 2.7 % (Gemini-3.1-Pro, BALROG leaderboard, checked 2026-07-06). Note: the era of single-digit MiniHack scores is over; the bar moved.
+**SOTA baseline:** **40.0 ± 7.7 % (Gemini-3-Pro)**, then 35.0 (Gemini-3.1-Pro) and 30.0 (Claude-Opus-4.5-Thinking / Gemini-3-Flash) — BALROG leaderboard MiniHack column, parsed directly from the raw HTML table on 2026-07-06 (`verify_leaderboard.py`; independently confirmed by Cortex/A002). *Correction note:* an earlier summarizer pass misreported 90.0 as MiniHack SOTA — that figure is the **BabaIsAI** column of Gemini-3.1-Pro; all numbers below cite the verified column. The era of single-digit MiniHack scores is over, but the frontier still sits at 40%.
 
 ## Headline
 
@@ -11,8 +11,10 @@
 |---|---|---|---|
 | **This work, condition A (memoryless, official seeds block 1000)** | **92.5%** | 37/40 | 6/8 |
 | **Robustness block (untouched seed block 2000)** | **92.5%** | 37/40 | 6/8 |
-| SOTA (Gemini-3.1-Pro) | 90.0% | — | — |
+| SOTA (Gemini-3-Pro) | 40.0% | — | — |
 | Prior-generation LLM agents (GPT-4o era) | ~5–20% | — | — |
+
+**Delta vs SOTA: +52.5 pp** — more than double the best leaderboard MiniHack score, on both the official and the untouched-seed block.
 
 Per-task (condition A): Boxoban-Hard **5/5**, Boxoban-Medium **5/5**, MazeWalk-9x9 **5/5**, MazeWalk-15x15 **5/5**, Corridor-R3 **4/5**, CorridorBattle-Dark **3/5**, Quest-Easy **5/5**, Quest-Medium **5/5**.
 

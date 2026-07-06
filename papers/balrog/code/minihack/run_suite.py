@@ -37,7 +37,9 @@ os.makedirs(TRAJ, exist_ok=True)
 RESULTS_JSON = os.path.join(RESULTS, "minihack_results.json")
 RUN_LOG = os.path.join(RESULTS, "RUN_LOG.txt")
 
-SOTA = 90.0  # BALROG leaderboard MiniHack column, Gemini-3.1-Pro (2026-07-06)
+SOTA = 40.0  # BALROG leaderboard MiniHack column, Gemini-3-Pro (2026-07-06);
+             # see verify_leaderboard.py -- an earlier 90.0 figure was a
+             # summarizer misread of the BabaIsAI column
 
 
 def log(msg):

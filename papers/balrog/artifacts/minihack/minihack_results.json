@@ -1,7 +1,7 @@
 {
  "summary": {
   "suite_score_over_attempted_tasks_pct": 92.5,
-  "sota_pct": 90.0,
+  "sota_pct": 40.0,
   "tasks_attempted": 8,
   "episodes_done": 40,
   "task_means": {
@@ -13,7 +13,8 @@
    "MiniHack-CorridorBattle-Dark-v0": 0.6,
    "MiniHack-Quest-Easy-v0": 1.0,
    "MiniHack-Quest-Medium-v0": 1.0
-  }
+  },
+  "sota_note": "MiniHack column SOTA = 40.0 +- 7.7 (Gemini-3-Pro), parsed from raw balrogai.com table 2026-07-06 (verify_leaderboard.py). Earlier 90.0 figure was a summarizer column-misread (BabaIsAI column of Gemini-3.1-Pro)."
  },
  "episodes": [
   {

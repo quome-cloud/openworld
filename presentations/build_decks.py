@@ -99,6 +99,17 @@ DIAGRAMS = {
   <div class="cbar-wrap"><div class="cbar cbar-comp"><span class="cval">0.92</span></div>
     <div class="clbl">Composition<br><small>four verified 4-rule parts + bridges</small></div></div>
 </div>''',
+    # what a world model IS: (state, action) -> World -> next state, agent is separate
+    "worldmodel": '''<div class="dgmm">
+  <div class="mm-row">
+    <div class="mm-in"><span class="mm-chip mm-s">state <b>s</b></span><span class="mm-chip mm-a">action <b>a</b></span></div>
+    <span class="mm-ar a1">&#8594;</span>
+    <div class="mm-world"><span class="mm-mark"></span><span class="mm-wl">World</span><small>verified transition</small></div>
+    <span class="mm-ar a2">&#8594;</span>
+    <span class="mm-chip mm-sp">next state <b>s&#8242;</b></span>
+  </div>
+  <div class="mm-cap">One World is both the environment and the planning model &#8212; the agent is a separate policy</div>
+</div>''',
     # many verified worlds feed one skill, which generalises to a held-out world
     "worldtime": '''<div class="dgmw ag">
   <div class="wt-src"><span class="wt-w w1"></span><span class="wt-w w2"></span><span class="wt-w w3"></span>
@@ -476,6 +487,28 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .cval{color:#fff;font-weight:800;font-size:3.2vh;margin-top:1.6vh}
 .clbl{margin-top:1.8vh;color:var(--deep);font-weight:800;font-size:2.5vh;text-align:center;line-height:1.25}
 .clbl small{display:block;color:var(--muted);font-weight:500;font-size:1.95vh;margin-top:.5vh}
+.dgmm{display:flex;flex-direction:column;align-items:center;gap:4.5vh;width:100%;max-width:82rem;margin:0 auto}
+.mm-row{display:flex;align-items:center;justify-content:center;gap:2vw;flex-wrap:wrap}
+.mm-in{display:flex;flex-direction:column;gap:1.6vh}
+.mm-chip{padding:1.7vh 1.8vw;border-radius:14px;background:#fff;border:2.5px solid var(--teal);font-size:2.7vh;
+  color:var(--deep);box-shadow:0 5px 16px rgba(11,46,79,.07);white-space:nowrap}
+.mm-chip b{color:var(--teal);font-size:3.1vh}
+.mm-a{border-color:var(--ochre)}.mm-a b{color:var(--ochre)}
+.mm-ar{color:var(--muted);font-size:3.6vh;font-weight:800}
+.mm-world{width:21vh;height:21vh;border-radius:26px;background:var(--deep);color:#fff;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.8vh;box-shadow:0 12px 36px rgba(11,46,79,.3)}
+.mm-mark{width:6.5vh;height:6.5vh;border:3px solid var(--teal);border-radius:9px;position:relative}
+.mm-mark::after{content:"";position:absolute;inset:30%;background:var(--ochre);border-radius:3px}
+.mm-wl{font-size:2.8vh;font-weight:800}.mm-world small{font-size:1.8vh;opacity:.82}
+.mm-sp{border-color:var(--deep)}.mm-sp b{color:var(--deep)}
+.mm-cap{color:var(--muted);font-size:2.3vh;text-align:center;max-width:52ch}
+.slide.on .mm-s{opacity:0;animation:popIn .5s .2s both}
+.slide.on .mm-a{opacity:0;animation:popIn .5s .35s both}
+.slide.on .mm-ar.a1{opacity:0;animation:fadeIn .4s .55s both}
+.slide.on .mm-world{opacity:0;animation:popIn .55s .7s both}
+.slide.on .mm-ar.a2{opacity:0;animation:fadeIn .4s 1.1s both}
+.slide.on .mm-sp{opacity:0;animation:popIn .5s 1.25s both}
+.slide.on .mm-cap{opacity:0;animation:fadeIn .6s 1.5s both}
 @keyframes growUp{from{height:0}}
 .slide.on .cbar-mono{animation:growUp 1s .3s cubic-bezier(.3,.6,.2,1) both}
 .slide.on .cbar-comp{animation:growUp 1.2s .5s cubic-bezier(.3,.6,.2,1) both}
@@ -549,7 +582,7 @@ def _atlas_html(parts, current=None):
             nodes.append(f'<div class="{lcls}"></div>')
         nodes.append(f'<div class="station {cls}"><span class="dot">{i+1}</span>'
                      f'<span class="lbl">{_h(p)}</span></div>')
-    return f'<div class="atlas ag">{"".join(nodes)}</div>'
+    return f'<div class="atlas">{"".join(nodes)}</div>'
 
 def _wm_html():
     return ('<span class="wm">'

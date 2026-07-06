@@ -6,12 +6,8 @@ VENUE = "github.com/quome-cloud/openworld"
 slides = [
     {"type": "agenda", "title": "The talk in one map"},
     {"type": "part", "title": "Foundations", "subtitle": "What is a world model?"},
-    {"type": "bullets", "title": "The unit of world computing",
-     "bullets": [
-         "A world model predicts the next state given a state and an action",
-         "World = symbolic state + discrete actions + a transition rule",
-         "One world serves as both ground-truth environment and planning model",
-         "Agents are separate policies -- users of a world, not part of it"]},
+    {"type": "anim", "diagram": "worldmodel", "title": "The unit of world computing",
+     "still": "figs/prototyping_pipeline.png"},
     {"type": "bullets", "title": "Two species of world models",
      "bullets": [
          "Perceptual/generative: neural nets over pixels/latents (Dreamer, Genie, Sora)",

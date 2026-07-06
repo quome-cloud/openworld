@@ -49,14 +49,7 @@
 \begin{frame}[plain]\vfill\centering \resizebox{0.95\textwidth}{!}{\begin{tikzpicture}[stn/.style={circle,draw=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owteal},std/.style={circle,draw=owteal,fill=owteal,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=white},stc/.style={circle,draw=owochre,fill=owochre,line width=1.2pt,minimum size=11.5mm,font=\bfseries,inner sep=0,text=white},stx/.style={circle,draw=owmuted,line width=1pt,minimum size=9mm,font=\bfseries,inner sep=0,text=owmuted},stlbl/.style={font=\scriptsize,text=owmuted,align=center,text width=28mm},stln/.style={draw=black!16,line width=1.4pt}]\node[stc] (s0) at (0.0,0) {1};\node[stx] (s1) at (3.4,0) {2};\node[stx] (s2) at (6.8,0) {3};\node[stx] (s3) at (10.2,0) {4};\node[stx] (s4) at (13.6,0) {5};\node[stlbl] at (0.0,-1.15) {Foundations};\node[stlbl] at (3.4,-1.15) {The substrate};\node[stlbl] at (6.8,-1.15) {Three results};\node[stlbl] at (10.2,-1.15) {Applications};\node[stlbl] at (13.6,-1.15) {The vision};\draw[stln] (s0)--(s1);\draw[stln] (s1)--(s2);\draw[stln] (s2)--(s3);\draw[stln] (s3)--(s4);\end{tikzpicture}}\\[24pt]
 {\color{owochre}\bfseries\footnotesize PART 1}\\[5pt]
 {\color{owdeep}\bfseries\Large Foundations}\\[10pt]{\color{owmuted}\large What is a world model?}\vfill\end{frame}
-\begin{frame}{The unit of world computing}
-\begin{itemize}
-  \item A world model predicts the next state given a state and an action
-  \item World = symbolic state + discrete actions + a transition rule
-  \item One world serves as both ground-truth environment and planning model
-  \item Agents are separate policies -- users of a world, not part of it
-\end{itemize}
-\end{frame}
+\begin{frame}{The unit of world computing}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{prototyping_pipeline.png}\end{frame}
 \begin{frame}{Two species of world models}
 \begin{itemize}
   \item Perceptual/generative: neural nets over pixels/latents (Dreamer, Genie, Sora)

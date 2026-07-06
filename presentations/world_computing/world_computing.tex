@@ -79,15 +79,7 @@
   \item PyTorch didn't give new models -- it made them fast to prototype
 \end{itemize}
 \end{frame}
-\begin{frame}{World, action, agent, simulation}
-\begin{itemize}
-  \item World = symbolic state + discrete actions + verified transition
-  \item Agent = a separate policy; a user of a world, not part of it
-  \item Simulation = agents in a world producing scored trajectories
-  \item A verified model relocates the sim-to-real gap into spec + perception
-  \item So one World serves as both ground-truth environment and planning model
-\end{itemize}
-\end{frame}
+\begin{frame}{World, action, agent, simulation}\centering\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{prototyping_pipeline.png}\end{frame}
 \begin{frame}{The world computer, benchmarked on cost, latency, performance}
 \centering
 \includegraphics[width=\linewidth,height=0.48\textheight,keepaspectratio]{world_computer.png}\vskip3pt{\color{owmuted}\footnotesize One agent authors validated, servable worlds; verified code rolls out \textasciitilde{}47,000x faster than an LLM\par}

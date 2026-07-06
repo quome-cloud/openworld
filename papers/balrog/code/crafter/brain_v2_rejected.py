@@ -73,6 +73,7 @@ class Brain:
         self.mine_back_cell = None     # stone we placed for shelter, to re-mine
         self.skel_sightings = []       # (pos, t) persistent danger zones
         self.home = None               # persistent burrow (c1, c2) once dug
+        self.bl_at_dusk = 0
         self.burrow_blacklist = set()  # rejected corridors (verified leaky)
         self.topping_drink = False
         self.topping_food = False
@@ -92,8 +93,9 @@ class Brain:
             a = (self._safety() or self._night() or self._vitals()
                  or self._goals() or self._explore() or ('noop', 'idle'))
         else:
-            a = (self._safety() or self._vitals() or self._prep()
-                 or self._goals() or self._explore() or ('noop', 'idle'))
+            a = (self._safety() or self._vitals() or self._survival_first()
+                 or self._prep() or self._goals() or self._explore()
+                 or ('noop', 'idle'))
         action, goal = a
         if action is None:
             action, goal = 'noop', goal + '?none'
@@ -140,16 +142,52 @@ class Brain:
         return None
 
     def _danger(self, p):
+        """Continuous threat field (v2): graded cost surfaces instead of
+        binary avoidance. Night scales zombie fields (spawn pressure +
+        pursuit); skeleton fields add a line-of-fire ridge (arrows fly
+        along cardinals up to 5)."""
+        b = self.b
+        night = is_night(b.t)
         cost = 0.0
-        for kind, rad, w in (('zombie', 2, 6.0), ('skeleton', 3, 5.0),
-                             ('arrow', 2, 4.0)):
-            r = self.b.report(kind)
-            if r:
-                for c in r.cells:
-                    d = mdist(p, c)
-                    if d <= rad:
-                        cost += w / max(1, d)
+        zw = 10.0 if night else 4.0
+        r = b.report('zombie')
+        if r:
+            for c in r.cells:
+                d = mdist(p, c)
+                if d <= 4:
+                    cost += zw / max(1, d)
+        r = b.report('skeleton')
+        if r:
+            for c in r.cells:
+                d = mdist(p, c)
+                if d <= 5:
+                    cost += 5.0 / max(1, d)
+                    if (p[0] == c[0] or p[1] == c[1]) and d <= 5:
+                        cost += 4.0    # line-of-fire ridge
+        r = b.report('arrow')
+        if r:
+            for c in r.cells:
+                d = mdist(p, c)
+                if d <= 3:
+                    cost += 5.0 / max(1, d)
         return cost
+
+    def _nearest_safe(self, mats, limit=None):
+        """Nearest cell of a wanted material outside skeleton zones; falls
+        back to the absolute nearest if no safe one is known."""
+        b = self.b
+        xs, ys = np.where(np.isin(b.map, list(mats)))
+        best, bd = None, 10 ** 9
+        for x, y in zip(map(int, xs), map(int, ys)):
+            d = mdist((x, y), b.pos) + (25 if self._skel_zone((x, y), rad=4)
+                                        else 0)
+            if d < bd:
+                best, bd = (x, y), d
+        if best is None:
+            return b.nearest_material(mats, limit=limit)
+        if limit is not None and mdist(best, b.pos) > limit:
+            return None
+        return best
 
     def _skel_zone(self, p, ttl=700, rad=5):
         """Structural danger: skeletons live in fixed tunnel systems, so a
@@ -425,16 +463,127 @@ class Brain:
                 self.topping_food = True
                 return a, 'eat'
         self.topping_food = False
-        if food <= 6:
+        if food <= 7:
             c = b.report('cow')
-            if c and c.dist <= 5 and damage(inv) >= 2:
+            if c and c.dist <= (8 if food <= 6 else 4) and damage(inv) >= 2:
                 a = self._eat()
                 if a:
                     return a, 'eat'
+        if food <= 4 and not b.report('cow') and \
+                not (b.plant_pos and b.plant_age > PLANT_RIPE_AGE):
+            a = self._march()
+            if a:
+                return a, 'forage_march'
         if inv.get('energy', 9) <= 1:
             # daytime emergency: sleep in the open only when provably calm
             if b.mob_dist('zombie') > 9 and b.mob_dist('skeleton') > 7:
                 return 'sleep', 'emergency_sleep'
+        return None
+
+    # ── survival-first scheduler: shelter ETA vs dusk horizon ─────────────
+    def _steps_to_dusk(self):
+        phase = self.b.t % 300
+        return max(0, 148 - phase) if phase < 148 else 0
+
+    def _shelter_eta(self):
+        """Belief-based estimate of steps needed to be corked from here.
+        Digging the corridor itself yields 2 stones (cork costs 1), so a
+        pickaxe is the only hard prerequisite once a stone face is known."""
+        b = self.b
+        inv = b.inventory
+        if self.home is not None:
+            c1, _ = self.home
+            return mdist(b.pos, c1) + 8
+        eta = 10                       # dig 2 + cork + slack
+        if inv.get('wood_pickaxe', 0) == 0:
+            eta += 18                  # craft pickaxe (needs table + wood)
+            if 'place_table' not in b.ach:
+                eta += 14
+            wood = inv.get('wood', 0)
+            need = (2 if 'place_table' not in b.ach else 0) + 1
+            if wood < need:
+                t = b.nearest_material({'tree'})
+                eta += (mdist(b.pos, t) if t else 25) + 3 * (need - wood)
+        s = b.nearest_material({'stone'})
+        if s is not None:
+            eta += mdist(b.pos, s)
+        else:
+            eta += 45                  # must still find a stone face
+        if inv.get('stone', 0) == 0:
+            eta += 2                   # mine cork stone en route
+        return eta
+
+    SHELTER_MARGIN = 22
+
+    def _survival_first(self):
+        """Hard subgoal: be corked (or funnel-held) by dusk. Preempts all
+        tech greed once the shelter ETA eats into the dusk horizon."""
+        b = self.b
+        if is_night(b.t):
+            return None                # _night owns the night
+        horizon = self._steps_to_dusk()
+        eta = self._shelter_eta()
+        if eta + self.SHELTER_MARGIN < horizon:
+            return None                # tech time remains
+        inv = b.inventory
+        # chain: wood -> table -> pickaxe -> stone face -> dig -> (cork at
+        # dusk). Each stage reuses the normal goal generators.
+        if inv.get('wood_pickaxe', 0) == 0:
+            need = (2 if 'place_table' not in b.ach else 0) + 1
+            if inv.get('wood', 0) < need:
+                t = b.nearest_material({'tree'})
+                if t:
+                    a = self.goto_and([t], 'do')
+                    if a:
+                        return a, 'shelter_wood'
+            if 'place_table' not in b.ach and inv.get('wood', 0) >= 2:
+                a = self._place_on_ground('place_table')
+                if a:
+                    return a, 'shelter_table'
+            if inv.get('wood', 0) >= 1:
+                a = self._at_station(('table',), 'make_wood_pickaxe')
+                if a:
+                    return a, 'shelter_pickaxe'
+            # cannot complete the chain: pre-position at the best funnel
+            return self._funnel_hold()
+        a = self._burrow()
+        if a:
+            return a, 'shelter_dig'
+        # no known corridor: PROSPECT for a stone face (mountain-frontier
+        # exploration) — sitting at a funnel all day was the v2.0 bug
+        if horizon > 25:
+            s = b.nearest_material({'stone'})
+            if s is None:
+                tgt = self._pick_frontier(prefer_mountain=True)
+                if tgt:
+                    a2 = self.goto_and([tgt], 'noop', allow_mine=True)
+                    if a2 and a2 != 'noop':
+                        return a2, 'shelter_prospect'
+            else:
+                a2 = self.goto_and([s], 'do')
+                if a2:
+                    return a2, 'shelter_prospect'
+        return self._funnel_hold()
+
+    def _funnel_hold(self):
+        """Defensible-terrain fallback: max-walled cell, pre-positioned
+        before dusk."""
+        b = self.b
+        corner = self._pick_corner()
+        if corner is None:
+            return None
+        if tuple(b.pos) == corner:
+            z = b.report('zombie')
+            if z and z.dist == 1 and z.exact:
+                a = self._face_or(z.exact, 'do')
+                if a:
+                    return a, 'funnel_hold'
+            return 'noop', 'funnel_hold'
+        r = self.path_next([corner], adjacent=False, allow_mine=False)
+        if r:
+            a = self._step_toward(r[0])
+            if a:
+                return a, 'goto_funnel'
         return None
 
     # ── pre-night preparation (t%300 in [105,148): top up, dig burrow) ─────
@@ -554,34 +703,56 @@ class Brain:
                                        # contiguous; verified while digging
             return None
 
+        def unknown_flanks(c1, c2, d):
+            n = 0
+            for cell in (c1, c2):
+                for p in ((d[1], d[0]), (-d[1], -d[0])):
+                    if b.mat((cell[0] + p[0], cell[1] + p[1])) is None:
+                        n += 1
+            if b.mat((c2[0] + d[0], c2[1] + d[1])) is None:
+                n += 1
+            return n
+
         xs, ys = np.where(np.isin(b.map, ['stone', 'grass', 'path', 'sand']))
         cells = set(zip(map(int, xs), map(int, ys)))
         for (sx, sy) in cells:
             if abs(sx - b.pos[0]) + abs(sy - b.pos[1]) > 22:
                 continue
             for d in D4:
-                c1 = (sx, sy)
-                c2 = (sx + d[0], sy + d[1])
                 e0 = (sx - d[0], sy - d[1])
-                k1 = cellok(c1)
-                k2 = cellok(c2, allow_unknown=not self.privileged)
-                if k1 is None or k2 is None:
-                    continue
                 m0 = b.mat(e0)
                 if m0 not in WALKABLE:
                     continue
-                if (c1, c2) in self.burrow_blacklist:
-                    continue
-                if not self._burrow_ok(c1, c2, strict=self.privileged):
-                    continue
-                mines = k1 + k2
-                if mines == 0 and inv.get('stone', 0) == 0:
-                    continue            # nothing to cork with (stone only)
-                if mines > 0 and not can_mine:
-                    continue
-                dd = mdist(b.pos, e0) + 2 * mines
-                if dd < bd:
-                    best, bd = (e0, d, c1, c2), dd
+                # depth k=0: chamber at the surface (cheap, leakier);
+                # depth k=1: chamber one cell inside the mass — the approach
+                # cell is mined en route and the cork lands ON it, so its
+                # flanks are irrelevant; interior flanks are stone far more
+                # often (proactive version of the extend-on-abort fix)
+                for k in (0, 1):
+                    c1 = (sx + k * d[0], sy + k * d[1])
+                    c2 = (c1[0] + d[0], c1[1] + d[1])
+                    k1 = cellok(c1, allow_unknown=k > 0 and not self.privileged)
+                    k2 = cellok(c2, allow_unknown=not self.privileged)
+                    if k1 is None or k2 is None:
+                        continue
+                    if (c1, c2) in self.burrow_blacklist:
+                        continue
+                    if not self._burrow_ok(c1, c2, strict=self.privileged):
+                        continue
+                    approach = cellok((sx, sy)) if k else 0
+                    if approach is None:
+                        continue
+                    mines = k1 + k2 + (approach if k else 0)
+                    if mines == 0 and inv.get('stone', 0) == 0:
+                        continue        # nothing to cork with (stone only)
+                    if mines > 0 and not can_mine:
+                        continue
+                    uf = unknown_flanks(c1, c2, d)
+                    dd = mdist(b.pos, e0) + 2 * mines + \
+                        (2 if k else 4) * uf + \
+                        (12 if self._skel_zone(e0, rad=4) else 0)
+                    if dd < bd:
+                        best, bd = (e0, d, c1, c2), dd
         if best is not None and bd <= 26:
             return best
         return None
@@ -598,13 +769,60 @@ class Brain:
             c1, c2 = bc
             pos = tuple(b.pos)
             if pos in (c1, c2) and not self._burrow_ok(c1, c2, strict=False):
-                # a revealed flank is walkable: this corridor cannot be
-                # sealed — blacklist it and walk back out
+                # a revealed flank is walkable. If the leak is at c1 and the
+                # mass continues past c2, EXTEND: corridor (c2, c3) has
+                # interior flanks and the cork lands on c1 — digging deeper
+                # converts an abort into progress (v2 fix for the v1
+                # abort-churn: 18 blacklists in one dev episode)
+                d = (c2[0] - c1[0], c2[1] - c1[1])
+                c3 = (c2[0] + d[0], c2[1] + d[1])
+                m3 = b.mat(c3)
+                c1_leaks = any(
+                    (lambda m: m in WALKABLE or m == 'floor')(
+                        b.mat((c1[0] + p[0], c1[1] + p[1])))
+                    for p in ((d[1], d[0]), (-d[1], -d[0])))
+                c2_leaks = any(
+                    (lambda m: m in WALKABLE or m == 'floor')(
+                        b.mat((c2[0] + p[0], c2[1] + p[1])))
+                    for p in ((d[1], d[0]), (-d[1], -d[0])))
+                far_leaks = (lambda m: m in WALKABLE or m == 'floor')(m3)
+                if not c1_leaks and not c2_leaks and far_leaks and \
+                        b.inventory.get('stone', 0) >= 2:
+                    # pierced a thin wall: cork the far end from c2, then
+                    # the normal entrance cork seals the chamber
+                    if pos == c2:
+                        if tuple(b.facing) == d:
+                            return 'place_stone'
+                        a = self._face_or(c3, 'place_stone')
+                        if a:
+                            return a
+                    if pos == c1:
+                        a = self._step_toward(c2)
+                        if a:
+                            return a
+                    return 'noop'      # never fall through to blacklist
+                if c1_leaks and not c2_leaks and \
+                        (m3 == 'stone' or m3 is None) and \
+                        b.inventory.get('wood_pickaxe', 0) > 0:
+                    self.burrow_blacklist.add((c1, c2))
+                    self.burrow_cells = (c2, c3)
+                    if self.home == bc:
+                        self.home = None
+                    return self._burrow()
+                if c2_leaks and m3 in ('stone', None) and \
+                        b.mat((c3[0] + d[0], c3[1] + d[1])) in ('stone', None) \
+                        and b.inventory.get('wood_pickaxe', 0) > 0:
+                    # leak at the chamber cell: shift the whole corridor one
+                    # deeper (cork will land on c2)
+                    self.burrow_blacklist.add((c1, c2))
+                    self.burrow_cells = (c3, (c3[0] + d[0], c3[1] + d[1]))
+                    if self.home == bc:
+                        self.home = None
+                    return self._burrow()
                 self.burrow_blacklist.add((c1, c2))
                 if self.home == bc:
                     self.home = None
                 self.burrow_cells = None
-                d = (c2[0] - c1[0], c2[1] - c1[1])
                 e0 = (c1[0] - d[0], c1[1] - d[1])
                 a = self._step_toward(e0 if pos == c1 else c1)
                 if a:
@@ -625,6 +843,15 @@ class Brain:
                 m0 = b.mat(e0)
                 if tuple(b.facing) == (-d[0], -d[1]):
                     if m0 in WALKABLE or m0 == 'floor' or m0 is None:
+                        # dusk bait: if defeat_zombie is unbanked and one is
+                        # near, hold the cork 1 tick — L1 fights adjacents,
+                        # the corridor mouth is a 1-wide funnel
+                        if is_night(b.t) and 'defeat_zombie' not in b.ach \
+                                and b.inventory.get('health', 0) >= 6 \
+                                and (b.t % 300) < 165:
+                            zr = b.report('zombie')
+                            if zr and zr.dist <= 3:
+                                return 'noop'
                         if not is_night(b.t):
                             # daytime pre-dig: corridor ready, cork at dusk
                             self.home = self.burrow_cells
@@ -708,7 +935,8 @@ class Brain:
                 walls = 0
                 for d in D4:
                     n = b.mat((c[0] + d[0], c[1] + d[1]))
-                    if n is not None and n != 'floor' and n not in WALKABLE:
+                    if n is not None and n != 'floor' and n not in WALKABLE \
+                            and n != 'lava':
                         walls += 1
                 if walls < 2:
                     continue
@@ -765,6 +993,7 @@ class Brain:
     def _night(self):
         b = self.b
         if not is_night(b.t):
+            self.bl_at_dusk = len(self.burrow_blacklist)
             # dawn: uncork and reclaim the stone, then resume the day
             if self.burrow_cells and self.mine_back_cell and \
                     b.inventory.get('wood_pickaxe', 0) > 0 and \
@@ -790,10 +1019,18 @@ class Brain:
                 a = self.goto_and([tgt], 'do', allow_mine=False)
                 if a:
                     return a, 'hunt_zombie'
-        # try to reach/dig/cork a burrow
-        a = self._burrow()
-        if a:
-            return a, 'night_burrow'
+        # try to reach/dig/cork a burrow (capped: repeated corridor aborts
+        # in swiss-cheese terrain must not consume the whole night)
+        phase = b.t % 300
+        if len(self.burrow_blacklist) - self.bl_at_dusk < 4 and \
+                (phase < 170 or self.burrow_cells):
+            a = self._burrow()
+            if a:
+                return a, 'night_burrow'
+        else:
+            f = self._funnel_hold()
+            if f:
+                return f
         # no burrow available: hold a defensive corner — a cell with >=2
         # walled sides limits engagements to ~one zombie at a time (they
         # attack only orthogonally); kiting into unmapped grass just finds
@@ -850,6 +1087,10 @@ class Brain:
             need_now = 5               # table 2 + pickaxe 1 + sword 1 + spare
         elif 'make_wood_pickaxe' not in ach or 'make_wood_sword' not in ach:
             need_now = 1
+        elif any(f'make_{t}' not in ach for t in
+                 ('stone_pickaxe', 'stone_sword', 'iron_pickaxe',
+                  'iron_sword')):
+            need_now = 2               # wood for the next tool tier
         else:
             need_now = 0
         if need_now and inv.get('wood', 0) < need_now:
@@ -897,6 +1138,13 @@ class Brain:
             a = self._place_on_ground('place_plant', where={'grass'})
             if a:
                 return a, 'place_plant'
+        # renewable food: harvest the ripe plant even after the achievement
+        # (eating resets grown to 0 — a plant near home is a farm)
+        if b.plant_pos and b.plant_age > PLANT_RIPE_AGE + 10 and \
+                inv.get('food', 9) <= 7:
+            a = self.goto_and([b.plant_pos], 'do', allow_mine=False)
+            if a:
+                return a, 'harvest_plant'
 
         # 5. first stones (enough for tools + a cork), then USE them —
         # topping up to a full bag before visiting the table starves the
@@ -904,7 +1152,7 @@ class Brain:
         if inv.get('wood_pickaxe', 0) > 0 and inv.get('stone', 0) < 3 and \
                 ('make_stone_pickaxe' not in ach or
                  'make_stone_sword' not in ach or 'place_stone' not in ach):
-            s = b.nearest_material({'stone'})
+            s = self._nearest_safe({'stone'})
             if s:
                 a = self.goto_and([s], 'do')
                 if a:
@@ -929,8 +1177,7 @@ class Brain:
         # 7b. prepare tonight's home burrow EARLY — open-field nights are
         # mathematically losing (zombie queue DPS > our regen+kill rate),
         # so the corked burrow is a day-1 primary goal, not a dusk scramble
-        if self.home is None and inv.get('wood_pickaxe', 0) > 0 and \
-                inv.get('stone', 0) >= 1:
+        if self.home is None and inv.get('wood_pickaxe', 0) > 0:
             a = self._burrow()
             if a:
                 return a, 'prepare_home'
@@ -942,7 +1189,7 @@ class Brain:
                 if a:
                     return a, 'place_furnace'
             elif inv.get('wood_pickaxe', 0) > 0:
-                s = b.nearest_material({'stone'})
+                s = self._nearest_safe({'stone'})
                 if s:
                     a = self.goto_and([s], 'do')
                     if a:
@@ -951,7 +1198,7 @@ class Brain:
         # 8b. top up the stone bag for corks / plant walls
         if inv.get('wood_pickaxe', 0) > 0 and \
                 inv.get('stone', 0) < self._stone_needed():
-            s = b.nearest_material({'stone'}, limit=12)
+            s = self._nearest_safe({'stone'}, limit=12)
             if s:
                 a = self.goto_and([s], 'do')
                 if a:
@@ -981,8 +1228,9 @@ class Brain:
                 if a:
                     return a, f'make_{tool}'
 
-        # 10b. wood buffer for corks / remaining recipes
-        if inv.get('wood', 0) < self._wood_needed():
+        # 10b. wood buffer for corks / remaining recipes — only once the
+        # night problem is solved (pre-home wood-banking ate day 1)
+        if self.home is not None and inv.get('wood', 0) < self._wood_needed():
             t = b.nearest_material({'tree'}, limit=14)
             if t:
                 a = self.goto_and([t], 'do')
@@ -1030,7 +1278,7 @@ class Brain:
             if a:
                 return a, 'hunt_cow'
         # top up drink when adjacent to water and not full
-        if inv.get('drink', 9) <= 7:
+        if inv.get('drink', 9) <= 8:
             for d in D4:
                 cell = (b.pos[0] + d[0], b.pos[1] + d[1])
                 if b.mat(cell) == 'water':
@@ -1101,9 +1349,9 @@ class Brain:
 
     def _at_station(self, stations, make_action):
         """Stand within 3x3 of the required station materials, then make.
-        Arrows destroy tables/furnaces: if the last make attempt changed
-        nothing, face the believed station so the served report corrects a
-        phantom map cell (v1.1 bugfix; 42-step craft churn observed)."""
+        Arrows destroy tables/furnaces, so the believed station can be a
+        phantom: if our last make attempt changed nothing, face the station
+        cell — the served faced-report overwrites the stale map cell."""
         b = self.b
         if b.last_action == make_action and b.prev_inventory == b.inventory:
             for s in stations:
@@ -1111,7 +1359,7 @@ class Brain:
                 if cell and mdist(b.pos, cell) == 1:
                     d = self._dir_to(cell)
                     if d and tuple(b.facing) != d:
-                        return DIR_ACTION[d]
+                        return DIR_ACTION[d]   # revalidate by facing
         near = {b.mat((b.pos[0] + dx, b.pos[1] + dy))
                 for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
         if all(s in near for s in stations):
@@ -1140,8 +1388,8 @@ class Brain:
     def _furnace_by_table(self):
         """Place furnace so table+furnace share a 3x3 with a standing cell:
         stand adjacent to the table, place furnace on another neighbor.
-        v1.1: after 25 stuck attempts place it anywhere legal (orbit churn
-        observed; a fresh table near it can come later, wood is renewable)."""
+        After 25 stuck attempts, place it anywhere legal (iron tools can get
+        a fresh table next to it later — wood is renewable; churn is not)."""
         b = self.b
         self.furnace_tries += 1
         if self.furnace_tries > 25:
@@ -1185,18 +1433,45 @@ class Brain:
                 if a and a != 'noop':
                     return a, 'roam'
             return None
-        # honest: frontier exploration
-        if self.explore_target and b.mat(self.explore_target) is None and \
-                mdist(b.pos, self.explore_target) > 1:
-            a = self._explore_step(self.explore_target)
-            if a:
-                return a, 'explore'
+        # honest: bearing-march exploration — straight lines reveal a
+        # 7-wide swath per step through the 9x7 window (frontier-BFS churn
+        # was the stone-discovery bottleneck); rotate on obstacles/margins
+        a = self._march()
+        if a:
+            return a, 'explore'
         tgt = self._pick_frontier(prefer_mountain=bool(wants))
         if tgt:
             self.explore_target = tgt
             a = self._explore_step(tgt)
             if a:
                 return a, 'explore'
+        return None
+
+    march_bearing = None
+    march_stale = 0
+
+    def _march(self):
+        b = self.b
+        if self.march_bearing is None:
+            self.march_bearing = D4[(b.pos[0] + b.pos[1] + b.t) % 4]
+        for _ in range(4):
+            d = self.march_bearing
+            c = (b.pos[0] + d[0], b.pos[1] + d[1])
+            m = b.mat(c)
+            in_bounds = (MARGIN <= c[0] < WORLD_AREA[0] - MARGIN and
+                         MARGIN <= c[1] < WORLD_AREA[1] - MARGIN)
+            if in_bounds and (m in WALKABLE or m == 'floor' or m is None) \
+                    and b.obj_at(c) is None and self._lava_safe(c) and \
+                    self._danger(c) < 4:
+                self.march_stale = 0
+                return DIR_ACTION[d]
+            # rotate bearing (clockwise) and try again
+            self.march_bearing = (-d[1], d[0])
+            self.march_stale += 1
+            if self.march_stale > 8:
+                self.march_bearing = None
+                self.march_stale = 0
+                return None
         return None
 
     def _explore_step(self, tgt):

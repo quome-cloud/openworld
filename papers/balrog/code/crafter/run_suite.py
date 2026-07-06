@@ -54,7 +54,7 @@ from brain import Brain  # noqa: E402
 import memory as memmod  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RESULTS = os.path.join(HERE, 'results')
+RESULTS = os.path.join(HERE, os.environ.get('CRAFTER_RESULTS_DIR', 'results'))
 SEEDS = list(range(9001, 9011))     # official suite seeds (fresh; the dev
                                     # seeds 7001-7010 were used for tuning)
 MAX_STEPS = 2000

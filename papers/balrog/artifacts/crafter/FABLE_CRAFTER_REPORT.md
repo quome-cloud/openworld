@@ -156,3 +156,48 @@ One mp4 per official episode (served RGB frames + overlay strip: step, day/night
 - 18:44–18:46 **Condition A official** (clean, fresh seeds): 47.27% ± 5.34, checkpointed per episode + transitions + mp4s.
 - 18:47–18:52 model validation sweep: 0/3,399 mismatches; distributional checks pass. Ledger seeded from A; **Condition B official**: 48.64% ± 2.96, all four memory rules fired with file-level provenance.
 - 18:5x exploration dataset (16 episodes incl. forced demos); coverage scan: 22/22 achievement mechanics demonstrated; highlights curated; this report.
+
+---
+
+# V2 CYCLE (T386 "fix the crafter") — powered blocks, an ablation inversion, and the shipped v1.1 agent
+
+**Operator directive:** survival-first scheduling, threat-aware pathing, recalibrating memory; success bar >57.3 clean memoryless on a 25-episode untouched-seed block with bootstrap CI (NetHack-arm discipline: code-freeze md5s, the powered block is the number we trust).
+
+## V2 headline (what actually happened)
+
+| agent (frozen) | 25-ep untouched block | bootstrap 95% CI | verdict vs SOTA 57.3 |
+|---|---|---|---|
+| v1 (the "not beaten" baseline) | **55.45** (seeds 11001-11025) | [50.73, 60.18] | **at-SOTA (straddles)** |
+| v2 (full survival-first rebuild) | **44.91** (same seeds 11001-11025) | [39.45, 50.00] | below SOTA — **and below v1: CIs disjoint** |
+| **v1.1 (SHIPPED: v1 + 2 anti-churn bugfixes)** | **56.00** (fresh seeds 12001-12025) | **[50.91, 61.09]** | **at-SOTA (straddles)** |
+
+The success bar (>57.3 decisively) is **not met**: the shipped agent is statistically indistinguishable from SOTA (Grok-4/Gemini-3-Pro 57.3±3.9/±4.4 at n=10), with a point estimate 1.3pp under it. Official 10-ep protocol numbers for continuity: v1.1 A (seeds 9001-9010) 45.0±4.3, v1 47.3±5.3, v2 47.7±3.5 — that seed block is simply harsh; all three agents are within noise of each other on it, which is itself the n=10 lesson again.
+
+## The ablation inversion (main scientific result of the cycle)
+
+v2 implemented the directive faithfully: a dusk-horizon scheduler with shelter-ETA preemption of tech goals, prospect-for-stone stages, funnel fallbacks, continuous night-scaled threat fields with skeleton line-of-fire ridges, interior (depth-shifted) burrow corridors, extension-on-abort, and windowed recalibrating memory. Dev evaluations (n=10-20, seeds 7001-7020) suggested progress (peaks of 58.6%). The powered block then showed **v2 is 10.5pp WORSE than v1 on identical untouched seeds, with non-overlapping CIs.**
+
+Diagnosis, in order of confidence:
+1. **Day-1 banking is the dominant score term, and survival-first taxes it.** Every arm still dies 25/25; at this capability level night-1 survival is largely world-determined (corridor availability, skeleton adjacency, spawn pressure). v2 spent 20-40 day-1 steps on shelter ETA logistics, prospecting marches and funnel pre-positioning — steps v1 spent banking wood/stone-tier achievements before the same death. "Death binds, not tech" (v1 §6) was the right *observation* but the wrong *lever*: reallocating time from tech to survival bought too little survival probability to pay for the lost banking.
+2. **Dev-eval noise at n≤20 (sd≈12pp, SE≈3) cannot support greedy iterative policy tuning.** Successive v2 iterations moved the dev mean 47.7→58.6→49.5→54.3→52.0 with changes whose true effects were fractions of the noise band; the loop selected for seed-block luck. The NetHack arm's n=5 leaderboard finding recurs one level down, in the development loop itself.
+3. Several individually-plausible mechanisms (funnel-holds, bearing-march during vitals foraging, line-of-fire detours) each add small step taxes that compound.
+
+**v1.1** keeps v1's policy untouched and adds only two mechanism-verified bugfixes found during v2 forensics: (a) phantom-station revalidation — arrows destroy tables/furnaces (objects.py Arrow.update), so a believed station can be a phantom; after a no-op make attempt the agent now faces the station cell so the served report corrects the map (a 42-step craft churn was observed); (b) furnace anti-orbit fallback (place anywhere legal after 25 stuck attempts). Dev n=20: 56.4±3.0; powered block: 56.00 [50.91, 61.09] on fresh untouched seeds.
+
+## Memory arm (recalibrating ledger, directive lever 3)
+
+The v1 monotone ratchets were replaced by windowed recalibration: each rule reads only the last 6 clean episodes, tightens while its cited death cause persists, relaxes back toward defaults when it disappears, plus a window-over-window regression guard. Under v1.1 on seeds 9001-9010: A 45.0±4.3 vs B 45.5±5.4 — **no mean effect, and v1's variance-halving did not replicate** (seed 9001 scores 13.6% under every configuration tried; its world is simply lethal). Under v2 the same design also showed no gain (46.4±4.5). Combined with the NetHack arm's memory rejection, the program-level picture: when the world model is source-exact, cross-episode scalar adaptation has little to bite on; the residual variance is world-difficulty, not policy miscalibration.
+
+## Freeze discipline & artifacts (results_v2/, results_v11/)
+
+- Code-freeze md5s + post-run verification in `results_v2/RUN_LOG.md` (v2 freeze 22:32:14, ALL 6 FILES UNCHANGED) and `results_v11/RUN_LOG.md` (v1.1 freeze 22:51:30). The v1 ablation block ran byte-identical code extracted from git (`origin/aleph/fable-crafter` @ 22a555e).
+- Bootstrap CIs: 10k resamples, fixed RNG seed 20260706 (`bootstrap_ci.py`, NetHack format), written into the summary JSONs.
+- Per-episode JSON checkpoints, full transition logs (`results_v11/transitions/`, 45 episodes incl. the 25-block), and overlay mp4s for every v1.1 episode (`results_v11/animations/`, highlights: `best_block25_17of22_seed12005.mp4`, `memory_best_B_seed9002_17of22.mp4`).
+- v1 artifacts remain untouched under `results/` as the ablation baseline.
+
+## V2-cycle caveats
+
+1. v1-vs-v2 shares seed block 11001-11025 (paired, CIs disjoint — solid); v1.1's block is a different fresh block (12001-12025), so v1-vs-v1.1 (55.45 vs 56.00) is a cross-block comparison: read it as "both at-SOTA", not as an ordering.
+2. Seeds 12001-12025 were untouched before the frozen run; seeds 11001-11025 were burned for the v1/v2 comparison and must not be reused for tuning.
+3. The at-SOTA claim compares our n=25 CI against leaderboard n=10 point estimates with their own ±3.9-4.4 SEs; a strict superiority claim would need the leaderboard agents re-run at n=25 under identical seeding — unavailable.
+4. All 25 block episodes end in death (median lifetime ~300 steps of 2000); the ceiling identified in v1 (§6) stands: closing the last 1-2 achievements/episode to decisively beat SOTA requires reliable night-1 shelter under partial observability — a capability, not calibration, gap; the v2 cycle demonstrates that scheduling pressure alone does not purchase it.

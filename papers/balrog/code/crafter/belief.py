@@ -389,6 +389,8 @@ class TextBelief(BaseBelief):
             self.ach.add('eat_cow')
         if action == 'do' and 3 <= delta('food') <= 4:
             self.ach.add('eat_plant')
+            if self.plant_pos and self.faced_prev == 'plant':
+                self.plant_age = 0     # eating resets grown (renewable farm)
         if was_sleeping and not self.sleeping and inv.get('energy', 0) >= 9 \
                 and not self.dead:
             self.ach.add('wake_up')

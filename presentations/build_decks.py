@@ -295,6 +295,40 @@ def beamer_slide(s, kicker="", parts=None, part_index=None):
              % (w, accent[i % 4], _btext(c["head"]), _btext(c.get("text", ""))))
             for i, c in enumerate(cards))
         return r"\begin{frame}{%s}\vfill\begin{columns}[T]%s\end{columns}\vfill\end{frame}" % (title, cols)
+    if t == "steps":
+        body = "".join(r"\item \textbf{%s} --- %s" % (_btext(x["head"]), _btext(x.get("text", "")))
+                       for x in s["steps"])
+        return r"\begin{frame}{%s}\vfill\begin{enumerate}%s\end{enumerate}\vfill\end{frame}" % (title, body)
+    if t == "hub":
+        sp = "".join(r"\item %s" % _btext(x["label"]) for x in s["spokes"])
+        return (r"\begin{frame}{%s}\vfill\begin{center}{\color{owdeep}\Large\bfseries %s}\end{center}"
+                r"\vskip8pt\begin{itemize}%s\end{itemize}\vfill\end{frame}"
+                % (title, _btext(s["center"]), sp))
+    if t == "bigstat":
+        pts = "".join(r"\item %s" % _btext(p) for p in s.get("points", []))
+        ptsblk = (r"\vskip10pt\begin{itemize}%s\end{itemize}" % pts) if pts else ""
+        return (r"\begin{frame}{%s}\vfill\begin{center}{\color{owteal}\fontsize{58}{62}\selectfont\bfseries %s}"
+                r"\par\vskip10pt{\color{owdeep}\large %s}\end{center}%s\vfill\end{frame}"
+                % (title, _btext(s["value"]), _btext(s.get("sub", "")), ptsblk))
+    if t == "quadrant":
+        q = s["cells"]
+        cell = lambda x: r"{\color{owdeep}\bfseries %s}\\[2pt]{\color{owmuted}\small %s}" % (
+            _btext(x["head"]), _btext(x.get("text", "")))
+        rowf = lambda a, b: (r"\begin{columns}[T]\begin{column}{.46\textwidth}%s\end{column}"
+                             r"\begin{column}{.46\textwidth}%s\end{column}\end{columns}" % (cell(a), cell(b)))
+        body = rowf(q[0], q[1]) + (r"\vskip12pt" + rowf(q[2], q[3]) if len(q) > 3 else "")
+        return r"\begin{frame}{%s}\vfill%s\vfill\end{frame}" % (title, body)
+    if t == "contrast":
+        cb = lambda d: r"{\color{owdeep}\large\bfseries %s}\\[3pt]{\color{owmuted}%s}" % (
+            _btext(d["head"]), _btext(d.get("text", "")))
+        return (r"\begin{frame}{%s}\vfill\begin{columns}[c]\begin{column}{.42\textwidth}%s\end{column}"
+                r"\begin{column}{.10\textwidth}\begin{center}{\color{owochre}\Huge$\rightarrow$}\end{center}\end{column}"
+                r"\begin{column}{.42\textwidth}%s\end{column}\end{columns}\vfill\end{frame}"
+                % (title, cb(s["before"]), cb(s["after"])))
+    if t == "timeline":
+        body = "".join(r"\item \textbf{%s} --- %s" % (_btext(x["t"]), _btext(x.get("text", "")))
+                       for x in s["items"])
+        return r"\begin{frame}{%s}\vfill\begin{itemize}%s\end{itemize}\vfill\end{frame}" % (title, body)
     if t == "anim":
         still = s.get("still")
         if not still:
@@ -541,6 +575,87 @@ li::before{content:"";position:absolute;left:0;top:.55em;width:11px;height:11px;
 .slide.on .cbar-comp{animation:growUp 1.2s .5s cubic-bezier(.3,.6,.2,1) both}
 .slide.on .cval{opacity:0;animation:fadeIn .5s 1.3s both}
 .slide.on .clbl{opacity:0;animation:riseIn .5s 1.1s both}
+/* ===== distinct content layouts (each slide gets a different look) ===== */
+/* steps: an ascending staircase of numbered blocks */
+.steps{display:flex;align-items:flex-end;justify-content:center;gap:1.4vw;width:100%;max-width:84rem;margin:0 auto}
+.stp{flex:1 1 0;background:#fff;border-radius:14px;border-top:5px solid var(--teal);padding:2.4vh 1.3vw 2vh;
+  box-shadow:0 7px 22px rgba(11,46,79,.08);display:flex;flex-direction:column;gap:.7vh;position:relative;min-height:20vh}
+.stp .stp-n{position:absolute;top:-2.6vh;left:1.3vw;width:5vh;height:5vh;border-radius:50%;background:var(--teal);color:#fff;
+  font-weight:800;display:flex;align-items:center;justify-content:center;font-size:2.4vh;box-shadow:0 5px 14px rgba(15,140,140,.32)}
+.stp h3{color:var(--deep);font-size:2.5vh;margin-top:1.6vh;font-weight:800}
+.stp p{color:var(--muted);font-size:2vh;line-height:1.32}
+.stp:nth-child(2){margin-bottom:6vh}.stp:nth-child(3){margin-bottom:12vh}
+.stp:nth-child(4){margin-bottom:18vh}.stp:nth-child(5){margin-bottom:24vh}
+.stp:nth-child(2){border-top-color:var(--ochre)}.stp:nth-child(2) .stp-n{background:var(--ochre)}
+.stp:nth-child(3){border-top-color:var(--blue)}.stp:nth-child(3) .stp-n{background:var(--blue)}
+.stp:nth-child(4){border-top-color:var(--deep)}.stp:nth-child(4) .stp-n{background:var(--deep)}
+.stp:nth-child(5){border-top-color:var(--teal)}.stp:nth-child(5) .stp-n{background:var(--teal)}
+/* hub: a centre concept with satellites in a 3x3 ring */
+.hub{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2vh 2vw;
+  width:100%;max-width:70rem;margin:0 auto;height:60vh;place-items:center}
+.hub-c{grid-area:2/2;width:18vh;height:18vh;border-radius:24px;background:var(--deep);color:#fff;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1vh;font-weight:800;
+  font-size:2.6vh;box-shadow:0 10px 32px rgba(11,46,79,.28)}
+.spk{background:#fff;border:2px solid var(--teal);border-radius:12px;padding:1.3vh 1.2vw;display:flex;align-items:center;
+  gap:.6vw;color:var(--deep);font-weight:700;font-size:2vh;box-shadow:0 5px 16px rgba(11,46,79,.07);max-width:20ch}
+.spk .ic{width:2.6vh;height:2.6vh;color:var(--teal);flex:none}
+.spk:nth-child(3n+1){border-color:var(--ochre)}.spk:nth-child(3n+1) .ic{color:var(--ochre)}
+.spk:nth-child(3n+2){border-color:var(--blue)}.spk:nth-child(3n+2) .ic{color:var(--blue)}
+/* bigstat: one hero number */
+.bigstat{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.5vh;width:100%}
+.bs-v{font-size:20vh;font-weight:800;color:var(--teal);line-height:.95;letter-spacing:-.02em}
+.bs-sub{font-size:3vh;color:var(--deep);font-weight:700;max-width:24ch}
+.bs-pts{display:flex;gap:2.5vw;margin-top:2vh;flex-wrap:wrap;justify-content:center}
+.bs-pts span{color:var(--muted);font-size:2.1vh;display:flex;align-items:center;gap:.5vw}
+.bs-pts span::before{content:"";width:1vh;height:1vh;border-radius:50%;background:var(--ochre);display:inline-block}
+/* quadrant: 2x2 with a cross divider */
+.quad{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:0;width:100%;max-width:74rem;margin:0 auto;
+  height:58vh;border-radius:18px;overflow:hidden;box-shadow:0 8px 28px rgba(11,46,79,.1);background:#fff}
+.qc{padding:3vh 2.4vw;display:flex;flex-direction:column;gap:1vh;border:1.5px solid var(--line)}
+.qc .ic{width:3.4vh;height:3.4vh;color:var(--teal)}
+.qc h3{color:var(--deep);font-size:2.7vh;font-weight:800}
+.qc p{color:var(--muted);font-size:2.1vh;line-height:1.32}
+.qc:nth-child(1){border-top:5px solid var(--teal)}.qc:nth-child(2){border-top:5px solid var(--ochre)}
+.qc:nth-child(2) .ic{color:var(--ochre)}.qc:nth-child(3){border-top:5px solid var(--blue)}
+.qc:nth-child(3) .ic{color:var(--blue)}.qc:nth-child(4){border-top:5px solid var(--deep)}.qc:nth-child(4) .ic{color:var(--deep)}
+/* contrast: before -> after with a big arrow */
+.contrast{display:flex;align-items:stretch;justify-content:center;gap:2vw;width:100%;max-width:80rem;margin:0 auto}
+.ct-side{flex:1 1 0;border-radius:16px;padding:3.4vh 2.2vw;display:flex;flex-direction:column;gap:1.2vh}
+.ct-before{background:#F3EEE4;border:2px solid var(--line)}
+.ct-after{background:#EAF5F4;border:2px solid var(--teal)}
+.ct-side .ct-h{font-size:1.7vh;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.ct-before .ct-h{color:var(--muted)}.ct-after .ct-h{color:var(--teal)}
+.ct-side h3{color:var(--deep);font-size:3vh;font-weight:800}
+.ct-side p{color:var(--muted);font-size:2.15vh;line-height:1.34}
+.ct-arrow{align-self:center;color:var(--ochre);font-size:6vh;font-weight:800}
+/* timeline: milestones on a line */
+.tl{position:relative;width:100%;max-width:84rem;margin:0 auto;padding:6vh 0}
+.tl-line{position:absolute;left:2%;right:2%;top:50%;height:3px;background:var(--line)}
+.tl-row{display:flex;justify-content:space-between;position:relative}
+.tl-item{flex:1 1 0;display:flex;flex-direction:column;align-items:center;position:relative}
+.tl-dot{width:3vh;height:3vh;border-radius:50%;background:var(--teal);border:3px solid var(--paper);z-index:2;box-shadow:0 3px 10px rgba(15,140,140,.35)}
+.tl-item:nth-child(2n) .tl-dot{background:var(--ochre)}
+.tl-c{position:absolute;width:15ch;text-align:center}
+.tl-item:nth-child(2n-1) .tl-c{bottom:4vh}.tl-item:nth-child(2n) .tl-c{top:4vh}
+.tl-c b{color:var(--deep);font-size:2.3vh;display:block}.tl-c p{color:var(--muted);font-size:1.9vh;margin-top:.4vh;line-height:1.28}
+/* per-layout entrance */
+.slide.on .stp{opacity:0;animation:riseIn .55s cubic-bezier(.2,.75,.3,1) both}
+.slide.on .stp:nth-child(1){animation-delay:.1s}.slide.on .stp:nth-child(2){animation-delay:.25s}
+.slide.on .stp:nth-child(3){animation-delay:.4s}.slide.on .stp:nth-child(4){animation-delay:.55s}.slide.on .stp:nth-child(5){animation-delay:.7s}
+.slide.on .hub-c{animation:popIn .5s .1s both}
+.slide.on .spk{opacity:0;animation:popIn .5s both}
+.slide.on .spk:nth-child(2){animation-delay:.35s}.slide.on .spk:nth-child(3){animation-delay:.5s}.slide.on .spk:nth-child(4){animation-delay:.65s}
+.slide.on .spk:nth-child(5){animation-delay:.8s}.slide.on .spk:nth-child(6){animation-delay:.95s}.slide.on .spk:nth-child(7){animation-delay:1.1s}
+.slide.on .bs-v{animation:popIn .7s cubic-bezier(.2,.8,.3,1.1) both}
+.slide.on .bs-sub{opacity:0;animation:riseIn .5s .4s both}.slide.on .bs-pts span{opacity:0;animation:fadeIn .5s .7s both}
+.slide.on .qc{opacity:0;animation:riseIn .5s both}
+.slide.on .qc:nth-child(1){animation-delay:.1s}.slide.on .qc:nth-child(2){animation-delay:.24s}
+.slide.on .qc:nth-child(3){animation-delay:.38s}.slide.on .qc:nth-child(4){animation-delay:.52s}
+.slide.on .ct-before{opacity:0;animation:riseIn .5s .15s both}.slide.on .ct-arrow{opacity:0;animation:popIn .5s .55s both}
+.slide.on .ct-after{opacity:0;animation:riseIn .5s .85s both}
+.slide.on .tl-item{opacity:0;animation:riseIn .5s both}
+.slide.on .tl-item:nth-child(1){animation-delay:.15s}.slide.on .tl-item:nth-child(2){animation-delay:.35s}
+.slide.on .tl-item:nth-child(3){animation-delay:.55s}.slide.on .tl-item:nth-child(4){animation-delay:.75s}.slide.on .tl-item:nth-child(5){animation-delay:.95s}
 /* ---- entrance animations: content rises in, staggered, each time a slide is shown ---- */
 @keyframes riseIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -678,6 +793,38 @@ def html_slide(s, kicker="", parts=None, part_index=None):
             return f'<div class="side {cls}"><h3>{_svg(d.get("icon",""))}{_h(d["head"])}</h3><ul>{items}</ul></div>'
         return (f'<section class="slide">{head}<div class="body"><div class="compare ag">'
                 f'{side(s["left"],"a")}{side(s["right"],"b")}</div></div></section>')
+    if t == "steps":
+        items = "".join(f'<div class="stp"><div class="stp-n">{i+1}</div><h3>{_h(x["head"])}</h3>'
+                        f'<p>{_h(x.get("text",""))}</p></div>' for i, x in enumerate(s["steps"]))
+        return f'<section class="slide">{head}<div class="body"><div class="steps">{items}</div></div></section>'
+    if t == "hub":
+        ring = [(1,2),(2,3),(3,2),(2,1),(1,1),(1,3),(3,3),(3,1)]
+        spokes = "".join(f'<div class="spk" style="grid-area:{r}/{c}">{_svg(x.get("icon",""))}{_h(x["label"])}</div>'
+                         for (r,c), x in zip(ring, s["spokes"]))
+        return (f'<section class="slide">{head}<div class="body"><div class="hub">'
+                f'<div class="hub-c">{_h(s["center"])}</div>{spokes}</div></div></section>')
+    if t == "bigstat":
+        sub = f'<div class="bs-sub">{_h(s["sub"])}</div>' if s.get("sub") else ""
+        pts = "".join(f'<span>{_h(p)}</span>' for p in s.get("points", []))
+        pw = f'<div class="bs-pts">{pts}</div>' if pts else ""
+        return (f'<section class="slide">{head}<div class="body"><div class="bigstat">'
+                f'<div class="bs-v">{_h(s["value"])}</div>{sub}{pw}</div></div></section>')
+    if t == "quadrant":
+        cells = "".join(f'<div class="qc">{_svg(x.get("icon",""))}<h3>{_h(x["head"])}</h3>'
+                        f'<p>{_h(x.get("text",""))}</p></div>' for x in s["cells"])
+        return f'<section class="slide">{head}<div class="body"><div class="quad">{cells}</div></div></section>'
+    if t == "contrast":
+        def cs(d, cls, label):
+            return (f'<div class="ct-side ct-{cls}"><div class="ct-h">{label}</div>'
+                    f'<h3>{_h(d["head"])}</h3><p>{_h(d.get("text",""))}</p></div>')
+        return (f'<section class="slide">{head}<div class="body"><div class="contrast">'
+                f'{cs(s["before"],"before","before")}<div class="ct-arrow">&#8594;</div>'
+                f'{cs(s["after"],"after","after")}</div></div></section>')
+    if t == "timeline":
+        items = "".join(f'<div class="tl-item"><span class="tl-dot"></span><div class="tl-c">'
+                        f'<b>{_h(x["t"])}</b><p>{_h(x.get("text",""))}</p></div></div>' for x in s["items"])
+        return (f'<section class="slide">{head}<div class="body"><div class="tl"><div class="tl-line"></div>'
+                f'<div class="tl-row">{items}</div></div></div></section>')
     if t == "anim":
         return f'<section class="slide">{head}<div class="body">{DIAGRAMS.get(s.get("diagram",""),"")}</div></section>'
     return ""

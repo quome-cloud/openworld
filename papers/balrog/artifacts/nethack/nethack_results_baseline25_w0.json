@@ -1,0 +1,124 @@
+{
+ "label": "baseline25_w0",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 6,
+   "seed": 2006,
+   "condition": "A",
+   "steps": 2234,
+   "illegal": 0,
+   "progression": 0.12558597019922987,
+   "highest_achievement": "Dlvl:10",
+   "depth_max": 10,
+   "xplvl_max": 5,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9",
+    "Dlvl:10"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4",
+    "Xp:5"
+   ],
+   "end_reason": "DEATH: died. Killed by a quivering blob.",
+   "role": "Samurai",
+   "race": "human",
+   "wallclock_s": 57.5,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep6.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 7,
+   "seed": 2007,
+   "condition": "A",
+   "steps": 258,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a bolt of lightning.",
+   "role": "Priest",
+   "race": "human",
+   "wallclock_s": 3.7,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep7.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 8,
+   "seed": 2008,
+   "condition": "A",
+   "steps": 99992,
+   "illegal": 0,
+   "progression": 0.01847840456172601,
+   "highest_achievement": "Xp:2",
+   "depth_max": 1,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "ABORTED: quit.",
+   "role": "Caveman",
+   "race": "dwarven",
+   "wallclock_s": 1687.8,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep8.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 9,
+   "seed": 2009,
+   "condition": "A",
+   "steps": 716,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a hobbit.",
+   "role": "Healer",
+   "race": "gnomish",
+   "wallclock_s": 9.9,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep9.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

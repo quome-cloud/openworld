@@ -1,0 +1,644 @@
+{
+ "passes": [
+  {
+   "pass": 1,
+   "seed_base": 4000,
+   "episodes": [
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 0,
+     "seed": 4000,
+     "condition": "B",
+     "steps": 1592,
+     "illegal": 0,
+     "progression": 0.12558597019922987,
+     "highest_achievement": "Dlvl:10",
+     "depth_max": 10,
+     "xplvl_max": 4,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6",
+      "Dlvl:7",
+      "Dlvl:8",
+      "Dlvl:9",
+      "Dlvl:10"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2",
+      "Xp:3",
+      "Xp:4"
+     ],
+     "end_reason": "DEATH: died. Killed by an orcish dagger.",
+     "role": "Monk",
+     "race": "human",
+     "wallclock_s": 18.4,
+     "transitions_file": "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+     "mem_fired": []
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 1,
+     "seed": 4001,
+     "condition": "B",
+     "steps": 6158,
+     "illegal": 0,
+     "progression": 0.024160136550546978,
+     "highest_achievement": "Xp:4",
+     "depth_max": 1,
+     "xplvl_max": 4,
+     "dlvl_list": [
+      "Dlvl:1"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2",
+      "Xp:3",
+      "Xp:4"
+     ],
+     "end_reason": "DEATH: was poisoned. Poisoned by a rotted large kobold corpse, while fainted from lack of food.",
+     "role": "Priest",
+     "race": "elven",
+     "wallclock_s": 267.2,
+     "transitions_file": "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['orcish dagger']",
+      "step 0: M2 loaded danger depth 10"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 2,
+     "seed": 4002,
+     "condition": "B",
+     "steps": 770,
+     "illegal": 0,
+     "progression": 0.09770935198701912,
+     "highest_achievement": "Dlvl:9",
+     "depth_max": 9,
+     "xplvl_max": 3,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6",
+      "Dlvl:7",
+      "Dlvl:8",
+      "Dlvl:9"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2",
+      "Xp:3"
+     ],
+     "end_reason": "DEATH: died. Killed by a jaguar.",
+     "role": "Valkyrie",
+     "race": "dwarven",
+     "wallclock_s": 10.4,
+     "transitions_file": "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 10"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 3,
+     "seed": 4003,
+     "condition": "B",
+     "steps": 942,
+     "illegal": 0,
+     "progression": 0.035428686118173014,
+     "highest_achievement": "Dlvl:6",
+     "depth_max": 6,
+     "xplvl_max": 2,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2"
+     ],
+     "end_reason": "DEATH: died. Killed by a manes, while fainted from lack of food.",
+     "role": "Wizard",
+     "race": "elven",
+     "wallclock_s": 9.3,
+     "transitions_file": "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['jaguar', 'orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 9"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 4,
+     "seed": 4004,
+     "condition": "B",
+     "steps": 264,
+     "illegal": 0,
+     "progression": 0.015392269075361172,
+     "highest_achievement": "Dlvl:2",
+     "depth_max": 2,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a goblin.",
+     "role": "Wizard",
+     "race": "gnomish",
+     "wallclock_s": 2.4,
+     "transitions_file": "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 9"
+     ]
+    }
+   ],
+   "score": 5.9655282786066035
+  },
+  {
+   "pass": 2,
+   "seed_base": 5000,
+   "episodes": [
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 0,
+     "seed": 5000,
+     "condition": "B",
+     "steps": 92,
+     "illegal": 0,
+     "progression": 0.20612854836308672,
+     "highest_achievement": "Dlvl:12",
+     "depth_max": 12,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6",
+      "Dlvl:7",
+      "Dlvl:8",
+      "Dlvl:9",
+      "Dlvl:10",
+      "Dlvl:11",
+      "Dlvl:12"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a dust vortex.",
+     "role": "Archeologist",
+     "race": "dwarven",
+     "wallclock_s": 0.5,
+     "transitions_file": "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 2"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 1,
+     "seed": 5001,
+     "condition": "B",
+     "steps": 9225,
+     "illegal": 0,
+     "progression": 0.021221378364235505,
+     "highest_achievement": "Dlvl:4",
+     "depth_max": 4,
+     "xplvl_max": 3,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2",
+      "Xp:3"
+     ],
+     "end_reason": "DEATH: starved to death.",
+     "role": "Monk",
+     "race": "human",
+     "wallclock_s": 54.9,
+     "transitions_file": "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 2"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 2,
+     "seed": 5002,
+     "condition": "B",
+     "steps": 1777,
+     "illegal": 0,
+     "progression": 0.09770935198701912,
+     "highest_achievement": "Dlvl:9",
+     "depth_max": 9,
+     "xplvl_max": 3,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6",
+      "Dlvl:7",
+      "Dlvl:8",
+      "Dlvl:9"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2",
+      "Xp:3"
+     ],
+     "end_reason": "DEATH: died. Killed by a werewolf.",
+     "role": "Cavewoman",
+     "race": "dwarven",
+     "wallclock_s": 36.3,
+     "transitions_file": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+      "step 0: M2 loaded danger depth 2",
+      "step 1595: M2 rest gate tightened at depth 2 (remembered danger depth 2)"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 3,
+     "seed": 5003,
+     "condition": "B",
+     "steps": 2718,
+     "illegal": 0,
+     "progression": 0.01847840456172601,
+     "highest_achievement": "Xp:2",
+     "depth_max": 1,
+     "xplvl_max": 2,
+     "dlvl_list": [
+      "Dlvl:1"
+     ],
+     "xplvl_list": [
+      "Xp:1",
+      "Xp:2"
+     ],
+     "end_reason": "DEATH: died. Killed by a newt.",
+     "role": "Wizard",
+     "race": "gnomish",
+     "wallclock_s": 71.1,
+     "transitions_file": "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 2"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 4,
+     "seed": 5004,
+     "condition": "B",
+     "steps": 333,
+     "illegal": 0,
+     "progression": 0.015392269075361172,
+     "highest_achievement": "Dlvl:2",
+     "depth_max": 2,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a goblin.",
+     "role": "Priestess",
+     "race": "elven",
+     "wallclock_s": 3.2,
+     "transitions_file": "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1"
+     ]
+    }
+   ],
+   "score": 7.178599047028571
+  },
+  {
+   "pass": 3,
+   "seed_base": 6000,
+   "episodes": [
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 0,
+     "seed": 6000,
+     "condition": "B",
+     "steps": 499,
+     "illegal": 0,
+     "progression": 0.015392269075361172,
+     "highest_achievement": "Dlvl:2",
+     "depth_max": 2,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a newt.",
+     "role": "Healer",
+     "race": "human",
+     "wallclock_s": 6.1,
+     "transitions_file": "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 1,
+     "seed": 6001,
+     "condition": "B",
+     "steps": 150,
+     "illegal": 0,
+     "progression": 0.015392269075361172,
+     "highest_achievement": "Dlvl:2",
+     "depth_max": 2,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a goblin.",
+     "role": "Rogue",
+     "race": "human",
+     "wallclock_s": 1.3,
+     "transitions_file": "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 2,
+     "seed": 6002,
+     "condition": "B",
+     "steps": 597,
+     "illegal": 0,
+     "progression": 0.026482449457437766,
+     "highest_achievement": "Dlvl:5",
+     "depth_max": 5,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a bat.",
+     "role": "Wizard",
+     "race": "human",
+     "wallclock_s": 5.1,
+     "transitions_file": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1",
+      "step 290: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 291: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 292: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 293: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 294: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 295: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 296: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 297: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 298: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 299: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 300: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 301: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 302: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 303: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 304: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 305: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 306: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 307: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 308: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 309: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 310: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 311: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 312: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 313: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 314: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 315: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 316: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 317: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 318: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 319: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 320: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 321: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 322: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 323: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 324: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 325: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 326: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 327: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 328: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 329: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 330: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 331: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 332: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 333: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 334: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 335: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 336: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 337: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 338: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 339: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 340: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 341: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 342: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 343: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 344: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 345: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 346: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 347: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 348: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 349: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 350: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 351: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 352: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 353: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 354: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 355: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 356: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 357: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 358: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 359: M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+      "step 360: M2 rest gate tightened at depth 1 (remembered danger depth 1)"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 3,
+     "seed": 6003,
+     "condition": "B",
+     "steps": 99980,
+     "illegal": 0,
+     "progression": 0.0,
+     "highest_achievement": null,
+     "depth_max": 1,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "ABORTED: quit.",
+     "role": "Caveman",
+     "race": "dwarven",
+     "wallclock_s": 2882.1,
+     "transitions_file": "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['bat', 'dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1"
+     ]
+    },
+    {
+     "task": "NetHackChallenge-v0",
+     "episode": 4,
+     "seed": 6004,
+     "condition": "B",
+     "steps": 207,
+     "illegal": 0,
+     "progression": 0.1612677822768481,
+     "highest_achievement": "Dlvl:11",
+     "depth_max": 11,
+     "xplvl_max": 1,
+     "dlvl_list": [
+      "Dlvl:1",
+      "Dlvl:2",
+      "Dlvl:3",
+      "Dlvl:4",
+      "Dlvl:5",
+      "Dlvl:6",
+      "Dlvl:7",
+      "Dlvl:8",
+      "Dlvl:9",
+      "Dlvl:10",
+      "Dlvl:11"
+     ],
+     "xplvl_list": [
+      "Xp:1"
+     ],
+     "end_reason": "DEATH: died. Killed by a giant ant.",
+     "role": null,
+     "race": null,
+     "wallclock_s": 1.0,
+     "transitions_file": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz",
+     "mem_fired": [
+      "step 0: M1 loaded avoid-species ['bat', 'dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+      "step 0: M2 loaded danger depth 1",
+      "step 44: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 45: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 46: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 47: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 48: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 49: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 50: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 51: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 52: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 53: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 54: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 55: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 56: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 57: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 58: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 59: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 60: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 61: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 62: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 63: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 64: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 65: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 66: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 67: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 68: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 69: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 70: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 71: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 72: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 73: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 74: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 75: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 76: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 77: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 78: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 101: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 102: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 103: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 104: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 105: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 106: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 107: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 108: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 109: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 110: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 111: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 112: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 113: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 114: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 115: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 116: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 117: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 118: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 119: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 120: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 121: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 122: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 123: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 124: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 125: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 126: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 127: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 128: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 129: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 130: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 131: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 132: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 133: M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+      "step 134: M2 rest gate tightened at depth 6 (remembered danger depth 1)"
+     ]
+    }
+   ],
+   "score": 4.370695397700164
+  }
+ ]
+}

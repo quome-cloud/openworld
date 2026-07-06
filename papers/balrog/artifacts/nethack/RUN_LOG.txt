@@ -1,0 +1,478 @@
+19:55:59 === clean_A episode 0 seed 1000 ===
+19:56:08   ep0: prog 0.2566 (Dlvl:13) depth 13 xp 3 steps 754 role Samurai end: DEATH: died. Killed by a crocodile.
+19:56:08   running mean over 1 eps: 25.66 (SOTA 6.8)
+19:56:08 === clean_A episode 1 seed 1001 ===
+19:56:13   ep1: prog 0.0265 (Dlvl:5) depth 5 xp 2 steps 623 role Ranger end: DEATH: died. Killed by a dwarf.
+19:56:13   running mean over 2 eps: 14.15 (SOTA 6.8)
+19:56:13 === clean_A episode 2 seed 1002 ===
+19:56:17   ep2: prog 0.0175 (Dlvl:3) depth 3 xp 1 steps 388 role Valkyrie end: DEATH: died. Killed by a dwarf.
+19:56:17   running mean over 3 eps: 10.02 (SOTA 6.8)
+19:56:17 === clean_A episode 3 seed 1003 ===
+19:56:25   ep3: prog 0.0175 (Dlvl:3) depth 3 xp 1 steps 725 role Cavewoman end: DEATH: died. Killed by a wand.
+19:56:25   running mean over 4 eps: 7.95 (SOTA 6.8)
+19:56:25 === clean_A episode 4 seed 1004 ===
+19:56:26   ep4: prog 0.0354 (Dlvl:6) depth 6 xp 1 steps 402 role Archeologist end: DEATH: died. Killed by a bat.
+19:56:26   running mean over 5 eps: 7.07 (SOTA 6.8)
+19:56:26 clean_A FINAL: 7.07 vs SOTA 6.8
+19:56:33 === memory pass 1 episode 0 seed 4000 ===
+19:56:47   ep0: prog 0.0354 depth 6 role Monk end DEATH: died. Killed by a dwarf. fired=0
+19:56:47 === memory pass 1 episode 1 seed 4001 ===
+19:57:37     step 2000 depth 1 (max 1) hp 24/24 xp 3 t=1995 wall=51s
+19:58:41   ep1: prog 0.0208 depth 1 role Priest end DEATH: died. Killed by a grid bug, while fainted from lack of food. fired=2
+19:58:41 === memory pass 1 episode 2 seed 4002 ===
+19:58:47   ep2: prog 0.1256 depth 10 role Valkyrie end DEATH: died. Killed by a werewolf. fired=36
+19:58:47 === memory pass 1 episode 3 seed 4003 ===
+19:58:56   ep3: prog 0.0354 depth 6 role Wizard end DEATH: died. Killed by a manes, while fainted from lack of food. fired=2
+19:58:56 === memory pass 1 episode 4 seed 4004 ===
+19:59:06   ep4: prog 0.0265 depth 5 role Wizard end DEATH: died. Killed by a kitten. fired=26
+19:59:06 memory pass 1 score: 4.87
+19:59:06 === memory pass 2 episode 0 seed 5000 ===
+19:59:07   ep0: prog 0.2061 depth 12 role Archeologist end DEATH: died. Killed by a gecko, while praying. fired=2
+19:59:07 === memory pass 2 episode 1 seed 5001 ===
+20:09:53 === clean_A episode 0 seed 1000 ===
+20:10:00   ep0: prog 0.2566 (Dlvl:13) depth 13 xp 3 steps 754 role Samurai end: DEATH: died. Killed by a crocodile.
+20:10:00   running mean over 1 eps: 25.66 (SOTA 6.8)
+20:10:00 === clean_A episode 1 seed 1001 ===
+20:10:12   ep1: prog 0.0485 (Dlvl:7) depth 7 xp 3 steps 1414 role Ranger end: DEATH: died. Killed by a giant spider.
+20:10:12   running mean over 2 eps: 15.25 (SOTA 6.8)
+20:10:12 === clean_A episode 2 seed 1002 ===
+20:11:23     step 2000 depth 2 (max 3) hp 37/37 xp 3 t=1985 wall=70s
+20:11:39     step 4000 depth 2 (max 3) hp 37/37 xp 3 t=4105 wall=86s
+20:11:49   ep2: prog 0.0242 (Xp:4) depth 3 xp 4 steps 5355 role Valkyrie end: DEATH: died. Killed by a jackal, while fainted from lack of food.
+20:11:49   running mean over 3 eps: 10.97 (SOTA 6.8)
+20:11:49 === clean_A episode 3 seed 1003 ===
+20:11:56   ep3: prog 0.0175 (Dlvl:3) depth 3 xp 1 steps 725 role Cavewoman end: DEATH: died. Killed by a wand.
+20:11:56   running mean over 4 eps: 8.67 (SOTA 6.8)
+20:11:56 === clean_A episode 4 seed 1004 ===
+20:11:58   ep4: prog 0.0354 (Dlvl:6) depth 6 xp 1 steps 402 role Archeologist end: DEATH: died. Killed by a bat.
+20:11:58   running mean over 5 eps: 7.64 (SOTA 6.8)
+20:11:58 clean_A FINAL: 7.64 vs SOTA 6.8
+20:12:23 === robustness episode 0 seed 2000 ===
+20:12:25 === memory pass 1 episode 0 seed 4000 ===
+20:12:57   ep0: prog 0.1256 depth 10 role Monk end DEATH: died. Killed by an orcish dagger. fired=0
+20:12:57 === memory pass 1 episode 1 seed 4001 ===
+20:13:14     step 2000 depth 2 (max 2) hp 16/16 xp 1 t=1991 wall=49s
+20:14:13     step 4000 depth 2 (max 2) hp 16/16 xp 1 t=3999 wall=108s
+20:14:29     step 2000 depth 1 (max 1) hp 19/19 xp 3 t=1989 wall=92s
+20:15:00   ep0: prog 0.0154 (Dlvl:2) depth 2 xp 1 steps 5534 role Caveman end: DEATH: died. Killed by a jackal, while fainted from lack of food.
+20:15:00   running mean over 1 eps: 1.54 (SOTA 6.8)
+20:15:00 === robustness episode 1 seed 2001 ===
+20:15:32     step 2000 depth 1 (max 1) hp 16/16 xp 1 t=367 wall=32s
+20:15:56     step 4000 depth 1 (max 1) hp 16/16 xp 1 t=399 wall=56s
+20:15:58     step 4000 depth 1 (max 1) hp 17/19 xp 3 t=4000 wall=181s
+20:16:26     step 6000 depth 1 (max 1) hp 16/16 xp 1 t=430 wall=86s
+20:16:49     step 8000 depth 1 (max 1) hp 16/16 xp 1 t=462 wall=110s
+20:17:15     step 6000 depth 1 (max 1) hp 18/23 xp 4 t=6020 wall=258s
+20:17:18     step 10000 depth 1 (max 1) hp 16/16 xp 1 t=494 wall=139s
+20:17:23   ep1: prog 0.0242 depth 1 role Priest end DEATH: was poisoned. Poisoned by a rotted large kobold corpse, while fainted from lack of food. fired=1
+20:17:23 === memory pass 1 episode 2 seed 4002 ===
+20:17:33   ep2: prog 0.1613 depth 11 role Valkyrie end DEATH: died. Killed by a Woodland-elf. fired=81
+20:17:33 === memory pass 1 episode 3 seed 4003 ===
+20:17:42   ep3: prog 0.0354 depth 6 role Wizard end DEATH: died. Killed by a manes, while fainted from lack of food. fired=2
+20:17:42 === memory pass 1 episode 4 seed 4004 ===
+20:17:44     step 12000 depth 1 (max 1) hp 16/16 xp 1 t=525 wall=165s
+20:17:52   ep4: prog 0.0265 depth 5 role Wizard end DEATH: died. Killed by a kitten. fired=26
+20:17:52 memory pass 1 score: 7.46
+20:17:52 === memory pass 2 episode 0 seed 5000 ===
+20:17:53   ep0: prog 0.2061 depth 12 role Archeologist end DEATH: died. Killed by a dust vortex. fired=2
+20:17:53 === memory pass 2 episode 1 seed 5001 ===
+20:18:08     step 14000 depth 1 (max 1) hp 16/16 xp 1 t=557 wall=189s
+20:18:11     step 2000 depth 4 (max 4) hp 26/26 xp 3 t=1480 wall=18s
+20:18:25     step 4000 depth 4 (max 4) hp 26/26 xp 3 t=2971 wall=32s
+20:18:34     step 6000 depth 4 (max 4) hp 26/26 xp 3 t=4466 wall=41s
+20:18:38     step 16000 depth 1 (max 1) hp 16/16 xp 1 t=589 wall=218s
+20:18:43     step 8000 depth 4 (max 4) hp 26/26 xp 3 t=5985 wall=51s
+20:18:49   ep1: prog 0.0212 depth 4 role Monk end DEATH: starved to death. fired=2
+20:18:49 === memory pass 2 episode 2 seed 5002 ===
+20:19:02     step 18000 depth 1 (max 1) hp 16/16 xp 1 t=621 wall=242s
+20:19:30   ep2: prog 0.0977 depth 9 role Cavewoman end DEATH: died. Killed by a werewolf. fired=2
+20:19:30 === memory pass 2 episode 3 seed 5003 ===
+20:19:34     step 20000 depth 1 (max 1) hp 16/16 xp 1 t=652 wall=274s
+20:19:57     step 22000 depth 1 (max 1) hp 16/16 xp 1 t=684 wall=298s
+20:20:20     step 24000 depth 1 (max 1) hp 16/16 xp 1 t=716 wall=320s
+20:20:34 === memory pass 1 episode 0 seed 4000 ===
+20:20:44     step 26000 depth 1 (max 1) hp 16/16 xp 1 t=749 wall=345s
+20:20:54   ep0: prog 0.1256 depth 10 role Monk end DEATH: died. Killed by an orcish dagger. fired=0
+20:20:54 === memory pass 1 episode 1 seed 4001 ===
+20:21:09     step 28000 depth 1 (max 1) hp 16/16 xp 1 t=780 wall=369s
+20:21:40     step 30000 depth 1 (max 1) hp 16/16 xp 1 t=813 wall=401s
+20:21:57     step 2000 depth 1 (max 1) hp 19/19 xp 3 t=1989 wall=63s
+20:22:04     step 32000 depth 1 (max 1) hp 16/16 xp 1 t=845 wall=425s
+20:22:32     step 34000 depth 1 (max 1) hp 16/16 xp 1 t=878 wall=453s
+20:22:59     step 36000 depth 1 (max 1) hp 16/16 xp 1 t=910 wall=480s
+20:23:11     step 4000 depth 1 (max 1) hp 17/19 xp 3 t=4000 wall=136s
+20:23:27     step 38000 depth 1 (max 1) hp 16/16 xp 1 t=942 wall=508s
+20:23:54     step 40000 depth 1 (max 1) hp 16/16 xp 1 t=992 wall=534s
+20:25:08     step 42000 depth 1 (max 1) hp 16/16 xp 1 t=1025 wall=608s
+20:25:14     step 6000 depth 1 (max 1) hp 18/23 xp 4 t=6020 wall=260s
+20:25:22   ep1: prog 0.0242 depth 1 role Priest end DEATH: was poisoned. Poisoned by a rotted large kobold corpse, while fainted from lack of food. fired=2
+20:25:22 === memory pass 1 episode 2 seed 4002 ===
+20:25:32   ep2: prog 0.0977 depth 9 role Valkyrie end DEATH: died. Killed by a jaguar. fired=2
+20:25:32 === memory pass 1 episode 3 seed 4003 ===
+20:25:37     step 44000 depth 1 (max 1) hp 25/25 xp 2 t=1065 wall=638s
+20:25:42   ep3: prog 0.0354 depth 6 role Wizard end DEATH: died. Killed by a manes, while fainted from lack of food. fired=2
+20:25:42 === memory pass 1 episode 4 seed 4004 ===
+20:25:44   ep4: prog 0.0154 depth 2 role Wizard end DEATH: died. Killed by a goblin. fired=2
+20:25:44 memory pass 1 score: 5.97
+20:25:44 === memory pass 2 episode 0 seed 5000 ===
+20:25:45   ep0: prog 0.2061 depth 12 role Archeologist end DEATH: died. Killed by a dust vortex. fired=2
+20:25:45 === memory pass 2 episode 1 seed 5001 ===
+20:26:01     step 2000 depth 4 (max 4) hp 26/26 xp 3 t=1480 wall=16s
+20:26:02     step 46000 depth 1 (max 1) hp 25/25 xp 2 t=1098 wall=662s
+20:26:13     step 4000 depth 4 (max 4) hp 26/26 xp 3 t=2971 wall=28s
+20:26:25     step 6000 depth 4 (max 4) hp 26/26 xp 3 t=4466 wall=40s
+20:26:31     step 48000 depth 1 (max 1) hp 25/25 xp 2 t=1129 wall=691s
+20:26:34     step 8000 depth 4 (max 4) hp 26/26 xp 3 t=5985 wall=49s
+20:26:40   ep1: prog 0.0212 depth 4 role Monk end DEATH: starved to death. fired=2
+20:26:40 === memory pass 2 episode 2 seed 5002 ===
+20:26:55     step 50000 depth 1 (max 1) hp 25/25 xp 2 t=1162 wall=715s
+20:27:16   ep2: prog 0.0977 depth 9 role Cavewoman end DEATH: died. Killed by a werewolf. fired=3
+20:27:16 === memory pass 2 episode 3 seed 5003 ===
+20:27:25     step 52000 depth 1 (max 1) hp 25/25 xp 2 t=1195 wall=746s
+20:27:50     step 54000 depth 1 (max 1) hp 25/25 xp 2 t=1226 wall=771s
+20:28:04     step 2000 depth 1 (max 1) hp 11/11 xp 1 t=1998 wall=48s
+20:28:14     step 56000 depth 1 (max 1) hp 25/25 xp 2 t=1259 wall=795s
+20:28:27   ep3: prog 0.0185 depth 1 role Wizard end DEATH: died. Killed by a newt. fired=2
+20:28:27 === memory pass 2 episode 4 seed 5004 ===
+20:28:31   ep4: prog 0.0154 depth 2 role Priestess end DEATH: died. Killed by a goblin. fired=2
+20:28:31 memory pass 2 score: 7.18
+20:28:31 === memory pass 3 episode 0 seed 6000 ===
+20:28:37   ep0: prog 0.0154 depth 2 role Healer end DEATH: died. Killed by a newt. fired=2
+20:28:37 === memory pass 3 episode 1 seed 6001 ===
+20:28:38   ep1: prog 0.0154 depth 2 role Rogue end DEATH: died. Killed by a goblin. fired=2
+20:28:38 === memory pass 3 episode 2 seed 6002 ===
+20:28:43   ep2: prog 0.0265 depth 5 role Wizard end DEATH: died. Killed by a bat. fired=73
+20:28:43 === memory pass 3 episode 3 seed 6003 ===
+20:28:44     step 58000 depth 1 (max 1) hp 25/25 xp 2 t=1295 wall=825s
+20:29:08     step 60000 depth 1 (max 1) hp 25/25 xp 2 t=1327 wall=848s
+20:29:27     step 2000 depth 1 (max 1) hp 15/18 xp 1 t=1279 wall=44s
+20:29:38     step 62000 depth 1 (max 1) hp 25/25 xp 2 t=1359 wall=879s
+20:30:04     step 64000 depth 1 (max 1) hp 24/25 xp 2 t=1405 wall=904s
+20:30:23     step 4000 depth 1 (max 1) hp 17/18 xp 1 t=1310 wall=100s
+20:30:33     step 66000 depth 1 (max 1) hp 25/25 xp 2 t=1438 wall=933s
+20:30:58     step 68000 depth 1 (max 1) hp 25/25 xp 2 t=1469 wall=958s
+20:31:16     step 6000 depth 1 (max 1) hp 18/18 xp 1 t=1342 wall=153s
+20:31:25     step 70000 depth 1 (max 1) hp 25/25 xp 2 t=1502 wall=985s
+20:31:53     step 72000 depth 1 (max 1) hp 25/25 xp 2 t=1536 wall=1013s
+20:32:13     step 8000 depth 1 (max 1) hp 18/18 xp 1 t=1374 wall=210s
+20:32:17     step 74000 depth 1 (max 1) hp 25/25 xp 2 t=1568 wall=1037s
+20:32:45     step 76000 depth 1 (max 1) hp 24/25 xp 2 t=1604 wall=1065s
+20:33:08     step 10000 depth 1 (max 1) hp 18/18 xp 1 t=1406 wall=264s
+20:33:10     step 78000 depth 1 (max 1) hp 25/25 xp 2 t=1636 wall=1090s
+20:33:37     step 80000 depth 1 (max 1) hp 25/25 xp 2 t=1669 wall=1117s
+20:34:04     step 12000 depth 1 (max 1) hp 18/18 xp 1 t=1437 wall=321s
+20:34:05     step 82000 depth 1 (max 1) hp 25/25 xp 2 t=1701 wall=1145s
+20:34:32     step 84000 depth 1 (max 1) hp 25/25 xp 2 t=1733 wall=1173s
+20:34:56     step 86000 depth 1 (max 1) hp 25/25 xp 2 t=1767 wall=1197s
+20:34:58     step 14000 depth 1 (max 1) hp 18/18 xp 1 t=1469 wall=375s
+20:35:25     step 88000 depth 1 (max 1) hp 25/25 xp 2 t=1799 wall=1226s
+20:35:49     step 90000 depth 1 (max 1) hp 25/25 xp 2 t=1831 wall=1249s
+20:35:52     step 16000 depth 1 (max 1) hp 18/18 xp 1 t=1501 wall=428s
+20:36:17     step 92000 depth 1 (max 1) hp 25/25 xp 2 t=1864 wall=1278s
+20:36:44     step 94000 depth 1 (max 1) hp 25/25 xp 2 t=1896 wall=1305s
+20:36:48     step 18000 depth 1 (max 1) hp 18/18 xp 1 t=1533 wall=485s
+20:37:07     step 96000 depth 1 (max 1) hp 25/25 xp 2 t=1927 wall=1328s
+20:37:37     step 98000 depth 1 (max 1) hp 25/25 xp 2 t=1959 wall=1357s
+20:37:43     step 20000 depth 1 (max 1) hp 18/18 xp 1 t=1564 wall=539s
+20:38:01   ep1: prog 0.0185 (Xp:2) depth 1 xp 2 steps 99985 role Knight end: ABORTED: quit.
+20:38:01   running mean over 2 eps: 1.69 (SOTA 6.8)
+20:38:01 === robustness episode 2 seed 2002 ===
+20:38:35     step 2000 depth 10 (max 10) hp 48/57 xp 5 t=1985 wall=34s
+20:38:40     step 22000 depth 1 (max 1) hp 18/18 xp 1 t=1596 wall=597s
+20:39:01   ep2: prog 0.1256 (Dlvl:10) depth 10 xp 6 steps 3400 role Barbarian end: DEATH: died. Killed by a gray unicorn.
+20:39:01   running mean over 3 eps: 5.32 (SOTA 6.8)
+20:39:01 === robustness episode 3 seed 2003 ===
+20:39:17   ep3: prog 0.0696 (Dlvl:8) depth 8 xp 2 steps 1253 role Priestess end: DEATH: died. Killed by a giant spider.
+20:39:17   running mean over 4 eps: 5.73 (SOTA 6.8)
+20:39:17 === robustness episode 4 seed 2004 ===
+20:39:35     step 24000 depth 1 (max 1) hp 18/18 xp 1 t=1628 wall=651s
+20:39:51     step 2000 depth 5 (max 5) hp 33/33 xp 4 t=1505 wall=34s
+20:40:28     step 26000 depth 1 (max 1) hp 18/18 xp 1 t=1660 wall=704s
+20:40:40     step 4000 depth 5 (max 5) hp 39/39 xp 5 t=3016 wall=82s
+20:41:14   ep4: prog 0.0369 (Xp:6) depth 6 xp 6 steps 5685 role Monk end: DEATH: died. Killed by a soldier ant.
+20:41:14   running mean over 5 eps: 5.32 (SOTA 6.8)
+20:41:14 robustness FINAL: 5.32 vs SOTA 6.8
+20:41:20     step 28000 depth 1 (max 1) hp 18/18 xp 1 t=1691 wall=756s
+20:42:02     step 30000 depth 1 (max 1) hp 18/18 xp 1 t=1723 wall=799s
+20:42:46     step 32000 depth 1 (max 1) hp 18/18 xp 1 t=1767 wall=843s
+20:43:33     step 34000 depth 1 (max 1) hp 18/18 xp 1 t=1799 wall=890s
+20:44:27     step 36000 depth 1 (max 1) hp 18/18 xp 1 t=1830 wall=944s
+20:45:09     step 38000 depth 1 (max 1) hp 18/18 xp 1 t=1862 wall=985s
+20:45:51     step 40000 depth 1 (max 1) hp 18/18 xp 1 t=1896 wall=1027s
+20:46:34     step 42000 depth 1 (max 1) hp 18/18 xp 1 t=1928 wall=1071s
+20:47:17     step 44000 depth 1 (max 1) hp 18/18 xp 1 t=1959 wall=1114s
+20:47:58     step 46000 depth 1 (max 1) hp 18/18 xp 1 t=1991 wall=1155s
+20:48:42     step 48000 depth 1 (max 1) hp 18/18 xp 1 t=2023 wall=1199s
+20:49:27     step 50000 depth 1 (max 1) hp 18/18 xp 1 t=2055 wall=1244s
+20:50:06     step 52000 depth 1 (max 1) hp 18/18 xp 1 t=2086 wall=1283s
+20:50:55     step 54000 depth 1 (max 1) hp 18/18 xp 1 t=2118 wall=1331s
+20:51:38     step 56000 depth 1 (max 1) hp 18/18 xp 1 t=2150 wall=1374s
+20:52:21     step 58000 depth 1 (max 1) hp 18/18 xp 1 t=2181 wall=1418s
+20:53:05     step 60000 depth 1 (max 1) hp 18/18 xp 1 t=2213 wall=1462s
+20:53:48     step 62000 depth 1 (max 1) hp 18/18 xp 1 t=2245 wall=1505s
+20:55:18     step 64000 depth 1 (max 1) hp 18/18 xp 1 t=2277 wall=1595s
+20:56:00     step 66000 depth 1 (max 1) hp 18/18 xp 1 t=2308 wall=1636s
+20:56:43     step 68000 depth 1 (max 1) hp 18/18 xp 1 t=2340 wall=1680s
+20:57:27     step 70000 depth 1 (max 1) hp 18/18 xp 1 t=2372 wall=1724s
+20:58:10     step 72000 depth 1 (max 1) hp 18/18 xp 1 t=2404 wall=1767s
+20:58:32 CODE FREEZE declared: nh_agent.py/nh_common.py/nh_runner.py/nh_harness.py frozen as of this line (md5s below). All subsequent scored blocks (baseline25 seeds 2000-2024, paired memory) run this exact code. Any future fix invalidates untouched-seed blocks and requires a fresh seed range.
+117d1a43f0b619cbd2a961e0bad399cc  nh_agent.py
+1f8d021bbb9c0a46db70530e73f2f07c  nh_common.py
+fb677af4ba77a3e6615195ba7024c68f  nh_runner.py
+71ddda9c8cb376a106fea94808bae32c  nh_harness.py
+137446f606e468d60f65b42b9330c9a0  nh_memory.py
+20:58:52 resuming baseline25: 5 episodes present
+20:58:52 === baseline25 episode 5 seed 2005 ===
+20:58:59     step 74000 depth 1 (max 1) hp 18/18 xp 1 t=2435 wall=1816s
+20:59:00   ep5: prog 0.0265 (Dlvl:5) depth 5 xp 2 steps 476 role Monk end: DEATH: died. Killed by a gnome king.
+20:59:00   running mean over 6 eps: 4.87 (SOTA 6.8)
+20:59:00 === baseline25 episode 6 seed 2006 ===
+20:59:33     step 2000 depth 8 (max 8) hp 24/39 xp 3 t=1470 wall=33s
+20:59:35   ep6: prog 0.1256 (Dlvl:10) depth 10 xp 5 steps 2234 role Samurai end: DEATH: died. Killed by a quivering blob.
+20:59:35   running mean over 7 eps: 5.97 (SOTA 6.8)
+20:59:35 === baseline25 episode 7 seed 2007 ===
+20:59:37   ep7: prog 0.0265 (Dlvl:5) depth 5 xp 2 steps 258 role Priest end: DEATH: died. Killed by a bolt of lightning.
+20:59:37   running mean over 8 eps: 5.56 (SOTA 6.8)
+20:59:37 === baseline25 episode 8 seed 2008 ===
+20:59:57     step 76000 depth 1 (max 1) hp 18/18 xp 1 t=2467 wall=1874s
+21:00:03     step 2000 depth 1 (max 1) hp 12/18 xp 1 t=273 wall=26s
+21:00:35     step 4000 depth 1 (max 1) hp 14/18 xp 1 t=305 wall=57s
+21:00:58     step 78000 depth 1 (max 1) hp 18/18 xp 1 t=2499 wall=1935s
+21:01:03     step 6000 depth 1 (max 1) hp 16/18 xp 1 t=337 wall=86s
+21:01:35     step 8000 depth 1 (max 1) hp 18/18 xp 1 t=368 wall=117s
+21:02:00     step 80000 depth 1 (max 1) hp 18/18 xp 1 t=2531 wall=1997s
+21:02:05     step 10000 depth 1 (max 1) hp 18/18 xp 1 t=400 wall=148s
+21:02:34     step 12000 depth 1 (max 1) hp 18/18 xp 1 t=432 wall=177s
+21:02:58     step 82000 depth 1 (max 1) hp 18/18 xp 1 t=2562 wall=2055s
+21:03:01     step 14000 depth 1 (max 1) hp 18/18 xp 1 t=464 wall=204s
+21:03:12 === baseline25/w1 episode 13 seed 2013 ===
+21:03:14 === baseline25/w2 episode 19 seed 2019 ===
+21:03:32   [w1] ep13: prog 0.0212 depth 4 role Wizard end DEATH: died. Killed by a giant bat.
+21:03:32 === baseline25/w1 episode 14 seed 2014 ===
+21:03:48 === baseline25/w0 episode 6 seed 2006 ===
+21:03:58     step 2000 depth 4 (max 4) hp 9/13 xp 1 t=326 wall=41s
+21:04:11     step 2000 depth 3 (max 3) hp 15/15 xp 1 t=1464 wall=39s
+21:04:29     step 84000 depth 1 (max 1) hp 18/18 xp 1 t=2594 wall=2145s
+21:04:45     step 4000 depth 4 (max 4) hp 11/13 xp 1 t=358 wall=87s
+21:04:45     step 2000 depth 8 (max 8) hp 24/39 xp 3 t=1470 wall=54s
+21:04:48   [w0] ep6: prog 0.1256 depth 10 role Samurai end DEATH: died. Killed by a quivering blob.
+21:04:48 === baseline25/w0 episode 7 seed 2007 ===
+21:04:52   [w0] ep7: prog 0.0265 depth 5 role Priest end DEATH: died. Killed by a bolt of lightning.
+21:04:52 === baseline25/w0 episode 8 seed 2008 ===
+21:04:54     step 4000 depth 3 (max 3) hp 15/15 xp 1 t=2982 wall=82s
+21:05:30     step 6000 depth 4 (max 4) hp 13/13 xp 1 t=390 wall=133s
+21:05:42     step 6000 depth 3 (max 3) hp 15/15 xp 1 t=4511 wall=130s
+21:05:50     step 2000 depth 1 (max 1) hp 12/18 xp 1 t=273 wall=58s
+21:06:09   [w1] ep14: prog 0.0175 depth 3 role Samurai end DEATH: starved to death.
+21:06:09 === baseline25/w1 episode 15 seed 2015 ===
+21:06:15     step 8000 depth 4 (max 4) hp 13/13 xp 1 t=421 wall=177s
+21:06:16   [w1] ep15: prog 0.0977 depth 9 role None end DEATH: died. Killed by a giant ant.
+21:06:16 === baseline25/w1 episode 16 seed 2016 ===
+21:06:19     step 86000 depth 1 (max 1) hp 18/18 xp 1 t=2626 wall=2256s
+21:06:45     step 4000 depth 1 (max 1) hp 14/18 xp 1 t=305 wall=112s
+21:06:55   [w1] ep16: prog 0.0000 depth 1 role None end DEATH: died. Killed by a jackal.
+21:06:55 === baseline25/w1 episode 17 seed 2017 ===
+21:07:01     step 10000 depth 4 (max 4) hp 16/16 xp 2 t=454 wall=223s
+21:07:40     step 6000 depth 1 (max 1) hp 16/18 xp 1 t=337 wall=167s
+21:07:53     step 12000 depth 4 (max 4) hp 12/16 xp 2 t=489 wall=276s
+21:08:09     step 88000 depth 1 (max 1) hp 18/18 xp 1 t=2670 wall=2366s
+21:08:32     step 8000 depth 1 (max 1) hp 18/18 xp 1 t=368 wall=220s
+21:08:35     step 2000 depth 1 (max 1) hp 16/16 xp 1 t=1673 wall=100s
+21:08:44     step 14000 depth 4 (max 4) hp 15/16 xp 2 t=521 wall=326s
+21:08:50   [w1] ep17: prog 0.0977 depth 9 role Caveman end DEATH: died. Killed by a plains centaur.
+21:08:50 === baseline25/w1 episode 18 seed 2018 ===
+21:09:18     step 16000 depth 4 (max 4) hp 16/16 xp 2 t=1657 wall=360s
+21:09:25     step 10000 depth 1 (max 1) hp 18/18 xp 1 t=400 wall=272s
+21:09:31   [w2] ep19: prog 0.0212 depth 4 role Priestess end DEATH: starved to death.
+21:09:31 === baseline25/w2 episode 20 seed 2020 ===
+21:09:32   [w1] ep18: prog 0.0000 depth 1 role Barbarian end DEATH: died. Killed by a guard.
+21:09:32 baseline25 chunk w1 complete (6 eps)
+21:09:42   [w2] ep20: prog 0.0696 depth 8 role Tourist end DEATH: died. Killed by a kobold lord.
+21:09:42 === baseline25/w2 episode 21 seed 2021 ===
+21:09:56     step 90000 depth 1 (max 1) hp 18/18 xp 1 t=2701 wall=2473s
+21:10:08     step 12000 depth 1 (max 1) hp 18/18 xp 1 t=432 wall=316s
+21:10:15     step 2000 depth 1 (max 1) hp 14/14 xp 1 t=162 wall=33s
+21:10:49     step 14000 depth 1 (max 1) hp 18/18 xp 1 t=464 wall=357s
+21:10:50     step 4000 depth 1 (max 1) hp 14/14 xp 1 t=194 wall=68s
+21:11:16     step 92000 depth 1 (max 1) hp 18/18 xp 1 t=2733 wall=2552s
+21:11:25     step 6000 depth 1 (max 1) hp 14/14 xp 1 t=225 wall=102s
+21:11:30     step 16000 depth 1 (max 1) hp 18/18 xp 1 t=496 wall=398s
+21:12:03     step 8000 depth 1 (max 1) hp 14/14 xp 1 t=257 wall=140s
+21:12:10     step 18000 depth 1 (max 1) hp 18/18 xp 1 t=528 wall=438s
+21:12:40     step 10000 depth 1 (max 1) hp 14/14 xp 1 t=289 wall=178s
+21:12:40     step 94000 depth 1 (max 1) hp 18/18 xp 1 t=2765 wall=2637s
+21:12:48     step 20000 depth 1 (max 1) hp 18/18 xp 1 t=560 wall=476s
+21:13:17     step 12000 depth 1 (max 1) hp 14/14 xp 1 t=334 wall=215s
+21:13:31     step 22000 depth 1 (max 1) hp 18/18 xp 1 t=592 wall=519s
+21:14:02     step 96000 depth 1 (max 1) hp 18/18 xp 1 t=2797 wall=2719s
+21:14:07     step 24000 depth 1 (max 1) hp 18/18 xp 1 t=623 wall=555s
+21:14:31     step 14000 depth 1 (max 1) hp 26/26 xp 3 t=2401 wall=288s
+21:14:36   [w2] ep21: prog 0.0208 depth 1 role Priestess end DEATH: died. Killed by a dart.
+21:14:36 === baseline25/w2 episode 22 seed 2022 ===
+21:14:49   [w2] ep22: prog 0.1256 depth 10 role Knight end DEATH: died. Killed by a giant spider.
+21:14:49 === baseline25/w2 episode 23 seed 2023 ===
+21:14:50     step 26000 depth 1 (max 1) hp 18/18 xp 1 t=655 wall=598s
+21:14:57   [w2] ep23: prog 0.0265 depth 5 role Tourist end DEATH: died. Killed by a sewer rat.
+21:14:57 === baseline25/w2 episode 24 seed 2024 ===
+21:15:29     step 98000 depth 1 (max 1) hp 18/18 xp 1 t=2828 wall=2806s
+21:15:34     step 28000 depth 1 (max 1) hp 18/18 xp 1 t=688 wall=642s
+21:16:12     step 30000 depth 1 (max 1) hp 18/18 xp 1 t=722 wall=680s
+21:16:14     step 2000 depth 3 (max 3) hp 28/32 xp 3 t=1928 wall=77s
+21:16:16   [w2] ep24: prog 0.0242 depth 3 role Valkyrie end DEATH: died. Killed by a giant bat.
+21:16:16 baseline25 chunk w2 complete (6 eps)
+21:16:47   ep3: prog 0.0000 depth 1 role Caveman end ABORTED: quit. fired=2
+21:16:47 === memory pass 3 episode 4 seed 6004 ===
+21:16:48   ep4: prog 0.1613 depth 11 role None end DEATH: died. Killed by a giant ant. fired=71
+21:16:48 memory pass 3 score: 4.37
+21:16:48 memory experiment complete: pass1=5.97, pass2=7.18, pass3=4.37
+21:16:48     step 32000 depth 1 (max 1) hp 18/18 xp 1 t=754 wall=716s
+21:17:09     step 34000 depth 1 (max 1) hp 18/18 xp 1 t=786 wall=737s
+21:17:21 === baseline25/w3 episode 9 seed 2009 ===
+21:17:22 === baseline25/w4 episode 11 seed 2011 ===
+21:17:38 === memory_paired episode 0 seed 2005 ===
+21:17:40   [w3] ep9: prog 0.0265 depth 5 role Healer end DEATH: died. Killed by a hobbit.
+21:17:40 === baseline25/w3 episode 10 seed 2010 ===
+21:17:45     step 36000 depth 1 (max 1) hp 18/18 xp 1 t=818 wall=773s
+21:17:53   ep0: prog 0.0265 depth 5 role Monk end DEATH: died. Killed by a gnome king. fired=0
+21:17:53 === memory_paired episode 1 seed 2006 ===
+21:18:00     step 2000 depth 6 (max 6) hp 22/22 xp 2 t=1968 wall=34s
+21:18:11   [w4] ep11: prog 0.0354 depth 6 role Knight end DEATH: died. Killed by a hill orc.
+21:18:11 === baseline25/w4 episode 12 seed 2012 ===
+21:18:36     step 2000 depth 5 (max 5) hp 21/21 xp 2 t=749 wall=25s
+21:18:41     step 38000 depth 1 (max 1) hp 18/18 xp 1 t=853 wall=829s
+21:18:46     step 2000 depth 7 (max 7) hp 39/39 xp 3 t=1468 wall=53s
+21:18:54     step 4000 depth 5 (max 5) hp 21/21 xp 2 t=780 wall=43s
+21:18:59   [w4] ep12: prog 0.0265 depth 5 role Healer end DEATH: died. Killed by a large kobold.
+21:18:59 baseline25 chunk w4 complete (2 eps)
+21:19:01     step 4000 depth 7 (max 7) hp 39/39 xp 3 t=2973 wall=69s
+21:19:03     step 2000 depth 3 (max 3) hp 40/40 xp 4 t=1991 wall=83s
+21:19:13     step 6000 depth 7 (max 7) hp 39/39 xp 3 t=4523 wall=80s
+21:19:24   ep1: prog 0.0485 depth 7 role Samurai end DEATH: starved to death. fired=80
+21:19:24 === memory_paired episode 2 seed 2007 ===
+21:19:25     step 40000 depth 1 (max 1) hp 18/18 xp 1 t=886 wall=873s
+21:19:27   ep2: prog 0.0265 depth 5 role Priest end DEATH: died. Killed by a bolt of lightning. fired=2
+21:19:27 === memory_paired episode 3 seed 2008 ===
+21:19:33     step 4000 depth 3 (max 3) hp 40/40 xp 4 t=3995 wall=112s
+21:19:47     step 6000 depth 3 (max 3) hp 40/40 xp 4 t=5999 wall=127s
+21:20:02     step 8000 depth 3 (max 3) hp 31/31 xp 3 t=8054 wall=142s
+21:20:04     step 42000 depth 1 (max 1) hp 18/18 xp 1 t=919 wall=912s
+21:20:04   [w3] ep10: prog 0.0242 depth 3 role Barbarian end DEATH: starved to death.
+21:20:04 baseline25 chunk w3 complete (2 eps)
+21:20:06     step 2000 depth 1 (max 1) hp 12/18 xp 1 t=273 wall=38s
+21:20:31     step 44000 depth 1 (max 1) hp 18/18 xp 1 t=951 wall=939s
+21:20:33     step 4000 depth 1 (max 1) hp 14/18 xp 1 t=305 wall=66s
+21:20:57     step 46000 depth 1 (max 1) hp 18/18 xp 1 t=982 wall=965s
+21:21:00     step 6000 depth 1 (max 1) hp 16/18 xp 1 t=337 wall=92s
+21:21:25     step 48000 depth 1 (max 1) hp 18/18 xp 1 t=1014 wall=993s
+21:21:27     step 8000 depth 1 (max 1) hp 18/18 xp 1 t=368 wall=119s
+21:21:49     step 50000 depth 1 (max 1) hp 18/18 xp 1 t=1046 wall=1017s
+21:21:51     step 10000 depth 1 (max 1) hp 18/18 xp 1 t=400 wall=144s
+21:22:18     step 52000 depth 1 (max 1) hp 18/18 xp 1 t=1079 wall=1045s
+21:22:22     step 12000 depth 1 (max 1) hp 18/18 xp 1 t=432 wall=174s
+21:22:44     step 54000 depth 1 (max 1) hp 18/18 xp 1 t=1110 wall=1072s
+21:22:47     step 14000 depth 1 (max 1) hp 18/18 xp 1 t=464 wall=199s
+21:23:11     step 56000 depth 1 (max 1) hp 18/18 xp 1 t=1142 wall=1099s
+21:23:14     step 16000 depth 1 (max 1) hp 18/18 xp 1 t=496 wall=227s
+21:23:40     step 58000 depth 1 (max 1) hp 18/18 xp 1 t=1174 wall=1127s
+21:23:42     step 18000 depth 1 (max 1) hp 18/18 xp 1 t=528 wall=254s
+21:24:03     step 60000 depth 1 (max 1) hp 18/18 xp 1 t=1206 wall=1151s
+21:24:06     step 20000 depth 1 (max 1) hp 18/18 xp 1 t=560 wall=279s
+21:24:32     step 62000 depth 1 (max 1) hp 18/18 xp 1 t=1237 wall=1180s
+21:24:36     step 22000 depth 1 (max 1) hp 18/18 xp 1 t=592 wall=308s
+21:24:55     step 64000 depth 1 (max 1) hp 18/18 xp 1 t=1270 wall=1203s
+21:25:00     step 24000 depth 1 (max 1) hp 18/18 xp 1 t=623 wall=333s
+21:25:25     step 66000 depth 1 (max 1) hp 18/18 xp 1 t=1302 wall=1232s
+21:25:30     step 26000 depth 1 (max 1) hp 18/18 xp 1 t=655 wall=362s
+21:25:49     step 68000 depth 1 (max 1) hp 18/18 xp 1 t=1334 wall=1257s
+21:25:54     step 28000 depth 1 (max 1) hp 18/18 xp 1 t=688 wall=386s
+21:26:13     step 70000 depth 1 (max 1) hp 18/18 xp 1 t=1365 wall=1281s
+21:26:18     step 30000 depth 1 (max 1) hp 18/18 xp 1 t=722 wall=411s
+21:26:43     step 72000 depth 1 (max 1) hp 18/18 xp 1 t=1397 wall=1310s
+21:26:48     step 32000 depth 1 (max 1) hp 18/18 xp 1 t=754 wall=441s
+21:27:08     step 74000 depth 1 (max 1) hp 18/18 xp 1 t=1429 wall=1336s
+21:27:14     step 34000 depth 1 (max 1) hp 18/18 xp 1 t=786 wall=466s
+21:27:38     step 76000 depth 1 (max 1) hp 18/18 xp 1 t=1461 wall=1366s
+21:27:44     step 36000 depth 1 (max 1) hp 18/18 xp 1 t=818 wall=496s
+21:28:03     step 78000 depth 1 (max 1) hp 18/18 xp 1 t=1492 wall=1391s
+21:28:08     step 38000 depth 1 (max 1) hp 18/18 xp 1 t=853 wall=521s
+21:28:29     step 80000 depth 1 (max 1) hp 18/18 xp 1 t=1524 wall=1417s
+21:28:35     step 40000 depth 1 (max 1) hp 18/18 xp 1 t=886 wall=547s
+21:28:55     step 82000 depth 1 (max 1) hp 18/18 xp 1 t=1556 wall=1443s
+21:29:00     step 42000 depth 1 (max 1) hp 18/18 xp 1 t=919 wall=573s
+21:29:24     step 84000 depth 1 (max 1) hp 18/18 xp 1 t=1588 wall=1472s
+21:29:29     step 44000 depth 1 (max 1) hp 18/18 xp 1 t=951 wall=602s
+21:29:51     step 86000 depth 1 (max 1) hp 18/18 xp 1 t=1619 wall=1499s
+21:29:56     step 46000 depth 1 (max 1) hp 18/18 xp 1 t=982 wall=629s
+21:30:15     step 88000 depth 1 (max 1) hp 18/18 xp 1 t=1651 wall=1523s
+21:30:22     step 48000 depth 1 (max 1) hp 18/18 xp 1 t=1014 wall=654s
+21:30:44     step 90000 depth 1 (max 1) hp 18/18 xp 1 t=1685 wall=1552s
+21:30:48     step 50000 depth 1 (max 1) hp 18/18 xp 1 t=1046 wall=681s
+21:31:13     step 92000 depth 1 (max 1) hp 18/18 xp 1 t=1720 wall=1581s
+21:31:15     step 52000 depth 1 (max 1) hp 18/18 xp 1 t=1079 wall=707s
+21:31:43     step 54000 depth 1 (max 1) hp 18/18 xp 1 t=1110 wall=735s
+21:31:43     step 94000 depth 1 (max 1) hp 18/18 xp 1 t=1763 wall=1611s
+21:32:09     step 56000 depth 1 (max 1) hp 18/18 xp 1 t=1142 wall=761s
+21:32:09     step 96000 depth 1 (max 1) hp 18/18 xp 1 t=1795 wall=1637s
+21:32:36     step 58000 depth 1 (max 1) hp 18/18 xp 1 t=1174 wall=788s
+21:32:37     step 98000 depth 1 (max 1) hp 18/18 xp 1 t=1827 wall=1664s
+21:32:58     step 60000 depth 1 (max 1) hp 18/18 xp 1 t=1206 wall=811s
+21:33:02   [w0] ep8: prog 0.0185 depth 1 role Caveman end ABORTED: quit.
+21:33:02 === baseline25/w0 episode 9 seed 2009 ===
+21:33:12   [w0] ep9: prog 0.0265 depth 5 role Healer end DEATH: died. Killed by a hobbit.
+21:33:12 === baseline25/w0 episode 10 seed 2010 ===
+21:33:28     step 62000 depth 1 (max 1) hp 18/18 xp 1 t=1237 wall=840s
+21:33:47     step 64000 depth 1 (max 1) hp 18/18 xp 1 t=1270 wall=860s
+21:34:07     step 66000 depth 1 (max 1) hp 18/18 xp 1 t=1302 wall=879s
+21:34:29     step 68000 depth 1 (max 1) hp 18/18 xp 1 t=1334 wall=901s
+21:34:48     step 70000 depth 1 (max 1) hp 18/18 xp 1 t=1365 wall=921s
+21:35:08     step 72000 depth 1 (max 1) hp 18/18 xp 1 t=1397 wall=940s
+21:35:33     step 74000 depth 1 (max 1) hp 18/18 xp 1 t=1429 wall=966s
+21:35:53     step 76000 depth 1 (max 1) hp 18/18 xp 1 t=1461 wall=985s
+21:36:12     step 78000 depth 1 (max 1) hp 18/18 xp 1 t=1492 wall=1005s
+21:36:35     step 80000 depth 1 (max 1) hp 18/18 xp 1 t=1524 wall=1028s
+21:36:54     step 82000 depth 1 (max 1) hp 18/18 xp 1 t=1556 wall=1047s
+21:37:14     step 84000 depth 1 (max 1) hp 18/18 xp 1 t=1588 wall=1067s
+21:37:38     step 86000 depth 1 (max 1) hp 18/18 xp 1 t=1619 wall=1091s
+21:37:58     step 88000 depth 1 (max 1) hp 18/18 xp 1 t=1651 wall=1110s
+21:38:17     step 90000 depth 1 (max 1) hp 18/18 xp 1 t=1685 wall=1130s
+21:38:42     step 92000 depth 1 (max 1) hp 18/18 xp 1 t=1720 wall=1155s
+21:39:03     step 94000 depth 1 (max 1) hp 18/18 xp 1 t=1763 wall=1175s
+21:39:24     step 96000 depth 1 (max 1) hp 18/18 xp 1 t=1795 wall=1197s
+21:39:46     step 98000 depth 1 (max 1) hp 18/18 xp 1 t=1827 wall=1219s
+21:40:07   ep3: prog 0.0185 depth 1 role Caveman end ABORTED: quit. fired=2
+21:40:07 === memory_paired episode 4 seed 2009 ===
+21:40:14   ep4: prog 0.0265 depth 5 role Healer end DEATH: died. Killed by a hobbit. fired=2
+21:40:14 === memory_paired episode 5 seed 2010 ===
+21:40:24   ep5: prog 0.0175 depth 3 role Barbarian end DEATH: died. Killed by a hobbit. fired=2
+21:40:24 === memory_paired episode 6 seed 2011 ===
+21:40:40     step 2000 depth 6 (max 6) hp 22/22 xp 2 t=1968 wall=16s
+21:40:45   ep6: prog 0.0354 depth 6 role Knight end DEATH: died. Killed by a hill orc. fired=2
+21:40:45 === memory_paired episode 7 seed 2012 ===
+21:40:55     step 2000 depth 5 (max 5) hp 21/21 xp 2 t=749 wall=9s
+21:41:01     step 4000 depth 5 (max 5) hp 21/21 xp 2 t=780 wall=15s
+21:41:03   ep7: prog 0.0265 depth 5 role Healer end DEATH: died. Killed by a large kobold. fired=2
+21:41:03 === memory_paired episode 8 seed 2013 ===
+21:41:23   ep8: prog 0.0354 depth 6 role Wizard end DEATH: died. Killed by a hobbit, while praying. fired=7
+21:41:23 === memory_paired episode 9 seed 2014 ===
+21:41:40     step 2000 depth 3 (max 3) hp 15/15 xp 1 t=1464 wall=16s
+21:41:59     step 4000 depth 3 (max 3) hp 15/15 xp 1 t=2982 wall=36s
+21:42:15     step 6000 depth 3 (max 3) hp 15/15 xp 1 t=4511 wall=52s
+21:42:28   ep9: prog 0.0175 depth 3 role Samurai end DEATH: starved to death. fired=2
+21:42:28 === memory_paired episode 10 seed 2015 ===
+21:42:29   ep10: prog 0.0354 depth 6 role None end DEATH: died. Killed by a giant bat. fired=9
+21:42:29 === memory_paired episode 11 seed 2016 ===
+21:42:45   ep11: prog 0.0000 depth 1 role None end DEATH: died. Killed by a jackal. fired=2
+21:42:45 === memory_paired episode 12 seed 2017 ===
+21:42:49   ep12: prog 0.0000 depth 1 role Caveman end DEATH: died. Killed by a jackal. fired=2
+21:42:49 === memory_paired episode 13 seed 2018 ===
+21:43:12   ep13: prog 0.0485 depth 7 role Barbarian end DEATH: died. Killed by a large kobold. fired=2
+21:43:12 === memory_paired episode 14 seed 2019 ===
+21:43:30     step 2000 depth 4 (max 4) hp 9/13 xp 1 t=326 wall=18s
+21:43:48     step 4000 depth 4 (max 4) hp 11/13 xp 1 t=358 wall=36s
+21:44:09     step 6000 depth 4 (max 4) hp 13/13 xp 1 t=390 wall=56s
+21:44:28     step 8000 depth 4 (max 4) hp 13/13 xp 1 t=421 wall=75s
+21:44:46     step 10000 depth 4 (max 4) hp 16/16 xp 2 t=454 wall=94s
+21:45:06     step 12000 depth 4 (max 4) hp 12/16 xp 2 t=489 wall=113s
+21:45:27     step 14000 depth 4 (max 4) hp 15/16 xp 2 t=521 wall=135s
+21:45:37   ep14: prog 0.0212 depth 4 role Priestess end DEATH: died. Killed by a giant bat. fired=2
+21:45:37 memory_paired FINAL over 15: 2.56

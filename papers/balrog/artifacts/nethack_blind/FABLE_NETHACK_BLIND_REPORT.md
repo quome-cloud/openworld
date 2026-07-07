@@ -105,10 +105,10 @@ Ledger at freeze: 48 rules — 46 corroborated, 2 hypothesized (R_DEPTH_STABLE a
 | Arm | n | Mean progression | 95% CI |
 |---|---|---|---|
 | **Source-blind induction (this arm)** | 25 (seeds 5000-5024) | **2.56%** | [1.65, 3.89] |
-| Source-synthesized sibling (v1, read NLE source) | 25 (seeds 2000-2024) | 4.39% | [2.97, 6.01]* |
+| Source-synthesized sibling (v1, read NLE source) | 25 (seeds 2000-2024) | 4.39% | [2.97, 5.97]* |
 | BALROG leaderboard SOTA (Gemini-3-Pro, 2026-02-03) | — | 6.8% | ±3.2 |
 
-*recomputed from `work/fable_nethack/results/nethack_results_baseline25.json` (10k bootstrap, seed 7); operator quoted [2.97, 5.97] from the sibling's own bootstrap.
+*recomputed with the canonical `papers/balrog/code/nethack/bootstrap_ci.py` (10k resamples, fixed seed 20260706) against `nethack_results_baseline25.json`, reconciled with the sibling's own report. An earlier pass in this report used an independently-implemented bootstrap (10k resamples, seed 7) that produced [2.97, 6.01] on the same data — a different-RNG artifact, not a data discrepancy; the canonical module is now the single source of truth for every CI in the NetHack arms.
 
 **Headline: the interaction-learned agent reaches 58% of its source-reading sibling's progression (2.56 vs 4.39; CIs overlap) with zero access to game internals** — the entire behavior repertoire (stair descent, corpse-freshness dietetics, prayer rate-limits, kickable locked doors, trap-fall opportunism, peaceful/statue/freeze-class threat taxonomy) was induced from 1.4M served observations and survived Popperian filtering. The gap (≈1.8 points, driven mostly by starvation deaths in food-poor spawns) is a measured price of source blindness at this budget, not a failure to learn: the blind arm's per-block trajectory was still recovering error classes in b3-b4 (rotted-corpse poisonings eliminated, then starvation reduced).
 

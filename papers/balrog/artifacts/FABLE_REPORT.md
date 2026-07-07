@@ -2,7 +2,7 @@
 
 **Synthesis model:** Fable 5 (max reasoning) — this report is generated during the run; a live progress log is at the bottom.
 **Claim under test:** world-model synthesis + classical search gives SOTA on BALROG Baba Is AI when the synthesis model is a max-reasoning frontier model. LLM-free at runtime: the planner below is pure code.
-**SOTA baseline:** 75.7% (Gemini-3.1-Pro-Thinking, per BALROG leaderboard figure recorded in run_suite.py).
+**SOTA baseline:** 90.0% (Gemini-3.1-Pro, per BALROG leaderboard `BabaIsAI` column; see `verify_leaderboard.py`). *Correction note:* an earlier pass cited 75.7% (Gemini-3.1-Pro-Thinking) as the BabaIsAI SOTA — that figure is Gemini-3.1-Pro-Thinking's **TextWorld** column; the true BabaIsAI top is 90.0% (Gemini-3.1-Pro, non-thinking). The live progress log below retains the original 75.7%/+24.3pp figures the run actually printed at the time (historical artifact); the corrected comparison is 90.0% / +10.0pp throughout the rest of this report and the paper.
 **Prior state (Sonnet 4.6 agent):** 65.83% — 26 tasks at 100%, `two_room-make_win-distr_obj_rule` at 1/3, 13 tasks unattempted (planner search-budget timeouts, ~700 s per failed episode at a 55K node ceiling).
 
 *(Sections below are filled in as results land; final numbers at the end.)*
@@ -62,10 +62,10 @@ The prior work's "world model with zero mispredictions" is `Game.clone()` = `cop
 | | score | episodes | tasks at 100% |
 |---|---|---|---|
 | **This work (Fable 5 synthesis, LLM-free runtime)** | **100.0%** | **120/120** | **40/40** |
-| SOTA baseline (Gemini-3.1-Pro-Thinking) | 75.7% | — | — |
+| SOTA baseline (Gemini-3.1-Pro) | 90.0% | — | — |
 | Prior agent run (Sonnet 4.6, env-clone BFS/A*) | 65.8% | 79/81 attempted | 26/40 |
 
-**Delta vs SOTA: +24.3 pp.** This is the ceiling of the benchmark's progression metric.
+**Delta vs SOTA: +10.0 pp.** This is the ceiling of the benchmark's progression metric.
 
 All 120 episodes are fresh, seeded, re-verified runs with the new planner (no prior results are mixed in). Every plan was (a) replay-verified on an env clone, then (b) executed on the live env instance, with `solved` = the env's own `levels > 0`. **Zero mispredictions, zero env-clone fallbacks, phase-3 never triggered.** Total suite wall-clock: **190 s** (median episode 0.17 s, max 8.4 s — vs ~700 s per *failed* episode before).
 

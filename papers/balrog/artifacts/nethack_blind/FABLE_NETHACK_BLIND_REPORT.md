@@ -96,7 +96,7 @@ Depth milestones learned entirely from play: first descent E11 (episode 13 of th
 
 ### Violation-rate trajectory (predict-before-observe verification)
 
-1,372,539 checked predictions across every logged episode; 24 out-of-set observations (1.75e-05 overall). Trajectory: 7.8e-4 (E1) → 4.3e-4 (E2) → 0.0 for 17 consecutive episodes → isolated spikes only at novel-event classes (terminal death frame, trap-door falls before the replay-derived widening reached the live process, and the open displacement class) → frozen block 3.3e-06 (1 violation / 306k predictions). Full per-episode series: `results/violation_curve.json`.
+1,372,539 checked predictions across every logged episode — **630,975 from the agent's own play + 741,564 from mined sibling-replay transitions** (disclosed above; see also the "Replay corpus contamination channel" limitation); 24 out-of-set observations (1.75e-05 overall). Trajectory: 7.8e-4 (E1) → 4.3e-4 (E2) → 0.0 for 17 consecutive episodes → isolated spikes only at novel-event classes (terminal death frame, trap-door falls before the replay-derived widening reached the live process, and the open displacement class) → frozen block 3.3e-06 (1 violation / 306k predictions). Full per-episode series: `results/violation_curve.json`.
 
 Ledger at freeze: 48 rules — 46 corroborated, 2 hypothesized (R_DEPTH_STABLE as a scoped possibility-set carrier and R_XP_MONO), 1,476,719 accumulated corroboration counts, 27 refutation counts, all carrying evidence citations (episode:step) into `results/transitions/`. Anomaly ledger: 18 entries, every one resolved by a new rule or an evidence-cited scope revision except the OPEN silent-displacement class (E23:413, b4val_E61:294, 8/741k replay) which is deliberately left unexplained rather than patched.
 

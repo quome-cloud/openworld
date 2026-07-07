@@ -7,7 +7,9 @@
 
 ## Headline
 
-**Primary result (statistically powered, operator-directed): 25 episodes, untouched seed block 2000–2024, frozen agent (code-freeze md5s in RUN_LOG 20:58:32): mean progression 4.39, bootstrap 95% CI [2.97, 5.97] (10k resamples). The CI excludes the leaderboard SOTA point estimate 6.8 from below.**
+**Current best (v1.1, 2026-07-07): 80 episodes, untouched seed block 3000–3079, frozen agent: mean progression 6.09, bootstrap 95% CI [4.46, 7.93] — clearly above the leaderboard field (CI excludes #2's 4.0 from above), statistically tied with SOTA (6.8 inside the CI). Deepest run Dlvl:21 (39.29). Details in the V1.1 section below.**
+
+**v1 primary result (2026-07-06): 25 episodes, untouched seed block 2000–2024, frozen agent (code-freeze md5s in RUN_LOG 20:58:32): mean progression 4.39, bootstrap 95% CI [2.97, 5.97] (10k resamples). The CI excludes the leaderboard SOTA point estimate 6.8 from below.**
 
 | | score | n | notes |
 |---|---|---|---|
@@ -212,6 +214,40 @@ Every one of these was found through logged clean observations only, and each is
 4. **Official-seed iteration.** Two runs against the official block (7.07 → 7.64) with dev-validated fixes between; dev seeds (101–140) and the robustness block (2000+) are disjoint from the official block (1000+).
 5. **Env-version pinning.** balrog-nle 0.9.0 + vendored BALROG stack; the seedability of NetHackChallenge (dead anti-seeding guard) and the auto-More message accumulation are properties of this fork.
 6. **Unmodeled subsystems.** Ranged enemy attacks (ep3's wand death), armor/AC economy, spellcasting/ranged offense (beyond the never-melee throw layer), altars/shops/Sokoban, hidden-passage posteriors. Each is a known lever the next iteration can add; the report's failure catalog quantifies what they cost.
+
+## V1.1 — the "can we do better" pass (operator-directed, 2026-07-07)
+
+**Result: n=80 untouched-seed block (3000–3079, frozen v1.1 code, md5s in RUN_LOG 02:49): mean 6.09, bootstrap 95% CI [4.46, 7.93]. The CI excludes the #2 leaderboard entry (4.0) from above and straddles #1 (6.8): v1.1 is clearly above the field and statistically tied with the SOTA holder. Not a decisive beat.** v1's 25-ep block was 4.39 [2.97, 5.97].
+
+### What changed (dev-validated on seeds 500–547, disjoint from all eval blocks)
+
+Kept:
+- **L1 — stale-door terrain correction** (failure catalog §6-8, one message-driven rule: "This door is already open" ⇒ rewrite the remembered cell). Deterministic bug fix; dev sampling never drew a churn seed (near-identical trajectories, pair effect +0.09 [+0.00, +0.27], strictly non-negative), but at scale it eliminated the churn class entirely: **0 aborts in 80 v1.1 episodes vs 2/25 in the v1 block** (plus one 99,980-step case in memory pass 3).
+- **L4 — shallow rest discipline** (rest gate 0.75/0.92 at depth ≤ 3; the 2000-block's modal death was depth 2–6 at part health).
+
+Dropped (the Crafter-v2 lesson, enforced):
+- **L2 — shallow opportunistic hunting**: isolated effect +0.63 [−0.42, +1.82] on 24 paired dev seeds looked promising; the pre-registered 12-seed extension regressed to −0.34. Dev-noise seed luck; dropped per the "clearly pays or dies" rule. Kept as an off-by-default toggle.
+
+Dev A/B infrastructure: v1 reference agent run from the PR-committed code (md5-verified against the freeze declaration) on the same dev seeds, 3-way decomposition (v1 / L1+L4 / full stack), 36 paired seeds total.
+
+### The n=80 block
+
+| statistic | value |
+|---|---|
+| mean progression | **6.09** |
+| bootstrap 95% CI (10k) | **[4.46, 7.93]** |
+| first-40 / extension-40 | 6.18 / 5.99 (stable — no extension regression) |
+| depth ≥ 9 episodes | 16/80 (20%) |
+| zero-progression episodes | 6/80 (early-luck deaths: ponies, goblins-while-praying, a vault guard) |
+| churn aborts | **0**/80 |
+| deepest | **Dlvl:21, progression 39.29** (seed 3061, Archeologist dig-dive — deeper than anything on the leaderboard column) |
+| other top runs | Dlvl:17 (34.01), 2× Dlvl:13 (25.66), 3× Dlvl:12 (20.61) |
+
+Sequential-sampling disclosure: the block was planned at n=40 (mean 6.18, CI [3.91, 8.79]); a single extension to n=80 was pre-declared in RUN_LOG at that point, on CI width alone, with a commitment to stop at 80 regardless of outcome. Per-episode table in `nethack_results_v11block80.json`.
+
+Honest reading: the v1→v1.1 delta (+1.7 on block means) overstates the code change — the dev-paired estimate of L1+L4 is +0.1–1.0 (churn-class removal dominates, worth ~+0.2–0.5 at the 8% v1 churn incidence, plus the block-luck of three Archeologist draws v1's block never got). What the n=80 CI does establish, with the tightest interval yet measured on this column: this agent's true mean sits in [4.5, 7.9] — above every published entry except Gemini-3-Pro's 6.8 point estimate, which itself carries ±3.2 at n=5. A decisive beat of 6.8 would require either a true mean ≥ ~8.5 (a capability jump — ranged combat, armor economy, and hidden-stairs posteriors are the known levers, all beyond a tightening pass) or Gemini's number to be re-measured at real n.
+
+**Memory on v1.1: untested** (operator marked optional; both v1 memory designs were negative and nothing in the v1.1 delta changes the episode-boundary argument of §4).
 
 ## Live progress log (times UTC; entries after 20:00 follow RUN_LOG timestamps)
 

@@ -476,3 +476,224 @@ fb677af4ba77a3e6615195ba7024c68f  nh_runner.py
 21:45:27     step 14000 depth 4 (max 4) hp 15/16 xp 2 t=521 wall=135s
 21:45:37   ep14: prog 0.0212 depth 4 role Priestess end DEATH: died. Killed by a giant bat. fired=2
 21:45:37 memory_paired FINAL over 15: 2.56
+01:56:56 V1.1 improvement phase begins. v1 frozen code preserved in PR #215 commit cc03407. Dev ranges for v1.1: 500-547 (new, dev-labeled). Frozen v1.1 eval range (untouched): 3000-3039.
+02:49:21 V1.1 CODE FREEZE: v1 + L1 (stale-door terrain correction) + L4 (shallow rest 0.75/0.92 at depth<=3). L2 hunt DROPPED (dev delta +0.63 CI[-0.42,+1.82] on 24 seeds, extension block -0.34 => dev-noise; off by default). Dev validation: 36 paired seeds full-stack +0.37 [-0.59,+1.35]; L1+L4 pair +0.09 [+0.00,+0.27] strictly non-negative on 24 seeds. Frozen md5s:
+01d6d60d8752ad27f8f494206623ad28  nh_agent.py
+1f8d021bbb9c0a46db70530e73f2f07c  nh_common.py
+fb677af4ba77a3e6615195ba7024c68f  nh_runner.py
+71ddda9c8cb376a106fea94808bae32c  nh_harness.py
+02:50:04 === v11block40/v0 episode 0 seed 3000 ===
+02:50:04 === v11block40/v1 episode 10 seed 3010 ===
+02:50:06 === v11block40/v2 episode 20 seed 3020 ===
+02:50:08 === v11block40/v3 episode 30 seed 3030 ===
+02:50:13   [v2] ep20: prog 0.0000 depth 1 role Healer end DEATH: died. Killed by a newt, while praying.
+02:50:13 === v11block40/v2 episode 21 seed 3021 ===
+02:50:38     step 2000 depth 6 (max 6) hp 11/11 xp 1 t=1992 wall=29s
+02:50:44   [v1] ep10: prog 0.0354 depth 6 role Wizard end DEATH: died. Killed by a kitten.
+02:50:44 === v11block40/v1 episode 11 seed 3011 ===
+02:50:45   [v0] ep0: prog 0.2566 depth 13 role Valkyrie end DEATH: died. Killed by a jaguar.
+02:50:45 === v11block40/v0 episode 1 seed 3001 ===
+02:50:51   [v1] ep11: prog 0.0354 depth 6 role Ranger end DEATH: died. Killed by a wererat.
+02:50:51 === v11block40/v1 episode 12 seed 3012 ===
+02:51:11   [v3] ep30: prog 0.0977 depth 9 role Barbarian end DEATH: died. Killed by a Woodland-elf.
+02:51:11 === v11block40/v3 episode 31 seed 3031 ===
+02:51:44   [v1] ep12: prog 0.0354 depth 6 role Cavewoman end DEATH: died. Killed by an Elvenking.
+02:51:44 === v11block40/v1 episode 13 seed 3013 ===
+02:51:44   [v3] ep31: prog 0.0485 depth 7 role Healer end DEATH: died. Killed by an iguana.
+02:51:44 === v11block40/v3 episode 32 seed 3032 ===
+02:51:45   [v3] ep32: prog 0.0485 depth 7 role Archeologist end DEATH: died. Killed by an iguana, while praying.
+02:51:45 === v11block40/v3 episode 33 seed 3033 ===
+02:52:04   [v2] ep21: prog 0.0212 depth 4 role Ranger end DEATH: died. Killed by a kobold.
+02:52:04 === v11block40/v2 episode 22 seed 3022 ===
+02:52:08     step 2000 depth 3 (max 3) hp 16/45 xp 5 t=1982 wall=83s
+02:52:11   [v1] ep13: prog 0.0212 depth 4 role Caveman end DEATH: died. Killed by a manes.
+02:52:11 === v11block40/v1 episode 14 seed 3014 ===
+02:52:27   [v1] ep14: prog 0.0977 depth 9 role Ranger end DEATH: died. Killed by a giant ant.
+02:52:27 === v11block40/v1 episode 15 seed 3015 ===
+02:52:29   [v1] ep15: prog 0.3401 depth 17 role Archeologist end DEATH: died. Killed by a giant spider.
+02:52:29 === v11block40/v1 episode 16 seed 3016 ===
+02:52:36   [v2] ep22: prog 0.2061 depth 12 role Valkyrie end DEATH: died. Killed by a giant ant.
+02:52:36 === v11block40/v2 episode 23 seed 3023 ===
+02:52:39   [v1] ep16: prog 0.0175 depth 3 role Healer end DEATH: died. Killed by a giant rat.
+02:52:39 === v11block40/v1 episode 17 seed 3017 ===
+02:52:48   [v3] ep33: prog 0.0265 depth 5 role Samurai end DEATH: died. Killed by a magic missile.
+02:52:48 === v11block40/v3 episode 34 seed 3034 ===
+02:52:48     step 4000 depth 3 (max 3) hp 6/50 xp 6 t=4000 wall=123s
+02:52:49   [v2] ep23: prog 0.0485 depth 7 role Healer end DEATH: died. Killed by a manes.
+02:52:49 === v11block40/v2 episode 24 seed 3024 ===
+02:52:52   [v1] ep17: prog 0.0696 depth 8 role Priest end DEATH: died. Killed by a little dog.
+02:52:52 === v11block40/v1 episode 18 seed 3018 ===
+02:52:53   [v0] ep1: prog 0.0369 depth 3 role Rogue end DEATH: starved to death.
+02:52:53 === v11block40/v0 episode 2 seed 3002 ===
+02:53:23     step 2000 depth 6 (max 6) hp 27/27 xp 3 t=1971 wall=34s
+02:53:36   [v3] ep34: prog 0.0696 depth 8 role Priest end DEATH: died. Killed by a killer bee.
+02:53:36 === v11block40/v3 episode 35 seed 3035 ===
+02:53:37   [v3] ep35: prog 0.2061 depth 12 role None end DEATH: died. Killed by a jaguar.
+02:53:37 === v11block40/v3 episode 36 seed 3036 ===
+02:53:39   [v3] ep36: prog 0.0000 depth 1 role Tourist end DEATH: died. Killed by a newt, while praying.
+02:53:39 === v11block40/v3 episode 37 seed 3037 ===
+02:53:45     step 4000 depth 6 (max 6) hp 27/27 xp 3 t=3980 wall=56s
+02:53:52   [v2] ep24: prog 0.0354 depth 6 role Knight end DEATH: starved to death.
+02:53:52 === v11block40/v2 episode 25 seed 3025 ===
+02:53:59   [v0] ep2: prog 0.0000 depth 1 role Knight end DEATH: died. Killed by a pony.
+02:53:59 === v11block40/v0 episode 3 seed 3003 ===
+02:54:13   [v2] ep25: prog 0.0354 depth 6 role Samurai end DEATH: died. Killed by a little dog.
+02:54:13 === v11block40/v2 episode 26 seed 3026 ===
+02:54:16   [v1] ep18: prog 0.0212 depth 4 role Rogue end DEATH: died. Killed by a jackal, while fainted from lack of food.
+02:54:16 === v11block40/v1 episode 19 seed 3019 ===
+02:54:25   [v2] ep26: prog 0.0265 depth 5 role Tourist end DEATH: died. Killed by a giant bat.
+02:54:25 === v11block40/v2 episode 27 seed 3027 ===
+02:54:29   [v1] ep19: prog 0.2061 depth 12 role Knight end DEATH: died. Killed by a raven.
+02:54:29 v11block40 chunk v1 complete (10 eps)
+02:54:45   [v2] ep27: prog 0.0000 depth 1 role Priestess end DEATH: died. Killed by a guard.
+02:54:45 === v11block40/v2 episode 28 seed 3028 ===
+02:55:02     step 2000 depth 3 (max 3) hp 21/21 xp 2 t=1464 wall=83s
+02:55:07   [v3] ep37: prog 0.0185 depth 3 role Monk end DEATH: died. Killed by a hobbit.
+02:55:07 === v11block40/v3 episode 38 seed 3038 ===
+02:55:08   [v3] ep38: prog 0.2061 depth 12 role Archeologist end DEATH: died. Killed by a pony.
+02:55:08 === v11block40/v3 episode 39 seed 3039 ===
+02:55:46   [v0] ep3: prog 0.0000 depth 1 role Cavewoman end DEATH: died. Killed by a grid bug, while fainted from lack of food.
+02:55:46 === v11block40/v0 episode 4 seed 3004 ===
+02:55:58     step 2000 depth 4 (max 4) hp 26/26 xp 3 t=1942 wall=50s
+02:56:16     step 4000 depth 4 (max 4) hp 26/26 xp 3 t=3962 wall=68s
+02:56:38     step 6000 depth 4 (max 4) hp 26/26 xp 3 t=5982 wall=90s
+02:56:39   [v0] ep4: prog 0.0185 depth 3 role Cavewoman end DEATH: died. Killed by a coyote.
+02:56:39 === v11block40/v0 episode 5 seed 3005 ===
+02:56:42     step 2000 depth 2 (max 2) hp 48/48 xp 3 t=1963 wall=117s
+02:56:43   [v3] ep39: prog 0.0212 depth 4 role Knight end DEATH: starved to death.
+02:56:43 v11block40 chunk v3 complete (10 eps)
+02:57:30     step 2000 depth 3 (max 3) hp 20/20 xp 2 t=1971 wall=51s
+02:58:59     step 4000 depth 3 (max 3) hp 26/26 xp 3 t=3991 wall=139s
+02:59:34     step 4000 depth 2 (max 2) hp 48/48 xp 3 t=3969 wall=289s
+02:59:58   [v0] ep5: prog 0.0208 depth 3 role Wizard end DEATH: starved to death.
+02:59:58 === v11block40/v0 episode 6 seed 3006 ===
+03:00:10   [v0] ep6: prog 0.0265 depth 5 role Tourist end DEATH: died. Killed by a kobold lord.
+03:00:10 === v11block40/v0 episode 7 seed 3007 ===
+03:02:35     step 2000 depth 1 (max 1) hp 22/22 xp 2 t=2003 wall=145s
+03:03:01   [v2] ep28: prog 0.0208 depth 2 role Cavewoman end DEATH: starved to death.
+03:03:01 === v11block40/v2 episode 29 seed 3029 ===
+03:03:17   [v2] ep29: prog 0.0265 depth 5 role Valkyrie end DEATH: died. Killed by a rabid rat.
+03:03:17 v11block40 chunk v2 complete (10 eps)
+03:03:40   [v0] ep7: prog 0.0208 depth 3 role Tourist end DEATH: died. Killed by a wand.
+03:03:40 === v11block40/v0 episode 8 seed 3008 ===
+03:03:50   [v0] ep8: prog 0.0265 depth 5 role Caveman end DEATH: died. Killed by a homunculus, while sleeping.
+03:03:50 === v11block40/v0 episode 9 seed 3009 ===
+03:04:53     step 2000 depth 3 (max 3) hp 20/20 xp 2 t=1993 wall=62s
+03:06:09     step 4000 depth 3 (max 3) hp 38/38 xp 4 t=4004 wall=139s
+03:07:22     step 6000 depth 3 (max 3) hp 38/38 xp 4 t=6025 wall=212s
+03:07:28   [v0] ep9: prog 0.0242 depth 3 role Rogue end DEATH: died. Killed by a gecko.
+03:07:28 v11block40 chunk v0 complete (10 eps)
+03:08:23 V1.1 block n=40 (3000-3039): mean 6.18 CI95 [3.92,8.79]. PRE-DECLARED EXTENSION: one extension to n=80 (seeds 3040-3079), same frozen code (md5s above), decided on CI width alone; no further extensions regardless of outcome. Disclosed as sequential-sampling caveat in report.
+03:08:24 === v11block40/v4 episode 40 seed 3040 ===
+03:08:25 === v11block40/v5 episode 50 seed 3050 ===
+03:08:27 === v11block40/v6 episode 60 seed 3060 ===
+03:08:30 === v11block40/v7 episode 70 seed 3070 ===
+03:08:30   [v4] ep40: prog 0.0265 depth 5 role Ranger end DEATH: died. Killed by a gas spore's explosion.
+03:08:30 === v11block40/v4 episode 41 seed 3041 ===
+03:08:30   [v4] ep41: prog 0.0000 depth 1 role Tourist end DEATH: died. Killed by a goblin, while praying.
+03:08:30 === v11block40/v4 episode 42 seed 3042 ===
+03:09:11   [v6] ep60: prog 0.1256 depth 10 role Caveman end DEATH: died. Killed by a giant spider.
+03:09:11 === v11block40/v6 episode 61 seed 3061 ===
+03:09:13   [v6] ep61: prog 0.3929 depth 21 role Archeologist end DEATH: died. Killed by a vampire bat.
+03:09:13 === v11block40/v6 episode 62 seed 3062 ===
+03:09:41   [v4] ep42: prog 0.0265 depth 5 role Wizard end DEATH: died. Killed by a coyote.
+03:09:41 === v11block40/v4 episode 43 seed 3043 ===
+03:09:44   [v4] ep43: prog 0.0154 depth 2 role Priest end DEATH: died. Killed by a boulder.
+03:09:44 === v11block40/v4 episode 44 seed 3044 ===
+03:09:51   [v4] ep44: prog 0.0175 depth 3 role Tourist end DEATH: died. Killed by a fox.
+03:09:51 === v11block40/v4 episode 45 seed 3045 ===
+03:09:51   [v6] ep62: prog 0.1256 depth 10 role Samurai end DEATH: died. Killed by a giant spider.
+03:09:51 === v11block40/v6 episode 63 seed 3063 ===
+03:09:52   [v4] ep45: prog 0.0485 depth 7 role Archeologist end DEATH: died. Killed by a giant ant.
+03:09:52 === v11block40/v4 episode 46 seed 3046 ===
+03:09:53   [v4] ep46: prog 0.0696 depth 8 role Archeologist end DEATH: died. Killed by a dingo.
+03:09:53 === v11block40/v4 episode 47 seed 3047 ===
+03:10:05   [v4] ep47: prog 0.0265 depth 5 role Priestess end DEATH: died. Killed by a werejackal.
+03:10:05 === v11block40/v4 episode 48 seed 3048 ===
+03:10:19   [v4] ep48: prog 0.0354 depth 6 role Valkyrie end DEATH: died. Killed by a wererat.
+03:10:19 === v11block40/v4 episode 49 seed 3049 ===
+03:10:20     step 2000 depth 3 (max 3) hp 30/30 xp 4 t=1934 wall=108s
+03:10:23   [v4] ep49: prog 0.2566 depth 13 role Archeologist end DEATH: died. Killed by a giant ant.
+03:10:23 v11block40 chunk v4 complete (10 eps)
+03:10:34   [v6] ep63: prog 0.0265 depth 5 role Ranger end DEATH: died. Killed by a giant rat.
+03:10:34 === v11block40/v6 episode 64 seed 3064 ===
+03:11:02     step 2000 depth 4 (max 4) hp 24/24 xp 2 t=1473 wall=155s
+03:11:03   [v6] ep64: prog 0.0354 depth 6 role Caveman end DEATH: died. Killed by a little dog.
+03:11:03 === v11block40/v6 episode 65 seed 3065 ===
+03:11:20   [v6] ep65: prog 0.0354 depth 6 role Samurai end DEATH: died. Killed by a wand.
+03:11:20 === v11block40/v6 episode 66 seed 3066 ===
+03:11:40   [v6] ep66: prog 0.0354 depth 6 role Tourist end DEATH: died. Killed by a goblin.
+03:11:40 === v11block40/v6 episode 67 seed 3067 ===
+03:11:53   [v5] ep50: prog 0.0212 depth 4 role Monk end DEATH: died. Killed by a goblin.
+03:11:53 === v11block40/v5 episode 51 seed 3051 ===
+03:12:28     step 4000 depth 3 (max 3) hp 32/38 xp 5 t=3954 wall=235s
+03:12:36     step 2000 depth 6 (max 6) hp 30/30 xp 4 t=1966 wall=42s
+03:12:39   [v5] ep51: prog 0.0354 depth 6 role Knight end DEATH: died. Killed by a giant bat, while fainted from lack of food.
+03:12:39 === v11block40/v5 episode 52 seed 3052 ===
+03:12:48   [v5] ep52: prog 0.0154 depth 2 role Valkyrie end DEATH: died. Killed by a wand.
+03:12:48 === v11block40/v5 episode 53 seed 3053 ===
+03:12:56   [v7] ep70: prog 0.0291 depth 3 role Wizard end DEATH: died. Killed by a kitten.
+03:12:56 === v11block40/v7 episode 71 seed 3071 ===
+03:13:07     step 2000 depth 1 (max 1) hp 17/22 xp 2 t=1991 wall=87s
+03:13:12   [v7] ep71: prog 0.0485 depth 7 role Priest end DEATH: died. Killed by a housecat.
+03:13:12 === v11block40/v7 episode 72 seed 3072 ===
+03:13:15   [v6] ep67: prog 0.0185 depth 1 role Priestess end DEATH: died. Killed by a fox.
+03:13:15 === v11block40/v6 episode 68 seed 3068 ===
+03:13:24   [v7] ep72: prog 0.0354 depth 6 role Rogue end DEATH: died. Killed by an orc zombie.
+03:13:24 === v11block40/v7 episode 73 seed 3073 ===
+03:13:35   [v6] ep68: prog 0.0212 depth 4 role Cavewoman end DEATH: starved to death.
+03:13:35 === v11block40/v6 episode 69 seed 3069 ===
+03:14:32     step 2000 depth 4 (max 5) hp 42/50 xp 4 t=1983 wall=57s
+03:14:43   [v6] ep69: prog 0.0265 depth 5 role Valkyrie end DEATH: died. Killed by a gnome zombie, while fainted from lack of food.
+03:14:43 v11block40 chunk v6 complete (10 eps)
+03:15:04     step 2000 depth 1 (max 1) hp 17/17 xp 2 t=1995 wall=99s
+03:15:20     step 2000 depth 2 (max 3) hp 40/40 xp 4 t=1961 wall=152s
+03:15:47     step 4000 depth 2 (max 2) hp 17/17 xp 2 t=3997 wall=142s
+03:16:04     step 4000 depth 2 (max 3) hp 40/40 xp 4 t=3973 wall=196s
+03:16:17     step 6000 depth 2 (max 2) hp 17/17 xp 2 t=6017 wall=172s
+03:16:38   [v7] ep73: prog 0.0185 depth 2 role Rogue end DEATH: starved to death.
+03:16:38 === v11block40/v7 episode 74 seed 3074 ===
+03:16:54     step 6000 depth 2 (max 3) hp 40/40 xp 4 t=5993 wall=246s
+03:17:45     step 8000 depth 2 (max 3) hp 40/40 xp 4 t=8013 wall=297s
+03:17:57   [v5] ep53: prog 0.0242 depth 3 role Barbarian end DEATH: starved to death.
+03:17:57 === v11block40/v5 episode 54 seed 3054 ===
+03:18:28     step 2000 depth 5 (max 5) hp 14/16 xp 1 t=859 wall=30s
+03:18:38   [v7] ep74: prog 0.0185 depth 1 role Monk end DEATH: died. Killed by a guard.
+03:18:38 === v11block40/v7 episode 75 seed 3075 ===
+03:18:41     step 4000 depth 5 (max 5) hp 16/16 xp 1 t=890 wall=44s
+03:18:57     step 6000 depth 5 (max 5) hp 16/16 xp 1 t=921 wall=60s
+03:19:03   [v7] ep75: prog 0.0265 depth 5 role Cavewoman end DEATH: died. Killed by a dwarf king.
+03:19:03 === v11block40/v7 episode 76 seed 3076 ===
+03:19:04   [v7] ep76: prog 0.0265 depth 5 role Archeologist end DEATH: died. Killed by a coyote, while praying.
+03:19:04 === v11block40/v7 episode 77 seed 3077 ===
+03:19:09     step 8000 depth 5 (max 5) hp 16/16 xp 1 t=954 wall=72s
+03:19:11   [v7] ep77: prog 0.0977 depth 9 role Valkyrie end DEATH: died. Killed by a dingo.
+03:19:11 === v11block40/v7 episode 78 seed 3078 ===
+03:19:23     step 10000 depth 5 (max 5) hp 16/16 xp 1 t=1005 wall=86s
+03:19:40     step 12000 depth 5 (max 5) hp 25/25 xp 3 t=2134 wall=103s
+03:19:41   [v5] ep54: prog 0.0265 depth 5 role Knight end DEATH: died. Killed by a giant ant.
+03:19:41 === v11block40/v5 episode 55 seed 3055 ===
+03:19:44     step 2000 depth 6 (max 6) hp 28/28 xp 3 t=1488 wall=33s
+03:20:02   [v7] ep78: prog 0.2061 depth 12 role Monk end DEATH: died. Killed by a straw golem.
+03:20:02 === v11block40/v7 episode 79 seed 3079 ===
+03:20:02     step 2000 depth 5 (max 5) hp 23/23 xp 2 t=1975 wall=21s
+03:20:13   [v7] ep79: prog 0.0265 depth 5 role Wizard end DEATH: died. Killed by a jackal.
+03:20:13 v11block40 chunk v7 complete (10 eps)
+03:20:15     step 4000 depth 5 (max 5) hp 23/23 xp 2 t=3995 wall=33s
+03:20:25     step 6000 depth 5 (max 5) hp 23/23 xp 2 t=6015 wall=44s
+03:20:27   [v5] ep55: prog 0.0265 depth 5 role Barbarian end DEATH: starved to death.
+03:20:27 === v11block40/v5 episode 56 seed 3056 ===
+03:20:29   [v5] ep56: prog 0.0977 depth 9 role Archeologist end DEATH: died. Killed by a giant spider.
+03:20:29 === v11block40/v5 episode 57 seed 3057 ===
+03:21:15     step 2000 depth 1 (max 1) hp 19/22 xp 2 t=1975 wall=46s
+03:22:01     step 4000 depth 1 (max 1) hp 30/30 xp 3 t=3994 wall=92s
+03:22:51     step 6000 depth 1 (max 1) hp 30/30 xp 3 t=6014 wall=142s
+03:23:02   [v5] ep57: prog 0.0208 depth 1 role Knight end DEATH: starved to death.
+03:23:02 === v11block40/v5 episode 58 seed 3058 ===
+03:23:18     step 2000 depth 4 (max 4) hp 31/48 xp 4 t=750 wall=17s
+03:23:29   [v5] ep58: prog 0.0242 depth 4 role Barbarian end DEATH: died. Killed by a jackal.
+03:23:29 === v11block40/v5 episode 59 seed 3059 ===
+03:23:56   [v5] ep59: prog 0.2061 depth 12 role Ranger end DEATH: died. Killed by a horse.
+03:23:56 v11block40 chunk v5 complete (10 eps)
+03:24:40 V1.1 FINAL n=80: mean 6.09 CI95 [4.46,7.93]. Excludes 4.0 from above (clearly above field, tied with #1); straddles 6.8 (no decisive beat). Depth record Dlvl:21 (39.29, seed 3061 Archeologist). 0 churn-aborts / 80 eps (v1: 2/25).
+(v1.1 phase log appended; see FABLE_NETHACK_REPORT.md V1.1 section for the narrative.)

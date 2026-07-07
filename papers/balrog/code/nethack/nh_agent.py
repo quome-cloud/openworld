@@ -48,6 +48,15 @@ for _g in range(C.GLYPH_OBJ_OFF, C.GLYPH_CMAP_OFF):
 # space are added back). Engraving is therefore disabled.
 OUR_SPEED = 12          # all starting roles move at speed 12
 
+# V1.1 L2 — shallow opportunistic hunting. DROPPED from v1.1 after dev
+# validation (coordinator rule: drop levers that don't clearly pay):
+# isolated effect +0.63 [-0.42,+1.82] on 24 paired dev seeds, and the
+# 12-seed extension block regressed to -0.34 — the initial gains were
+# dev-noise seed luck (the Crafter v2 lesson). Kept as an off-by-default
+# toggle for future work.
+import os as _os
+HUNT_SHALLOW = _os.environ.get("NH_HUNT", "0") == "1"
+
 RE_KILLED = re.compile(r"You (?:kill|destroy) the ([a-zA-Z' -]+?)!")
 RE_SEE_HERE = re.compile(r"You see here (?:an? |the )?([^.]*)\.")
 
@@ -76,6 +85,8 @@ class DiveAgent:
         self.kick_dir = None
         self.kick_count = 0
         self.door_giveup = set()
+        self.door_target = None                 # cell of last open/kick attempt
+        self.hunt_turns = {}                    # level key -> game turns spent hunting
         self.fresh_kills = []                   # (cell, species, time)
         self.role = None
         self.race = None
@@ -263,6 +274,22 @@ class DiveAgent:
                 "You succeed" in msg:
             self.kick_dir = None
             self.kick_count = 0
+
+        # V1.1 L1 — stale-door terrain correction (v1 failure catalog #8:
+        # an item glyph covering an opened door left remembered terrain
+        # "closed"; the open/direction loop then churned 100k-step episodes
+        # at ~zero game time). The message channel is authoritative:
+        if self.door_target is not None:
+            tx, ty = self.door_target
+            if "This door is already open" in msg or "The door opens" in msg:
+                A.level.terrain[ty][tx] = C.DOOR_OPEN
+                self.door_target = None
+            elif "You see no door there" in msg or "no door" in msg.lower():
+                A.level.terrain[ty][tx] = C.DOORWAY
+                self.door_target = None
+            elif "This door is broken" in msg:
+                A.level.terrain[ty][tx] = C.DOORWAY
+                self.door_target = None
 
     # -------------------------------------------------------------- helpers
     def _suspects(self):
@@ -510,6 +537,26 @@ class DiveAgent:
                 self.rest_budget.get(A.key, 0) < 900:
             self.rest_budget[A.key] = self.rest_budget.get(A.key, 0) + 1
             return "search"
+
+        # ---- P5.7: shallow opportunistic hunting (V1.1 L2) -----------------
+        if HUNT_SHALLOW and A.depth <= 4 and A.hp >= 0.6 * A.hpmax and \
+                not self.digger_letter and \
+                self.hunt_turns.get(A.key, 0) < 250:
+            prey = [m for m in self._mobile_hostiles()
+                    if m.difficulty <= A.xplvl + 1 and m.speed <= OUR_SPEED
+                    and not self._never_melee(m)
+                    and max(abs(m.x - A.agent[0]),
+                            abs(m.y - A.agent[1])) <= 6]
+            if prey:
+                tgt = min(prey, key=lambda m: max(abs(m.x - A.agent[0]),
+                                                  abs(m.y - A.agent[1])))
+                path = A.level.bfs(A.agent, [tgt.pos],
+                                   avoid=self._suspects() |
+                                   (self._mcells() - {tgt.pos}))
+                if path:
+                    t0 = self.hunt_turns.setdefault(A.key, 0)
+                    self.hunt_turns[A.key] = t0 + 1
+                    return self._step_path(path)
 
         # ---- P6/P7: descent (dig > stairs), with rest gate -----------------
         act = self._descend(obs)
@@ -821,6 +868,11 @@ class DiveAgent:
     def _rest_threshold(self):
         A = self.atlas
         lo, hi = 0.6, 0.85
+        # V1.1 L4 — shallow rest discipline: the 2000-block's early deaths
+        # (13/25 episodes at depth 2-6, xp 1-2) went in at part health;
+        # shallow floors are the cheapest place to buy HP
+        if A.depth <= 3:
+            lo, hi = 0.75, 0.92
         if self._mem_danger_depth is not None and \
                 A.depth >= self._mem_danger_depth - 1:
             if (lo, hi) != (0.9, 0.95) and A.hp < 0.9 * A.hpmax:
@@ -1113,6 +1165,7 @@ class DiveAgent:
             ddx, ddy = door[0] - A.agent[0], door[1] - A.agent[1]
             if (ddx, ddy) in DIR_OF and (ddx == 0 or ddy == 0):
                 dname = DIR_OF[(ddx, ddy)]
+                self.door_target = door
                 if "This door is locked" in A.message or self.kick_dir == dname:
                     self.kick_dir = dname
                     self.kick_count += 1
@@ -1202,6 +1255,7 @@ class DiveAgent:
         # closed door ahead: open instead of bumping
         if L.terrain[ny][nx] == C.DOOR_CLOSED:
             if dx == 0 or dy == 0:
+                self.door_target = (nx, ny)
                 if "This door is locked" in A.message or self.kick_dir == step:
                     self.kick_dir = step
                     self.kick_count += 1

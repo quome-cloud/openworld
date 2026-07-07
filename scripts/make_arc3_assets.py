@@ -233,6 +233,13 @@ def source_matrix_assets(opus, codex, fable):
     for s in ax.spines.values():
         s.set_visible(False)
     ax.set_title("source-free completion, per game (replay-verified)", fontsize=9.5)
+    legend_handles = [
+        plt.Rectangle((0, 0), 1, 1, facecolor="#2a8a3e", edgecolor="white", label="all levels (full solve)"),
+        plt.Rectangle((0, 0), 1, 1, facecolor="#bfe3c5", edgecolor="white", label="some levels (partial)"),
+        plt.Rectangle((0, 0), 1, 1, facecolor="#ededed", edgecolor="white", label="none"),
+    ]
+    ax.legend(handles=legend_handles, loc="upper center", bbox_to_anchor=(0.5, -0.035),
+              ncol=3, frameon=False, fontsize=7.5, handlelength=1.1, columnspacing=1.3)
     fig.savefig(FIGS / "arc3_source_matrix.png", dpi=200, bbox_inches="tight")
     plt.close(fig); print(f"wrote arc3_source_matrix.png ({len(cols)} cols)")
 
@@ -693,7 +700,7 @@ def main():
     gx = [g for g in real if g in q32]
     xs = [q32[g]["verified_exact"] for g in gx]
     ys = [cl[g]["verified_exact"] for g in gx]
-    axs.scatter(xs, ys, color=TEAL, s=34, zorder=3, edgecolor="white", linewidth=0.6)
+    axs.scatter(xs, ys, color=BLUE, s=34, zorder=3, edgecolor="white", linewidth=0.6)
     axs.plot([0, 1], [0, 1], "--", color="black", alpha=0.4, lw=1)
     axs.set_xlabel("qwen-32B fidelity"); axs.set_ylabel("Claude fidelity")
     axs.set_xlim(-0.03, 1.03); axs.set_ylim(-0.03, 1.03)

@@ -29,5 +29,9 @@ plt.xticks(x, games, rotation=90, fontsize=8, fontfamily="monospace"); plt.ylabe
 n_above=sum(above)
 n_zero=sum(1 for i in range(len(games)) if rv[i]==0 and ov[i]>=1)
 plt.title(f"The honest measure: {n_above}/25 strictly above random ({n_zero} random never reaches); random already gets ≥1 level on {sum(1 for v in rv if v>=1)}/25", fontsize=10.5, fontweight="bold")
-plt.legend(loc="upper right"); plt.tight_layout(); plt.savefig(FIG/"arc3_above_random.png", dpi=140); plt.close()
+from matplotlib.patches import Patch
+_leg=[Patch(facecolor="#cbd5e1", edgecolor="#94a3b8", label="random baseline"),
+      Patch(facecolor="#2e8b57", edgecolor="#334155", label="our method — above random"),
+      Patch(facecolor="#f59e0b", edgecolor="#334155", label="our method — random also reaches ≥1")]
+plt.legend(handles=_leg, loc="upper right", fontsize=8.5, frameon=True); plt.tight_layout(); plt.savefig(FIG/"arc3_above_random.png", dpi=140); plt.close()
 print("wrote arc3_above_random.png |", n_above, "above random; random>=1 on", sum(1 for v in rv if v>=1))

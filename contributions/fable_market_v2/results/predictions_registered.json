@@ -1,0 +1,16 @@
+{
+  "registered_utc": "2026-07-06T19:55:00Z",
+  "registered_by": "Fable 5 (max reasoning) synthesis agent, E-market v2",
+  "frozen_before": "any POST-CUTOFF (2026-02-01+) evaluation of any variant",
+  "basis": "v1 null result (0/7), DEV sanity run (pre-cutoff, results/gate_dev.json), prior literature on signal decay, and the measured permutation-null spread (~1.5-2 annualized Sharpe on ~105 days)",
+  "gate": "PASS = net LS Sharpe > 0 AND within-date gross permutation p < 0.05, 10 bps/side, POST window only",
+  "predictions": [
+    {"id": "P1", "claim": "0 of 4 SOLO family variants PASS the full gate on POST", "confidence": 0.80},
+    {"id": "P2", "claim": "FULL model does not PASS the gate on POST", "confidence": 0.85},
+    {"id": "P3", "claim": "SOLO_PEAD has the highest net Sharpe among the four SOLO variants on POST", "confidence": 0.55},
+    {"id": "P4", "claim": "SOLO_PEAD net Sharpe > 0 on POST", "confidence": 0.55},
+    {"id": "P5", "claim": "At least 3 of 5 non-PEAD variants (FULL + SOLO_SLL, SOLO_PEER, SOLO_REV, plus DROP_PEAD) have negative net Sharpe on POST", "confidence": 0.70},
+    {"id": "P6", "claim": "Drop-one ablation shows PEAD with positive marginal contribution: DROP_PEAD net Sharpe < FULL net Sharpe on POST", "confidence": 0.55},
+    {"id": "P7", "claim": "Meta: the POST permutation null gross-Sharpe std lands in [1.0, 2.5] annualized, i.e. only edges with true annualized Sharpe >~2 are detectable at p<0.05 in 5 months — the experiment is underpowered for realistically-sized (<1 Sharpe) cross-sectional edges", "confidence": 0.80}
+  ]
+}

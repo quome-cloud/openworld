@@ -1,0 +1,350 @@
+{
+ "down_depth_plus1": 854,
+ "down_no_change": 507,
+ "down_other": [
+  [
+   "clean_A/NetHackChallenge-v0__ep4.jsonl.gz",
+   374,
+   2,
+   4,
+   "You fall down a shaft!\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1559,
+   2,
+   0,
+   "You descend the stairs.\nThere is a staircase up here.  You s"
+  ]
+ ],
+ "depth_change_other_action": [
+  [
+   "baseline25/NetHackChallenge-v0__ep10.jsonl.gz",
+   207,
+   "west",
+   2,
+   3,
+   "A trap door opens up under you!\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep12.jsonl.gz",
+   155,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep13.jsonl.gz",
+   486,
+   "up",
+   4,
+   3,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep19.jsonl.gz",
+   96,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep24.jsonl.gz",
+   411,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep6.jsonl.gz",
+   1206,
+   "up",
+   4,
+   3,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "baseline25/NetHackChallenge-v0__ep9.jsonl.gz",
+   617,
+   "up",
+   4,
+   3,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "clean_A/NetHackChallenge-v0__ep1.jsonl.gz",
+   615,
+   "up",
+   5,
+   4,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "clean_A/NetHackChallenge-v0__ep2.jsonl.gz",
+   378,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep101.jsonl.gz",
+   369,
+   "up",
+   5,
+   4,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep113.jsonl.gz",
+   506,
+   "up",
+   4,
+   3,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep114.jsonl.gz",
+   168,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   225,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1053,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1057,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1061,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1065,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1069,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1073,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1077,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1081,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1085,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1090,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1097,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1101,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1105,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1109,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1113,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1117,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1121,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1125,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1129,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1133,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1137,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1141,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1145,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1149,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1153,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1157,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ],
+  [
+   "dev/NetHackChallenge-v0__ep115.jsonl.gz",
+   1161,
+   "up",
+   3,
+   2,
+   "You climb up the stairs.\n"
+  ]
+ ],
+ "frozen_msgs": {
+  "the floating eye's gaze!": 5
+ },
+ "n_steps": 741564,
+ "time_decrease_nonterminal": [],
+ "hp_above_max": 0,
+ "single_move_displacement_gt1": 8,
+ "files": 171
+}

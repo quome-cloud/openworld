@@ -72,6 +72,18 @@ CAT_COLOR={SP:"#2563eb", GD:"#c2410c", RA:"#15803d"}
 # column order = group by category (CAT_ORDER), preserving narrative order within each group
 corder=[j for cat in CAT_ORDER for j in range(len(STRATS)) if CATS[j]==cat]
 STRATS=[STRATS[j] for j in corder]; CATS=[CATS[j] for j in corder]
+# Collapse the (contiguous, all-empty) goal-discovery block into ONE summary column, so the columns that
+# actually solve games get the width instead of a wall of blank cells.
+_n_gd=sum(1 for c in CATS if c==GD)
+if _n_gd>1:
+    _new_S=[]; _new_C=[]; _did=False
+    for _s,_c in zip(STRATS, CATS):
+        if _c==GD:
+            if not _did:
+                _new_S.append((f"{_n_gd} goal-discovery\nmethods \N{RIGHTWARDS ARROW} 0", set())); _new_C.append(GD); _did=True
+        else:
+            _new_S.append(_s); _new_C.append(_c)
+    STRATS, CATS = _new_S, _new_C
 # matrix (games x strats, reordered columns); sort games: solved-by-most first, then alpha
 M=np.array([[1 if g in s else 0 for _,s in STRATS] for g in ALL])
 order=sorted(range(len(ALL)), key=lambda i:(-M[i].sum(), ALL[i]))

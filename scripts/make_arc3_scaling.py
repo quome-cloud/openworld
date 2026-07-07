@@ -55,17 +55,16 @@ def main():
     for s in ("top", "right"):
         axA.spines[s].set_visible(False)
 
-    # ---- B: cost per solve falls ----
-    xb = [1, 2]  # opus, fable have token telemetry; codex logged none
-    axB.bar(xb, [tok[1], tok[2]], color=[BLUE, TEAL], width=0.6, zorder=3)
-    for xi, tv in zip(xb, [tok[1], tok[2]]):
-        axB.text(xi, tv + 2, f"{tv:.0f}M", ha="center", fontsize=11, fontweight="bold",
-                 color=BLUE if xi == 1 else TEAL)
-    axB.text(0, 8, "GPT-5.5\n(no token\ntelemetry)", ha="center", va="center", fontsize=8, color=GREY, style="italic")
-    axB.annotate(f"{tok[1] / tok[2]:.1f}$\\times$ cheaper\nper solve", xy=(2, tok[2] + 6), xytext=(1.5, 62),
+    # ---- B: cost per solve falls (Opus, Fable; GPT-5.5 logged no token telemetry, so it is omitted here) ----
+    xb = [0, 1]  # opus, fable
+    axB.bar(xb, [tok[1], tok[2]], color=[BLUE, TEAL], width=0.55, zorder=3)
+    for xi, tv, c in zip(xb, [tok[1], tok[2]], [BLUE, TEAL]):
+        axB.text(xi, tv + 2, f"{tv:.0f}M", ha="center", fontsize=11, fontweight="bold", color=c)
+    axB.annotate(f"{tok[1] / tok[2]:.1f}$\\times$ cheaper\nper solve", xy=(1, tok[2] + 6), xytext=(0.42, 62),
                  ha="center", fontsize=9.5, color=TEAL, fontweight="bold",
                  arrowprops=dict(arrowstyle="->", color=TEAL, lw=1.4, connectionstyle="arc3,rad=0.2"))
-    axB.set_xticks([0, 1, 2]); axB.set_xticklabels(ARMS, fontsize=9.5)
+    axB.set_xticks([0, 1]); axB.set_xticklabels([ARMS[1], ARMS[2]], fontsize=9.5)
+    axB.set_xlim(-0.65, 1.65)
     axB.set_ylabel("mean tokens / solved game (millions)"); axB.set_ylim(0, 95)
     axB.set_title("…and each solve costs less", fontsize=11, fontweight="bold")
     axB.grid(axis="y", alpha=0.25, zorder=0)

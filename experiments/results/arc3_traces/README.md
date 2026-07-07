@@ -1,5 +1,5 @@
 ---
-license: mit
+license: apache-2.0
 pretty_name: ARC-AGI-3 Source-Free Solving Traces (Hybrid World Models)
 task_categories:
   - reinforcement-learning

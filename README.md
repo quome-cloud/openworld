@@ -7,7 +7,7 @@
 **The *PyTorch for code world models*: describe a world, let an LLM write and _verify_ its dynamics as plain Python, and deploy it in one line — no training, no GPU, no dataset.**
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/quome-cloud/openworld/blob/main/notebooks/quickstart.ipynb)
-[![License: MIT](https://img.shields.io/badge/License-MIT-1d4ed8.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-1d4ed8.svg)](LICENSE)
 [![Python 3.14](https://img.shields.io/badge/python-3.14-1d4ed8.svg)](https://www.python.org/)
 [![Core: zero-dependency](https://img.shields.io/badge/core-zero--dependency-0f766e.svg)](#-design-principles)
 [![Tests: 284 passing](https://img.shields.io/badge/tests-284%20passing-brightgreen.svg)](#-reproducibility--testing)
@@ -574,7 +574,7 @@ Found a bug or have an idea? Open an [issue](https://github.com/quome-cloud/open
 
 ## 📄 License
 
-Released under the **[MIT License](LICENSE)** — free for commercial and academic use.
+Released under the **[Apache License 2.0](LICENSE)** — free for commercial and academic use, with an explicit patent grant.
 
 <div align="center">
 <sub>Built with verified code, not vibes. ⭐ Star the repo if a readable, deployable world model is useful to you.</sub>

@@ -78,4 +78,4 @@ Synthetic data — *not* real clinical records. The oracle is Bayes-optimal on t
 
 ## License
 
-MIT (same as the OpenWorld repository).
+Apache 2.0 (same as the OpenWorld repository).

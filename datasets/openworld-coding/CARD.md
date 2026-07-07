@@ -58,4 +58,4 @@ is below the threshold where transfer becomes strong.
 
 ## License
 
-MIT (same as the OpenWorld repository). Tasks/tests are LLM-generated; treated as synthetic.
+Apache 2.0 (same as the OpenWorld repository). Tasks/tests are LLM-generated; treated as synthetic.

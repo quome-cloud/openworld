@@ -149,7 +149,7 @@ def main():
     done_keys = {(r["task"], r["episode"]) for r in all_results}
 
     log(f"=== BALROG MiniHack suite: 8 tasks x {H.EPISODES_PER_TASK} episodes; "
-        f"SOTA {SOTA}% (Gemini-3.1-Pro) ===")
+        f"SOTA {SOTA}% (Gemini-3-Pro) ===")
     for ti, task in enumerate(H.MINIHACK_TASKS):
         for ep in range(H.EPISODES_PER_TASK):
             if (task, ep) in done_keys:

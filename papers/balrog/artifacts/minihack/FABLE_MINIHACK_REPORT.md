@@ -156,14 +156,7 @@ Honest read: the operator's hypothesis is **not supported at this performance le
 
 Ledger schema (`memory_store.py`, one JSON per task under `results/memory/`): episode records, observed stairs cells, lava columns, combat exchange samples, failure causes — every entry carrying `from` (transition-log file) + `steps` provenance pointing at a clean-condition episode in `results/transitions/`. Retrieval: E1 (stairs-hint frontier bias, weight 0.8/manhattan-cell) and E2 (hold-vs-dash threshold at 0.85 x dpk x rats-remaining).
 
-Pass-by-pass (5 eps/task, fresh seed blocks 4000/5000/6000):
-
-| pass | score | deaths | mean steps-to-solve | fails |
-|---|---|---|---|---|
-| B1 | 95.0% | 1 | 50.0 | Corridor-R3 ep2, CorridorBattle-Dark ep3 |
-| B2 | 95.0% | 0 | 48.2 | Quest-Easy ep1, Quest-Easy ep3 |
-| B3 | 82.5% | 4 | 47.3 | Corridor-R3 ep3, CorridorBattle-Dark ep0, CorridorBattle-Dark ep4, Quest-Easy ep1, Quest-Easy ep3, Quest-Medium ep1, Quest-Medium ep3 |
-| A (baseline, different seed block) | 92.5% | 2 | 48.4 | see above |
+Pass-by-pass scores (5 eps/task, fresh seed blocks 4000/5000/6000): see §3's memory table (duplicated here in an earlier draft; removed).
 
 Deaths across passes (1, 0, 4) are dominated by combat variance; the score curve is NOT a memory-learning curve. The steps-to-solve trend (50.0 → 48.2 → 47.3) is consistent with E1's small savings. Which entries fired and what they changed is in §3's memory table and the `fired` logs; E2's damage-per-kill estimates (1.06–1.49) also illustrate a measurement subtlety: dpk is computed from *all* damage taken over kills achieved, so it underestimates the marginal cost of the next kill when some damage came from multi-rat contact phases.
 

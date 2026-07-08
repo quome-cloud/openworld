@@ -2,7 +2,7 @@ name: publish
 
 # Publishes to PyPI via Trusted Publishing (OIDC) — no API token stored in the
 # repo. PyPI side: Publishing -> "Add a new pending publisher" with
-#   project=openworld, owner=quome-cloud, repo=openworld,
+#   project=pyoworld, owner=quome-cloud, repo=openworld,
 #   workflow=publish.yml, environment=pypi
 on:
   release:

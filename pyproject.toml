@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openworld"
+name = "pyoworld"
 version = "0.3.0"
 description = "Build, optimize, and deploy verified symbolic world models."
 readme = "README.md"

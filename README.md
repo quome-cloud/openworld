@@ -278,7 +278,7 @@ verified code is ~876× more sample-efficient. Numbers from
 > / `rich`.
 
 ```bash
-pip install openworld            # from PyPI: core + CLI/server
+pip install pyoworld             # from PyPI: core + CLI/server (imports as `openworld`)
 ```
 
 Or from source (for the experiments, papers, and tests):

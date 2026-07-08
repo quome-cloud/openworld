@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="OpenWorld — verified symbolic world models" width="760"/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/logo.png" alt="OpenWorld — verified symbolic world models" width="760"/>
 
 # OpenWorld
 
@@ -17,7 +17,7 @@
 
 <br/>
 
-<a href="#arc3"><img src="assets/arc3/su15.gif" width="230" alt="OpenWorld solving ARC-AGI-3 game su15 source-free — 9 of 9 levels"/></a>
+<a href="#arc3"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/su15.gif" width="230" alt="OpenWorld solving ARC-AGI-3 game su15 source-free — 9 of 9 levels"/></a>
 
 **Source-free, it's the first perfect ARC-AGI-3 result → [25/25 games · 183/183 levels · human-efficient, beats prior SOTA](#arc3).**
 Every solve is a *verified, serveable* world model the agent built by acting — the map **is** the model.
@@ -45,7 +45,7 @@ worlds, and deploys as an inference server — one zero-dependency core, no trai
 ## ⚡ The 30-second mental model
 
 <div align="center">
-<img src="assets/pipeline.png" alt="BUILD → OPTIMIZE → DEPLOY. BUILD: describe it in plain terms; Claude Code writes and verifies the code dynamics (0 training data). OPTIMIZE: tune dials and dynamics against a goal (Study, sweep, dials). DEPLOY: FastAPI server plus live React Flow — /step /predict /run /observe, WS /live (stateless forward pass). Between them: one portable JSON spec, one self-contained SVG card. The boundary: perceive (text in) → WORLD (verified symbolic state plus code dynamics; compose worlds-within-worlds, bridges, roll-ups) → emit (report out)." width="920"/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/pipeline.png" alt="BUILD → OPTIMIZE → DEPLOY. BUILD: describe it in plain terms; Claude Code writes and verifies the code dynamics (0 training data). OPTIMIZE: tune dials and dynamics against a goal (Study, sweep, dials). DEPLOY: FastAPI server plus live React Flow — /step /predict /run /observe, WS /live (stateless forward pass). Between them: one portable JSON spec, one self-contained SVG card. The boundary: perceive (text in) → WORLD (verified symbolic state plus code dynamics; compose worlds-within-worlds, bridges, roll-ups) → emit (report out)." width="920"/>
 </div>
 
 Every world serializes to a **lossless JSON spec** and renders to a **stunning,
@@ -54,7 +54,7 @@ self-contained SVG model card** (a HuggingFace-style card — but the artifact i
 *bridges* and rolled up by *aggregators*.
 
 <div align="center">
-<img src="assets/sample-card.png" width="620" alt="A generated OpenWorld model card for the 'sprint' world: a header with tags and version, a BFS state-transition graph, the inferred state schema, the declared actions, the verified code dynamics, a sample rollout chart, metrics (round-trip exact, reachable states, spec size), and the natural-language rule contract."/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/sample-card.png" width="620" alt="A generated OpenWorld model card for the 'sprint' world: a header with tags and version, a BFS state-transition graph, the inferred state schema, the declared actions, the verified code dynamics, a sample rollout chart, metrics (round-trip exact, reachable states, spec size), and the natural-language rule contract."/>
 <br/><sub>A generated <b>model card</b> — one self-contained SVG per world: state graph · schema · verified dynamics · rollout · metrics · declared rules. Just <code>render_card(world)</code>.</sub>
 </div>
 
@@ -76,7 +76,7 @@ Behind a **source-free boundary** (the agent's Python cannot import the engine),
 every game — a reusable pattern for building verified world models by acting:
 
 <div align="center">
-<img src="assets/arc3-recipe.png" width="900" alt="The recipe: a process-isolated agent perceives pixels into a symbolic state, explores to gather (s,a,s') transitions, synthesizes a verified predict(frame,action) program (gate 1: accepted only if it exact-matches held-out transitions), reasons the win condition into a code objective, plans through the verified model in imagination, and verifies by replaying on the real engine (gate 2); each verified win banks as a serveable OpenWorld World of Perceptor plus FunctionTransition plus CodeObjective."/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3-recipe.png" width="900" alt="The recipe: a process-isolated agent perceives pixels into a symbolic state, explores to gather (s,a,s') transitions, synthesizes a verified predict(frame,action) program (gate 1: accepted only if it exact-matches held-out transitions), reasons the win condition into a code objective, plans through the verified model in imagination, and verifies by replaying on the real engine (gate 2); each verified win banks as a serveable OpenWorld World of Perceptor plus FunctionTransition plus CodeObjective."/>
 </div>
 
 **① Perceive** pixels → a symbolic state (mask the status bar so the state space doesn't explode) · **②
@@ -92,39 +92,39 @@ re-run, and serve at `openworld serve /view`; unsolved games loop back and re-sy
 <div align="center">
 <table>
 <tr>
-<td align="center"><img src="assets/arc3/ar25.gif" width="115" alt="ar25 solved source-free, 8 of 8 levels"/><br/><sub><b>ar25</b> · 8/8</sub></td>
-<td align="center"><img src="assets/arc3/bp35.gif" width="115" alt="bp35 solved source-free, 9 of 9 levels"/><br/><sub><b>bp35</b> · 9/9</sub></td>
-<td align="center"><img src="assets/arc3/cd82.gif" width="115" alt="cd82 solved source-free, 6 of 6 levels"/><br/><sub><b>cd82</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/cn04.gif" width="115" alt="cn04 solved source-free, 6 of 6 levels"/><br/><sub><b>cn04</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/dc22.gif" width="115" alt="dc22 solved source-free, 6 of 6 levels"/><br/><sub><b>dc22</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/ar25.gif" width="115" alt="ar25 solved source-free, 8 of 8 levels"/><br/><sub><b>ar25</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/bp35.gif" width="115" alt="bp35 solved source-free, 9 of 9 levels"/><br/><sub><b>bp35</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/cd82.gif" width="115" alt="cd82 solved source-free, 6 of 6 levels"/><br/><sub><b>cd82</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/cn04.gif" width="115" alt="cn04 solved source-free, 6 of 6 levels"/><br/><sub><b>cn04</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/dc22.gif" width="115" alt="dc22 solved source-free, 6 of 6 levels"/><br/><sub><b>dc22</b> · 6/6</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="assets/arc3/ft09.gif" width="115" alt="ft09 solved source-free, 6 of 6 levels"/><br/><sub><b>ft09</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/g50t.gif" width="115" alt="g50t solved source-free, 7 of 7 levels"/><br/><sub><b>g50t</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/ka59.gif" width="115" alt="ka59 solved source-free, 7 of 7 levels"/><br/><sub><b>ka59</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/lf52.gif" width="115" alt="lf52 solved source-free, 10 of 10 levels"/><br/><sub><b>lf52</b> · 10/10</sub></td>
-<td align="center"><img src="assets/arc3/lp85.gif" width="115" alt="lp85 solved source-free, 8 of 8 levels"/><br/><sub><b>lp85</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/ft09.gif" width="115" alt="ft09 solved source-free, 6 of 6 levels"/><br/><sub><b>ft09</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/g50t.gif" width="115" alt="g50t solved source-free, 7 of 7 levels"/><br/><sub><b>g50t</b> · 7/7</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/ka59.gif" width="115" alt="ka59 solved source-free, 7 of 7 levels"/><br/><sub><b>ka59</b> · 7/7</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/lf52.gif" width="115" alt="lf52 solved source-free, 10 of 10 levels"/><br/><sub><b>lf52</b> · 10/10</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/lp85.gif" width="115" alt="lp85 solved source-free, 8 of 8 levels"/><br/><sub><b>lp85</b> · 8/8</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="assets/arc3/ls20.gif" width="115" alt="ls20 solved source-free, 7 of 7 levels"/><br/><sub><b>ls20</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/m0r0.gif" width="115" alt="m0r0 solved source-free, 6 of 6 levels"/><br/><sub><b>m0r0</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/r11l.gif" width="115" alt="r11l solved source-free, 6 of 6 levels"/><br/><sub><b>r11l</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/re86.gif" width="115" alt="re86 solved source-free, 8 of 8 levels"/><br/><sub><b>re86</b> · 8/8</sub></td>
-<td align="center"><img src="assets/arc3/s5i5.gif" width="115" alt="s5i5 solved source-free, 8 of 8 levels"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/ls20.gif" width="115" alt="ls20 solved source-free, 7 of 7 levels"/><br/><sub><b>ls20</b> · 7/7</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/m0r0.gif" width="115" alt="m0r0 solved source-free, 6 of 6 levels"/><br/><sub><b>m0r0</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/r11l.gif" width="115" alt="r11l solved source-free, 6 of 6 levels"/><br/><sub><b>r11l</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/re86.gif" width="115" alt="re86 solved source-free, 8 of 8 levels"/><br/><sub><b>re86</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/s5i5.gif" width="115" alt="s5i5 solved source-free, 8 of 8 levels"/><br/><sub><b>s5i5</b> · 8/8</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="assets/arc3/sb26.gif" width="115" alt="sb26 solved source-free, 8 of 8 levels"/><br/><sub><b>sb26</b> · 8/8</sub></td>
-<td align="center"><img src="assets/arc3/sc25.gif" width="115" alt="sc25 solved source-free, 6 of 6 levels"/><br/><sub><b>sc25</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/sk48.gif" width="115" alt="sk48 solved source-free, 8 of 8 levels"/><br/><sub><b>sk48</b> · 8/8</sub></td>
-<td align="center"><img src="assets/arc3/sp80.gif" width="115" alt="sp80 solved source-free, 6 of 6 levels"/><br/><sub><b>sp80</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/su15.gif" width="115" alt="su15 solved source-free, 9 of 9 levels"/><br/><sub><b>su15</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/sb26.gif" width="115" alt="sb26 solved source-free, 8 of 8 levels"/><br/><sub><b>sb26</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/sc25.gif" width="115" alt="sc25 solved source-free, 6 of 6 levels"/><br/><sub><b>sc25</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/sk48.gif" width="115" alt="sk48 solved source-free, 8 of 8 levels"/><br/><sub><b>sk48</b> · 8/8</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/sp80.gif" width="115" alt="sp80 solved source-free, 6 of 6 levels"/><br/><sub><b>sp80</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/su15.gif" width="115" alt="su15 solved source-free, 9 of 9 levels"/><br/><sub><b>su15</b> · 9/9</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="assets/arc3/tn36.gif" width="115" alt="tn36 solved source-free, 7 of 7 levels"/><br/><sub><b>tn36</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/tr87.gif" width="115" alt="tr87 solved source-free, 6 of 6 levels"/><br/><sub><b>tr87</b> · 6/6</sub></td>
-<td align="center"><img src="assets/arc3/tu93.gif" width="115" alt="tu93 solved source-free, 9 of 9 levels"/><br/><sub><b>tu93</b> · 9/9</sub></td>
-<td align="center"><img src="assets/arc3/vc33.gif" width="115" alt="vc33 solved source-free, 7 of 7 levels"/><br/><sub><b>vc33</b> · 7/7</sub></td>
-<td align="center"><img src="assets/arc3/wa30.gif" width="115" alt="wa30 solved source-free, 9 of 9 levels"/><br/><sub><b>wa30</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/tn36.gif" width="115" alt="tn36 solved source-free, 7 of 7 levels"/><br/><sub><b>tn36</b> · 7/7</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/tr87.gif" width="115" alt="tr87 solved source-free, 6 of 6 levels"/><br/><sub><b>tr87</b> · 6/6</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/tu93.gif" width="115" alt="tu93 solved source-free, 9 of 9 levels"/><br/><sub><b>tu93</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/vc33.gif" width="115" alt="vc33 solved source-free, 7 of 7 levels"/><br/><sub><b>vc33</b> · 7/7</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/wa30.gif" width="115" alt="wa30 solved source-free, 9 of 9 levels"/><br/><sub><b>wa30</b> · 9/9</sub></td>
 </tr>
 </table>
 </div>
@@ -145,9 +145,9 @@ dynamics, and reward on one page. Three of the 25 (full atlas in
 <div align="center">
 <table>
 <tr>
-<td align="center"><img src="assets/arc3/maps/su15.png" width="300" alt="Atlas model card for the source-free solve of su15: the start to level-1 to win state-transition graph, state schema, click actions, verified learned-table dynamics, and the 141-step solve trace."/><br/><sub><b>arc3-su15</b> · 9/9</sub></td>
-<td align="center"><img src="assets/arc3/maps/bp35.png" width="300" alt="Atlas model card for the source-free solve of bp35: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-bp35</b> · 9/9</sub></td>
-<td align="center"><img src="assets/arc3/maps/lf52.png" width="300" alt="Atlas model card for the source-free solve of lf52: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-lf52</b> · 10/10</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/maps/su15.png" width="300" alt="Atlas model card for the source-free solve of su15: the start to level-1 to win state-transition graph, state schema, click actions, verified learned-table dynamics, and the 141-step solve trace."/><br/><sub><b>arc3-su15</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/maps/bp35.png" width="300" alt="Atlas model card for the source-free solve of bp35: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-bp35</b> · 9/9</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/arc3/maps/lf52.png" width="300" alt="Atlas model card for the source-free solve of lf52: its discovered state-transition graph, schema, actions, verified dynamics, and solve trace."/><br/><sub><b>arc3-lf52</b> · 10/10</sub></td>
 </tr>
 </table>
 </div>
@@ -157,7 +157,7 @@ dynamics, and reward on one page. Three of the 25 (full atlas in
 ## 🧠 Why OpenWorld
 
 <div align="center">
-<img src="assets/why-verified.png" width="820" alt="Two result panels from the OpenWorld prototyping paper. Left: verified code stays exact (accuracy 1.0) at every rollout depth, while an LLM next-state proxy's exact-match rate collapses as depth grows. Right: adding world-time compute — traversing your own verified worlds — lifts held-out accuracy on unseen worlds across model sizes, +29 points at 0.5B, approaching an oracle handed the true rules."/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/why-verified.png" width="820" alt="Two result panels from the OpenWorld prototyping paper. Left: verified code stays exact (accuracy 1.0) at every rollout depth, while an LLM next-state proxy's exact-match rate collapses as depth grows. Right: adding world-time compute — traversing your own verified worlds — lifts held-out accuracy on unseen worlds across model sizes, +29 points at 0.5B, approaching an oracle handed the true rules."/>
 <br/><sub><b>Why code, not weights:</b> verified dynamics are <b>exact at every depth</b> (no compounding error), and <b>world-time compute</b> lifts generalization on unseen worlds — biggest lift where models are smallest.</sub>
 </div>
 
@@ -189,7 +189,7 @@ dynamics, and reward on one page. Three of the 25 (full atlas in
 A verified world model is a reusable artifact, and it is useful **whether or not you ever fine-tune**. There are **three routes to spend it**, plus a hybrid that combines them.
 
 <div align="center">
-<img src="assets/three-routes.png" width="900" alt="One verified world is a reusable artifact you can spend three ways. Route 1, Use it as a tool (no training): serve and call it — exact, tool at inference, works on any world. Route 2, Distill one world (test-time training): QLoRA-tune its skill into weights — approximate, no tool at inference, within the world. Route 3, Train across many (world-time compute): traverse a family of worlds and generalize to held-out worlds — approximate, no tool at inference, generalizes across the family. Hybrid: the tool makes exact data, training amortizes it, and the tool stays the exact oracle for high-stakes queries."/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/three-routes.png" width="900" alt="One verified world is a reusable artifact you can spend three ways. Route 1, Use it as a tool (no training): serve and call it — exact, tool at inference, works on any world. Route 2, Distill one world (test-time training): QLoRA-tune its skill into weights — approximate, no tool at inference, within the world. Route 3, Train across many (world-time compute): traverse a family of worlds and generalize to held-out worlds — approximate, no tool at inference, generalizes across the family. Hybrid: the tool makes exact data, training amortizes it, and the tool stays the exact oracle for high-stakes queries."/>
 </div>
 
 
@@ -223,7 +223,7 @@ Verified-code dynamics vs. learned / LLM dynamics on the framework's own benchma
 suite (numbers from the bundled, reproducible experiments — see [`experiments/`](experiments/)).
 
 <div align="center">
-<img src="assets/baselines.png" width="900" alt="Two panels from experiment E36. Left: exact accuracy on unseen part-combinations at K=5 — OpenWorld verified code scores 1.00 with zero training samples, while all nine monolithic learned families, trained on thousands of samples, collapse; the strongest (hist gradient boosting) reaches only 0.20 and the rest sit near chance. Right: swept over task size K from 2 to 5, verified code holds flat at 1.00 while the best learned model erodes from 0.48 to 0.20 and the monolithic MLP stays near zero."/>
+<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/baselines.png" width="900" alt="Two panels from experiment E36. Left: exact accuracy on unseen part-combinations at K=5 — OpenWorld verified code scores 1.00 with zero training samples, while all nine monolithic learned families, trained on thousands of samples, collapse; the strongest (hist gradient boosting) reaches only 0.20 and the rest sit near chance. Right: swept over task size K from 2 to 5, verified code holds flat at 1.00 while the best learned model erodes from 0.48 to 0.20 and the monolithic MLP stays near zero."/>
 <br/><sub>Generated from <code>experiments/results/e36_representations.json</code> by <code>scripts/make_readme_baselines_fig.py</code>. <b>Structure, not scale:</b> verified symbolic composition needs only per-part marginals; monolithic learners need the full joint and never see it.</sub>
 </div>
 
@@ -248,11 +248,17 @@ data; the strongest of 9 learned families reaches ~0.20.</sub>
 
 ## 🚀 Install
 
-> **Note:** Source install for now (not yet on PyPI). **Python 3.14 is recommended**
+> **Note:** **Python 3.14 is recommended**
 > (faster-CPython + security/stdlib hardening; a `.python-version` pin selects it under
 > pyenv), though the code runs on 3.9+. The **core** (`import openworld`) is
 > zero-dependency; the `openworld` CLI + server add `fastapi` / `uvicorn` / `click`
 > / `rich`.
+
+```bash
+pip install openworld            # from PyPI: core + CLI/server
+```
+
+Or from source (for the experiments, papers, and tests):
 
 ```bash
 git clone https://github.com/quome-cloud/openworld.git

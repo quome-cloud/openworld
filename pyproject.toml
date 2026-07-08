@@ -9,7 +9,7 @@ description = "Build, optimize, and deploy verified symbolic world models."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Jim" }]
+authors = [{ name = "Jim Schwoebel" }]
 keywords = ["world-models", "ollama", "simulation", "agents", "neuro-symbolic"]
 # Targets Python 3.14 (faster-CPython, security/stdlib hardening; the .python-version
 # pin, CI, and the Docker image all use it). The floor stays at 3.9 because the code is
@@ -50,6 +50,11 @@ gym = ["gymnasium>=0.29", "numpy>=1.24"]
 # Reproduce the paper: run the experiment scripts and regenerate every
 # figure/table/number via scripts/make_paper_assets.py.
 experiments = ["numpy>=1.24", "matplotlib>=3.6"]
+
+[project.urls]
+Homepage = "https://github.com/quome-cloud/openworld"
+Repository = "https://github.com/quome-cloud/openworld"
+Issues = "https://github.com/quome-cloud/openworld/issues"
 
 [project.scripts]
 openworld = "openworld.cli:main"

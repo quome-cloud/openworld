@@ -256,7 +256,7 @@ solve and ~100k to solve reliably (from 48×48 pixels, on an A100), while frozen
 them into a single solve.
 
 <p align="center">
-  <img src="assets/doorkey_bench.png" alt="MiniGrid DoorKey: OpenWorld solves zero-shot in 11 steps; DreamerV3 needs 9,640 interactions for a first solve and ~100k to be reliable; frozen V-JEPA-2 features never solve it" width="760"/>
+  <img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/doorkey_bench.png" alt="MiniGrid DoorKey: OpenWorld solves zero-shot in 11 steps; DreamerV3 needs 9,640 interactions for a first solve and ~100k to be reliable; frozen V-JEPA-2 features never solve it" width="760"/>
 </p>
 
 <sub>Fair-comparison caveat: DreamerV3 learns everything from raw pixels with zero

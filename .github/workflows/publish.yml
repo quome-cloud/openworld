@@ -1,0 +1,57 @@
+name: publish
+
+# Publishes to PyPI via Trusted Publishing (OIDC) — no API token stored in the
+# repo. PyPI side: Publishing -> "Add a new pending publisher" with
+#   project=openworld, owner=quome-cloud, repo=openworld,
+#   workflow=publish.yml, environment=pypi
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build
+          python -m twine check dist/*
+
+      - name: Smoke-test the wheel (zero-dep core + CLI)
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install dist/*.whl
+          /tmp/smoke/bin/python -c "
+          import sys, openworld
+          banned = [m for m in sys.modules if m.split('.')[0] in ('fastapi','uvicorn','click','rich','numpy')]
+          assert not banned, f'core import pulled third-party deps: {banned}'
+          print('import openworld OK,', openworld.__version__)
+          "
+          /tmp/smoke/bin/openworld --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for PyPI Trusted Publishing (OIDC)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

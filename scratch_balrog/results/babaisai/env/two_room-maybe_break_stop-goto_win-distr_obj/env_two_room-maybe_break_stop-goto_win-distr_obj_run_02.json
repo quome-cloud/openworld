@@ -1,0 +1,14 @@
+{
+  "task_id": "env/two_room-maybe_break_stop-goto_win-distr_obj",
+  "episode": 2,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 2,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "right"
+  ],
+  "bfs_nodes": 2,
+  "elapsed_s": 0.02
+}

@@ -1,0 +1,25 @@
+{
+  "task_id": "env/two_room-break_stop-goto_win",
+  "episode": 0,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 13,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "up",
+    "left",
+    "left",
+    "up",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 534,
+  "elapsed_s": 5.67
+}

@@ -1,0 +1,1399 @@
+{
+ "episodes": [
+  {
+   "seed": 4000,
+   "role": "Monk",
+   "progression": 0.12558597019922987,
+   "depth_max": 10,
+   "xplvl_max": 4,
+   "end_reason": "DEATH: died. Killed by an orcish dagger.",
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-1592"
+  },
+  {
+   "seed": 4001,
+   "role": "Priest",
+   "progression": 0.024160136550546978,
+   "depth_max": 1,
+   "xplvl_max": 4,
+   "end_reason": "DEATH: was poisoned. Poisoned by a rotted large kobold corpse, while fainted from lack of food.",
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-6158"
+  },
+  {
+   "seed": 4002,
+   "role": "Valkyrie",
+   "progression": 0.09770935198701912,
+   "depth_max": 9,
+   "xplvl_max": 3,
+   "end_reason": "DEATH: died. Killed by a jaguar.",
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-770"
+  },
+  {
+   "seed": 4003,
+   "role": "Wizard",
+   "progression": 0.035428686118173014,
+   "depth_max": 6,
+   "xplvl_max": 2,
+   "end_reason": "DEATH: died. Killed by a manes, while fainted from lack of food.",
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+   "steps": "0-942"
+  },
+  {
+   "seed": 4004,
+   "role": "Wizard",
+   "progression": 0.015392269075361172,
+   "depth_max": 2,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a goblin.",
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-264"
+  },
+  {
+   "seed": 5000,
+   "role": "Archeologist",
+   "progression": 0.20612854836308672,
+   "depth_max": 12,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a dust vortex.",
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-92"
+  },
+  {
+   "seed": 5001,
+   "role": "Monk",
+   "progression": 0.021221378364235505,
+   "depth_max": 4,
+   "xplvl_max": 3,
+   "end_reason": "DEATH: starved to death.",
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-9225"
+  },
+  {
+   "seed": 5002,
+   "role": "Cavewoman",
+   "progression": 0.09770935198701912,
+   "depth_max": 9,
+   "xplvl_max": 3,
+   "end_reason": "DEATH: died. Killed by a werewolf.",
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-1777"
+  },
+  {
+   "seed": 5003,
+   "role": "Wizard",
+   "progression": 0.01847840456172601,
+   "depth_max": 1,
+   "xplvl_max": 2,
+   "end_reason": "DEATH: died. Killed by a newt.",
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+   "steps": "0-2718"
+  },
+  {
+   "seed": 5004,
+   "role": "Priestess",
+   "progression": 0.015392269075361172,
+   "depth_max": 2,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a goblin.",
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-333"
+  },
+  {
+   "seed": 6000,
+   "role": "Healer",
+   "progression": 0.015392269075361172,
+   "depth_max": 2,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a newt.",
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-499"
+  },
+  {
+   "seed": 6001,
+   "role": "Rogue",
+   "progression": 0.015392269075361172,
+   "depth_max": 2,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a goblin.",
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-150"
+  },
+  {
+   "seed": 6002,
+   "role": "Wizard",
+   "progression": 0.026482449457437766,
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a bat.",
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-597"
+  },
+  {
+   "seed": 6003,
+   "role": "Caveman",
+   "progression": 0.0,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "end_reason": "ABORTED: quit.",
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+   "steps": "0-99980"
+  },
+  {
+   "seed": 6004,
+   "role": null,
+   "progression": 0.1612677822768481,
+   "depth_max": 11,
+   "xplvl_max": 1,
+   "end_reason": "DEATH: died. Killed by a giant ant.",
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-207"
+  }
+ ],
+ "species": {
+  "newt": {
+   "exchanges": 47,
+   "damage": 67.0,
+   "kills": 25,
+   "deaths_caused": 2,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "grid bug": {
+   "exchanges": 6,
+   "damage": 7.1,
+   "kills": 19,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "lichen": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 16,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz"
+   ]
+  },
+  "gnome": {
+   "exchanges": 1,
+   "damage": 2.0,
+   "kills": 2,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "bat": {
+   "exchanges": 6,
+   "damage": 18.0,
+   "kills": 7,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "gecko": {
+   "exchanges": 8,
+   "damage": 16.0,
+   "kills": 12,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "killer bee": {
+   "exchanges": 4,
+   "damage": 14.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "rothe": {
+   "exchanges": 2,
+   "damage": 5.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "gray unicorn": {
+   "exchanges": 2,
+   "damage": 27.0,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "soldier ant": {
+   "exchanges": 2,
+   "damage": 25.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "invisible monster": {
+   "exchanges": 3,
+   "damage": 33.0,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "kitten": {
+   "exchanges": 1,
+   "damage": 3.5,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "hill orc": {
+   "exchanges": 2,
+   "damage": 6.5,
+   "kills": 2,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "orcish dagger": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "fox": {
+   "exchanges": 12,
+   "damage": 24.5,
+   "kills": 9,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz"
+   ]
+  },
+  "sewer rat": {
+   "exchanges": 4,
+   "damage": 11.0,
+   "kills": 11,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "jackal": {
+   "exchanges": 35,
+   "damage": 51.1,
+   "kills": 23,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "goblin": {
+   "exchanges": 20,
+   "damage": 69.0,
+   "kills": 4,
+   "deaths_caused": 3,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "giant rat": {
+   "exchanges": 5,
+   "damage": 10.0,
+   "kills": 6,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "kobold": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 3,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz"
+   ]
+  },
+  "large kobold": {
+   "exchanges": 1,
+   "damage": 5.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "rotted large kobold corpse": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "wererat": {
+   "exchanges": 2,
+   "damage": 6.0,
+   "kills": 2,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "guardian naga hatchling": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "jaguar": {
+   "exchanges": 1,
+   "damage": 3.0,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "iguana": {
+   "exchanges": 2,
+   "damage": 6.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz"
+   ]
+  },
+  "manes": {
+   "exchanges": 1,
+   "damage": 6.0,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz"
+   ]
+  },
+  "giant ant": {
+   "exchanges": 7,
+   "damage": 10.266666666666667,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  },
+  "dust vortex": {
+   "exchanges": 2,
+   "damage": 1.5,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "orc zombie": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 2,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "dwarf zombie": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 3,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "coyote": {
+   "exchanges": 8,
+   "damage": 5.65,
+   "kills": 2,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "floating eye": {
+   "exchanges": 14,
+   "damage": 9.3,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "acid blob": {
+   "exchanges": 7,
+   "damage": 4.65,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "gas spore": {
+   "exchanges": 1,
+   "damage": 0.4,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+   ]
+  },
+  "kobold zombie": {
+   "exchanges": 1,
+   "damage": 2.0,
+   "kills": 4,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+    "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz"
+   ]
+  },
+  "hobbit": {
+   "exchanges": 2,
+   "damage": 1.5,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "hobgoblin": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "gnome zombie": {
+   "exchanges": 0,
+   "damage": 0.0,
+   "kills": 1,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "werewolf": {
+   "exchanges": 5,
+   "damage": 32.0,
+   "kills": 0,
+   "deaths_caused": 1,
+   "sources": [
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+    "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+   ]
+  },
+  "paper golem": {
+   "exchanges": 9,
+   "damage": 13.033333333333331,
+   "kills": 0,
+   "deaths_caused": 0,
+   "sources": [
+    "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+   ]
+  }
+ },
+ "deaths": [
+  {
+   "depth": 10,
+   "xplvl": 4,
+   "cause": "orcish dagger",
+   "combat": true,
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-1592"
+  },
+  {
+   "depth": 1,
+   "xplvl": 4,
+   "cause": "rotted large kobold corpse",
+   "combat": false,
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-6158"
+  },
+  {
+   "depth": 9,
+   "xplvl": 3,
+   "cause": "jaguar",
+   "combat": true,
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-770"
+  },
+  {
+   "depth": 6,
+   "xplvl": 2,
+   "cause": "manes",
+   "combat": false,
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz",
+   "steps": "0-942"
+  },
+  {
+   "depth": 2,
+   "xplvl": 1,
+   "cause": "goblin",
+   "combat": true,
+   "from": "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-264"
+  },
+  {
+   "depth": 12,
+   "xplvl": 1,
+   "cause": "dust vortex",
+   "combat": true,
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-92"
+  },
+  {
+   "depth": 4,
+   "xplvl": 3,
+   "cause": null,
+   "combat": false,
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-9225"
+  },
+  {
+   "depth": 9,
+   "xplvl": 3,
+   "cause": "werewolf",
+   "combat": true,
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-1777"
+  },
+  {
+   "depth": 1,
+   "xplvl": 2,
+   "cause": "newt",
+   "combat": true,
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz",
+   "steps": "0-2718"
+  },
+  {
+   "depth": 2,
+   "xplvl": 1,
+   "cause": "goblin",
+   "combat": true,
+   "from": "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-333"
+  },
+  {
+   "depth": 2,
+   "xplvl": 1,
+   "cause": "newt",
+   "combat": true,
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz",
+   "steps": "0-499"
+  },
+  {
+   "depth": 2,
+   "xplvl": 1,
+   "cause": "goblin",
+   "combat": true,
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz",
+   "steps": "0-150"
+  },
+  {
+   "depth": 5,
+   "xplvl": 1,
+   "cause": "bat",
+   "combat": true,
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz",
+   "steps": "0-597"
+  },
+  {
+   "depth": 11,
+   "xplvl": 1,
+   "cause": "giant ant",
+   "combat": true,
+   "from": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz",
+   "steps": "0-207"
+  }
+ ],
+ "fired": [
+  {
+   "what": "M1 loaded avoid-species ['orcish dagger']",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 10",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 10",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['jaguar', 'orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 9",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 9",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 2",
+   "episode": "transitions/memory_pass1/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 2",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse']",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 2",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 2 (remembered danger depth 2)",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 2",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass2/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep0.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep1.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 1 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['bat', 'dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep2.jsonl.gz"
+  },
+  {
+   "what": "M1 loaded avoid-species ['bat', 'dust vortex', 'goblin', 'jaguar', 'manes', 'newt', 'orcish dagger', 'rotted large kobold corpse', 'werewolf']",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M2 loaded danger depth 1",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep3.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  },
+  {
+   "what": "M2 rest gate tightened at depth 6 (remembered danger depth 1)",
+   "episode": "transitions/memory_pass3/NetHackChallenge-v0__ep4.jsonl.gz"
+  }
+ ]
+}

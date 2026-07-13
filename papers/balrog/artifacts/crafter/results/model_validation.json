@@ -1,0 +1,37 @@
+{
+ "deterministic": {
+  "steps": 3399,
+  "compared": 3399,
+  "mismatch_count": 0,
+  "mismatches": [],
+  "excluded_hostile_steps": 1068,
+  "excluded_sapling_draws": 633,
+  "daylight": {
+   "checked": 3399,
+   "mismatches": 0
+  }
+ },
+ "distributional": {
+  "cow_move_rate": {
+   "observed": 0.442051282051282,
+   "expected": 0.5,
+   "n": 11700,
+   "note": "cow attempts a random-direction move w.p. 0.5; observed rate is lower than 0.5 by the blocked-move fraction (attempts into non-walkable cells fail silently) \u2014 expected_success = 0.5 * P(free cell)"
+  },
+  "zombie_chase_rate": {
+   "observed": 0.8093994778067886,
+   "expected": ">=0.9 among successful moves (chase p=0.9, long/short axis 0.8/0.2; blocked chase steps drop out of the moved-denominator)",
+   "n": 383
+  },
+  "sapling_rate": {
+   "observed": 0.09794628751974724,
+   "expected": 0.1,
+   "n": 633
+  },
+  "plant_frozen_beyond_18": {
+   "checked": 0,
+   "grew_anyway": 0,
+   "expected": 0
+  }
+ }
+}

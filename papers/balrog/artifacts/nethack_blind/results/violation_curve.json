@@ -1,0 +1,812 @@
+[
+ {
+  "n_pred": 0,
+  "n_viol": 0,
+  "steps": 250,
+  "prog": 0.0,
+  "end": null,
+  "episode": "probe_P0",
+  "viol_rate": null
+ },
+ {
+  "n_pred": 0,
+  "n_viol": 0,
+  "steps": 320,
+  "prog": 0.0,
+  "end": null,
+  "episode": "probe_P1",
+  "viol_rate": null
+ },
+ {
+  "n_pred": 0,
+  "n_viol": 0,
+  "steps": 280,
+  "prog": 0.0,
+  "end": null,
+  "episode": "probe_P2",
+  "viol_rate": null
+ },
+ {
+  "n_pred": 5150,
+  "n_viol": 4,
+  "steps": 1030,
+  "prog": 0.0,
+  "end": "DEATH: starved to death.",
+  "episode": "explore_E1",
+  "viol_rate": 0.0007766990291262136
+ },
+ {
+  "n_pred": 9285,
+  "n_viol": 4,
+  "steps": 1857,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a newt.",
+  "episode": "explore_E2",
+  "viol_rate": 0.0004308023694130318
+ },
+ {
+  "n_pred": 17500,
+  "n_viol": 0,
+  "steps": 3500,
+  "prog": 0.0,
+  "end": null,
+  "episode": "explore_E3",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 17500,
+  "n_viol": 0,
+  "steps": 3500,
+  "prog": 0.0,
+  "end": null,
+  "episode": "explore_E4",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 17500,
+  "n_viol": 0,
+  "steps": 3500,
+  "prog": 0.02081163581974355,
+  "end": null,
+  "episode": "explore_E5",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 18076,
+  "n_viol": 0,
+  "steps": 3616,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a jackal.",
+  "episode": "explore_E6",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 611,
+  "n_viol": 0,
+  "steps": 123,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a fox, while praying.",
+  "episode": "explore_E7",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 7821,
+  "n_viol": 0,
+  "steps": 1565,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a pony.",
+  "episode": "explore_E8",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 20000,
+  "n_viol": 0,
+  "steps": 4000,
+  "prog": 0.01847840456172601,
+  "end": null,
+  "episode": "explore_E9",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 20000,
+  "n_viol": 0,
+  "steps": 4000,
+  "prog": 0.02081163581974355,
+  "end": null,
+  "episode": "explore_E10",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 18353,
+  "n_viol": 0,
+  "steps": 3672,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a giant bat.",
+  "episode": "explore_E11",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 20000,
+  "n_viol": 0,
+  "steps": 4000,
+  "prog": 0.0,
+  "end": null,
+  "episode": "explore_E12",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 326,
+  "n_viol": 0,
+  "steps": 66,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a fox.",
+  "episode": "explore_E13",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 29160,
+  "n_viol": 0,
+  "steps": 5833,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a sewer rat, while frozen by a monster's gaze.",
+  "episode": "explore_E14",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 5845,
+  "n_viol": 0,
+  "steps": 1170,
+  "prog": 0.015392269075361172,
+  "end": "ABORTED: quit.",
+  "episode": "explore_E15",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 29999,
+  "n_viol": 0,
+  "steps": 6000,
+  "prog": 0.024160136550546978,
+  "end": null,
+  "episode": "explore_E16",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 16910,
+  "n_viol": 0,
+  "steps": 3383,
+  "prog": 0.015392269075361172,
+  "end": "DEATH: died. Killed by a wand.",
+  "episode": "explore_E17",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 30000,
+  "n_viol": 0,
+  "steps": 6000,
+  "prog": 0.024160136550546978,
+  "end": null,
+  "episode": "explore_E18",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 16915,
+  "n_viol": 0,
+  "steps": 3384,
+  "prog": 0.02081163581974355,
+  "end": "ABORTED: quit.",
+  "episode": "explore_E19",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 29996,
+  "n_viol": 0,
+  "steps": 6000,
+  "prog": 0.029108986017138745,
+  "end": null,
+  "episode": "p1v5_E20",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 14681,
+  "n_viol": 0,
+  "steps": 2937,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a jackal, while fainted from lack of food.",
+  "episode": "p1v5_E21",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 30000,
+  "n_viol": 0,
+  "steps": 6000,
+  "prog": 0.01847840456172601,
+  "end": null,
+  "episode": "p1v5_E22",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 29999,
+  "n_viol": 1,
+  "steps": 6000,
+  "prog": 0.02081163581974355,
+  "end": null,
+  "episode": "p1v5_E23",
+  "viol_rate": 3.333444448148272e-05
+ },
+ {
+  "n_pred": 5843,
+  "n_viol": 0,
+  "steps": 1170,
+  "prog": 0.021221378364235505,
+  "end": "DEATH: died. Killed by a gecko.",
+  "episode": "p1v5_E24",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 8689,
+  "n_viol": 3,
+  "steps": 1740,
+  "prog": 0.1612677822768481,
+  "end": "DEATH: died. Killed by a dog.",
+  "episode": "p1v5_E25",
+  "viol_rate": 0.00034526412705719877
+ },
+ {
+  "n_pred": 6329,
+  "n_viol": 0,
+  "steps": 1267,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a crossbow bolt.",
+  "episode": "b1_E30",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 15921,
+  "n_viol": 0,
+  "steps": 3185,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: starved to death.",
+  "episode": "b1_E31",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13521,
+  "n_viol": 0,
+  "steps": 2705,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a grid bug, while fainted from lack of food.",
+  "episode": "b1_E32",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 12776,
+  "n_viol": 0,
+  "steps": 2556,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: starved to death.",
+  "episode": "b1_E33",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 6377,
+  "n_viol": 0,
+  "steps": 1277,
+  "prog": 0.026482449457437766,
+  "end": "DEATH: died. Killed by a goblin.",
+  "episode": "b1_E34",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 19569,
+  "n_viol": 4,
+  "steps": 3915,
+  "prog": 0.01847840456172601,
+  "end": "ABORTED: quit.",
+  "episode": "b1_E35",
+  "viol_rate": 0.00020440492615872042
+ },
+ {
+  "n_pred": 11961,
+  "n_viol": 0,
+  "steps": 2393,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a jackal, while fainted from lack of food.",
+  "episode": "b1_E36",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 8236,
+  "n_viol": 0,
+  "steps": 1648,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a little dog called Idefix.",
+  "episode": "b1_E37",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 14345,
+  "n_viol": 0,
+  "steps": 2870,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: died. Killed by a goblin, while fainted from lack of food.",
+  "episode": "b1_E38",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 10346,
+  "n_viol": 0,
+  "steps": 2070,
+  "prog": 0.0,
+  "end": "DEATH: starved to death.",
+  "episode": "b1_E39",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 5926,
+  "n_viol": 0,
+  "steps": 1186,
+  "prog": 0.0,
+  "end": "DEATH: was poisoned. Poisoned by a rotted jackal corpse.",
+  "episode": "b2v7partial_E40",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13686,
+  "n_viol": 0,
+  "steps": 2738,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: was poisoned. Poisoned by a rotted jackal corpse.",
+  "episode": "b2v7partial_E41",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 19581,
+  "n_viol": 0,
+  "steps": 3917,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: was poisoned. Poisoned by a rotted kobold corpse.",
+  "episode": "b2v7partial_E42",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 11031,
+  "n_viol": 0,
+  "steps": 2207,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a newt, while fainted from lack of food.",
+  "episode": "b2_E40",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13666,
+  "n_viol": 0,
+  "steps": 2734,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: was poisoned. Poisoned by a rotted jackal corpse.",
+  "episode": "b2_E41",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 27081,
+  "n_viol": 0,
+  "steps": 5417,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: starved to death.",
+  "episode": "b2_E42",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 8761,
+  "n_viol": 0,
+  "steps": 1753,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a kobold, while fainted from lack of food.",
+  "episode": "b2_E43",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 39995,
+  "n_viol": 0,
+  "steps": 8000,
+  "prog": 0.035428686118173014,
+  "end": null,
+  "episode": "b2_E44",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 34981,
+  "n_viol": 0,
+  "steps": 6997,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a newt, while fainted from lack of food.",
+  "episode": "b2_E45",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 9386,
+  "n_viol": 0,
+  "steps": 1878,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a jackal, while fainted from lack of food.",
+  "episode": "b2_E46",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13395,
+  "n_viol": 0,
+  "steps": 2680,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a gnome zombie, while fainted from lack of food.",
+  "episode": "b2_E47",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 10046,
+  "n_viol": 1,
+  "steps": 2010,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: starved to death.",
+  "episode": "b2_E48",
+  "viol_rate": 9.954210631096954e-05
+ },
+ {
+  "n_pred": 28521,
+  "n_viol": 0,
+  "steps": 5705,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a fox, while fainted from lack of food.",
+  "episode": "b2_E49",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 3289,
+  "n_viol": 0,
+  "steps": 659,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: died. Killed by a gnome lord.",
+  "episode": "b3_E50",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 31175,
+  "n_viol": 1,
+  "steps": 6238,
+  "prog": 0.20612854836308672,
+  "end": "DEATH: died. Killed by an earth elemental.",
+  "episode": "b3_E51",
+  "viol_rate": 3.207698476343224e-05
+ },
+ {
+  "n_pred": 2928,
+  "n_viol": 1,
+  "steps": 587,
+  "prog": 0.035428686118173014,
+  "end": "DEATH: died. Killed by a small mimic.",
+  "episode": "b3_E52",
+  "viol_rate": 0.00034153005464480874
+ },
+ {
+  "n_pred": 40000,
+  "n_viol": 0,
+  "steps": 8000,
+  "prog": 0.02081163581974355,
+  "end": null,
+  "episode": "b3_E53",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13195,
+  "n_viol": 0,
+  "steps": 2640,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: died. Killed by a coyote.",
+  "episode": "b3_E54",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 2046,
+  "n_viol": 0,
+  "steps": 410,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a jackal.",
+  "episode": "b3_E55",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 40000,
+  "n_viol": 0,
+  "steps": 8000,
+  "prog": 0.024160136550546978,
+  "end": null,
+  "episode": "b3_E56",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 20290,
+  "n_viol": 0,
+  "steps": 4059,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: died. Killed by a kobold zombie, while fainted from lack of food.",
+  "episode": "b3_E57",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 426,
+  "n_viol": 1,
+  "steps": 86,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a jackal.",
+  "episode": "b3_E58",
+  "viol_rate": 0.002347417840375587
+ },
+ {
+  "n_pred": 19926,
+  "n_viol": 0,
+  "steps": 3986,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a brown mold.",
+  "episode": "b3_E59",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 7869,
+  "n_viol": 1,
+  "steps": 1575,
+  "prog": 0.026482449457437766,
+  "end": "DEATH: died. Killed by a hobbit.",
+  "episode": "b4_E63",
+  "viol_rate": 0.00012708095056551024
+ },
+ {
+  "n_pred": 15580,
+  "n_viol": 0,
+  "steps": 3118,
+  "prog": 0.04846098359243788,
+  "end": "ABORTED: quit.",
+  "episode": "b4_E64",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 17182,
+  "n_viol": 1,
+  "steps": 3438,
+  "prog": 0.029108986017138745,
+  "end": "DEATH: died. Killed by a gnome.",
+  "episode": "b4_E65",
+  "viol_rate": 5.820044232336166e-05
+ },
+ {
+  "n_pred": 9461,
+  "n_viol": 0,
+  "steps": 1893,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: starved to death.",
+  "episode": "b4_E66",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 2195,
+  "n_viol": 0,
+  "steps": 440,
+  "prog": 0.015392269075361172,
+  "end": "DEATH: died. Killed by a fox.",
+  "episode": "b4_E67",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 16075,
+  "n_viol": 1,
+  "steps": 3216,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a gnome zombie, while fainted from lack of food.",
+  "episode": "b4_E68",
+  "viol_rate": 6.220839813374805e-05
+ },
+ {
+  "n_pred": 17417,
+  "n_viol": 0,
+  "steps": 3485,
+  "prog": 0.026482449457437766,
+  "end": "DEATH: died. Killed by a rothe.",
+  "episode": "b4_E69",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 12529,
+  "n_viol": 0,
+  "steps": 2507,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a gecko.",
+  "episode": "frozen_F0",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13036,
+  "n_viol": 0,
+  "steps": 2608,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a jackal, while fainted from lack of food.",
+  "episode": "frozen_F1",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 13951,
+  "n_viol": 0,
+  "steps": 2791,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F2",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 18489,
+  "n_viol": 0,
+  "steps": 3699,
+  "prog": 0.021221378364235505,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F6",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 3269,
+  "n_viol": 0,
+  "steps": 655,
+  "prog": 0.017539535798967013,
+  "end": "DEATH: died. Killed by a dwarf.",
+  "episode": "frozen_F7",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 34940,
+  "n_viol": 0,
+  "steps": 6989,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a magic missile.",
+  "episode": "frozen_F8",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 7201,
+  "n_viol": 0,
+  "steps": 1441,
+  "prog": 0.0,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F9",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 20436,
+  "n_viol": 1,
+  "steps": 4089,
+  "prog": 0.035428686118173014,
+  "end": "ABORTED: quit.",
+  "episode": "frozen_F10",
+  "viol_rate": 4.893325504012527e-05
+ },
+ {
+  "n_pred": 26281,
+  "n_viol": 0,
+  "steps": 5257,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: was poisoned. Poisoned by a rotted green mold corpse, while fainted from lack of food.",
+  "episode": "frozen_F11",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 5928,
+  "n_viol": 0,
+  "steps": 1187,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a dwarf.",
+  "episode": "frozen_F12",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 11411,
+  "n_viol": 0,
+  "steps": 2283,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: died. Killed by a kobold, while fainted from lack of food.",
+  "episode": "frozen_F13",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 16401,
+  "n_viol": 0,
+  "steps": 3281,
+  "prog": 0.01847840456172601,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F14",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 19576,
+  "n_viol": 0,
+  "steps": 3916,
+  "prog": 0.024160136550546978,
+  "end": "DEATH: died. Killed by a newt, while fainted from lack of food.",
+  "episode": "frozen_F15",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 12296,
+  "n_viol": 0,
+  "steps": 2460,
+  "prog": 0.0,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F16",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 2855,
+  "n_viol": 0,
+  "steps": 573,
+  "prog": 0.04846098359243788,
+  "end": "DEATH: died. Killed by an iguana.",
+  "episode": "frozen_F17",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 23685,
+  "n_viol": 0,
+  "steps": 4738,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: was poisoned. Poisoned by a rotted bat corpse.",
+  "episode": "frozen_F18",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 9656,
+  "n_viol": 0,
+  "steps": 1932,
+  "prog": 0.0,
+  "end": "DEATH: died. Killed by a little dog called Sirius.",
+  "episode": "frozen_F19",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 14121,
+  "n_viol": 0,
+  "steps": 2825,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: died. Killed by a brown mold.",
+  "episode": "frozen_F20",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 21433,
+  "n_viol": 0,
+  "steps": 4288,
+  "prog": 0.021221378364235505,
+  "end": "DEATH: died. Killed by a manes, while frozen by a monster's gaze.",
+  "episode": "frozen_F21",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 18136,
+  "n_viol": 0,
+  "steps": 3629,
+  "prog": 0.035428686118173014,
+  "end": "DEATH: died. Killed by a golden naga hatchling, while fainted from lack of food.",
+  "episode": "frozen_F22",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 31041,
+  "n_viol": 0,
+  "steps": 6209,
+  "prog": 0.02081163581974355,
+  "end": "DEATH: starved to death.",
+  "episode": "frozen_F23",
+  "viol_rate": 0.0
+ },
+ {
+  "n_pred": 1218,
+  "n_viol": 0,
+  "steps": 245,
+  "prog": 0.021221378364235505,
+  "end": "DEATH: died. Killed by a gnome.",
+  "episode": "frozen_F24",
+  "viol_rate": 0.0
+ }
+]

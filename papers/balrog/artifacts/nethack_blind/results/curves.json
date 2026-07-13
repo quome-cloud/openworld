@@ -1,0 +1,143 @@
+[
+ {
+  "tag": "p1v5",
+  "n": 6,
+  "mean_prog": 0.04181469783994865,
+  "best_prog": 0.1612677822768481,
+  "mean_viol_rate": 6.309976192311358e-05,
+  "total_preds": 119208,
+  "total_viols": 4,
+  "deaths": 3,
+  "ends": [
+   "None",
+   "DEATH: died. Killed by a jackal, while f",
+   "None",
+   "None",
+   "DEATH: died. Killed by a gecko.",
+   "DEATH: died. Killed by a dog."
+  ]
+ },
+ {
+  "tag": "b1",
+  "n": 10,
+  "mean_prog": 0.012120770352408536,
+  "best_prog": 0.026482449457437766,
+  "mean_viol_rate": 2.0440492615872042e-05,
+  "total_preds": 119381,
+  "total_viols": 4,
+  "deaths": 9,
+  "ends": [
+   "DEATH: died. Killed by a crossbow bolt.",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a grid bug, while",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a goblin.",
+   "ABORTED: quit.",
+   "DEATH: died. Killed by a jackal, while f",
+   "DEATH: died. Killed by a little dog call",
+   "DEATH: died. Killed by a goblin, while f",
+   "DEATH: starved to death."
+  ]
+ },
+ {
+  "tag": "b2",
+  "n": 10,
+  "mean_prog": 0.019360411711683713,
+  "best_prog": 0.035428686118173014,
+  "mean_viol_rate": 9.954210631096954e-06,
+  "total_preds": 196863,
+  "total_viols": 1,
+  "deaths": 9,
+  "ends": [
+   "DEATH: died. Killed by a newt, while fai",
+   "DEATH: was poisoned. Poisoned by a rotte",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a kobold, while f",
+   "None",
+   "DEATH: died. Killed by a newt, while fai",
+   "DEATH: died. Killed by a jackal, while f",
+   "DEATH: died. Killed by a gnome zombie, w",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a fox, while fain"
+  ]
+ },
+ {
+  "tag": "b3",
+  "n": 10,
+  "mean_prog": 0.037312405086132795,
+  "best_prog": 0.20612854836308672,
+  "mean_viol_rate": 0.00027210248797838283,
+  "total_preds": 173275,
+  "total_viols": 3,
+  "deaths": 8,
+  "ends": [
+   "DEATH: died. Killed by a gnome lord.",
+   "DEATH: died. Killed by an earth elementa",
+   "DEATH: died. Killed by a small mimic.",
+   "None",
+   "DEATH: died. Killed by a coyote.",
+   "DEATH: died. Killed by a jackal.",
+   "None",
+   "DEATH: died. Killed by a kobold zombie, ",
+   "DEATH: died. Killed by a jackal.",
+   "DEATH: died. Killed by a brown mold."
+  ]
+ },
+ {
+  "tag": "b4",
+  "n": 8,
+  "mean_prog": 0.02517029391062392,
+  "best_prog": 0.04846098359243788,
+  "mean_viol_rate": 4.1511519986118524e-05,
+  "total_preds": 97599,
+  "total_viols": 4,
+  "deaths": 7,
+  "ends": [
+   "DEATH: died. Killed by a hobbit.",
+   "ABORTED: quit.",
+   "DEATH: died. Killed by a gnome.",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a fox.",
+   "DEATH: died. Killed by a gnome zombie, w",
+   "DEATH: died. Killed by a rothe.",
+   "DEATH: died. Killed by a giant rat."
+  ]
+ },
+ {
+  "tag": "frozen",
+  "n": 25,
+  "mean_prog": 0.02559002613103675,
+  "best_prog": 0.1612677822768481,
+  "mean_viol_rate": 3.2600072028425545e-06,
+  "total_preds": 409170,
+  "total_viols": 2,
+  "deaths": 24,
+  "ends": [
+   "DEATH: died. Killed by a large kobold, w",
+   "DEATH: died. Killed by a soldier ant.",
+   "DEATH: died. Killed by a little dog, whi",
+   "DEATH: died. Killed by a gecko.",
+   "DEATH: died. Killed by a jackal, while f",
+   "DEATH: starved to death.",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a dwarf.",
+   "DEATH: died. Killed by a magic missile.",
+   "DEATH: starved to death.",
+   "ABORTED: quit.",
+   "DEATH: was poisoned. Poisoned by a rotte",
+   "DEATH: died. Killed by a dwarf.",
+   "DEATH: died. Killed by a kobold, while f",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a newt, while fai",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by an iguana.",
+   "DEATH: was poisoned. Poisoned by a rotte",
+   "DEATH: died. Killed by a little dog call",
+   "DEATH: died. Killed by a brown mold.",
+   "DEATH: died. Killed by a manes, while fr",
+   "DEATH: died. Killed by a golden naga hat",
+   "DEATH: starved to death.",
+   "DEATH: died. Killed by a gnome."
+  ]
+ }
+]

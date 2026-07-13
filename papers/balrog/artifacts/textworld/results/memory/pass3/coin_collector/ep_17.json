@@ -1,0 +1,18 @@
+{
+ "task": "coin_collector",
+ "episode": 17,
+ "pass": 3,
+ "protocol": "clean+memory",
+ "game": "level_220_seed_50027.ulx",
+ "memory_in": {
+  "avoid": [],
+  "target": "coin"
+ },
+ "steps_executed": 50,
+ "done": true,
+ "won": true,
+ "score": 1,
+ "max_score": 1,
+ "progression": 1.0,
+ "wall_s": 0.233
+}

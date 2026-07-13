@@ -1,0 +1,1208 @@
+{
+ "episodes": [
+  {
+   "task": "goto",
+   "seed": 880000,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880005,
+   "policy": "guided",
+   "steps": 40,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880010,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880015,
+   "policy": "guided",
+   "steps": 3,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880020,
+   "policy": "random",
+   "steps": 54,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880025,
+   "policy": "guided",
+   "steps": 4,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880030,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880035,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880040,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880045,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880050,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880055,
+   "policy": "guided",
+   "steps": 3,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880060,
+   "policy": "random",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880065,
+   "policy": "guided",
+   "steps": 2,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880070,
+   "policy": "random",
+   "steps": 29,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880075,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880080,
+   "policy": "random",
+   "steps": 18,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880085,
+   "policy": "guided",
+   "steps": 2,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880090,
+   "policy": "random",
+   "steps": 58,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880095,
+   "policy": "guided",
+   "steps": 2,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880100,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880105,
+   "policy": "guided",
+   "steps": 6,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880110,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880115,
+   "policy": "guided",
+   "steps": 4,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880120,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880125,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880130,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880135,
+   "policy": "guided",
+   "steps": 9,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "goto",
+   "seed": 880140,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "goto",
+   "seed": 880145,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881000,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881005,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881010,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881015,
+   "policy": "guided",
+   "steps": 8,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881020,
+   "policy": "random",
+   "steps": 42,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881025,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881030,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881035,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881040,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881045,
+   "policy": "guided",
+   "steps": 10,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881050,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881055,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881060,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881065,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881070,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881075,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881080,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881085,
+   "policy": "guided",
+   "steps": 12,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881090,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881095,
+   "policy": "guided",
+   "steps": 6,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881100,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881105,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881110,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881115,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881120,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881125,
+   "policy": "guided",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881130,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881135,
+   "policy": "guided",
+   "steps": 10,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pickup",
+   "seed": 881140,
+   "policy": "random",
+   "steps": 64,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pickup",
+   "seed": 881145,
+   "policy": "guided",
+   "steps": 8,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882000,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882005,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882010,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882015,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882020,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882025,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882030,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882035,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882040,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882045,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882050,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882055,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882060,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882065,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882070,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882075,
+   "policy": "guided",
+   "steps": 17,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882080,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882085,
+   "policy": "guided",
+   "steps": 14,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882090,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882095,
+   "policy": "guided",
+   "steps": 10,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882100,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882105,
+   "policy": "guided",
+   "steps": 10,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882110,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882115,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882120,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882125,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882130,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882135,
+   "policy": "guided",
+   "steps": 16,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "open",
+   "seed": 882140,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "open",
+   "seed": 882145,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883000,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883005,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883010,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883015,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883020,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883025,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883030,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883035,
+   "policy": "guided",
+   "steps": 12,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "putnext",
+   "seed": 883040,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883045,
+   "policy": "guided",
+   "steps": 9,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "putnext",
+   "seed": 883050,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883055,
+   "policy": "guided",
+   "steps": 11,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "putnext",
+   "seed": 883060,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883065,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883070,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883075,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883080,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883085,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883090,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883095,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883100,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883105,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883110,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883115,
+   "policy": "guided",
+   "steps": 10,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "putnext",
+   "seed": 883120,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883125,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883130,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883135,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883140,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "putnext",
+   "seed": 883145,
+   "policy": "guided",
+   "steps": 13,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884000,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884005,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884010,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884015,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884020,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884025,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884030,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884035,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884040,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884045,
+   "policy": "guided",
+   "steps": 8,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884050,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884055,
+   "policy": "guided",
+   "steps": 9,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884060,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884065,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884070,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884075,
+   "policy": "guided",
+   "steps": 9,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884080,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884085,
+   "policy": "guided",
+   "steps": 11,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884090,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884095,
+   "policy": "guided",
+   "steps": 5,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884100,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884105,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884110,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884115,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884120,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884125,
+   "policy": "guided",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884130,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884135,
+   "policy": "guided",
+   "steps": 19,
+   "disagreements": 0,
+   "env_success": true
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884140,
+   "policy": "random",
+   "steps": 128,
+   "disagreements": 0,
+   "env_success": false
+  },
+  {
+   "task": "pick_up_seq_go_to",
+   "seed": 884145,
+   "policy": "guided",
+   "steps": 7,
+   "disagreements": 0,
+   "env_success": true
+  }
+ ],
+ "total_steps": 12006,
+ "total_disagreements": 0,
+ "wall_clock_s": 14.5,
+ "n_episodes": 150
+}

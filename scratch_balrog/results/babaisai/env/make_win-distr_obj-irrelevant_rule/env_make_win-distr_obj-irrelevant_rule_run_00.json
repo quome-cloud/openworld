@@ -1,0 +1,27 @@
+{
+  "task_id": "env/make_win-distr_obj-irrelevant_rule",
+  "episode": 0,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 15,
+  "method": "bfs",
+  "actions": [
+    "left",
+    "left",
+    "up",
+    "right",
+    "right",
+    "right",
+    "left",
+    "down",
+    "down",
+    "right",
+    "up",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 3326,
+  "elapsed_s": 24.53
+}

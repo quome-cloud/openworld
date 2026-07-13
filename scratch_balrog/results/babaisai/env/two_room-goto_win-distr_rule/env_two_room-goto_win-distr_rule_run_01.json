@@ -1,0 +1,16 @@
+{
+  "task_id": "env/two_room-goto_win-distr_rule",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 4,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "up",
+    "up",
+    "left"
+  ],
+  "bfs_nodes": 14,
+  "elapsed_s": 0.17
+}

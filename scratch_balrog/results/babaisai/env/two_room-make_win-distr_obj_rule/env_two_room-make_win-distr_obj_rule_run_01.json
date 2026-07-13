@@ -1,0 +1,11 @@
+{
+  "task_id": "env/two_room-make_win-distr_obj_rule",
+  "episode": 1,
+  "solved": false,
+  "progression": 0.0,
+  "steps": 0,
+  "method": "failed",
+  "actions": [],
+  "bfs_nodes": 55000,
+  "elapsed_s": 712.15
+}

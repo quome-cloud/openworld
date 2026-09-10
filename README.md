@@ -13,6 +13,7 @@
 [![Tests: 284 passing](https://img.shields.io/badge/tests-284%20passing-brightgreen.svg)](#-reproducibility--testing)
 [![Experiments: 62](https://img.shields.io/badge/experiments-62-b45309.svg)](#-empirical-baselines)
 [![GitHub stars](https://img.shields.io/github/stars/quome-cloud/openworld?style=social)](https://github.com/quome-cloud/openworld/stargazers)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.09163-b31b1b.svg)](https://arxiv.org/abs/2609.09163)
 [![Cite](https://img.shields.io/badge/cite-this%20work-purple.svg)](#-citation)
 
 <br/>

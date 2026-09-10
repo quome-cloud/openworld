@@ -535,49 +535,32 @@ same results (`cd paper && tectonic main.tex`).
 
 ## 📚 Citation
 
-OpenWorld is described in **three companion papers** (2026 — arXiv preprints, currently under
-review). Cite the one(s) your work builds on.
+If you use OpenWorld in your research, please cite the paper:
 
-| If your work uses… | Cite |
-|---|---|
-| The **framework** itself — authoring, verifying, composing, or serving code world models (the library, the prototyping benchmark, the world zoo) | **① World Computing** |
-| **World-time compute** — training a model on trajectories through *many* verified worlds to generalize to unseen worlds (incl. the diagnosis & coding world families) | **② World-Time Compute** |
-| The **ARC-AGI-3** source-free result — the perceptual code-world-model agent and its solve traces | **③ Solving ARC-AGI-3** |
-
-<details>
-<summary><b>BibTeX</b> — three papers</summary>
+> James Schwoebel, Ingrida Semenec, Jenia Rousseva, Marcos Ortiz, Collin Overbay, Christopher Klaus,
+> Anderson Edmond, Manish Bhatt, Rome Thorstenson, Jessica Tsai, and Martin G. Frasch.
+> **World-Time Compute with Verified Code World Models.** *arXiv preprint arXiv:2609.09163*, 2026.
+> [arXiv](https://arxiv.org/abs/2609.09163) · [PDF](https://arxiv.org/pdf/2609.09163) ·
+> [DOI: 10.48550/arXiv.2609.09163](https://doi.org/10.48550/arXiv.2609.09163)
 
 ```bibtex
-@misc{schwoebel2026worldcomputing,
-  title  = {World Computing: Prototyping and Evaluating Verified Code World Models},
-  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
-            and Overbay, Collin and Bhatt, Manish and Thorstenson, Rome and Frasch, Martin G.},
-  year   = {2026},
-  note   = {arXiv preprint, under review}
-}
-
-@misc{schwoebel2026worldtime,
-  title  = {World-Time Compute with Verified Code World Models},
-  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
-            and Overbay, Collin and Klaus, Christopher and Edmond, Anderson and Bhatt, Manish
-            and Thorstenson, Rome and Tsai, Jessica and Frasch, Martin G.},
-  year   = {2026},
-  note   = {arXiv preprint, under review}
-}
-
-@misc{schwoebel2026arcagi3,
-  title  = {Solving ARC-AGI-3 with Perceptual Code World Models},
-  author = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
-            and Overbay, Collin and Klaus, Christopher and Bhatt, Manish and Thorstenson, Rome
-            and Tsai, Jessica and Frasch, Martin G.},
-  year   = {2026},
-  note   = {arXiv preprint, under review}
+@article{schwoebel2026worldtime,
+  title         = {World-Time Compute with Verified Code World Models},
+  author        = {Schwoebel, James and Semenec, Ingrida and Rousseva, Jenia and Ortiz, Marcos
+                   and Overbay, Collin and Klaus, Christopher and Edmond, Anderson and Bhatt, Manish
+                   and Thorstenson, Rome and Tsai, Jessica and Frasch, Martin G.},
+  journal       = {arXiv preprint arXiv:2609.09163},
+  year          = {2026},
+  eprint        = {2609.09163},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2609.09163},
+  url           = {https://arxiv.org/abs/2609.09163}
 }
 ```
-</details>
 
-> **Note:** all three papers are under review; arXiv IDs / DOIs will be filled in here on
-> release. Until then please cite them as preprints (above).
+The same metadata ships in [`CITATION.cff`](CITATION.cff), so GitHub's **"Cite this repository"**
+button and reference managers (Zotero, Google Scholar) pick it up automatically.
 
 ---
 

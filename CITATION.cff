@@ -25,7 +25,42 @@ keywords:
   - reproducibility
   - large-language-models
   - reinforcement-learning
-# A companion paper is under review. When it is public, add a `preferred-citation:`
-# block here (type: article, with the DOI / arXiv identifier) so that GitHub's
-# "Cite this repository" button and downstream tools surface the paper. Tracked in
-# the repo issues.
+identifiers:
+  - type: doi
+    value: "10.48550/arXiv.2609.09163"
+    description: "arXiv preprint of the companion paper"
+preferred-citation:
+  type: article
+  title: "World-Time Compute with Verified Code World Models"
+  authors:
+    - family-names: Schwoebel
+      given-names: James
+    - family-names: Semenec
+      given-names: Ingrida
+    - family-names: Rousseva
+      given-names: Jenia
+    - family-names: Ortiz
+      given-names: Marcos
+    - family-names: Overbay
+      given-names: Collin
+    - family-names: Klaus
+      given-names: Christopher
+    - family-names: Edmond
+      given-names: Anderson
+    - family-names: Bhatt
+      given-names: Manish
+    - family-names: Thorstenson
+      given-names: Rome
+    - family-names: Tsai
+      given-names: Jessica
+    - family-names: Frasch
+      given-names: Martin G.
+  journal: "arXiv preprint arXiv:2609.09163"
+  year: 2026
+  doi: "10.48550/arXiv.2609.09163"
+  url: "https://arxiv.org/abs/2609.09163"
+  identifiers:
+    - type: doi
+      value: "10.48550/arXiv.2609.09163"
+    - type: url
+      value: "https://arxiv.org/abs/2609.09163"

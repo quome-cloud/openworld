@@ -1,0 +1,32 @@
+{
+ "label": "condition_B",
+ "episodes": 10,
+ "progression_pct": 46.36,
+ "standard_error_pct": 4.54,
+ "per_episode": [
+  13.64,
+  45.45,
+  54.55,
+  54.55,
+  54.55,
+  59.09,
+  40.91,
+  50.0,
+  31.82,
+  59.09
+ ],
+ "mean_achievements": 10.2,
+ "deaths": 10,
+ "death_causes": {
+  "9001": "zombie_night_no_home",
+  "9002": "zombie_day",
+  "9003": "zombie_day",
+  "9004": "zombie_day",
+  "9005": "starvation",
+  "9006": "unknown",
+  "9007": "zombie_day",
+  "9008": "zombie_night_no_home",
+  "9009": "starvation",
+  "9010": "zombie_night"
+ }
+}

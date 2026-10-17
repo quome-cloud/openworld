@@ -1,0 +1,20 @@
+{
+ "task": "treasure_hunter",
+ "episode": 20,
+ "pass": 3,
+ "protocol": "clean+memory",
+ "game": "seed_54472.ulx",
+ "memory_in": {
+  "avoid": [
+   "salad"
+  ],
+  "target": "nest of caterpillars"
+ },
+ "steps_executed": 49,
+ "done": true,
+ "won": true,
+ "score": 1,
+ "max_score": 1,
+ "progression": 1.0,
+ "wall_s": 0.787
+}

@@ -1,0 +1,18 @@
+{
+ "task": "the_cooking_game",
+ "episode": 3,
+ "pass": 1,
+ "protocol": "clean+memory",
+ "game": "cooking_item5_seed_12896.z8",
+ "memory_in": {
+  "avoid": [],
+  "target": null
+ },
+ "steps_executed": 52,
+ "done": true,
+ "won": true,
+ "score": 17,
+ "max_score": 17,
+ "progression": 1.0,
+ "wall_s": 0.936
+}

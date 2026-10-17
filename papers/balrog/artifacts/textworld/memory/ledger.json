@@ -1,0 +1,1302 @@
+{
+ "seed_10033.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "fly larva",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_00.json",
+    "step": 48
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_00.json",
+    "step": 49
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_00.json",
+    "step": 49
+   }
+  }
+ ],
+ "seed_10915.ulx": [
+  {
+   "type": "winning_take",
+   "object": "fondue",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_01.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "fondue",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_01.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "fondue",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_01.json",
+    "step": 59
+   }
+  }
+ ],
+ "seed_14115.ulx": [
+  {
+   "type": "winning_take",
+   "object": "potato",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_02.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "potato",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_02.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "potato",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_02.json",
+    "step": 59
+   }
+  }
+ ],
+ "seed_16404.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "cd",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_03.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "plant",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_03.json",
+    "step": 60
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "plant",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_03.json",
+    "step": 60
+   }
+  }
+ ],
+ "seed_18762.ulx": [
+  {
+   "type": "winning_take",
+   "object": "teapot",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_04.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "teapot",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_04.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "teapot",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_04.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_20085.ulx": [
+  {
+   "type": "winning_take",
+   "object": "shadfly",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_05.json",
+    "step": 56
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "shadfly",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_05.json",
+    "step": 56
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "shadfly",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_05.json",
+    "step": 56
+   }
+  }
+ ],
+ "seed_21726.ulx": [
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_06.json",
+    "step": 60
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_06.json",
+    "step": 60
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_06.json",
+    "step": 60
+   }
+  }
+ ],
+ "seed_24649.ulx": [
+  {
+   "type": "winning_take",
+   "object": "vacuum",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_07.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "vacuum",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_07.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "vacuum",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_07.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_27903.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "cucumber",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_08.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "mop",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_08.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "mop",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_08.json",
+    "step": 51
+   }
+  }
+ ],
+ "seed_30233.ulx": [
+  {
+   "type": "winning_take",
+   "object": "burger",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_09.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "burger",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_09.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "burger",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_09.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_34432.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "apple",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_10.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_10.json",
+    "step": 63
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_10.json",
+    "step": 63
+   }
+  }
+ ],
+ "seed_34884.ulx": [
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_11.json",
+    "step": 50
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_11.json",
+    "step": 50
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_11.json",
+    "step": 50
+   }
+  }
+ ],
+ "seed_37212.ulx": [
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_12.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_12.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "key",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_12.json",
+    "step": 59
+   }
+  }
+ ],
+ "seed_40784.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "blackberry",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_13.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "cashew",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_13.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "cashew",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_13.json",
+    "step": 51
+   }
+  }
+ ],
+ "seed_47496.ulx": [
+  {
+   "type": "winning_take",
+   "object": "passkey",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_14.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "passkey",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_14.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "passkey",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_14.json",
+    "step": 57
+   }
+  }
+ ],
+ "seed_50479.ulx": [
+  {
+   "type": "winning_take",
+   "object": "cushion",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_15.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "cushion",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_15.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "cushion",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_15.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_51016.ulx": [
+  {
+   "type": "winning_take",
+   "object": "lamp",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_16.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "lamp",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_16.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "lamp",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_16.json",
+    "step": 51
+   }
+  }
+ ],
+ "seed_51709.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "apple",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_17.json",
+    "step": 68
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "sponge",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_17.json",
+    "step": 64
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "sponge",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_17.json",
+    "step": 64
+   }
+  }
+ ],
+ "seed_51781.ulx": [
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_18.json",
+    "step": 58
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_18.json",
+    "step": 58
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "latchkey",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_18.json",
+    "step": 58
+   }
+  }
+ ],
+ "seed_53195.ulx": [
+  {
+   "type": "winning_take",
+   "object": "banana",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_19.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "banana",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_19.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "banana",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_19.json",
+    "step": 55
+   }
+  }
+ ],
+ "seed_54472.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "salad",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_20.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "nest of caterpillars",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_20.json",
+    "step": 48
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "nest of caterpillars",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_20.json",
+    "step": 48
+   }
+  }
+ ],
+ "seed_58109.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "peanut",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_21.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "stick of butter",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_21.json",
+    "step": 60
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "stick of butter",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_21.json",
+    "step": 60
+   }
+  }
+ ],
+ "seed_61644.ulx": [
+  {
+   "type": "winning_take",
+   "object": "pizza",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_22.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "pizza",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_22.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "pizza",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_22.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_61922.ulx": [
+  {
+   "type": "fatal_take",
+   "object": "passkey",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_23.json",
+    "step": 66
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "book",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_23.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "book",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_23.json",
+    "step": 61
+   }
+  }
+ ],
+ "seed_898.ulx": [
+  {
+   "type": "winning_take",
+   "object": "salad",
+   "source": {
+    "episode_file": "results/memory/pass1/treasure_hunter/ep_24.json",
+    "step": 58
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "salad",
+   "source": {
+    "episode_file": "results/memory/pass2/treasure_hunter/ep_24.json",
+    "step": 58
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "salad",
+   "source": {
+    "episode_file": "results/memory/pass3/treasure_hunter/ep_24.json",
+    "step": 58
+   }
+  }
+ ],
+ "level_220_seed_100.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_00.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_00.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_00.json",
+    "step": 55
+   }
+  }
+ ],
+ "level_220_seed_1171.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_01.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_01.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_01.json",
+    "step": 51
+   }
+  }
+ ],
+ "level_220_seed_12089.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_02.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_02.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_02.json",
+    "step": 57
+   }
+  }
+ ],
+ "level_220_seed_15858.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_03.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_03.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_03.json",
+    "step": 61
+   }
+  }
+ ],
+ "level_220_seed_16706.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_04.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_04.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_04.json",
+    "step": 67
+   }
+  }
+ ],
+ "level_220_seed_20174.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_05.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_05.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_05.json",
+    "step": 61
+   }
+  }
+ ],
+ "level_220_seed_23258.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_06.json",
+    "step": 63
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_06.json",
+    "step": 63
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_06.json",
+    "step": 63
+   }
+  }
+ ],
+ "level_220_seed_24972.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_07.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_07.json",
+    "step": 55
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_07.json",
+    "step": 55
+   }
+  }
+ ],
+ "level_220_seed_34290.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_08.json",
+    "step": 49
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_08.json",
+    "step": 49
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_08.json",
+    "step": 49
+   }
+  }
+ ],
+ "level_220_seed_38603.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_09.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_09.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_09.json",
+    "step": 59
+   }
+  }
+ ],
+ "level_220_seed_39118.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_10.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_10.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_10.json",
+    "step": 57
+   }
+  }
+ ],
+ "level_220_seed_39317.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_11.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_11.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_11.json",
+    "step": 67
+   }
+  }
+ ],
+ "level_220_seed_41628.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_12.json",
+    "step": 65
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_12.json",
+    "step": 65
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_12.json",
+    "step": 65
+   }
+  }
+ ],
+ "level_220_seed_42962.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_13.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_13.json",
+    "step": 67
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_13.json",
+    "step": 67
+   }
+  }
+ ],
+ "level_220_seed_43450.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_14.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_14.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_14.json",
+    "step": 53
+   }
+  }
+ ],
+ "level_220_seed_45669.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_15.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_15.json",
+    "step": 61
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_15.json",
+    "step": 61
+   }
+  }
+ ],
+ "level_220_seed_46023.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_16.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_16.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_16.json",
+    "step": 59
+   }
+  }
+ ],
+ "level_220_seed_50027.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_17.json",
+    "step": 49
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_17.json",
+    "step": 49
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_17.json",
+    "step": 49
+   }
+  }
+ ],
+ "level_220_seed_51189.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_18.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_18.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_18.json",
+    "step": 53
+   }
+  }
+ ],
+ "level_220_seed_52044.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_19.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_19.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_19.json",
+    "step": 53
+   }
+  }
+ ],
+ "level_220_seed_53694.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_20.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_20.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_20.json",
+    "step": 51
+   }
+  }
+ ],
+ "level_220_seed_55609.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_21.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_21.json",
+    "step": 51
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_21.json",
+    "step": 51
+   }
+  }
+ ],
+ "level_220_seed_57866.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_22.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_22.json",
+    "step": 53
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_22.json",
+    "step": 53
+   }
+  }
+ ],
+ "level_220_seed_60838.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_23.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_23.json",
+    "step": 57
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_23.json",
+    "step": 57
+   }
+  }
+ ],
+ "level_220_seed_8250.ulx": [
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass1/coin_collector/ep_24.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass2/coin_collector/ep_24.json",
+    "step": 59
+   }
+  },
+  {
+   "type": "winning_take",
+   "object": "coin",
+   "source": {
+    "episode_file": "results/memory/pass3/coin_collector/ep_24.json",
+    "step": 59
+   }
+  }
+ ]
+}

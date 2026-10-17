@@ -1,0 +1,1304 @@
+{
+ "rules": [
+  {
+   "id": "R_AUTOPICKUP",
+   "statement": "Walking onto some item cells auto-adds the item to inventory (message like 'k - a scroll labeled ...').",
+   "status": "corroborated",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "E2",
+     11
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_BLOCK_MSG",
+   "statement": "Blocked moves come with message \"It's a wall.\" or \"It's solid stone.\" and produce no position/time change. Wall glyphs: '-', '|'. Unlit/unknown cells render as ' '.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     7
+    ],
+    [
+     "P1",
+     1
+    ],
+    [
+     "P1",
+     12
+    ],
+    [
+     "P1",
+     16
+    ],
+    [
+     "P2",
+     28
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_COMBAT",
+   "statement": "Bumping a hostile adjacent creature attacks it: messages 'You kill/hit ...' or 'The X bites/hits/misses!'; damage to us appears as hp decrease (fox bite -1).",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E2",
+     8
+    ],
+    [
+     "E2",
+     9
+    ],
+    [
+     "E2",
+     42
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_COORD",
+   "statement": "Screen layout: tty row 0 = message line, rows 1-21 = dungeon map, rows 22-23 = status. The agent's map cell is tty[y_pos+1][x_pos] and renders as '@'.",
+   "status": "corroborated",
+   "confidence": 0.97,
+   "evidence": [
+    [
+     "P0",
+     0
+    ],
+    [
+     "P2",
+     0
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "checked on reset frames + per-step frames"
+  },
+  {
+   "id": "R_CORPSE_ROT",
+   "statement": "Floor corpses can be rotted and eating one can poison fatally ('DEATH: was poisoned. Poisoned by a rotted jackal/kobold corpse.', 4 deaths across v7/v8). Rot is invisible in the eat-offer prompt; freshness (recency of the kill) is the only observable proxy.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "b2v7partial_E40",
+     "end"
+    ],
+    [
+     "b2v7partial_E41",
+     "end"
+    ],
+    [
+     "b2v7partial_E42",
+     "end"
+    ],
+    [
+     "b2_E41",
+     "end"
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "policy: floor corpses only when desperate or freshly killed, never blacklisted names (poison_corpses.json)"
+  },
+  {
+   "id": "R_DEATH_HP0",
+   "statement": "Reaching hitpoints 0 via damage ends the episode with end_reason DEATH.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E2",
+     1857
+    ],
+    [
+     "E1",
+     1030
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_DEPTH_STABLE",
+   "statement": "depth changes only via stair-class transitions (down/up) or unknown rare events; ordinary actions keep depth constant (all 850 probed steps: depth constant).",
+   "status": "hypothesized",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "P0",
+     120
+    ],
+    [
+     "P1",
+     320
+    ],
+    [
+     "P2",
+     278
+    ]
+   ],
+   "corroborations": 295237,
+   "refutations": 5,
+   "scope": "allow depth+1 on any action as trap-hypothesis until falsified | excludes terminal zeroed frame",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R_DEPTH_TRAP",
+   "statement": "Depth can increase WITHOUT taking stairs: 'A trap door opens up under you!' (+1) and 'You fall down a shaft!' (+2). Non-stair depth possibility set must be {d..d+2}. LIVE confirmation: E25 fell 5->7 (shaft chain, t=665) and 10->11 (trap door, t=1175), reaching Dlvl 11.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "baseline25/ep10 step207 trap door 2->3"
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "clean_A/ep4 step374 shaft 2->4"
+    ],
+    [
+     "E25",
+     665
+    ],
+    [
+     "E25",
+     1175
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "rare (2 events/741k replay steps; 2 events/24k live steps)"
+  },
+  {
+   "id": "R_DET_SEED",
+   "statement": "Identical seed => identical initial state and identical transition sequence for identical actions.",
+   "status": "corroborated",
+   "confidence": 0.95,
+   "evidence": [
+    [
+     "DET555",
+     0
+    ],
+    [
+     "DET555",
+     5
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "one seed, 5-step sequence, 2 trials"
+  },
+  {
+   "id": "R_DIR_PROMPT",
+   "statement": "'In what direction?' prompts are answered by direction-name actions (e.g. 'south'), applying the pending verb in that direction.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "XKICK",
+     3
+    ],
+    [
+     "XKICK",
+     4
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_DOWN_NEEDS_TILE",
+   "statement": "'down' works only on a downstairs tile '>' : elsewhere it fails (\"You can't go down here.\"); on '>' it prints 'You descend the stairs.' and depth increases by exactly 1.",
+   "status": "corroborated",
+   "confidence": 0.95,
+   "evidence": [
+    [
+     "P0",
+     16
+    ],
+    [
+     "P2",
+     40
+    ],
+    [
+     "E11",
+     52
+    ],
+    [
+     "E11",
+     116
+    ],
+    [
+     "E11",
+     180
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "854x down->depth+1; 507x down->no-change"
+    ]
+   ],
+   "corroborations": 92,
+   "refutations": 0,
+   "scope": "failure branch observed; success branch is pure hypothesis from action name + 'Dlvl' ladder in achievements.json",
+   "revisions": [
+    {
+     "when": "after E11",
+     "change": "success branch confirmed: depth 1->2->3->4 at t=52/116/180"
+    }
+   ]
+  },
+  {
+   "id": "R_EAT_FRESH",
+   "statement": "Eating a corpse within ~60 steps of the kill is nutritionally effective and was never observed to poison: b3 block, 27 successful corpse/floor eats ('tastes delicious' / 'really hits the spot'), 0 poisonings; occasional non-fatal 'Blecch! Rotten food!' outcomes (light-headedness) from older floor items. Contrast: 4 fatal poisonings all from corpses of unknown age (R_CORPSE_ROT).",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "b3_E53",
+     5977
+    ],
+    [
+     "b3_E53",
+     6277
+    ],
+    [
+     "b3_E51",
+     1393
+    ],
+    [
+     "b3_E51",
+     2942
+    ],
+    [
+     "b3_E53",
+     7910
+    ],
+    [
+     "b3 aggregate",
+     "27 eats, 0 poisonings"
+    ]
+   ],
+   "corroborations": 27,
+   "refutations": 0,
+   "scope": "freshness proxy = kill recency; rot outcomes non-fatal so far in-scope"
+  },
+  {
+   "id": "R_EAT_INV",
+   "statement": "'eat' prompts with edible inventory letters; choosing one restores satiation ('This food really hits the spot!'); with no food: 'You don't have anything to eat.' Starvation causes fainting then death.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E2",
+     1013
+    ],
+    [
+     "E2",
+     1014
+    ],
+    [
+     "E1",
+     754
+    ],
+    [
+     "E1",
+     1028
+    ],
+    [
+     "E1",
+     1030
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_FAR_MOVE",
+   "statement": "'far <dir>' moves 0..N cells along that compass direction (stops at obstacles/objects/creatures); position change is along the named axis only; time advances >= 0.",
+   "status": "corroborated",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "P0",
+     9
+    ],
+    [
+     "P0",
+     10
+    ],
+    [
+     "P0",
+     11
+    ],
+    [
+     "P0",
+     12
+    ],
+    [
+     "P2",
+     25
+    ],
+    [
+     "P2",
+     34
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "axis-only displacement so far; corridors may bend paths - unobserved"
+  },
+  {
+   "id": "R_FREEZE",
+   "statement": "Some creatures freeze the attacker on melee contact (floating eye 'e': 'You are frozen by the floating eye'); while frozen the agent cannot act and can be killed (E14 death: 'killed by a sewer rat, while frozen by...'). Such glyphs must not be melee-attacked.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E14",
+     5833
+    ],
+    [
+     "E14",
+     5834
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "5x 'frozen by the floating eye's gaze!'"
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_GLYPH_OPEN_WORLD",
+   "statement": "The glyph vocabulary is open-ended (e.g. '`' first seen E12 blocking a corridor); passability must be learned per glyph (tiles_learned.json), optimistic-until-refuted, not whitelisted.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E12",
+     8
+    ],
+    [
+     "E12",
+     9
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_HP_BOUND",
+   "statement": "0 <= hitpoints <= max_hitpoints; hp slowly regenerates over time (observed +1 after ~14 waits).",
+   "status": "corroborated",
+   "confidence": 0.99,
+   "evidence": [
+    [
+     "P0",
+     102
+    ],
+    [
+     "P0",
+     116
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "0 counterexamples in 741,564 steps"
+    ]
+   ],
+   "corroborations": 295357,
+   "refutations": 0,
+   "scope": "excludes terminal zeroed frame",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R_HUNGER_SCALE",
+   "statement": "blstats hunger_state is an ordinal hunger scale: 1->2 coincides with 'You are beginning to feel hungry' (168x), 2->3 with 'weak' (50x), 3->4 with 'faint' (32x), drops to 0/1 after eating; 0 = satiated ('Satiated' on status row).",
+   "status": "corroborated",
+   "confidence": 0.95,
+   "evidence": [
+    [
+     "OWN-LOGS aggregate",
+     "hunger transitions mined from all logged episodes"
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_KICK_DOOR",
+   "statement": "A locked door ('This door is locked.') can be broken with kick + direction: 'As you kick the door, it crashes open!', after which the cell is walkable.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "XKICK",
+     3
+    ],
+    [
+     "XKICK",
+     5
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_KICK_RISK",
+   "statement": "Kicking empty space can strain a leg ('Dumb move! You strain a muscle.' -> 'Your right leg is in no shape for kicking.'), temporarily disabling kicks.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "XKICK",
+     10
+    ],
+    [
+     "XKICK",
+     11
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_KILL_XP",
+   "statement": "Killing a creature ('You kill the X!') grants experience_points (fox +4, newt +1).",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E2",
+     9
+    ],
+    [
+     "E2",
+     42
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_MONSTERS",
+   "statement": "Letter glyphs on the map are autonomous creatures; hostile ones attack adjacent characters and can reduce hp (observed: sewer rat bite -> hp -1; grid bug bites).",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "P0",
+     101
+    ],
+    [
+     "P0",
+     102
+    ],
+    [
+     "P2",
+     16
+    ],
+    [
+     "P2",
+     22
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_MOVE",
+   "statement": "A single-direction action ('north'... 'northwest') either moves the agent exactly one cell in the named compass direction (north = y-1, east = x+1) or leaves position unchanged; never any other displacement. Walking into one's pet swaps places (still a one-cell move).",
+   "status": "corroborated",
+   "confidence": 0.95,
+   "evidence": [
+    [
+     "P0",
+     1
+    ],
+    [
+     "P0",
+     2
+    ],
+    [
+     "P0",
+     3
+    ],
+    [
+     "P0",
+     4
+    ],
+    [
+     "P0",
+     5
+    ],
+    [
+     "P0",
+     7
+    ],
+    [
+     "P1",
+     1
+    ],
+    [
+     "P1",
+     6
+    ],
+    [
+     "P1",
+     36
+    ],
+    [
+     "P2",
+     19
+    ],
+    [
+     "E25",
+     665
+    ],
+    [
+     "E23",
+     413
+    ],
+    [
+     "b4val_E61",
+     294
+    ]
+   ],
+   "corroborations": 142687,
+   "refutations": 16,
+   "scope": "pos set applies only while depth unchanged (trap falls relocate: E25:665, E25:1175). Rare unexplained exceptions at constant depth: 8/741k replay steps + live E23:413 + b4val_E61:294 (21-cell jump, empty message) ('west' displaced (22,15)->(21,14)); kept as open anomaly class, not patched.",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    },
+    {
+     "when": "after p1v5 batch",
+     "change": "pos possibility set scoped to depth-unchanged steps",
+     "anomalies": [
+      [
+       "E25",
+       665
+      ],
+      [
+       "E25",
+       1175
+      ],
+      [
+       "E23",
+       413
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R_MOVE_TIME",
+   "statement": "A successful single move advances time by 0 or 1; a blocked move advances time by 0.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P1",
+     6
+    ],
+    [
+     "P1",
+     7
+    ],
+    [
+     "P1",
+     1
+    ],
+    [
+     "P0",
+     7
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "single moves"
+  },
+  {
+   "id": "R_NONMOVE_POS",
+   "statement": "Named non-movement actions (probed catalog: adjust..zap, wait, search, look, inventory, prompts) do not change agent position.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P2",
+     43
+    ],
+    [
+     "P2",
+     49
+    ],
+    [
+     "P2",
+     91
+    ],
+    [
+     "P2",
+     172
+    ],
+    [
+     "P0",
+     17
+    ]
+   ],
+   "corroborations": 152533,
+   "refutations": 1,
+   "scope": "exceptions expected for teleport-class effects; none observed yet | excludes terminal zeroed frame",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R_NOPROGRESS_QUIT",
+   "statement": "The served environment aborts the run as 'ABORTED: quit.' after a long stretch with no game-time progress (observed after zero-time loops: eat-prompt loop E15, peaceful-bump loops E19/E35; matches no_progress_timeout=150 in the official config). Zero-time action loops are fatal to the run.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E15",
+     1170
+    ],
+    [
+     "E19",
+     3384
+    ],
+    [
+     "E35",
+     3915
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "mechanism attributed to the wrapper's no-progress guard (config.yaml, allowed protocol knowledge)"
+  },
+  {
+   "id": "R_PEACEFUL",
+   "statement": "Some creatures are non-hostile: bumping them asks 'Really attack the <name>? [yn] (n)'. Declining and re-bumping loops forever (E19 lost 3384 steps); they must be treated as obstacles.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E19",
+     3377
+    ],
+    [
+     "E19",
+     3380
+    ],
+    [
+     "E19",
+     3383
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_PET",
+   "statement": "A pet creature (observed 'd' little dog, 'f' kitten) starts adjacent, moves on its own, attacks other creatures, and swaps places when the agent walks into it.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     2
+    ],
+    [
+     "P0",
+     12
+    ],
+    [
+     "P2",
+     16
+    ],
+    [
+     "P2",
+     19
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_PET_GLYPH_COLLISION",
+   "statement": "Pet glyph classes collide with hostiles of the same class ('d' dog vs 'd' fox/jackal): E7 ignored an adjacent fox as 'pet glyph' and died. Hostility must be inferred from behavior (hp drops while adjacent), not glyph identity.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E7",
+     118
+    ],
+    [
+     "E7",
+     121
+    ],
+    [
+     "E13",
+     66
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_PET_PROVOKE",
+   "statement": "Bumping one's own pet under the hp-drop heuristic provokes it; a provoked pet fights back and can kill ('Killed by a little dog called Idefix', E37 t=1648 after repeated attack-d swaps). Swap-confirmation must exempt the pet from hostile targeting.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E37",
+     1648
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_POTION_RISK",
+   "statement": "Quaffing an unidentified owned potion can inflict severe damage: VAL_QUAFF (b4val_E60 t=196) 'This burns like acid!' hp 14->6. Unknown potions are not a safe resource; exploit play must not quaff unidentified potions.",
+   "status": "corroborated",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "b4val_E60",
+     196
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "single observation; acid class; validation-episode negative result"
+  },
+  {
+   "id": "R_PRAY_COMBAT_RISK",
+   "statement": "Praying takes multiple game turns during which adjacent monsters keep attacking: E7 died 'Killed by a fox, while praying' at hp 1. Pray only with no adjacent threat.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E7",
+     122
+    ],
+    [
+     "E7",
+     123
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "policy: flee/fight first"
+  },
+  {
+   "id": "R_PRAY_COOLDOWN",
+   "statement": "Prayer rescue is rate-limited: E21 first prayer cured fainting (t=2008) but a second prayer ~880 steps later got 'You feel that Anhur is displeased' and no rescue; agent died fainted. Prayers must be spaced far apart.",
+   "status": "corroborated",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "E21",
+     2008
+    ],
+    [
+     "E21",
+     2892
+    ],
+    [
+     "E21",
+     2937
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": "exact cooldown unknown; policy uses >1600 steps"
+  },
+  {
+   "id": "R_PRAY_STARVING",
+   "statement": "When starving/fainting with no food, 'pray'+confirm ('You begin praying...surrounded by a shimmering light') cures starvation: E3/E4/E5 survived 2600+ turns foodless with 2-3 prayers each, whereas E1 starved to death without praying.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E3",
+     1116
+    ],
+    [
+     "E3",
+     2248
+    ],
+    [
+     "E4",
+     1807
+    ],
+    [
+     "E5",
+     843
+    ],
+    [
+     "E1",
+     1030
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_PROMPT_ESC",
+   "statement": "Actions that need an object/direction open a prompt ('What do you want to X? [letters or ?*]' / 'In what direction?'); 'esc' cancels ('Never mind.'). Full-screen text displays (e.g. from 'attributes') swallow named-action keys until 'esc' is pressed. [yn] prompts may need two 'esc'.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     19
+    ],
+    [
+     "P0",
+     25
+    ],
+    [
+     "P0",
+     74
+    ],
+    [
+     "P2",
+     49
+    ],
+    [
+     "P2",
+     50
+    ],
+    [
+     "P2",
+     139
+    ],
+    [
+     "P2",
+     142
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_PROMPT_LETTERS",
+   "statement": "Object prompts list the valid inventory letters in brackets, e.g. eat -> 'What do you want to eat? [fghi or ?*]' lists edible item letters.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "P2",
+     79
+    ],
+    [
+     "P2",
+     145
+    ],
+    [
+     "P2",
+     151
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_QUIT_HAZARD",
+   "statement": "Feeding raw named-action keys into open menus/prompts can select arbitrary menu entries and even abort the run ('ABORTED: quit.' E15/E19); prompts must be detected and cleared before issuing normal actions.",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E15",
+     1163
+    ],
+    [
+     "E15",
+     1170
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_ROLE_VARIES",
+   "statement": "The starting character class varies across seeds (observed: 'Priest' seed101, 'Monk' seed103) with different stats and inventory.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     0
+    ],
+    [
+     "P2",
+     0
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_ROT_NONFATAL",
+   "statement": "'Blecch! Rotten food!' outcomes exist that are non-fatal (temporary blindness/light-headedness: 'Everything suddenly goes dark', 'You feel rather light headed'), distinct from the fatal rotted-corpse poisonings.",
+   "status": "corroborated",
+   "confidence": 0.8,
+   "evidence": [
+    [
+     "b3_E51",
+     2421
+    ],
+    [
+     "b3_E53",
+     1067
+    ],
+    [
+     "b3_E51",
+     6095
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_STAIR_HIDDEN",
+   "statement": "The agent's own map cell always renders '@', hiding the tile underneath; tiles (e.g. '>') must be remembered from earlier frames. Discovered via E9's 154-step oscillation on the stair cell.",
+   "status": "corroborated",
+   "confidence": 0.95,
+   "evidence": [
+    [
+     "E9",
+     360
+    ],
+    [
+     "E9",
+     707
+    ],
+    [
+     "E11",
+     52
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_STATUE",
+   "statement": "Some monster-letter glyphs are statues: bumping them yields 'You see here a statue of a X.' and no combat; they behave as blocked terrain (E1 wasted 471 attack steps on a lichen statue 'F').",
+   "status": "corroborated",
+   "confidence": 0.85,
+   "evidence": [
+    [
+     "E1",
+     1027
+    ],
+    [
+     "E1",
+     1029
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_SWAP_PET",
+   "statement": "Walking into one's pet swaps places ('You swap places with your little dog.'); the pet is identified by this message. Pets are never valid attack targets (E2 wasted 499 steps ping-ponging with the pet).",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E2",
+     1
+    ],
+    [
+     "E2",
+     8
+    ],
+    [
+     "P0",
+     2
+    ],
+    [
+     "P2",
+     19
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_TERMINAL_ZERO",
+   "statement": "On episode end by death, the final observation's blstats are zeroed (time=0, hp=0/0, pos=(0,0), depth=0); other rules' predictions do not apply to this terminal frame.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "E1",
+     1030
+    ],
+    [
+     "E2",
+     1857
+    ]
+   ],
+   "corroborations": 77,
+   "refutations": 0,
+   "scope": "terminal step only; discovered via 8 anomalies at E1:1030/E2:1857"
+  },
+  {
+   "id": "R_TIME",
+   "statement": "blstats 'time' is non-decreasing across steps within an episode.",
+   "status": "corroborated",
+   "confidence": 0.999,
+   "evidence": [
+    [
+     "P0",
+     1
+    ],
+    [
+     "P0",
+     76
+    ],
+    [
+     "P1",
+     6
+    ],
+    [
+     "P2",
+     43
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "0 counterexamples in 741,564 steps"
+    ]
+   ],
+   "corroborations": 295355,
+   "refutations": 2,
+   "scope": "all steps observed so far (850+) | excludes terminal zeroed frame",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "R_UNKNOWN_CMD",
+   "statement": "'more' and 'space' send raw keys that the game reports as unknown commands; they are no-ops outside prompts/menus.",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     18
+    ],
+    [
+     "P0",
+     75
+    ],
+    [
+     "P2",
+     46
+    ],
+    [
+     "P2",
+     203
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_UP_NEEDS_TILE",
+   "statement": "'up' fails off special tiles (\"You can't go up here.\"); on the starting stair it warns 'Beware, there will be no return! Still climb? [yn]' - climbing up from Dlvl:1 likely ends the run. Replay: 'up' on an upstairs prints 'You climb up the stairs.' and depth decreases by 1 (39x).",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     13
+    ],
+    [
+     "P2",
+     37
+    ],
+    [
+     "REPLAY(disclosed source-informed policy logs, work/fable_nethack/results/transitions)",
+     "39x up->depth-1"
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_WAIT",
+   "statement": "'wait' advances time by 0-1 and leaves position unchanged; the world acts meanwhile (pets/monsters move).",
+   "status": "corroborated",
+   "confidence": 0.9,
+   "evidence": [
+    [
+     "P0",
+     76
+    ],
+    [
+     "P0",
+     102
+    ],
+    [
+     "P2",
+     206
+    ],
+    [
+     "P2",
+     212
+    ]
+   ],
+   "corroborations": 0,
+   "refutations": 0,
+   "scope": ""
+  },
+  {
+   "id": "R_XP_MONO",
+   "statement": "experience_level does not decrease (no drain event observed).",
+   "status": "hypothesized",
+   "confidence": 0.7,
+   "evidence": [
+    [
+     "P0",
+     120
+    ],
+    [
+     "P2",
+     278
+    ]
+   ],
+   "corroborations": 295354,
+   "refutations": 3,
+   "scope": "weak: xp never changed at all yet | excludes terminal zeroed frame",
+   "revisions": [
+    {
+     "when": "after E1/E2",
+     "change": "scope now excludes the terminal zeroed frame (see R_TERMINAL_ZERO)",
+     "anomalies": [
+      [
+       "E1",
+       1030
+      ],
+      [
+       "E2",
+       1857
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}

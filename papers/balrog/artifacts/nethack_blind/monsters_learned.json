@@ -1,0 +1,32 @@
+{
+ "e": {
+  "no_attack": true,
+  "evidence": [
+   [
+    "E14",
+    5833,
+    "You miss the floating eye.  You are frozen by the floating eye"
+   ],
+   [
+    "E69",
+    3296,
+    "You hit the floating eye.  You are frozen by the floating ey"
+   ],
+   [
+    "F21",
+    4283,
+    "You hit the floating eye!  You are frozen by the floating ey"
+   ],
+   [
+    "F21",
+    4286,
+    "You hit the floating eye!  You are frozen by the floating ey"
+   ],
+   [
+    "F21",
+    4288,
+    "You hit the floating eye!  You are frozen by the floating ey"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,16 @@
+Deterministic replay experiment XKICK (seed 213, replaying explore_E13 actions to t=24, then probing).
+Served transcript (pos, message after each action):
+pre (25, 11) "It's a wall."
+south (25, 11) 'This door is locked.'
+kick (25, 11) 'In what direction?'
+south (25, 11) 'As you kick the door, it crashes open!'
+south (25, 12) ''                      <- walked through the broken door
+open (25, 12) 'In what direction?'
+south (25, 12) 'You see no door there.'
+kick (25, 12) 'In what direction?'
+south (25, 12) 'You kick at empty space.'
+kick (25, 12) 'In what direction?'
+south (25, 12) 'Dumb move!  You strain a muscle.'
+kick (25, 12) 'Your right leg is in no shape for kicking.'
+south (25, 13) ''
+south (25, 14) ''

@@ -1,0 +1,14 @@
+{
+  "task_id": "env/two_room-goto_win-distr_obj-irrelevant_rule",
+  "episode": 2,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 2,
+  "method": "bfs",
+  "actions": [
+    "down",
+    "left"
+  ],
+  "bfs_nodes": 4,
+  "elapsed_s": 0.05
+}

@@ -1,0 +1,18 @@
+{
+ "protocol": "privileged",
+ "tasks": {
+  "goto": 10,
+  "pickup": 10,
+  "open": 10,
+  "putnext": 10,
+  "pick_up_seq_go_to": 10
+ },
+ "episodes": 50,
+ "solved": 50,
+ "score_pct": 100.0,
+ "methods": {
+  "macro": 50,
+  "ucs": 0
+ },
+ "total_time_s": 0.5
+}

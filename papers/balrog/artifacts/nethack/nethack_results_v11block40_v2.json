@@ -1,0 +1,293 @@
+{
+ "label": "v11block40_v2",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 20,
+   "seed": 3020,
+   "condition": "A",
+   "steps": 106,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a newt, while praying.",
+   "role": "Healer",
+   "race": "human",
+   "wallclock_s": 2.4,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep20.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 21,
+   "seed": 3021,
+   "condition": "A",
+   "steps": 1582,
+   "illegal": 0,
+   "progression": 0.021221378364235505,
+   "highest_achievement": "Dlvl:4",
+   "depth_max": 4,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a kobold.",
+   "role": "Ranger",
+   "race": "gnomish",
+   "wallclock_s": 110.9,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep21.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 22,
+   "seed": 3022,
+   "condition": "A",
+   "steps": 1205,
+   "illegal": 0,
+   "progression": 0.20612854836308672,
+   "highest_achievement": "Dlvl:12",
+   "depth_max": 12,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9",
+    "Dlvl:10",
+    "Dlvl:11",
+    "Dlvl:12"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant ant.",
+   "role": "Valkyrie",
+   "race": "dwarven",
+   "wallclock_s": 32.0,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep22.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 23,
+   "seed": 3023,
+   "condition": "A",
+   "steps": 632,
+   "illegal": 0,
+   "progression": 0.04846098359243788,
+   "highest_achievement": "Dlvl:7",
+   "depth_max": 7,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a manes.",
+   "role": "Healer",
+   "race": "gnomish",
+   "wallclock_s": 12.5,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep23.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 24,
+   "seed": 3024,
+   "condition": "A",
+   "steps": 4680,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Knight",
+   "race": "human",
+   "wallclock_s": 63.2,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep24.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 25,
+   "seed": 3025,
+   "condition": "A",
+   "steps": 651,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a little dog.",
+   "role": "Samurai",
+   "race": "human",
+   "wallclock_s": 20.8,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep25.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 26,
+   "seed": 3026,
+   "condition": "A",
+   "steps": 427,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant bat.",
+   "role": "Tourist",
+   "race": "human",
+   "wallclock_s": 11.4,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep26.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 27,
+   "seed": 3027,
+   "condition": "A",
+   "steps": 435,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a guard.",
+   "role": "Priestess",
+   "race": "elven",
+   "wallclock_s": 19.5,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep27.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 28,
+   "seed": 3028,
+   "condition": "A",
+   "steps": 5514,
+   "illegal": 0,
+   "progression": 0.02081163581974355,
+   "highest_achievement": "Xp:3",
+   "depth_max": 2,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Cavewoman",
+   "race": "dwarven",
+   "wallclock_s": 495.5,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep28.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 29,
+   "seed": 3029,
+   "condition": "A",
+   "steps": 1004,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a rabid rat.",
+   "role": "Valkyrie",
+   "race": "dwarven",
+   "wallclock_s": 16.4,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep29.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

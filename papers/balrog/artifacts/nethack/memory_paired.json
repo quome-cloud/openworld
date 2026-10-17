@@ -1,0 +1,674 @@
+{
+ "label": "memory_paired",
+ "seeds": [
+  2005,
+  2006,
+  2007,
+  2008,
+  2009,
+  2010,
+  2011,
+  2012,
+  2013,
+  2014,
+  2015,
+  2016,
+  2017,
+  2018,
+  2019
+ ],
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 0,
+   "seed": 2005,
+   "condition": "B",
+   "steps": 476,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a gnome king.",
+   "role": "Monk",
+   "race": "human",
+   "wallclock_s": 11.7,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep0.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 1,
+   "seed": 2006,
+   "condition": "B",
+   "steps": 7315,
+   "illegal": 0,
+   "progression": 0.04846098359243788,
+   "highest_achievement": "Dlvl:7",
+   "depth_max": 7,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Samurai",
+   "race": "human",
+   "wallclock_s": 90.7,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep1.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['gnome king']",
+    "step 0: M2 loaded danger depth 5",
+    "step 1670: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1671: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1672: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1673: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1674: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1675: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1676: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1677: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1678: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1679: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1680: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1681: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1682: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1683: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1684: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1685: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1686: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1687: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1688: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1689: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1690: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1691: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1692: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1693: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1694: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1695: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1696: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1697: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1698: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1699: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1700: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1701: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1702: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1703: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1704: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1705: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1706: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1707: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1708: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1709: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1710: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1711: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1712: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1713: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1714: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1715: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1716: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1717: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1718: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1719: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1720: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1721: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1722: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1723: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1724: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1725: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1726: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1727: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1728: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1729: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1730: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1731: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1732: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1733: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1734: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1735: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1736: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1737: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1738: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1739: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1740: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1741: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1742: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1743: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1744: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1745: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1746: M2 rest gate tightened at depth 6 (remembered danger depth 5)",
+    "step 1747: M2 rest gate tightened at depth 6 (remembered danger depth 5)"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 2,
+   "seed": 2007,
+   "condition": "B",
+   "steps": 258,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a bolt of lightning.",
+   "role": "Priest",
+   "race": "human",
+   "wallclock_s": 3.7,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep2.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['gnome king']",
+    "step 0: M2 loaded danger depth 5"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 3,
+   "seed": 2008,
+   "condition": "B",
+   "steps": 99992,
+   "illegal": 0,
+   "progression": 0.01847840456172601,
+   "highest_achievement": "Xp:2",
+   "depth_max": 1,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "ABORTED: quit.",
+   "role": "Caveman",
+   "race": "dwarven",
+   "wallclock_s": 1238.9,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep3.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king']",
+    "step 0: M2 loaded danger depth 5"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 4,
+   "seed": 2009,
+   "condition": "B",
+   "steps": 716,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a hobbit.",
+   "role": "Healer",
+   "race": "gnomish",
+   "wallclock_s": 6.5,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep4.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king']",
+    "step 0: M2 loaded danger depth 5"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 5,
+   "seed": 2010,
+   "condition": "B",
+   "steps": 726,
+   "illegal": 0,
+   "progression": 0.017539535798967013,
+   "highest_achievement": "Dlvl:3",
+   "depth_max": 3,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a hobbit.",
+   "role": "Barbarian",
+   "race": "human",
+   "wallclock_s": 9.9,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep5.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hobbit']",
+    "step 0: M2 loaded danger depth 5"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 6,
+   "seed": 2011,
+   "condition": "B",
+   "steps": 3596,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 4,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4"
+   ],
+   "end_reason": "DEATH: died. Killed by a hill orc.",
+   "role": "Knight",
+   "race": "human",
+   "wallclock_s": 21.3,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep6.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hobbit']",
+    "step 0: M2 loaded danger depth 3"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 7,
+   "seed": 2012,
+   "condition": "B",
+   "steps": 4736,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a large kobold.",
+   "role": "Healer",
+   "race": "human",
+   "wallclock_s": 17.9,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep7.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hill orc', 'hobbit']",
+    "step 0: M2 loaded danger depth 3"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 8,
+   "seed": 2013,
+   "condition": "B",
+   "steps": 1621,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a hobbit, while praying.",
+   "role": "Wizard",
+   "race": "gnomish",
+   "wallclock_s": 19.7,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep8.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hill orc', 'hobbit', 'large kobold']",
+    "step 0: M2 loaded danger depth 3",
+    "step 563: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 564: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 565: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 566: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 567: M2 rest gate tightened at depth 3 (remembered danger depth 3)"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 9,
+   "seed": 2014,
+   "condition": "B",
+   "steps": 7358,
+   "illegal": 0,
+   "progression": 0.017539535798967013,
+   "highest_achievement": "Dlvl:3",
+   "depth_max": 3,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Samurai",
+   "race": "human",
+   "wallclock_s": 64.6,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep9.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hill orc', 'hobbit', 'large kobold']",
+    "step 0: M2 loaded danger depth 3"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 10,
+   "seed": 2015,
+   "condition": "B",
+   "steps": 260,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant bat.",
+   "role": null,
+   "race": null,
+   "wallclock_s": 1.5,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep10.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'gnome king', 'hill orc', 'hobbit', 'large kobold']",
+    "step 0: M2 loaded danger depth 3",
+    "step 45: M2 rest gate tightened at depth 2 (remembered danger depth 3)",
+    "step 71: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 72: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 73: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 74: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 75: M2 rest gate tightened at depth 3 (remembered danger depth 3)",
+    "step 76: M2 rest gate tightened at depth 3 (remembered danger depth 3)"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 11,
+   "seed": 2016,
+   "condition": "B",
+   "steps": 1271,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a jackal.",
+   "role": null,
+   "race": null,
+   "wallclock_s": 15.2,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep11.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'giant bat', 'gnome king', 'hill orc', 'hobbit', 'large kobold']",
+    "step 0: M2 loaded danger depth 3"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 12,
+   "seed": 2017,
+   "condition": "B",
+   "steps": 493,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a jackal.",
+   "role": "Caveman",
+   "race": "human",
+   "wallclock_s": 4.4,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep12.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'giant bat', 'gnome king', 'hill orc', 'hobbit', 'jackal', 'large kobold']",
+    "step 0: M2 loaded danger depth 1"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 13,
+   "seed": 2018,
+   "condition": "B",
+   "steps": 1785,
+   "illegal": 0,
+   "progression": 0.04846098359243788,
+   "highest_achievement": "Dlvl:7",
+   "depth_max": 7,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a large kobold.",
+   "role": "Barbarian",
+   "race": "orcish",
+   "wallclock_s": 22.9,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep13.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'giant bat', 'gnome king', 'hill orc', 'hobbit', 'jackal', 'large kobold']",
+    "step 0: M2 loaded danger depth 1"
+   ]
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 14,
+   "seed": 2019,
+   "condition": "B",
+   "steps": 14961,
+   "illegal": 0,
+   "progression": 0.021221378364235505,
+   "highest_achievement": "Dlvl:4",
+   "depth_max": 4,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant bat.",
+   "role": "Priestess",
+   "race": "elven",
+   "wallclock_s": 144.3,
+   "transitions_file": "transitions/memory_paired/NetHackChallenge-v0__ep14.jsonl.gz",
+   "mem_fired": [
+    "step 0: M1 loaded avoid-species ['bolt of lightning', 'giant bat', 'gnome king', 'hill orc', 'hobbit', 'jackal', 'large kobold']",
+    "step 0: M2 loaded danger depth 1"
+   ]
+  }
+ ],
+ "score": 2.5594445192869424,
+ "paired_analysis": {
+  "pairs": [
+   {
+    "seed": 2005,
+    "baseline": 2.6482449457437767,
+    "memory": 2.6482449457437767,
+    "delta": 0.0
+   },
+   {
+    "seed": 2006,
+    "baseline": 12.558597019922987,
+    "memory": 4.846098359243788,
+    "delta": -7.7124986606791985
+   },
+   {
+    "seed": 2007,
+    "baseline": 2.6482449457437767,
+    "memory": 2.6482449457437767,
+    "delta": 0.0
+   },
+   {
+    "seed": 2008,
+    "baseline": 1.847840456172601,
+    "memory": 1.847840456172601,
+    "delta": 0.0
+   },
+   {
+    "seed": 2009,
+    "baseline": 2.6482449457437767,
+    "memory": 2.6482449457437767,
+    "delta": 0.0
+   },
+   {
+    "seed": 2010,
+    "baseline": 2.416013655054698,
+    "memory": 1.7539535798967012,
+    "delta": -0.6620600751579968
+   },
+   {
+    "seed": 2011,
+    "baseline": 3.542868611817301,
+    "memory": 3.542868611817301,
+    "delta": 0.0
+   },
+   {
+    "seed": 2012,
+    "baseline": 2.6482449457437767,
+    "memory": 2.6482449457437767,
+    "delta": 0.0
+   },
+   {
+    "seed": 2013,
+    "baseline": 2.1221378364235504,
+    "memory": 3.542868611817301,
+    "delta": 1.4207307753937508
+   },
+   {
+    "seed": 2014,
+    "baseline": 1.7539535798967012,
+    "memory": 1.7539535798967012,
+    "delta": 0.0
+   },
+   {
+    "seed": 2015,
+    "baseline": 9.770935198701912,
+    "memory": 3.542868611817301,
+    "delta": -6.22806658688461
+   },
+   {
+    "seed": 2016,
+    "baseline": 0.0,
+    "memory": 0.0,
+    "delta": 0.0
+   },
+   {
+    "seed": 2017,
+    "baseline": 9.770935198701912,
+    "memory": 0.0,
+    "delta": -9.770935198701912
+   },
+   {
+    "seed": 2018,
+    "baseline": 0.0,
+    "memory": 4.846098359243788,
+    "delta": 4.846098359243788
+   },
+   {
+    "seed": 2019,
+    "baseline": 2.1221378364235504,
+    "memory": 2.1221378364235504,
+    "delta": 0.0
+   }
+  ],
+  "mean_delta": -1.2071154257857453,
+  "delta_ci95": [
+   -3.1674037668974204,
+   0.46836665565821956
+  ]
+ }
+}

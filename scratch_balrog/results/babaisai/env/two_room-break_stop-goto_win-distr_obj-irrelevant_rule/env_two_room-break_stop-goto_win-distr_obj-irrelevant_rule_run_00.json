@@ -1,0 +1,24 @@
+{
+  "task_id": "env/two_room-break_stop-goto_win-distr_obj-irrelevant_rule",
+  "episode": 0,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 12,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "up",
+    "left",
+    "up",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 535,
+  "elapsed_s": 6.35
+}

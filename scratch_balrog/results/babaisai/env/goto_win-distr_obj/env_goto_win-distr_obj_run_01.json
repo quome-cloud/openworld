@@ -1,0 +1,13 @@
+{
+  "task_id": "env/goto_win-distr_obj",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 1,
+  "method": "bfs",
+  "actions": [
+    "up"
+  ],
+  "bfs_nodes": 1,
+  "elapsed_s": 0.0
+}

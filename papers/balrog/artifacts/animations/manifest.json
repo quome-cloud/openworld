@@ -1,0 +1,90 @@
+[
+  {
+    "file": "goto_win.gif",
+    "task": "env/goto_win",
+    "episode": 0,
+    "frames": 4,
+    "win": true,
+    "kb": 53
+  },
+  {
+    "file": "make_win.gif",
+    "task": "env/make_win",
+    "episode": 0,
+    "frames": 21,
+    "win": true,
+    "kb": 245
+  },
+  {
+    "file": "two_room-goto_win.gif",
+    "task": "env/two_room-goto_win",
+    "episode": 0,
+    "frames": 3,
+    "win": true,
+    "kb": 64
+  },
+  {
+    "file": "two_room-break_stop-goto_win.gif",
+    "task": "env/two_room-break_stop-goto_win",
+    "episode": 0,
+    "frames": 11,
+    "win": true,
+    "kb": 217
+  },
+  {
+    "file": "two_room-maybe_break_stop-goto_win.gif",
+    "task": "env/two_room-maybe_break_stop-goto_win",
+    "episode": 0,
+    "frames": 11,
+    "win": true,
+    "kb": 224
+  },
+  {
+    "file": "two_room-make_win_SHOWCASE.gif",
+    "task": "env/two_room-make_win-distr_obj_rule",
+    "episode": 0,
+    "frames": 25,
+    "win": true,
+    "kb": 532
+  },
+  {
+    "file": "two_room-make_win.gif",
+    "task": "env/two_room-make_win",
+    "episode": 0,
+    "frames": 16,
+    "win": true,
+    "kb": 308
+  },
+  {
+    "file": "two_room-break_stop-make_win.gif",
+    "task": "env/two_room-break_stop-make_win",
+    "episode": 0,
+    "frames": 30,
+    "win": true,
+    "kb": 592
+  },
+  {
+    "file": "two_room-make_you.gif",
+    "task": "env/two_room-make_you",
+    "episode": 0,
+    "frames": 11,
+    "win": true,
+    "kb": 248
+  },
+  {
+    "file": "two_room-make_you-make_win.gif",
+    "task": "env/two_room-make_you-make_win",
+    "episode": 0,
+    "frames": 27,
+    "win": true,
+    "kb": 582
+  },
+  {
+    "file": "two_room-make_wall_win.gif",
+    "task": "env/two_room-make_wall_win",
+    "episode": 0,
+    "frames": 17,
+    "win": true,
+    "kb": 324
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "task_id": "env/goto_win",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 3,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "up",
+    "up"
+  ],
+  "bfs_nodes": 5,
+  "elapsed_s": 0.03
+}

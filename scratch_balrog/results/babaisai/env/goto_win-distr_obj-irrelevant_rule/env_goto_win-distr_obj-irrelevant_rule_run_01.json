@@ -1,0 +1,16 @@
+{
+  "task_id": "env/goto_win-distr_obj-irrelevant_rule",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 4,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "left",
+    "left",
+    "left"
+  ],
+  "bfs_nodes": 11,
+  "elapsed_s": 0.07
+}

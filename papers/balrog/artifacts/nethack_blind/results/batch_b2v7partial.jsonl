@@ -1,0 +1,3 @@
+{"ep": "E40", "seed": 401, "steps": 1186, "depth": 0, "prog": 0.0, "xp": 0, "time": 0, "end": "DEATH: was poisoned. Poisoned by a rotted jackal corpse.", "viol_rate": 0.0, "n_pred": 5926, "n_viol": 0, "anomalies": [], "wallclock": 22.3}
+{"ep": "E41", "seed": 402, "steps": 2738, "depth": 0, "prog": 0.01847840456172601, "xp": 0, "time": 0, "end": "DEATH: was poisoned. Poisoned by a rotted jackal corpse.", "viol_rate": 0.0, "n_pred": 13686, "n_viol": 0, "anomalies": [], "wallclock": 54.2}
+{"ep": "E42", "seed": 403, "steps": 3917, "depth": 0, "prog": 0.02081163581974355, "xp": 0, "time": 0, "end": "DEATH: was poisoned. Poisoned by a rotted kobold corpse.", "viol_rate": 0.0, "n_pred": 19581, "n_viol": 0, "anomalies": [], "wallclock": 79.9}

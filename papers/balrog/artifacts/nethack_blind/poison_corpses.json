@@ -1,0 +1,10 @@
+{
+ "names": ["jackal", "kobold"],
+ "evidence": [
+  ["b2v7partial_E40", "end", "DEATH: was poisoned. Poisoned by a rotted jackal corpse."],
+  ["b2v7partial_E41", "end", "DEATH: was poisoned. Poisoned by a rotted jackal corpse."],
+  ["b2v7partial_E42", "end", "DEATH: was poisoned. Poisoned by a rotted kobold corpse."],
+  ["b2_E41(v8)", "end", "DEATH: was poisoned. Poisoned by a rotted jackal corpse."]
+ ],
+ "note": "names that have poisoned us when eaten rotted; blacklist is name-based because rot is not visible in the offer prompt"
+}

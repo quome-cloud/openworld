@@ -1,0 +1,312 @@
+{
+ "task": "MiniHack-Quest-Medium-v0",
+ "episodes": [
+  {
+   "seed": 4700,
+   "progression": 1.0,
+   "steps": "0-91",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep0.json.gz"
+  },
+  {
+   "seed": 4701,
+   "progression": 1.0,
+   "steps": "0-68",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep1.json.gz"
+  },
+  {
+   "seed": 4702,
+   "progression": 1.0,
+   "steps": "0-74",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep2.json.gz"
+  },
+  {
+   "seed": 4703,
+   "progression": 1.0,
+   "steps": "0-91",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep3.json.gz"
+  },
+  {
+   "seed": 4704,
+   "progression": 1.0,
+   "steps": "0-73",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep4.json.gz"
+  },
+  {
+   "seed": 5700,
+   "progression": 1.0,
+   "steps": "0-65",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep0.json.gz"
+  },
+  {
+   "seed": 5701,
+   "progression": 1.0,
+   "steps": "0-66",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep1.json.gz"
+  },
+  {
+   "seed": 5702,
+   "progression": 1.0,
+   "steps": "0-71",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep2.json.gz"
+  },
+  {
+   "seed": 5703,
+   "progression": 1.0,
+   "steps": "0-75",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep3.json.gz"
+  },
+  {
+   "seed": 5704,
+   "progression": 1.0,
+   "steps": "0-88",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep4.json.gz"
+  },
+  {
+   "seed": 6700,
+   "progression": 1.0,
+   "steps": "0-91",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep0.json.gz"
+  },
+  {
+   "seed": 6701,
+   "progression": 0.0,
+   "steps": "0-100",
+   "end_reason": "-1",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep1.json.gz"
+  },
+  {
+   "seed": 6702,
+   "progression": 1.0,
+   "steps": "0-64",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep2.json.gz"
+  },
+  {
+   "seed": 6703,
+   "progression": 0.0,
+   "steps": "0-44",
+   "end_reason": "1",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep3.json.gz",
+   "death_cause": "Are you sure you want to pray? [yn] (n)"
+  },
+  {
+   "seed": 6704,
+   "progression": 1.0,
+   "steps": "0-79",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep4.json.gz"
+  }
+ ],
+ "stairs_seen": [
+  {
+   "cell": [
+    55,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep0.json.gz",
+   "steps": "0-91"
+  },
+  {
+   "cell": [
+    54,
+    12
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep0.json.gz",
+   "steps": "0-91"
+  },
+  {
+   "cell": [
+    54,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep1.json.gz",
+   "steps": "0-68"
+  },
+  {
+   "cell": [
+    53,
+    12
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep1.json.gz",
+   "steps": "0-68"
+  },
+  {
+   "cell": [
+    53,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep3.json.gz",
+   "steps": "0-91"
+  },
+  {
+   "cell": [
+    52,
+    12
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep3.json.gz",
+   "steps": "0-91"
+  },
+  {
+   "cell": [
+    53,
+    10
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep2.json.gz",
+   "steps": "0-71"
+  },
+  {
+   "cell": [
+    55,
+    12
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep3.json.gz",
+   "steps": "0-75"
+  },
+  {
+   "cell": [
+    54,
+    10
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep1.json.gz",
+   "steps": "0-100"
+  }
+ ],
+ "lava_cols": [
+  {
+   "x": 52,
+   "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep0.json.gz",
+   "steps": "0-91"
+  }
+ ],
+ "combat": {
+  "kills": 76,
+  "damage_taken": 93,
+  "deaths": 1,
+  "samples": [
+   {
+    "kills": 4,
+    "damage": 4,
+    "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep0.json.gz",
+    "steps": "0-91"
+   },
+   {
+    "kills": 6,
+    "damage": 5,
+    "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep1.json.gz",
+    "steps": "0-68"
+   },
+   {
+    "kills": 6,
+    "damage": 3,
+    "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep2.json.gz",
+    "steps": "0-74"
+   },
+   {
+    "kills": 4,
+    "damage": 11,
+    "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep3.json.gz",
+    "steps": "0-91"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass1/MiniHack-Quest-Medium-v0__ep4.json.gz",
+    "steps": "0-73"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep0.json.gz",
+    "steps": "0-65"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep1.json.gz",
+    "steps": "0-66"
+   },
+   {
+    "kills": 6,
+    "damage": 3,
+    "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep2.json.gz",
+    "steps": "0-71"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep3.json.gz",
+    "steps": "0-75"
+   },
+   {
+    "kills": 4,
+    "damage": 11,
+    "from": "transitions/memory_pass2/MiniHack-Quest-Medium-v0__ep4.json.gz",
+    "steps": "0-88"
+   },
+   {
+    "kills": 4,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep0.json.gz",
+    "steps": "0-91"
+   },
+   {
+    "kills": 3,
+    "damage": 4,
+    "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep1.json.gz",
+    "steps": "0-100"
+   },
+   {
+    "kills": 6,
+    "damage": 3,
+    "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep2.json.gz",
+    "steps": "0-64"
+   },
+   {
+    "kills": 3,
+    "damage": 13,
+    "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep3.json.gz",
+    "steps": "0-44"
+   },
+   {
+    "kills": 6,
+    "damage": 12,
+    "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep4.json.gz",
+    "steps": "0-79"
+   }
+  ]
+ },
+ "failure_causes": [
+  {
+   "cause": "Are you sure you want to pray? [yn] (n)",
+   "from": "transitions/memory_pass3/MiniHack-Quest-Medium-v0__ep3.json.gz",
+   "steps": "0-44"
+  }
+ ],
+ "fired": [
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(55, 11), (54, 12), (54, 11)]"
+ ]
+}

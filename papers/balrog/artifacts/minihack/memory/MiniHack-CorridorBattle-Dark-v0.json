@@ -1,0 +1,266 @@
+{
+ "task": "MiniHack-CorridorBattle-Dark-v0",
+ "episodes": [
+  {
+   "seed": 4500,
+   "progression": 1.0,
+   "steps": "0-58",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz"
+  },
+  {
+   "seed": 4501,
+   "progression": 1.0,
+   "steps": "0-66",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz"
+  },
+  {
+   "seed": 4502,
+   "progression": 1.0,
+   "steps": "0-56",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz"
+  },
+  {
+   "seed": 4503,
+   "progression": 0.0,
+   "steps": "0-44",
+   "end_reason": "1",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz",
+   "death_cause": "You miss the giant rat.  The giant rat misses!"
+  },
+  {
+   "seed": 4504,
+   "progression": 1.0,
+   "steps": "0-59",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz"
+  },
+  {
+   "seed": 5500,
+   "progression": 1.0,
+   "steps": "0-61",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz"
+  },
+  {
+   "seed": 5501,
+   "progression": 1.0,
+   "steps": "0-53",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz"
+  },
+  {
+   "seed": 5502,
+   "progression": 1.0,
+   "steps": "0-58",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz"
+  },
+  {
+   "seed": 5503,
+   "progression": 1.0,
+   "steps": "0-58",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz"
+  },
+  {
+   "seed": 5504,
+   "progression": 1.0,
+   "steps": "0-70",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz"
+  },
+  {
+   "seed": 6500,
+   "progression": 0.0,
+   "steps": "0-34",
+   "end_reason": "1",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+   "death_cause": "You kill the giant rat!"
+  },
+  {
+   "seed": 6501,
+   "progression": 1.0,
+   "steps": "0-51",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz"
+  },
+  {
+   "seed": 6502,
+   "progression": 1.0,
+   "steps": "0-55",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz"
+  },
+  {
+   "seed": 6503,
+   "progression": 1.0,
+   "steps": "0-62",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz"
+  },
+  {
+   "seed": 6504,
+   "progression": 0.0,
+   "steps": "0-35",
+   "end_reason": "1",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz",
+   "death_cause": "You miss the giant rat.  The giant rat bites!"
+  }
+ ],
+ "stairs_seen": [
+  {
+   "cell": [
+    54,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+   "steps": "0-58"
+  },
+  {
+   "cell": [
+    53,
+    11
+   ],
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+   "steps": "0-58"
+  }
+ ],
+ "lava_cols": [],
+ "combat": {
+  "kills": 82,
+  "damage_taken": 131,
+  "deaths": 3,
+  "samples": [
+   {
+    "kills": 6,
+    "damage": 9,
+    "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+    "steps": "0-58"
+   },
+   {
+    "kills": 6,
+    "damage": 8,
+    "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz",
+    "steps": "0-66"
+   },
+   {
+    "kills": 6,
+    "damage": 2,
+    "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz",
+    "steps": "0-56"
+   },
+   {
+    "kills": 4,
+    "damage": 16,
+    "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz",
+    "steps": "0-44"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz",
+    "steps": "0-59"
+   },
+   {
+    "kills": 6,
+    "damage": 8,
+    "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+    "steps": "0-61"
+   },
+   {
+    "kills": 6,
+    "damage": 4,
+    "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz",
+    "steps": "0-53"
+   },
+   {
+    "kills": 6,
+    "damage": 4,
+    "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz",
+    "steps": "0-58"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz",
+    "steps": "0-58"
+   },
+   {
+    "kills": 6,
+    "damage": 13,
+    "from": "transitions/memory_pass2/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz",
+    "steps": "0-70"
+   },
+   {
+    "kills": 3,
+    "damage": 14,
+    "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+    "steps": "0-34"
+   },
+   {
+    "kills": 6,
+    "damage": 8,
+    "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz",
+    "steps": "0-51"
+   },
+   {
+    "kills": 6,
+    "damage": 6,
+    "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz",
+    "steps": "0-55"
+   },
+   {
+    "kills": 6,
+    "damage": 14,
+    "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz",
+    "steps": "0-62"
+   },
+   {
+    "kills": 3,
+    "damage": 13,
+    "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz",
+    "steps": "0-35"
+   }
+  ]
+ },
+ "failure_causes": [
+  {
+   "cause": "You miss the giant rat.  The giant rat misses!",
+   "from": "transitions/memory_pass1/MiniHack-CorridorBattle-Dark-v0__ep3.json.gz",
+   "steps": "0-44"
+  },
+  {
+   "cause": "You kill the giant rat!",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz",
+   "steps": "0-34"
+  },
+  {
+   "cause": "You miss the giant rat.  The giant rat bites!",
+   "from": "transitions/memory_pass3/MiniHack-CorridorBattle-Dark-v0__ep4.json.gz",
+   "steps": "0-35"
+  }
+ ],
+ "fired": [
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E2 dash: hp=3 < 0.85*expected remaining damage 4.2 (dpk=1.06, kills=2)",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E2 dash: hp=3 < 0.85*expected remaining damage 5.2 (dpk=1.31, kills=2)",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E2 dash: hp=3 < 0.85*expected remaining damage 4.3 (dpk=1.42, kills=3)",
+  "E1 beeline: frontier biased toward remembered stairs [(54, 11), (53, 11)]",
+  "E2 dash: hp=4 < 0.85*expected remaining damage 6.0 (dpk=1.49, kills=2)"
+ ]
+}

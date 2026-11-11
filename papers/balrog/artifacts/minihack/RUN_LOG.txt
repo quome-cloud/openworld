@@ -1,0 +1,289 @@
+18:29:04 === BALROG MiniHack suite: 8 tasks x 5 episodes; SOTA 90.0% (Gemini-3.1-Pro) ===
+18:29:07       solver w=1.0: solved(1050 nodes, 0.1s)
+18:29:07 MiniHack-Boxoban-Hard-v0 ep0 seed=1000 -> prog=1.0 steps=30 end=2 (0.23s) | running score 100.0% over 1 tasks
+18:29:08       solver w=1.0: solved(4971 nodes, 0.7s)
+18:29:09 MiniHack-Boxoban-Hard-v0 ep1 seed=1001 -> prog=1.0 steps=83 end=2 (1.1s) | running score 100.0% over 1 tasks
+18:29:10       solver w=1.0: solved(5854 nodes, 1.5s)
+18:29:11 MiniHack-Boxoban-Hard-v0 ep2 seed=1002 -> prog=1.0 steps=55 end=2 (1.89s) | running score 100.0% over 1 tasks
+18:29:16       solver w=1.0: solved(9249 nodes, 5.2s)
+18:29:18 MiniHack-Boxoban-Hard-v0 ep3 seed=1003 -> prog=1.0 steps=52 end=2 (6.07s) | running score 100.0% over 1 tasks
+18:29:19       solver w=1.0: solved(1498 nodes, 0.6s)
+18:29:21 MiniHack-Boxoban-Hard-v0 ep4 seed=1004 -> prog=1.0 steps=57 end=2 (1.36s) | running score 100.0% over 1 tasks
+18:29:33       solver w=1.0: solved(14062 nodes, 8.0s)
+18:29:34 MiniHack-Boxoban-Medium-v0 ep0 seed=1100 -> prog=1.0 steps=53 end=2 (8.36s) | running score 100.0% over 2 tasks
+18:29:38       solver w=1.0: solved(4220 nodes, 1.1s)
+18:29:39 MiniHack-Boxoban-Medium-v0 ep1 seed=1101 -> prog=1.0 steps=70 end=2 (1.71s) | running score 100.0% over 2 tasks
+18:29:43       solver w=1.0: solved(4440 nodes, 1.9s)
+18:29:44 MiniHack-Boxoban-Medium-v0 ep2 seed=1102 -> prog=1.0 steps=39 end=2 (2.17s) | running score 100.0% over 2 tasks
+18:29:46       solver w=1.0: solved(636 nodes, 0.3s)
+18:29:47 MiniHack-Boxoban-Medium-v0 ep3 seed=1103 -> prog=1.0 steps=36 end=2 (0.59s) | running score 100.0% over 2 tasks
+18:29:52       solver w=1.0: solved(8011 nodes, 2.6s)
+18:29:53 MiniHack-Boxoban-Medium-v0 ep4 seed=1104 -> prog=1.0 steps=63 end=2 (3.05s) | running score 100.0% over 2 tasks
+18:29:54 MiniHack-MazeWalk-9x9-v0 ep0 seed=1200 -> prog=1.0 steps=5 end=2 (0.1s) | running score 100.0% over 3 tasks
+18:29:54 MiniHack-MazeWalk-9x9-v0 ep1 seed=1201 -> prog=1.0 steps=5 end=2 (0.06s) | running score 100.0% over 3 tasks
+18:29:54 MiniHack-MazeWalk-9x9-v0 ep2 seed=1202 -> prog=1.0 steps=6 end=2 (0.05s) | running score 100.0% over 3 tasks
+18:29:55 MiniHack-MazeWalk-9x9-v0 ep3 seed=1203 -> prog=1.0 steps=1 end=2 (0.01s) | running score 100.0% over 3 tasks
+18:29:56 MiniHack-MazeWalk-9x9-v0 ep4 seed=1204 -> prog=1.0 steps=26 end=2 (0.41s) | running score 100.0% over 3 tasks
+18:29:57 MiniHack-MazeWalk-15x15-v0 ep0 seed=1300 -> prog=1.0 steps=82 end=2 (0.91s) | running score 100.0% over 4 tasks
+18:29:58 MiniHack-MazeWalk-15x15-v0 ep1 seed=1301 -> prog=1.0 steps=64 end=2 (0.49s) | running score 100.0% over 4 tasks
+18:30:00 MiniHack-MazeWalk-15x15-v0 ep2 seed=1302 -> prog=1.0 steps=73 end=2 (0.93s) | running score 100.0% over 4 tasks
+18:30:00 MiniHack-MazeWalk-15x15-v0 ep3 seed=1303 -> prog=1.0 steps=7 end=2 (0.06s) | running score 100.0% over 4 tasks
+18:30:01 MiniHack-MazeWalk-15x15-v0 ep4 seed=1304 -> prog=1.0 steps=54 end=2 (0.61s) | running score 100.0% over 4 tasks
+18:30:03 MiniHack-Corridor-R3-v0 ep0 seed=1400 -> prog=0.0 steps=100 end=-1 (1.34s) | running score 80.0% over 5 tasks
+18:30:04 MiniHack-Corridor-R3-v0 ep1 seed=1401 -> prog=1.0 steps=41 end=2 (0.36s) | running score 90.0% over 5 tasks
+18:30:05 MiniHack-Corridor-R3-v0 ep2 seed=1402 -> prog=1.0 steps=33 end=2 (0.3s) | running score 93.3% over 5 tasks
+18:30:06 MiniHack-Corridor-R3-v0 ep3 seed=1403 -> prog=1.0 steps=62 end=2 (0.52s) | running score 95.0% over 5 tasks
+18:30:07 MiniHack-Corridor-R3-v0 ep4 seed=1404 -> prog=1.0 steps=73 end=2 (0.74s) | running score 96.0% over 5 tasks
+18:30:08 MiniHack-CorridorBattle-Dark-v0 ep0 seed=1500 -> prog=1.0 steps=57 end=2 (0.47s) | running score 96.7% over 6 tasks
+18:30:09 MiniHack-CorridorBattle-Dark-v0 ep1 seed=1501 -> prog=0.0 steps=38 end=1 (0.24s) | running score 88.3% over 6 tasks
+18:30:09 MiniHack-CorridorBattle-Dark-v0 ep2 seed=1502 -> prog=0.0 steps=43 end=1 (0.24s) | running score 85.6% over 6 tasks
+18:30:10 MiniHack-CorridorBattle-Dark-v0 ep3 seed=1503 -> prog=1.0 steps=54 end=2 (0.44s) | running score 88.3% over 6 tasks
+18:30:11 MiniHack-CorridorBattle-Dark-v0 ep4 seed=1504 -> prog=1.0 steps=60 end=2 (0.5s) | running score 90.0% over 6 tasks
+18:30:12 MiniHack-Quest-Easy-v0 ep0 seed=1600 -> prog=1.0 steps=41 end=2 (0.29s) | running score 91.4% over 7 tasks
+18:30:12 MiniHack-Quest-Easy-v0 ep1 seed=1601 -> prog=1.0 steps=38 end=2 (0.32s) | running score 91.4% over 7 tasks
+18:30:13 MiniHack-Quest-Easy-v0 ep2 seed=1602 -> prog=1.0 steps=38 end=2 (0.31s) | running score 91.4% over 7 tasks
+18:30:14 MiniHack-Quest-Easy-v0 ep3 seed=1603 -> prog=1.0 steps=38 end=2 (0.43s) | running score 91.4% over 7 tasks
+18:30:14 MiniHack-Quest-Easy-v0 ep4 seed=1604 -> prog=1.0 steps=37 end=2 (0.29s) | running score 91.4% over 7 tasks
+18:30:16 MiniHack-Quest-Medium-v0 ep0 seed=1700 -> prog=1.0 steps=91 end=2 (0.58s) | running score 92.5% over 8 tasks
+18:30:17 MiniHack-Quest-Medium-v0 ep1 seed=1701 -> prog=1.0 steps=70 end=2 (0.42s) | running score 92.5% over 8 tasks
+18:30:18 MiniHack-Quest-Medium-v0 ep2 seed=1702 -> prog=1.0 steps=63 end=2 (0.65s) | running score 92.5% over 8 tasks
+18:30:20 MiniHack-Quest-Medium-v0 ep3 seed=1703 -> prog=1.0 steps=65 end=2 (0.71s) | running score 92.5% over 8 tasks
+18:30:23 MiniHack-Quest-Medium-v0 ep4 seed=1704 -> prog=1.0 steps=67 end=2 (1.04s) | running score 92.5% over 8 tasks
+18:30:23 === suite complete ===
+18:30:32       solver w=1.0: solved(839 nodes, 0.4s)
+18:30:33 [robust] MiniHack-Boxoban-Hard-v0 ep0 seed=2000 -> prog=1.0 steps=38 end=2
+18:30:34       solver w=1.0: solved(2493 nodes, 0.4s)
+18:30:34 [robust] MiniHack-Boxoban-Hard-v0 ep1 seed=2001 -> prog=1.0 steps=51 end=2
+18:30:39       solver w=1.0: exhausted(19138 nodes)
+18:30:43       solver w=1.5: exhausted(19147 nodes)
+18:30:48       solver w=2.5: exhausted(19714 nodes)
+18:30:49 [robust] MiniHack-Boxoban-Hard-v0 ep2 seed=2002 -> prog=0.0 steps=100 end=-1
+18:30:59       solver w=1.0: solved(29549 nodes, 9.9s)
+18:31:00 [robust] MiniHack-Boxoban-Hard-v0 ep3 seed=2003 -> prog=1.0 steps=68 end=2
+18:31:05       solver w=1.0: solved(14817 nodes, 4.8s)
+18:31:06 [robust] MiniHack-Boxoban-Hard-v0 ep4 seed=2004 -> prog=1.0 steps=75 end=2
+18:31:08       solver w=1.0: solved(426 nodes, 0.1s)
+18:31:09 [robust] MiniHack-Boxoban-Medium-v0 ep0 seed=2100 -> prog=1.0 steps=48 end=2
+18:31:11       solver w=1.0: solved(2906 nodes, 0.6s)
+18:31:12 [robust] MiniHack-Boxoban-Medium-v0 ep1 seed=2101 -> prog=1.0 steps=53 end=2
+18:31:14       solver w=1.0: solved(1754 nodes, 0.4s)
+18:31:15 [robust] MiniHack-Boxoban-Medium-v0 ep2 seed=2102 -> prog=1.0 steps=33 end=2
+18:31:17       solver w=1.0: solved(795 nodes, 0.4s)
+18:31:17 [robust] MiniHack-Boxoban-Medium-v0 ep3 seed=2103 -> prog=1.0 steps=29 end=2
+18:31:34       solver w=1.0: solved(24641 nodes, 13.5s)
+18:31:34 [robust] MiniHack-Boxoban-Medium-v0 ep4 seed=2104 -> prog=1.0 steps=47 end=2
+18:31:35 [robust] MiniHack-MazeWalk-9x9-v0 ep0 seed=2200 -> prog=1.0 steps=16 end=2
+18:31:37 [robust] MiniHack-MazeWalk-9x9-v0 ep1 seed=2201 -> prog=1.0 steps=30 end=2
+18:31:37 [robust] MiniHack-MazeWalk-9x9-v0 ep2 seed=2202 -> prog=1.0 steps=5 end=2
+18:31:38 [robust] MiniHack-MazeWalk-9x9-v0 ep3 seed=2203 -> prog=1.0 steps=3 end=2
+18:31:39 [robust] MiniHack-MazeWalk-9x9-v0 ep4 seed=2204 -> prog=1.0 steps=11 end=2
+18:31:40 [robust] MiniHack-MazeWalk-15x15-v0 ep0 seed=2300 -> prog=1.0 steps=24 end=2
+18:31:42 [robust] MiniHack-MazeWalk-15x15-v0 ep1 seed=2301 -> prog=1.0 steps=33 end=2
+18:31:44 [robust] MiniHack-MazeWalk-15x15-v0 ep2 seed=2302 -> prog=1.0 steps=68 end=2
+18:31:47 [robust] MiniHack-MazeWalk-15x15-v0 ep3 seed=2303 -> prog=1.0 steps=79 end=2
+18:31:47 [robust] MiniHack-MazeWalk-15x15-v0 ep4 seed=2304 -> prog=1.0 steps=4 end=2
+18:31:49 [robust] MiniHack-Corridor-R3-v0 ep0 seed=2400 -> prog=1.0 steps=42 end=2
+18:31:52 [robust] MiniHack-Corridor-R3-v0 ep1 seed=2401 -> prog=1.0 steps=71 end=2
+18:31:54 [robust] MiniHack-Corridor-R3-v0 ep2 seed=2402 -> prog=1.0 steps=47 end=2
+18:31:55 [robust] MiniHack-Corridor-R3-v0 ep3 seed=2403 -> prog=1.0 steps=63 end=2
+18:31:57 [robust] MiniHack-Corridor-R3-v0 ep4 seed=2404 -> prog=1.0 steps=67 end=2
+18:31:57 [robust] MiniHack-CorridorBattle-Dark-v0 ep0 seed=2500 -> prog=0.0 steps=35 end=1
+18:31:58 [robust] MiniHack-CorridorBattle-Dark-v0 ep1 seed=2501 -> prog=0.0 steps=39 end=1
+18:31:58 [robust] MiniHack-CorridorBattle-Dark-v0 ep2 seed=2502 -> prog=1.0 steps=54 end=2
+18:31:59 [robust] MiniHack-CorridorBattle-Dark-v0 ep3 seed=2503 -> prog=1.0 steps=61 end=2
+18:32:00 [robust] MiniHack-CorridorBattle-Dark-v0 ep4 seed=2504 -> prog=1.0 steps=53 end=2
+18:32:01 [robust] MiniHack-Quest-Easy-v0 ep0 seed=2600 -> prog=1.0 steps=40 end=2
+18:32:02 [robust] MiniHack-Quest-Easy-v0 ep1 seed=2601 -> prog=1.0 steps=46 end=2
+18:32:02 [robust] MiniHack-Quest-Easy-v0 ep2 seed=2602 -> prog=1.0 steps=36 end=2
+18:32:03 [robust] MiniHack-Quest-Easy-v0 ep3 seed=2603 -> prog=1.0 steps=34 end=2
+18:32:04 [robust] MiniHack-Quest-Easy-v0 ep4 seed=2604 -> prog=1.0 steps=39 end=2
+18:32:04 [robust] MiniHack-Quest-Medium-v0 ep0 seed=2700 -> prog=1.0 steps=89 end=2
+18:32:05 [robust] MiniHack-Quest-Medium-v0 ep1 seed=2701 -> prog=1.0 steps=76 end=2
+18:32:06 [robust] MiniHack-Quest-Medium-v0 ep2 seed=2702 -> prog=1.0 steps=85 end=2
+18:32:07 [robust] MiniHack-Quest-Medium-v0 ep3 seed=2703 -> prog=1.0 steps=77 end=2
+18:32:08 [robust] MiniHack-Quest-Medium-v0 ep4 seed=2704 -> prog=1.0 steps=76 end=2
+18:32:08 === robustness block: 92.5% ===
+18:32:12       solver w=1.0: solved(11321 nodes, 1.7s)
+18:32:13 [B pass 1] MiniHack-Boxoban-Hard-v0 ep0 seed=4000 -> prog=1.0 steps=87 end=2
+18:32:42       solver w=1.0: solved(96250 nodes, 28.3s)
+18:32:42 [B pass 1] MiniHack-Boxoban-Hard-v0 ep1 seed=4001 -> prog=1.0 steps=69 end=2
+18:32:43       solver w=1.0: solved(2431 nodes, 0.4s)
+18:32:43 [B pass 1] MiniHack-Boxoban-Hard-v0 ep2 seed=4002 -> prog=1.0 steps=55 end=2
+18:32:45       solver w=1.0: solved(5606 nodes, 1.1s)
+18:32:45 [B pass 1] MiniHack-Boxoban-Hard-v0 ep3 seed=4003 -> prog=1.0 steps=63 end=2
+18:32:46       solver w=1.0: solved(922 nodes, 0.1s)
+18:32:46 [B pass 1] MiniHack-Boxoban-Hard-v0 ep4 seed=4004 -> prog=1.0 steps=32 end=2
+18:32:48       solver w=1.0: solved(3111 nodes, 0.5s)
+18:32:48 [B pass 1] MiniHack-Boxoban-Medium-v0 ep0 seed=4100 -> prog=1.0 steps=42 end=2
+18:32:52       solver w=1.0: solved(15665 nodes, 2.8s)
+18:32:52 [B pass 1] MiniHack-Boxoban-Medium-v0 ep1 seed=4101 -> prog=1.0 steps=63 end=2
+18:32:54       solver w=1.0: solved(713 nodes, 0.1s)
+18:32:54 [B pass 1] MiniHack-Boxoban-Medium-v0 ep2 seed=4102 -> prog=1.0 steps=47 end=2
+18:32:56       solver w=1.0: solved(1023 nodes, 0.3s)
+18:32:56 [B pass 1] MiniHack-Boxoban-Medium-v0 ep3 seed=4103 -> prog=1.0 steps=34 end=2
+18:32:58       solver w=1.0: solved(4224 nodes, 0.9s)
+18:32:58 [B pass 1] MiniHack-Boxoban-Medium-v0 ep4 seed=4104 -> prog=1.0 steps=59 end=2
+18:32:59 [B pass 1] MiniHack-MazeWalk-9x9-v0 ep0 seed=4200 -> prog=1.0 steps=2 end=2
+18:32:59 [B pass 1] MiniHack-MazeWalk-9x9-v0 ep1 seed=4201 -> prog=1.0 steps=6 end=2
+18:32:59 [B pass 1] MiniHack-MazeWalk-9x9-v0 ep2 seed=4202 -> prog=1.0 steps=26 end=2
+18:32:59 [B pass 1] MiniHack-MazeWalk-9x9-v0 ep3 seed=4203 -> prog=1.0 steps=1 end=2
+18:32:59 [B pass 1] MiniHack-MazeWalk-9x9-v0 ep4 seed=4204 -> prog=1.0 steps=18 end=2
+18:33:00 [B pass 1] MiniHack-MazeWalk-15x15-v0 ep0 seed=4300 -> prog=1.0 steps=56 end=2
+18:33:01 [B pass 1] MiniHack-MazeWalk-15x15-v0 ep1 seed=4301 -> prog=1.0 steps=72 end=2
+18:33:02 [B pass 1] MiniHack-MazeWalk-15x15-v0 ep2 seed=4302 -> prog=1.0 steps=15 end=2
+18:33:03 [B pass 1] MiniHack-MazeWalk-15x15-v0 ep3 seed=4303 -> prog=1.0 steps=90 end=2
+18:33:04 [B pass 1] MiniHack-MazeWalk-15x15-v0 ep4 seed=4304 -> prog=1.0 steps=26 end=2
+18:33:04 [B pass 1] MiniHack-Corridor-R3-v0 ep0 seed=4400 -> prog=1.0 steps=54 end=2
+18:33:05 [B pass 1] MiniHack-Corridor-R3-v0 ep1 seed=4401 -> prog=1.0 steps=67 end=2
+18:33:06 [B pass 1] MiniHack-Corridor-R3-v0 ep2 seed=4402 -> prog=0.0 steps=100 end=-1
+18:33:07 [B pass 1] MiniHack-Corridor-R3-v0 ep3 seed=4403 -> prog=1.0 steps=27 end=2
+18:33:07 [B pass 1] MiniHack-Corridor-R3-v0 ep4 seed=4404 -> prog=1.0 steps=62 end=2
+18:33:08 [B pass 1] MiniHack-CorridorBattle-Dark-v0 ep0 seed=4500 -> prog=1.0 steps=58 end=2
+18:33:09 [B pass 1] MiniHack-CorridorBattle-Dark-v0 ep1 seed=4501 -> prog=1.0 steps=66 end=2
+18:33:10 [B pass 1] MiniHack-CorridorBattle-Dark-v0 ep2 seed=4502 -> prog=1.0 steps=56 end=2
+18:33:10       MEM-FIRED E2 dash: hp=3 < 0.85*expected remaining damage 4.2 (dpk=1.06, kills=2)
+18:33:10 [B pass 1] MiniHack-CorridorBattle-Dark-v0 ep3 seed=4503 -> prog=0.0 steps=44 end=1
+18:33:10 [B pass 1] MiniHack-CorridorBattle-Dark-v0 ep4 seed=4504 -> prog=1.0 steps=59 end=2
+18:33:11 [B pass 1] MiniHack-Quest-Easy-v0 ep0 seed=4600 -> prog=1.0 steps=42 end=2
+18:33:11 [B pass 1] MiniHack-Quest-Easy-v0 ep1 seed=4601 -> prog=1.0 steps=34 end=2
+18:33:12 [B pass 1] MiniHack-Quest-Easy-v0 ep2 seed=4602 -> prog=1.0 steps=37 end=2
+18:33:13 [B pass 1] MiniHack-Quest-Easy-v0 ep3 seed=4603 -> prog=1.0 steps=37 end=2
+18:33:13 [B pass 1] MiniHack-Quest-Easy-v0 ep4 seed=4604 -> prog=1.0 steps=41 end=2
+18:33:14 [B pass 1] MiniHack-Quest-Medium-v0 ep0 seed=4700 -> prog=1.0 steps=91 end=2
+18:33:15 [B pass 1] MiniHack-Quest-Medium-v0 ep1 seed=4701 -> prog=1.0 steps=68 end=2
+18:33:16 [B pass 1] MiniHack-Quest-Medium-v0 ep2 seed=4702 -> prog=1.0 steps=74 end=2
+18:33:16 [B pass 1] MiniHack-Quest-Medium-v0 ep3 seed=4703 -> prog=1.0 steps=91 end=2
+18:33:18 [B pass 1] MiniHack-Quest-Medium-v0 ep4 seed=4704 -> prog=1.0 steps=73 end=2
+18:33:18 === pass 1: score 95.0%, deaths 1, mean steps-to-solve 50.0 ===
+18:33:18       solver w=1.0: solved(1152 nodes, 0.3s)
+18:33:19 [B pass 2] MiniHack-Boxoban-Hard-v0 ep0 seed=5000 -> prog=1.0 steps=35 end=2
+18:33:21       solver w=1.0: solved(8632 nodes, 2.0s)
+18:33:22 [B pass 2] MiniHack-Boxoban-Hard-v0 ep1 seed=5001 -> prog=1.0 steps=66 end=2
+18:33:23       solver w=1.0: solved(1853 nodes, 0.5s)
+18:33:24 [B pass 2] MiniHack-Boxoban-Hard-v0 ep2 seed=5002 -> prog=1.0 steps=67 end=2
+18:33:24       solver w=1.0: solved(326 nodes, 0.0s)
+18:33:25 [B pass 2] MiniHack-Boxoban-Hard-v0 ep3 seed=5003 -> prog=1.0 steps=34 end=2
+18:33:25       solver w=1.0: solved(1386 nodes, 0.2s)
+18:33:25 [B pass 2] MiniHack-Boxoban-Hard-v0 ep4 seed=5004 -> prog=1.0 steps=34 end=2
+18:33:27       solver w=1.0: solved(2332 nodes, 0.4s)
+18:33:28 [B pass 2] MiniHack-Boxoban-Medium-v0 ep0 seed=5100 -> prog=1.0 steps=40 end=2
+18:33:29       solver w=1.0: solved(2498 nodes, 0.5s)
+18:33:30 [B pass 2] MiniHack-Boxoban-Medium-v0 ep1 seed=5101 -> prog=1.0 steps=41 end=2
+18:33:31       solver w=1.0: solved(2841 nodes, 0.3s)
+18:33:32 [B pass 2] MiniHack-Boxoban-Medium-v0 ep2 seed=5102 -> prog=1.0 steps=53 end=2
+18:33:33       solver w=1.0: solved(2150 nodes, 0.4s)
+18:33:34 [B pass 2] MiniHack-Boxoban-Medium-v0 ep3 seed=5103 -> prog=1.0 steps=45 end=2
+18:33:37       solver w=1.0: solved(7729 nodes, 1.9s)
+18:33:37 [B pass 2] MiniHack-Boxoban-Medium-v0 ep4 seed=5104 -> prog=1.0 steps=57 end=2
+18:33:37 [B pass 2] MiniHack-MazeWalk-9x9-v0 ep0 seed=5200 -> prog=1.0 steps=1 end=2
+18:33:38 [B pass 2] MiniHack-MazeWalk-9x9-v0 ep1 seed=5201 -> prog=1.0 steps=7 end=2
+18:33:38 [B pass 2] MiniHack-MazeWalk-9x9-v0 ep2 seed=5202 -> prog=1.0 steps=6 end=2
+18:33:38 [B pass 2] MiniHack-MazeWalk-9x9-v0 ep3 seed=5203 -> prog=1.0 steps=34 end=2
+18:33:38 [B pass 2] MiniHack-MazeWalk-9x9-v0 ep4 seed=5204 -> prog=1.0 steps=2 end=2
+18:33:39 [B pass 2] MiniHack-MazeWalk-15x15-v0 ep0 seed=5300 -> prog=1.0 steps=1 end=2
+18:33:39 [B pass 2] MiniHack-MazeWalk-15x15-v0 ep1 seed=5301 -> prog=1.0 steps=35 end=2
+18:33:39 [B pass 2] MiniHack-MazeWalk-15x15-v0 ep2 seed=5302 -> prog=1.0 steps=5 end=2
+18:33:40 [B pass 2] MiniHack-MazeWalk-15x15-v0 ep3 seed=5303 -> prog=1.0 steps=63 end=2
+18:33:41 [B pass 2] MiniHack-MazeWalk-15x15-v0 ep4 seed=5304 -> prog=1.0 steps=99 end=2
+18:33:42 [B pass 2] MiniHack-Corridor-R3-v0 ep0 seed=5400 -> prog=1.0 steps=38 end=2
+18:33:43 [B pass 2] MiniHack-Corridor-R3-v0 ep1 seed=5401 -> prog=1.0 steps=99 end=2
+18:33:44 [B pass 2] MiniHack-Corridor-R3-v0 ep2 seed=5402 -> prog=1.0 steps=77 end=2
+18:33:45 [B pass 2] MiniHack-Corridor-R3-v0 ep3 seed=5403 -> prog=1.0 steps=54 end=2
+18:33:46 [B pass 2] MiniHack-Corridor-R3-v0 ep4 seed=5404 -> prog=1.0 steps=62 end=2
+18:33:46 [B pass 2] MiniHack-CorridorBattle-Dark-v0 ep0 seed=5500 -> prog=1.0 steps=61 end=2
+18:33:47 [B pass 2] MiniHack-CorridorBattle-Dark-v0 ep1 seed=5501 -> prog=1.0 steps=53 end=2
+18:33:48 [B pass 2] MiniHack-CorridorBattle-Dark-v0 ep2 seed=5502 -> prog=1.0 steps=58 end=2
+18:33:49 [B pass 2] MiniHack-CorridorBattle-Dark-v0 ep3 seed=5503 -> prog=1.0 steps=58 end=2
+18:33:49 [B pass 2] MiniHack-CorridorBattle-Dark-v0 ep4 seed=5504 -> prog=1.0 steps=70 end=2
+18:33:51 [B pass 2] MiniHack-Quest-Easy-v0 ep0 seed=5600 -> prog=1.0 steps=34 end=2
+18:33:51       ACQUIRE: free letters ['f', 'g'] unreachable; giving up tools
+18:33:53 [B pass 2] MiniHack-Quest-Easy-v0 ep1 seed=5601 -> prog=0.0 steps=100 end=-1
+18:33:54 [B pass 2] MiniHack-Quest-Easy-v0 ep2 seed=5602 -> prog=1.0 steps=35 end=2
+18:33:54       ACQUIRE: free letters ['f', 'g'] unreachable; giving up tools
+18:33:56 [B pass 2] MiniHack-Quest-Easy-v0 ep3 seed=5603 -> prog=0.0 steps=100 end=-1
+18:33:56 [B pass 2] MiniHack-Quest-Easy-v0 ep4 seed=5604 -> prog=1.0 steps=42 end=2
+18:33:57 [B pass 2] MiniHack-Quest-Medium-v0 ep0 seed=5700 -> prog=1.0 steps=65 end=2
+18:33:57 [B pass 2] MiniHack-Quest-Medium-v0 ep1 seed=5701 -> prog=1.0 steps=66 end=2
+18:33:58 [B pass 2] MiniHack-Quest-Medium-v0 ep2 seed=5702 -> prog=1.0 steps=71 end=2
+18:33:59 [B pass 2] MiniHack-Quest-Medium-v0 ep3 seed=5703 -> prog=1.0 steps=75 end=2
+18:34:00 [B pass 2] MiniHack-Quest-Medium-v0 ep4 seed=5704 -> prog=1.0 steps=88 end=2
+18:34:00 === pass 2: score 95.0%, deaths 0, mean steps-to-solve 48.2 ===
+18:34:01       solver w=1.0: solved(2265 nodes, 0.5s)
+18:34:01 [B pass 3] MiniHack-Boxoban-Hard-v0 ep0 seed=6000 -> prog=1.0 steps=59 end=2
+18:34:01       solver w=1.0: solved(526 nodes, 0.1s)
+18:34:02 [B pass 3] MiniHack-Boxoban-Hard-v0 ep1 seed=6001 -> prog=1.0 steps=43 end=2
+18:34:03       solver w=1.0: solved(6847 nodes, 1.2s)
+18:34:04 [B pass 3] MiniHack-Boxoban-Hard-v0 ep2 seed=6002 -> prog=1.0 steps=69 end=2
+18:34:05       solver w=1.0: solved(5571 nodes, 0.7s)
+18:34:06 [B pass 3] MiniHack-Boxoban-Hard-v0 ep3 seed=6003 -> prog=1.0 steps=72 end=2
+18:34:08       solver w=1.0: solved(10691 nodes, 2.2s)
+18:34:09 [B pass 3] MiniHack-Boxoban-Hard-v0 ep4 seed=6004 -> prog=1.0 steps=73 end=2
+18:34:15       solver w=1.0: solved(15709 nodes, 4.6s)
+18:34:15 [B pass 3] MiniHack-Boxoban-Medium-v0 ep0 seed=6100 -> prog=1.0 steps=40 end=2
+18:34:19       solver w=1.0: solved(7915 nodes, 2.7s)
+18:34:19 [B pass 3] MiniHack-Boxoban-Medium-v0 ep1 seed=6101 -> prog=1.0 steps=51 end=2
+18:34:21       solver w=1.0: solved(389 nodes, 0.1s)
+18:34:22 [B pass 3] MiniHack-Boxoban-Medium-v0 ep2 seed=6102 -> prog=1.0 steps=30 end=2
+18:34:25       solver w=1.0: solved(4650 nodes, 0.6s)
+18:34:25 [B pass 3] MiniHack-Boxoban-Medium-v0 ep3 seed=6103 -> prog=1.0 steps=60 end=2
+18:34:28       solver w=1.0: solved(10770 nodes, 2.0s)
+18:34:29 [B pass 3] MiniHack-Boxoban-Medium-v0 ep4 seed=6104 -> prog=1.0 steps=77 end=2
+18:34:30 [B pass 3] MiniHack-MazeWalk-9x9-v0 ep0 seed=6200 -> prog=1.0 steps=25 end=2
+18:34:30 [B pass 3] MiniHack-MazeWalk-9x9-v0 ep1 seed=6201 -> prog=1.0 steps=9 end=2
+18:34:30 [B pass 3] MiniHack-MazeWalk-9x9-v0 ep2 seed=6202 -> prog=1.0 steps=21 end=2
+18:34:30 [B pass 3] MiniHack-MazeWalk-9x9-v0 ep3 seed=6203 -> prog=1.0 steps=1 end=2
+18:34:31 [B pass 3] MiniHack-MazeWalk-9x9-v0 ep4 seed=6204 -> prog=1.0 steps=52 end=2
+18:34:31 [B pass 3] MiniHack-MazeWalk-15x15-v0 ep0 seed=6300 -> prog=1.0 steps=5 end=2
+18:34:31 [B pass 3] MiniHack-MazeWalk-15x15-v0 ep1 seed=6301 -> prog=1.0 steps=37 end=2
+18:34:32 [B pass 3] MiniHack-MazeWalk-15x15-v0 ep2 seed=6302 -> prog=1.0 steps=55 end=2
+18:34:32 [B pass 3] MiniHack-MazeWalk-15x15-v0 ep3 seed=6303 -> prog=1.0 steps=4 end=2
+18:34:32 [B pass 3] MiniHack-MazeWalk-15x15-v0 ep4 seed=6304 -> prog=1.0 steps=39 end=2
+18:34:33 [B pass 3] MiniHack-Corridor-R3-v0 ep0 seed=6400 -> prog=1.0 steps=47 end=2
+18:34:33 [B pass 3] MiniHack-Corridor-R3-v0 ep1 seed=6401 -> prog=1.0 steps=50 end=2
+18:34:34 [B pass 3] MiniHack-Corridor-R3-v0 ep2 seed=6402 -> prog=1.0 steps=62 end=2
+18:34:35 [B pass 3] MiniHack-Corridor-R3-v0 ep3 seed=6403 -> prog=0.0 steps=100 end=-1
+18:34:36 [B pass 3] MiniHack-Corridor-R3-v0 ep4 seed=6404 -> prog=1.0 steps=70 end=2
+18:34:36       MEM-FIRED E2 dash: hp=3 < 0.85*expected remaining damage 5.2 (dpk=1.31, kills=2)
+18:34:36 [B pass 3] MiniHack-CorridorBattle-Dark-v0 ep0 seed=6500 -> prog=0.0 steps=34 end=1
+18:34:37 [B pass 3] MiniHack-CorridorBattle-Dark-v0 ep1 seed=6501 -> prog=1.0 steps=51 end=2
+18:34:37 [B pass 3] MiniHack-CorridorBattle-Dark-v0 ep2 seed=6502 -> prog=1.0 steps=55 end=2
+18:34:37       MEM-FIRED E2 dash: hp=3 < 0.85*expected remaining damage 4.3 (dpk=1.42, kills=3)
+18:34:37 [B pass 3] MiniHack-CorridorBattle-Dark-v0 ep3 seed=6503 -> prog=1.0 steps=62 end=2
+18:34:38       MEM-FIRED E2 dash: hp=4 < 0.85*expected remaining damage 6.0 (dpk=1.49, kills=2)
+18:34:38 [B pass 3] MiniHack-CorridorBattle-Dark-v0 ep4 seed=6504 -> prog=0.0 steps=35 end=1
+18:34:38 [B pass 3] MiniHack-Quest-Easy-v0 ep0 seed=6600 -> prog=1.0 steps=40 end=2
+18:34:38       ACQUIRE: free letters ['f', 'g'] unreachable; giving up tools
+18:34:40 [B pass 3] MiniHack-Quest-Easy-v0 ep1 seed=6601 -> prog=0.0 steps=100 end=-1
+18:34:40 [B pass 3] MiniHack-Quest-Easy-v0 ep2 seed=6602 -> prog=1.0 steps=34 end=2
+18:34:41 [B pass 3] MiniHack-Quest-Easy-v0 ep3 seed=6603 -> prog=0.0 steps=29 end=1
+18:34:41 [B pass 3] MiniHack-Quest-Easy-v0 ep4 seed=6604 -> prog=1.0 steps=35 end=2
+18:34:42 [B pass 3] MiniHack-Quest-Medium-v0 ep0 seed=6700 -> prog=1.0 steps=91 end=2
+18:34:42 [B pass 3] MiniHack-Quest-Medium-v0 ep1 seed=6701 -> prog=0.0 steps=100 end=-1
+18:34:43 [B pass 3] MiniHack-Quest-Medium-v0 ep2 seed=6702 -> prog=1.0 steps=64 end=2
+18:34:43 [B pass 3] MiniHack-Quest-Medium-v0 ep3 seed=6703 -> prog=0.0 steps=44 end=1
+18:34:44 [B pass 3] MiniHack-Quest-Medium-v0 ep4 seed=6704 -> prog=1.0 steps=79 end=2
+18:34:44 === pass 3: score 82.5%, deaths 4, mean steps-to-solve 47.3 ===
+18:34:47 [explore] MiniHack-Boxoban-Hard-v0 random seed=9000: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Hard-v0__ep0.json.gz
+18:34:48 [explore] MiniHack-Boxoban-Hard-v0 sweep seed=9001: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Hard-v0__ep1.json.gz
+18:34:49 [explore] MiniHack-Boxoban-Hard-v0 drunkard seed=9002: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Hard-v0__ep2.json.gz
+18:34:50 [explore] MiniHack-Boxoban-Medium-v0 random seed=9100: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Medium-v0__ep0.json.gz
+18:34:52 [explore] MiniHack-Boxoban-Medium-v0 sweep seed=9101: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Medium-v0__ep1.json.gz
+18:34:54 [explore] MiniHack-Boxoban-Medium-v0 drunkard seed=9102: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Boxoban-Medium-v0__ep2.json.gz
+18:34:55 [explore] MiniHack-MazeWalk-9x9-v0 random seed=9200: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-9x9-v0__ep0.json.gz
+18:34:55 [explore] MiniHack-MazeWalk-9x9-v0 sweep seed=9201: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-9x9-v0__ep1.json.gz
+18:34:56 [explore] MiniHack-MazeWalk-9x9-v0 drunkard seed=9202: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-9x9-v0__ep2.json.gz
+18:34:57 [explore] MiniHack-MazeWalk-15x15-v0 random seed=9300: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-15x15-v0__ep0.json.gz
+18:34:58 [explore] MiniHack-MazeWalk-15x15-v0 sweep seed=9301: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-15x15-v0__ep1.json.gz
+18:34:59 [explore] MiniHack-MazeWalk-15x15-v0 drunkard seed=9302: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-MazeWalk-15x15-v0__ep2.json.gz
+18:34:59 [explore] MiniHack-Corridor-R3-v0 random seed=9400: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Corridor-R3-v0__ep0.json.gz
+18:35:00 [explore] MiniHack-Corridor-R3-v0 sweep seed=9401: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Corridor-R3-v0__ep1.json.gz
+18:35:00 [explore] MiniHack-Corridor-R3-v0 drunkard seed=9402: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Corridor-R3-v0__ep2.json.gz
+18:35:01 [explore] MiniHack-CorridorBattle-Dark-v0 random seed=9500: 84 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-CorridorBattle-Dark-v0__ep0.json.gz
+18:35:01 [explore] MiniHack-CorridorBattle-Dark-v0 sweep seed=9501: 54 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-CorridorBattle-Dark-v0__ep1.json.gz
+18:35:02 [explore] MiniHack-CorridorBattle-Dark-v0 drunkard seed=9502: 100 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-CorridorBattle-Dark-v0__ep2.json.gz
+18:35:02 [explore] MiniHack-Quest-Easy-v0 random seed=9600: 51 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Easy-v0__ep0.json.gz
+18:35:02 [explore] MiniHack-Quest-Easy-v0 sweep seed=9601: 14 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Easy-v0__ep1.json.gz
+18:35:03 [explore] MiniHack-Quest-Easy-v0 drunkard seed=9602: 17 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Easy-v0__ep2.json.gz
+18:35:03 [explore] MiniHack-Quest-Medium-v0 random seed=9700: 90 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Medium-v0__ep0.json.gz
+18:35:04 [explore] MiniHack-Quest-Medium-v0 sweep seed=9701: 70 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Medium-v0__ep1.json.gz
+18:35:04 [explore] MiniHack-Quest-Medium-v0 drunkard seed=9702: 77 steps -> /data/doh/teams/researchy/work/fable_minihack/results/transitions/exploration/MiniHack-Quest-Medium-v0__ep2.json.gz

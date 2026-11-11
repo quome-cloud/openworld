@@ -1,0 +1,4050 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>BALROG</title>
+  <meta name="description" content="BALROG: Benchmarking Agentic LLM/VLM Reasoning On Games" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta property="og:image" content="img/logo.png" />
+  <link rel="shortcut icon" href="img/logo.png" />
+  <link rel="icon" href="img/logo.png" />
+  <link rel="stylesheet" href="css/normalize.css" />
+  <link rel="stylesheet" href="css/fonts.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+    integrity="..." crossorigin="anonymous" />
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H9XFCMDPNS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "G-H9XFCMDPNS");
+  </script>
+</head>
+
+<body>
+  <div style="padding-bottom: 50px">
+    <section style="background-color: var(--dark_accent_color)">
+      <div class="content-wrapper title-wrapper" style="flex-direction: column">
+        <div style="
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+              padding-bottom: 15px;
+            ">
+          <h1 style="font-size: 60px; padding-top: 0.4em">BALROG</h1>
+          <img src="img/logo.png" style="height: 120px; padding-top: 0em; padding-left: 0.5em" />
+        </div>
+        <h3>Benchmarking Agentic LLM/VLM Reasoning On Games</h3>
+        <!-- <h3 style="font-size: 20px; padding-top: 1.2em">ICLR 2024</h3> -->
+        <p style="text-align: center;margin-top:1em;">
+          Davide Paglieri*, Bartłomiej Cupiał*, Samuel Coward, Ulyana Piterbarg, <br />
+          Maciej Wolczyk, Akbir Khan, Eduardo Pignatelli, Łukasz Kuciński, Lerrel Pinto <br />
+          Rob Fergus, Jakob Nicolaus Foerster, Jack Parker-Holder, Tim Rocktäschel
+        </p>
+        <div class="content-wrapper" style="margin-top: 2em">
+          <a href="https://arxiv.org/abs/2411.13543">
+            <button class="outline">
+              <i class="fa fa-paperclip"></i> Paper&nbsp;
+            </button>
+          </a>
+          <a href="https://github.com/balrog-ai/BALROG">
+            <button class="outline">
+              <i class="fab fa-github"></i> Code&nbsp;
+            </button>
+          </a>
+          <a href="submit.html">
+            <button class="outline">
+              <i class="fa fa-upload"></i> Submit&nbsp;
+            </button>
+          </a>
+          <a>
+            <button class="outline" id="toggle-style-btn">
+              <i class="fa fa-circle"> </i> Mode
+            </button>
+          </a>
+
+          <script>
+            // Define the style block as a string
+            const styleBlock = `
+              <style id="dynamic-style">
+                :root {
+                  --black: #000000;
+                  --green: #699f56;
+                  --forest: #032f14;
+                  --blue: #34566f;
+                  --grey: #40434b;
+                  --grey2: #d8d8d8;
+                  --red: #aa4926;
+                  --orange: #ff7040;
+                  --lightgreen: #C2D8B9;
+                  --darkorange: #d54718;
+          
+                  /* BALROG */
+                  /* --accent_color: rgb(200, 40, 40); */
+                  --accent_color: rgb(240, 180, 95);
+                  --outline_accent_color: #000;
+                  /* --accent_color: #FF5733; */
+                  --lighted_accent_color: rgb(90, 80, 255);
+                  --dark_accent_color: transparent;
+          
+                  /* Dark grey and gold */
+                  /* --accent_color: rgb(242, 182, 98);
+                  --dark_accent_color: rgb(41, 49, 60); */
+          
+                  /* Blue and red */
+                  /* --accent_color: #e91518;
+                  --dark_accent_color: #0454f4; */
+                  --odd_line_color: transparent;
+                  --even_line_color: transparent;
+                  --slate_gray: transparent;
+                }
+          
+                body {
+                  background-image: url('img/background.png'); /* Replace 'img/background.jpg' with your desired image path */
+                  background-size: cover; /* Ensures the image covers the entire page */
+                  background-repeat: no-repeat; /* Prevents the image from repeating */
+                  background-attachment: fixed; /* Keeps the image fixed during scrolling */
+                }
+          
+                body, h1, h2, h3, h4, h5, h6, p, a, .tablinks, table, th, td {
+                  color: #fff !important;
+                }
+
+                ul.tab {
+                  background-color: transparent !important;
+                }
+
+                ul.tab {
+                  background-color: #000;
+                }
+
+                .tablinks
+                {
+                  background-color: #333;
+                }
+
+                ul.tab li a:focus,.active
+                {
+                  background-color: #121212;
+                }
+                
+                .number, .label-date, .text-content, .sticky-header-content {
+                  color: #fff !important;
+                }
+          
+                .label-date{
+                  color: #000 !important;
+                  background-color: #fff !important;
+                }
+        
+                button {
+        
+                &.outline {
+                  color: var(--outline_accent_color);
+                }
+
+                &.outline:hover {
+                  color: #40434b;
+                  border-color: #40434b;
+                  transition: all 0.2s linear;
+                }
+
+              </style>
+            `;
+
+            const toggleButton = document.getElementById('toggle-style-btn');
+
+            // Function to apply dark mode
+            function enableDarkMode() {
+              if (!document.getElementById('dynamic-style')) {
+                document.head.insertAdjacentHTML('beforeend', styleBlock);
+              }
+              localStorage.setItem('darkMode', 'enabled');
+
+              // Update button text without removing the icon
+              toggleButton.innerHTML = '<i class="fa fa-moon">  </i> Mode';
+
+              // Change diagram to dark version
+              const diagram = document.querySelector('img[src="img/diagram.png"]');
+              if (diagram) {
+                diagram.src = 'img/diagram_dark.png';
+              }
+            }
+
+            // Function to disable dark mode
+            function disableDarkMode() {
+              const existingStyle = document.getElementById('dynamic-style');
+              if (existingStyle) {
+                existingStyle.remove();
+              }
+              localStorage.setItem('darkMode', 'disabled');
+
+              // Update button text without removing the icon
+              toggleButton.innerHTML = '<i class="fa fa-circle">  </i> Mode';
+
+              // Change diagram back to light version
+              const diagram = document.querySelector('img[src="img/diagram_dark.png"]');
+              if (diagram) {
+                diagram.src = 'img/diagram.png';
+              }
+            }
+
+
+            // Check localStorage on page load
+            window.addEventListener('DOMContentLoaded', () => {
+              const darkMode = localStorage.getItem('darkMode');
+              if (darkMode === null || darkMode === 'enabled') {
+                enableDarkMode();
+              } else {
+                disableDarkMode();
+              }
+            });
+
+            // Add event listener to the button
+            toggleButton.addEventListener('click', () => {
+              const darkMode = localStorage.getItem('darkMode');
+              if (darkMode === 'enabled') {
+                disableDarkMode();
+              } else {
+                enableDarkMode();
+              }
+            });
+          </script>
+
+          <!-- <a href="viewer.html">
+            <button class="outline">
+              <i class="fa fa-chart-simple"></i> Analysis&nbsp;
+            </button>
+          </a> -->
+        </div>
+      </div>
+    </section>
+    <section class="main-container">
+      <div class="content-wrapper"
+        style="margin-top: 1em; display: flex; justify-content: center; align-items: center;">
+      </div>
+      <div class="content-wrapper">
+        <div class="content-box">
+          <h2 class="text-title">Leaderboard</h2>
+          <ul class="tab">
+            <li><button id="tab-llm" class="tablinks" data-leaderboard="LLM">LLM</button></li>
+            <li><button id="tab-vlm" class="tablinks" data-leaderboard="VLM">VLM</button></li>
+          </ul>
+          
+          <div class="tabcontent" style="display: block" id="leaderboard-LLM">
+            <!-- Assign an ID to your table -->
+            <table id="leaderboard-table-LLM" class="table scrollable">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="sticky-header-content">Agent</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">% Progress</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">BabyAI</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">Crafter</div>
+                  </th>
+                  
+                  <th>
+                    <div class="sticky-header-content">TextWorld</div>
+                  </th>
+                  
+                  <th>
+                    <div class="sticky-header-content">BabaIsAI</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">MiniHack</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">NetHack</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">Date</div>
+                  </th>
+                </tr>
+              </thead>
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <tbody>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen2.5-72B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen2.5-72B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="16.18">
+                    <p class="number">
+                      
+                      16.2 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="34.0">
+                    <p class="number">
+                      
+                      34.0 ± 6.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="27.272727272727277">
+                    <p class="number">
+                      
+                      27.3 ± 3.6
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="11.176470588235295">
+                    <p class="number">
+                      
+                      11.2 ± 3.8
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="19.327731092436977">
+                    <p class="number">
+                      
+                      19.3 ± 3.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.30784538150722346">
+                    <p class="number">
+                      
+                      0.3 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-3.5-Sonnet-2024-10-22&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Claude-3.5-Sonnet-2024-10-22
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="32.64471266283788">
+                    <p class="number">
+                      
+                      32.6 ± 1.9
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="68.0">
+                    <p class="number">
+                      
+                      68.0 ± 6.6
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="32.72727272727273">
+                    <p class="number">
+                      
+                      32.7 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="42.05882352941177">
+                    <p class="number">
+                      
+                      42.1 ± 5.4
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="37.5">
+                    <p class="number">
+                      
+                      37.5 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="15.0">
+                    <p class="number">
+                      
+                      15.0 ± 5.6
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.5821797203427749">
+                    <p class="number">
+                      
+                      0.6 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-Opus-4.5&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Claude-Opus-4.5
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="43.54618446646006">
+                    <p class="number">
+                      
+                      43.5 ± 2.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="80.0">
+                    <p class="number">
+                      
+                      80.0 ± 5.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="49.54545454545454">
+                    <p class="number">
+                      
+                      49.5 ± 3.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="51.372549019607824">
+                    <p class="number">
+                      
+                      51.4 ± 8.4
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="50.83333333333333">
+                    <p class="number">
+                      
+                      50.8 ± 4.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="27.500000000000004">
+                    <p class="number">
+                      
+                      27.5 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="2.02576990036468">
+                    <p class="number">
+                      
+                      2.0 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-24">
+                    <p><span class="label-date">2026-02-24</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Grok-4&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Grok-4
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="43.55037625935449">
+                    <p class="number">
+                      
+                      43.6 ± 2.2
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="76.0">
+                    <p class="number">
+                      
+                      76.0 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="57.272727272727266">
+                    <p class="number">
+                      
+                      57.3 ± 3.9
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="62.941176470588225">
+                    <p class="number">
+                      
+                      62.9 ± 7.9
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="45.83333333333333">
+                    <p class="number">
+                      
+                      45.8 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="17.5">
+                    <p class="number">
+                      
+                      17.5 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.7550204794781488">
+                    <p class="number">
+                      
+                      1.8 ± 0.8
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-07-23">
+                    <p><span class="label-date">2025-07-23</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-1.5-Flash-002&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-1.5-Flash-002
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="14.633333333333333">
+                    <p class="number">
+                      
+                      14.6 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="50.0">
+                    <p class="number">
+                      
+                      50.0 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="20.0">
+                    <p class="number">
+                      
+                      20.0 ± 0.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="12.8">
+                    <p class="number">
+                      
+                      12.8 ± 2.3
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.1-8B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.1-8B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="15.144385026737966">
+                    <p class="number">
+                      
+                      15.1 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="36.0">
+                    <p class="number">
+                      
+                      36.0 ± 6.8
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="25.454545454545453">
+                    <p class="number">
+                      
+                      25.5 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="6.07843137254902">
+                    <p class="number">
+                      
+                      6.1 ± 2.4
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="18.333333333333332">
+                    <p class="number">
+                      
+                      18.3 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen-2.5-7B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen-2.5-7B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="7.797534165181225">
+                    <p class="number">
+                      
+                      7.8 ± 1.1
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="14.000000000000002">
+                    <p class="number">
+                      
+                      14.0 ± 4.9
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="16.363636363636363">
+                    <p class="number">
+                      
+                      16.4 ± 3.0
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="3.9215686274509802">
+                    <p class="number">
+                      
+                      3.9 ± 1.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="12.5">
+                    <p class="number">
+                      
+                      12.5 ± 3.0
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=DeepSeek-R1-Distill-Qwen-32B&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      DeepSeek-R1-Distill-Qwen-32B
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="19.471228579431113">
+                    <p class="number">
+                      
+                      19.5 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="48.0">
+                    <p class="number">
+                      
+                      48.0 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="14.999999999999996">
+                    <p class="number">
+                      
+                      15.0 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="10.588235294117649">
+                    <p class="number">
+                      
+                      10.6 ± 3.7
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="40.0">
+                    <p class="number">
+                      
+                      40.0 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.7391361824690403">
+                    <p class="number">
+                      
+                      0.7 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-01-26">
+                    <p><span class="label-date">2025-01-26</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-3.1-Pro-Thinking&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥈
+                      
+                      🕹️
+                      ✔️
+                      Gemini-3.1-Pro-Thinking
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="57.02049703308491">
+                    <p class="number">
+                      
+                      57.0 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="98.0">
+                    <p class="number">
+                      
+                      98.0 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="54.99999999999999">
+                    <p class="number">
+                      
+                      55.0 ± 6.4
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="75.68627450980391">
+                    <p class="number">
+                      
+                      75.7 ± 6.4
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="83.33333333333334">
+                    <p class="number">
+                      
+                      83.3 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="27.500000000000004">
+                    <p class="number">
+                      
+                      27.5 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="2.6033743553721593">
+                    <p class="number">
+                      
+                      2.6 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-25">
+                    <p><span class="label-date">2026-02-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Microsoft-Phi-4&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Microsoft-Phi-4
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="11.642008318478906">
+                    <p class="number">
+                      
+                      11.6 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="32.0">
+                    <p class="number">
+                      
+                      32.0 ± 6.6
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="13.636363636363635">
+                    <p class="number">
+                      
+                      13.6 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="2.5490196078431375">
+                    <p class="number">
+                      
+                      2.5 ± 0.9
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="16.666666666666664">
+                    <p class="number">
+                      
+                      16.7 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-01-13">
+                    <p><span class="label-date">2025-01-13</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Reka-Flash-3&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Reka-Flash-3
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="29.19233586394863">
+                    <p class="number">
+                      
+                      29.2 ± 1.8
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="76.0">
+                    <p class="number">
+                      
+                      76.0 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="33.63636363636363">
+                    <p class="number">
+                      
+                      33.6 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="11.568627450980392">
+                    <p class="number">
+                      
+                      11.6 ± 4.6
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="43.333333333333336">
+                    <p class="number">
+                      
+                      43.3 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="10.0">
+                    <p class="number">
+                      
+                      10.0 ± 4.7
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.6156907630144469">
+                    <p class="number">
+                      
+                      0.6 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-03-13">
+                    <p><span class="label-date">2025-03-13</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-2.5-Flash&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-2.5-Flash
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="33.48363979929569">
+                    <p class="number">
+                      
+                      33.5 ± 2.2
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="68.0">
+                    <p class="number">
+                      
+                      68.0 ± 6.6
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="40.0">
+                    <p class="number">
+                      
+                      40.0 ± 4.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="29.607843137254903">
+                    <p class="number">
+                      
+                      29.6 ± 7.2
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="50.0">
+                    <p class="number">
+                      
+                      50.0 ± 4.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="12.5">
+                    <p class="number">
+                      
+                      12.5 ± 5.2
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.7939956585192304">
+                    <p class="number">
+                      
+                      0.8 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-07-22">
+                    <p><span class="label-date">2025-07-22</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen2-VL-7B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen2-VL-7B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="3.665881504116798">
+                    <p class="number">
+                      
+                      3.7 ± 0.8
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="4.0">
+                    <p class="number">
+                      
+                      4.0 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="6.363636363636363">
+                    <p class="number">
+                      
+                      6.4 ± 1.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="1.5686274509803921">
+                    <p class="number">
+                      
+                      1.6 ± 0.6
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="7.563025210084033">
+                    <p class="number">
+                      
+                      7.6 ± 2.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Grok-3-beta&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Grok-3-beta
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="29.503487428508553">
+                    <p class="number">
+                      
+                      29.5 ± 2.2
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="62.0">
+                    <p class="number">
+                      
+                      62.0 ± 6.9
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="25.000000000000007">
+                    <p class="number">
+                      
+                      25.0 ± 4.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="32.549019607843135">
+                    <p class="number">
+                      
+                      32.5 ± 6.9
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="33.33333333333333">
+                    <p class="number">
+                      
+                      33.3 ± 4.3
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="22.5">
+                    <p class="number">
+                      
+                      22.5 ± 6.6
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.638571629874851">
+                    <p class="number">
+                      
+                      1.6 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-04-25">
+                    <p><span class="label-date">2025-04-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-3B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-3B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="10.133689839572192">
+                    <p class="number">
+                      
+                      10.1 ± 1.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="20.0">
+                    <p class="number">
+                      
+                      20.0 ± 5.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="17.27272727272727">
+                    <p class="number">
+                      
+                      17.3 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="3.5294117647058822">
+                    <p class="number">
+                      
+                      3.5 ± 1.1
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="17.5">
+                    <p class="number">
+                      
+                      17.5 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.3-70B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.3-70B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="23.03203437290035">
+                    <p class="number">
+                      
+                      23.0 ± 1.7
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="66.0">
+                    <p class="number">
+                      
+                      66.0 ± 6.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="28.636363636363633">
+                    <p class="number">
+                      
+                      28.6 ± 4.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="9.019607843137255">
+                    <p class="number">
+                      
+                      9.0 ± 2.9
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="29.166666666666668">
+                    <p class="number">
+                      
+                      29.2 ± 4.1
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.36956809123452017">
+                    <p class="number">
+                      
+                      0.4 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-12-09">
+                    <p><span class="label-date">2024-12-09</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=GPT-4o-2024-05-13&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      GPT-4o-2024-05-13
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="32.34">
+                    <p class="number">
+                      
+                      32.3 ± 1.5
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="77.6">
+                    <p class="number">
+                      
+                      77.6 ± 3.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="33.1">
+                    <p class="number">
+                      
+                      33.1 ± 2.3
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="39.31">
+                    <p class="number">
+                      
+                      39.3 ± 5.2
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="33.66">
+                    <p class="number">
+                      
+                      33.7 ± 3.3
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="10.0">
+                    <p class="number">
+                      
+                      10.0 ± 4.7
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.37">
+                    <p class="number">
+                      
+                      0.4 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=GPT-5-minimal-think&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      GPT-5-minimal-think
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="32.806020394338006">
+                    <p class="number">
+                      
+                      32.8 ± 2.2
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="80.0">
+                    <p class="number">
+                      
+                      80.0 ± 5.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="39.09090909090909">
+                    <p class="number">
+                      
+                      39.1 ± 4.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="30.588235294117645">
+                    <p class="number">
+                      
+                      30.6 ± 7.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="25.833333333333336">
+                    <p class="number">
+                      
+                      25.8 ± 4.0
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="20.0">
+                    <p class="number">
+                      
+                      20.0 ± 7.3
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.3236446476679857">
+                    <p class="number">
+                      
+                      1.3 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-08-19">
+                    <p><span class="label-date">2025-08-19</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-1.5-Pro-002&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-1.5-Pro-002
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="21.0">
+                    <p class="number">
+                      
+                      21.0 ± 1.2
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="58.4">
+                    <p class="number">
+                      
+                      58.4 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="30.21">
+                    <p class="number">
+                      
+                      30.2 ± 2.9
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="32.02">
+                    <p class="number">
+                      
+                      32.0 ± 3.3
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.37">
+                    <p class="number">
+                      
+                      0.4 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen2-VL-72B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen2-VL-72B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="12.75">
+                    <p class="number">
+                      
+                      12.8 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="24.0">
+                    <p class="number">
+                      
+                      24.0 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="22.72">
+                    <p class="number">
+                      
+                      22.7 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="16.47">
+                    <p class="number">
+                      
+                      16.5 ± 5.4
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="10.83">
+                    <p class="number">
+                      
+                      10.8 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-3.1-Pro&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥉
+                      
+                      🕹️
+                      ✔️
+                      Gemini-3.1-Pro
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="56.886176240183914">
+                    <p class="number">
+                      
+                      56.9 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="100.0">
+                    <p class="number">
+                      
+                      100.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="46.81818181818181">
+                    <p class="number">
+                      
+                      46.8 ± 4.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="66.47058823529412">
+                    <p class="number">
+                      
+                      66.5 ± 7.5
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="90.0">
+                    <p class="number">
+                      
+                      90.0 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="35.0">
+                    <p class="number">
+                      
+                      35.0 ± 7.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="3.0282873876275773">
+                    <p class="number">
+                      
+                      3.0 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-21">
+                    <p><span class="label-date">2026-02-21</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Mistral-Nemo-it-2407&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Mistral-Nemo-it-2407
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="17.646375893946985">
+                    <p class="number">
+                      
+                      17.6 ± 1.5
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="50.0">
+                    <p class="number">
+                      
+                      50.0 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="27.727272727272727">
+                    <p class="number">
+                      
+                      27.7 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="4.509803921568627">
+                    <p class="number">
+                      
+                      4.5 ± 1.3
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="20.833333333333336">
+                    <p class="number">
+                      
+                      20.8 ± 3.7
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.30784538150722346">
+                    <p class="number">
+                      
+                      0.3 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-12-09">
+                    <p><span class="label-date">2024-12-09</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.1-70B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.1-70B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="27.876666666666665">
+                    <p class="number">
+                      
+                      27.9 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="73.2">
+                    <p class="number">
+                      
+                      73.2 ± 4.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="31.21">
+                    <p class="number">
+                      
+                      31.2 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="15.0">
+                    <p class="number">
+                      
+                      15.0 ± 4.6
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="40.0">
+                    <p class="number">
+                      
+                      40.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="7.5">
+                    <p class="number">
+                      
+                      7.5 ± 4.2
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.35">
+                    <p class="number">
+                      
+                      0.3 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-Opus-4.5-Thinking&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Claude-Opus-4.5-Thinking
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="42.980482737201726">
+                    <p class="number">
+                      
+                      43.0 ± 2.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="72.0">
+                    <p class="number">
+                      
+                      72.0 ± 6.3
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="48.63636363636363">
+                    <p class="number">
+                      
+                      48.6 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="59.019607843137244">
+                    <p class="number">
+                      
+                      59.0 ± 8.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="45.83333333333333">
+                    <p class="number">
+                      
+                      45.8 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="30.0">
+                    <p class="number">
+                      
+                      30.0 ± 7.2
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="2.3935916103761268">
+                    <p class="number">
+                      
+                      2.4 ± 0.3
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-24">
+                    <p><span class="label-date">2026-02-24</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=GPT-4o-mini-2024-07-18&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      GPT-4o-mini-2024-07-18
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="17.36">
+                    <p class="number">
+                      
+                      17.4 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="50.4">
+                    <p class="number">
+                      
+                      50.4 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="15.9">
+                    <p class="number">
+                      
+                      15.9 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="12.25">
+                    <p class="number">
+                      
+                      12.2 ± 3.5
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="15.6">
+                    <p class="number">
+                      
+                      15.6 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="10.0">
+                    <p class="number">
+                      
+                      10.0 ± 4.7
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-90B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-90B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="27.293333333333337">
+                    <p class="number">
+                      
+                      27.3 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="72.0">
+                    <p class="number">
+                      
+                      72.0 ± 6.3
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="31.68">
+                    <p class="number">
+                      
+                      31.7 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="11.18">
+                    <p class="number">
+                      
+                      11.2 ± 3.0
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="43.9">
+                    <p class="number">
+                      
+                      43.9 ± 3.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-3.5-Haiku-2024-10-22&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Claude-3.5-Haiku-2024-10-22
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="19.31525904701802">
+                    <p class="number">
+                      
+                      19.3 ± 1.8
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="52.0">
+                    <p class="number">
+                      
+                      52.0 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="26.36363636363636">
+                    <p class="number">
+                      
+                      26.4 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="18.03921568627451">
+                    <p class="number">
+                      
+                      18.0 ± 5.8
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="8.333333333333332">
+                    <p class="number">
+                      
+                      8.3 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="10.0">
+                    <p class="number">
+                      
+                      10.0 ± 4.7
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.1553688988639115">
+                    <p class="number">
+                      
+                      1.2 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-12-11">
+                    <p><span class="label-date">2024-12-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-Haiku-4.5&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Claude-Haiku-4.5
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="31.240641711229948">
+                    <p class="number">
+                      
+                      31.2 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="66.0">
+                    <p class="number">
+                      
+                      66.0 ± 6.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="24.09090909090909">
+                    <p class="number">
+                      
+                      24.1 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="49.01960784313725">
+                    <p class="number">
+                      
+                      49.0 ± 7.6
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="33.33333333333333">
+                    <p class="number">
+                      
+                      33.3 ± 4.3
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="15.0">
+                    <p class="number">
+                      
+                      15.0 ± 5.6
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-24">
+                    <p><span class="label-date">2026-02-24</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-3-Flash&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-3-Flash
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="48.08088119335723">
+                    <p class="number">
+                      
+                      48.1 ± 2.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="86.0">
+                    <p class="number">
+                      
+                      86.0 ± 4.9
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="45.0">
+                    <p class="number">
+                      
+                      45.0 ± 6.3
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="50.19607843137255">
+                    <p class="number">
+                      
+                      50.2 ± 8.1
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="73.33333333333333">
+                    <p class="number">
+                      
+                      73.3 ± 4.0
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="30.0">
+                    <p class="number">
+                      
+                      30.0 ± 7.2
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="3.9558753954374732">
+                    <p class="number">
+                      
+                      4.0 ± 0.8
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-13">
+                    <p><span class="label-date">2026-02-13</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-3-Pro&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥇
+                      
+                      🕹️
+                      ✔️
+                      Gemini-3-Pro
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="58.09553788130927">
+                    <p class="number">
+                      
+                      58.1 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="96.0">
+                    <p class="number">
+                      
+                      96.0 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="57.272727272727266">
+                    <p class="number">
+                      
+                      57.3 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="60.196078431372555">
+                    <p class="number">
+                      
+                      60.2 ± 7.5
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="88.33333333333333">
+                    <p class="number">
+                      
+                      88.3 ± 2.9
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="40.0">
+                    <p class="number">
+                      
+                      40.0 ± 7.7
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="6.771088250422433">
+                    <p class="number">
+                      
+                      6.8 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2026-02-03">
+                    <p><span class="label-date">2026-02-03</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-11B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-11B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="16.825">
+                    <p class="number">
+                      
+                      16.8 ± 1.5
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="50.0">
+                    <p class="number">
+                      
+                      50.0 ± 7.1
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="26.19">
+                    <p class="number">
+                      
+                      26.2 ± 3.3
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="6.66">
+                    <p class="number">
+                      
+                      6.7 ± 2.2
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="15.6">
+                    <p class="number">
+                      
+                      15.6 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=DeepSeek-R1&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      DeepSeek-R1
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="34.89071895962323">
+                    <p class="number">
+                      
+                      34.9 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="74.0">
+                    <p class="number">
+                      
+                      74.0 ± 6.2
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="36.36363636363637">
+                    <p class="number">
+                      
+                      36.4 ± 3.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="21.764705882352942">
+                    <p class="number">
+                      
+                      21.8 ± 6.1
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="50.83333333333333">
+                    <p class="number">
+                      
+                      50.8 ± 4.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="25.0">
+                    <p class="number">
+                      
+                      25.0 ± 6.8
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.3826381784167503">
+                    <p class="number">
+                      
+                      1.4 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-04-10">
+                    <p><span class="label-date">2025-04-10</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-2.5-Pro-Exp-03-25&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-2.5-Pro-Exp-03-25
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="43.346016457403294">
+                    <p class="number">
+                      
+                      43.3 ± 2.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="80.0">
+                    <p class="number">
+                      
+                      80.0 ± 5.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="55.00000000000001">
+                    <p class="number">
+                      
+                      55.0 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="49.2156862745098">
+                    <p class="number">
+                      
+                      49.2 ± 8.2
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="56.666666666666664">
+                    <p class="number">
+                      
+                      56.7 ± 4.5
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="17.5">
+                    <p class="number">
+                      
+                      17.5 ± 6.0
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.6937458032433108">
+                    <p class="number">
+                      
+                      1.7 ± 0.2
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-04-25">
+                    <p><span class="label-date">2025-04-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-1B-it&leaderboard=LLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-1B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="6.648989898989899">
+                    <p class="number">
+                      
+                      6.6 ± 1.0
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="8.0">
+                    <p class="number">
+                      
+                      8.0 ± 3.8
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="12.727272727272727">
+                    <p class="number">
+                      
+                      12.7 ± 1.9
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <td
+                    data-order="3.3333333333333335">
+                    <p class="number">
+                      
+                      3.3 ± 0.9
+                      
+                    </p>
+                  </td>
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="10.833333333333334">
+                    <p class="number">
+                      
+                      10.8 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="tabcontent" style="display: block" id="leaderboard-VLM">
+            <!-- Assign an ID to your table -->
+            <table id="leaderboard-table-VLM" class="table scrollable">
+              <thead>
+                <tr>
+                  <th>
+                    <div class="sticky-header-content">Agent</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">% Progress</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">BabyAI</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">Crafter</div>
+                  </th>
+                  
+                  <th>
+                    <div class="sticky-header-content">BabaIsAI</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">MiniHack</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">NetHack</div>
+                  </th>
+                  <th>
+                    <div class="sticky-header-content">Date</div>
+                  </th>
+                </tr>
+              </thead>
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              <tbody>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Claude-3.5-Sonnet-2024-10-22&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥈
+                      
+                      🕹️
+                      ✔️
+                      Claude-3.5-Sonnet-2024-10-22
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="35.47637553683924">
+                    <p class="number">
+                      
+                      35.5 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="82.0">
+                    <p class="number">
+                      
+                      82.0 ± 5.4
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="37.272727272727266">
+                    <p class="number">
+                      
+                      37.3 ± 3.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="34.45378151260504">
+                    <p class="number">
+                      
+                      34.5 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="22.5">
+                    <p class="number">
+                      
+                      22.5 ± 6.6
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.1553688988639113">
+                    <p class="number">
+                      
+                      1.2 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-1.5-Flash-002&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Gemini-1.5-Flash-002
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="14.940000000000001">
+                    <p class="number">
+                      
+                      14.9 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="43.2">
+                    <p class="number">
+                      
+                      43.2 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="20.7">
+                    <p class="number">
+                      
+                      20.7 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="8.3">
+                    <p class="number">
+                      
+                      8.3 ± 1.9
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen2-VL-7B-it&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen2-VL-7B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="4.3799560913219935">
+                    <p class="number">
+                      
+                      4.4 ± 0.8
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="2.0">
+                    <p class="number">
+                      
+                      2.0 ± 2.0
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="5.454545454545454">
+                    <p class="number">
+                      
+                      5.5 ± 0.9
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="11.864406779661017">
+                    <p class="number">
+                      
+                      11.9 ± 3.0
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=GPT-4o-2024-05-13&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      GPT-4o-2024-05-13
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="22.560000000000002">
+                    <p class="number">
+                      
+                      22.6 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="62.0">
+                    <p class="number">
+                      
+                      62.0 ± 4.3
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="26.81">
+                    <p class="number">
+                      
+                      26.8 ± 3.7
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="18.62">
+                    <p class="number">
+                      
+                      18.6 ± 2.7
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.37">
+                    <p class="number">
+                      
+                      0.4 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-1.5-Pro-002&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥉
+                      
+                      🕹️
+                      ✔️
+                      Gemini-1.5-Pro-002
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="25.7568">
+                    <p class="number">
+                      
+                      25.8 ± 1.4
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="58.4">
+                    <p class="number">
+                      
+                      58.4 ± 4.4
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="33.5">
+                    <p class="number">
+                      
+                      33.5 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="31.4">
+                    <p class="number">
+                      
+                      31.4 ± 3.2
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="5.0">
+                    <p class="number">
+                      
+                      5.0 ± 3.4
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.484">
+                    <p class="number">
+                      
+                      0.5 ± 0.5
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Qwen2-VL-72B-it&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Qwen2-VL-72B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="12.212">
+                    <p class="number">
+                      
+                      12.2 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="34.0">
+                    <p class="number">
+                      
+                      34.0 ± 6.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="18.63">
+                    <p class="number">
+                      
+                      18.6 ± 2.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="5.93">
+                    <p class="number">
+                      
+                      5.9 ± 2.2
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-25">
+                    <p><span class="label-date">2024-11-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-90B-it&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-90B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="20.988">
+                    <p class="number">
+                      
+                      21.0 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="66.0">
+                    <p class="number">
+                      
+                      66.0 ± 6.7
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="14.54">
+                    <p class="number">
+                      
+                      14.5 ± 1.8
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="21.9">
+                    <p class="number">
+                      
+                      21.9 ± 2.9
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Llama-3.2-11B-it&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      Llama-3.2-11B-it
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="8.434">
+                    <p class="number">
+                      
+                      8.4 ± 1.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="18.0">
+                    <p class="number">
+                      
+                      18.0 ± 5.4
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="15.91">
+                    <p class="number">
+                      
+                      15.9 ± 1.2
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="5.76">
+                    <p class="number">
+                      
+                      5.8 ± 1.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=Gemini-2.5-Pro-Exp-03-25&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🥇
+                      
+                      🕹️
+                      ✔️
+                      Gemini-2.5-Pro-Exp-03-25
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="35.74892644718709">
+                    <p class="number">
+                      
+                      35.7 ± 2.1
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="74.0">
+                    <p class="number">
+                      
+                      74.0 ± 6.2
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="37.27272727272727">
+                    <p class="number">
+                      
+                      37.3 ± 4.6
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="53.333333333333336">
+                    <p class="number">
+                      
+                      53.3 ± 4.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="12.5">
+                    <p class="number">
+                      
+                      12.5 ± 5.2
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="1.638571629874851">
+                    <p class="number">
+                      
+                      1.6 ± 0.4
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2025-04-25">
+                    <p><span class="label-date">2025-04-25</span></p>
+                  </td>
+                </tr>
+                
+                <tr
+                  onclick="window.location.href='viewer.html?model=GPT-4o-mini-2024-07-18&leaderboard=VLM'"
+                  style="cursor: pointer;">
+                  <td>
+                    <p class="model-type">
+                      
+                      🕹️
+                      ✔️
+                      GPT-4o-mini-2024-07-18
+                    </p>
+                  </td>
+                  <!-- Use data-order for sorting -->
+                  <td
+                    data-order="15.3632">
+                    <p class="number">
+                      
+                      15.4 ± 1.3
+                      
+                    </p>
+                  </td>
+                  <!-- BabyAI Column -->
+                  <td
+                    data-order="38.0">
+                    <p class="number">
+                      
+                      38.0 ± 4.3
+                      
+                    </p>
+                  </td>
+                  <!-- Crafter Column -->
+                  <td
+                    data-order="19.906">
+                    <p class="number">
+                      
+                      19.9 ± 3.1
+                      
+                    </p>
+                  </td>
+                  <!-- TextWorld Column -->
+                  
+                  <!-- BabaIsAI Column -->
+                  <td
+                    data-order="16.41">
+                    <p class="number">
+                      
+                      16.4 ± 2.6
+                      
+                    </p>
+                  </td>
+                  <!-- MiniHack Column -->
+                  <td
+                    data-order="2.5">
+                    <p class="number">
+                      
+                      2.5 ± 2.5
+                      
+                    </p>
+                  </td>
+                  <!-- NLE Column -->
+                  <td
+                    data-order="0.0">
+                    <p class="number">
+                      
+                      0.0 ± 0.0
+                      
+                    </p>
+                  </td>
+                  <!-- Date Column -->
+                  <td data-order="2024-11-11">
+                    <p><span class="label-date">2024-11-11</span></p>
+                  </td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+          
+          <p class="text-content">
+            <!-- BALROG <b>LLM</b> is the leaderboard for language-only evaluation mode.
+            [<a href="lite.html">Post</a>].
+            <br> -->
+            <!-- BALROG <b>VLM</b> is the leaderboard for vision-language evaluation mode.
+            [<a href="#">Post</a>].
+            <✔️br><br> -->
+            - The <span style="color:var(--accent_color);"><b>% Progress</b></span> metric refers to the average
+            completion
+            percentage of BALROG
+            environments of the model.
+            <br>
+            - <span style="color:var(--accent_color);"><b>✔️ Checked</b></span> indicates that we, the BALROG team,
+            received
+            access to the system and
+            were able to reproduce the patch generations.
+            <br>
+            - 🕹️ <span style="color:var(--accent_color);"><b> Open</b></span> refers to submissions that have
+            open-source
+            code. This
+            does <i>not</i>
+            necessarily mean the underlying model is open-source.
+            <br>
+            - The leaderboard is updated once a week on <b>Monday</b>.
+            <br>
+            - If you would like to submit your model to the leaderboard, please check the <a
+              href="submit.html">submission</a> page.
+          </p>
+        </div>
+      </div>
+      <div class="content-wrapper">
+        <div class="content-box">
+          <h2 class="text-title">About</h2>
+          <img src="img/diagram.png" style="width:80%;margin:auto;display:block;" />
+          <p class="text-content">
+            BALROG is a benchmark designed to evaluate the agentic capabilities of large language and
+            vision-language models (LLMs and VLMs) on long-horizon tasks, testing their ability to plan, reason
+            spatially, and explore in dynamic environments. Our benchmark reveals that while current models show some
+            success on simpler tasks, they struggle with more complex, procedurally generated environments like NetHack,
+            especially when vision-based decision-making is involved. We provide an open, fine-grained
+            evaluation framework to drive progress in autonomous agent research. Read more about BALROG in our <a
+              href="https://arxiv.org/abs/2411.13543" , target="_blank">paper</a>!
+          </p class="text-content">
+          <h3 class="text-title" style="margin-bottom:0.5em">Citation</h3>
+          <pre id="citation"><code>
+  @inproceedings{paglieri2025balrog,  
+    title={{BALROG}: Benchmarking Agentic {LLM} and {VLM} Reasoning On Games},
+    author={Davide Paglieri and Bart{\l}omiej Cupia{\l} and Samuel Coward and Ulyana Piterbarg and Maciej Wolczyk and Akbir Khan and Eduardo Pignatelli and {\L}ukasz Kuci{\'n}ski and Lerrel Pinto and Rob Fergus and Jakob Nicolaus Foerster and Jack Parker-Holder and Tim Rockt{\"a}schel},
+    booktitle={The Thirteenth International Conference on Learning Representations},
+    year={2025},
+    url={https://openreview.net/forum?id=fp6t3F669F}
+  }
+    </code></pre>
+          <p class="text-content" style="margin-bottom: 0;">
+          <p style="line-height: 1.6667em;">
+            <b>Usage:</b> BALROG's website and leaderboard use the template made available by <a
+              href="https://princeton-nlp.github.io/SWE-bench/">SWE-bench</a>.
+            If you would like to use this template for your own leaderboard, please visit their website and request
+            permission
+          </p>
+          <p class="text-content">
+            Correspondence to: <a href="mailto:d.paglieri@cs.ucl.ac.uk">d.paglieri@cs.ucl.ac.uk</a>
+          </p>
+          <div class="content-wrapper" style="display: flex; flex-direction: row; margin-top: 0.5em;">
+            <a href="https://www.ucl.ac.uk/">
+              <img src="img/UCL.jpg" style="height: 3em;padding-top:0.5em;padding-right: 1em" />
+            </a>
+            <a href="https://ideas-ncbr.pl/en/">
+              <img src="img/IDEAS.png" style="height: 3em;padding-top:0.5em;padding-right: 1em" />
+            </a>
+            <a href="https://www.ox.ac.uk/">
+              <img src="img/oxford.svg" style="height: 3em;padding-top:0.5em;padding-right: 1em" />
+            </a>
+            <a href="https://www.nyu.edu/">
+              <img src="img/NYU.png" style="height: 3em;padding-top:0.5em;padding-right: 1em" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <!-- Remove the sorttable.js scripts -->
+  <!-- Include jQuery and DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="js/theme.js"></script>
+
+  <!-- Initialize DataTables -->
+  <script>
+    $(document).ready(function () {
+      // Initialize DataTables for each leaderboard table
+      
+      $('#leaderboard-table-LLM').DataTable({
+        "paging": false,
+        "ordering": true,
+        "info": false,
+        "searching": false,
+        "order": [[1, "desc"]], // Set default ordering to the Average column in descending order
+        "columnDefs": [
+          {
+            "orderSequence": ["desc", "asc"],
+            "targets": [
+              1, // % Average
+              2, // BabyAI
+              3, // Crafter
+              
+              4, // TextWorld
+          5, // BabaIsAI
+          6, // MiniHack
+          7  // NLE
+              
+            ]
+          }
+        ]
+      });
+    
+      $('#leaderboard-table-VLM').DataTable({
+        "paging": false,
+        "ordering": true,
+        "info": false,
+        "searching": false,
+        "order": [[1, "desc"]], // Set default ordering to the Average column in descending order
+        "columnDefs": [
+          {
+            "orderSequence": ["desc", "asc"],
+            "targets": [
+              1, // % Average
+              2, // BabyAI
+              3, // Crafter
+              
+              4, // BabaIsAI
+        5, // MiniHack
+        6  // NLE
+              
+            ]
+          }
+        ]
+      });
+    
+    });
+  </script>
+  <script>
+    function openLeaderboard(leaderboard) {
+      var tabcontent = document.getElementsByClassName("tabcontent");
+      for (var i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      var tablinks = document.getElementsByClassName("tablinks");
+      for (var i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+
+      document.getElementById(`leaderboard-${leaderboard}`).style.display = "block";
+      document.querySelector(`[data-leaderboard="${leaderboard}"]`).classList.add("active");
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var tabs = document.querySelectorAll('.tablinks');
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function (event) {
+          openLeaderboard(this.getAttribute('data-leaderboard'));
+        });
+      });
+
+      // Open the 'LLM' leaderboard by default
+      openLeaderboard('LLM');
+    });
+  </script>
+</body>
+
+</html>

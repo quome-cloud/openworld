@@ -1,0 +1,404 @@
+{
+ "task": "MiniHack-Corridor-R3-v0",
+ "episodes": [
+  {
+   "seed": 4400,
+   "progression": 1.0,
+   "steps": "0-54",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep0.json.gz"
+  },
+  {
+   "seed": 4401,
+   "progression": 1.0,
+   "steps": "0-67",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep1.json.gz"
+  },
+  {
+   "seed": 4402,
+   "progression": 0.0,
+   "steps": "0-100",
+   "end_reason": "-1",
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep2.json.gz"
+  },
+  {
+   "seed": 4403,
+   "progression": 1.0,
+   "steps": "0-27",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep3.json.gz"
+  },
+  {
+   "seed": 4404,
+   "progression": 1.0,
+   "steps": "0-62",
+   "end_reason": "2",
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep4.json.gz"
+  },
+  {
+   "seed": 5400,
+   "progression": 1.0,
+   "steps": "0-38",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep0.json.gz"
+  },
+  {
+   "seed": 5401,
+   "progression": 1.0,
+   "steps": "0-99",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep1.json.gz"
+  },
+  {
+   "seed": 5402,
+   "progression": 1.0,
+   "steps": "0-77",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep2.json.gz"
+  },
+  {
+   "seed": 5403,
+   "progression": 1.0,
+   "steps": "0-54",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep3.json.gz"
+  },
+  {
+   "seed": 5404,
+   "progression": 1.0,
+   "steps": "0-62",
+   "end_reason": "2",
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep4.json.gz"
+  },
+  {
+   "seed": 6400,
+   "progression": 1.0,
+   "steps": "0-47",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep0.json.gz"
+  },
+  {
+   "seed": 6401,
+   "progression": 1.0,
+   "steps": "0-50",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep1.json.gz"
+  },
+  {
+   "seed": 6402,
+   "progression": 1.0,
+   "steps": "0-62",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep2.json.gz"
+  },
+  {
+   "seed": 6403,
+   "progression": 0.0,
+   "steps": "0-100",
+   "end_reason": "-1",
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep3.json.gz"
+  },
+  {
+   "seed": 6404,
+   "progression": 1.0,
+   "steps": "0-70",
+   "end_reason": "2",
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep4.json.gz"
+  }
+ ],
+ "stairs_seen": [
+  {
+   "cell": [
+    74,
+    3
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-54"
+  },
+  {
+   "cell": [
+    73,
+    2
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-54"
+  },
+  {
+   "cell": [
+    26,
+    18
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep1.json.gz",
+   "steps": "0-67"
+  },
+  {
+   "cell": [
+    26,
+    17
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep1.json.gz",
+   "steps": "0-67"
+  },
+  {
+   "cell": [
+    10,
+    5
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep3.json.gz",
+   "steps": "0-27"
+  },
+  {
+   "cell": [
+    11,
+    4
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep3.json.gz",
+   "steps": "0-27"
+  },
+  {
+   "cell": [
+    27,
+    4
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep4.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    26,
+    4
+   ],
+   "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep4.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    38,
+    18
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-38"
+  },
+  {
+   "cell": [
+    39,
+    18
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-38"
+  },
+  {
+   "cell": [
+    56,
+    15
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep1.json.gz",
+   "steps": "0-99"
+  },
+  {
+   "cell": [
+    56,
+    14
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep1.json.gz",
+   "steps": "0-99"
+  },
+  {
+   "cell": [
+    31,
+    17
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep2.json.gz",
+   "steps": "0-77"
+  },
+  {
+   "cell": [
+    30,
+    16
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep2.json.gz",
+   "steps": "0-77"
+  },
+  {
+   "cell": [
+    12,
+    6
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep3.json.gz",
+   "steps": "0-54"
+  },
+  {
+   "cell": [
+    13,
+    5
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep3.json.gz",
+   "steps": "0-54"
+  },
+  {
+   "cell": [
+    12,
+    14
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep4.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    13,
+    15
+   ],
+   "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep4.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    52,
+    2
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-47"
+  },
+  {
+   "cell": [
+    51,
+    3
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep0.json.gz",
+   "steps": "0-47"
+  },
+  {
+   "cell": [
+    12,
+    4
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep1.json.gz",
+   "steps": "0-50"
+  },
+  {
+   "cell": [
+    28,
+    4
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep2.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    29,
+    3
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep2.json.gz",
+   "steps": "0-62"
+  },
+  {
+   "cell": [
+    72,
+    3
+   ],
+   "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep4.json.gz",
+   "steps": "0-70"
+  }
+ ],
+ "lava_cols": [],
+ "combat": {
+  "kills": 0,
+  "damage_taken": 0,
+  "deaths": 0,
+  "samples": [
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep0.json.gz",
+    "steps": "0-54"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep1.json.gz",
+    "steps": "0-67"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep2.json.gz",
+    "steps": "0-100"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep3.json.gz",
+    "steps": "0-27"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass1/MiniHack-Corridor-R3-v0__ep4.json.gz",
+    "steps": "0-62"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep0.json.gz",
+    "steps": "0-38"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep1.json.gz",
+    "steps": "0-99"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep2.json.gz",
+    "steps": "0-77"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep3.json.gz",
+    "steps": "0-54"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass2/MiniHack-Corridor-R3-v0__ep4.json.gz",
+    "steps": "0-62"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep0.json.gz",
+    "steps": "0-47"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep1.json.gz",
+    "steps": "0-50"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep2.json.gz",
+    "steps": "0-62"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep3.json.gz",
+    "steps": "0-100"
+   },
+   {
+    "kills": 0,
+    "damage": 0,
+    "from": "transitions/memory_pass3/MiniHack-Corridor-R3-v0__ep4.json.gz",
+    "steps": "0-70"
+   }
+  ]
+ },
+ "failure_causes": [],
+ "fired": []
+}

@@ -1,0 +1,7 @@
+{
+  "source": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+  "fetched_utc": "2026-07-06T18:54:09Z",
+  "parsed_utc": "2026-07-06T23:04:16.264999Z",
+  "n": 503,
+  "note": "Membership as of fetch date. ~8-10 names turnover vs Feb-2026 membership => mild survivorship in post-cutoff window; second-order for cross-sectional LS deciles; acknowledged in report limitations."
+}

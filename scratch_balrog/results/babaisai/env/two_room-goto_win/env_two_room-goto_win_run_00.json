@@ -1,0 +1,17 @@
+{
+  "task_id": "env/two_room-goto_win",
+  "episode": 0,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 5,
+  "method": "bfs",
+  "actions": [
+    "up",
+    "up",
+    "up",
+    "left",
+    "left"
+  ],
+  "bfs_nodes": 27,
+  "elapsed_s": 0.36
+}

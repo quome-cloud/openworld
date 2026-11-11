@@ -1,0 +1,211 @@
+{
+  "protocol": "clean: obs-only initial-state parse, no clone verification, no fallback, open-loop execution, scored by live env win signal",
+  "final_score_pct": 100.0,
+  "episodes_solved": 120,
+  "episodes_run": 120,
+  "sota_pct": 75.7,
+  "delta_vs_sota_pp": 24.3,
+  "divergences_vs_privileged_run": [],
+  "per_task": {
+    "make_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "goto_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "goto_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "goto_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "goto_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "goto_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "make_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "make_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "make_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "make_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-goto_win-distr_win_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-goto_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-goto_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-goto_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-goto_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-goto_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-maybe_break_stop-goto_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-maybe_break_stop-goto_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_win-distr_win_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-make_win-distr_obj_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-make_win-distr_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-make_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-make_win-distr_obj-irrelevant_rule": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-break_stop-make_win-distr_obj": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_you": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_you-make_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    },
+    "two_room-make_wall_win": {
+      "solved": 3,
+      "episodes": 3,
+      "mean_progression": 1.0
+    }
+  }
+}

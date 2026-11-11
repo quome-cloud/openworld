@@ -1,0 +1,233 @@
+{
+  "benchmark": "BALROG / Baba Is AI",
+  "suite_size": 40,
+  "tasks_attempted": 27,
+  "tasks_missing": 13,
+  "missing_family": "two_room-make_win (13 of 14 variants not completed; search budget exceeded)",
+  "episodes_run": 81,
+  "episodes_solved": 79,
+  "overall_score_pct": 65.83,
+  "sota_pct": 75.7,
+  "planner": "BFS (5K node cap) with A* fallback (50K node cap), executable world model via env clone()",
+  "per_task": {
+    "goto_win": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "goto_win-distr_obj": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "goto_win-distr_obj-irrelevant_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "goto_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "goto_win-distr_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "make_win": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "make_win-distr_obj": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "make_win-distr_obj-irrelevant_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "make_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "make_win-distr_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "astar",
+        "bfs"
+      ]
+    },
+    "two_room-break_stop-goto_win": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-break_stop-goto_win-distr_obj": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-break_stop-goto_win-distr_obj-irrelevant_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-break_stop-goto_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-break_stop-goto_win-distr_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "astar",
+        "bfs"
+      ]
+    },
+    "two_room-goto_win": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-goto_win-distr_obj": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-goto_win-distr_obj-irrelevant_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-goto_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-goto_win-distr_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-goto_win-distr_win_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-make_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 1,
+      "mean_progression": 0.3333,
+      "methods": [
+        "astar",
+        "failed"
+      ]
+    },
+    "two_room-maybe_break_stop-goto_win": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj-irrelevant_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-maybe_break_stop-goto_win-distr_obj_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    },
+    "two_room-maybe_break_stop-goto_win-distr_rule": {
+      "episodes": 3,
+      "solved": 3,
+      "mean_progression": 1.0,
+      "methods": [
+        "bfs"
+      ]
+    }
+  }
+}

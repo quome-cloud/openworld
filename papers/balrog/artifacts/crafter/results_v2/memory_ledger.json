@@ -1,0 +1,432 @@
+{
+ "episodes": [
+  {
+   "file": "ep_00_seed9001.json",
+   "seed": 9001,
+   "condition": "A",
+   "score": 8.0,
+   "steps": 192,
+   "achievements": [
+    "collect_drink",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "zombie_night_no_home",
+   "death_phase": 192
+  },
+  {
+   "file": "ep_01_seed9002.json",
+   "seed": 9002,
+   "condition": "A",
+   "score": 9.0,
+   "steps": 193,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_table"
+   ],
+   "death_cause": "zombie_night_no_home",
+   "death_phase": 193
+  },
+  {
+   "file": "ep_02_seed9003.json",
+   "seed": 9003,
+   "condition": "A",
+   "score": 12.0,
+   "steps": 315,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 15
+  },
+  {
+   "file": "ep_03_seed9004.json",
+   "seed": 9004,
+   "condition": "A",
+   "score": 12.0,
+   "steps": 304,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 4
+  },
+  {
+   "file": "ep_04_seed9005.json",
+   "seed": 9005,
+   "condition": "A",
+   "score": 12.0,
+   "steps": 394,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 94
+  },
+  {
+   "file": "ep_05_seed9006.json",
+   "seed": 9006,
+   "condition": "A",
+   "score": 10.0,
+   "steps": 273,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 273
+  },
+  {
+   "file": "ep_06_seed9007.json",
+   "seed": 9007,
+   "condition": "A",
+   "score": 8.0,
+   "steps": 397,
+   "achievements": [
+    "collect_drink",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_table"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 97
+  },
+  {
+   "file": "ep_07_seed9008.json",
+   "seed": 9008,
+   "condition": "A",
+   "score": 13.0,
+   "steps": 407,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_stone_sword",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 107
+  },
+  {
+   "file": "ep_08_seed9009.json",
+   "seed": 9009,
+   "condition": "A",
+   "score": 7.0,
+   "steps": 303,
+   "achievements": [
+    "collect_drink",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_table"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 3
+  },
+  {
+   "file": "ep_09_seed9010.json",
+   "seed": 9010,
+   "condition": "A",
+   "score": 14.0,
+   "steps": 489,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_stone_sword",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_furnace",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "skeleton_arrows",
+   "death_phase": 189
+  },
+  {
+   "file": "ep_00_seed9001.json",
+   "seed": 9001,
+   "condition": "B",
+   "score": 3.0,
+   "steps": 203,
+   "achievements": [
+    "collect_drink",
+    "collect_wood",
+    "defeat_zombie"
+   ],
+   "death_cause": "zombie_night_no_home",
+   "death_phase": 203
+  },
+  {
+   "file": "ep_01_seed9002.json",
+   "seed": 9002,
+   "condition": "B",
+   "score": 10.0,
+   "steps": 328,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_table"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 28
+  },
+  {
+   "file": "ep_02_seed9003.json",
+   "seed": 9003,
+   "condition": "B",
+   "score": 12.0,
+   "steps": 308,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 8
+  },
+  {
+   "file": "ep_03_seed9004.json",
+   "seed": 9004,
+   "condition": "B",
+   "score": 12.0,
+   "steps": 436,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 136
+  },
+  {
+   "file": "ep_04_seed9005.json",
+   "seed": 9005,
+   "condition": "B",
+   "score": 12.0,
+   "steps": 298,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "make_stone_pickaxe",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 298
+  },
+  {
+   "file": "ep_05_seed9006.json",
+   "seed": 9006,
+   "condition": "B",
+   "score": 13.0,
+   "steps": 618,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_skeleton",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table",
+    "wake_up"
+   ],
+   "death_cause": "unknown",
+   "death_phase": 18
+  },
+  {
+   "file": "ep_06_seed9007.json",
+   "seed": 9007,
+   "condition": "B",
+   "score": 9.0,
+   "steps": 617,
+   "achievements": [
+    "collect_drink",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_table",
+    "wake_up"
+   ],
+   "death_cause": "zombie_day",
+   "death_phase": 17
+  },
+  {
+   "file": "ep_07_seed9008.json",
+   "seed": 9008,
+   "condition": "B",
+   "score": 11.0,
+   "steps": 258,
+   "achievements": [
+    "collect_coal",
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_table"
+   ],
+   "death_cause": "zombie_night_no_home",
+   "death_phase": 258
+  },
+  {
+   "file": "ep_08_seed9009.json",
+   "seed": 9009,
+   "condition": "B",
+   "score": 7.0,
+   "steps": 309,
+   "achievements": [
+    "collect_drink",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_table"
+   ],
+   "death_cause": "starvation",
+   "death_phase": 9
+  },
+  {
+   "file": "ep_09_seed9010.json",
+   "seed": 9010,
+   "condition": "B",
+   "score": 13.0,
+   "steps": 241,
+   "achievements": [
+    "collect_drink",
+    "collect_sapling",
+    "collect_stone",
+    "collect_wood",
+    "defeat_zombie",
+    "eat_cow",
+    "make_stone_pickaxe",
+    "make_stone_sword",
+    "make_wood_pickaxe",
+    "make_wood_sword",
+    "place_plant",
+    "place_stone",
+    "place_table"
+   ],
+   "death_cause": "zombie_night",
+   "death_phase": 241
+  }
+ ],
+ "entries": []
+}

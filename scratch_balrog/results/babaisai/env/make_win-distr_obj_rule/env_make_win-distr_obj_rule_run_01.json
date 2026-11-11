@@ -1,0 +1,33 @@
+{
+  "task_id": "env/make_win-distr_obj_rule",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 21,
+  "method": "bfs",
+  "actions": [
+    "right",
+    "down",
+    "right",
+    "down",
+    "right",
+    "up",
+    "up",
+    "up",
+    "right",
+    "up",
+    "left",
+    "left",
+    "left",
+    "left",
+    "down",
+    "left",
+    "up",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 4771,
+  "elapsed_s": 38.68
+}

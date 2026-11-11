@@ -1,0 +1,22 @@
+{
+  "task_id": "env/two_room-break_stop-goto_win-distr_rule",
+  "episode": 1,
+  "solved": true,
+  "progression": 1.0,
+  "steps": 10,
+  "method": "bfs",
+  "actions": [
+    "left",
+    "up",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "right",
+    "down",
+    "down"
+  ],
+  "bfs_nodes": 534,
+  "elapsed_s": 5.72
+}

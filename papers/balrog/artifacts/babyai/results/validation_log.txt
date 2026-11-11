@@ -1,0 +1,8 @@
+goto: done (1022 cumulative steps, 0 disagreements)
+pickup: done (2472 cumulative steps, 0 disagreements)
+open: done (5739 cumulative steps, 0 disagreements)
+Sampling rejected: objs already next to each other
+Sampling rejected: objs already next to each other
+putnext: done (8994 cumulative steps, 0 disagreements)
+pick_up_seq_go_to: done (12006 cumulative steps, 0 disagreements)
+TOTAL: 150 episodes, 12006 lock-stepped steps, 0 disagreements, 14.5s

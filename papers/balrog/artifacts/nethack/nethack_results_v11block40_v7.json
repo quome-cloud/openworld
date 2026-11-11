@@ -1,0 +1,308 @@
+{
+ "label": "v11block40_v7",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 70,
+   "seed": 3070,
+   "condition": "A",
+   "steps": 4841,
+   "illegal": 0,
+   "progression": 0.029108986017138745,
+   "highest_achievement": "Xp:5",
+   "depth_max": 3,
+   "xplvl_max": 5,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4",
+    "Xp:5"
+   ],
+   "end_reason": "DEATH: died. Killed by a kitten.",
+   "role": "Wizard",
+   "race": "elven",
+   "wallclock_s": 263.0,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep70.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 71,
+   "seed": 3071,
+   "condition": "A",
+   "steps": 830,
+   "illegal": 0,
+   "progression": 0.04846098359243788,
+   "highest_achievement": "Dlvl:7",
+   "depth_max": 7,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a housecat.",
+   "role": "Priest",
+   "race": "elven",
+   "wallclock_s": 16.2,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep71.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 72,
+   "seed": 3072,
+   "condition": "A",
+   "steps": 526,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by an orc zombie.",
+   "role": "Rogue",
+   "race": "orcish",
+   "wallclock_s": 11.9,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep72.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 73,
+   "seed": 3073,
+   "condition": "A",
+   "steps": 7090,
+   "illegal": 0,
+   "progression": 0.01847840456172601,
+   "highest_achievement": "Xp:2",
+   "depth_max": 2,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Rogue",
+   "race": "orcish",
+   "wallclock_s": 193.4,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep73.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 74,
+   "seed": 3074,
+   "condition": "A",
+   "steps": 1749,
+   "illegal": 0,
+   "progression": 0.01847840456172601,
+   "highest_achievement": "Xp:2",
+   "depth_max": 1,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a guard.",
+   "role": "Monk",
+   "race": "human",
+   "wallclock_s": 120.1,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep74.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 75,
+   "seed": 3075,
+   "condition": "A",
+   "steps": 1062,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a dwarf king.",
+   "role": "Cavewoman",
+   "race": "gnomish",
+   "wallclock_s": 24.9,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep75.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 76,
+   "seed": 3076,
+   "condition": "A",
+   "steps": 38,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a coyote, while praying.",
+   "role": "Archeologist",
+   "race": "human",
+   "wallclock_s": 0.3,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep76.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 77,
+   "seed": 3077,
+   "condition": "A",
+   "steps": 588,
+   "illegal": 0,
+   "progression": 0.09770935198701912,
+   "highest_achievement": "Dlvl:9",
+   "depth_max": 9,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a dingo.",
+   "role": "Valkyrie",
+   "race": "human",
+   "wallclock_s": 7.0,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep77.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 78,
+   "seed": 3078,
+   "condition": "A",
+   "steps": 3837,
+   "illegal": 0,
+   "progression": 0.20612854836308672,
+   "highest_achievement": "Dlvl:12",
+   "depth_max": 12,
+   "xplvl_max": 6,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9",
+    "Dlvl:10",
+    "Dlvl:11",
+    "Dlvl:12"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4",
+    "Xp:5",
+    "Xp:6"
+   ],
+   "end_reason": "DEATH: died. Killed by a straw golem.",
+   "role": "Monk",
+   "race": "human",
+   "wallclock_s": 50.7,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep78.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 79,
+   "seed": 3079,
+   "condition": "A",
+   "steps": 582,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a jackal.",
+   "role": "Wizard",
+   "race": "gnomish",
+   "wallclock_s": 11.7,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep79.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

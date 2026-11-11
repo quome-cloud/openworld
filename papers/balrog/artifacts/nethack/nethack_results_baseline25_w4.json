@@ -1,0 +1,66 @@
+{
+ "label": "baseline25_w4",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 11,
+   "seed": 2011,
+   "condition": "A",
+   "steps": 3596,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 4,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4"
+   ],
+   "end_reason": "DEATH: died. Killed by a hill orc.",
+   "role": "Knight",
+   "race": "human",
+   "wallclock_s": 44.9,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep11.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 12,
+   "seed": 2012,
+   "condition": "A",
+   "steps": 4736,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a large kobold.",
+   "role": "Healer",
+   "race": "human",
+   "wallclock_s": 48.7,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep12.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

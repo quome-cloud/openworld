@@ -1,0 +1,181 @@
+{
+ "label": "baseline25_w2",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 19,
+   "seed": 2019,
+   "condition": "A",
+   "steps": 17230,
+   "illegal": 0,
+   "progression": 0.021221378364235505,
+   "highest_achievement": "Dlvl:4",
+   "depth_max": 4,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Priestess",
+   "race": "elven",
+   "wallclock_s": 372.7,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep19.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 20,
+   "seed": 2020,
+   "condition": "A",
+   "steps": 881,
+   "illegal": 0,
+   "progression": 0.0695812141543123,
+   "highest_achievement": "Dlvl:8",
+   "depth_max": 8,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a kobold lord.",
+   "role": "Tourist",
+   "race": "human",
+   "wallclock_s": 11.5,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep20.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 21,
+   "seed": 2021,
+   "condition": "A",
+   "steps": 14192,
+   "illegal": 0,
+   "progression": 0.02081163581974355,
+   "highest_achievement": "Xp:3",
+   "depth_max": 1,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a dart.",
+   "role": "Priestess",
+   "race": "human",
+   "wallclock_s": 293.1,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep21.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 22,
+   "seed": 2022,
+   "condition": "A",
+   "steps": 672,
+   "illegal": 0,
+   "progression": 0.12558597019922987,
+   "highest_achievement": "Dlvl:10",
+   "depth_max": 10,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9",
+    "Dlvl:10"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant spider.",
+   "role": "Knight",
+   "race": "human",
+   "wallclock_s": 12.5,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep22.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 23,
+   "seed": 2023,
+   "condition": "A",
+   "steps": 809,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a sewer rat.",
+   "role": "Tourist",
+   "race": "human",
+   "wallclock_s": 8.6,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep23.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 24,
+   "seed": 2024,
+   "condition": "A",
+   "steps": 2391,
+   "illegal": 0,
+   "progression": 0.024160136550546978,
+   "highest_achievement": "Xp:4",
+   "depth_max": 3,
+   "xplvl_max": 4,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant bat.",
+   "role": "Valkyrie",
+   "race": "dwarven",
+   "wallclock_s": 79.0,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep24.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

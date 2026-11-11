@@ -1,0 +1,174 @@
+{
+ "label": "baseline25_w1",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 13,
+   "seed": 2013,
+   "condition": "A",
+   "steps": 741,
+   "illegal": 0,
+   "progression": 0.021221378364235505,
+   "highest_achievement": "Dlvl:4",
+   "depth_max": 4,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant bat.",
+   "role": "Wizard",
+   "race": "gnomish",
+   "wallclock_s": 16.1,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep13.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 14,
+   "seed": 2014,
+   "condition": "A",
+   "steps": 7358,
+   "illegal": 0,
+   "progression": 0.017539535798967013,
+   "highest_achievement": "Dlvl:3",
+   "depth_max": 3,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Samurai",
+   "race": "human",
+   "wallclock_s": 156.8,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep14.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 15,
+   "seed": 2015,
+   "condition": "A",
+   "steps": 358,
+   "illegal": 0,
+   "progression": 0.09770935198701912,
+   "highest_achievement": "Dlvl:9",
+   "depth_max": 9,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant ant.",
+   "role": null,
+   "race": null,
+   "wallclock_s": 6.4,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep15.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 16,
+   "seed": 2016,
+   "condition": "A",
+   "steps": 1271,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a jackal.",
+   "role": null,
+   "race": null,
+   "wallclock_s": 39.3,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep16.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 17,
+   "seed": 2017,
+   "condition": "A",
+   "steps": 2407,
+   "illegal": 0,
+   "progression": 0.09770935198701912,
+   "highest_achievement": "Dlvl:9",
+   "depth_max": 9,
+   "xplvl_max": 3,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3"
+   ],
+   "end_reason": "DEATH: died. Killed by a plains centaur.",
+   "role": "Caveman",
+   "race": "human",
+   "wallclock_s": 114.6,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep17.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 18,
+   "seed": 2018,
+   "condition": "A",
+   "steps": 1079,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a guard.",
+   "role": "Barbarian",
+   "race": "orcish",
+   "wallclock_s": 41.7,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep18.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

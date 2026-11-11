@@ -1,0 +1,62 @@
+{
+ "label": "baseline25_w3",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 9,
+   "seed": 2009,
+   "condition": "A",
+   "steps": 716,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a hobbit.",
+   "role": "Healer",
+   "race": "gnomish",
+   "wallclock_s": 15.7,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep9.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 10,
+   "seed": 2010,
+   "condition": "A",
+   "steps": 8125,
+   "illegal": 0,
+   "progression": 0.024160136550546978,
+   "highest_achievement": "Xp:4",
+   "depth_max": 3,
+   "xplvl_max": 4,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2",
+    "Xp:3",
+    "Xp:4"
+   ],
+   "end_reason": "DEATH: starved to death.",
+   "role": "Barbarian",
+   "race": "human",
+   "wallclock_s": 143.6,
+   "transitions_file": "transitions/baseline25/NetHackChallenge-v0__ep10.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

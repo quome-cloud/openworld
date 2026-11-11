@@ -1,0 +1,292 @@
+{
+ "label": "v11block40_v4",
+ "episodes": [
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 40,
+   "seed": 3040,
+   "condition": "A",
+   "steps": 363,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a gas spore's explosion.",
+   "role": "Ranger",
+   "race": "human",
+   "wallclock_s": 4.2,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep40.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 41,
+   "seed": 3041,
+   "condition": "A",
+   "steps": 51,
+   "illegal": 0,
+   "progression": 0.0,
+   "highest_achievement": null,
+   "depth_max": 1,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a goblin, while praying.",
+   "role": "Tourist",
+   "race": "human",
+   "wallclock_s": 0.7,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep41.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 42,
+   "seed": 3042,
+   "condition": "A",
+   "steps": 1146,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a coyote.",
+   "role": "Wizard",
+   "race": "human",
+   "wallclock_s": 70.2,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep42.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 43,
+   "seed": 3043,
+   "condition": "A",
+   "steps": 112,
+   "illegal": 0,
+   "progression": 0.015392269075361172,
+   "highest_achievement": "Dlvl:2",
+   "depth_max": 2,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a boulder.",
+   "role": "Priest",
+   "race": "human",
+   "wallclock_s": 3.2,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep43.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 44,
+   "seed": 3044,
+   "condition": "A",
+   "steps": 276,
+   "illegal": 0,
+   "progression": 0.017539535798967013,
+   "highest_achievement": "Dlvl:3",
+   "depth_max": 3,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a fox.",
+   "role": "Tourist",
+   "race": "human",
+   "wallclock_s": 6.8,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep44.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 45,
+   "seed": 3045,
+   "condition": "A",
+   "steps": 58,
+   "illegal": 0,
+   "progression": 0.04846098359243788,
+   "highest_achievement": "Dlvl:7",
+   "depth_max": 7,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant ant.",
+   "role": "Archeologist",
+   "race": "human",
+   "wallclock_s": 0.7,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep45.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 46,
+   "seed": 3046,
+   "condition": "A",
+   "steps": 95,
+   "illegal": 0,
+   "progression": 0.0695812141543123,
+   "highest_achievement": "Dlvl:8",
+   "depth_max": 8,
+   "xplvl_max": 2,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8"
+   ],
+   "xplvl_list": [
+    "Xp:1",
+    "Xp:2"
+   ],
+   "end_reason": "DEATH: died. Killed by a dingo.",
+   "role": "Archeologist",
+   "race": "human",
+   "wallclock_s": 1.0,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep46.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 47,
+   "seed": 3047,
+   "condition": "A",
+   "steps": 444,
+   "illegal": 0,
+   "progression": 0.026482449457437766,
+   "highest_achievement": "Dlvl:5",
+   "depth_max": 5,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a werejackal.",
+   "role": "Priestess",
+   "race": "elven",
+   "wallclock_s": 11.7,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep47.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 48,
+   "seed": 3048,
+   "condition": "A",
+   "steps": 446,
+   "illegal": 0,
+   "progression": 0.035428686118173014,
+   "highest_achievement": "Dlvl:6",
+   "depth_max": 6,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a wererat.",
+   "role": "Valkyrie",
+   "race": "human",
+   "wallclock_s": 13.6,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep48.jsonl.gz",
+   "mem_fired": []
+  },
+  {
+   "task": "NetHackChallenge-v0",
+   "episode": 49,
+   "seed": 3049,
+   "condition": "A",
+   "steps": 196,
+   "illegal": 0,
+   "progression": 0.2566039887664476,
+   "highest_achievement": "Dlvl:13",
+   "depth_max": 13,
+   "xplvl_max": 1,
+   "dlvl_list": [
+    "Dlvl:1",
+    "Dlvl:2",
+    "Dlvl:3",
+    "Dlvl:4",
+    "Dlvl:5",
+    "Dlvl:6",
+    "Dlvl:7",
+    "Dlvl:8",
+    "Dlvl:9",
+    "Dlvl:10",
+    "Dlvl:11",
+    "Dlvl:12",
+    "Dlvl:13"
+   ],
+   "xplvl_list": [
+    "Xp:1"
+   ],
+   "end_reason": "DEATH: died. Killed by a giant ant.",
+   "role": "Archeologist",
+   "race": "human",
+   "wallclock_s": 3.5,
+   "transitions_file": "transitions/v11block40/NetHackChallenge-v0__ep49.jsonl.gz",
+   "mem_fired": []
+  }
+ ]
+}

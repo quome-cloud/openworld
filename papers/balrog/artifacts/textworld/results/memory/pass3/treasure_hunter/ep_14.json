@@ -1,0 +1,18 @@
+{
+ "task": "treasure_hunter",
+ "episode": 14,
+ "pass": 3,
+ "protocol": "clean+memory",
+ "game": "seed_47496.ulx",
+ "memory_in": {
+  "avoid": [],
+  "target": "passkey"
+ },
+ "steps_executed": 58,
+ "done": true,
+ "won": true,
+ "score": 1,
+ "max_score": 1,
+ "progression": 1.0,
+ "wall_s": 0.627
+}

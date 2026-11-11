@@ -1,0 +1,18 @@
+{
+ "task": "treasure_hunter",
+ "episode": 24,
+ "pass": 3,
+ "protocol": "clean+memory",
+ "game": "seed_898.ulx",
+ "memory_in": {
+  "avoid": [],
+  "target": "salad"
+ },
+ "steps_executed": 59,
+ "done": true,
+ "won": true,
+ "score": 1,
+ "max_score": 1,
+ "progression": 1.0,
+ "wall_s": 1.018
+}

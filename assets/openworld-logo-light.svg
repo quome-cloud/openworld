@@ -1,0 +1,101 @@
+<svg viewBox="0 0 980 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OpenWorld: an astronaut quokka beside a globe made of code (code world models)">
+<style>
+/* Motion of the qugit mark, as approved in the 2026-11-07 mockup: the source of truth for the
+   animation (classes referenced by the SVGs in this folder). Everything sits behind
+   prefers-reduced-motion: no-preference; with reduced motion the mark is a still. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .qm-flow { animation: qm-flow 1.6s linear infinite; }
+  .qm-beacon { animation: qm-beacon 2.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .qm-bob { animation: qm-bob 5s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 90%; }
+  .qm-eyes { animation: qm-blink 5.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+}
+
+@keyframes qm-flow { to { stroke-dashoffset: -14; } }
+
+@keyframes qm-beacon { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.2); } }
+
+@keyframes qm-bob { 0%, 100% { transform: translateY(0) rotate(-0.4deg); } 50% { transform: translateY(-3px) rotate(0.4deg); } }
+
+@keyframes qm-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.08); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .qm-float { animation: qm-float 3.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 60%; }
+  .qm-flame { animation: qm-flame 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0; }
+}
+
+@keyframes qm-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+
+@keyframes qm-flame { from { transform: scaleY(0.7); opacity: .7; } to { transform: scaleY(1.15); opacity: 1; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .qm-ring { animation: qm-ring 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  .qm-ring2 { animation: qm-ring 1.8s ease-out .4s infinite; transform-box: fill-box; transform-origin: center; }
+  .qm-swing { animation: qm-swing 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 0; }
+  .qm-glint { animation: qm-glint 2.8s ease-in-out infinite; }
+  .qm-led { animation: qm-led 1.6s steps(1) infinite; }
+  .qm-led2 { animation: qm-led 1.6s steps(1) .53s infinite; }
+  .qm-led3 { animation: qm-led 1.6s steps(1) 1.06s infinite; }
+}
+@keyframes qm-ring { 0% { opacity: .9; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.35); } }
+@keyframes qm-swing { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes qm-glint { 0%,70%,100% { opacity: .25; } 80% { opacity: .9; } }
+@keyframes qm-led { 0%,33% { opacity: 1; } 34%,100% { opacity: .25; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .qm-spin { animation: qm-spin 14s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .qm-scanx { animation: qm-scanx 2.4s ease-in-out infinite alternate; }
+  .qm-scany { animation: qm-scany 2.4s ease-in-out infinite alternate; }
+}
+@keyframes qm-spin { to { transform: rotate(360deg); } }
+@keyframes qm-scanx { from { transform: translateX(0); } to { transform: translateX(88px); } }
+@keyframes qm-scany { from { transform: translateY(0); } to { transform: translateY(64px); } }
+</style>
+<g transform="translate(34,18)"><g class="qm-float">
+<g transform="translate(-26,0)">
+        <!-- pack: two tanks behind the left shoulder -->
+        <rect x="56" y="128" width="26" height="78" rx="13" fill="#c9ced8" stroke="#9aa2b1" stroke-width="2"></rect>
+        <rect x="80" y="122" width="26" height="84" rx="13" fill="#c9ced8" stroke="#9aa2b1" stroke-width="2"></rect>
+        <rect x="63" y="206" width="12" height="7" rx="2" fill="#9aa2b1"></rect><rect x="87" y="206" width="12" height="7" rx="2" fill="#9aa2b1"></rect>
+        <path class="qm-flame" d="M69 213 q-6 12 0 20 q6 -8 0 -20z" fill="#fab219"></path><path class="qm-flame" style="animation-delay:.2s" d="M93 213 q-6 12 0 20 q6 -8 0 -20z" fill="#fab219"></path>
+        <!-- feet -->
+        <ellipse cx="118" cy="250" rx="26" ry="15" fill="#7c5ceb"></ellipse><ellipse cx="182" cy="252" rx="26" ry="15" fill="#7c5ceb"></ellipse>
+        <!-- body + belly -->
+        <ellipse cx="150" cy="178" rx="78" ry="82" fill="#8c7ff2"></ellipse>
+        <ellipse cx="150" cy="192" rx="52" ry="60" fill="#d6d1fb"></ellipse>
+        <!-- left arm: from the shoulder, resting on the belly -->
+        
+      <path d="M92 168 C84 190, 94 212, 112 222" fill="none" stroke="#7c5ceb" stroke-width="26" stroke-linecap="round"></path>
+      <circle cx="116" cy="224" r="14" fill="#7c5ceb"></circle>
+      <path d="M112 233 q4 4 8 0 M120 232 q3 3 7 -1" fill="none" stroke="#6d4de0" stroke-width="2" stroke-linecap="round" opacity="0.8"></path>
+        <!-- ears -->
+        <ellipse cx="106" cy="70" rx="24" ry="28" fill="#8c7ff2" transform="rotate(-12 106 70)"></ellipse><ellipse cx="106" cy="72" rx="12" ry="15" fill="#b05ef1" transform="rotate(-12 106 72)"></ellipse>
+        <ellipse cx="194" cy="70" rx="24" ry="28" fill="#8c7ff2" transform="rotate(12 194 70)"></ellipse><ellipse cx="194" cy="72" rx="12" ry="15" fill="#b05ef1" transform="rotate(12 194 72)"></ellipse>
+        <!-- head -->
+        <ellipse cx="150" cy="112" rx="62" ry="58" fill="#8c7ff2"></ellipse><ellipse cx="150" cy="132" rx="34" ry="28" fill="#d6d1fb"></ellipse>
+        <circle cx="112" cy="128" r="11" fill="#cb94f6" opacity="0.6"></circle><circle cx="188" cy="128" r="11" fill="#cb94f6" opacity="0.6"></circle>
+        <g class="qm-eyes"><ellipse cx="128" cy="106" rx="8" ry="10" fill="#1a1a24"></ellipse><ellipse cx="172" cy="106" rx="8" ry="10" fill="#1a1a24"></ellipse>
+          <circle cx="131" cy="102" r="2.6" fill="#ffffff"></circle><circle cx="175" cy="102" r="2.6" fill="#ffffff"></circle></g>
+        <path d="M150 120 l8 8 a6 6 0 0 1 -16 0 z" fill="#3c27cf"></path>
+        <path d="M126 134 Q150 160 174 134" fill="none" stroke="#3c27cf" stroke-width="4.5" stroke-linecap="round"></path>
+        <path d="M138 144 Q150 152 162 144" fill="#b05ef1"></path>
+        <!-- helmet: glass, rim, shine; collar under its base; antenna-star -->
+        <circle cx="150" cy="110" r="82" fill="#a5b4fc" fill-opacity="0.12" stroke="#6f74a8" stroke-width="3"></circle>
+        <path d="M96 58 q20 -26 50 -30" fill="none" stroke="#ffffff" stroke-opacity="0.6" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M90 172 q60 30 120 0" fill="none" stroke="#c9ced8" stroke-width="10" stroke-linecap="round"></path>
+        <path d="M90 172 q60 30 120 0" fill="none" stroke="#9aa2b1" stroke-width="2" stroke-linecap="round" opacity="0.7" transform="translate(0,5)"></path>
+        <path d="M150 28 v-16" stroke="#6f74a8" stroke-width="3" stroke-linecap="round"></path>
+        <path d="M150 2 l3 7 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1z" fill="#facc15"></path>
+      </g>
+    
+    <!-- the prop -->
+    <circle cx="256" cy="156" r="44" fill="#1e1b4b" stroke="#0891b2" stroke-width="3"/><g fill="none" stroke="#22d3ee" stroke-width="2" opacity=".6"><ellipse cx="256" cy="156" rx="18" ry="44"/><ellipse cx="256" cy="156" rx="44" ry="16"/></g><g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M246 146 l-10 10 10 10"/><path d="M266 146 l10 10 -10 10"/><path d="M260 142 l-8 28"/></g><ellipse class="qm-flow" cx="256" cy="156" rx="58" ry="18" transform="rotate(-24 256 156)" fill="none" stroke="#5f4ddd" stroke-width="2.5" stroke-dasharray="4 10" stroke-linecap="round"/><circle class="qm-beacon" cx="308" cy="130" r="7" fill="#fab219"/>
+    <!-- right arm -->
+    <g transform="translate(-26,0)">
+      <path d="M208 168 C218 190, 212 212, 198 224" fill="none" stroke="#7c5ceb" stroke-width="26" stroke-linecap="round"></path>
+      <circle cx="196" cy="226" r="14" fill="#7c5ceb"></circle>
+      <path d="M192 235 q4 4 8 0 M200 234 q3 3 7 -1" fill="none" stroke="#6d4de0" stroke-width="2" stroke-linecap="round" opacity="0.8"></path></g>
+
+</g></g>
+<!-- the name: outlined from Geist (weight 600, 104px, letter-spacing -2); never live text -->
+<g transform="translate(344,86.0) scale(1.000)"><path transform="translate(0,92)" d="M39.73 1.66C61.78 1.66 74.98-13.10 74.98-36.82C74.98-60.74 61.78-75.50 39.73-75.50C17.68-75.50 4.58-60.74 4.58-36.82C4.58-13.10 17.68 1.66 39.73 1.66ZM18.72-36.82C18.72-53.56 26.52-63.54 39.73-63.54C53.14-63.54 60.94-53.56 60.94-36.82C60.94-20.28 53.14-10.30 39.73-10.30C26.52-10.30 18.72-20.28 18.72-36.82ZM84.84 15.60L98.36 15.60L98.36-7.49C101.58-1.77 107.10 1.25 114.48 1.25C130.39 1.25 138.09-11.75 138.09-27.56C138.09-43.37 130.39-56.37 114.48-56.37C106.68-56.37 100.96-53.14 97.94-47.22L97.63-55.12L84.84-55.12ZM97.32-27.56C97.32-36.92 101.38-45.55 110.74-45.55C119.99-45.55 124.15-36.92 124.15-27.56C124.15-18.10 120.10-9.57 110.74-9.57C101.38-9.57 97.32-18.10 97.32-27.56ZM144.82-27.56C144.82-10.09 155.64 1.25 172.07 1.25C184.03 1.25 194.02-5.30 197.24-15.91L183.51-16.95C181.54-12.17 177.06-9.36 172.07-9.36C164.27-9.36 159.49-14.77 158.86-23.92L198.07-23.92L197.97-27.25C197.76-46.80 186.22-56.37 172.07-56.37C155.64-56.37 144.82-45.03 144.82-27.56ZM159.07-32.86C160.11-40.87 164.79-45.76 172.07-45.76C177.90-45.76 183.10-42.22 184.14-32.86ZM207.72-55.12L207.72 0L221.24 0L221.24-31.20C221.24-40.35 225.40-45.45 232.78-45.45C239.86-45.45 242.25-40.35 242.25-31.20L242.25 0L255.66 0L255.66-35.46C255.66-47.84 249.01-56.37 236.84-56.37C229.46-56.37 223.22-53.46 220.20-46.18L219.89-55.12ZM263.44-73.84L283.10 0L298.28 0L311.07-49.09L323.97 0L339.05 0L358.81-73.84L344.35-73.84L331.04-18.93L317.42-73.84L304.73-73.84L291.10-18.93L277.79-73.84ZM390.92 1.25C407.35 1.25 418.17-10.09 418.17-27.56C418.17-45.03 407.35-56.37 390.92-56.37C374.49-56.37 363.67-45.03 363.67-27.56C363.67-10.09 374.49 1.25 390.92 1.25ZM377.50-27.56C377.50-38.90 382.39-45.45 390.92-45.45C399.45-45.45 404.34-38.90 404.34-27.56C404.34-16.22 399.45-9.67 390.92-9.67C382.39-9.67 377.50-16.22 377.50-27.56ZM427.82-55.12L427.82 0L441.34 0L441.34-31.41C441.34-40.25 444.98-44.62 453.82-44.62L459.12-44.62L459.12-55.12L453.92-55.12C446.85-55.12 442.79-51.58 440.71-44.41L440.40-55.12ZM468.66-73.84L468.66-13.83C468.66-5.10 474.28 0 482.50 0L490.30 0L490.30-10.50L486.03-10.50C483.54-10.50 482.18-11.86 482.18-14.46L482.18-73.84ZM549.55-73.84L536.03-73.84L536.03-47.74C532.91-53.14 526.67-56.37 519.60-56.37C505.25-56.37 496.30-45.24 496.30-27.56C496.30-9.88 505.25 1.25 519.60 1.25C527.09 1.25 533.43-2.18 536.45-7.80L536.76 0L549.55 0ZM510.14-27.56C510.14-38.79 515.34-45.86 523.55-45.86C531.66-45.86 536.97-38.79 536.97-27.56C536.97-16.64 531.77-9.57 523.55-9.57C515.44-9.57 510.14-16.64 510.14-27.56Z" fill="#1a1a24"/></g></svg>

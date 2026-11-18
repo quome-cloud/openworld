@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/logo.png" alt="OpenWorld — verified symbolic world models" width="760"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/openworld-logo-dark.svg">
+  <img src="https://raw.githubusercontent.com/quome-cloud/openworld/main/assets/openworld-logo-light.svg" alt="OpenWorld" width="520"/>
+</picture>
 
 # OpenWorld
 
